@@ -8,6 +8,9 @@ const SEMANTIC_ALIGNMENT_PROMPT_PATH = join(currentDirectory, "../../../bin/AI/p
 
 // Output upper bound: a JSON entry per non-exact row, so we need generous room.
 const DEFAULT_MAX_TOKENS = 8000;
+// Classify in batches so each LLM call's JSON output stays well within max_tokens. With one JSON entry
+// (category + reason) per pair, a single call over many pairs would be truncated and unparseable.
+const BATCH_SIZE = 30;
 // The five canonical categories the prompt asks the LLM to choose from.
 const CATEGORIES = ["Exact match AI", "SubclassOf", "SubclassOf inverse", "Not match", "Unknown"];
 
@@ -110,6 +113,34 @@ function parseClassifications(rawText) {
     return JSON.parse(jsonSlice);
 }
 
+/**
+ * Restricts the definitions table to the labels present in the given pairs (keeps each batch prompt small).
+ * @param {Object} definitions - { from: [{label,definition}], target: [{label,definition}] }.
+ * @param {Array} pairs - The batch of non-exact pairs.
+ * @returns {Object} The filtered { from, target }.
+ */
+function filterDefinitionsForPairs(definitions, pairs) {
+    const srcLabels = {};
+    const tgtLabels = {};
+    pairs.forEach(function (pair) {
+        srcLabels[pair.srcLabel] = true;
+        tgtLabels[pair.tgtLabel] = true;
+    });
+    let from = [];
+    let target = [];
+    if (definitions && definitions.from) {
+        from = definitions.from.filter(function (entry) {
+            return srcLabels[entry.label];
+        });
+    }
+    if (definitions && definitions.target) {
+        target = definitions.target.filter(function (entry) {
+            return tgtLabels[entry.label];
+        });
+    }
+    return { from: from, target: target };
+}
+
 export default function () {
     let operations = {
         POST,
@@ -133,38 +164,52 @@ export default function () {
             }
 
             const basePrompt = readFileSync(SEMANTIC_ALIGNMENT_PROMPT_PATH, "utf8");
-            const prompt = buildAlignmentPrompt(basePrompt, nonExacts, definitions);
-
             const options = { maxTokens: maxTokens };
 
-            const result = await new Promise((resolve, reject) => {
-                llmClient.complete(prompt, options, (error, completion) => {
-                    if (error) return reject(error);
-                    resolve(completion);
+            // Classify in batches: each call handles BATCH_SIZE pairs (with only the relevant definitions),
+            // so its JSON output stays within max_tokens. Results, counts and token usage are aggregated.
+            const classifications = [];
+            const parseErrors = [];
+            let modelName = null;
+            let inputTokens = 0;
+            let outputTokens = 0;
+
+            for (let start = 0; start < nonExacts.length; start += BATCH_SIZE) {
+                const batchPairs = nonExacts.slice(start, start + BATCH_SIZE);
+                const batchDefinitions = filterDefinitionsForPairs(definitions, batchPairs);
+                const prompt = buildAlignmentPrompt(basePrompt, batchPairs, batchDefinitions);
+
+                const result = await new Promise((resolve, reject) => {
+                    llmClient.complete(prompt, options, (error, completion) => {
+                        if (error) return reject(error);
+                        resolve(completion);
+                    });
                 });
-            });
 
-            const rawText = result.content?.[0]?.text ?? "";
-            let classifications = [];
-            let parseError = null;
-            try {
-                classifications = parseClassifications(rawText);
-            } catch (error) {
-                parseError = error.message;
+                modelName = result.model;
+                inputTokens += result.usage?.input_tokens ?? 0;
+                outputTokens += result.usage?.output_tokens ?? 0;
+
+                const rawText = result.content?.[0]?.text ?? "";
+                try {
+                    const batchClassifications = parseClassifications(rawText);
+                    batchClassifications.forEach(function (item) {
+                        classifications.push(item);
+                    });
+                } catch (parseException) {
+                    parseErrors.push("batch starting at row " + (start + 1) + ": " + parseException.message);
+                }
             }
-            const counts = countCategories(classifications);
-            const inputTokens = result.usage?.input_tokens ?? 0;
-            const outputTokens = result.usage?.output_tokens ?? 0;
 
+            const counts = countCategories(classifications);
             const response = {
-                model: result.model,
+                model: modelName,
                 counts: counts,
                 classifications: classifications,
                 usage: { input_tokens: inputTokens, output_tokens: outputTokens },
             };
-            if (parseError) {
-                response.parseError = parseError;
-                response.rawOutput = rawText;
+            if (parseErrors.length > 0) {
+                response.parseError = parseErrors.join("; ");
             }
             res.status(200).json(response);
         } catch (error) {

@@ -79,7 +79,7 @@ function complete(prompt, options, callback) {
                         resolve(result);
                     });
                 });
-            })
+            }),
         )
         .then((result) => callback(null, result))
         .catch(callback);
@@ -98,7 +98,7 @@ function createMessage(params, callback) {
                         resolve(result);
                     });
                 });
-            })
+            }),
         )
         .then((result) => callback(null, result))
         .catch(callback);

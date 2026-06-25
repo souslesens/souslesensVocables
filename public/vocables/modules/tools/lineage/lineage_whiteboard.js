@@ -2076,7 +2076,6 @@ var Lineage_whiteboard = (function () {
                                     var attrs = self.getNodeVisjAttrs(item["child" + i + "Type"], item.subject, childNodeSource);
                                     var isIndividualId = namedLinkedDataMap[item["child" + i]];
 
-
                                     if (isIndividualId) {
                                         attrs.shape = self.namedIndividualShape;
                                     }

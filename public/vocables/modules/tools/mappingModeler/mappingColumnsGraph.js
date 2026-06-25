@@ -2004,10 +2004,7 @@ var MappingColumnsGraph = (function () {
                 return;
             }
             var isTypeLink = edge.data.type == "rdf:type" || edge.data.type == "owl:Class";
-            var isSubClassOfFromOwlClass =
-                edge.data.type == "rdfs:subClassOf" &&
-                tableNodes[edge.from].data &&
-                tableNodes[edge.from].data.rdfType === "owl:Class";
+            var isSubClassOfFromOwlClass = edge.data.type == "rdfs:subClassOf" && tableNodes[edge.from].data && tableNodes[edge.from].data.rdfType === "owl:Class";
             if (isTypeLink || isSubClassOfFromOwlClass) {
                 newNodesMap[edge.to].hidden = false;
                 newNodesMap[edge.from].hidden = false;

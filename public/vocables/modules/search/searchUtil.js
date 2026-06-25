@@ -406,24 +406,22 @@ indexes.push(source.toLowerCase());
         var queryObj;
 
         if (!mode || mode == "plurialTerm") {
-            queryObj =  {
+            queryObj = {
                 term: {
                     [field]: { value: word, case_insensitive: true },
                 },
-            }
-            return queryObj
+            };
+            return queryObj;
         }
 
         if (!mode || mode == "match_phrase") {
-            queryObj =  {
+            queryObj = {
                 match_phrase: {
-                    label: word ,
+                    label: word,
                 },
-            }
-            return queryObj
+            };
+            return queryObj;
         }
-
-
 
         if (!mode || mode == "exactMatch") {
             var normalizedWord = word.trim().replace(/\s+/g, " ");
@@ -446,7 +444,7 @@ indexes.push(source.toLowerCase());
                     },
                 },
             };
-        } else if (false  && word.indexOf("*") > -1) {
+        } else if (false && word.indexOf("*") > -1) {
             // old fuzzy CF with queryString
             queryObj = {
                 bool: {
@@ -466,8 +464,7 @@ indexes.push(source.toLowerCase());
             // fuzzy new way
             var fuzzyWord = self.makeFuzzyQueryString(word);
 
-
-        /*    queryObj= {
+            /*    queryObj= {
 
                     query_string: {
                         query: fuzzyWord,
@@ -478,11 +475,9 @@ indexes.push(source.toLowerCase());
             }*/
 
             queryObj = {
-
                 bool: {
                     must: [
                         {
-
                             query_string: {
                                 query: fuzzyWord,
                                 fields: fields,
@@ -510,14 +505,13 @@ indexes.push(source.toLowerCase());
             };
         }
 
-
-      if (queryObj.bool ) {
-          if (!queryObj.bool.should) {
-              queryObj.bool.should = [];
-          }
-          var preferredLang = Config && Config.default_lang ? Config.default_lang : "en";
-          queryObj.bool.should.push({term: {lang: {value: preferredLang, boost: 3}}});
-      }
+        if (queryObj.bool) {
+            if (!queryObj.bool.should) {
+                queryObj.bool.should = [];
+            }
+            var preferredLang = Config && Config.default_lang ? Config.default_lang : "en";
+            queryObj.bool.should.push({ term: { lang: { value: preferredLang, boost: 3 } } });
+        }
         return queryObj;
     };
 
@@ -531,7 +525,7 @@ indexes.push(source.toLowerCase());
         var bulQueryStr = "";
         var slices = common.array.slice(words, 100);
         var allResults = [];
-        size=6//for fuzzy match
+        size = 6; //for fuzzy match
         async.eachSeries(
             slices,
             function (wordSlice, callbackEach) {
@@ -675,9 +669,9 @@ indexes.push(source.toLowerCase());
 
                         // indexNamedIndividuals
                         function (callbackSeries) {
-                        if(options.skipIndividuals){
-                            return callbackSeries();
-                        }
+                            if (options.skipIndividuals) {
+                                return callbackSeries();
+                            }
                             var taxonomyClassesIdsMap = {};
                             taxonomyClasses.forEach(function (item) {
                                 taxonomyClassesIdsMap[item.id] = item;
@@ -740,7 +734,7 @@ indexes.push(source.toLowerCase());
                                     filter: filter,
                                     processorFectchSize: 100,
                                     skosPrefLabel: true,
-                                    withoutImports:true
+                                    withoutImports: true,
                                 },
                                 processor,
                                 function (err, result) {
@@ -758,7 +752,7 @@ indexes.push(source.toLowerCase());
                             }
                             UI.message("indexing properties");
                             totalLines = 0;
-                            Sparql_OWL.getObjectProperties(sourceLabel, {   withoutImports:true}, function (err, result) {
+                            Sparql_OWL.getObjectProperties(sourceLabel, { withoutImports: true }, function (err, result) {
                                 if (err) {
                                     return callback(err);
                                 }

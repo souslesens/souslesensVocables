@@ -50,6 +50,19 @@ var Sparql_generic = (function () {
             var defaultPredicates;
             if (source.schemaType == "SKOS") {
                 defaultPredicates = Sparql_SKOS.defaultPredicates;
+            } else {
+                // OWL (and other non-SKOS schemas) default: subsumption hierarchy + rdfs:label.
+                // Without this, sources lacking an explicit `predicates` config crash below on
+                // `predicates.prefixes`.
+                defaultPredicates = {
+                    prefixes: [" rdfs:<http://www.w3.org/2000/01/rdf-schema#>", " rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>", " owl:<http://www.w3.org/2002/07/owl#>"],
+                    topConceptFilter: source.topClassFilter,
+                    broaderPredicate: "rdfs:subClassOf",
+                    narrowerPredicate: "rdfs:subClassOf",
+                    prefLabel: "rdfs:label",
+                    limit: 10000,
+                    optionalDepth: 5,
+                };
             }
 
             var predicates = "";
@@ -94,6 +107,7 @@ var Sparql_generic = (function () {
      * @param {Object} [options] - Controller-specific options
      * @param {Function} callback - Error-first callback `(err, result)` with the top concepts
      * @returns {void}
+     * @expose
      */
     self.getTopConcepts = function (sourceLabel, options, callback) {
         $("#waitImg").css("display", "block");
@@ -116,6 +130,7 @@ var Sparql_generic = (function () {
      * @param {Object} [options] - Controller-specific options
      * @param {Function} callback - Error-first callback `(err, result)` with the node's triples
      * @returns {void}
+     * @expose
      */
     self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
         $("#waitImg").css("display", "block");
@@ -136,6 +151,7 @@ var Sparql_generic = (function () {
      * @param {Object} [options] - Controller-specific options
      * @param {Function} callback - Error-first callback `(err, result)` with the items
      * @returns {void}
+     * @expose
      */
     self.getItems = function (sourceLabel, options, callback) {
         $("#waitImg").css("display", "block");
@@ -185,12 +201,13 @@ var Sparql_generic = (function () {
      * @name getNodeChildren
      * @memberof module:Sparql_generic
      * @param {string} sourceLabel - Source name to query
-     * @param {(string|string[])} words - Label word(s) to match; mutually exclusive with `ids`
-     * @param {(string|string[])} ids - Parent node URI(s) whose children are fetched
+     * @param {(string|string[])} [words] - Label word(s) to match; mutually exclusive with `ids`
+     * @param {(string|string[])} [ids] - Parent node URI(s) whose children are fetched
      * @param {number} descendantsDepth - Depth of descendants to retrieve
      * @param {Object} [options] - Controller-specific options (merged with `{depth: 0, source}`)
      * @param {Function} callback - Error-first callback `(err, bulkResult)` with the concatenated children
      * @returns {void}
+     * @expose
      */
     self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
         $("#waitImg").css("display", "block");
@@ -246,12 +263,13 @@ var Sparql_generic = (function () {
      * @name getNodeParents
      * @memberof module:Sparql_generic
      * @param {string} sourceLabel - Source name to query
-     * @param {(string|string[])} words - Label word(s) to match; mutually exclusive with `ids`
-     * @param {(string|string[])} ids - Child node URI(s) whose ancestors are fetched
+     * @param {(string|string[])} [words] - Label word(s) to match; mutually exclusive with `ids`
+     * @param {(string|string[])} [ids] - Child node URI(s) whose ancestors are fetched
      * @param {number} ancestorsDepth - Depth of ancestors to retrieve
      * @param {Object} [options] - Controller-specific options (merged with `{depth: 0, source}`)
      * @param {Function} callback - Error-first callback `(err, bulkResult)` with the concatenated ancestors
      * @returns {void}
+     * @expose
      */
     self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
         if (!Config.sources[sourceLabel] || !Config.sources[sourceLabel].controller) {
@@ -406,6 +424,7 @@ var Sparql_generic = (function () {
      * @param {string} id - URI of the node whose label is fetched
      * @param {Function} callback - Error-first callback `(err, bindings)` with the label/type bindings
      * @returns {void}
+     * @expose
      */
     self.getNodeLabel = function (sourceLabel, id, callback) {
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
@@ -422,13 +441,13 @@ var Sparql_generic = (function () {
             "filter (?subject=<" +
             id +
             ">) ";
-        if (lang) {
-            query += 'filter( lang(?subjectLabel)="' + lang + '")';
+        if (sourceVariables.lang) {
+            query += 'filter( lang(?subjectLabel)="' + sourceVariables.lang + '")';
         }
 
         query += "}limit " + sourceVariables.limit + " ";
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, {}, { source: sourceLabel }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -1183,6 +1202,7 @@ var Sparql_generic = (function () {
      * @param {boolean} [options.withoutImports] - Exclude imported graphs from the `FROM` clause
      * @param {Function} callback - Error-first callback `(err, {classesMap, labels})` where `classesMap` maps each node URI to `{id, label, lang, skoslabels, parents, type}` and `labels` maps URI → label
      * @returns {void}
+     * @expose
      */
     self.getSourceTaxonomy = function (sourceLabel, options, callback) {
         var schemaType = Config.sources[sourceLabel].schemaType;

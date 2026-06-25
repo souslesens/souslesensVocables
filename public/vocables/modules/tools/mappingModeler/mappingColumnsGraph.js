@@ -230,7 +230,7 @@ var MappingColumnsGraph = (function () {
                 if ((newResource.data.type == "Class" || newResource.data.type == "superClass") && self.currentGraphNode) {
                     var label, type;
                     if (self.currentGraphNode.data.type == "Class") {
-                        label = "";
+                        label = "subClassOf";
                         type = "rdfs:subClassOf";
                     } else {
                         label = "";
@@ -409,7 +409,7 @@ var MappingColumnsGraph = (function () {
     };
 
     /**
-     * Normalize rdf:type / rdfs:subClassOf edge color to blue for consistency.
+     * Normalize rdf:type / rdfs:subClassOf edge display for consistency.
      * It updates the edges store in place.
      * @param {Object} visjsGraph
      * @returns {void}
@@ -425,18 +425,31 @@ var MappingColumnsGraph = (function () {
         var edges = edgesStore.get();
         var updates = [];
 
-        edges.forEach(function (e) {
-            var t = e && e.data ? e.data.type : null;
-            if (t === "rdf:type" || t === "rdfs:subClassOf") {
+        edges.forEach(function (edge) {
+            var edgeType = edge && edge.data ? edge.data.type : null;
+            if (edgeType === "rdf:type" || edgeType === "rdfs:subClassOf") {
                 var currentColor = "";
-                if (typeof e.color === "string") {
-                    currentColor = e.color.toLowerCase();
-                } else if (e.color && typeof e.color.color === "string") {
-                    currentColor = e.color.color.toLowerCase();
+                if (typeof edge.color === "string") {
+                    currentColor = edge.color.toLowerCase();
+                } else if (edge.color && typeof edge.color.color === "string") {
+                    currentColor = edge.color.color.toLowerCase();
                 }
-                // Update only if not already blue
+                var edgeUpdate = { id: edge.id };
+                var shouldUpdateEdge = false;
                 if (currentColor !== "#00afef") {
-                    updates.push({ id: e.id, color: "#00afef" });
+                    edgeUpdate.color = "#00afef";
+                    shouldUpdateEdge = true;
+                }
+                if (!edge.label && edgeType === "rdfs:subClassOf") {
+                    edgeUpdate.label = "subClassOf";
+                    shouldUpdateEdge = true;
+                }
+                if (!edge.label && edgeType === "rdf:type") {
+                    edgeUpdate.label = "a";
+                    shouldUpdateEdge = true;
+                }
+                if (shouldUpdateEdge) {
+                    updates.push(edgeUpdate);
                 }
             }
         });
@@ -1983,6 +1996,8 @@ var MappingColumnsGraph = (function () {
         var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
         var edges = MappingColumnsGraph.visjsGraph.data.edges.get();
 
+        self.normalizeRdfTypeEdgesColor(MappingColumnsGraph.visjsGraph);
+
         var newNodes = [];
         var newNodesMap = {};
         var tableNodes = {};
@@ -2004,8 +2019,8 @@ var MappingColumnsGraph = (function () {
                 return;
             }
             var isTypeLink = edge.data.type == "rdf:type" || edge.data.type == "owl:Class";
-            var isSubClassOfFromOwlClass = edge.data.type == "rdfs:subClassOf" && tableNodes[edge.from].data && tableNodes[edge.from].data.rdfType === "owl:Class";
-            if (isTypeLink || isSubClassOfFromOwlClass) {
+            var isSubClassOfLink = edge.data.type == "rdfs:subClassOf";
+            if (isTypeLink || isSubClassOfLink) {
                 newNodesMap[edge.to].hidden = false;
                 newNodesMap[edge.from].hidden = false;
             }

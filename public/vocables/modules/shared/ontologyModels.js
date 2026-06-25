@@ -1614,36 +1614,78 @@ var OntologyModels = (function () {
             Config.ontologiesVocabularyModels[source];
         }
         var filterStr = options.filter || "";
-
         var sourceGraphUri = Config.sources[source].graphUri;
-        var query =
+        var url = Config.sparql_server.url + "?format=json&query=";
+        var allBindings = [];
+
+        var classesQuery =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-            "SELECT distinct ?class ?prop ?datatype  FROM   <" +
+            "SELECT distinct ?class FROM <" +
             sourceGraphUri +
-            ">" +
-            " WHERE {   \n" +
-            // " ?s rdf:type+ ?class.\n" +
-            " ?s rdf:type ?class.\n" +
+            "> WHERE {\n" +
+            "  ?s rdf:type ?class.\n" +
             "  filter (?class not in (owl:NamedIndividual))\n" +
-            "  ?s ?prop ?v.\n" +
-            "   bind (datatype(?v) as ?datatype)\n" +
-            "  filter (?prop not in (<http://souslesens.org/KGcreator#mappingFile>,<http://purl.org/dc/terms/created>))\n" +
-            "\n" +
-            filterStr +
             "}";
 
-        let url = Config.sparql_server.url + "?format=json&query=";
+        var chunkSize = 20;
 
         UI.message("loading ", false, true);
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, classesQuery, null, {}, function (err, result) {
             if (err) {
                 return callback(err);
             }
+            var classes = result.results.bindings.map(function (binding) {
+                return binding.class.value;
+            });
 
-            UI.message("", true);
-            return callback(null, result.results.bindings);
+            var chunks = [];
+            for (var chunkIndex = 0; chunkIndex < classes.length; chunkIndex += chunkSize) {
+                chunks.push(classes.slice(chunkIndex, chunkIndex + chunkSize));
+            }
+
+            async.eachSeries(
+                chunks,
+                function (classChunk, callbackEach) {
+                    var valuesStr = classChunk
+                        .map(function (uri) {
+                            return "<" + uri + ">";
+                        })
+                        .join(" ");
+                    var query2 =
+                        "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                        "SELECT distinct ?class ?prop ?datatype FROM <" +
+                        sourceGraphUri +
+                        "> WHERE {\n" +
+                        "  VALUES ?class { " +
+                        valuesStr +
+                        " }\n" +
+                        "  ?s rdf:type ?class.\n" +
+                        "  ?s ?prop ?v.\n" +
+                        "  bind (datatype(?v) as ?datatype)\n" +
+                        "  filter (?prop not in (<http://souslesens.org/KGcreator#mappingFile>,<http://purl.org/dc/terms/created>))\n" +
+                        "\n" +
+                        filterStr +
+                        "}";
+
+                    Sparql_proxy.querySPARQL_GET_proxy(url, query2, null, {}, function (err, result) {
+                        if (err) {
+                            return callbackEach(err);
+                        }
+                        allBindings = allBindings.concat(result.results.bindings);
+                        callbackEach();
+                    });
+                },
+                function (err) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    UI.message("", true);
+                    return callback(null, allBindings);
+                },
+            );
         });
     };
     /**

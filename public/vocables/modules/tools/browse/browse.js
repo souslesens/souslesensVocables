@@ -23,7 +23,53 @@ var Browse = (function () {
                 $("#Browse_rightPanelTabs").css("width", graphDivWidth);
                 $("#Browse_rightPanelTabs").css("width", graphDivWidth);
                 $("#Browse_graphDiv").css("width", graphDivWidth);
+
+                // Direct node infos view (URL action=browse routed here from MainController.parseUrlParam)
+                var browseTool = Config.userTools["Browse"];
+                if (browseTool && browseTool.urlParam_nodeURI) {
+                    var nodeURI = browseTool.urlParam_nodeURI;
+                    var source = browseTool.urlParam_source;
+                    browseTool.urlParam_nodeURI = null;
+                    browseTool.urlParam_source = null;
+                    self.showNodeInfosByUri(source, nodeURI);
+                }
             });
+        });
+    };
+
+    /**
+     * Displays the node infos and subgraph for a given URI directly, bypassing the search step.
+     * Registers the source (so ontology queries resolve), renders the NodeInfosWidget inline in
+     * the Infos tab, populates the Graph tab, and reflects the node in the URL for reload/sharing.
+     * @function
+     * @name showNodeInfosByUri
+     * @memberof module:Browse
+     * @param {string} source - The source name owning the node.
+     * @param {string} nodeURI - The URI of the node to display.
+     * @returns {void}
+     */
+    self.showNodeInfosByUri = function (source, nodeURI) {
+        if (!source || !nodeURI) {
+            return;
+        }
+        Lineage_sources.registerSource(source, function (err) {
+            if (err) {
+                return MainController.errorAlert(err);
+            }
+            Lineage_sources.activeSource = source;
+            self.currentSource = source;
+
+            // Clean URL: tool then nodeURI. Source is derived from the URI on reload, so it is
+            // omitted; nodeURI stays human-readable (: and / are valid unencoded in query strings).
+            window.history.replaceState(null, "", "?tool=Browse&nodeURI=" + nodeURI);
+
+            var node = { data: { id: nodeURI } };
+            NodeInfosWidget.showNodeInfos(source, node, "Browse_hitDetailsDiv", {
+                hideModifyButtons: true,
+                noDialog: true,
+            });
+            $("#Browse_rightPanelTabs").tabs("option", "active", 1);
+            self.showHitGraph({ source: source, id: nodeURI });
         });
     };
     /**

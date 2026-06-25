@@ -76,7 +76,7 @@ export async function saveSource(source: ServerSource, edition: boolean) {
     try {
         let response = null;
         if (edition) {
-            response = await fetch(endpoint + "/" + source.name, {
+            response = await fetch(endpoint + "/" + encodeURIComponent(source.name), {
                 method: "put",
                 body: JSON.stringify(source, null, "\t"),
                 headers: { "Content-Type": "application/json" },
@@ -104,7 +104,7 @@ export async function saveSource(source: ServerSource, edition: boolean) {
 
 export async function deleteSource(source: ServerSource) {
     try {
-        const response = await fetch(`${endpoint}/${source.name}`, { method: "delete" });
+        const response = await fetch(`${endpoint}/${encodeURIComponent(source.name)}`, { method: "delete" });
         const { message, resources } = (await response.json()) as Response;
 
         if (response.status === 200) {

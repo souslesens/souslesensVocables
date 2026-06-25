@@ -934,8 +934,8 @@ var KGquery = (function () {
             $("#dataTableDivExport").on("click", "td", function () {
                 var table = $("#dataTableDivExport").DataTable();
                 var index = table.cell(this).index();
-                if (!index.row) {
-                    return UI.message("No row corresponding");
+                if (index == null || index.row == null) {
+                    return UI.message("No node info available for this cell");
                 }
                 var dataItem = self.currentData[index.row];
 

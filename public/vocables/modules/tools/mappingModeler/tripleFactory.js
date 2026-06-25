@@ -842,11 +842,11 @@ var TripleFactory = (function () {
 
         self.columnsMap = {};
         nodes.forEach(function (node) {
-            if (node.data && MappingModeler.columnsMappingsObjects.includes(node.data.type) && (node.data.dataTable == table||node.data.type=="Class" )) {
+            if (node.data && MappingModeler.columnsMappingsObjects.includes(node.data.type) && (node.data.dataTable == table || node.data.type == "Class")) {
                 self.columnsMap[node.id] = node;
                 // add node to treeData only if node master or if he adding a new other predicate compared to the master node
                 if (!node.data.definedInColumn || (node.data.otherPredicates && node.data.otherPredicates.length > 0)) {
-                    if(node.data.type!="Class") {
+                    if (node.data.type != "Class") {
                         treeData.push({
                             id: node.id,
                             text: node.label,

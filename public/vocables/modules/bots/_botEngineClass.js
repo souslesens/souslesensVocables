@@ -624,6 +624,23 @@ class BotEngineClass {
                     const label = ids.join(", ");
                     resolveSelection(ids, label, checkedNodes);
                 });
+
+            $("#" + treeDivId).on("check_node.jstree uncheck_node.jstree", function () {
+                setTimeout(function () {
+                    var tree = $("#" + treeDivId).jstree(true);
+                    if (!tree) {
+                        return;
+                    }
+                    var hasCheckedLeaf = tree.get_checked(true).some(function (n) {
+                        return !tree.is_parent(n);
+                    });
+                    if (hasCheckedLeaf) {
+                        $("#" + searchInputId).val("");
+                        tree.search("");
+                    }
+                    $("#" + searchInputId).prop("disabled", hasCheckedLeaf);
+                }, 0);
+            });
         }
     }
 
@@ -765,6 +782,8 @@ class BotEngineClass {
         if (!this.history.step.includes(this.history.currentIndex)) {
             this.history.step.push(this.history.currentIndex);
         }
+        var savedContainerWidth = null;
+        var savedDialogWidth = null;
         $("#" + this.divId)
             .find("#bot_resourcesProposalSelect")
             .hide();
@@ -780,6 +799,14 @@ class BotEngineClass {
                 // this.nextStep();
             });
         }
+
+        $("#" + this.divId)
+            .find("#botPromptInput")
+            .on("keydown", (evt) => {
+                if (evt.keyCode == 13) {
+                    evt.preventDefault();
+                }
+            });
 
         $("#" + this.divId)
             .find("#botPromptInput")
@@ -811,6 +838,10 @@ class BotEngineClass {
                     };
 
                     this.currentBot.params[varToFill] = value.trim();
+                    if (savedContainerWidth !== null && $("#botPanel").dialog("instance")) {
+                        $("#botContainerDiv").css("width", savedContainerWidth + "px");
+                        $("#botPanel").dialog("option", "width", savedDialogWidth);
+                    }
                     this.insertBotMessage(value);
                     $("#" + this.divId)
                         .find("#botPromptInput")
@@ -835,6 +866,16 @@ class BotEngineClass {
         $("#" + this.divId)
             .find("#botPromptInput")
             .trigger("focus");
+        if (options && options.expandDialog && $("#botPanel").length && $("#botPanel").dialog("instance")) {
+            savedContainerWidth = $("#botContainerDiv").width();
+            savedDialogWidth = $("#botPanel").dialog("widget").outerWidth();
+            var dialogChrome = savedDialogWidth - savedContainerWidth;
+            var expandedWidth = 600;
+            if (expandedWidth > savedContainerWidth) {
+                $("#botContainerDiv").css("width", expandedWidth + "px");
+                $("#botPanel").dialog("option", "width", expandedWidth + dialogChrome);
+            }
+        }
         if (!this.history.step.includes(this.history.currentIndex)) {
             this.history.step.push(this.history.currentIndex);
         }

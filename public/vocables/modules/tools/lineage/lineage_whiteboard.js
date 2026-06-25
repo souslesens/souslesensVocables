@@ -163,6 +163,64 @@ var Lineage_whiteboard = (function () {
 
     /**
      * @function
+     * @name installNodeInfosUrlSync
+     * @memberof module:Lineage_whiteboard
+     * Installs document-level listeners that keep the URL's nodeURI param in sync
+     * with the currently open NodeInfosWidget dialog.
+     * Opening a node info panel adds the URI to the URL; closing it removes it.
+     * @returns {void}
+     */
+    self.installNodeInfosUrlSync = function () {
+        if (self._nodeInfosUrlSyncInstalled) {
+            return;
+        }
+        self._nodeInfosUrlSyncInstalled = true;
+
+        $(document).on("nodeInfosWidget:show.lineageUrlSync", function (evt, data) {
+            if (MainController.currentTool !== "lineage" || data.divId !== "mainDialogDiv" || !data.nodeId) {
+                return;
+            }
+            // Clean, ordered URL: tool, source, then nodeURI (kept human-readable since : and / are
+            // valid unencoded in query strings). action is dropped (lineage is the default).
+            var params = new URLSearchParams(document.location.search);
+            var source = params.get("source") || MainController.currentSource;
+            var query = "tool=lineage";
+            if (source) {
+                query += "&source=" + source;
+            }
+            query += "&nodeURI=" + data.nodeId;
+            window.history.replaceState(null, "", "?" + query);
+        });
+
+        $(document).on("nodeInfosWidget:close.lineageUrlSync", function (evt, data) {
+            if (MainController.currentTool !== "lineage" || data.divId !== "mainDialogDiv") {
+                return;
+            }
+            // Closing the panel: keep the clean tool + source URL, drop nodeURI (and any leftover action)
+            var source = new URLSearchParams(document.location.search).get("source") || MainController.currentSource;
+            var query = "tool=lineage";
+            if (source) {
+                query += "&source=" + source;
+            }
+            window.history.replaceState(null, "", "?" + query);
+        });
+    };
+
+    /**
+     * @function
+     * @name uninstallNodeInfosUrlSync
+     * @memberof module:Lineage_whiteboard
+     * Removes the document-level listeners installed by installNodeInfosUrlSync.
+     * @returns {void}
+     */
+    self.uninstallNodeInfosUrlSync = function () {
+        $(document).off("nodeInfosWidget:show.lineageUrlSync");
+        $(document).off("nodeInfosWidget:close.lineageUrlSync");
+        self._nodeInfosUrlSyncInstalled = false;
+    };
+
+    /**
+     * @function
      * @name unload
      * @memberof module:Lineage_whiteboard
      * Unloads the Lineage whiteboard by clearing the graph display and resetting the lateral panel.
@@ -182,6 +240,7 @@ var Lineage_whiteboard = (function () {
             namespace: "lineageLegendAutoHide",
         });
         self._legendAutoHideInstalled = false;
+        self.uninstallNodeInfosUrlSync();
     };
 
     /**
@@ -210,6 +269,11 @@ var Lineage_whiteboard = (function () {
      * @returns {void}
      */
     self.loadSources = function (options) {
+        // Consume one-shot nodeURI param captured in MainController.parseUrlParam.
+        // (action=browse is routed to the Browse tool earlier and never reaches here.)
+        var nodeURI = Config.userTools["lineage"].urlParam_nodeURI || null;
+        Config.userTools["lineage"].urlParam_nodeURI = null;
+
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
                 return MainController.errorAlert(err);
@@ -223,6 +287,16 @@ var Lineage_whiteboard = (function () {
                 }
 
                 Lineage_whiteboard.initUI();
+                Lineage_whiteboard.installNodeInfosUrlSync();
+
+                if (nodeURI) {
+                    // Headless snapshot export (admin/snapshots.js) waits on window.nodeInfosSnapshotReady so it
+                    // never captures a half-rendered widget. Flag flips true only once ALL async sections finished.
+                    window.nodeInfosSnapshotReady = false;
+                    NodeInfosWidget.showNodeInfos(MainController.currentSource, nodeURI, "mainDialogDiv", {}, function () {
+                        window.nodeInfosSnapshotReady = true;
+                    });
+                }
             });
         });
     };
@@ -1857,7 +1931,7 @@ var Lineage_whiteboard = (function () {
         options.skipRestrictions = 1;
         options.selectGraph = 1;
         options.includeSources = [MainController.currentSource];
-       // options.filter = ' FILTER (regex(str(?child1),"http"))';
+        // options.filter = ' FILTER (regex(str(?child1),"http"))';
 
         Sparql_generic.getNodeChildren(source, null, parentIds, depth, options, function (err, result) {
             if (err) {
@@ -2002,7 +2076,6 @@ var Lineage_whiteboard = (function () {
                                 if (!existingIds[item["child" + i]]) {
                                     var attrs = self.getNodeVisjAttrs(item["child" + i + "Type"], item.subject, childNodeSource);
                                     var isIndividualId = namedLinkedDataMap[item["child" + i]];
-
 
                                     if (isIndividualId) {
                                         attrs.shape = self.namedIndividualShape;
@@ -2922,9 +2995,9 @@ restrictionSource = Config.predicatesSource;
                     if (!item.subject.value.startsWith("http") || !item.value.value.startsWith("http")) {
                         return;
                     }
-if(item.subject.value=='_:b02d0194c19'){
-    var x=3
-}
+                    if (item.subject.value == "_:b02d0194c19") {
+                        var x = 3;
+                    }
                     if (!existingNodes[item.subject.value]) {
                         existingNodes[item.subject.value] = 1;
 
@@ -5297,7 +5370,6 @@ attrs.color=self.getSourceColor(superClassValue)
             self.initUI();
         }
     };
-
 
     return self;
 })();

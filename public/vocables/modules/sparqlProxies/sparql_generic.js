@@ -1168,10 +1168,9 @@ var Sparql_generic = (function () {
 
                     // build full ancestor chain following chosen parents only (memoized)
                     function buildParentChain(nodeId) {
-                      if(self.processedParents[nodeId])
-                          return []
+                        if (self.processedParents[nodeId]) return [];
 
-                        self.processedParents[nodeId]=1
+                        self.processedParents[nodeId] = 1;
                         var obj = allClassesMap[nodeId];
                         if (!obj || obj._chainBuilt) return obj ? obj.parents : [];
                         var chosenParent = chosenParents[nodeId];
@@ -1180,7 +1179,7 @@ var Sparql_generic = (function () {
                         obj._chainBuilt = true;
                         return obj.parents;
                     }
-                    self.processedParents={}
+                    self.processedParents = {};
                     for (var key in allClassesMap) {
                         buildParentChain(key);
                         delete allClassesMap[key]._directParents;

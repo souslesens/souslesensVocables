@@ -496,19 +496,7 @@ fixedColumns: true*/
     };*/
     self.exportDataToCSV = function (dataset) {
         let csvContent = dataset.map((row) => row.map((cell) => `"${cell}"`).join(";")).join("\n");
-
-        let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-        let link = document.createElement("a");
-
-        let url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", "export_data.csv");
-        document.body.appendChild(link);
-
-        link.click();
-
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        self.downloadStringAsFile(csvContent, "export_data.csv", "text/csv;charset=utf-8;");
     };
 
     self.showExportPopUp = function (visjsGraph) {
@@ -521,7 +509,7 @@ fixedColumns: true*/
         }
         if (visjsGraph == "KGquery_graph.KGqueryGraph") {
             html += `<span class="popupMenuItem" onclick="KGquery_graph.exportVisjsGraph();">JSON</span>`;
-             }
+        }
         if (visjsGraph == "Lineage_whiteboard.graph") {
             html += `<span class="popupMenuItem" onclick="Lineage_whiteboard.graph.exportWhiteboard();">JSON</span>`;
         }
@@ -539,8 +527,23 @@ fixedColumns: true*/
      * @returns {void}
      */
     self.downloadJSON = function (data, fileName) {
-        const jsonString = JSON.stringify(data, null, 2);
-        const blob = new Blob([jsonString], { type: "application/json" });
+        self.downloadStringAsFile(JSON.stringify(data, null, 2), fileName, "application/json");
+    };
+
+    /**
+     * Triggers a browser download of a string as a file with the given name and MIME type.
+     * Generic blob-download helper (e.g. used to save a node-infos snapshot as standalone HTML).
+     *
+     * @function
+     * @name downloadStringAsFile
+     * @memberof module:Export
+     * @param {string} content - The file content.
+     * @param {string} fileName - The download file name (with extension).
+     * @param {string} mimeType - The MIME type, e.g. "text/html".
+     * @returns {void}
+     */
+    self.downloadStringAsFile = function (content, fileName, mimeType) {
+        const blob = new Blob([content], { type: mimeType });
         const link = document.createElement("a");
 
         link.href = URL.createObjectURL(blob);
@@ -548,10 +551,10 @@ fixedColumns: true*/
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
     };
 
     self.downloadText = function (text, fileName) {
-
         const blob = new Blob([text], { type: "text/plain; charset=utf-8" });
         const link = document.createElement("a");
 
@@ -594,16 +597,7 @@ fixedColumns: true*/
             plantUMLString = plantUMLString + "\n@enduml";
         }
 
-        // Create the file content
-        const blob = new Blob([plantUMLString], { type: "text/plain;charset=utf-8" });
-        const link = document.createElement("a");
-
-        link.href = URL.createObjectURL(blob);
-        link.download = `${fileName}.${format}`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(link.href);
+        self.downloadStringAsFile(plantUMLString, `${fileName}.${format}`, "text/plain;charset=utf-8");
     };
 
     return self;

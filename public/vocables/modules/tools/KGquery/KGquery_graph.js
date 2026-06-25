@@ -1556,9 +1556,6 @@ var KGquery_graph = (function () {
         });
     };
 
-
-
-
     /**
      * Imports a KG model graph from a JSON file.
      * @function

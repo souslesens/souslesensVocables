@@ -1,6 +1,8 @@
 import { processResponse } from "./utils.js";
 
-var ontologyModelsCache = {};
+// Exported so other endpoints (e.g. admin/snapshots) can read a source's cached classes without re-querying
+// the triple store. ESM exports are live bindings, so the DELETE handler's reassignment is seen by importers.
+export var ontologyModelsCache = {};
 export default function () {
     let operations = {
         GET,

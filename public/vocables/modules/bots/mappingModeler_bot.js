@@ -29,12 +29,10 @@ var MappingModeler_bot = (function () {
         startFn: {
             _OR: {
                 "add predicate": {
-                    listNonObjectPropertiesVocabsFn: {
-                        listNonObjectPropertiesFn: {
-                            listDatatypePropertyRangeFn: {
-                                choosedateTypeFn: {
-                                    listTableColumnsFn: {},
-                                },
+                    listAllNonObjectPropertiesTreeFn: {
+                        listDatatypePropertyRangeFn: {
+                            choosedateTypeFn: {
+                                listTableColumnsFn: {},
                             },
                         },
                     },
@@ -96,6 +94,7 @@ var MappingModeler_bot = (function () {
         labelFn: "select a column for node label",
         otherFn: "choose next operation",
         rdfTypeFn: "select type to add",
+        listAllNonObjectPropertiesTreeFn: "Choose annotation property",
         listNonObjectPropertiesVocabsFn: " Choose annnotation property vocabulary",
         listNonObjectPropertiesFn: " Choose annnotation property ",
         promptTargetColumnVocabularyFn: "Choose ontology for predicate column",
@@ -140,6 +139,41 @@ var MappingModeler_bot = (function () {
         },
         promptLabelFn: function () {
             self.myBotEngine.promptValue("enter resource label", "rdfsLabel");
+        },
+        listAllNonObjectPropertiesTreeFn: function () {
+            CommonBotFunctions.listVocabsFn(self.params.source, true, function (err, vocabs) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                if (vocabs.length == 0) {
+                    return self.myBotEngine.previousStep("no values found, try another option");
+                }
+                var treeData = [];
+                var vocabIds = [];
+                async.eachSeries(
+                    vocabs,
+                    function (vocab, callbackEach) {
+                        var vocabId = vocab.id || vocab;
+                        var vocabLabel = vocab.label || vocab;
+                        vocabIds.push(vocabId);
+                        treeData.push({ id: vocabId, text: vocabLabel, parent: "#", type: "Folder" });
+                        CommonBotFunctions.listNonObjectPropertiesFn([vocabId], null, function (_err, props) {
+                            if (!_err && props) {
+                                props.forEach(function (prop) {
+                                    treeData.push({ id: prop.id, text: prop.label, parent: vocabId });
+                                });
+                            }
+                            callbackEach();
+                        });
+                    },
+                    function () {
+                        self.myBotEngine.showTree(treeData, "nonObjectPropertyId", {
+                            parentNodeIds: vocabIds,
+                            openAll: false,
+                        });
+                    },
+                );
+            });
         },
         listNonObjectPropertiesVocabsFn: function () {
             CommonBotFunctions.listVocabsFn(self.params.source, true, function (err, vocabs) {

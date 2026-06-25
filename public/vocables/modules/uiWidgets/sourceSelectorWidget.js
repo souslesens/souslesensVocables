@@ -149,6 +149,14 @@ var SourceSelectorWidget = (function () {
                         parent: "#",
                     });
                 }
+                // Skip sources whose name contains characters that break jstree's internal querySelector
+                // (tab, slash, colon, leading/trailing whitespace). These are invalid source names
+                // that can only be cleaned up via the config editor.
+                if (sourceLabel !== sourceLabel.trim() || /[\/:]/.test(sourceLabel)) {
+                    console.warn("sourceSelectorWidget: skipping corrupted source name:", JSON.stringify(sourceLabel));
+                    return;
+                }
+
                 if (!distinctNodes[sourceLabel]) {
                     distinctNodes[sourceLabel] = 1;
 
@@ -337,6 +345,13 @@ var SourceSelectorWidget = (function () {
         const params = new URLSearchParams(document.location.search);
         if (source) {
             params.set("source", source);
+        }
+        // nodeURI/action are one-shot params: keep them during initial load (urlParam_nodeURI
+        // still set), remove them when the user changes source (urlParam_nodeURI already consumed).
+        var lineageTools = Config.userTools && Config.userTools["lineage"];
+        if (!lineageTools || !lineageTools.urlParam_nodeURI) {
+            params.delete("nodeURI");
+            params.delete("action");
         }
         common.storeLocally(source, "recentSources", 8);
         window.history.replaceState(null, "", `?${params.toString()}`);

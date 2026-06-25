@@ -9,7 +9,13 @@
     </div>
     <div style="display: flex; flex-direction: column; justify-content: center; width: 100%; margin-bottom: 20px; margin-left: 10px">
         <!--<div id="botFilterProposalDiv">filter <input id="botFilterProposalInput" /></div>-->
-        <input id="botPromptInput" autocomplete="off" class="w3-input w3-border w3-padding" style="width: 80%; margin-left: 10px; display: none" />
+        <textarea
+            id="botPromptInput"
+            autocomplete="off"
+            class="w3-input w3-border w3-padding"
+            rows="1"
+            style="width: 95%; margin-left: 10px; display: none; resize: none; overflow-y: hidden; white-space: nowrap; overflow-x: auto"
+        ></textarea>
         <div id="botMessage" style="display: flex; flex-direction: column; border: none; color: #5f3f3f"></div>
         <div id="botFilterProposalDiv" class="input-group mb-3" style="width: 100%; margin-top: 20px">
             <div class="input-group-prepend">

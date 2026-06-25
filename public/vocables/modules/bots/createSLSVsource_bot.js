@@ -108,7 +108,7 @@ var CreateSLSVsource_bot = (function () {
             });
         },
         promptGraphUriFn: function () {
-            self.myBotEngine.promptValue("graph Uri", "graphUri", "http://");
+            self.myBotEngine.promptValue("graph Uri", "graphUri", "http://", { expandDialog: true });
         },
         validateGraphUriFn: function () {
             // check that graphUri is a valid URL using URL constructor.

@@ -78,6 +78,12 @@ var MappingParser = {
 
                     if (toNodeData && toNodeData.type == "Class") {
                         var mappings = MappingParser.getTypeAndLabelMappings(fromNodeData, toNodeData);
+                        // Edge type is ground truth — override the derived predicate so that
+                        // columns missing rdfType="owl:Class" still produce rdfs:subClassOf triples
+                        // when the drawn edge explicitly declares rdfs:subClassOf.
+                        if (edge.data && edge.data.type && mappings.length > 0) {
+                            mappings[0].p = edge.data.type;
+                        }
                         mappings.forEach(function (mapping) {
                             mapping.isConstantUri = MappingParser.isConstantUri(mapping.o);
                             mapping.isConstantPrefixedUri = MappingParser.isConstantPrefixedUri(mapping.o);

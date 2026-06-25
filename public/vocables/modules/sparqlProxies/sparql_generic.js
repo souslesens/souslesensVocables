@@ -28,6 +28,8 @@ var Sparql_generic = (function () {
             var defaultPredicates;
             if (source.schemaType == "SKOS") {
                 defaultPredicates = Sparql_SKOS.defaultPredicates;
+            } else {
+                defaultPredicates = Sparql_OWL.defaultPredicates;
             }
 
             var predicates = "";
@@ -296,32 +298,7 @@ var Sparql_generic = (function () {
     };
 
     self.getNodeLabel = function (sourceLabel, id, callback) {
-        var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
-        var query = "";
-        query += sourceVariables.prefixesStr;
-        query +=
-            " select distinct * " +
-            sourceVariables.fromStr +
-            "  WHERE {" +
-            "?subject   rdf:type   ?type." +
-            "?subject " +
-            sourceVariables.prefLabelPredicate +
-            " ?subjectLabel." +
-            "filter (?subject=<" +
-            id +
-            ">) ";
-        if (lang) {
-            query += 'filter( lang(?subjectLabel)="' + lang + '")';
-        }
-
-        query += "}limit " + sourceVariables.limit + " ";
-
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, { source: sourceLabel }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            return callback(null, result.results.bindings);
-        });
+        Config.sources[sourceLabel].controller.getNodeLabel(sourceLabel, id, callback);
     };
 
     self.getEndPointAllGraphsMap = function (sparqlServerUrl, callback) {

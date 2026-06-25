@@ -92,6 +92,17 @@ var TripleFactory = (function () {
         }
         var filterMappingIds = [];
         checkedNodes.forEach(function (item) {
+            if (item.parent == "Relations") {
+                var edgesById = MappingColumnsGraph.getEdgesMap("id")[item.id];
+                if (edgesById && edgesById[0]) {
+                    var edge = edgesById[0];
+                    var predicate = edge.data && (edge.data.type || edge.data.id);
+                    if (predicate && edge.from) {
+                        filterMappingIds.push(edge.from + ">" + predicate);
+                        return;
+                    }
+                }
+            }
             filterMappingIds.push(item.id);
         });
         try {
@@ -860,7 +871,8 @@ var TripleFactory = (function () {
 
         edges.forEach(function (edge) {
             if (self.columnsMap[edge.from] && self.columnsMap[edge.to]) {
-                var label = self.columnsMap[edge.from].label + "-" + edge.label + "->" + self.columnsMap[edge.to].label;
+                var jstreeEdgeLabel = edge.label === "a" ? "rdf:type" : edge.label;
+                var label = self.columnsMap[edge.from].label + "-" + jstreeEdgeLabel + "->" + self.columnsMap[edge.to].label;
                 treeData.push({
                     id: edge.id,
                     text: label,

@@ -1,8 +1,9 @@
 import { readMainConfig } from "../../model/config.js";
 import createAnthropicAdapter from "./adapters/anthropicAdapter.js";
 import createOpenRouterAdapter from "./adapters/openRouterAdapter.js";
+import createOllamaAdapter from "./adapters/ollamaAdapter.js";
 
-const ADAPTERS = { anthropic: createAnthropicAdapter, openrouter: createOpenRouterAdapter };
+const ADAPTERS = { anthropic: createAnthropicAdapter, openrouter: createOpenRouterAdapter, ollama: createOllamaAdapter };
 
 // ── Rate limiter (module-level singleton — shared across all callers) ───────
 const tokenWindow = [];

@@ -2995,9 +2995,6 @@ restrictionSource = Config.predicatesSource;
                     if (!item.subject.value.startsWith("http") || !item.value.value.startsWith("http")) {
                         return;
                     }
-if(item.subject.value=='_:b02d0194c19'){
-    var x=3
-}
                     if (!existingNodes[item.subject.value]) {
                         existingNodes[item.subject.value] = 1;
 

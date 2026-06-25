@@ -2000,11 +2000,14 @@ var MappingColumnsGraph = (function () {
         //show classes linked to column
         var edgesFromClassMap = {};
         edges.forEach(function (edge) {
-            if (edge.data && (edge.data.type == "rdf:type" || edge.data.type == "owl:Class")) {
-                if (tableNodes[edge.from]) {
-                    newNodesMap[edge.to].hidden = false;
-                    newNodesMap[edge.from].hidden = false;
-                }
+            if (!edge.data || !tableNodes[edge.from]) {
+                return;
+            }
+            var isTypeLink = edge.data.type == "rdf:type" || edge.data.type == "owl:Class";
+            var isSubClassOfFromOwlClass = edge.data.type == "rdfs:subClassOf" && tableNodes[edge.from].data && tableNodes[edge.from].data.rdfType === "owl:Class";
+            if (isTypeLink || isSubClassOfFromOwlClass) {
+                newNodesMap[edge.to].hidden = false;
+                newNodesMap[edge.from].hidden = false;
             }
         });
         for (var nodeId in newNodesMap) {

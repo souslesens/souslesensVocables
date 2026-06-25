@@ -325,22 +325,28 @@ var TriplesMaker = {
 
             for (var columnId in columnMappings) {
                 // filter columns
-                var allowedPredicates = null;
+                var allowedPredicateFilters = null;
                 if (options.filterMappingIds) {
                     var columnIsDirectlySelected = options.filterMappingIds.indexOf(columnId) > -1;
-                    var compositePredicates = [];
+                    var compositePredicateFilters = [];
                     for (var filterIndex = 0; filterIndex < options.filterMappingIds.length; filterIndex++) {
-                        var filterId = options.filterMappingIds[filterIndex];
-                        var filterParts = filterId.split(">");
+                        var filterMappingId = options.filterMappingIds[filterIndex];
+                        if (typeof filterMappingId !== "string") {
+                            continue;
+                        }
+                        var filterParts = filterMappingId.split(">");
                         if (filterParts[0] === columnId && filterParts[1]) {
-                            compositePredicates.push(filterParts[1]);
+                            compositePredicateFilters.push({
+                                predicate: filterParts[1],
+                                object: filterParts[2] || null,
+                            });
                         }
                     }
-                    if (!columnIsDirectlySelected && compositePredicates.length === 0) {
+                    if (!columnIsDirectlySelected && compositePredicateFilters.length === 0) {
                         continue;
                     }
                     if (!columnIsDirectlySelected) {
-                        allowedPredicates = compositePredicates;
+                        allowedPredicateFilters = compositePredicateFilters;
                     }
                 }
 
@@ -363,8 +369,22 @@ var TriplesMaker = {
                     if (!columnId) {
                         return;
                     }
-                    if (allowedPredicates && allowedPredicates.indexOf(mapping.p) < 0) {
-                        return;
+                    if (allowedPredicateFilters) {
+                        var mappingIsAllowed = false;
+                        allowedPredicateFilters.forEach(function (predicateFilter) {
+                            if (mappingIsAllowed) {
+                                return;
+                            }
+                            if (predicateFilter.predicate === mapping.p && (!predicateFilter.object || predicateFilter.object === mapping.o)) {
+                                mappingIsAllowed = true;
+                            }
+                            if (predicateFilter.predicate === "rdfs:subClassOf" && mapping.p === "rdf:type" && mapping.o === "owl:Class") {
+                                mappingIsAllowed = true;
+                            }
+                        });
+                        if (!mappingIsAllowed) {
+                            return;
+                        }
                     }
 
                     var object = null;

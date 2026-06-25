@@ -205,6 +205,10 @@ async function loadConfig() {
     globalThis.Config.basicVocabularies = basicVocabularies;
     globalThis.Config.ontologiesVocabularyModels = JSON.parse(JSON.stringify(basicVocabularies));
 
+    // SPARQL builders default their `LIMIT` to `Config.queryLimit` (set by app_config.js in the
+    // browser). Without it, queries end with the literal `limit undefined` → Virtuoso syntax error.
+    globalThis.Config.queryLimit = globalThis.Config.queryLimit || 10000;
+
     // Add sources with graphUri to ontologiesVocabularyModels
     for (const sourceName in allSources) {
         if (allSources[sourceName].graphUri) {
@@ -225,11 +229,60 @@ async function loadConfig() {
     };
     globalThis.Config.sources["_defaultSource"] = globalThis.Config._defaultSource;
 
+    // Resolve each source's `controller` (a module-name string from sources.json, e.g.
+    // "Sparql_OWL") into the actual controller module object. In the browser, mainController.js
+    // does this at init; here we replicate it so Sparql_generic delegation works headless —
+    // it calls `Config.sources[src].controller.getNodeChildren(...)`, which throws if the
+    // controller is still a string.
+    const controllerModules = {};
+    for (const controllerModuleName of ["Sparql_OWL", "Sparql_SKOS"]) {
+        const importedController = await import(VOCABLES_MODULE_PATHS[controllerModuleName]);
+        controllerModules[controllerModuleName] = importedController.default || globalThis[controllerModuleName];
+    }
+    for (const sourceName in globalThis.Config.sources) {
+        const controllerName = globalThis.Config.sources[sourceName].controller;
+        if (typeof controllerName === "string" && controllerModules[controllerName]) {
+            globalThis.Config.sources[sourceName].controllerName = controllerName;
+            globalThis.Config.sources[sourceName].controller = controllerModules[controllerName];
+        }
+    }
+
     configLoaded = true;
 }
 
-// async from npm
-globalThis.async = async;
+// async from npm.
+// The frontend SPARQL builders use the async v2 style for `whilst`/`until`/`doWhilst`/`doUntil`,
+// where the test is a *synchronous* function returning a boolean. async v3 (what we run here)
+// changed the test to async-style (it must call a callback), so a v2 sync test never resolves and
+// the loop hangs forever. Wrap those four so a sync-returning test keeps working headless.
+function withSyncTest(originalLoop, testIsFirstArg) {
+    return function (...loopArgs) {
+        const testIndex = testIsFirstArg ? 0 : 1;
+        const originalTest = loopArgs[testIndex];
+        loopArgs[testIndex] = function (...testArgs) {
+            // async v3 always passes the test callback as the last argument; any preceding args
+            // are the iteratee results (doWhilst/doUntil), which the v2 sync test expects directly.
+            const testCallback = testArgs[testArgs.length - 1];
+            const testInputs = testArgs.slice(0, -1);
+            let keepGoing;
+            try {
+                keepGoing = originalTest(...testInputs);
+            } catch (testError) {
+                return testCallback(testError);
+            }
+            return testCallback(null, keepGoing);
+        };
+        return originalLoop.apply(async, loopArgs);
+    };
+}
+
+const asyncCompat = Object.assign(Object.create(async), {
+    whilst: withSyncTest(async.whilst, true),
+    until: withSyncTest(async.until, true),
+    doWhilst: withSyncTest(async.doWhilst, false),
+    doUntil: withSyncTest(async.doUntil, false),
+});
+globalThis.async = asyncCompat;
 
 // Mapping from public module name to its absolute file URL.
 // Must be file:// URLs, not relative paths — bare specifiers like "public/..."

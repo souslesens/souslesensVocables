@@ -122,7 +122,6 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.returnQueryStr] - Return the SPARQL query string instead of executing it
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?topConcept`/`?topConceptLabel`(/`?subjectGraph`)
      * @returns {void}
-     * @expose
      */
     self.getTopConcepts = function (sourceLabel, options, callback) {
         if (!options) {
@@ -233,7 +232,6 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?subject`/`?child1…`(labels), label-enriched
      * @returns {void}
-     * @expose
      */
     self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
         if (!options) {
@@ -450,7 +448,6 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?prop`/`?value`(/labels/graph)
      * @returns {void}
-     * @expose
      */
     self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
         if (!options) {
@@ -1124,9 +1121,9 @@ var Sparql_OWL = (function () {
      * @name getFilteredTriples2
      * @memberof module:Sparql_OWL
      * @param {string} sourceLabel - OWL source name to query
-     * @param {(string|string[])} subjectIds - Subject URI(s) to match (optional)
-     * @param {(string|string[])} propertyIds - Property URI(s) to match (optional)
-     * @param {(string|string[])} objectIds - Object URI(s) to match (optional)
+     * @param {(string|string[])} [subjectIds] - Subject URI(s) to match (optional)
+     * @param {(string|string[])} [propertyIds] - Property URI(s) to match (optional)
+     * @param {(string|string[])} [objectIds] - Object URI(s) to match (optional)
      * @param {Object} [options] - Query options
      * @param {boolean} [options.withImports] - Include imported graphs in the `FROM` clause (imports are excluded by default here)
      * @param {string} [options.distinct] - Variables for the SELECT clause (defaults to `*`)
@@ -1219,9 +1216,9 @@ var Sparql_OWL = (function () {
      * @name getFilteredTriples
      * @memberof module:Sparql_OWL
      * @param {string} sourceLabel - OWL source name to query
-     * @param {(string|string[])} subjectIds - Subject URI(s) to match (optional)
-     * @param {(string|string[])} propertyIds - Property URI(s) to match (optional)
-     * @param {(string|string[])} objectIds - Object URI(s) to match (optional)
+     * @param {(string|string[])} [subjectIds] - Subject URI(s) to match (optional)
+     * @param {(string|string[])} [propertyIds] - Property URI(s) to match (optional)
+     * @param {(string|string[])} [objectIds] - Object URI(s) to match (optional)
      * @param {Object} [options] - Query options
      * @param {string} [options.filter] - Extra SPARQL filter appended to the query
      * @param {boolean} [options.onlyObjectProperties] - Restrict to `owl:ObjectProperty` predicates
@@ -1232,6 +1229,7 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?subject`/`?prop`/`?object` and their labels
      * @returns {void}
+     * @expose
      */
     self.getFilteredTriples = function (sourceLabel, subjectIds, propertyIds, objectIds, options, callback) {
         if (!options) {
@@ -1411,7 +1409,7 @@ var Sparql_OWL = (function () {
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports);
 
         var query = "";
-        query += "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema# >" + "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " + "PREFIX owl: <http://www.w3.org/2002/07/owl#> ";
+        query += "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " + "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " + "PREFIX owl: <http://www.w3.org/2002/07/owl#> ";
 
         var selectStr = "*";
         if (options.distinct) {
@@ -1513,7 +1511,7 @@ var Sparql_OWL = (function () {
      * @name getObjectPropertiesDomainAndRange
      * @memberof module:Sparql_OWL
      * @param {string} sourceLabel - OWL source name to query
-     * @param {(string|string[])} domainIds - Domain (or range) class URI(s) to filter by (optional)
+     * @param {(string|string[])} [domainIds] - Domain (or range) class URI(s) to filter by (optional)
      * @param {Object} [options] - Query options
      * @param {boolean} [options.inverseRestriction] - Filter on range instead of domain
      * @param {(string|string[])} [options.propIds] - Filter by property URI(s)
@@ -1528,6 +1526,7 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?domain`/`?prop`/`?range`/`?subProp`/`?inverseProp` (+labels)
      * @returns {void}
+     * @expose
      */
     self.getObjectPropertiesDomainAndRange = function (sourceLabel, domainIds, options, callback) {
         if (!options) {
@@ -1714,7 +1713,7 @@ var Sparql_OWL = (function () {
      * @name getObjectRestrictions
      * @memberof module:Sparql_OWL
      * @param {string} sourceLabel - OWL source name to query
-     * @param {(string|string[])} subClassIds - Class URI(s) carrying the restrictions (or restriction values when `inverseRestriction`)
+     * @param {(string|string[])} [subClassIds] - Class URI(s) carrying the restrictions (or restriction values when `inverseRestriction`)
      * @param {Object} [options] - Query options
      * @param {boolean} [options.inverseRestriction] - Filter on the restriction value (range) instead of the subject
      * @param {(string|string[])} [options.restrictionIds] - Filter by restriction value URI(s)
@@ -1730,6 +1729,7 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?subject`/`?prop`/`?value`/`?node`/`?constraintType` (+labels)
      * @returns {void}
+     * @expose
      */
     self.getObjectRestrictions = function (sourceLabel, subClassIds, options, callback) {
         if (!options) {
@@ -1883,12 +1883,13 @@ var Sparql_OWL = (function () {
      * @name getNamedIndividuals
      * @memberof module:Sparql_OWL
      * @param {string} sourceLabel - OWL source name to query
-     * @param {(string|string[])} ids - Class URI(s) whose individuals are fetched
+     * @param {(string|string[])} [ids] - Class URI(s) whose individuals are fetched
      * @param {Object} [options] - Query options
      * @param {boolean} [options.selectGraph] - Bind each triple's named graph
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?subject`/`?node` (+labels)
      * @returns {void}
+     * @expose
      */
     self.getNamedIndividuals = function (sourceLabel, ids, options, callback) {
         if (!options) {
@@ -2046,6 +2047,7 @@ var Sparql_OWL = (function () {
      * @param {(string|string[])} ids - Resource URI(s) whose OWL type is determined
      * @param {Function} callback - Error-first callback `(err, typesMap)` mapping URI → `"NamedIndividual"`/`"Class"`/`"Restriction"`
      * @returns {void}
+     * @expose
      */
     self.getNodesOwlTypeMap = function (source, ids, callback) {
         if (!Array.isArray(ids)) {
@@ -2236,6 +2238,7 @@ var Sparql_OWL = (function () {
      * @param {string[]} uris - URIs whose labels are fetched
      * @param {Function} callback - Error-first callback `(err, labelsMap)` mapping URI → label
      * @returns {void}
+     * @expose
      */
     self.getUrisLabelsMap = function (source, uris, callback) {
         var sparql_url = Config.sources[source].sparql_server.url;
@@ -2289,6 +2292,7 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Total result cap (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, labelsMap)` mapping URI → label
      * @returns {void}
+     * @expose
      */
     self.getLabelsMap = function (sourceLabel, options, callback) {
         if (!options) {
@@ -2388,6 +2392,7 @@ var Sparql_OWL = (function () {
      * @param {Function} [processor] - Optional `(pageBindings, cb)` processor invoked per page; if omitted, pages are accumulated
      * @param {Function} callback - Error-first callback `(err, allData)` with the accumulated bindings (empty when a processor is used)
      * @returns {void}
+     * @expose
      */
     self.getDictionary = function (sourceLabel, options, processor, callback) {
         if (!options) {
@@ -2550,6 +2555,7 @@ var Sparql_OWL = (function () {
      * @param {string} [options.filter] - Extra SPARQL filter appended to the query
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?property` (+label)
      * @returns {void}
+     * @expose
      */
     self.getObjectProperties = function (sourceLabel, options, callback) {
         if (!options) {
@@ -2804,6 +2810,7 @@ var Sparql_OWL = (function () {
      * @param {string} [options.filter] - Extra SPARQL filter applied within each UNION branch
      * @param {Function} callback - Error-first callback `(err, propsMap)` mapping property URI → `{prop, propLabel, subProps, domain, domainLabel, range, rangeLabel, inverseProp, inversePropLabel}`
      * @returns {void}
+     * @expose
      */
     self.getInferredPropertiesDomainsAndRanges = function (sourceLabel, options, callback) {
         if (!options) {
@@ -3593,7 +3600,7 @@ var Sparql_OWL = (function () {
      * @name getAllDescendants
      * @memberof module:Sparql_OWL
      * @param {string} source - Source name to query
-     * @param {(string|string[])} resourcesIds - Ancestor resource URI(s) whose descendants are fetched
+     * @param {(string|string[])} [resourcesIds] - Ancestor resource URI(s) whose descendants are fetched
      * @param {string} [taxonomyPredicate="rdfs:subClassOf"] - Predicate defining the parent relation
      * @param {Object} [options] - Query options
      * @param {boolean} [options.includeParent] - Include the starting resource(s) (`*` path)
@@ -3601,6 +3608,7 @@ var Sparql_OWL = (function () {
      * @param {string} [options.filter] - Extra SPARQL filter appended to the query
      * @param {Function} callback - Error-first callback `(err, allResults)` with `?descendant`/`?descendantParent` (+labels)
      * @returns {void}
+     * @expose
      */
     self.getAllDescendants = function (source, resourcesIds, taxonomyPredicate, options, callback) {
         if (!options) {

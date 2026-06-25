@@ -26,7 +26,9 @@ const MODULES_TO_EXTRACT = [
 // Group 1: raw JSDoc content (everything between /** and */)
 // Group 2: function name
 // Group 3: raw parameter list
-const functionWithJsdocRegex = /\/\*\*([\s\S]*?)\*\/\s*self\.(\w+)\s*=\s*function\s*\(([^)]*)\)/g;
+// The capture forbids crossing a `*/`, so the matched JSDoc is the block directly
+// above `self.NAME` — never an earlier comment (e.g. the file's MIT header) bleeding in.
+const functionWithJsdocRegex = /\/\*\*((?:(?!\*\/)[\s\S])*?)\*\/\s*self\.(\w+)\s*=\s*function\s*\(([^)]*)\)/g;
 const functionNoJsdocRegex = /(?<!\/\*\*[\s\S]{0,2000}\*\/\s*)self\.(\w+)\s*=\s*function\s*\(([^)]*)\)/g;
 
 const jsdocLinePrefixRegex = /^\s*\*\s?/;
@@ -56,10 +58,30 @@ function parseJsDoc(rawJsDoc) {
             const paramMatch = line.match(paramTagRegex);
             if (paramMatch) {
                 const [, type, rawName, description] = paramMatch;
-                if (rawName.includes(".")) continue;
                 const isOptional = rawName.startsWith("[");
                 const cleanName = rawName.replace(optionalBracketsRegex, "");
-                params[cleanName] = { type: type.trim(), required: !isOptional, description: description.trim() };
+
+                // Dotted names (e.g. `options.filter`) are sub-fields of an object param:
+                // attach them as `properties` of the parent so the catalog can show users
+                // which keys an `options` object accepts instead of an opaque "Query options".
+                if (cleanName.includes(".")) {
+                    const firstDotIndex = cleanName.indexOf(".");
+                    const parentName = cleanName.slice(0, firstDotIndex);
+                    const propertyName = cleanName.slice(firstDotIndex + 1);
+                    if (!params[parentName]) {
+                        params[parentName] = { type: "Object", required: false, description: "", properties: {} };
+                    }
+                    if (!params[parentName].properties) {
+                        params[parentName].properties = {};
+                    }
+                    params[parentName].properties[propertyName] = { type: type.trim(), required: !isOptional, description: description.trim() };
+                } else {
+                    const existingProperties = params[cleanName] ? params[cleanName].properties : undefined;
+                    params[cleanName] = { type: type.trim(), required: !isOptional, description: description.trim() };
+                    if (existingProperties) {
+                        params[cleanName].properties = existingProperties;
+                    }
+                }
             }
         } else if (line.startsWith("@responseSchema")) {
             responseSchema = line.replace(responseSchemaTagRegex, "").trim();
@@ -109,12 +131,23 @@ function extractFunctions(source, moduleName) {
         // Merge signature params with JSDoc types (signature is authoritative for names/order)
         const mergedParams = exposedSignatureParams.map((paramName) => {
             const jsDocParam = jsDoc.params[paramName];
-            return {
+            const mergedParam = {
                 name: paramName,
                 type: jsDocParam ? jsDocParam.type : "any",
                 required: jsDocParam ? jsDocParam.required : paramName !== "options",
                 description: jsDocParam ? jsDocParam.description : "",
             };
+            if (jsDocParam && jsDocParam.properties) {
+                const propertyEntries = Object.entries(jsDocParam.properties);
+                const propertyList = propertyEntries.map(([propertyName, property]) => ({
+                    name: propertyName,
+                    type: property.type,
+                    required: property.required,
+                    description: property.description,
+                }));
+                mergedParam.properties = propertyList;
+            }
+            return mergedParam;
         });
 
         entries.push({

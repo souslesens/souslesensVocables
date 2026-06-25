@@ -761,6 +761,7 @@ const apiDoc = {
         { name: "RDF", description: "Manage RDF graphs" },
         { name: "Sources", description: "Manage sources related to a graph URI" },
         { name: "Sparql", description: "Manage Sparql requests" },
+        { name: "Sparql queries", description: "Share cataloged SPARQL queries generated from SousLeSens content with external clients" },
         { name: "Tools", description: "Manage tools available for each user" },
         { name: "UserData", description: "Manage shared data for each user and profile" },
         { name: "Users", description: "Manage information about the registered users" },

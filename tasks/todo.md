@@ -1,3 +1,44 @@
+# Current Task: Split SPARQL Queries API Routes
+
+## Plan
+
+- [x] Inspect existing `/sparqlQueries` handlers and callers.
+- [x] Extract shared registry/execution helpers.
+- [x] Add `/sparqlQueries/catalog`, `/sparqlQueries/run`, and `/sparqlQueries/codeRequest`.
+- [x] Keep legacy `/sparqlQueries` behavior compatible unless safely obsolete.
+- [x] Run focused syntax checks and review the diff.
+
+## Review
+
+- Added explicit SPARQL query API endpoints:
+    - `GET /api/v1/sparqlQueries/catalog`
+    - `POST /api/v1/sparqlQueries/run`
+    - `POST /api/v1/sparqlQueries/codeRequest`
+- `run` forces `returnQueryStr: false`; `codeRequest` forces `returnQueryStr: true`; the body no longer exposes that toggle in Swagger.
+- Legacy `GET/POST /api/v1/sparqlQueries` remains compatible for existing callers.
+- Verification: `node --check` passed for all touched route files; `node -e "import('./app.js')..."` passed.
+
+---
+
+# Current Task: Put SPARQL Queries In Its Own Swagger Group
+
+## Plan
+
+- [x] Add a dedicated Swagger tag for shared SLS SPARQL query routes.
+- [x] Move shared handlers outside `api/v1/paths` so helpers do not create a legacy route.
+- [x] Retag `catalog`, `run`, and `codeRequest` into the new Swagger group.
+- [x] Delete the old `/api/v1/sparqlQueries` route.
+- [x] Run syntax, format, and app import checks.
+
+## Review
+
+- Added the `Sparql queries` Swagger tag with a sharing-oriented description for cataloged SLS SPARQL queries.
+- Moved shared route logic into `api/v1/controllers/sparqlQueries.js`.
+- Removed legacy `GET/POST /api/v1/sparqlQueries`; only `catalog`, `run`, and `codeRequest` remain.
+- Verification: `node --check`, Prettier check, `app.js` import, and `Select-String` route/tag search passed.
+
+---
+
 # Current Task
 
 ## Plan

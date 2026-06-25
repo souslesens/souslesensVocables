@@ -95,18 +95,18 @@ var TripleFactory = (function () {
         // on exclut alors l'id colonne nu pour ne garder que le prédicat sélectionné
         var parentColumnIdsOfSelectedPredicates = {};
         checkedNodes.forEach(function (item) {
-            var filterMappingId = item.data && item.data.filterMappingId ? item.data.filterMappingId : item.id;
-            if (filterMappingId.indexOf(">") > -1) {
-                var parentColumnId = filterMappingId.split(">")[0];
-                parentColumnIdsOfSelectedPredicates[parentColumnId] = true;
+            if (item.parent == "Relations") {
+                var edgesById = MappingColumnsGraph.getEdgesMap("id")[item.id];
+                if (edgesById && edgesById[0]) {
+                    var edge = edgesById[0];
+                    var predicate = edge.data && (edge.data.type || edge.data.id);
+                    if (predicate && edge.from) {
+                        filterMappingIds.push(edge.from + ">" + predicate);
+                        return;
+                    }
+                }
             }
-        });
-        checkedNodes.forEach(function (item) {
-            var filterMappingId = item.data && item.data.filterMappingId ? item.data.filterMappingId : item.id;
-            if (parentColumnIdsOfSelectedPredicates[filterMappingId]) {
-                return;
-            }
-            filterMappingIds.push(filterMappingId);
+            filterMappingIds.push(item.id);
         });
         try {
             var offset = parseInt($("#mappingTripleFactory_offset").val());
@@ -879,12 +879,9 @@ var TripleFactory = (function () {
         });
 
         edges.forEach(function (edge) {
-            var fromMappingNode = self.columnsMap[edge.from];
-            var toMappingNode = self.columnsMap[edge.to];
-            var toClassNode = classNodesMap[edge.to];
-            if (fromMappingNode && toMappingNode) {
+            if (self.columnsMap[edge.from] && self.columnsMap[edge.to]) {
                 var jstreeEdgeLabel = edge.label === "a" ? "rdf:type" : edge.label;
-                var label = fromMappingNode.label + "-" + jstreeEdgeLabel + "->" + toMappingNode.label;
+                var label = self.columnsMap[edge.from].label + "-" + jstreeEdgeLabel + "->" + self.columnsMap[edge.to].label;
                 treeData.push({
                     id: edge.id,
                     text: label,

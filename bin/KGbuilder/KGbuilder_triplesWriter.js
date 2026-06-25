@@ -559,13 +559,7 @@ const KGbuilder_triplesWriter = {
                         "} " +
                         "}",
                     deleteClause:
-                        "DELETE { GRAPH <" +
-                        graphUri +
-                        "> { ?sub " +
-                        formattedPredicate +
-                        " ?targetClass . " +
-                        (item.propertyUri === "rdfs:subClassOf" ? "?sub rdf:type owl:Class . " : "") +
-                        "} }",
+                        "DELETE { GRAPH <" + graphUri + "> { ?sub " + formattedPredicate + " ?targetClass . " + (item.propertyUri === "rdfs:subClassOf" ? "?sub rdf:type owl:Class . " : "") + "} }",
                 };
             },
         };

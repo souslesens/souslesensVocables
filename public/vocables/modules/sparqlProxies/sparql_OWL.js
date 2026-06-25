@@ -1984,14 +1984,20 @@ var Sparql_OWL = (function () {
 
         query += " limit " + sourceVariables.limit + " ";
 
-        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            if (result.query) return callback(null, result);
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "predicate"], { source: sourceLabel });
-            return callback(null, result.results.bindings);
-        });
+        Sparql_proxy.querySPARQL_GET_proxy(
+            sourceVariables.url,
+            query,
+            sourceVariables.queryOptions,
+            { source: sourceLabel, returnQueryStr: options && options.returnQueryStr },
+            function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                if (result.query) return callback(null, result);
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "predicate"], { source: sourceLabel });
+                return callback(null, result.results.bindings);
+            },
+        );
     };
 
     /**

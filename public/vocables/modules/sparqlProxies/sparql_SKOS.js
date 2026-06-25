@@ -56,14 +56,20 @@ var Sparql_SKOS = (function () {
         query += "  } ORDER BY ?topConceptLabel ";
         query += "limit " + sourceVariables.limit + " ";
 
-        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            if (result.query) return callback(null, result);
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "topConcept");
-            return callback(null, result.results.bindings);
-        });
+        Sparql_proxy.querySPARQL_GET_proxy(
+            sourceVariables.url,
+            query,
+            sourceVariables.queryOptions,
+            { source: sourceLabel, returnQueryStr: options && options.returnQueryStr },
+            function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                if (result.query) return callback(null, result);
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "topConcept");
+                return callback(null, result.results.bindings);
+            },
+        );
     };
 
     /**
@@ -140,16 +146,22 @@ var Sparql_SKOS = (function () {
         query += "} ";
         query += "limit " + sourceVariables.limit + " ";
 
-        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            if (result.query) return callback(null, result);
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "child"]);
+        Sparql_proxy.querySPARQL_GET_proxy(
+            sourceVariables.url,
+            query,
+            sourceVariables.queryOptions,
+            { source: sourceLabel, returnQueryStr: options && options.returnQueryStr },
+            function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                if (result.query) return callback(null, result);
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "child"]);
 
-            result.results.bindings = Sparql_generic.sortBindings(result.results.bindings, "child1Label");
-            return callback(null, result.results.bindings);
-        });
+                result.results.bindings = Sparql_generic.sortBindings(result.results.bindings, "child1Label");
+                return callback(null, result.results.bindings);
+            },
+        );
     };
 
     /**
@@ -221,14 +233,20 @@ var Sparql_SKOS = (function () {
                      query += " limit " + sourceVariables.limit + " ";*/
         }
 
-        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            if (result.query) return callback(null, result);
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "predicate"]);
-            return callback(null, result.results.bindings);
-        });
+        Sparql_proxy.querySPARQL_GET_proxy(
+            sourceVariables.url,
+            query,
+            sourceVariables.queryOptions,
+            { source: sourceLabel, returnQueryStr: options && options.returnQueryStr },
+            function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                if (result.query) return callback(null, result);
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "predicate"]);
+                return callback(null, result.results.bindings);
+            },
+        );
     };
 
     /**
@@ -407,14 +425,20 @@ var Sparql_SKOS = (function () {
         query += "  } ";
         query += "limit " + sourceVariables.limit + " ";
 
-        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            if (result.query) return callback(null, result);
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "subject");
-            return callback(null, result.results.bindings);
-        });
+        Sparql_proxy.querySPARQL_GET_proxy(
+            sourceVariables.url,
+            query,
+            sourceVariables.queryOptions,
+            { source: sourceLabel, returnQueryStr: options && options.returnQueryStr },
+            function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                if (result.query) return callback(null, result);
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "subject");
+                return callback(null, result.results.bindings);
+            },
+        );
     };
 
     /*******************************************end basic requests (mode read) **************************************************************/

@@ -162,7 +162,6 @@ if (typeof globalThis.window === "undefined") {
     };
     globalThis.MainController = { errorAlert: (err) => console.error("[MainController]", err) };
     globalThis.Sparql_common = { getLabelFromURI: (uri) => uri };
-
 }
 
 // Load Config lazily

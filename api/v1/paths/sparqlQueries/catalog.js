@@ -1,8 +1,25 @@
-import { getSparqlQueryCatalog } from "../../controllers/sparqlQueries.js";
+import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
+const requireJson = createRequire(import.meta.url);
+
+function loadRegistry() {
+    const registryPath = path.join(projectRoot, "bin", "sparqlRegistry.json");
+    return requireJson(registryPath);
+}
 
 export default function () {
-    async function GET(req, res, _next) {
-        return getSparqlQueryCatalog(req, res, _next);
+    async function GET(_req, res, _next) {
+        try {
+            const registry = loadRegistry();
+            const exposedEntries = registry.filter((entry) => entry.expose === true);
+            res.status(200).json(exposedEntries);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Failed to load SPARQL query registry" });
+        }
     }
 
     GET.apiDoc = {

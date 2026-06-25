@@ -1,0 +1,1400 @@
+{
+  "nonExacts": [
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000759",
+      "srcLabel": "hopper",
+      "tgtUri": "http://souslesens/ontology/unspsc/27112039",
+      "tgtLabel": "Lopper",
+      "score": 7.935604
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000129",
+      "srcLabel": "marine",
+      "tgtUri": "http://souslesens/ontology/unspsc/95121618",
+      "tgtLabel": "Marina",
+      "score": 7.935604
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000632",
+      "srcLabel": "wall",
+      "tgtUri": "http://souslesens/ontology/unspsc/95121805",
+      "tgtLabel": "Well",
+      "score": 7.142044
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000676",
+      "srcLabel": "control switch",
+      "tgtUri": "http://souslesens/ontology/unspsc/39122214",
+      "tgtLabel": "Controller switch",
+      "score": 11.594524
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000963",
+      "srcLabel": "cell",
+      "tgtUri": "http://souslesens/ontology/unspsc/95121805",
+      "tgtLabel": "Well",
+      "score": 7.142044
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000399",
+      "srcLabel": "bell",
+      "tgtUri": "http://souslesens/ontology/unspsc/95121805",
+      "tgtLabel": "Well",
+      "score": 7.142044
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000933",
+      "srcLabel": "ventilator",
+      "tgtUri": "http://souslesens/ontology/unspsc/40101500",
+      "tgtLabel": "Ventilation",
+      "score": 7.6181793
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000623",
+      "srcLabel": "motor control centre",
+      "tgtUri": "http://souslesens/ontology/unspsc/39121104",
+      "tgtLabel": "Motor control centers",
+      "score": 16.89152
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000125",
+      "srcLabel": "louvre",
+      "tgtUri": "http://souslesens/ontology/unspsc/30161901",
+      "tgtLabel": "Louvers",
+      "score": 11.290918
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000611",
+      "srcLabel": "bund wall",
+      "tgtUri": "http://souslesens/ontology/unspsc/40141751",
+      "tgtLabel": "Wall bend",
+      "score": 9.414242
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000441",
+      "srcLabel": "pig detector",
+      "tgtUri": "http://souslesens/ontology/unspsc/23151516",
+      "tgtLabel": "Ejector pins",
+      "score": 10.89813
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000995",
+      "srcLabel": "shield door",
+      "tgtUri": "http://souslesens/ontology/unspsc/30171524",
+      "tgtLabel": "Shielding door",
+      "score": 16.243496
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30001012",
+      "srcLabel": "boat",
+      "tgtUri": "http://souslesens/ontology/unspsc/31191508",
+      "tgtLabel": "Bort",
+      "score": 7.142044
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30001019",
+      "srcLabel": "heater treater",
+      "tgtUri": "http://souslesens/ontology/unspsc/95121506",
+      "tgtLabel": "Theater",
+      "score": 18.056654
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000972",
+      "srcLabel": "floor",
+      "tgtUri": "http://souslesens/ontology/unspsc/30161700",
+      "tgtLabel": "Flooring",
+      "score": 8.506844
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000866",
+      "srcLabel": "slide valve",
+      "tgtUri": "http://souslesens/ontology/unspsc/40141633",
+      "tgtLabel": "Slider valves",
+      "score": 10.754627
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000047",
+      "srcLabel": "fence",
+      "tgtUri": "http://souslesens/ontology/unspsc/30152000",
+      "tgtLabel": "Fencing",
+      "score": 7.8171387
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000246",
+      "srcLabel": "spark arrestor",
+      "tgtUri": "http://souslesens/ontology/unspsc/25173705",
+      "tgtLabel": "Spark arresters",
+      "score": 14.278662
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000686",
+      "srcLabel": "dust detector",
+      "tgtUri": "http://souslesens/ontology/unspsc/23153132",
+      "tgtLabel": "Dust deflectors",
+      "score": 13.623726
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000385",
+      "srcLabel": "condenser",
+      "tgtUri": "http://souslesens/ontology/unspsc/15101510",
+      "tgtLabel": "Condensate",
+      "score": 8.042261
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000336",
+      "srcLabel": "electric actuator",
+      "tgtUri": "http://souslesens/ontology/unspsc/31251502",
+      "tgtLabel": "Electronic actuators",
+      "score": 9.919656
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000365",
+      "srcLabel": "signal cable",
+      "tgtUri": "http://souslesens/ontology/unspsc/30241507",
+      "tgtLabel": "Gable",
+      "score": 7.6181793
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30001018",
+      "srcLabel": "harmonic filter",
+      "tgtUri": "http://souslesens/ontology/unspsc/40161500",
+      "tgtLabel": "Filters",
+      "score": 7.935604
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000850",
+      "srcLabel": "multiport valve",
+      "tgtUri": "http://souslesens/ontology/unspsc/40141600",
+      "tgtLabel": "Valves",
+      "score": 7.6181793
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000089",
+      "srcLabel": "hydraulic connector",
+      "tgtUri": "http://souslesens/ontology/unspsc/31163100",
+      "tgtLabel": "Connectors",
+      "score": 8.4646435
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000802",
+      "srcLabel": "adsorber column",
+      "tgtUri": "http://souslesens/ontology/unspsc/30161902",
+      "tgtLabel": "Columns",
+      "score": 9.272563
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000244",
+      "srcLabel": "sound attenuator",
+      "tgtUri": "http://souslesens/ontology/unspsc/32101515",
+      "tgtLabel": "Attenuators",
+      "score": 8.570452
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000861",
+      "srcLabel": "pressure-vacuum relief valve",
+      "tgtUri": "http://souslesens/ontology/unspsc/40141606",
+      "tgtLabel": "Relief valves",
+      "score": 14.469772
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000265",
+      "srcLabel": "ultrasonic flow transmitter",
+      "tgtUri": "http://souslesens/ontology/unspsc/41112516",
+      "tgtLabel": "Flow transmitters",
+      "score": 13.350485
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000620",
+      "srcLabel": "hvac duct",
+      "tgtUri": "http://souslesens/ontology/unspsc/40141900",
+      "tgtLabel": "Ducts",
+      "score": 8.838802
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000073",
+      "srcLabel": "galvanic isolator",
+      "tgtUri": "http://souslesens/ontology/unspsc/32101522",
+      "tgtLabel": "Isolators",
+      "score": 8.332385
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30001014",
+      "srcLabel": "pinch control valve",
+      "tgtUri": "http://souslesens/ontology/unspsc/40141609",
+      "tgtLabel": "Control valves",
+      "score": 9.654489
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000335",
+      "srcLabel": "earthing boss",
+      "tgtUri": "http://souslesens/ontology/unspsc/25101502",
+      "tgtLabel": "Busses",
+      "score": 8.630429
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30001002",
+      "srcLabel": "structural wall",
+      "tgtUri": "http://souslesens/ontology/unspsc/95121805",
+      "tgtLabel": "Well",
+      "score": 7.142044
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000616",
+      "srcLabel": "electrical reactor",
+      "tgtUri": "http://souslesens/ontology/unspsc/39121015",
+      "tgtLabel": "Reactors",
+      "score": 10.864145
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000249",
+      "srcLabel": "spreader bar",
+      "tgtUri": "http://souslesens/ontology/unspsc/95122501",
+      "tgtLabel": "Barn",
+      "score": 6.3484826
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000630",
+      "srcLabel": "static mixer",
+      "tgtUri": "http://souslesens/ontology/unspsc/32101523",
+      "tgtLabel": "Mixers",
+      "score": 8.969228
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000456",
+      "srcLabel": "printing machine",
+      "tgtUri": "http://souslesens/ontology/unspsc/31390000",
+      "tgtLabel": "Machinings",
+      "score": 3.306966
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000470",
+      "srcLabel": "smoke detector",
+      "tgtUri": "http://souslesens/ontology/unspsc/32101519",
+      "tgtLabel": "Detectors",
+      "score": 9.272563
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000936",
+      "srcLabel": "bridge bearing",
+      "tgtUri": "http://souslesens/ontology/unspsc/31171500",
+      "tgtLabel": "Bearings",
+      "score": 8.162335
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000867",
+      "srcLabel": "spiral heat exchanger",
+      "tgtUri": "http://souslesens/ontology/unspsc/40101802",
+      "tgtLabel": "Heat exchangers",
+      "score": 10.892263
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000887",
+      "srcLabel": "drain port",
+      "tgtUri": "http://souslesens/ontology/unspsc/30102900",
+      "tgtLabel": "Post",
+      "score": 7.142044
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000655",
+      "srcLabel": "process nozzle",
+      "tgtUri": "http://souslesens/ontology/unspsc/40141731",
+      "tgtLabel": "Nozzles",
+      "score": 8.338281
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000235",
+      "srcLabel": "signal splitter",
+      "tgtUri": "http://souslesens/ontology/unspsc/32101529",
+      "tgtLabel": "Splitter",
+      "score": 11.047989
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000841",
+      "srcLabel": "gravity separator",
+      "tgtUri": "http://souslesens/ontology/unspsc/40161707",
+      "tgtLabel": "Separators",
+      "score": 7.9421673
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000004",
+      "srcLabel": "break glass unit",
+      "tgtUri": "http://souslesens/ontology/unspsc/20142700",
+      "tgtLabel": "Pumping units",
+      "score": 8.223006
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000975",
+      "srcLabel": "gully drain",
+      "tgtUri": "http://souslesens/ontology/unspsc/30181605",
+      "tgtLabel": "Drain",
+      "score": 9.522724
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000418",
+      "srcLabel": "differential pressure transmitter",
+      "tgtUri": "http://souslesens/ontology/unspsc/41112410",
+      "tgtLabel": "Pressure transmitters",
+      "score": 12.218069
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000117",
+      "srcLabel": "lifting beam",
+      "tgtUri": "http://souslesens/ontology/unspsc/30101700",
+      "tgtLabel": "Beams",
+      "score": 7.757188
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000542",
+      "srcLabel": "mechanical seal",
+      "tgtUri": "http://souslesens/ontology/unspsc/31410000",
+      "tgtLabel": "Seals",
+      "score": 7.8370867
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30001029",
+      "srcLabel": "tote tank",
+      "tgtUri": "http://souslesens/ontology/unspsc/25102001",
+      "tgtLabel": "Tanks",
+      "score": 8.758053
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000979",
+      "srcLabel": "lead glass window",
+      "tgtUri": "http://souslesens/ontology/unspsc/30171600",
+      "tgtLabel": "Windows",
+      "score": 10.52223
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000913",
+      "srcLabel": "road compactor",
+      "tgtUri": "http://souslesens/ontology/unspsc/22101511",
+      "tgtLabel": "Compactors",
+      "score": 9.658594
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000508",
+      "srcLabel": "earthing resistor",
+      "tgtUri": "http://souslesens/ontology/unspsc/32121600",
+      "tgtLabel": "Resistors",
+      "score": 9.272563
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000999",
+      "srcLabel": "structural cell wall",
+      "tgtUri": "http://souslesens/ontology/unspsc/95121805",
+      "tgtLabel": "Well",
+      "score": 14.284088
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30001013",
+      "srcLabel": "rescue boat",
+      "tgtUri": "http://souslesens/ontology/unspsc/31191508",
+      "tgtLabel": "Bort",
+      "score": 7.142044
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000052",
+      "srcLabel": "fire hydrant",
+      "tgtUri": "http://souslesens/ontology/unspsc/40141726",
+      "tgtLabel": "Hydrants",
+      "score": 11.507238
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000114",
+      "srcLabel": "life buoy",
+      "tgtUri": "http://souslesens/ontology/unspsc/25111520",
+      "tgtLabel": "Buoy",
+      "score": 9.522724
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000464",
+      "srcLabel": "restriction orifice plate",
+      "tgtUri": "http://souslesens/ontology/unspsc/41112513",
+      "tgtLabel": "Orifice plate",
+      "score": 13.817519
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000403",
+      "srcLabel": "conductivity cell",
+      "tgtUri": "http://souslesens/ontology/unspsc/95121805",
+      "tgtLabel": "Well",
+      "score": 7.142044
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000756",
+      "srcLabel": "kettle reboiler",
+      "tgtUri": "http://souslesens/ontology/unspsc/40102000",
+      "tgtLabel": "Boilers",
+      "score": 6.489664
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000748",
+      "srcLabel": "flow computer",
+      "tgtUri": "http://souslesens/ontology/unspsc/43211500",
+      "tgtLabel": "Computers",
+      "score": 8.332385
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000128",
+      "srcLabel": "manual control switch",
+      "tgtUri": "http://souslesens/ontology/unspsc/39122214",
+      "tgtLabel": "Controller switch",
+      "score": 11.594524
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000334",
+      "srcLabel": "earth plate",
+      "tgtUri": "http://souslesens/ontology/unspsc/30102200",
+      "tgtLabel": "Plate",
+      "score": 9.522724
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30001000",
+      "srcLabel": "structural floor",
+      "tgtUri": "http://souslesens/ontology/unspsc/30161700",
+      "tgtLabel": "Flooring",
+      "score": 8.506844
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000415",
+      "srcLabel": "differential pressure gauge",
+      "tgtUri": "http://souslesens/ontology/unspsc/41112412",
+      "tgtLabel": "Pressure gauge",
+      "score": 10.837826
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000417",
+      "srcLabel": "differential pressure switch",
+      "tgtUri": "http://souslesens/ontology/unspsc/39122210",
+      "tgtLabel": "Pressure switch",
+      "score": 12.171009
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000822",
+      "srcLabel": "double block and bleed valve",
+      "tgtUri": "http://souslesens/ontology/unspsc/40141658",
+      "tgtLabel": "Block and bleed valve",
+      "score": 18.460583
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000375",
+      "srcLabel": "trip amplifier",
+      "tgtUri": "http://souslesens/ontology/unspsc/32101514",
+      "tgtLabel": "Amplifiers",
+      "score": 8.4646435
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000127",
+      "srcLabel": "manual call point",
+      "tgtUri": "http://souslesens/ontology/unspsc/25174203",
+      "tgtLabel": "Ball joint",
+      "score": 10.156391
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000053",
+      "srcLabel": "fired heater",
+      "tgtUri": "http://souslesens/ontology/unspsc/95121506",
+      "tgtLabel": "Theater",
+      "score": 7.935604
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000345",
+      "srcLabel": "electronic frequency converter",
+      "tgtUri": "http://souslesens/ontology/unspsc/39121007",
+      "tgtLabel": "Frequency converters",
+      "score": 12.377239
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000332",
+      "srcLabel": "earth electrode",
+      "tgtUri": "http://souslesens/ontology/unspsc/39121436",
+      "tgtLabel": "Electrodes",
+      "score": 8.4646435
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000136",
+      "srcLabel": "mounting bracket",
+      "tgtUri": "http://souslesens/ontology/unspsc/31162509",
+      "tgtLabel": "Brackets",
+      "score": 10.555302
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000827",
+      "srcLabel": "finned tube heat exchanger",
+      "tgtUri": "http://souslesens/ontology/unspsc/40101860",
+      "tgtLabel": "Heat exchanger tube",
+      "score": 13.63158
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000344",
+      "srcLabel": "electrical socket",
+      "tgtUri": "http://souslesens/ontology/unspsc/27111704",
+      "tgtLabel": "Sockets",
+      "score": 9.814676
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000513",
+      "srcLabel": "safety shower",
+      "tgtUri": "http://souslesens/ontology/unspsc/30181503",
+      "tgtLabel": "Showers",
+      "score": 10.422852
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000888",
+      "srcLabel": "drain pot",
+      "tgtUri": "http://souslesens/ontology/unspsc/30102900",
+      "tgtLabel": "Post",
+      "score": 6.3484826
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000551",
+      "srcLabel": "reciprocating compressor",
+      "tgtUri": "http://souslesens/ontology/unspsc/40151600",
+      "tgtLabel": "Compressors",
+      "score": 8.924412
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000116",
+      "srcLabel": "life raft",
+      "tgtUri": "http://souslesens/ontology/unspsc/25111806",
+      "tgtLabel": "Rafts",
+      "score": 11.259165
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000036",
+      "srcLabel": "document scanner",
+      "tgtUri": "http://souslesens/ontology/unspsc/43211711",
+      "tgtLabel": "Scanners",
+      "score": 10.864145
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000080",
+      "srcLabel": "guide post",
+      "tgtUri": "http://souslesens/ontology/unspsc/30102900",
+      "tgtLabel": "Post",
+      "score": 9.586538
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000240",
+      "srcLabel": "snatch block",
+      "tgtUri": "http://souslesens/ontology/unspsc/30131500",
+      "tgtLabel": "Blocks",
+      "score": 8.132915
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000022",
+      "srcLabel": "control module",
+      "tgtUri": "http://souslesens/ontology/unspsc/32101528",
+      "tgtLabel": "Modulators",
+      "score": 7.2124023
+    },
+    {
+      "srcUri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000558",
+      "srcLabel": "turbo expander",
+      "tgtUri": "http://souslesens/ontology/unspsc/43201605",
+      "tgtLabel": "Expanders",
+      "score": 8.332385
+    }
+  ],
+  "definitions": {
+    "from": [
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000759",
+        "label": "hopper",
+        "definition": "A vessel with a conical shape for filling or dosing purposes."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000129",
+        "label": "marine",
+        "definition": "A physical object that is related to the sea or sea transport."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000632",
+        "label": "wall",
+        "definition": "Which is flat and typically vertical suitable for separation."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000676",
+        "label": "control switch",
+        "definition": "A switch intended to switch or give an on/off signal when the measured variable has reached a pre-set value."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000963",
+        "label": "cell",
+        "definition": "An Area designed to facilitate safe storage and safe working with hazardous materials."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000399",
+        "label": "bell",
+        "definition": "A physical object that is a hollow body with a flared mouth made of cast metal. Formed to emit a clear musical sound by the sonorous vibration of its entire circumference when struck by a clapper, hammer or other appliance."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000933",
+        "label": "ventilator",
+        "definition": "A ventilator is a machine designed to mechanically move breathable air into and out of the lungs, to provide the mechanism of breathing for a patient who is physically unable to breathe, or breathing insufficiently."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000623",
+        "label": "motor control centre",
+        "definition": "A switchgear and controlgear that houses motor starters to control electric motors."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000125",
+        "label": "louvre",
+        "definition": "An artefact which contains fins or vanes intended to control a flow of air. Typically also to separate water droplets from an air stream."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000611",
+        "label": "bund wall",
+        "definition": "A constructed retaining wall around storage where potentially polluting substances are handled, processed or stored, for the purposes of containing any unintended escape of material from that area until such time as remedial action can be taken."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000441",
+        "label": "pig detector",
+        "definition": "A detector that is intended to detect a pig inside the pipeline or pig receiver."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000995",
+        "label": "shield door",
+        "definition": "A hinged or sliding barrier used to control access to a high hazard area, made from robust materials used to protect personnel from exposure to hazards."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30001012",
+        "label": "boat",
+        "definition": "A small open vessel for travelling on water."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30001019",
+        "label": "heater treater",
+        "definition": "A 2 or 3-phase separator vessel that utilizes heat and mechanical separation devices to facilitate the separation of oil-water emulsions."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000972",
+        "label": "floor",
+        "definition": "A level contained within a building or industrial compound, that provides safe access and a stable working or operational area for internal structures, equipment & personnel."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000866",
+        "label": "slide valve",
+        "definition": "A valve that opens and closes a passageway by sliding over a port."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000047",
+        "label": "fence",
+        "definition": "Is an artefact intended to act as a barrier and boundary or means of protection or confinement."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000246",
+        "label": "spark arrestor",
+        "definition": "A device which removes incandescent particles from a gas stream. Spark arrestors are fitted to vehicles and stationary engines which are operated in potentially flammable atmospheres."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000686",
+        "label": "dust detector",
+        "definition": "A detector for measuring the velocity, mass, charge, flight direction, and number of dust particles in space."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000385",
+        "label": "condenser",
+        "definition": "A cooler that is intended to change a vapour to liquid."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000336",
+        "label": "electric actuator",
+        "definition": "An actuator that produces a specified movement when excited by an electric signal."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000365",
+        "label": "signal cable",
+        "definition": "An electric cable intended for  transmission of electric signals."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30001018",
+        "label": "harmonic filter",
+        "definition": "A physical object that is a passive circuit that attenuates all signals except those within one or more frequency bands."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000850",
+        "label": "multiport valve",
+        "definition": "A valve that has three or more ports arranged to switch flow."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000089",
+        "label": "hydraulic connector",
+        "definition": "An artefact for releasably connecting hydraulic fluid lines, having means for closing the fluid path when the connector is released."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000802",
+        "label": "adsorber column",
+        "definition": "A physical fluid separator that is based on the principle of attraction exhibited by the surface of a solid for a liquid or a gas when they are in contact."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000244",
+        "label": "sound attenuator",
+        "definition": "A device decreasing noise in a HVAC system."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000861",
+        "label": "pressure-vacuum relief valve",
+        "definition": "A pressure relief valve that is intended to release excess pressure or admit pressure to prevent a vacuum forming when filling or emptying a pipeline or tank."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000265",
+        "label": "ultrasonic flow transmitter",
+        "definition": "A flow transmitter providing electrical outputs that are proportional to the flow inputs from an ultrasonic flow meter."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000620",
+        "label": "hvac duct",
+        "definition": "A large sheet-metal duct or casing through which air is passed for forced-draught, ventilation or air-conditioning purposes."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000073",
+        "label": "galvanic isolator",
+        "definition": "Galvanic isolation is the principle of isolating functional sections of electric systems so that charge-carrying particles cannot move from one section to another."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30001014",
+        "label": "pinch control valve",
+        "definition": "A pinch valve is an actuated membrane valve that is comprising a flexible tube, either exposed or enclosed in a body. The tube is pinched to close by mechanical means."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000335",
+        "label": "earthing boss",
+        "definition": "An electrical conductor that is used to connect the earthing system to structure."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30001002",
+        "label": "structural wall",
+        "definition": "A wall used to maintain structural integrity, and provide separation."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000616",
+        "label": "electrical reactor",
+        "definition": "A physical object that provides reactance in a circuit."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000249",
+        "label": "spreader bar",
+        "definition": "A beam that is used to spread ropes or slings when lifting."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000630",
+        "label": "static mixer",
+        "definition": "A physical object that is intended to mix fluid by means of diverging the flow with static obstacles or by increasing locally the velocity."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000456",
+        "label": "printing machine",
+        "definition": "A physical object that produces characters or graphic symbols on paper or other medium."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000470",
+        "label": "smoke detector",
+        "definition": "A detector that is intended to sense smoke."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000936",
+        "label": "bridge bearing",
+        "definition": "A device to permit relative movement between a bridge and its support generally requiring periodic inspection and maintenance"
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000867",
+        "label": "spiral heat exchanger",
+        "definition": "A container intended for storage and/or processing of fluids. Relates to Spiral Plate Heat Exchanger."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000887",
+        "label": "drain port",
+        "definition": "A drain port is a collection port that can be installed in pressure sensing lines for transmitters, steam lines, etc. to be able to remove liquids from the system that otherwise would create problems for the instruments."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000655",
+        "label": "process nozzle",
+        "definition": "A nozzle intended to enable transfer of process material."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000235",
+        "label": "signal splitter",
+        "definition": "A device with one input and at least two outputs used for dividing a detectable transmitted energy (as a voltage, current, or  magnetic field strength) by which information can be transmitted."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000841",
+        "label": "gravity separator",
+        "definition": "A separator that is based on the difference in specific gravity for the substances to be separated."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000004",
+        "label": "break glass unit",
+        "definition": "A device for actuating an alarm system that required a person to break the glass cover."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000975",
+        "label": "gully drain",
+        "definition": "A drainage channel that can be enclosed like a pipe or can be open with a protective grill. Typically used to collect rainwater or fluid spills in operational or production areas."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000418",
+        "label": "differential pressure transmitter",
+        "definition": "A pressure transmitter that is producing a standardized output signal dependent of a received pressure difference signal."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000117",
+        "label": "lifting beam",
+        "definition": "Is a solid or fabricated metal or wooden beam, suspended from a hoist/crane or from a forklift, designed to provide multiple lifting points."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000542",
+        "label": "mechanical seal",
+        "definition": "A seal that comprises of a set of one or more rotating and stationary seal faces, together with auxiliary hardware, separated by a film of fluid intended to reduce flow loss around a rotating shaft to an acceptable level."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30001029",
+        "label": "tote tank",
+        "definition": "A tank which is supposed to be transported."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000979",
+        "label": "lead glass window",
+        "definition": "A type of window designed to enable safe viewing of hazardous areas."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000913",
+        "label": "road compactor",
+        "definition": "A machine used to compact soil, gravel, concrete, or asphalt in the construction of roads and foundations"
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000508",
+        "label": "earthing resistor",
+        "definition": "A resistance through which the neutral pint of a supply system is earthed, in order to limit the current that flows on the occurrence of an earth fault."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000999",
+        "label": "structural cell wall",
+        "definition": "A wall, used to maintain structural integrity, and provide Shielding and Containment."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30001013",
+        "label": "rescue boat",
+        "definition": "A rescue boat designed for rescuing personnel."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000052",
+        "label": "fire hydrant",
+        "definition": "A device where hoses can be connected for drawing water for fire fighting."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000114",
+        "label": "life buoy",
+        "definition": "An artefact for the rescue of personnel from an installation in the case of an emergency situation."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000464",
+        "label": "restriction orifice plate",
+        "definition": "An orifice plate that is intended for use as a restrictor."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000403",
+        "label": "conductivity cell",
+        "definition": "A detecting element or probe that is used with a conductivity meter to measure the conductivity of a liquid."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000756",
+        "label": "kettle reboiler",
+        "definition": "A reboiler often boils liquid coming from the bottom of a distillation column, after which the resulting vapour is returned to the distillation column."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000748",
+        "label": "flow computer",
+        "definition": "A computer that is specially designed and programme to calculate flow and to correct for external influence."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000128",
+        "label": "manual control switch",
+        "definition": "A control switch that is operated by a person."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000334",
+        "label": "earth plate",
+        "definition": "An electrode that is an earth electrode consisting of a metal plate buried in the ground."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30001000",
+        "label": "structural floor",
+        "definition": "The lower enclosing surface of a room, used to support imposed loads."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000415",
+        "label": "differential pressure gauge",
+        "definition": "A gauge that is intended for measuring and indicating pressure differences."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000417",
+        "label": "differential pressure switch",
+        "definition": "A pilot switch intended to switch or give an on/off signal when the measured differential pressure has reached a pre-set value."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000822",
+        "label": "double block and bleed valve",
+        "definition": "A block and bleed valve that is incorporating two seats, each of which provides a seal, and a means of venting the space between the seats. The seats may isolate with the pressure differential acting in the same or in opposite directions depending on the design."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000375",
+        "label": "trip amplifier",
+        "definition": "A pilot switch intended to create a switch action at a pre-set value."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000127",
+        "label": "manual call point",
+        "definition": "A manual call point is a device which enables personnel to raise an alarm in the event of a fire incident by pressing a frangible element to activate the alarm system."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000053",
+        "label": "fired heater",
+        "definition": "Is a fired heat transfer equipment intended to burn fuel and to transfer the heat of combustion to a liquid without vaporising the liquid."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000345",
+        "label": "electronic frequency converter",
+        "definition": "An electronic ac converter for changing the frequency."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000332",
+        "label": "earth electrode",
+        "definition": "An electrode, which is the conductive part, that can be embedded in a specific conductive medium, e.g. concrete or coke, in electric contact with the Earth."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000136",
+        "label": "mounting bracket",
+        "definition": "Is a bracket intended to attach an item to another item."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000827",
+        "label": "finned tube heat exchanger",
+        "definition": "A heat exchanger that has finned tubes."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000344",
+        "label": "electrical socket",
+        "definition": "An electrical connector in which the terminals of an electricity supply are inside holes made to receive the pins of a plug."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000513",
+        "label": "safety shower",
+        "definition": "A shower intended for emergency situations."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000888",
+        "label": "drain pot",
+        "definition": "A liquid outlet port that allows liquid to leave a container under gravity"
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000551",
+        "label": "reciprocating compressor",
+        "definition": "A positive displacement compressor in which forced reduction of gas volume takes place by the movement of a displacing element in a cylinder or enclosure."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000116",
+        "label": "life raft",
+        "definition": "An artefact which is a raft for emergency situations."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000036",
+        "label": "document scanner",
+        "definition": "A device used to translate print media into computer language so that a document can be viewed and read later on."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000080",
+        "label": "guide post",
+        "definition": "An artefact which is an upstanding tapered shaft or rod fixed to a permanent guide base and intended to be used to guide equipment to the seabed."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000240",
+        "label": "snatch block",
+        "definition": "A block through which a rope can be reeved without access to an end."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000022",
+        "label": "control module",
+        "definition": "A module for control functions."
+      },
+      {
+        "uri": "https://jip36-cfihos/rdl-iof/equip-CFIHOS-30000558",
+        "label": "turbo expander",
+        "definition": "An expander of the turbine type used to reduce the pressure of a gas flow by leading it through a turbine rotor by which the recovered energy is transferred into rotational energy for either power generation or mechanical drive application."
+      }
+    ],
+    "target": [
+      {
+        "uri": "http://souslesens/ontology/unspsc/27112039",
+        "label": "Lopper",
+        "definition": "A set of hand devices used to perform or facilitate manual work in agriculture, forestry and gardening activities such as cutting, breaking up, boring, digging, planting, ploughing, mulching, furrowing and removing."
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/95121618",
+        "label": "Marina",
+        "definition": "buildings and structures that are used for transportation purposes"
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/95121805",
+        "label": "Well",
+        "definition": "Buildings and structures used to provide various utility services"
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/39122214",
+        "label": "Controller switch",
+        "definition": "Electrical devices for regulating flow of electrical energy"
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/40101500",
+        "label": "Ventilation",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/39121104",
+        "label": "Motor control centers",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/30161901",
+        "label": "Louvers",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/40141751",
+        "label": "Wall bend",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/23151516",
+        "label": "Ejector pins",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/30171524",
+        "label": "Shielding door",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/31191508",
+        "label": "Bort",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/95121506",
+        "label": "Theater",
+        "definition": "Buildings and structures that are used for either commercial or entertainment purposes"
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/30161700",
+        "label": "Flooring",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/40141633",
+        "label": "Slider valves",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/30152000",
+        "label": "Fencing",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/25173705",
+        "label": "Spark arresters",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/23153132",
+        "label": "Dust deflectors",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/15101510",
+        "label": "Condensate",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/31251502",
+        "label": "Electronic actuators",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/30241507",
+        "label": "Gable",
+        "definition": "Units generic to portable structures, such as gin poles, stakes and pegs, tube frame connectors, or others, that are designed either to support loads or to transmit loads to other units or components of the portable structure, such as a tent, grandstand, or stage, etc, or to fix them to the ground."
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/40161500",
+        "label": "Filters",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/40141600",
+        "label": "Valves",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/31163100",
+        "label": "Connectors",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/30161902",
+        "label": "Columns",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/32101515",
+        "label": "Attenuators",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/40141606",
+        "label": "Relief valves",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/41112516",
+        "label": "Flow transmitters",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/40141900",
+        "label": "Ducts",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/32101522",
+        "label": "Isolators",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/40141609",
+        "label": "Control valves",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/25101502",
+        "label": "Busses",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/39121015",
+        "label": "Reactors",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/95122501",
+        "label": "Barn",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/32101523",
+        "label": "Mixers",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/31390000",
+        "label": "Machinings",
+        "definition": "Objects formed by the removal of material from an initial shape, using various powered material removal processes, to achieve a desired shape"
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/32101519",
+        "label": "Detectors",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/31171500",
+        "label": "Bearings",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/40101802",
+        "label": "Heat exchangers",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/30102900",
+        "label": "Post",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/40141731",
+        "label": "Nozzles",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/32101529",
+        "label": "Splitter",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/40161707",
+        "label": "Separators",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/20142700",
+        "label": "Pumping units",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/30181605",
+        "label": "Drain",
+        "definition": "Non-ceramic plumbing related residential fixtures that are not considered sanitary ware."
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/41112410",
+        "label": "Pressure transmitters",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/30101700",
+        "label": "Beams",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/31410000",
+        "label": "Seals",
+        "definition": "Devices used to eliminate or control the leakage of liquids and or gases while preventing the entrance of external contaminants"
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/25102001",
+        "label": "Tanks",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/30171600",
+        "label": "Windows",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/22101511",
+        "label": "Compactors",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/32121600",
+        "label": "Resistors",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/40141726",
+        "label": "Hydrants",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/25111520",
+        "label": "Buoy",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/41112513",
+        "label": "Orifice plate",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/40102000",
+        "label": "Boilers",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/43211500",
+        "label": "Computers",
+        "definition": "The computer and its accessories together provide a platform to enable user computing. A computer is a device that accepts information (in the form of digital data) and manipulates it for some result based on a program or sequence of instructions on how data is to be processed. Complex computers also include the means for storing data (including the program, which is also a form of data) for some necessary duration. A program may be invariable and built into the computer (and called logic circuitry as it is on microprocessors) or different programs may be provided to the computer (loaded into its storage and then started by an administrator or user). Todays computers have both kinds of programming."
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/30102200",
+        "label": "Plate",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/41112412",
+        "label": "Pressure gauge",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/39122210",
+        "label": "Pressure switch",
+        "definition": "Electrical devices for regulating flow of electrical energy"
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/40141658",
+        "label": "Block and bleed valve",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/32101514",
+        "label": "Amplifiers",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/25174203",
+        "label": "Ball joint",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/39121007",
+        "label": "Frequency converters",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/39121436",
+        "label": "Electrodes",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/31162509",
+        "label": "Brackets",
+        "definition": "This class includes brackets, braces, supports and other types of bracketing hardware."
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/40101860",
+        "label": "Heat exchanger tube",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/27111704",
+        "label": "Sockets",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/30181503",
+        "label": "Showers",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/40151600",
+        "label": "Compressors",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/25111806",
+        "label": "Rafts",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/43211711",
+        "label": "Scanners",
+        "definition": "Devices that enable a computer to access data inputs or feed signals from outside sources."
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/30131500",
+        "label": "Blocks",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/32101528",
+        "label": "Modulators",
+        "definition": ""
+      },
+      {
+        "uri": "http://souslesens/ontology/unspsc/43201605",
+        "label": "Expanders",
+        "definition": "Components that are used to provide the casing and connections for information technology equipment."
+      }
+    ]
+  }
+}

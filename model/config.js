@@ -102,13 +102,22 @@ const MainConfigObject = z
             .strict(),
         llm: z
             .object({
-                provider: z.enum(["anthropic", "openrouter"]),
+                provider: z.enum(["anthropic", "openrouter", "ollama"]),
                 anthropic: z
                     .object({
                         apiKey: z.string(),
                         defaultModel: z.string().default("claude-sonnet-4-6"),
                         maxTokens: z.number().positive().max(32768).default(1024),
                         rateLimitTPM: z.number().positive().default(28000),
+                    })
+                    .strict()
+                    .optional(),
+                ollama: z
+                    .object({
+                        baseUrl: z.string().url().default("http://localhost:11434"),
+                        defaultModel: z.string(),
+                        maxTokens: z.number().positive().max(32768).default(1024),
+                        rateLimitTPM: z.number().positive().default(10000000),
                     })
                     .strict()
                     .optional(),

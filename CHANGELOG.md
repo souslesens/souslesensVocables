@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.9.0](https://github.com/souslesens/souslesensVocables/compare/3.8.0...3.9.0) (2026-06-26)
+
+
+### Features
+
+* **mainapp:** chunk upload on mappingModeler-upload-app and kg-upload-app ([4f712b2](https://github.com/souslesens/souslesensVocables/commit/4f712b241d8efb67d6280a053193f5ab1bb9978b))
+* open LogsTable on admin tool ([71d8c43](https://github.com/souslesens/souslesensVocables/commit/71d8c431407753d5dd94c5169cb2ef0a26c6cbff))
+
+
+### Bug Fixes
+
+* **csv:** respect line limit when reading CSV files ([a7a9b7c](https://github.com/souslesens/souslesensVocables/commit/a7a9b7cbd2a31d46edf5d8c3d03b264d3e886e38))
+* **getSourceTaxonomy:** buildParentChain self referenced on hierarchy ([63e036d](https://github.com/souslesens/souslesensVocables/commit/63e036d72eba23fac087e4469a572d77fa29ffd9))
+* **mappingCOlumnGraph:** subclassOf link not hided now by is classColumn for definedColumns ([09d4db4](https://github.com/souslesens/souslesensVocables/commit/09d4db45f8b61d06a2adf6ba598f63ab0e5de807))
+* **mappingModeler:** don't hide subclassOf links on column mappings ([28be0a3](https://github.com/souslesens/souslesensVocables/commit/28be0a35cd3fb2847d9ae6bde0960755d3e38dde))
+* **mappingModeler:** subclassof and rdf:type treament as relations in jstree ([00d884b](https://github.com/souslesens/souslesensVocables/commit/00d884b8d6698a0d78380a591615ebe3d4cb132c))
+* **remoteCodeRunner:** bug retrunQueryStr ([5957466](https://github.com/souslesens/souslesensVocables/commit/5957466e26613d4e4a714ca7aad2757908fb8015))
+
 ## [3.8.0](https://github.com/souslesens/souslesensVocables/compare/3.7.0...3.8.0) (2026-06-19)
 
 

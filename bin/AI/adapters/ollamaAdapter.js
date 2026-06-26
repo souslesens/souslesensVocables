@@ -99,7 +99,7 @@ function createOllamaAdapter(ollamaConfig) {
                 messages: [{ role: "user", content: prompt }],
                 maxTokens: options?.maxTokens,
             },
-            callback
+            callback,
         );
     }
 

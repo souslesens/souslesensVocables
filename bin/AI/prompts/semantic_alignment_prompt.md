@@ -7,10 +7,11 @@ You classify the **non-exact matches** produced by the exact-match script that c
 You are given **two tables**:
 
 1. **Non-exact matches table** — the rows you must classify. It has two columns:
-   - **source (from)**: a CFIHOS class label
-   - **target (cible)**: a UNSPSC class label
 
-   Every row in this table is a *non-exact* match. The exact matches were already handled in a previous, separate pass and are **not** part of this task.
+    - **source (from)**: a CFIHOS class label
+    - **target (cible)**: a UNSPSC class label
+
+    Every row in this table is a _non-exact_ match. The exact matches were already handled in a previous, separate pass and are **not** part of this task.
 
 2. **Definitions table** — a lookup table giving the definition of each class label (for both the source-from classes and the target classes).
 

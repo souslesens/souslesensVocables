@@ -52,6 +52,22 @@ async function runRegisteredSparqlQuery(req, res, returnQueryStr) {
         const user = await ConfigManager.getUser(req, res);
         const userTools = await profileModel.getUserTools(userInfo.user);
 
+        // Deny up-front if the caller requests any source they are not allowed to access.
+        // Every source-identifying param is named with "source" (e.g. sourceLabel,
+        // fromSourceLabel, toSourceLabel); presence in userSources means at least read access.
+        const sourceParamNameRegex = /source/i;
+        const allowedSourceNames = Object.keys(userSources);
+        const sourceParams = entry.params.filter((param) => sourceParamNameRegex.test(param.name));
+        for (const sourceParam of sourceParams) {
+            const requestedSource = params[sourceParam.name];
+            if (typeof requestedSource !== "string" || requestedSource.length === 0) {
+                continue;
+            }
+            if (!allowedSourceNames.includes(requestedSource)) {
+                return res.status(403).json({ message: `Access denied: you are not allowed to access source '${requestedSource}'` });
+            }
+        }
+
         const userContext = { user, userSources, tools: userTools };
 
         RemoteCodeRunner.runVocablesFn({ moduleName, functionName: name, args: positionalArgs }, userContext, function (error, result) {

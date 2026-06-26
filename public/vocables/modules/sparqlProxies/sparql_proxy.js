@@ -244,11 +244,11 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
      * @function
      * @name exportGraph
      * @memberof module:Sparql_proxy
-     * @param {string} source - Source name whose `graphUri` and `sparql_server.url` are read from `Config.sources`
+     * @param {string} sourceLabel - Source name whose `graphUri` and `sparql_server.url` are read from `Config.sources`
      * @returns {void}
      */
-    self.exportGraph = function (source) {
-        var graphUri = Config.sources[source].graphUri;
+    self.exportGraph = function (sourceLabel) {
+        var graphUri = Config.sources[sourceLabel].graphUri;
         var graphUriStr = "";
         if (graphUri) {
             graphUriStr = " from <" + graphUri + "> ";
@@ -262,7 +262,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
         headers["Accept"] = "application/x-nice-turtle";
         //  headers["Content-Type"] = "application/x-nice-turtle; charset=UTF-8";
 
-        var serverUrl = Config.sources[source].sparql_server.url;
+        var serverUrl = Config.sources[sourceLabel].sparql_server.url;
         if (serverUrl.indexOf("_default") == 0) {
             serverUrl = Config.sparql_server.url;
         }

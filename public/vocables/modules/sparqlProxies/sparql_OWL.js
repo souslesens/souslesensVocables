@@ -37,22 +37,22 @@ var Sparql_OWL = (function () {
      * @function
      * @name getSourceTaxonomyPredicates
      * @memberof module:Sparql_OWL
-     * @param {string} source - Source name whose `taxonomyPredicates` are read (null → default `rdfs:subClassOf`)
+     * @param {string} sourceLabel - Source name whose `taxonomyPredicates` are read (null → default `rdfs:subClassOf`)
      * @param {Object} [options] - Predicate options
      * @param {(string|string[])} [options.specificPredicates] - Predicate(s) to use instead of the source config
      * @param {boolean} [options.memberPredicate] - Append `^rdfs:member` to the path
      * @returns {string} A SPARQL property-path string defining the taxonomy relation
      */
-    self.getSourceTaxonomyPredicates = function (source, options) {
+    self.getSourceTaxonomyPredicates = function (sourceLabel, options) {
         if (!options) {
             options = {};
         }
         var defaultTaxonomyPredicates = " <http://www.w3.org/2000/01/rdf-schema#subClassOf> ";
 
-        if (!source) {
+        if (!sourceLabel) {
             return defaultTaxonomyPredicates;
         }
-        var sourceConfig = Config.sources[source];
+        var sourceConfig = Config.sources[sourceLabel];
 
         var str = " ";
 
@@ -2012,12 +2012,12 @@ var Sparql_OWL = (function () {
      * @function
      * @name getNodesTypes
      * @memberof module:Sparql_OWL
-     * @param {string} source - Source name whose endpoint is queried
+     * @param {string} sourceLabel - Source name whose endpoint is queried
      * @param {(string|string[])} ids - Resource URI(s) whose types are fetched
      * @param {Function} callback - Error-first callback `(err, allData)` with `?subject`/`?type`/`?g` bindings
      * @returns {void}
      */
-    self.getNodesTypes = function (source, ids, callback) {
+    self.getNodesTypes = function (sourceLabel, ids, callback) {
         var slices = common.array.slice(ids, 200);
         var allData = [];
         async.eachSeries(
@@ -2027,9 +2027,9 @@ var Sparql_OWL = (function () {
                 var query = " select  distinct *   WHERE { GRAPH ?g{ " + " ?subject rdf:type ?type. " + filterStr + " }}";
 
                 query += " limit " + 10000 + " ";
-                self.sparql_url = Config.sources[source].sparql_server.url;
+                self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
                 var url = self.sparql_url + "?format=json&query=";
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function (err, result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, result) {
                     if (err) {
                         return callbackEach(err);
                     }
@@ -2052,13 +2052,13 @@ var Sparql_OWL = (function () {
      * @function
      * @name getNodesOwlTypeMap
      * @memberof module:Sparql_OWL
-     * @param {string} source - Source name whose endpoint is queried
+     * @param {string} sourceLabel - Source name whose endpoint is queried
      * @param {(string|string[])} ids - Resource URI(s) whose OWL type is determined
      * @param {Function} callback - Error-first callback `(err, typesMap)` mapping URI → `"NamedIndividual"`/`"Class"`/`"Restriction"`
      * @returns {void}
      * @expose
      */
-    self.getNodesOwlTypeMap = function (source, ids, callback) {
+    self.getNodesOwlTypeMap = function (sourceLabel, ids, callback) {
         if (!Array.isArray(ids)) {
             ids = [ids];
         }
@@ -2068,7 +2068,7 @@ var Sparql_OWL = (function () {
             slices,
             function (slice, callbackEach) {
                 var filterStr = Sparql_common.setFilter("subject", slice);
-                var fromStr = Sparql_common.getFromStr(source);
+                var fromStr = Sparql_common.getFromStr(sourceLabel);
                 var query =
                     " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
                     "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
@@ -2080,9 +2080,9 @@ var Sparql_OWL = (function () {
                     " }";
 
                 query += " limit " + 10000 + " ";
-                self.sparql_url = Config.sources[source].sparql_server.url;
+                self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
                 var url = self.sparql_url + "?format=json&query=";
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function (err, result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, result) {
                     if (err) {
                         return callbackEach(err);
                     }
@@ -2243,15 +2243,15 @@ var Sparql_OWL = (function () {
      * @function
      * @name getUrisLabelsMap
      * @memberof module:Sparql_OWL
-     * @param {string} source - Source name to query
+     * @param {string} sourceLabel - Source name to query
      * @param {string[]} uris - URIs whose labels are fetched
      * @param {Function} callback - Error-first callback `(err, labelsMap)` mapping URI → label
      * @returns {void}
      * @expose
      */
-    self.getUrisLabelsMap = function (source, uris, callback) {
-        var sparql_url = Config.sources[source].sparql_server.url;
-        var fromStr = Sparql_common.getFromStr(source);
+    self.getUrisLabelsMap = function (sourceLabel, uris, callback) {
+        var sparql_url = Config.sources[sourceLabel].sparql_server.url;
+        var fromStr = Sparql_common.getFromStr(sourceLabel);
 
         var filter = Sparql_common.setFilter("s", uris);
 
@@ -2687,16 +2687,16 @@ var Sparql_OWL = (function () {
      * @function
      * @name generateInverseRestrictions
      * @memberof module:Sparql_OWL
-     * @param {string} source - Source name whose graph is edited
+     * @param {string} sourceLabel - Source name whose graph is edited
      * @param {string} propId - Property URI whose restrictions are inverted
      * @param {string} inversePropId - Property URI used in the generated inverse restrictions
      * @param {number} cardinality - Cardinality for the generated restrictions
      * @param {Function} callback - Error-first callback `(err, totalItems)` with the number of triples inserted
      * @returns {void}
      */
-    self.generateInverseRestrictions = function (source, propId, inversePropId, cardinality, callback) {
+    self.generateInverseRestrictions = function (sourceLabel, propId, inversePropId, cardinality, callback) {
         var filter = "filter (?prop=<" + propId + ">)";
-        self.getObjectRestrictions(source, null, { filter: filter }, function (err, result) {
+        self.getObjectRestrictions(sourceLabel, null, { filter: filter }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -2712,7 +2712,7 @@ var Sparql_OWL = (function () {
             async.eachSeries(
                 slices,
                 function (slice, callbackEach) {
-                    Sparql_generic.insertTriples(source, slice, null, function (err, _result) {
+                    Sparql_generic.insertTriples(sourceLabel, slice, null, function (err, _result) {
                         if (err) {
                             return callbackEach(err);
                         }
@@ -3172,22 +3172,22 @@ var Sparql_OWL = (function () {
      * @function
      * @name getStoredQueries
      * @memberof module:Sparql_OWL
-     * @param {string} source - Source name to query
+     * @param {string} sourceLabel - Source name to query
      * @param {string} scope - Scope value matched against `slsv:hasScope`
      * @param {Object} [options] - Reserved options object
      * @param {Function} callback - Error-first callback `(err, bindings)` with the stored-query triples
      * @returns {void}
      */
-    self.getStoredQueries = function (source, scope, options, callback) {
+    self.getStoredQueries = function (sourceLabel, scope, options, callback) {
         if (!options) {
             options = {};
         }
-        var fromStr = Sparql_common.getFromStr(source);
+        var fromStr = Sparql_common.getFromStr(sourceLabel);
 
         var query = "PREFIX slsv:<" + Config.storedQueries_graphUri + "> \n" + "select * " + fromStr + ' where {?s ?p ?o.?s slsv:hasScope "' + scope + '"}order by ?label';
 
         var url = Config.sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source, returnQueryStr: options && options.returnQueryStr }, function (err, _result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, _result) {
             if (err) {
                 return callback(err);
             }
@@ -3581,15 +3581,15 @@ var Sparql_OWL = (function () {
      * @param {Function} callback - Error-first callback `(err)`; errors with `"nothing to copy"` when the resource has no triples
      * @returns {void}
      */
-    self.copyUriTriplesFromSourceToSource = function (fromSource, toSource, subjectUri, callback) {
-        self.getNodeInfos(fromSource, subjectUri, null, function (err, result) {
+    self.copyUriTriplesFromSourceToSource = function (fromSourceLabel, toSourceLabel, subjectUri, callback) {
+        self.getNodeInfos(fromSourceLabel, subjectUri, null, function (err, result) {
             if (err) {
                 return callback(err);
             }
             if (result.length == 0) {
                 return callback("nothing to copy");
             }
-            var toStr = Sparql_common.getFromStr(toSource);
+            var toStr = Sparql_common.getFromStr(toSourceLabel);
 
             var triples = [];
             result.forEach(function (item) {
@@ -3608,7 +3608,7 @@ var Sparql_OWL = (function () {
      * @function
      * @name getAllDescendants
      * @memberof module:Sparql_OWL
-     * @param {string} source - Source name to query
+     * @param {string} sourceLabel - Source name to query
      * @param {(string|string[])} [resourcesIds] - Ancestor resource URI(s) whose descendants are fetched
      * @param {string} [taxonomyPredicate="rdfs:subClassOf"] - Predicate defining the parent relation
      * @param {Object} [options] - Query options
@@ -3619,11 +3619,11 @@ var Sparql_OWL = (function () {
      * @returns {void}
      * @expose
      */
-    self.getAllDescendants = function (source, resourcesIds, taxonomyPredicate, options, callback) {
+    self.getAllDescendants = function (sourceLabel, resourcesIds, taxonomyPredicate, options, callback) {
         if (!options) {
             options = {};
         }
-        var fromStr = Sparql_common.getFromStr(source, false, false, options);
+        var fromStr = Sparql_common.getFromStr(sourceLabel, false, false, options);
         var filter = options.filter || "";
         if (resourcesIds) {
             // needs options.useFilterKeyWord because VALUES dont work
@@ -3671,7 +3671,7 @@ var Sparql_OWL = (function () {
             "} " +
             "      ";
 
-        var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+        var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         var resultSize = 1;
         var limitSize = 2000;
         var offset = 0;
@@ -3685,7 +3685,7 @@ var Sparql_OWL = (function () {
                 var query2 = "" + query;
                 query2 += " limit " + (limitSize + 1) + " offset " + offset;
 
-                Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", { source: source, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
                     if (err) {
                         return callbackWhilst(err);
                     }

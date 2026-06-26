@@ -1580,12 +1580,12 @@ var Sparql_generic = (function () {
      * @function
      * @name createDecapitalizedLabelTriples
      * @memberof module:Sparql_generic
-     * @param {string} source - Source name to process
+     * @param {string} sourceLabel - Source name to process
      * @param {Function} callback - Error-first callback `(err, total)` with the number of triples inserted
      * @returns {void}
      */
-    self.createDecapitalizedLabelTriples = function (source, callback) {
-        Sparql_generic.getItems(source, {}, function (err, result) {
+    self.createDecapitalizedLabelTriples = function (sourceLabel, callback) {
+        Sparql_generic.getItems(sourceLabel, {}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -1614,7 +1614,7 @@ var Sparql_generic = (function () {
                     if (triples.length == 0) {
                         return callbackEach;
                     }
-                    self.insertTriples(source, triples, null, function (err, result) {
+                    self.insertTriples(sourceLabel, triples, null, function (err, result) {
                         total += result;
                         // eslint-disable-next-line no-console
                         console.log(total + " inserted");

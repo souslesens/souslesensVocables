@@ -963,9 +963,7 @@ var Sparql_OWL = (function () {
                 if (!options.descendants) {
                     classIds.forEach(function (id) {
                         hierarchies = {};
-                        if (id == "http://tsf/resources/ontology/DEXPIProcess_gfi_2/AmbientTemperature") {
-                            var x = 3;
-                        }
+
 
                         hierarchies[id] = [];
 

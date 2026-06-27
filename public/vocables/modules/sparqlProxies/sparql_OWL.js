@@ -3818,6 +3818,45 @@ var Sparql_OWL = (function () {
         );
     };
 
+    var defaultPredicates = {
+        prefixes: [
+            " rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
+            " rdfs:<http://www.w3.org/2000/01/rdf-schema#>",
+            " owl:<http://www.w3.org/2002/07/owl#>",
+            " skos:<http://www.w3.org/2004/02/skos/core#>",
+        ],
+        topConceptFilter: "?topConcept rdf:type owl:Class",
+        broaderPredicate: "rdfs:subClassOf",
+        narrowerPredicate: "^rdfs:subClassOf",
+        prefLabel: "rdfs:label",
+        limit: 10000,
+        optionalDepth: 5,
+    };
+    self.defaultPredicates = defaultPredicates;
+
+    self.getNodeLabel = function (sourceLabel, id, callback) {
+        var fromStr = Sparql_common.getFromStr(sourceLabel);
+        var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+        var query =
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+            "SELECT DISTINCT * " +
+            fromStr +
+            " WHERE {" +
+            "?subject rdf:type ?type." +
+            "?subject rdfs:label ?subjectLabel." +
+            "FILTER (?subject=<" +
+            id +
+            ">)" +
+            "} LIMIT 10000";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, { source: sourceLabel }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            return callback(null, result.results.bindings);
+        });
+    };
+
     return self;
 })();
 

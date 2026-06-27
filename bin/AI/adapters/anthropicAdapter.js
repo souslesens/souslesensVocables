@@ -1,7 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk";
 
 function createAnthropicAdapter(anthropicConfig) {
-    const client = new Anthropic({ apiKey: anthropicConfig.apiKey });
+    // dangerouslyAllowBrowser: the SLS Node server defines browser-like globals (window/document) so it
+    // can import shared frontend modules, which trips the SDK's browser detection. This adapter runs
+    // server-side only — the API key never reaches the client — so enabling the flag here is safe.
+    const client = new Anthropic({ apiKey: anthropicConfig.apiKey, dangerouslyAllowBrowser: true });
 
     async function createMessage({ model, system, messages, maxTokens }, callback) {
         try {

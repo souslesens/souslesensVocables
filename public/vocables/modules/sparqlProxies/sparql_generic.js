@@ -17,17 +17,52 @@ import searchUtil from "../search/searchUtil.js";
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * Sparql_generic Module
+ * Schema-agnostic CRUD and traversal layer over the triple store. Read operations
+ * (`getTopConcepts`, `getNodeChildren`, `getNodeInfos`, …) delegate to the per-source
+ * controller (`Sparql_OWL` or `Sparql_SKOS`) chosen by `Config.sources[source].controller`,
+ * automatically batching large id/word lists into slices. Write operations build and run
+ * `INSERT` / `DELETE` / `COPY` SPARQL against the source's named graph, and helpers convert
+ * triple objects to SPARQL text and post-process result bindings (labels, types, sorting).
+ * @module Sparql_generic
+ */
+
 var Sparql_generic = (function () {
     var self = {};
     self.slicesSize = 25;
     var sourcesVariables = {};
 
+    /**
+     * Builds and memoizes a per-source bundle of SPARQL building blocks (prefixes string,
+     * `FROM` clause, hierarchy predicates, preferred-label predicate, language, limit, endpoint
+     * URL). For SKOS sources, defaults come from `Sparql_SKOS.defaultPredicates`, overridden by
+     * the source's own `predicates` config.
+     * @function
+     * @name getSourceVariables
+     * @memberof module:Sparql_generic
+     * @param {string} sourceLabel - Source name to compute query variables for
+     * @returns {Object} Cached object with `prefixesStr`, `fromStr`, `broaderPredicate`, `narrowerPredicate`, `prefLabelPredicate`, `topConceptFilter`, `lang`, `limit`, `optionalDepth`, `url`, `queryOptions`, `graphUri`
+     */
     self.getSourceVariables = function (sourceLabel) {
         source = Config.sources[sourceLabel];
         if (!sourcesVariables[sourceLabel]) {
             var defaultPredicates;
             if (source.schemaType == "SKOS") {
                 defaultPredicates = Sparql_SKOS.defaultPredicates;
+            } else {
+                // OWL (and other non-SKOS schemas) default: subsumption hierarchy + rdfs:label.
+                // Without this, sources lacking an explicit `predicates` config crash below on
+                // `predicates.prefixes`.
+                defaultPredicates = {
+                    prefixes: [" rdfs:<http://www.w3.org/2000/01/rdf-schema#>", " rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>", " owl:<http://www.w3.org/2002/07/owl#>"],
+                    topConceptFilter: source.topClassFilter,
+                    broaderPredicate: "rdfs:subClassOf",
+                    narrowerPredicate: "rdfs:subClassOf",
+                    prefLabel: "rdfs:label",
+                    limit: 10000,
+                    optionalDepth: 5,
+                };
             }
 
             var predicates = "";
@@ -62,6 +97,18 @@ var Sparql_generic = (function () {
     /**********************************************************************************************************************************/
     /**********************************************************************************************************************************/
 
+    /**
+     * Returns the top-level concepts/classes of a source by delegating to its controller
+     * (`Sparql_OWL` or `Sparql_SKOS`).
+     * @function
+     * @name getTopConcepts
+     * @memberof module:Sparql_generic
+     * @param {string} sourceLabel - Source name to query
+     * @param {Object} [options] - Controller-specific options
+     * @param {Function} callback - Error-first callback `(err, result)` with the top concepts
+     * @returns {void}
+     * @expose
+     */
     self.getTopConcepts = function (sourceLabel, options, callback) {
         $("#waitImg").css("display", "block");
         if (!options) {
@@ -72,6 +119,19 @@ var Sparql_generic = (function () {
         });
     };
 
+    /**
+     * Returns all properties/triples describing a node (or nodes) by delegating to the source
+     * controller. Used to inspect a resource's outgoing predicates and values.
+     * @function
+     * @name getNodeInfos
+     * @memberof module:Sparql_generic
+     * @param {string} sourceLabel - Source name to query
+     * @param {(string|string[])} conceptId - URI(s) of the node(s) to describe
+     * @param {Object} [options] - Controller-specific options
+     * @param {Function} callback - Error-first callback `(err, result)` with the node's triples
+     * @returns {void}
+     * @expose
+     */
     self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
         $("#waitImg").css("display", "block");
         if (!options) {
@@ -82,6 +142,17 @@ var Sparql_generic = (function () {
         });
     };
 
+    /**
+     * Returns all items (concepts/classes) of a source by delegating to its controller.
+     * @function
+     * @name getItems
+     * @memberof module:Sparql_generic
+     * @param {string} sourceLabel - Source name to query
+     * @param {Object} [options] - Controller-specific options
+     * @param {Function} callback - Error-first callback `(err, result)` with the items
+     * @returns {void}
+     * @expose
+     */
     self.getItems = function (sourceLabel, options, callback) {
         $("#waitImg").css("display", "block");
         if (!options) {
@@ -91,6 +162,18 @@ var Sparql_generic = (function () {
             callback(err, result);
         });
     };
+    /**
+     * Returns the member nodes of a collection (SKOS collection / grouping) by delegating to
+     * the source controller.
+     * @function
+     * @name getCollectionNodes
+     * @memberof module:Sparql_generic
+     * @param {string} sourceLabel - Source name to query
+     * @param {string} collection - URI of the collection whose members are fetched
+     * @param {Object} [options] - Controller-specific options
+     * @param {Function} callback - Error-first callback `(err, result)` with the collection members
+     * @returns {void}
+     */
     self.getCollectionNodes = function (sourceLabel, collection, options, callback) {
         $("#waitImg").css("display", "block");
         if (!options) {
@@ -102,35 +185,30 @@ var Sparql_generic = (function () {
     };
 
     /**
+     * Returns the children of node(s) down to a given depth, delegating to the source controller.
+     * The `ids` or `words` filter is split into slices of `self.slicesSize` and queried
+     * sequentially with `async.eachSeries`, concatenating the per-slice results.
      *
-     * request example with collection filtering
-     PREFIX  terms:<http://purl.org/dc/terms/> PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> PREFIX  elements:<http://purl.org/dc/elements/1.1/>  select distinct ?child1,?child1Label, ?subjectLabel,?collLabel  FROM <http://souslesens/thesaurus/TEST/>   WHERE {?child1 skos:broader ?subject.
-
-     ?subject skos:prefLabel ?subjectLabel.
-
-     OPTIONAL{ ?child1 skos:prefLabel ?child1Label. } .filter( ?subject =<http://souslesens/thesaurus/TEST/9d53e3925c>)OPTIONAL{?child1 rdf:type ?child1Type.}
-
-     ?collection skos:member* ?acollection. ?acollection rdf:type skos:Collection.   ?collection skos:prefLabel ?collLabel.  ?acollection skos:prefLabel ?acollLabel.filter (?collection= <http://souslesens/thesaurus/TEST/5d97abb964> )
-     ?acollection skos:member ?aconcept. ?aconcept rdf:type skos:Concept.?aconcept skos:prefLabel ?aconceptLabel.
-     ?childX skos:broader ?aconcept.?childX skos:prefLabel ?childLabel.  ?childX skos:broader* ?child1
-
-     }ORDER BY ?child1Label limit 1000
-
-     *
-     * @param
-     sourceLabel
-     * @param
-     words
-     * @param
-     ids
-     * @param
-     descendantsDepth
-     * @param
-     options
-     * @param
-     callback
+     * Example controller query (SKOS, with collection filtering):
+     * ```sparql
+     * select distinct ?child1 ?child1Label ?subjectLabel ?collLabel
+     * FROM <http://souslesens/thesaurus/TEST/>
+     * WHERE { ?child1 skos:broader ?subject. ?subject skos:prefLabel ?subjectLabel.
+     *         OPTIONAL { ?child1 skos:prefLabel ?child1Label. } filter(?subject = <...>) }
+     * ORDER BY ?child1Label limit 1000
+     * ```
+     * @function
+     * @name getNodeChildren
+     * @memberof module:Sparql_generic
+     * @param {string} sourceLabel - Source name to query
+     * @param {(string|string[])} [words] - Label word(s) to match; mutually exclusive with `ids`
+     * @param {(string|string[])} [ids] - Parent node URI(s) whose children are fetched
+     * @param {number} descendantsDepth - Depth of descendants to retrieve
+     * @param {Object} [options] - Controller-specific options (merged with `{depth: 0, source}`)
+     * @param {Function} callback - Error-first callback `(err, bulkResult)` with the concatenated children
+     * @returns {void}
+     * @expose
      */
-
     self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
         $("#waitImg").css("display", "block");
         if (!options) {
@@ -177,6 +255,22 @@ var Sparql_generic = (function () {
         );
     };
 
+    /**
+     * Returns the ancestors of node(s) up to a given depth, delegating to the source controller.
+     * The `ids` or `words` filter is sliced into `self.slicesSize` chunks and queried
+     * sequentially, concatenating the per-slice results. Returns `[]` when the source has no controller.
+     * @function
+     * @name getNodeParents
+     * @memberof module:Sparql_generic
+     * @param {string} sourceLabel - Source name to query
+     * @param {(string|string[])} [words] - Label word(s) to match; mutually exclusive with `ids`
+     * @param {(string|string[])} [ids] - Child node URI(s) whose ancestors are fetched
+     * @param {number} ancestorsDepth - Depth of ancestors to retrieve
+     * @param {Object} [options] - Controller-specific options (merged with `{depth: 0, source}`)
+     * @param {Function} callback - Error-first callback `(err, bulkResult)` with the concatenated ancestors
+     * @returns {void}
+     * @expose
+     */
     self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
         if (!Config.sources[sourceLabel] || !Config.sources[sourceLabel].controller) {
             return callback(null, []);
@@ -231,6 +325,18 @@ var Sparql_generic = (function () {
 
     /*******************************************end basic requests (mode read) **************************************************************/
 
+    /**
+     * Returns the full chain of ancestors of a node. For non-SKOS sources, falls back to the
+     * controller's `getTopConcepts`. For SKOS, runs a transitive-closure query
+     * (`?subject broaderPredicate* ?broader`) fetching every broader concept's label and type.
+     * @function
+     * @name getSingleNodeAllGenealogy
+     * @memberof module:Sparql_generic
+     * @param {string} sourceLabel - Source name to query
+     * @param {string} id - URI of the node whose ancestors are fetched
+     * @param {Function} callback - Error-first callback `(err, bindings)` with the ancestor bindings
+     * @returns {void}
+     */
     self.getSingleNodeAllGenealogy = function (sourceLabel, id, callback) {
         if (Config.sources[sourceLabel].controllerName != "Sparql_SKOS") {
             Config.sources[sourceLabel].controller.getTopConcepts(sourceLabel, { source: sourceLabel }, function (err, result) {
@@ -265,6 +371,18 @@ var Sparql_generic = (function () {
         });
     };
 
+    /**
+     * Returns the full set of descendants of a node by running a transitive-closure query over
+     * the inverse broader / narrower predicates (`?subject ^broader*|narrower* ?narrower`),
+     * fetching each descendant's preferred label and type.
+     * @function
+     * @name getSingleNodeAllDescendants
+     * @memberof module:Sparql_generic
+     * @param {string} sourceLabel - Source name to query
+     * @param {string} id - URI of the node whose descendants are fetched
+     * @param {Function} callback - Error-first callback `(err, bindings)` with the descendant bindings
+     * @returns {void}
+     */
     self.getSingleNodeAllDescendants = function (sourceLabel, id, callback) {
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
         var query = "";
@@ -295,6 +413,19 @@ var Sparql_generic = (function () {
         });
     };
 
+    /**
+     * Fetches the preferred label and `rdf:type` of a single node, optionally filtered by
+     * language. Runs `SELECT * WHERE { ?subject rdf:type ?type. ?subject prefLabel ?subjectLabel.
+     * filter(?subject = <id>) }`.
+     * @function
+     * @name getNodeLabel
+     * @memberof module:Sparql_generic
+     * @param {string} sourceLabel - Source name to query
+     * @param {string} id - URI of the node whose label is fetched
+     * @param {Function} callback - Error-first callback `(err, bindings)` with the label/type bindings
+     * @returns {void}
+     * @expose
+     */
     self.getNodeLabel = function (sourceLabel, id, callback) {
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
         var query = "";
@@ -310,13 +441,13 @@ var Sparql_generic = (function () {
             "filter (?subject=<" +
             id +
             ">) ";
-        if (lang) {
-            query += 'filter( lang(?subjectLabel)="' + lang + '")';
+        if (sourceVariables.lang) {
+            query += 'filter( lang(?subjectLabel)="' + sourceVariables.lang + '")';
         }
 
         query += "}limit " + sourceVariables.limit + " ";
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, {}, { source: sourceLabel }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -324,6 +455,16 @@ var Sparql_generic = (function () {
         });
     };
 
+    /**
+     * Lists all named graphs available on an endpoint by running
+     * `SELECT distinct ?g WHERE { GRAPH ?g { ?s ?p ?o } } LIMIT 10000`.
+     * @function
+     * @name getEndPointAllGraphsMap
+     * @memberof module:Sparql_generic
+     * @param {string} [sparqlServerUrl] - Endpoint URL to query; defaults to the main server
+     * @param {Function} callback - Error-first callback `(err, graphs)`; `graphs` is a map of graph URI → 1
+     * @returns {void}
+     */
     self.getEndPointAllGraphsMap = function (sparqlServerUrl, callback) {
         if (!sparqlServerUrl) {
             sparqlServerUrl = Config.sparql_server.url + "?format=json&query=";
@@ -340,6 +481,17 @@ var Sparql_generic = (function () {
             return callback(null, graphs);
         });
     };
+    /**
+     * Fetches every outgoing triple (`?subject ?prop ?value`) for a list of subjects, batching
+     * the subject ids into slices of 2000 and combining results. Used to bulk-export node data.
+     * @function
+     * @name getNodesAllTriples
+     * @memberof module:Sparql_generic
+     * @param {string} sourceLabel - Source name to query
+     * @param {string[]} subjectIds - Subject URIs whose triples are fetched
+     * @param {Function} callback - Error-first callback `(err, triples)` with the concatenated triple bindings
+     * @returns {void}
+     */
     self.getNodesAllTriples = function (sourceLabel, subjectIds, callback) {
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
         var sliceSize = 2000;
@@ -373,14 +525,19 @@ var Sparql_generic = (function () {
         );
     };
     /**
-     *
-     *
-     * @param sourceLabel
-     * @param subjectUri
-     * @param predicateUri
-     * @param object a string represetning an uri or a literal or an object with
-     * @param callback
-     * @returns {*}
+     * Deletes triples matching a subject/predicate/object pattern from a source's named graph.
+     * Builds `with <graphUri> DELETE { ?s ?p ?o } WHERE { ?s ?p ?o <filters> }`, where each
+     * supplied component contributes a `Sparql_common.getUriFilter` clause. Refuses to run when
+     * all three filters are empty (would delete the whole graph).
+     * @function
+     * @name deleteTriples
+     * @memberof module:Sparql_generic
+     * @param {string} sourceLabel - Source name whose graph is edited
+     * @param {string} subjectUri - Subject URI to match (optional)
+     * @param {string} predicateUri - Predicate URI to match (optional)
+     * @param {(string|Object)} object - Object to match: a URI/literal string or a literal descriptor (optional)
+     * @param {Function} callback - Error-first callback `(err, bindings)`; errors with a message if no filter is given
+     * @returns {*} The callback result; early-returns a string error when no filter is supplied
      */
     self.deleteTriples = function (sourceLabel, subjectUri, predicateUri, object, callback) {
         if (!subjectUri && !predicateUri && !object) {
@@ -414,6 +571,18 @@ var Sparql_generic = (function () {
         });
     };
 
+    /**
+     * Serialises a triple descriptor object into a SPARQL/Turtle triple string, choosing the
+     * right syntax for each element: angle-bracketed URIs and blank nodes, quoted literals with
+     * optional `@lang` tag, prefixed names for allowed prefixes, and `^^datatype` typed literals
+     * (with numeric and `xsd:dateTime` normalisation). An inverse predicate (prefixed with `^`)
+     * swaps subject and object.
+     * @function
+     * @name triplesObjectToString
+     * @memberof module:Sparql_generic
+     * @param {Object} item - Triple descriptor with `subject`/`s`, `predicate`/`p`, `object`/`o`, and optional `lang`, `isString`, `valueType`
+     * @returns {string} A single `subject predicate object . ` SPARQL triple string
+     */
     self.triplesObjectToString = function (item) {
         if (!item.subject) {
             item.subject = item.s;
@@ -492,6 +661,14 @@ var Sparql_generic = (function () {
         }
     };
 
+    /**
+     * Builds a `PREFIX key: <uri>` string for every prefix declared in
+     * `Config.defaultSparqlPrefixes`, to prepend to INSERT/DELETE queries.
+     * @function
+     * @name getDefaultSparqlPrefixesStr
+     * @memberof module:Sparql_generic
+     * @returns {string} Concatenated PREFIX declarations for all default prefixes
+     */
     self.getDefaultSparqlPrefixesStr = function () {
         var str = "";
         for (var key in Config.defaultSparqlPrefixes) {
@@ -500,6 +677,23 @@ var Sparql_generic = (function () {
         return str;
     };
 
+    /**
+     * Inserts triples into a source's named graph (or an explicit `options.graphUri`). Each
+     * triple descriptor is serialised via {@link module:Sparql_generic.triplesObjectToString},
+     * deduplicated, batched into slices of 200 and run as `WITH GRAPH <graphUri> INSERT { ... }`.
+     * With `options.getSparqlOnly`, returns the generated query instead of executing it.
+     * @function
+     * @name insertTriples
+     * @memberof module:Sparql_generic
+     * @param {string} sourceLabel - Source name whose graph receives the triples (may be null if `options.graphUri` is set)
+     * @param {Object[]} _triples - Triple descriptor objects to insert
+     * @param {Object} [options] - Insert options
+     * @param {string} [options.graphUri] - Target graph URI when no `sourceLabel` is given
+     * @param {Object} [options.sparqlPrefixes] - Prefix map used to expand prefixed names before insertion
+     * @param {boolean} [options.getSparqlOnly] - Return the generated INSERT query instead of executing it
+     * @param {Function} callback - Error-first callback `(err, insertedCount)` (or `(null, query)` when `getSparqlOnly`)
+     * @returns {void}
+     */
     self.insertTriples = function (sourceLabel, _triples, options, callback) {
         if (!options) {
             options = {};
@@ -554,6 +748,18 @@ var Sparql_generic = (function () {
         );
     };
 
+    /**
+     * Deletes triples from a source's graph matching a SPARQL filter expression
+     * (`WITH <graphUri> DELETE { ?s ?x ?y } WHERE { ?s ?x ?y. ?s ?p ?o. filter(<filter>) }`).
+     * When no filter is given, prompts for confirmation before deleting the entire graph.
+     * @function
+     * @name deleteTriplesWithFilter
+     * @memberof module:Sparql_generic
+     * @param {string} sourceLabel - Source name whose graph is edited
+     * @param {string} filter - SPARQL filter expression selecting the triples to delete; empty deletes all (after confirmation)
+     * @param {Function} callback - Error-first callback `(err, result)`
+     * @returns {void}
+     */
     self.deleteTriplesWithFilter = function (sourceLabel, filter, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;
 
@@ -574,6 +780,18 @@ var Sparql_generic = (function () {
         });
     };
 
+    /**
+     * Copies all triples from a source's graph into another graph using paginated
+     * `with <fromGraph> insert { graph <toGraph> { ?s ?p ?o } } where { ?s ?p ?o }` runs,
+     * looping with `async.whilst` over `offset`/`limit` windows of 100000 until exhausted.
+     * @function
+     * @name copyGraph
+     * @memberof module:Sparql_generic
+     * @param {string} fromSourceLabel - Source name whose graph is the copy origin
+     * @param {string} toGraphUri - Destination graph URI
+     * @param {Function} callback - Error-first callback `(err, resultSize)` with the last batch size
+     * @returns {void}
+     */
     self.copyGraph = function (fromSourceLabel, toGraphUri, callback) {
         var fromGraphUri = Config.sources[fromSourceLabel].graphUri;
         var query = " COPY <" + fromGraphUri + "> TO <" + toGraphUri + ">;";
@@ -617,6 +835,19 @@ var Sparql_generic = (function () {
             },
         );
     };
+    /**
+     * Lists the distinct predicates used in a source, with their optional labels. Runs
+     * `select distinct ?p ?pLabel WHERE { ?s ?p ?o. optional { ?p ?x ?pLabel. filter(?x in
+     * (skos:prefLabel, rdfs:label)) } }` then fills missing labels via
+     * {@link module:Sparql_generic.setBindingsOptionalProperties}.
+     * @function
+     * @name getDistinctPredicates
+     * @memberof module:Sparql_generic
+     * @param {string} sourceLabel - Source name to query
+     * @param {Object} [options] - Reserved options object
+     * @param {Function} callback - Error-first callback `(err, bindings)` with `?p`/`?pLabel` bindings
+     * @returns {void}
+     */
     self.getDistinctPredicates = function (sourceLabel, options, callback) {
         $("#waitImg").css("display", "block");
         if (!options) {
@@ -631,12 +862,37 @@ var Sparql_generic = (function () {
             fromStr +
             " WHERE {?s ?p ?o. optional{?p ?x ?pLabel. filter(?x in (skos:prefLabel,rdfs:label))}}";
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (_err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (_err, result) {
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["p"]);
             return callback(null, result.results.bindings);
         });
     };
 
+    /**
+     * Copies selected nodes (and their properties) from a source into a target graph, optionally
+     * minting fresh URIs. Fetches each node's triples via {@link module:Sparql_generic.getNodeInfos},
+     * remaps subject/object URIs (random hexa ids unless `keepOriginalUris`), can add
+     * `skos:exactMatch`/`rdfs:sameAs` back-links, parent links and `rdf:type` triples per the
+     * target schema, then INSERTs the rebuilt triples in batches of 100.
+     * @function
+     * @name copyNodes
+     * @memberof module:Sparql_generic
+     * @param {string} fromSourceLabel - Source name the nodes come from
+     * @param {string} toGraphUri - Destination graph URI
+     * @param {string[]} sourceIds - URIs of the nodes to copy
+     * @param {Object} [options] - Copy options
+     * @param {boolean} [options.keepOriginalUris] - Reuse source URIs instead of minting new ones
+     * @param {boolean} [options.addExactMatchPredicate] - Add an exactMatch/sameAs link back to the source node
+     * @param {Object} [options.setParentNode] - `{sourceUri, targetUri}` to attach a parent (broader/subClassOf) link
+     * @param {string[]} [options.properties] - Only copy these property URIs
+     * @param {string[]} [options.excludedProperties] - Skip these property URIs
+     * @param {string[]} [options.additionalTriplesNt] - Extra N-Triples strings to insert
+     * @param {Function} [options.setSubjectFn] - Hook to mutate each item's subject
+     * @param {Function} [options.setPredicateFn] - Hook to mutate each item's predicate
+     * @param {Function} [options.setObjectFn] - Hook to mutate each item's object
+     * @param {Function} callback - Error-first callback `(err, insertedCount)`
+     * @returns {void}
+     */
     self.copyNodes = function (fromSourceLabel, toGraphUri, sourceIds, options, callback) {
         if (!options) {
             options = {};
@@ -787,6 +1043,17 @@ var Sparql_generic = (function () {
         );
     };
 
+    /**
+     * Sorts SPARQL result bindings in place by the string value of a given field (missing
+     * values sort as empty string).
+     * @function
+     * @name sortBindings
+     * @memberof module:Sparql_generic
+     * @param {Array<Object>} bindings - Result bindings to sort
+     * @param {string} field - Variable name to sort by (`binding[field].value`)
+     * @param {Object} [_options] - Reserved (unused)
+     * @returns {Array<Object>} The same array, sorted ascending by the field value
+     */
     self.sortBindings = function (bindings, field, _options) {
         bindings.sort(function (a, b) {
             var aValue = a[field] ? a[field].value : "";
@@ -802,6 +1069,17 @@ var Sparql_generic = (function () {
         return bindings;
     };
 
+    /**
+     * Fills missing `<field>Label` cells in result bindings by deriving a label from the
+     * field's URI value (its local name) via {@link module:Sparql_common.getLabelFromURI}.
+     * @function
+     * @name setMissingLabels
+     * @memberof module:Sparql_generic
+     * @param {Array<Object>} bindings - Result bindings to enrich in place
+     * @param {(string|string[])} _fields - Variable name(s) whose labels to backfill
+     * @param {Object} [options] - Reserved options object
+     * @returns {Array<Object>} The same bindings with `<field>Label` cells added where missing
+     */
     self.setMissingLabels = function (bindings, _fields, options) {
         if (!options) {
             options = {};
@@ -821,6 +1099,21 @@ var Sparql_generic = (function () {
         return bindings;
     };
 
+    /**
+     * Backfills missing `<field>Type` and `<field>Label` cells for a family of indexed fields
+     * (`field`, `field1` … `field4`) in result bindings. Defaults the type to
+     * `skos:Concept` (or `options.type`) and derives labels from the URI local name; blank
+     * nodes get an empty label.
+     * @function
+     * @name setBindingsOptionalProperties
+     * @memberof module:Sparql_generic
+     * @param {Array<Object>} bindings - Result bindings to enrich in place
+     * @param {(string|string[])} _fields - Base variable name(s); indexed variants 0–4 are processed
+     * @param {Object} [options] - Enrichment options
+     * @param {boolean} [options.noType] - Do not add `<field>Type` cells
+     * @param {string} [options.type] - Type URI to use instead of the default `skos:Concept`
+     * @returns {Array<Object>} The same bindings with type/label cells filled in
+     */
     self.setBindingsOptionalProperties = function (bindings, _fields, options) {
         if (!options) {
             options = {};
@@ -870,6 +1163,17 @@ var Sparql_generic = (function () {
         return bindings;
     };
 
+    /**
+     * Builds a SPARQL language filter that keeps a variable's literals in the requested
+     * language or with no language tag (`FILTER (lang(var)='xx' || !lang(var))`).
+     * @function
+     * @name getLangFilterStr
+     * @memberof module:Sparql_generic
+     * @param {Object} options - Filter options
+     * @param {string} [options.lang] - BCP-47 language code to keep (alongside untagged literals); no filter emitted when absent
+     * @param {string} variable - SPARQL variable expression (including `?`) the filter applies to
+     * @returns {string} The language `FILTER` clause, or `""` when no `options.lang` is given
+     */
     self.getLangFilterStr = function (options, variable) {
         var langFilter = "";
         if (!options || !options.lang) {
@@ -878,6 +1182,28 @@ var Sparql_generic = (function () {
         return " FILTER (lang(" + variable + ")='" + options.lang + "' || !lang(" + variable + "))  ";
     };
 
+    /**
+     * Builds the complete subsumption taxonomy (class/concept hierarchy) of a source as a flat
+     * map of nodes with resolved ancestor chains. The parent predicate and concept type are
+     * chosen from the schema (`rdfs:subClassOf`/`owl:Class` for OWL, `skos:broader`/`skos:Concept`
+     * for SKOS, `rdf:type`/`owl:NamedIndividual` for KNOWLEDGE_GRAPH, or `options.parentType`).
+     * The hierarchy query is paginated (limit 500) with `async.whilst`; results are then folded
+     * into `allClassesMap` (collecting labels/altLabels per node), each node's direct parents are
+     * expanded into a single most-specific ancestor chain, and orphan parents are back-filled
+     * (labels fetched via {@link module:Sparql_OWL.getLabelsMap} for OWL).
+     * @function
+     * @name getSourceTaxonomy
+     * @memberof module:Sparql_generic
+     * @param {string} sourceLabel - Source name whose taxonomy is built
+     * @param {Object} [options] - Build options
+     * @param {string[]} [options.ids] - Restrict to these subject URIs (adds a `setFilter` clause)
+     * @param {string} [options.filter] - Extra SPARQL filter appended to the hierarchy query
+     * @param {string} [options.parentType] - Parent predicate to use when the schema type is unrecognised
+     * @param {boolean} [options.withoutImports] - Exclude imported graphs from the `FROM` clause
+     * @param {Function} callback - Error-first callback `(err, {classesMap, labels})` where `classesMap` maps each node URI to `{id, label, lang, skoslabels, parents, type}` and `labels` maps URI → label
+     * @returns {void}
+     * @expose
+     */
     self.getSourceTaxonomy = function (sourceLabel, options, callback) {
         var schemaType = Config.sources[sourceLabel].schemaType;
         if (!options) {
@@ -1167,14 +1493,17 @@ var Sparql_generic = (function () {
                     }
 
                     // build full ancestor chain following chosen parents only (memoized)
+                    // processedParents guards against cycles (e.g. OWL reflexive subClassOf triples materialized by reasoner)
+                    var processedParents = {};
                     function buildParentChain(nodeId) {
                         if (self.processedParents[nodeId]) return [];
 
                         self.processedParents[nodeId] = 1;
                         var obj = allClassesMap[nodeId];
                         if (!obj || obj._chainBuilt) return obj ? obj.parents : [];
-                        var chosenParent = chosenParents[nodeId];
-
+                        if (processedParents[nodeId]) return [];
+                        processedParents[nodeId] = 1;
+                        var chosenParent = chosenParents[nodeId] !== nodeId ? chosenParents[nodeId] : null;
                         obj.parents = chosenParent ? [chosenParent].concat(buildParentChain(chosenParent)) : [];
                         obj._chainBuilt = true;
                         return obj.parents;
@@ -1244,6 +1573,17 @@ var Sparql_generic = (function () {
         );
     };
 
+    /**
+     * For every item whose preferred label is capitalised, inserts a `skos:altLabel` triple
+     * holding the decapitalised variant (improves search matching). Items are fetched via
+     * {@link module:Sparql_generic.getItems}, and the new triples are inserted in batches of 100.
+     * @function
+     * @name createDecapitalizedLabelTriples
+     * @memberof module:Sparql_generic
+     * @param {string} source - Source name to process
+     * @param {Function} callback - Error-first callback `(err, total)` with the number of triples inserted
+     * @returns {void}
+     */
     self.createDecapitalizedLabelTriples = function (source, callback) {
         Sparql_generic.getItems(source, {}, function (err, result) {
             if (err) {
@@ -1292,6 +1632,14 @@ var Sparql_generic = (function () {
         });
     };
 
+    /**
+     * Stub intended to serialise an array of triples into Turtle (not yet implemented).
+     * @function
+     * @name triplesToTurtle
+     * @memberof module:Sparql_generic
+     * @param {Object[]} triples - Triple descriptors to serialise
+     * @returns {void}
+     */
     self.triplesToTurtle = function (triples) {
         var subjectsMap = {};
 

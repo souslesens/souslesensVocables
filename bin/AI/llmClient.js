@@ -1,8 +1,10 @@
 import { readMainConfig } from "../../model/config.js";
 import createAnthropicAdapter from "./adapters/anthropicAdapter.js";
 import createOpenRouterAdapter from "./adapters/openRouterAdapter.js";
+import createOllamaAdapter from "./adapters/ollamaAdapter.js";
+import { decryptSecret } from "./secret.js";
 
-const ADAPTERS = { anthropic: createAnthropicAdapter, openrouter: createOpenRouterAdapter };
+const ADAPTERS = { anthropic: createAnthropicAdapter, openrouter: createOpenRouterAdapter, ollama: createOllamaAdapter };
 
 // ── Rate limiter (module-level singleton — shared across all callers) ───────
 const tokenWindow = [];
@@ -59,7 +61,13 @@ async function getAdapter() {
     const providerConfig = llmConfig[llmConfig.provider];
     if (!providerConfig) throw new Error(`Config missing for LLM provider "${llmConfig.provider}"`);
 
-    return { adapter: adapterFactory(providerConfig), rateLimitTPM: providerConfig.rateLimitTPM };
+    // Decrypt the API key if it was stored encrypted (enc:v1:...); plaintext keys pass through unchanged.
+    const resolvedConfig = { ...providerConfig };
+    if (resolvedConfig.apiKey) {
+        resolvedConfig.apiKey = decryptSecret(resolvedConfig.apiKey);
+    }
+
+    return { adapter: adapterFactory(resolvedConfig), rateLimitTPM: providerConfig.rateLimitTPM };
 }
 
 // ── Public API ───────────────────────────────────────────────────────────────

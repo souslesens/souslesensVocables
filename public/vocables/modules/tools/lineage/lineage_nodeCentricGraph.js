@@ -437,7 +437,7 @@ var Lineage_nodeCentricGraph = (function () {
                             //   str += "│"
 
                             var label = node.data.label;
-                            if (showSuperClasses && node.data.parentLabel && node.data.parentLabel!=rootNode.data.label) {
+                            if (showSuperClasses && node.data.parentLabel) {
                                 label += " (" + node.data.parentLabel + ")";
                             }
 

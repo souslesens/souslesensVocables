@@ -355,7 +355,12 @@ var Predicates_bot = (function () {
                             if (!seen[nonObjectProperty.id]) {
                                 seen[nonObjectProperty.id] = true;
                                 var nonObjectIsObject = classifyPropertyAsObject(model, nonObjectProperty.id);
-                                nodes.push({ id: nonObjectProperty.id, text: nonObjectProperty.label || nonObjectProperty.id, parent: "__src__" + vocab, data: { id: nonObjectProperty.id, isObjectProperty: nonObjectIsObject } });
+                                nodes.push({
+                                    id: nonObjectProperty.id,
+                                    text: nonObjectProperty.label || nonObjectProperty.id,
+                                    parent: "__src__" + vocab,
+                                    data: { id: nonObjectProperty.id, isObjectProperty: nonObjectIsObject },
+                                });
                             }
                         }
                     }

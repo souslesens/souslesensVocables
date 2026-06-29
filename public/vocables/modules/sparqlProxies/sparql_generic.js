@@ -162,28 +162,7 @@ var Sparql_generic = (function () {
             callback(err, result);
         });
     };
-    /**
-     * Returns the member nodes of a collection (SKOS collection / grouping) by delegating to
-     * the source controller.
-     * @function
-     * @name getCollectionNodes
-     * @memberof module:Sparql_generic
-     * @param {string} sourceLabel - Source name to query
-     * @param {string} collection - URI of the collection whose members are fetched
-     * @param {Object} [options] - Controller-specific options
-     * @param {Function} callback - Error-first callback `(err, result)` with the collection members
-     * @returns {void}
-     */
-    self.getCollectionNodes = function (sourceLabel, collection, options, callback) {
-        $("#waitImg").css("display", "block");
-        if (!options) {
-            options = {};
-        }
-        Config.sources[sourceLabel].controller.getCollectionNodes(sourceLabel, collection, options, function (err, result) {
-            callback(err, result);
-        });
-    };
-
+    
     /**
      * Returns the children of node(s) down to a given depth, delegating to the source controller.
      * The `ids` or `words` filter is split into slices of `self.slicesSize` and queried

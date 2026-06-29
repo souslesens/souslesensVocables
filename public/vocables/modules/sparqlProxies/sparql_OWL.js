@@ -235,6 +235,8 @@ var Sparql_OWL = (function () {
      * @returns {void}
      * @expose
      */
+
+    // To simplify delete collection ...
     self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
         if (!options) {
             options = {};
@@ -353,85 +355,7 @@ var Sparql_OWL = (function () {
         });
     };
 
-    /**
-     * Returns the full set of descendant classes of given parent class(es) via the transitive
-     * closure of the taxonomy predicate (`?subject (predicate)+ ?parentClass`).
-     * @function
-     * @name getNodesDescendants
-     * @memberof module:Sparql_OWL
-     * @param {string} sourceLabel - OWL source name to query
-     * @param {(string|string[])} ids - Parent class URI(s) whose descendants are fetched
-     * @param {Object} [options] - Query options
-     * @param {(string|string[])} [options.specificPredicates] - Override taxonomy predicate (defaults to `rdfs:subClassOf`)
-     * @param {boolean} [options.selectGraph] - Bind each triple's named graph
-     * @param {Function} callback - Error-first callback `(err, bindings)` with the `?subject` descendants
-     * @returns {void}
-     */
-    self.getNodesDescendants = function (sourceLabel, ids, options, callback) {
-        var predicateStr = Sparql_common.getSpecificPredicates(options) || "rdfs:subClassOf";
-        var filterStr = Sparql_common.setFilter("parentClass", ids, null, { useFilterKeyWord: 1 });
-        var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.selectGraph, options);
-
-        var query =
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-            "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-            "select   distinct ?subject " +
-            fromStr +
-            " where {?subject  (" +
-            predicateStr +
-            ")+ ?parentClass " +
-            filterStr +
-            "} order by ?subject limit 10000";
-
-        var url = self.sparql_url + "?format=json&query=";
-        self.graphUri = Config.sources[sourceLabel].graphUri;
-        self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-        self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
-        if (self.no_params) {
-            url = self.sparql_url;
-        }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            if (result.query) return callback(null, result);
-
-            return callback(null, result.results.bindings);
-        });
-    };
-
-    /**
-     * Returns the named graph(s) each given resource lives in
-     * (`SELECT ?g ?s WHERE { GRAPH ?g { ?s ?p ?o } <filter> }`).
-     * @function
-     * @name getNodesGraphUri
-     * @memberof module:Sparql_OWL
-     * @param {string} sourceLabel - Source name whose endpoint is queried
-     * @param {(string|string[])} ids - Resource URI(s) to locate
-     * @param {Object} [options] - Reserved options object
-     * @param {Function} callback - Error-first callback `(err, bindings)` with `?g`/`?s` pairs
-     * @returns {void}
-     */
-    self.getNodesGraphUri = function (sourceLabel, ids, options, callback) {
-        var filterStr = Sparql_common.setFilter("s", ids, null, {});
-
-        var query = " SELECT distinct ?g ?s WHERE {" + " Graph ?g {?s ?p ?o} " + filterStr + "} LIMIT  10000";
-        var url = self.sparql_url + "?format=json&query=";
-        self.graphUri = Config.sources[sourceLabel].graphUri;
-        self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-        self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
-        if (self.no_params) {
-            url = self.sparql_url;
-        }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            if (result.query) return callback(null, result);
-
-            return callback(null, result.results.bindings);
-        });
-    };
+   
 
     /**
      * Returns all triples describing a resource (`<conceptId> ?prop ?value`), optionally also
@@ -534,9 +458,10 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.excludeType] - Reserved flag to drop type variables from the SELECT clause
      * @param {(string|string[])} [options.filterCollections] - Exclude ancestors that are members of these collections
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
-     * @param {Function} callback - Error-first callback `(err, bindings)` with `?subject`/`?broader1…` (labels, grouped types)
-     * @returns {void}
-     */
+    * @returns {err|Array} Throws and error or returns sparqlResults with variables : subjectSuperClasses, subjectTypes, broader1, broader1Label, broaderGraphs1, broader2, broader2Label, broaderGraphs2
+    *
+    * @expose
+    */
     self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
         if (Config.sources[sourceLabel].imports && Config.sources[sourceLabel].imports.length > 0) {
             //limit at 4 ancestorsDepth when imports
@@ -656,202 +581,6 @@ var Sparql_OWL = (function () {
         });
     };
 
-    /**
-     * Returns the ordered array of ancestor class URIs of an entity, by querying
-     * `?subject rdfs:subClassOf*[|rdf:type*] ?ancestor` then walking the parent chain in JS
-     * (ordered when `options.orderAncestors`, otherwise flat).
-     *
-     * Historical: no remaining caller in the codebase (kept for backward compatibility / plugins).
-     * @function
-     * @name getEntityAncestorsArray
-     * @memberof module:Sparql_OWL
-     * @param {string} sourceLabel - OWL source name to query
-     * @param {string} id - URI of the entity whose ancestors are fetched
-     * @param {Object} [options] - Query options
-     * @param {boolean} [options.individuals] - Also climb `rdf:type*` (for individuals)
-     * @param {boolean} [options.orderAncestors] - Return the chain ordered from the entity upward
-     * @param {boolean} [options.withLabels] - Also fetch subject/parent labels
-     * @param {boolean} [options.withoutImports] - Exclude imported graphs from the `FROM` clause
-     * @param {Function} callback - Error-first callback `(err, parentsArray)` with the ancestor URI array
-     * @returns {void}
-     */
-    self.getEntityAncestorsArray = function (sourceLabel, id, options, callback) {
-        if (!options) {
-            options = {};
-        }
-
-        var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true);
-
-        var typePredicate = "";
-        if (options.individuals) {
-            typePredicate = "|rdf:type*";
-        }
-        var query =
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-            "select distinct *  " +
-            fromStr +
-            "WHERE {?subject rdfs:subClassOf*" +
-            typePredicate +
-            " ?ancestor ." +
-            "FILTER (?subject=<" +
-            id +
-            ">) " +
-            "?ancestor  rdf:type owl:Class. " +
-            "?ancestor  rdfs:subClassOf ?parent. " +
-            "?parent  rdf:type owl:Class. ";
-
-        if (options.withLabels) {
-            query += "OPTIONAL {?subject rdfs: label subjectLabel } OPTIONAL {?parent rdfs: label parentLabel }";
-        }
-
-        query += "} LIMIT 10000";
-
-        var url = self.sparql_url + "?format=json&query=";
-        self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
-        if (self.no_params) {
-            url = self.sparql_url;
-        }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            if (result.query) return callback(null, result);
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "parent"], { source: sourceLabel });
-
-            var parentsArray = [];
-
-            if (options.orderAncestors) {
-                // manage only one parentClass
-                recurse = function (childId) {
-                    result.results.bindings.forEach(function (item) {
-                        if (item.ancestor.value == childId) {
-                            var p = parentsArray.indexOf(item.ancestor.value);
-
-                            if (p < 0) {
-                                parentsArray.push(item.ancestor.value);
-                                recurse(item.parent.value);
-                            }
-                        }
-                    });
-                };
-                recurse(id);
-            } else {
-                parentsArray = [id];
-                result.results.bindings.forEach(function (item) {
-                    parentsArray.push(item.parent.value);
-                });
-            }
-            return callback(null, parentsArray);
-        });
-    };
-
-    /**
-     * Legacy version of {@link module:Sparql_OWL.getNodesAncestorsOrDescendants}: returns
-     * ordered single-line hierarchies for each class via `?class rdfs:subClassOf*|rdf:type*
-     * ?superClass` and an in-JS recursion. Superseded by the newer multi-hierarchy version.
-     * @function
-     * @name getNodesAncestorsOrDescendantsOld
-     * @memberof module:Sparql_OWL
-     * @param {string} sourceLabel - OWL source name to query
-     * @param {(string|string[])} classIds - Class URI(s) whose hierarchy is built
-     * @param {Object} [options] - Query options
-     * @param {boolean} [options.excludeItself] - Use `+` instead of `*` (exclude the class itself)
-     * @param {boolean} [options.withLabels] - Also fetch class/subClass/superClass labels
-     * @param {string} [options.filter] - Extra SPARQL filter appended to the query
-     * @param {boolean} [options.withoutImports] - Exclude imported graphs from the `FROM` clause
-     * @param {Function} callback - Error-first callback `(err, {hierarchies, rawResult})`
-     * @returns {void}
-     */
-    self.getNodesAncestorsOrDescendantsOld = function (sourceLabel, classIds, options, callback) {
-        if (!options) {
-            options = {};
-        }
-        if (!Array.isArray(classIds)) {
-            classIds = [classIds];
-        }
-        var filterStr = Sparql_common.setFilter("class", classIds);
-
-        var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true);
-        var modifier = "*";
-        if (options.excludeItself) {
-            modifier = "+";
-        }
-        var query =
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-            //  "SELECT distinct ?class ?type ?classLabel ?subClass ?subClassType ?subClassLabel ?superClass ?superClassType  ?superClassLabel " +
-            "SELECT distinct ?class ?type ?classLabel ?subClass ?subClassType ?subClassLabel ?superClass ?superClassType  ?superClassLabel " +
-            fromStr +
-            " WHERE {" +
-            " ?class rdf:type ?type." +
-            " ?class rdfs:subClassOf" +
-            modifier +
-            "|rdf:type" +
-            modifier +
-            " ?superClass." +
-            " ?superClass ^rdfs:subClassOf ?subClass." +
-            " ?subClass rdf:type ?subClassType. ?superClass rdf:type ?superClassType" +
-            filterStr +
-            " filter (?superClassType !=owl:Restriction)";
-
-        if (options.filter) {
-            query += options.filter;
-        }
-        if (options.withLabels) {
-            query += "OPTIONAL {?class rdfs: label classLabel }OPTIONAL {?subClass rdfs: label subClassLabel } OPTIONAL {?superClass rdfs: label superClassLabel }";
-        }
-        query += filterStr;
-
-        query += "} LIMIT 1000";
-
-        var url = self.sparql_url + "?format=json&query=";
-        self.no_params = true;
-        if (Config.sources[sourceLabel]) {
-            self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
-            if (self.no_params) {
-                url = self.sparql_url;
-            }
-        }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            if (result.query) return callback(null, result);
-
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["class", "superClass", "subClass"], { source: sourceLabel });
-
-            var map = {};
-            result.results.bindings.forEach(function (item) {
-                map[item.subClass.value] = item;
-            });
-            var hierarchyArray = [];
-
-            function recurse(array, itemId) {
-                if (map[itemId] && array.indexOf(itemId) < 0) {
-                    array.push(itemId);
-                    if (map[itemId].superClass && map[itemId].superClass.value) {
-                        recurse(array, map[itemId].superClass.value);
-                    }
-                }
-            }
-
-            var hierarchies = {};
-            classIds.forEach(function (id) {
-                hierarchies[id] = [];
-                recurse(hierarchies[id], id);
-            });
-            for (var key in hierarchies) {
-                hierarchies[key].forEach(function (item, index) {
-                    hierarchies[key][index] = map[item];
-                });
-            }
-
-            return callback(null, { hierarchies: hierarchies, rawResult: result.results.bindings });
-        });
-    };
 
     /**
      * Returns the ancestor (or descendant) hierarchies of given class(es), supporting multiple
@@ -871,6 +600,7 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.withoutImports] - Exclude imported graphs from the `FROM` clause
      * @param {Function} callback - Error-first callback `(err, {hierarchies, rawResult})` where `hierarchies` maps each class URI to its ordered hierarchy
      * @returns {void}
+     * @expose
      */
     self.getNodesAncestorsOrDescendants = function (sourceLabel, classIds, options, callback) {
         if (!options) {
@@ -1042,77 +772,6 @@ var Sparql_OWL = (function () {
     };
 
     /**
-     * Returns a map of each resource URI to its (semicolon-joined) `rdf:type`/`rdfs:subClassOf`
-     * types, excluding `owl:Class` and blank nodes, via a `GROUP_CONCAT` query.
-     *
-     * Historical: no remaining caller in the codebase (kept for backward compatibility / plugins).
-     * @function
-     * @name getNodesTypesMap
-     * @memberof module:Sparql_OWL
-     * @param {string} sourceLabel - OWL source name to query
-     * @param {(string|string[])} ids - Resource URI(s) whose types are fetched
-     * @param {Object} [options] - Query options
-     * @param {boolean} [options.withoutImports] - Exclude imported graphs from the `FROM` clause
-     * @param {Function} callback - Error-first callback `(err, map)` mapping URI → `";;"`-joined type URIs
-     * @returns {void}
-     */
-    self.getNodesTypesMap = function (sourceLabel, ids, options, callback) {
-        if (!options) {
-            options = {};
-        }
-        if (!Array.isArray(ids)) {
-            ids = [ids];
-        }
-        var filterStr = Sparql_common.setFilter("id", ids);
-
-        var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true);
-
-        var query =
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-            'select ?id (GROUP_CONCAT( distinct ?type;separator=";;")as ?types)   ' +
-            fromStr +
-            " where" +
-            " { ?id rdf:type|rdfs:subClassOf  ?type." +
-            "  filter (?type !=owl:Class && !isblank(?type)) " +
-            filterStr +
-            " }" +
-            "GROUP  BY ?id " +
-            "limit 10000";
-
-        var url = self.sparql_url + "?format=json&query=";
-        self.no_params = true;
-        if (Config.sources[sourceLabel]) {
-            self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
-            if (self.no_params) {
-                url = self.sparql_url;
-            }
-        }
-        Sparql_proxy.querySPARQL_GET_proxy(
-            url,
-            query,
-            "",
-            {
-                source: sourceLabel,
-                dontCacheCurrentQuery: true,
-                returnQueryStr: options && options.returnQueryStr,
-            },
-            function (err, result) {
-                if (err) {
-                    return callback(err);
-                }
-                if (result.query) return callback(null, result);
-                var map = {};
-                result.results.bindings.forEach(function (item) {
-                    map[item.id.value] = item.types.value;
-                });
-                return callback(null, map);
-            },
-        );
-    };
-
-    /**
      * Alternative to {@link module:Sparql_OWL.getFilteredTriples} that resolves the type and
      * label of subject, property and object from any graph, then matches the actual triples in
      * the source's own graph. Filters by subject/property/object ids.
@@ -1134,7 +793,10 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with the matching triples and their labels/types
      * @returns {void}
+     * @expose
      */
+
+    // know how getFIltered and getFiltered2 are different
     self.getFilteredTriples2 = function (sourceLabel, subjectIds, propertyIds, objectIds, options, callback) {
         var filterStr = "";
 
@@ -1384,128 +1046,6 @@ var Sparql_OWL = (function () {
     };
 
     /**
-     * Returns every subject of the source with its label, `rdf:type` and taxonomy superclass
-     * (`?subject ?p ?o` plus optional label/type/superclass patterns). Blank nodes are excluded
-     * by default; results can be language-filtered.
-     * @function
-     * @name getItems
-     * @memberof module:Sparql_OWL
-     * @param {string} sourceLabel - OWL source name to query
-     * @param {Object} [options] - Query options
-     * @param {boolean} [options.selectGraph] - Bind each triple's named graph
-     * @param {boolean} [options.includeBlankNodes] - Include blank-node subjects
-     * @param {boolean} [options.withoutImports] - Exclude imported graphs from the `FROM` clause
-     * @param {string} [options.distinct] - Variables for the SELECT clause (defaults to `*`)
-     * @param {string} [options.filter] - Extra SPARQL filter appended to the query
-     * @param {string} [options.lang] - Restrict labels to this language
-     * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
-     * @param {Function} callback - Error-first callback `(err, bindings)` with `?subject`/`?p`/`?o` (+ label/type/superClass)
-     * @returns {void}
-     */
-    self.getItems = function (sourceLabel, options, callback) {
-        if (!options) {
-            options = {};
-        }
-        self.graphUri = Config.sources[sourceLabel].graphUri;
-        self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-
-        var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports);
-
-        var query = "";
-        query += "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " + "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " + "PREFIX owl: <http://www.w3.org/2002/07/owl#> ";
-
-        var selectStr = "*";
-        if (options.distinct) {
-            selectStr = options.distinct;
-        }
-
-        query += " select distinct " + selectStr + " " + fromStr + "  WHERE {";
-
-        if (!Config.sources[sourceLabel].graphUri) {
-            options.selectGraph = false;
-        }
-
-        if (options.selectGraph) {
-            query += " GRAPH ?g ";
-        }
-        query += "{ ?subject ?p ?o.";
-        if (!options.includeBlankNodes) {
-            query += "FILTER (!isBlank(?subject))";
-        }
-        query += "OPTIONAL {?subject rdfs:label ?subjectLabel.}";
-        query += "OPTIONAL {?subject rdf:type ?subjectType.}";
-        query += "OPTIONAL {?subject " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?superClass. }";
-
-        if (options.filter) {
-            query += options.filter;
-        }
-        if (options.lang) {
-            query += "filter(lang(?subjectLabel )='" + options.lang + "')";
-        }
-
-        query += "  }} ";
-
-        var limit = options.limit || Config.queryLimit;
-        query += " limit " + limit;
-
-        var url = self.sparql_url + "?format=json&query=";
-        self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
-        if (self.no_params) {
-            url = self.sparql_url;
-        }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            if (result.query) return callback(null, result);
-
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "subject", { source: sourceLabel });
-            return callback(null, result.results.bindings);
-        });
-    };
-    /**
-     * Lists all `owl:ObjectProperty` of a source with their label, super-property, domain and
-     * range (and those entities' labels). Imports are excluded from the `FROM` clause.
-     * @function
-     * @name listObjectProperties
-     * @memberof module:Sparql_OWL
-     * @param {string} sourceLabel - OWL source name to query
-     * @param {Object} [options] - Reserved options object
-     * @param {Function} callback - Error-first callback `(err, bindings)` with `?prop`/`?propLabel`/`?superProp`/`?domain`/`?range`(+labels)
-     * @returns {void}
-     */
-    self.listObjectProperties = function (sourceLabel, options, callback) {
-        var fromStr = Sparql_common.getFromStr(sourceLabel, false, true);
-        var query =
-            "PREFIX type: <http://info.deepcarbon.net/schema/type#>" +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-            "select distinct * " +
-            fromStr +
-            " WHERE   {?prop rdf:type owl:ObjectProperty. OPTIONAL{?prop rdfs:label ?propLabel.} " +
-            " OPTIONAL {?prop rdfs:subPropertyOf ?superProp. OPTIONAL{?superProp rdfs:label ?superPropLabel. }} " +
-            " OPTIONAL {?prop rdfs:domain ?domain. OPTIONAL{?domain rdfs:label ?domainLabel. }} " +
-            " OPTIONAL {?prop rdfs:range ?range. OPTIONAL{?range rdfs:label ?rangeLabel. }} " +
-            "}  limit " +
-            Config.queryLimit;
-
-        self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-        var url = self.sparql_url + "?format=json&query=";
-        self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
-        if (self.no_params) {
-            url = self.sparql_url;
-        }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            if (result.query) return callback(null, result);
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "superPropLabel"], { source: sourceLabel });
-            return callback(null, result.results.bindings);
-        });
-    };
-    /**
      * Returns object (or datatype) properties with their domains, ranges, sub-properties and
      * inverse properties (plus all labels). The id filter can target the domain, range, prop or
      * subProp depending on options, and a `searchType` mode searches by words on prop/domain/range.
@@ -1654,57 +1194,7 @@ var Sparql_OWL = (function () {
         });
     };
 
-    /**
-     * Returns the transitive sub-properties of given properties
-     * (`?subProperty rdfs:subPropertyOf+ ?property`) with their labels.
-     * @function
-     * @name getObjectSubProperties
-     * @memberof module:Sparql_OWL
-     * @param {string} sourceLabel - OWL source name to query
-     * @param {(string|string[])} propertyIds - Property URI(s) whose sub-properties are fetched
-     * @param {Object} [options] - Query options
-     * @param {boolean} [options.selectGraph] - Bind each triple's named graph
-     * @param {Function} callback - Error-first callback `(err, bindings)` with `?property`/`?subProperty` (+labels)
-     * @returns {void}
-     */
-    self.getObjectSubProperties = function (sourceLabel, propertyIds, options, callback) {
-        if (!options) {
-            options = {};
-        }
 
-        var filterStr = "";
-
-        if (!Config.sources[sourceLabel].graphUri) {
-            options.selectGraph = false;
-        }
-
-        var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
-        var filterStr = Sparql_common.setFilter("property", propertyIds);
-        var query =
-            "PREFIX type: <http://info.deepcarbon.net/schema/type#> " +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-            "select distinct ?property ?propertyLabel ?subProperty ?subPropertyLabel " +
-            fromStr +
-            " WHERE {?subProperty rdfs:subPropertyOf+ ?property . " +
-            " OPTIONAL{?subProperty rdfs:label ?subPropertyLabel.}  " +
-            " OPTIONAL{?property rdfs:label ?propertyLabel.}  " +
-            filterStr +
-            "} limit 10000";
-
-        self.graphUri = Config.sources[sourceLabel].graphUri;
-        self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-        var url = self.sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            if (result.query) return callback(null, result);
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["property", "subProperty"], { source: sourceLabel });
-            return callback(null, result.results.bindings);
-        });
-    };
 
     /**
      * Returns OWL restrictions on classes: matches `?subject rdfs:subClassOf ?node`, `?node
@@ -1935,74 +1425,7 @@ var Sparql_OWL = (function () {
         });
     };
 
-    /**
-     * Returns the concepts belonging to a SKOS collection within an OWL source (mixed
-     * OWL/SKOS data). With no collection, lists non-collection subjects; with a collection URI,
-     * walks `?collection skos:member* ?acollection` and the broader closure to the members.
-     * @function
-     * @name getCollectionNodes
-     * @memberof module:Sparql_OWL
-     * @param {string} sourceLabel - Source name to query
-     * @param {string} collection - Collection URI whose members are fetched (empty = all subjects)
-     * @param {Object} [options] - Query options
-     * @param {Object} [options.filter] - `{predicates}` to restrict the predicates returned
-     * @param {Function} callback - Error-first callback `(err, bindings)` with `?subject`/`?predicate`/`?object` (+labels)
-     * @returns {void}
-     */
-    self.getCollectionNodes = function (sourceLabel, collection, options, callback) {
-        $("#waitImg").css("display", "block");
-
-        var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
-        var filterStr = "";
-        if (options && options.filter) {
-            if (options.filter.predicates) {
-                filterStr = Sparql_common.setFilter("predicate", options.filter.predicates, null, options);
-            }
-        }
-
-        var query =
-            " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
-            "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-            "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
-            " select  distinct * " +
-            sourceVariables.fromStr +
-            "   WHERE { " +
-            " ?subject ?predicate ?object. " +
-            filterStr +
-            "?subject rdf:type ?type. filter( not exists {?subject rdf:type skos:Collection})";
-
-        if (!collection || collection == "") {
-            query += "}";
-        } else {
-            query +=
-                "   ?collection skos:member* ?acollection. " +
-                Sparql_common.getUriFilter("collection", collection) +
-                "?acollection rdf:type skos:Collection.    ?acollection skos:member/(^skos:broader+|skos:broader*) ?subject.  " +
-                "   ?collection skos:prefLabel ?collectionLabel." +
-                "   ?acollection skos:prefLabel ?acollectionLabel." +
-                "   ?subject skos:prefLabel ?subjectLabel." +
-                "filter(lang(?subjectLabel)='en')" +
-                "}";
-        }
-
-        query += " limit " + sourceVariables.limit + " ";
-
-        Sparql_proxy.querySPARQL_GET_proxy(
-            sourceVariables.url,
-            query,
-            sourceVariables.queryOptions,
-            { source: sourceLabel, returnQueryStr: options && options.returnQueryStr },
-            function (err, result) {
-                if (err) {
-                    return callback(err);
-                }
-                if (result.query) return callback(null, result);
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "predicate"], { source: sourceLabel });
-                return callback(null, result.results.bindings);
-            },
-        );
-    };
-
+ 
     /**
      * Returns the `rdf:type` triples (with their graph) for given resources, batching the ids
      * into slices of 200 and concatenating results (`GRAPH ?g { ?subject rdf:type ?type }`).
@@ -2125,6 +1548,7 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?prop`/`?restriction`/`?sourceClass`/`?targetClass` (+labels)
      * @returns {void}
+     * @expose
      */
     self.getPropertiesRestrictionsDescription = function (sourceLabel, propIds, options, callback) {
         if (!options) {
@@ -2184,58 +1608,7 @@ var Sparql_OWL = (function () {
         });
     };
 
-    /**
-     * Returns each resource's label plus its (comma-joined) types and graphs, using
-     * `GRAPH ?g { ?subject rdf:type ?subjectType }` with `GROUP_CONCAT` and a preferred-language label.
-     * @function
-     * @name getNodesLabelTypesAndGraph
-     * @memberof module:Sparql_OWL
-     * @param {string} sourceLabel - OWL source name to query
-     * @param {(string|string[])} ids - Resource URI(s) to describe
-     * @param {Object} [options] - Query options
-     * @param {string} [options.orderBy] - SPARQL ORDER BY expression (defaults to `?subjectLabel`)
-     * @param {Function} callback - Error-first callback `(err, bindings)` with `?subject`/`?subjectLabel`/`?sTypes`/`?graphs`
-     * @returns {void}
-     */
-    self.getNodesLabelTypesAndGraph = function (sourceLabel, ids, options, callback) {
-        var filterStr = Sparql_common.setFilter("subject", ids, null);
-        if (!options) {
-            options = {};
-        }
-
-        var fromStr = (fromStr = Sparql_common.getFromStr(sourceLabel));
-
-        var query =
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
-            'SELECT distinct ?subject ?subjectLabel  (GROUP_CONCAT( distinct ?subjectType;separator=",") as ?sTypes)' +
-            '(GROUP_CONCAT( distinct ?g;separator=", ") as ?graphs)' +
-            fromStr +
-            " WHERE {GRAPH ?g{" +
-            "?subject rdf:type ?subjectType. " +
-            Sparql_common.getVariableLangLabel("subject", false, true) +
-            filterStr +
-            " }";
-
-        query += "}" + "GROUP BY ?subject ?subjectLabel  ";
-        if (options.orderBy) {
-            query += " ORDER BY " + options.orderBy;
-        } else {
-            query += " ORDER BY ?subjectLabel";
-        }
-        query += " LIMIT 10000";
-
-        var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, _result) {
-            if (err) {
-                return callback(err);
-            }
-            // _result.results.bindings=   Sparql_generic.setBindingsOptionalProperties(_result.results.bindings, ["subject"]);
-
-            callback(null, _result.results.bindings);
-        });
-    };
+   
 
     /**
      * Returns a map of URI → `rdfs:label` for given URIs (`?s rdfs:label ?sLabel`), falling back
@@ -2249,6 +1622,8 @@ var Sparql_OWL = (function () {
      * @returns {void}
      * @expose
      */
+
+    // compare with getLabelsMap and choose one
     self.getUrisLabelsMap = function (sourceLabel, uris, callback) {
         var sparql_url = Config.sources[sourceLabel].sparql_server.url;
         var fromStr = Sparql_common.getFromStr(sourceLabel);
@@ -2505,51 +1880,7 @@ var Sparql_OWL = (function () {
         );
     };
 
-    /**
-     * Lists the distinct predicates used in a source, with their graph and label
-     * (`GRAPH ?g { ?sub ?property ?obj }`). When imports are included, graphs are bound via `GRAPH ?g`.
-     * @function
-     * @name getPredicates
-     * @memberof module:Sparql_OWL
-     * @param {string} sourceLabel - OWL source name to query
-     * @param {Object} [options] - Query options
-     * @param {boolean} [options.withoutImports] - Exclude imported graphs and the `GRAPH ?g` binding
-     * @param {Function} callback - Error-first callback `(err, bindings)` with `?g`/`?property` (+label)
-     * @returns {void}
-     */
-    self.getPredicates = function (sourceLabel, options, callback) {
-        if (!options) {
-            options = {};
-        }
-        var fromStr = "";
-        if (options.withoutImports) {
-            fromStr = Sparql_common.getFromStr(sourceLabel, false, true);
-        } else {
-            fromStr = Sparql_common.getFromStr(sourceLabel, true, false);
-        }
-
-        var query =
-            "PREFIX owl: <https://www.w3.org/2002/07/owl#>\n" +
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-            "SELECT distinct ?g ?property  " +
-            fromStr +
-            "WHERE {\n";
-        if (!options.withoutImports) {
-            query += "  GRAPH ?g";
-        }
-        query += "" + "{ ?sub ?property ?obj ." + Sparql_common.getVariableLangLabel("property", true, true) + "}" + "} LIMIT 10000";
-
-        var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            if (result.query) return callback(null, result);
-
-            return callback(null, result.results.bindings);
-        });
-    };
+    
     /**
      * Lists all `owl:ObjectProperty` of a source with their labels
      * (`?property rdf:type owl:ObjectProperty` + language-filtered label).
@@ -2594,87 +1925,6 @@ var Sparql_OWL = (function () {
             }
             if (result.query) return callback(null, result);
 
-            return callback(null, result.results.bindings);
-        });
-    };
-
-    /**
-     * Returns the named graph each given URI lives in (`GRAPH ?g { ?id ?p ?o }`), batching the
-     * ids into slices of 200. Can restrict the graphs to the source and its imports.
-     * @function
-     * @name getUrisNamedGraph
-     * @memberof module:Sparql_OWL
-     * @param {string} sourceLabel - Source name defining the import scope
-     * @param {string[]} ids - URIs to locate
-     * @param {Object} [options] - Query options
-     * @param {boolean} [options.onlySourceAndImports] - Restrict graphs to the source and its imports
-     * @param {boolean} [options.withGraph] - Bind the graph in the `FROM` clause
-     * @param {boolean} [options.withoutImports] - Exclude imported graphs from the `FROM` clause
-     * @param {Function} callback - Error-first callback `(err, allResults)` with `?id`/`?g` pairs
-     * @returns {void}
-     */
-    self.getUrisNamedGraph = function (sourceLabel, ids, options, callback) {
-        if (!options) {
-            options = {};
-        }
-
-        var allResults = [];
-        var sliceSize = 200;
-        var slices = common.array.slice(ids, sliceSize);
-        async.eachSeries(
-            slices,
-            function (ids, callbackEach) {
-                var filter = Sparql_common.setFilter("id", ids);
-                if (options.onlySourceAndImports) {
-                    var sources = Config.sources[sourceLabel].imports;
-                    sources.push(sourceLabel);
-                    var graphUris = [];
-                    sources.forEach(function (source) {
-                        graphUris.push(Config.sources[source].graphUri);
-                    });
-                    filter += Sparql_common.setFilter("g", graphUris);
-                }
-                var fromStr = Sparql_common.getFromStr(sourceLabel, options.withGraph, options.withoutImports);
-                var query = "SELECT distinct ?id ?g " + fromStr + "WHERE {GRAPH ?g{?id ?p ?o. " + filter + "}} limit 10000";
-
-                self.sparql_url = Config.sparql_server.url;
-                var url = self.sparql_url + "?format=json&query=";
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {}, function (err, result) {
-                    if (err) {
-                        return callbackEach(err);
-                    }
-                    allResults = allResults.concat(result.results.bindings);
-                    return callbackEach();
-                });
-            },
-            function (err) {
-                if (err) {
-                    return callback(err);
-                }
-                return callback(null, allResults);
-            },
-        );
-    };
-
-    /**
-     * Finds graphs whose `owl:versionIRI` matches a regex pattern, returning the matching
-     * version-IRI triples (`?s owl:versionIRI ?graph. filter(regex(str(?graph), pattern))`).
-     * @function
-     * @name getGraphsByRegex
-     * @memberof module:Sparql_OWL
-     * @param {string} pattern - Regular expression matched against each graph's version IRI
-     * @param {Function} callback - Error-first callback `(err, bindings)` with the matching graph triples
-     * @returns {void}
-     */
-    self.getGraphsByRegex = function (pattern, callback) {
-        var query = "SELECT * " + "WHERE {" + '  ?s <http://www.w3.org/2002/07/owl#versionIRI> ?graph. filter (regex(str(?graph),"' + pattern + '"))' + " ?graph ?p ?value." + "}";
-
-        self.sparql_url = Config.sparql_server.url;
-        var url = self.sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {}, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
             return callback(null, result.results.bindings);
         });
     };
@@ -2744,6 +1994,7 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.withoutImports] - Exclude imported graphs from the `FROM` clause
      * @param {Function} callback - Error-first callback `(err, propsMap)` mapping property URI → `{parentProp, prop, domain, range, domainLabel, rangeLabel}`
      * @returns {void}
+     * @expose
      */
     self.getPropertiesInheritedConstraints = function (sourceLabel, properties, options, callback) {
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.withGraph, options.withoutImports);
@@ -2925,101 +2176,8 @@ var Sparql_OWL = (function () {
         });
     };
 
-    /**
-     * Legacy single-query version of {@link module:Sparql_OWL.getInferredPropertiesDomainsAndRanges},
-     * resolving domains/ranges through `rdfs:subClassOf*` and inverse properties in one large
-     * optional-pattern query. Returns the raw bindings rather than a folded map.
-     * @function
-     * @name getInferredPropertiesDomainsAndRangesOld
-     * @memberof module:Sparql_OWL
-     * @param {string} sourceLabel - OWL source name to query
-     * @param {Object} options - Query options
-     * @param {string} [options.filter] - Extra SPARQL filter appended to the query
-     * @param {Function} callback - Error-first callback `(err, bindings)` with the raw property/domain/range bindings
-     * @returns {void}
-     */
-    self.getInferredPropertiesDomainsAndRangesOld = function (sourceLabel, options, callback) {
-        var fromStr = Sparql_common.getFromStr(sourceLabel);
-        var query =
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
-            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> " +
-            "SELECT distinct * " +
-            fromStr +
-            " WHERE {{" +
-            "   ?prop rdf:type owl:ObjectProperty. " +
-            "   optional { ?subProp rdfs:subPropertyOf ?prop  optional { ?subProp rdfs:label|skos:prefLabel  ?subPropLabel}} " +
-            "   optional { ?prop rdfs:label|skos:prefLabel ?propLabel} " + // filter(?prop in (<http://rds.posccaesar.org/ontology/lis14/rdl/hasResident>,<http://rds.posccaesar.org/ontology/lis14/rdl/residesIn>))" +
-            " optional { ?prop rdfs:domain ?propDomain. ?domain  rdfs:subClassOf* ?propDomain  filter ( isIRI(?propDomain))  optional { ?propDomain rdfs:label|skos:prefLabel  ?propDomainLabel}} " +
-            "    optional { ?prop rdfs:range ?propRange. ?range  rdfs:subClassOf* ?propRange. filter ( isIRI(?propRange))  optional { ?propRange rdfs:label|skos:prefLabel  ?propRangeLabel}}" +
-            "      optional { ?prop owl:inverseOf|^owl:inverseOf ?inverseProp optional {?inverseProp rdfs:label|skos:prefLabel ?inversePropLabel}  " +
-            "       optional { ?inverseProp rdfs:range ?propDomain. ?domain  rdfs:subClassOf* ?propDomain  filter (isIRI(?propDomain))} " +
-            "     optional{ ?inverseProp rdfs:domain ?propRange. ?range  rdfs:subClassOf* ?propRange. filter (isIRI(?propRange))}" +
-            "    }";
-        if (options.filter) {
-            query += options.filter;
-        }
-        query += "  }" + "} LIMIT 10000";
-
-        var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, _result) {
-            if (err) {
-                return callback(err);
-            }
-
-            _result.results.bindings = _result.results.bindings; // Sparql_generic.setBindingsOptionalProperties(_result.results.bindings, ["propDomain", "propRange", "domain", "range", "subProp", "inverseProp"]);
-            return callback(null, _result.results.bindings);
-        });
-    };
-
-    /**
-     * Returns the object properties that have no domain or range, even via super-properties or
-     * inverse properties, using a `MINUS` query against properties whose super/inverse chain
-     * carries a `rdfs:domain`/`rdfs:range`.
-     * @function
-     * @name getPropertiesWithoutDomainsAndRanges
-     * @memberof module:Sparql_OWL
-     * @param {string} sourceLabel - OWL source name to query
-     * @param {Object} options - Query options
-     * @param {boolean} [options.withoutImports] - Exclude imported graphs from the `FROM` clause
-     * @param {Function} callback - Error-first callback `(err, bindings)` with `?prop` (+label)
-     * @returns {void}
-     */
-    self.getPropertiesWithoutDomainsAndRanges = function (sourceLabel, options, callback) {
-        var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports);
-        var query =
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
-            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> " +
-            "SELECT distinct * " +
-            fromStr +
-            " WHERE {{" +
-            "  ?prop rdf:type owl:ObjectProperty. " +
-            "     ?prop rdfs:label|skos:prefLabel ?propLabel .   filter( lang(?propLabel)= 'en' || !lang(?propLabel))" +
-            "}" +
-            "    minus {" +
-            "    ?prop rdf:type owl:ObjectProperty.?prop rdfs:subPropertyOf* ?superProp. ?superProp (rdfs:domain|rdfs:range) ?x  filter ( isIRI(?x)) " +
-            " optional { ?prop rdfs:label|skos:prefLabel  ?propLabel}" +
-            "  }" +
-            "   minus {" +
-            "    ?prop rdf:type owl:ObjectProperty.?prop (owl:inverseOf|^owl:inverseOf)/rdfs:subPropertyOf* ?superProp. ?superProp (rdfs:domain|rdfs:range) ?x filter ( isIRI(?x))  " +
-            " optional { ?prop rdfs:label|skos:prefLabel  ?propLabel}" +
-            "  }" +
-            "} LIMIT 20000";
-
-        var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, _result) {
-            if (err) {
-                return callback(err);
-            }
-            _result.results.bindings = Sparql_generic.setBindingsOptionalProperties(_result.results.bindings, ["prop", "superProp"], { source: sourceLabel });
-
-            return callback(null, _result.results.bindings);
-        });
-    };
-
+    
+    
     /**
      * Returns all triples of a source (or explicit graph) with subject/predicate/object labels,
      * optionally restricted to triples where a given role (subject/predicate/object) is one of
@@ -3102,98 +2260,7 @@ var Sparql_OWL = (function () {
         );
     };
 
-    /**
-     * Returns raw `?s ?p ?o` triples of a source (or explicit graph), with an optional filter,
-     * select-variable override and ordering.
-     * @function
-     * @name getTriples
-     * @memberof module:Sparql_OWL
-     * @param {string} sourceLabel - OWL source name to query (or null with `options.graphUri`)
-     * @param {Object} [options] - Query options
-     * @param {string} [options.graphUri] - Explicit graph URI when no source is given
-     * @param {string} [options.selectVars] - Variables for the SELECT clause (defaults to `*`)
-     * @param {string} [options.filter] - Extra SPARQL filter appended to the query
-     * @param {string} [options.orderBy] - SPARQL ORDER BY expression
-     * @param {Function} callback - Error-first callback `(err, allResults)` with the triple bindings
-     * @returns {void}
-     */
-    self.getTriples = function (sourceLabel, options, callback) {
-        if (!options) {
-            options = {};
-        }
-        var fromStr;
-        if (!sourceLabel) {
-            if (options.graphUri) {
-                fromStr = " FROM <" + options.graphUri + "> ";
-            } else {
-                return callback("no graphUri or source");
-            }
-        } else {
-            fromStr = Sparql_common.getFromStr(sourceLabel);
-        }
-
-        var selectStr = "*";
-        if (options.selectVars) {
-            selectStr = options.selectVars;
-        }
-
-        var query =
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
-            "SELECT   " +
-            selectStr +
-            " " +
-            fromStr +
-            " WHERE { ?s ?p ?o.";
-        if (options.filter) {
-            query += options.filter;
-        }
-
-        query += "}";
-        if (options.orderBy) {
-            query += " ORDER BY " + options.orderBy;
-        }
-        query += " LIMIT 10000";
-
-        var url = Config.sources[sourceLabel] ? Config.sources[sourceLabel].sparql_server.url : Config.sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, _result) {
-            if (err) {
-                return callback(err);
-            }
-            var allResults = _result.results.bindings;
-            callback(null, allResults);
-        });
-    };
-
-    /**
-     * Returns the stored queries saved for a given scope from the stored-queries graph
-     * (`?s slsv:hasScope "<scope>"`).
-     * @function
-     * @name getStoredQueries
-     * @memberof module:Sparql_OWL
-     * @param {string} sourceLabel - Source name to query
-     * @param {string} scope - Scope value matched against `slsv:hasScope`
-     * @param {Object} [options] - Reserved options object
-     * @param {Function} callback - Error-first callback `(err, bindings)` with the stored-query triples
-     * @returns {void}
-     */
-    self.getStoredQueries = function (sourceLabel, scope, options, callback) {
-        if (!options) {
-            options = {};
-        }
-        var fromStr = Sparql_common.getFromStr(sourceLabel);
-
-        var query = "PREFIX slsv:<" + Config.storedQueries_graphUri + "> \n" + "select * " + fromStr + ' where {?s ?p ?o.?s slsv:hasScope "' + scope + '"}order by ?label';
-
-        var url = Config.sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, _result) {
-            if (err) {
-                return callback(err);
-            }
-            return calback(null, _result.results.bindings);
-        });
-    };
+    
 
     /**
      * Serialises a source to Turtle by paginating `DESCRIBE ?s ?p ?o` queries (`text/turtle`
@@ -3207,6 +2274,7 @@ var Sparql_OWL = (function () {
      * @param {string} [options.filter] - Reserved filter (currently unused in the query body)
      * @param {Function} callback - Error-first callback `(err, turtle)` with the full Turtle string
      * @returns {void}
+     * @expose
      */
     self.generateOWL = function (sourceLabel, options, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;
@@ -3288,6 +2356,7 @@ var Sparql_OWL = (function () {
      * @param {string} [options.otherProperty] - Use this property instead of `rdfs:label`
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?label`(/`?id`)
      * @returns {void}
+     * 
      */
     self.getDistinctClassLabels = function (sourceLabel, classIds, options, callback) {
         if (!options) {
@@ -3326,39 +2395,7 @@ var Sparql_OWL = (function () {
         });
     };
 
-    /**
-     * Returns the distinct object values of a datatype property across the source
-     * (`?s <propertyUri> ?o`).
-     * @function
-     * @name getDataTypePropertyValues
-     * @memberof module:Sparql_OWL
-     * @param {string} sourceLabel - OWL source name to query
-     * @param {string} propertyUri - URI of the datatype property whose values are fetched
-     * @param {Function} callback - Error-first callback `(err, bindings)` with the distinct `?o` values
-     * @returns {void}
-     */
-    self.getDataTypePropertyValues = function (sourceLabel, propertyUri, callback) {
-        var fromStr = Sparql_common.getFromStr(sourceLabel);
-
-        var query =
-            "" +
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
-            " Select distinct ?o    " +
-            fromStr +
-            " where { ?s  <" +
-            propertyUri +
-            "> ?o } LIMIT 10000";
-        var url = Config.sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
-            if (err) {
-                return callback(err);
-            }
-            return callback(null, _result.results.bindings);
-        });
-    };
-
+   
     /**
      * Returns the (non-`owl:NamedIndividual`) `rdf:type`(s) of given individuals, batching the
      * ids into slices of 50.
@@ -3370,6 +2407,7 @@ var Sparql_OWL = (function () {
      * @param {Object} [options] - Reserved options object
      * @param {Function} callback - Error-first callback `(err, allBindings)` with the `?type` bindings
      * @returns {void}
+     * @expose
      */
     self.getIndividualsType = function (sourceLabel, allIds, options, callback) {
         if (!options) {
@@ -3423,6 +2461,7 @@ var Sparql_OWL = (function () {
      * @param {Object} [options] - Reserved options object
      * @param {Function} callback - Error-first callback `(err, allBindings)` with `?id`/`?label`
      * @returns {void}
+     * @expose
      */
     self.getIndividualsOfClass = function (sourceLabel, classIds, options, callback) {
         if (!options) {
@@ -3465,48 +2504,7 @@ var Sparql_OWL = (function () {
         );
     };
 
-    /**
-     * Returns a map of URI → label fetched from the dedicated labels graph
-     * (`FROM <Config.labelsGraphUri>`), falling back to the URI local name when absent.
-     * @function
-     * @name getLabelsMapFromLabelsGraph
-     * @memberof module:Sparql_OWL
-     * @param {string[]} ids - URIs whose labels are fetched from the labels graph
-     * @param {Function} callback - Error-first callback `(err, labelsMap)` mapping URI → label
-     * @returns {void}
-     */
-    self.getLabelsMapFromLabelsGraph = function (ids, callback) {
-        var filter = Sparql_common.setFilter("sub", ids);
-        var query =
-            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-            "SELECT    distinct ?sub ?label from  <" +
-            Config.labelsGraphUri +
-            "> " +
-            " WHERE {?sub rdfs:label ?label " +
-            filter +
-            "  } limit 10000";
-        var url = Config.sparql_server.url + "?query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: Config._defaultSource }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-
-            var labelsMap = {};
-            result.results.bindings.forEach(function (item) {
-                labelsMap[item.sub.value] = item.label.value;
-            });
-            ids.forEach(function (id) {
-                if (!labelsMap[id]) {
-                    labelsMap[id] = Sparql_common.getLabelFromURI(id);
-                }
-            });
-
-            return callback(null, labelsMap);
-        });
-    };
-
+   
     /**
      * Empties a named graph by POSTing to the backend `/kg/clearGraph` endpoint (not a SPARQL query).
      * @function
@@ -3538,35 +2536,7 @@ var Sparql_OWL = (function () {
         });
     };
 
-    /**
-     * Builds (but does not yet execute) a query for the distinct properties used by individuals
-     * of a class (`?s rdf:type <classId>. ?s ?p ?o`). Incomplete stub — no callback is invoked.
-     * @function
-     * @name getIndividualsOfClassDistinctProperties
-     * @memberof module:Sparql_OWL
-     * @param {string} sourceLabel - OWL source name to query
-     * @param {string} classId - Class URI whose individuals' properties are inspected
-     * @param {Function} callback - Error-first callback `(err, bindings)` (not currently invoked)
-     * @returns {void}
-     */
-    self.getIndividualsOfClassDistinctProperties = function (sourceLabel, classId, callback) {
-        var fromStr = Sparql_common.getFromStr(sourceLabel);
-        self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-
-        var query =
-            "" +
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
-            " Select distinct ?p ?pType   " +
-            fromStr +
-            " where {\n" +
-            " ?s  rdf:type " +
-            "<" +
-            classId +
-            ">. " +
-            " ?s  ?p ?o.   ?o rdf:type ?oType";
-    };
+   
 
     /**
      * Intended to copy a resource's triples from one source to another. Currently fetches the
@@ -3619,6 +2589,7 @@ var Sparql_OWL = (function () {
      * @returns {void}
      * @expose
      */
+    // look with getNodeADesencantORAncestor
     self.getAllDescendants = function (sourceLabel, resourcesIds, taxonomyPredicate, options, callback) {
         if (!options) {
             options = {};

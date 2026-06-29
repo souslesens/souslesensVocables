@@ -58,9 +58,11 @@ var UserDataWidget = (function () {
         };
 
         var type = "POST";
+        var url = `${Config.apiUrl}/users/data`;
         if (self.currentTreeNode) {
             type = "PUT";
             payload.id = parseInt(self.currentTreeNode.id);
+            url += "/" + payload.id;
             // PUT don't update owned_by
             delete payload.owned_by;
             // update shared data with current node data
@@ -74,7 +76,7 @@ var UserDataWidget = (function () {
         payload = JSON.stringify(payload);
         $.ajax({
             type: type,
-            url: `${Config.apiUrl}/users/data`,
+            url: url,
             data: payload,
             //dataType: "json",
             contentType: "application/json",

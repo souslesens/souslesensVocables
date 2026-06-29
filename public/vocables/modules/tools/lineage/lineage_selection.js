@@ -10,6 +10,7 @@
  * - Managing selection trees and hierarchies
  * - Supporting selection-based operations
  */
+import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 
 var Lineage_selection = (function () {
     var self = {};
@@ -228,7 +229,7 @@ var Lineage_selection = (function () {
         } else if (action == "deleteSelection") {
             self.modifyPredicates.deleteSelection();
         } else if (action == "exportCsv") {
-            alert("on construction");
+            self.exportCsv()
         } else if (action == "sparqlFilter") {
             self.getSparqlFilter();
         } else if (action == "SelectRootNodes") {
@@ -650,6 +651,61 @@ var Lineage_selection = (function () {
 
         $("#lineage_selection_selectedNodesTreeDiv").jstree(true).check_node(topNodes);
     };
+
+    self.exportCsv=function() {
+        var nodeIds = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+        var fromStr = Sparql_common.getFromStr(Lineage_sources.activeSource)
+        var filter=Sparql_common.setFilter("node",nodeIds)
+        var query =
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "SELECT ?node ?node_label ?superClass1Label ?superClass2Label ?superClass3Label ?superClass4Label ?definition ?description ?propLabel ?targetClass_label " +
+            fromStr +
+            "\n" +
+            "WHERE {\n" +
+            "  ?node rdfs:label ?node_label.\n" +
+          filter+
+            "          optional{ ?node <http://purl.org/dc/terms/description>|rdfs:isDefinedBy|skos:definition ?definition .}\n" +
+            "  ?node rdfs:subClassOf ?superClass1. ?superClass1 rdf:type owl:Class. ?superClass1 rdfs:label ?superClass1Label\n" +
+            "  optional{ ?superClass1 rdfs:subClassOf ?superClass2.  ?superClass2 rdf:type owl:Class.?superClass2 rdfs:label ?superClass2Label\n" +
+            "    optional{ ?superClass2 rdfs:subClassOf ?superClass3.?superClass3 rdf:type owl:Class. ?superClass3 rdfs:label ?superClass3Label\n" +
+            "      optional{ ?superClass3 rdfs:subClassOf ?superClass4. ?superClass4 rdf:type owl:Class.?superClass4 rdfs:label ?superClass4Label}}}\n" +
+            " \n" +
+         /*   "    optional{ ?node rdfs:subClassOf ?restriction. ?restriction owl:onProperty ?prop. \n" +
+            "    ?node ?p ?targetClass.?targetClass rdf:type owl:Class.\n" +
+            "    ?prop rdfs:label ?propLabel.\n" +
+            "    ?targetClass rdfs:label ?targetClass_label.\n" +
+            "  \n" +
+            "  }\n" +*/
+            "      \n" +
+            "\n" +
+            "} LIMIT 10000"
+
+        var url = Config.sparql_server.url + "?query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: Lineage_sources.activeSource}, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+
+            var str = "uri\tlabel\tdefinition\tsuperClass1\tsuperClass2\tsuperClass3\tsuperClass4\n"
+            result.results.bindings.forEach(function (item) {
+                str += item.node.value + "\t"
+                str += (item.node_label ? item.node_label.value : "") + "\t"
+                str += (item.definition ? item.definition.value : "" )+ "\t"
+                str += (item.superClass1Label ? item.superClass1Label.value : "" )+ "\t"
+                str += (item.superClass2Label ? item.superClass2Label.value : "" )+ "\t"
+                str += (item.superClass3Label ? item.superClass3Label.value : "") + "\t"
+                str += (item.superClass4Label ? item.superClass4Label.value : "") + "\n"
+            })
+
+            var fileName=Lineage_sources.activeSource+"_whiteboard classes and definitions.txt"
+            Export.downloadText  (str, fileName)
+
+
+        })
+    }
 
     return self;
 })();

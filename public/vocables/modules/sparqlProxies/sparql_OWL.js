@@ -2825,6 +2825,63 @@ var Sparql_OWL = (function () {
         });
     };
 
+    /**
+     * Returns, for each given node, its label, definition (`dcterms:description`|
+     * `rdfs:isDefinedBy`|`skos:definition`) and up to four levels of OWL super-classes with their
+     * labels, by chaining nested `OPTIONAL` blocks on `rdfs:subClassOf` (each super-class is
+     * restricted to `rdf:type owl:Class`). Used by `Lineage_selection.exportCsv` to dump the
+     * whiteboard classes and their hierarchy/definition as a tab-separated file.
+     * @function
+     * @name getNodesSuperClassesAndDefinition
+     * @memberof module:Sparql_OWL
+     * @param {string} sourceLabel - OWL source name to query
+     * @param {(string|string[])} nodeIds - Node URI(s) to describe (matched on `?node`)
+     * @param {Object} [options] - Query options
+     * @param {boolean} [options.returnQueryStr] - Return the SPARQL query string instead of executing it
+     * @param {Function} callback - Error-first callback `(err, bindings)` with `?node`/`?node_label`/`?definition`/`?superClass1Label`…`?superClass4Label`
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `node`, `node_label`, `definition` (optional), `superClass1Label` (optional), `superClass2Label` (optional), `superClass3Label` (optional), `superClass4Label` (optional), `description` (optional), `propLabel` (optional), `targetClass_label` (optional).
+     * @expose
+     */
+    self.getNodesSuperClassesAndDefinition = function (sourceLabel, nodeIds, options, callback) {
+        if (!options) {
+            options = {};
+        }
+        self.graphUri = Config.sources[sourceLabel].graphUri;
+        self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+
+        var fromStr = Sparql_common.getFromStr(sourceLabel);
+        var filter = Sparql_common.setFilter("node", nodeIds);
+        var query =
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "SELECT ?node ?node_label ?superClass1Label ?superClass2Label ?superClass3Label ?superClass4Label ?definition ?description ?propLabel ?targetClass_label " +
+            fromStr +
+            "\n" +
+            "WHERE {\n" +
+            "  ?node rdfs:label ?node_label.\n" +
+            filter +
+            "          optional{ ?node <http://purl.org/dc/terms/description>|rdfs:isDefinedBy|skos:definition ?definition .}\n" +
+            "  ?node rdfs:subClassOf ?superClass1. ?superClass1 rdf:type owl:Class. ?superClass1 rdfs:label ?superClass1Label\n" +
+            "  optional{ ?superClass1 rdfs:subClassOf ?superClass2.  ?superClass2 rdf:type owl:Class.?superClass2 rdfs:label ?superClass2Label\n" +
+            "    optional{ ?superClass2 rdfs:subClassOf ?superClass3.?superClass3 rdf:type owl:Class. ?superClass3 rdfs:label ?superClass3Label\n" +
+            "      optional{ ?superClass3 rdfs:subClassOf ?superClass4. ?superClass4 rdf:type owl:Class.?superClass4 rdfs:label ?superClass4Label}}}\n" +
+            " \n" +
+            "      \n" +
+            "\n" +
+            "} LIMIT 10000";
+
+        var url = self.sparql_url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel, returnQueryStr: options && options.returnQueryStr }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            if (result.query) return callback(null, result);
+            return callback(null, result.results.bindings);
+        });
+    };
+
     return self;
 })();
 

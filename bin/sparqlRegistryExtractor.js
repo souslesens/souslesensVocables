@@ -55,11 +55,19 @@ function parseJsDoc(rawJsDoc) {
     let example = null;
     let returns = null;
 
+    // The JSDoc description is the free-text block at the top of the comment, before any
+    // `@tag`. Once a tag appears, subsequent non-@ lines belong to that tag's prose, not the
+    // description — so we accumulate only the leading non-@ lines, joined with spaces.
+    let seenAnyTag = false;
     for (const line of nonEmptyLines) {
+        const isTag = line.startsWith("@");
+        if (isTag) {
+            seenAnyTag = true;
+        }
         if (line.startsWith("@param")) {
             const paramMatch = line.match(paramTagRegex);
             if (paramMatch) {
-                const [, type, rawName, description] = paramMatch;
+                const [, type, rawName, paramDescription] = paramMatch;
                 const isOptional = rawName.startsWith("[");
                 const cleanName = rawName.replace(optionalBracketsRegex, "");
 
@@ -76,10 +84,10 @@ function parseJsDoc(rawJsDoc) {
                     if (!params[parentName].properties) {
                         params[parentName].properties = {};
                     }
-                    params[parentName].properties[propertyName] = { type: type.trim(), required: !isOptional, description: description.trim() };
+                    params[parentName].properties[propertyName] = { type: type.trim(), required: !isOptional, description: paramDescription.trim() };
                 } else {
                     const existingProperties = params[cleanName] ? params[cleanName].properties : undefined;
-                    params[cleanName] = { type: type.trim(), required: !isOptional, description: description.trim() };
+                    params[cleanName] = { type: type.trim(), required: !isOptional, description: paramDescription.trim() };
                     if (existingProperties) {
                         params[cleanName].properties = existingProperties;
                     }
@@ -91,19 +99,17 @@ function parseJsDoc(rawJsDoc) {
             expose = true;
         } else if (line.startsWith("@example")) {
             example = line.replace(exampleTagRegex, "").trim();
-        } else if (!line.startsWith("@") && !line.startsWith("*")) {
-            if (!description) {
-                description = line;
-            }
         } else if (line.startsWith("@returns") || line.startsWith("@return")) {
             const returnsMatch = line.match(returnsTagRegex);
             if (returnsMatch) {
-                const [, type, description] = returnsMatch;
+                const [, type, returnsDescription] = returnsMatch;
                 returns = {
                     type: type.trim(),
-                    description: description.trim(),
+                    description: returnsDescription.trim(),
                 };
             }
+        } else if (!isTag && !seenAnyTag) {
+            description = description ? description + " " + line : line;
         }
     }
     return { description, params, responseSchema, expose, example, returns };

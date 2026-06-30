@@ -47,7 +47,8 @@ var Sparql_proxy = (function () {
      * @param {boolean} [options.dontCacheCurrentQuery] - When true, does not store the query in `self.currentQuery`
      * @param {string} [options.caller] - Key under which the query body is pushed into `self.queriesHistory`
      * @param {Function} callback - Error-first callback `(err, result)`; `result` is the parsed JSON (`result.results.bindings`) or raw turtle for CONSTRUCT
-     * @returns {void}
+     * @returns {err|Object} Throws an error or returns the parsed SPARQL JSON result (`result.results.bindings`), or raw turtle for CONSTRUCT queries.
+     * @expose
      */
     self.querySPARQL_GET_proxy = function (url, query, queryOptions, options, callback) {
         if (!options) {

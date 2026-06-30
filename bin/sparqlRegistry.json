@@ -1444,11 +1444,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns SPARQL results with variables: `topConcept` {string}, `topConceptLabel` {string}."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -1496,11 +1496,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `subjectLabel` {string} (optional), `child1` {string}, `child1Label` {string} (optional), `child1Type` {string} (optional), depth-indexed `childN` {string} (optional), `childNLabel` {string} (optional), `childNType` {string} (optional); with `options.filterCollections`: `collection` {string}, `acollection` {string}, `collectionLabel` {string}, `acollectionLabel` {string}."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -1536,11 +1536,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `predicate` {string}, `object` {string}, `type` {string}; with a collection: `collection` {string}, `acollection` {string}, `collectionLabel` {string}, `acollectionLabel` {string}, `subjectLabel` {string}."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -1606,11 +1606,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `subjectLabel` {string} (optional), `type` {string} (optional), `broader1` {string} (optional), `broader1Label` {string} (optional), `broader1Type` {string} (optional), depth-indexed `broaderN` {string} (optional), `broaderNLabel` {string} (optional), `broaderNType` {string} (optional)."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -1652,11 +1652,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns SPARQL results with variables: `id` {string}, `prop` {string}, `value` {string}, `valueLabel` {string} (optional), `propLabel` {string} (optional)."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -1692,11 +1692,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `x` {string}, `y` {string}, `subjectLabel` {string} (optional)."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -1718,11 +1718,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `broader` {string}, `broaderLabel` {string}, `type` {string}."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -1744,11 +1744,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `narrower` {string}, `narrowerLabel` {string}, `type` {string}."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -1770,11 +1770,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `type` {string}, `subjectLabel` {string}."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -1796,11 +1796,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `prop` {string}, `value` {string}."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -1834,11 +1834,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|*",
+      "description": "Throws an error or returns the callback result."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -1880,11 +1880,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|*",
+      "description": "Throws an error or returns the callback result."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -1906,11 +1906,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|*",
+      "description": "Throws an error or returns the callback result."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -1926,11 +1926,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|*",
+      "description": "Throws an error or returns the callback result."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -1952,11 +1952,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|*",
+      "description": "Throws an error or returns the callback result."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -2012,11 +2012,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns an array of language codes."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -2033,7 +2033,7 @@
     ],
     "returns": {
       "type": "Object",
-      "description": "Cached object with `prefixesStr`, `fromStr`, `broaderPredicate`, `narrowerPredicate`, `prefLabelPredicate`, `topConceptFilter`, `lang`, `limit`, `optionalDepth`, `url`, `queryOptions`, `graphUri`"
+      "description": "Cached object with `prefixesStr` {string}, `fromStr` {string}, `broaderPredicate` {string}, `narrowerPredicate` {string}, `prefLabelPredicate` {string}, `topConceptFilter` {string}, `lang` {string}, `limit` {number}, `optionalDepth` {number}, `url` {string}, `queryOptions` {string}, `graphUri` {string}"
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": false,
@@ -2058,8 +2058,8 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns the delegated controller's top-concept bindings."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -2090,8 +2090,8 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns the delegated controller's node triple bindings."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -2116,8 +2116,8 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns the delegated controller's item bindings."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -2160,8 +2160,8 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns the concatenated children bindings from each slice."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -2204,8 +2204,8 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns the concatenated ancestor bindings from each slice; returns `[]` when the source has no controller."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -2230,11 +2230,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `broader` {string}, `broaderLabel` {string}, `type` {string}."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -2256,11 +2256,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `narrower` {string}, `narrowerLabel` {string}, `type` {string}."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -2282,8 +2282,8 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `type` {string}, `subjectLabel` {string}."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -2302,11 +2302,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Object",
+      "description": "Throws an error or returns a map of graph URI to `1`."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -2328,11 +2328,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `prop` {string}, `value` {string}."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -2366,11 +2366,11 @@
       }
     ],
     "returns": {
-      "type": "*",
-      "description": "The callback result; early-returns a string error when no filter is supplied"
+      "type": "err|*",
+      "description": "Throws an error or returns the callback result; early-returns a string error when no filter is supplied."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -2451,11 +2451,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|*",
+      "description": "Throws an error or returns the inserted count (or the query string when `options.getSparqlOnly`)."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -2477,11 +2477,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|*",
+      "description": "Throws an error or returns the callback result."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -2503,11 +2503,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|number",
+      "description": "Throws an error or returns the last batch size."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -2529,11 +2529,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Array",
+      "description": "Throws an error or returns SPARQL results with variables: `p` {string}, `pLabel` {string} (optional)."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -2623,11 +2623,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|number",
+      "description": "Throws an error or returns the number of triples inserted."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {
@@ -2819,8 +2819,8 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|Object",
+      "description": "Throws an error or returns `{classesMap, labels}`; each `classesMap` entry has `id` {string}, `label` {string}, `lang` {string}, `skoslabels` {Array<string>}, `parents` {Array<string>}, `type` {string}."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -2839,11 +2839,11 @@
       }
     ],
     "returns": {
-      "type": "void",
-      "description": ""
+      "type": "err|number",
+      "description": "Throws an error or returns the number of triples inserted."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
-    "expose": false,
+    "expose": true,
     "example": null
   },
   {

@@ -95,7 +95,7 @@ function parseJsDoc(rawJsDoc) {
             if (!description) {
                 description = line;
             }
-        }else if (line.startsWith("@returns") || line.startsWith("@return")) {
+        } else if (line.startsWith("@returns") || line.startsWith("@return")) {
             const returnsMatch = line.match(returnsTagRegex);
             if (returnsMatch) {
                 const [, type, description] = returnsMatch;
@@ -169,7 +169,6 @@ function extractFunctions(source, moduleName) {
             responseSchema: jsDoc.responseSchema || DEFAULT_RESPONSE_SCHEMA,
             expose: jsDoc.expose,
             example: jsDoc.example || null,
-            
         });
     }
 

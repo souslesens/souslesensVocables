@@ -424,8 +424,6 @@ var OntologyModels = (function () {
                             callbackSeries();
                         },
 
-                        
-
                         //register source in Config.sources
                         function (callbackSeries) {
                             if (!Config.sources[source]) {

@@ -3336,7 +3336,7 @@ restrictionSource = Config.predicatesSource;
             if (Lineage_sources.isSourceEditableForUser(node.data.source)) {
                 html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.deleteObjectProperty();"> Delete relation</span>';
             }
-        }  else if (node.data && node.data.context == Lineage_linkedData_mappings.context) {
+        } else if (node.data && node.data.context == Lineage_linkedData_mappings.context) {
             html = "...";
             // '<span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.expandIndividual();"> Expand individual</span>';
         } else if (node.data && node.data.rdfType === "literal") {

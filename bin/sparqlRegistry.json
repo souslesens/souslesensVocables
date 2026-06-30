@@ -97,7 +97,7 @@
     ],
     "returns": {
       "type": "err|Array",
-      "description": "Throws an error or returns SPARQL results with variables: `topConcept`, `topConceptLabel` (optional), `subjectGraph` (optional)."
+      "description": "Throws an error or returns SPARQL results with variables: `topConcept` {string}, `topConceptLabel` {string} (optional), `subjectGraph` {string} (optional)."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -161,7 +161,7 @@
     ],
     "returns": {
       "type": "err|Array",
-      "description": "Throws an error or returns SPARQL results with variables: `prop`, `value`, `propLabel` (optional), `valueLabel` (optional), `g` (optional)."
+      "description": "Throws an error or returns SPARQL results with variables: `prop` {string}, `value` {string}, `propLabel` {string} (optional), `valueLabel` {string} (optional), `g` {string} (optional)."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -237,7 +237,7 @@
     ],
     "returns": {
       "type": "err|Array",
-      "description": "Throws an error or returns SPARQL results with variables: `subject`, `subjectLabel` (optional), `subjectTypes`, `subjectSuperClasses` (optional), `broader1`, `broader1Label` (optional), `broaderGraphs1`, and depth-indexed `broaderN` (optional), `broaderNLabel` (optional), `broaderGraphsN`."
+      "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `subjectLabel` {string} (optional), `subjectTypes` {string}, `subjectSuperClasses` {string} (optional), `broader1` {string}, `broader1Label` {string} (optional), `broaderGraphs1` {string}, and depth-indexed `broaderN` {string} (optional), `broaderNLabel` {string} (optional), `broaderGraphsN` {string}."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -295,7 +295,7 @@
     ],
     "returns": {
       "type": "err|Object",
-      "description": "Throws an error or returns `{hierarchies, rawResult}`; each `rawResult` binding contains `subject`, `class`, `type`, `classLabel` (optional), `superClass`, `superClassType`, `superClassSubClass`, `superClassLabel` (optional), `subjectTypes`."
+      "description": "Throws an error or returns `{hierarchies, rawResult}`; each `rawResult` binding contains `subject` {string}, `class` {string}, `type` {string}, `classLabel` {string} (optional), `superClass` {string}, `superClassType` {string}, `superClassSubClass` {string}, `superClassLabel` {string} (optional), `subjectTypes` {string}."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -383,7 +383,7 @@
     ],
     "returns": {
       "type": "err|Array",
-      "description": "Throws an error or returns SPARQL results with variables: `subject`, `prop`, `object`, `subjectType` (optional), `subjectLabel` (optional), `propLabel` (optional), `objectType` (optional), `objectValue` (optional), `objectLabel` (optional); `options.distinct` replaces this default variable list."
+      "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `prop` {string}, `object` {string}, `subjectType` {string} (optional), `subjectLabel` {string} (optional), `propLabel` {string} (optional), `objectType` {string} (optional), `objectValue` {string} (optional), `objectLabel` {string} (optional); `options.distinct` replaces this default variable list."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -483,7 +483,7 @@
     ],
     "returns": {
       "type": "err|Array",
-      "description": "Throws an error or returns SPARQL results with variables: `domain` (optional), `domainLabel` (optional), `prop`, `propLabel` (optional), `range` (optional), `rangeLabel` (optional), `subProp` (optional), `subPropLabel` (optional), `inverseProp` (optional), `inversePropLabel` (optional)."
+      "description": "Throws an error or returns SPARQL results with variables: `domain` {string} (optional), `domainLabel` {string} (optional), `prop` {string}, `propLabel` {string} (optional), `range` {string} (optional), `rangeLabel` {string} (optional), `subProp` {string} (optional), `subPropLabel` {string} (optional), `inverseProp` {string} (optional), `inversePropLabel` {string} (optional)."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -589,7 +589,7 @@
     ],
     "returns": {
       "type": "err|Array",
-      "description": "Throws an error or returns SPARQL results with variables: `subject`, `subjectLabel` (optional), `node`, `prop`, `propLabel` (optional), `constraintType`, `value`, `valueLabel` (optional), `cardinalityType` (optional), `cardinalityValue` (optional), `g` (optional), `status` (optional), `creationDate` (optional), `creator` (optional), `provenance` (optional), `domainSourceLabel` (optional), `rangeSourceLabel` (optional). With `listPropertiesOnly`: `prop`, `propLabel` (optional). With `withoutBlankNodes`: `subject`, `subjectLabel` (optional), `prop`, `propLabel` (optional), `value`, `valueLabel` (optional), `constraintType`. With `turtle`: RDF triples rather than bindings."
+      "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `subjectLabel` {string} (optional), `node` {string}, `prop` {string}, `propLabel` {string} (optional), `constraintType` {string}, `value` {string}, `valueLabel` {string} (optional), `cardinalityType` {string} (optional), `cardinalityValue` {string} (optional), `g` {string} (optional), `status` {string} (optional), `creationDate` {string} (optional), `creator` {string} (optional), `provenance` {string} (optional), `domainSourceLabel` {string} (optional), `rangeSourceLabel` {string} (optional). With `listPropertiesOnly`: `prop` {string}, `propLabel` {string} (optional). With `withoutBlankNodes`: `subject` {string}, `subjectLabel` {string} (optional), `prop` {string}, `propLabel` {string} (optional), `value` {string}, `valueLabel` {string} (optional), `constraintType` {string}. With `turtle`: RDF triples rather than bindings."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -635,7 +635,7 @@
     ],
     "returns": {
       "type": "err|Array",
-      "description": "Throws an error or returns SPARQL results with variables: `subject`, `node`, `subjectLabel` (optional), `nodeLabel` (optional), `g` (optional)."
+      "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `node` {string}, `subjectLabel` {string} (optional), `nodeLabel` {string} (optional), `g` {string} (optional)."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -661,7 +661,7 @@
     ],
     "returns": {
       "type": "err|Array",
-      "description": "Throws an error or returns SPARQL results with variables: `subject`, `type`, and `g`."
+      "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `type` {string}, and `g` {string}."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": false,
@@ -745,7 +745,7 @@
     ],
     "returns": {
       "type": "err|Array",
-      "description": "Throws an error or returns SPARQL results with variables: `restriction`, `prop`, `sourceClass`, `constraintType` (optional), `targetClass` (optional)."
+      "description": "Throws an error or returns SPARQL results with variables: `restriction` {string}, `prop` {string}, `sourceClass` {string}, `constraintType` {string} (optional), `targetClass` {string} (optional)."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -903,7 +903,7 @@
     ],
     "returns": {
       "type": "err|Array",
-      "description": "Throws an error or returns accumulated SPARQL results with variables: `id`, `type` (optional), `label` (optional); returns an empty array when `processor` handles each page."
+      "description": "Throws an error or returns accumulated SPARQL results with variables: `id` {string}, `type` {string} (optional), `label` {string} (optional); returns an empty array when `processor` handles each page."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -955,7 +955,7 @@
     ],
     "returns": {
       "type": "err|Array",
-      "description": "Throws an error or returns SPARQL results with variables: `property`, `propertyLabel`, `g` (optional)."
+      "description": "Throws an error or returns SPARQL results with variables: `property` {string}, `propertyLabel` {string}, `g` {string} (optional)."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -1039,7 +1039,7 @@
     ],
     "returns": {
       "type": "err|Object",
-      "description": "Throws an error or returns a map keyed by property URI with fields: `parentProp`, `prop`, `domain` (optional), `range` (optional), `domainLabel` (optional), `rangeLabel` (optional)."
+      "description": "Throws an error or returns a map keyed by property URI with fields: `parentProp` {string}, `prop` {string}, `domain` {string} (optional), `range` {string} (optional), `domainLabel` {string} (optional), `rangeLabel` {string} (optional)."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -1079,7 +1079,7 @@
     ],
     "returns": {
       "type": "err|Object",
-      "description": "Throws an error or returns a map keyed by property URI with fields: `prop`, `propLabel`, `subProps`, `domain` (optional), `domainLabel` (optional), `range` (optional), `rangeLabel` (optional), `inverseProp` (optional), `inversePropLabel` (optional)."
+      "description": "Throws an error or returns a map keyed by property URI with fields: `prop` {string}, `propLabel` {string}, `subProps` {Array<string>}, `domain` {string} (optional), `domainLabel` {string} (optional), `range` {string} (optional), `rangeLabel` {string} (optional), `inverseProp` {string} (optional), `inversePropLabel` {string} (optional)."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -1137,7 +1137,7 @@
     ],
     "returns": {
       "type": "err|Array",
-      "description": "Throws an error or returns SPARQL results with variables: `subject`, `predicate`, `object`, `subjectLabel` (optional), `predicateLabel` (optional), `objectLabel` (optional)."
+      "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `predicate` {string}, `object` {string}, `subjectLabel` {string} (optional), `predicateLabel` {string} (optional), `objectLabel` {string} (optional)."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": false,
@@ -1211,7 +1211,7 @@
     ],
     "returns": {
       "type": "err|Array",
-      "description": "Throws an error or returns SPARQL results with variables: `label`, `id` (optional when `options.otherProperty` is set)."
+      "description": "Throws an error or returns SPARQL results with variables: `label` {string}, `id` {string} (optional when `options.otherProperty` is set)."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": false,
@@ -1243,7 +1243,7 @@
     ],
     "returns": {
       "type": "err|Array",
-      "description": "Throws an error or returns SPARQL results with variable: `type`."
+      "description": "Throws an error or returns SPARQL results with variable: `type` {string}."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -1275,7 +1275,7 @@
     ],
     "returns": {
       "type": "err|Array",
-      "description": "Throws an error or returns SPARQL results with variables: `id` and `label`."
+      "description": "Throws an error or returns SPARQL results with variables: `id` {string} and `label` {string}."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,
@@ -1353,7 +1353,7 @@
     ],
     "returns": {
       "type": "err|Array",
-      "description": "Throws an error or returns SPARQL results with variable: `g`."
+      "description": "Throws an error or returns SPARQL results with variable: `g` {string}."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": false,
@@ -1405,7 +1405,7 @@
     ],
     "returns": {
       "type": "err|Array",
-      "description": "Throws an error or returns SPARQL results with variables: `subject`, `type`, and `subjectLabel`."
+      "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `type` {string}, and `subjectLabel` {string}."
     },
     "responseSchema": "#/definitions/SparqlQueryResponse",
     "expose": true,

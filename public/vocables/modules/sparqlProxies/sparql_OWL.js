@@ -121,7 +121,7 @@ var Sparql_OWL = (function () {
      * @param {(string|string[])} [options.filterCollections] - Restrict to top concepts reachable from these SKOS collections
      * @param {boolean} [options.returnQueryStr] - Return the SPARQL query string instead of executing it
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?topConcept`/`?topConceptLabel`(/`?subjectGraph`)
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `topConcept` {string}, `topConceptLabel` {string} (optional), `subjectGraph` {string} (optional).
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `topConcept`, `topConceptLabel` (optional), `subjectGraph` (optional).
      * @expose
      */
     self.getTopConcepts = function (sourceLabel, options, callback) {
@@ -232,7 +232,7 @@ var Sparql_OWL = (function () {
      * @param {string} [options.sort] - Variable name to order results by
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?subject`/`?child1…`(labels), label-enriched
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject` {string}, `subjectLabel` {string} (optional), `child1` {string}, `child1Label` {string} (optional), `child1Type` {string} (optional), `child1Graph` {string} (optional), depth-indexed `childN` {string} (optional), `childNLabel` {string} (optional), `collection` {string} (optional when `options.filterCollections` is set), `acollection` {string} (optional when `options.filterCollections` is set), `collectionLabel` {string} (optional when `options.filterCollections` is set), `acollectionLabel` {string} (optional when `options.filterCollections` is set).
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `subjectLabel` (optional), `child1`, `child1Label` (optional), `child1Type` (optional), `child1Graph` (optional), depth-indexed `childN` (optional), `childNLabel` (optional), `collection` (optional), `acollection` (optional), `collectionLabel` (optional), `acollectionLabel` (optional).
      * @expose
      */
 
@@ -371,7 +371,7 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.noRestrictions] - Exclude values that are `owl:Restriction`
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?prop`/`?value`(/labels/graph)
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `prop` {string}, `value` {string}, `propLabel` {string} (optional), `valueLabel` {string} (optional), `g` {string} (optional).
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `prop`, `value`, `propLabel` (optional), `valueLabel` (optional), `g` (optional).
      * @expose
      */
     self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
@@ -456,7 +456,7 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.excludeType] - Reserved flag to drop type variables from the SELECT clause
      * @param {(string|string[])} [options.filterCollections] - Exclude ancestors that are members of these collections
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject` {string}, `subjectLabel` {string} (optional), `subjectTypes` {string}, `subjectSuperClasses` {string} (optional), `broader1` {string}, `broader1Label` {string} (optional), `broaderGraphs1` {string}, and depth-indexed `broaderN` {string} (optional), `broaderNLabel` {string} (optional), `broaderGraphsN` {string}.
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `subjectLabel` (optional), `subjectTypes`, `subjectSuperClasses` (optional), `broader1`, `broader1Label` (optional), `broaderGraphs1`, and depth-indexed `broaderN` (optional), `broaderNLabel` (optional), `broaderGraphsN`.
      *
      * @expose
      */
@@ -596,7 +596,7 @@ var Sparql_OWL = (function () {
      * @param {string} [options.filter] - Extra SPARQL filter appended to the query
      * @param {boolean} [options.withoutImports] - Exclude imported graphs from the `FROM` clause
      * @param {Function} callback - Error-first callback `(err, {hierarchies, rawResult})` where `hierarchies` maps each class URI to its ordered hierarchy
-     * @returns {err|Object} Throws an error or returns `{hierarchies, rawResult}`; each `rawResult` binding contains `subject` {string}, `class` {string}, `type` {string}, `classLabel` {string} (optional), `superClass` {string}, `superClassType` {string}, `superClassSubClass` {string}, `superClassLabel` {string} (optional), `subjectTypes` {string}.
+     * @returns {err|Object} Throws an error or returns `{hierarchies, rawResult}`; each `rawResult` binding contains `subject`, `class`, `type`, `classLabel` (optional), `superClass`, `superClassType`, `superClassSubClass`, `superClassLabel` (optional), `subjectTypes`.
      * @expose
      */
     self.getNodesAncestorsOrDescendants = function (sourceLabel, classIds, options, callback) {
@@ -789,7 +789,7 @@ var Sparql_OWL = (function () {
      * @param {string} [options.filter] - Extra SPARQL filter appended to the query
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with the matching triples and their labels/types
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject` {string}, `subjectType` {string}, `subjectLabel` {string} (optional), `prop` {string}, `x` {string}, `propType` {string}, `propLabel` {string} (optional), `object` {string}, `objectType` {string}, `objectLabel` {string} (optional), `g` {string}; `options.distinct` replaces this default variable list.
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `subjectType`, `subjectLabel` (optional), `prop`, `x`, `propType`, `propLabel` (optional), `object`, `objectType`, `objectLabel` (optional), `g`.
      * @expose
      */
 
@@ -890,7 +890,7 @@ var Sparql_OWL = (function () {
      * @param {string} [options.distinct] - Variables for the SELECT clause (defaults to `*`)
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?subject`/`?prop`/`?object` and their labels
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject` {string}, `prop` {string}, `object` {string}, `subjectType` {string} (optional), `subjectLabel` {string} (optional), `propLabel` {string} (optional), `objectType` {string} (optional), `objectValue` {string} (optional), `objectLabel` {string} (optional); `options.distinct` replaces this default variable list.
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `prop`, `object`, `subjectType` (optional), `subjectLabel` (optional), `propLabel` (optional), `objectType` (optional), `objectValue` (optional), `objectLabel` (optional).
      * @expose
      */
     self.getFilteredTriples = function (sourceLabel, subjectIds, propertyIds, objectIds, options, callback) {
@@ -1065,7 +1065,7 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.selectGraph] - Bind each triple's named graph
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?domain`/`?prop`/`?range`/`?subProp`/`?inverseProp` (+labels)
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `domain` {string} (optional), `domainLabel` {string} (optional), `prop` {string}, `propLabel` {string} (optional), `range` {string} (optional), `rangeLabel` {string} (optional), `subProp` {string} (optional), `subPropLabel` {string} (optional), `inverseProp` {string} (optional), `inversePropLabel` {string} (optional).
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `domain` (optional), `domainLabel` (optional), `prop`, `propLabel` (optional), `range` (optional), `rangeLabel` (optional), `subProp` (optional), `subPropLabel` (optional), `inverseProp` (optional), `inversePropLabel` (optional).
      * @expose
      */
     self.getObjectPropertiesDomainAndRange = function (sourceLabel, domainIds, options, callback) {
@@ -1216,7 +1216,7 @@ var Sparql_OWL = (function () {
      * @param {string} [options.filter] - Extra SPARQL filter (its `object` is mapped to `value`)
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?subject`/`?prop`/`?value`/`?node`/`?constraintType` (+labels)
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject` {string}, `subjectLabel` {string} (optional), `node` {string}, `prop` {string}, `propLabel` {string} (optional), `constraintType` {string}, `value` {string}, `valueLabel` {string} (optional), `cardinalityType` {string} (optional), `cardinalityValue` {string} (optional), `g` {string} (optional), `status` {string} (optional), `creationDate` {string} (optional), `creator` {string} (optional), `provenance` {string} (optional), `domainSourceLabel` {string} (optional), `rangeSourceLabel` {string} (optional). With `listPropertiesOnly`: `prop` {string}, `propLabel` {string} (optional). With `withoutBlankNodes`: `subject` {string}, `subjectLabel` {string} (optional), `prop` {string}, `propLabel` {string} (optional), `value` {string}, `valueLabel` {string} (optional), `constraintType` {string}. With `turtle`: RDF triples rather than bindings.
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `subjectLabel` (optional), `node`, `prop`, `propLabel` (optional), `constraintType`, `value`, `valueLabel` (optional), `cardinalityType` (optional), `cardinalityValue` (optional), `g` (optional), `status` (optional), `creationDate` (optional), `creator` (optional), `provenance` (optional), `domainSourceLabel` (optional), `rangeSourceLabel` (optional).
      * @expose
      */
     self.getObjectRestrictions = function (sourceLabel, subClassIds, options, callback) {
@@ -1376,7 +1376,7 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.selectGraph] - Bind each triple's named graph
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?subject`/`?node` (+labels)
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject` {string}, `node` {string}, `subjectLabel` {string} (optional), `nodeLabel` {string} (optional), `g` {string} (optional).
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `node`, `subjectLabel` (optional), `nodeLabel` (optional), `g` (optional).
      * @expose
      */
     self.getNamedIndividuals = function (sourceLabel, ids, options, callback) {
@@ -1432,7 +1432,7 @@ var Sparql_OWL = (function () {
      * @param {string} sourceLabel - Source name whose endpoint is queried
      * @param {(string|string[])} ids - Resource URI(s) whose types are fetched
      * @param {Function} callback - Error-first callback `(err, allData)` with `?subject`/`?type`/`?g` bindings
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject` {string}, `type` {string}, and `g` {string}.
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `type`, and `g`.
      */
     self.getNodesTypes = function (sourceLabel, ids, callback) {
         var slices = common.array.slice(ids, 200);
@@ -1541,7 +1541,7 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.selectGraph] - Bind each triple's named graph
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?prop`/`?restriction`/`?sourceClass`/`?targetClass` (+labels)
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `restriction` {string}, `prop` {string}, `sourceClass` {string}, `constraintType` {string} (optional), `targetClass` {string} (optional).
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `restriction`, `prop`, `sourceClass`, `constraintType` (optional), `targetClass` (optional).
      * @expose
      */
     self.getPropertiesRestrictionsDescription = function (sourceLabel, propIds, options, callback) {
@@ -1767,7 +1767,7 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Total result cap (defaults to `Config.queryLimit`)
      * @param {Function} [processor] - Optional `(pageBindings, cb)` processor invoked per page; if omitted, pages are accumulated
      * @param {Function} callback - Error-first callback `(err, allData)` with the accumulated bindings (empty when a processor is used)
-     * @returns {err|Array} Throws an error or returns accumulated SPARQL results with variables: `id` {string}, `type` {string} (optional), `label` {string} (optional); returns an empty array when `processor` handles each page.
+     * @returns {err|Array} Throws an error or returns accumulated SPARQL results with variables: `id`, `type` (optional), `label` (optional).
      * @expose
      */
     self.getDictionary = function (sourceLabel, options, processor, callback) {
@@ -1885,7 +1885,7 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.skosLabels] - Also match `skos:prefLabel` for labels
      * @param {string} [options.filter] - Extra SPARQL filter appended to the query
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?property` (+label)
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `property` {string}, `propertyLabel` {string}, `g` {string} (optional).
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `property`, `propertyLabel`, `g` (optional).
      * @expose
      */
     self.getObjectProperties = function (sourceLabel, options, callback) {
@@ -1984,7 +1984,7 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.withGraph] - Bind the graph in the `FROM` clause
      * @param {boolean} [options.withoutImports] - Exclude imported graphs from the `FROM` clause
      * @param {Function} callback - Error-first callback `(err, propsMap)` mapping property URI → `{parentProp, prop, domain, range, domainLabel, rangeLabel}`
-     * @returns {err|Object} Throws an error or returns a map keyed by property URI with fields: `parentProp` {string}, `prop` {string}, `domain` {string} (optional), `range` {string} (optional), `domainLabel` {string} (optional), `rangeLabel` {string} (optional).
+     * @returns {err|Object} Throws an error or returns a map keyed by property URI with fields: `parentProp`, `prop`, `domain` (optional), `range` (optional), `domainLabel` (optional), `rangeLabel` (optional).
      * @expose
      */
     self.getPropertiesInheritedConstraints = function (sourceLabel, properties, options, callback) {
@@ -2060,7 +2060,7 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.prefLabelAlso] - Match `skos:prefLabel` in addition to `rdfs:label`
      * @param {string} [options.filter] - Extra SPARQL filter applied within each UNION branch
      * @param {Function} callback - Error-first callback `(err, propsMap)` mapping property URI → `{prop, propLabel, subProps, domain, domainLabel, range, rangeLabel, inverseProp, inversePropLabel}`
-     * @returns {err|Object} Throws an error or returns a map keyed by property URI with fields: `prop` {string}, `propLabel` {string}, `subProps` {Array<string>}, `domain` {string} (optional), `domainLabel` {string} (optional), `range` {string} (optional), `rangeLabel` {string} (optional), `inverseProp` {string} (optional), `inversePropLabel` {string} (optional).
+     * @returns {err|Object} Throws an error or returns a map keyed by property URI with fields: `prop`, `propLabel`, `subProps`, `domain` (optional), `domainLabel` (optional), `range` (optional), `rangeLabel` (optional), `inverseProp` (optional), `inversePropLabel` (optional).
      * @expose
      */
     self.getInferredPropertiesDomainsAndRanges = function (sourceLabel, options, callback) {
@@ -2182,7 +2182,7 @@ var Sparql_OWL = (function () {
      * @param {string} [options.graphUri] - Explicit graph URI when no source is given
      * @param {boolean} [options.removeBlankNodesObjects] - Exclude blank-node objects
      * @param {Function} callback - Error-first callback `(err, allResults)` with `?subject`/`?predicate`/`?object` (+labels)
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject` {string}, `predicate` {string}, `object` {string}, `subjectLabel` {string} (optional), `predicateLabel` {string} (optional), `objectLabel` {string} (optional).
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `predicate`, `object`, `subjectLabel` (optional), `predicateLabel` (optional), `objectLabel` (optional).
      */
     self.getAllTriples = function (sourceLabel, role, ids, options, callback) {
         if (!options) {
@@ -2342,7 +2342,7 @@ var Sparql_OWL = (function () {
      * @param {Object} [options] - Query options
      * @param {string} [options.otherProperty] - Use this property instead of `rdfs:label`
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?label`(/`?id`)
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `label` {string}, `id` {string} (optional when `options.otherProperty` is set).
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `label`, `id` (optional).
      *
      */
     self.getDistinctClassLabels = function (sourceLabel, classIds, options, callback) {
@@ -2392,7 +2392,7 @@ var Sparql_OWL = (function () {
      * @param {string[]} allIds - Individual URIs whose class types are fetched
      * @param {Object} [options] - Reserved options object
      * @param {Function} callback - Error-first callback `(err, allBindings)` with the `?type` bindings
-     * @returns {err|Array} Throws an error or returns SPARQL results with variable: `type` {string}.
+     * @returns {err|Array} Throws an error or returns SPARQL results with variable: `type`.
      * @expose
      */
     self.getIndividualsType = function (sourceLabel, allIds, options, callback) {
@@ -2446,7 +2446,7 @@ var Sparql_OWL = (function () {
      * @param {string[]} classIds - Class URIs whose individuals are fetched
      * @param {Object} [options] - Reserved options object
      * @param {Function} callback - Error-first callback `(err, allBindings)` with `?id`/`?label`
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `id` {string} and `label` {string}.
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `id` and `label`.
      * @expose
      */
     self.getIndividualsOfClass = function (sourceLabel, classIds, options, callback) {
@@ -2569,7 +2569,7 @@ var Sparql_OWL = (function () {
      * @param {number} [options.depth] - Limit traversal to this depth (`{0,depth}` path)
      * @param {string} [options.filter] - Extra SPARQL filter appended to the query
      * @param {Function} callback - Error-first callback `(err, allResults)` with `?descendant`/`?descendantParent` (+labels)
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `descendant` {string}, `descendantParent` {string}, `descendantLabel` {string} (optional), `descendantParentLabel` {string} (optional).
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `descendant`, `descendantParent`, `descendantLabel` (optional), `descendantParentLabel` (optional).
      * @expose
      */
     // look with getNodeADesencantORAncestor
@@ -2668,7 +2668,7 @@ var Sparql_OWL = (function () {
      * @param {string} sourceLabel - OWL source name whose subjects anchor the search
      * @param {string} filter - SPARQL filter restricting the inner subjects
      * @param {Function} callback - Error-first callback `(err, bindings)` with the distinct `?g` graphs
-     * @returns {err|Array} Throws an error or returns SPARQL results with variable: `g` {string}.
+     * @returns {err|Array} Throws an error or returns SPARQL results with variable: `g`.
      */
     self.getGraphsWithSameClasses = function (sourceLabel, filter, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;
@@ -2801,7 +2801,7 @@ var Sparql_OWL = (function () {
      * @param {string} sourceLabel - OWL source name to query
      * @param {string} id - URI of the resource whose label is fetched
      * @param {Function} callback - Error-first callback receiving the matching SPARQL bindings
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject` {string}, `type` {string}, and `subjectLabel` {string}.
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `type`, and `subjectLabel`.
      * @expose
      */
     self.getNodeLabel = function (sourceLabel, id, callback) {

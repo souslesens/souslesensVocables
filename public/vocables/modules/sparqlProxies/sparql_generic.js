@@ -42,7 +42,7 @@ var Sparql_generic = (function () {
      * @name getSourceVariables
      * @memberof module:Sparql_generic
      * @param {string} sourceLabel - Source name to compute query variables for
-     * @returns {Object} Cached object with `prefixesStr` {string}, `fromStr` {string}, `broaderPredicate` {string}, `narrowerPredicate` {string}, `prefLabelPredicate` {string}, `topConceptFilter` {string}, `lang` {string}, `limit` {number}, `optionalDepth` {number}, `url` {string}, `queryOptions` {string}, `graphUri` {string}
+     * @returns {Object} Cached object with `prefixesStr`, `fromStr`, `broaderPredicate`, `narrowerPredicate`, `prefLabelPredicate`, `topConceptFilter`, `lang`, `limit`, `optionalDepth`, `url`, `queryOptions`, `graphUri`
      */
     self.getSourceVariables = function (sourceLabel) {
         source = Config.sources[sourceLabel];
@@ -314,7 +314,7 @@ var Sparql_generic = (function () {
      * @param {string} sourceLabel - Source name to query
      * @param {string} id - URI of the node whose ancestors are fetched
      * @param {Function} callback - Error-first callback `(err, bindings)` with the ancestor bindings
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject` {string}, `broader` {string}, `broaderLabel` {string}, `type` {string}.
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `broader`, `broaderLabel`, `type`.
      * @expose
      */
     self.getSingleNodeAllGenealogy = function (sourceLabel, id, callback) {
@@ -361,7 +361,7 @@ var Sparql_generic = (function () {
      * @param {string} sourceLabel - Source name to query
      * @param {string} id - URI of the node whose descendants are fetched
      * @param {Function} callback - Error-first callback `(err, bindings)` with the descendant bindings
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject` {string}, `narrower` {string}, `narrowerLabel` {string}, `type` {string}.
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `narrower`, `narrowerLabel`, `type`.
      * @expose
      */
     self.getSingleNodeAllDescendants = function (sourceLabel, id, callback) {
@@ -404,7 +404,7 @@ var Sparql_generic = (function () {
      * @param {string} sourceLabel - Source name to query
      * @param {string} id - URI of the node whose label is fetched
      * @param {Function} callback - Error-first callback `(err, bindings)` with the label/type bindings
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject` {string}, `type` {string}, `subjectLabel` {string}.
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `type`, `subjectLabel`.
      * @expose
      */
     self.getNodeLabel = function (sourceLabel, id, callback) {
@@ -472,7 +472,7 @@ var Sparql_generic = (function () {
      * @param {string} sourceLabel - Source name to query
      * @param {string[]} subjectIds - Subject URIs whose triples are fetched
      * @param {Function} callback - Error-first callback `(err, triples)` with the concatenated triple bindings
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject` {string}, `prop` {string}, `value` {string}.
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `prop`, `value`.
      * @expose
      */
     self.getNodesAllTriples = function (sourceLabel, subjectIds, callback) {
@@ -833,7 +833,7 @@ var Sparql_generic = (function () {
      * @param {string} sourceLabel - Source name to query
      * @param {Object} [options] - Reserved options object
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?p`/`?pLabel` bindings
-     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `p` {string}, `pLabel` {string} (optional).
+     * @returns {err|Array} Throws an error or returns SPARQL results with variables: `p`, `pLabel` (optional).
      * @expose
      */
     self.getDistinctPredicates = function (sourceLabel, options, callback) {
@@ -1190,7 +1190,7 @@ var Sparql_generic = (function () {
      * @param {string} [options.parentType] - Parent predicate to use when the schema type is unrecognised
      * @param {boolean} [options.withoutImports] - Exclude imported graphs from the `FROM` clause
      * @param {Function} callback - Error-first callback `(err, {classesMap, labels})` where `classesMap` maps each node URI to `{id, label, lang, skoslabels, parents, type}` and `labels` maps URI → label
-     * @returns {err|Object} Throws an error or returns `{classesMap, labels}`; each `classesMap` entry has `id` {string}, `label` {string}, `lang` {string}, `skoslabels` {Array<string>}, `parents` {Array<string>}, `type` {string}.
+     * @returns {err|Object} Throws an error or returns `{classesMap, labels}`; each `classesMap` entry has `id`, `label`, `lang`, `skoslabels`, `parents`, `type`.
      * @expose
      */
     self.getSourceTaxonomy = function (sourceLabel, options, callback) {

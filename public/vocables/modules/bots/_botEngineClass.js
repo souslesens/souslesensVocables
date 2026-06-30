@@ -603,10 +603,21 @@ class BotEngineClass {
 
         $("#" + searchInputId).trigger("focus");
 
-        $("#" + searchInputId).on("keyup", function () {
-            $("#" + treeDivId)
-                .jstree(true)
-                .search($(this).val());
+        // Autocompletion: filter only when Enter is pressed, and only once at least 3 characters are typed.
+        $("#" + searchInputId).on("keyup", function (evt) {
+            if (evt.key !== "Enter" && evt.keyCode !== 13) {
+                return;
+            }
+            var tree = $("#" + treeDivId).jstree(true);
+            if (!tree) {
+                return;
+            }
+            var term = $(this).val();
+            if (term.length < 3) {
+                tree.clear_search();
+                return;
+            }
+            tree.search(term);
         });
 
         if (withCheckboxes) {

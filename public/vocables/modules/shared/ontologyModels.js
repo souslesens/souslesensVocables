@@ -424,45 +424,6 @@ var OntologyModels = (function () {
                             callbackSeries();
                         },
 
-                        // set transSourceRangeAndDomainLabels
-                        function (callbackSeries) {
-                            if (true) {
-                                return callbackSeries();
-                            }
-
-                            if (!Config.sources[source]) {
-                                return callbackSeries();
-                            }
-                            var classes = [];
-                            for (var propId in Config.ontologiesVocabularyModels[source].constraints) {
-                                var constraint = Config.ontologiesVocabularyModels[source].constraints[propId];
-                                if (constraint.domain && classes.indexOf(constraint.domain) < 0) {
-                                    classes.push(constraint.domain);
-                                }
-                                if (constraint.range && classes.indexOf(constraint.range) < 0) {
-                                    classes.push(constraint.range);
-                                }
-                            }
-                            if (classes.length == 0) {
-                                return callbackSeries();
-                            }
-                            Sparql_OWL.getLabelsMapFromLabelsGraph(classes, function (err, labelsMap) {
-                                if (err) {
-                                    return callbackSeries(err);
-                                }
-                                for (var propId in Config.ontologiesVocabularyModels[source].constraints) {
-                                    var constraint = Config.ontologiesVocabularyModels[source].constraints[propId];
-                                    if (labelsMap[constraint.domain]) {
-                                        Config.ontologiesVocabularyModels[source].constraints[propId].domainLabel = labelsMap[constraint.domain];
-                                    }
-                                    if (labelsMap[constraint.range]) {
-                                        Config.ontologiesVocabularyModels[source].constraints[propId].rangeLabel = labelsMap[constraint.range];
-                                    }
-                                }
-                                return callbackSeries();
-                            });
-                        },
-
                         //register source in Config.sources
                         function (callbackSeries) {
                             if (!Config.sources[source]) {

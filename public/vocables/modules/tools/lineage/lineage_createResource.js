@@ -193,30 +193,6 @@ var Lineage_createResource = (function () {
     };
 
     /**
-     * Retrieves a list of possible named individuals from the ontology.
-     * The individuals are returned as a key-value map where the key is the individual label, and the value is the URI.
-     *
-     * @function
-     * @name getPossibleNamedIndividuals
-     * @memberof Lineage_createResource
-     * @param {Function} callback - The callback function to handle the result, with signature (error, individuals).
-     */
-    self.getPossibleNamedIndividuals = function (callback) {
-        var individuals = {};
-        //   return callback(null, individuals);
-        Sparql_OWL.getNamedIndividuals(self.currentSource, null, null, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-
-            result.forEach(function (item) {
-                individuals[item.subjectLabel.value] = item.subject.value;
-            });
-            return callback(null, individuals);
-        });
-    };
-
-    /**
      * Sets the resource triples from the user interface.
      * Collects the values from the input fields and updates the current resource triples.
      *

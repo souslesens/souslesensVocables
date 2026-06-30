@@ -19,8 +19,8 @@ function getSparqlQueryRequestBodySchema() {
             name: "getNodeChildren",
             module: "Sparql_OWL",
             params: {
-                source: "BFO",
-                id: "http://purl.obolibrary.org/obo/BFO_0000001",
+                sourceLabel: "BFO",
+                ids: "http://purl.obolibrary.org/obo/BFO_0000001",
                 options: { limit: 50 },
             },
         },
@@ -34,7 +34,7 @@ function getSparqlQueryErrorResponses() {
             schema: { properties: { message: { type: "string" } } },
         },
         403: {
-            description: "Function exists but is not exposed (missing `@expose` JSDoc tag).",
+            description: "Function exists but is not exposed (missing `@expose` JSDoc tag), or the caller is not allowed to access a requested source.",
             schema: { properties: { message: { type: "string" } } },
         },
         404: {

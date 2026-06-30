@@ -5,7 +5,7 @@
         "description": "Builds the SPARQL property path expressing the parent/child (taxonomy) relation for a",
         "params": [
             {
-                "name": "source",
+                "name": "sourceLabel",
                 "type": "string",
                 "required": true,
                 "description": "Source name whose `taxonomyPredicates` are read (null → default `rdfs:subClassOf`)"
@@ -31,6 +31,10 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "string",
+            "description": "A SPARQL property-path string defining the taxonomy relation"
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
         "example": null
@@ -91,168 +95,12 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `topConcept` {string}, `topConceptLabel` {string} (optional), `subjectGraph` {string} (optional)."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
-        "example": null
-    },
-    {
-        "name": "getNodeChildren",
-        "module": "Sparql_OWL",
-        "description": "Returns the children of node(s) down to a given depth in an OWL class hierarchy. Matches",
-        "params": [
-            {
-                "name": "sourceLabel",
-                "type": "string",
-                "required": true,
-                "description": "OWL source name to query"
-            },
-            {
-                "name": "words",
-                "type": "(string|string[])",
-                "required": true,
-                "description": "Label word(s) for fuzzy/exact parent match; mutually exclusive with `ids`"
-            },
-            {
-                "name": "ids",
-                "type": "(string|string[])",
-                "required": true,
-                "description": "Parent class URI(s) whose children are fetched"
-            },
-            {
-                "name": "descendantsDepth",
-                "type": "number",
-                "required": true,
-                "description": "Number of taxonomy levels to expand"
-            },
-            {
-                "name": "options",
-                "type": "Object",
-                "required": false,
-                "description": "Query options",
-                "properties": [
-                    {
-                        "name": "selectGraph",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Bind each triple's named graph"
-                    },
-                    {
-                        "name": "exactMatch",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Treat `words` as exact rather than regex matches"
-                    },
-                    {
-                        "name": "withoutImports",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Exclude imported graphs from the `FROM` clause"
-                    },
-                    {
-                        "name": "specificPredicates",
-                        "type": "(string|string[])",
-                        "required": false,
-                        "description": "Override taxonomy predicate(s) used for the parent/child relation"
-                    },
-                    {
-                        "name": "filter",
-                        "type": "string",
-                        "required": false,
-                        "description": "Extra SPARQL filter appended to the query"
-                    },
-                    {
-                        "name": "filterCollections",
-                        "type": "(string|string[])",
-                        "required": false,
-                        "description": "Restrict children to members of these SKOS collections"
-                    },
-                    {
-                        "name": "sort",
-                        "type": "string",
-                        "required": false,
-                        "description": "Variable name to order results by"
-                    },
-                    {
-                        "name": "limit",
-                        "type": "number",
-                        "required": false,
-                        "description": "Result limit (defaults to `Config.queryLimit`)"
-                    }
-                ]
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
-        "example": null
-    },
-    {
-        "name": "getNodesDescendants",
-        "module": "Sparql_OWL",
-        "description": "Returns the full set of descendant classes of given parent class(es) via the transitive",
-        "params": [
-            {
-                "name": "sourceLabel",
-                "type": "string",
-                "required": true,
-                "description": "OWL source name to query"
-            },
-            {
-                "name": "ids",
-                "type": "(string|string[])",
-                "required": true,
-                "description": "Parent class URI(s) whose descendants are fetched"
-            },
-            {
-                "name": "options",
-                "type": "Object",
-                "required": false,
-                "description": "Query options",
-                "properties": [
-                    {
-                        "name": "specificPredicates",
-                        "type": "(string|string[])",
-                        "required": false,
-                        "description": "Override taxonomy predicate (defaults to `rdfs:subClassOf`)"
-                    },
-                    {
-                        "name": "selectGraph",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Bind each triple's named graph"
-                    }
-                ]
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
-        "example": null
-    },
-    {
-        "name": "getNodesGraphUri",
-        "module": "Sparql_OWL",
-        "description": "Returns the named graph(s) each given resource lives in",
-        "params": [
-            {
-                "name": "sourceLabel",
-                "type": "string",
-                "required": true,
-                "description": "Source name whose endpoint is queried"
-            },
-            {
-                "name": "ids",
-                "type": "(string|string[])",
-                "required": true,
-                "description": "Resource URI(s) to locate"
-            },
-            {
-                "name": "options",
-                "type": "Object",
-                "required": false,
-                "description": "Reserved options object"
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -311,8 +159,12 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `prop` {string}, `value` {string}, `propLabel` {string} (optional), `valueLabel` {string} (optional), `g` {string} (optional)."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -383,116 +235,12 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `subjectLabel` {string} (optional), `subjectTypes` {string}, `subjectSuperClasses` {string} (optional), `broader1` {string}, `broader1Label` {string} (optional), `broaderGraphs1` {string}, and depth-indexed `broaderN` {string} (optional), `broaderNLabel` {string} (optional), `broaderGraphsN` {string}."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
-        "example": null
-    },
-    {
-        "name": "getEntityAncestorsArray",
-        "module": "Sparql_OWL",
-        "description": "Returns the ordered array of ancestor class URIs of an entity, by querying",
-        "params": [
-            {
-                "name": "sourceLabel",
-                "type": "string",
-                "required": true,
-                "description": "OWL source name to query"
-            },
-            {
-                "name": "id",
-                "type": "string",
-                "required": true,
-                "description": "URI of the entity whose ancestors are fetched"
-            },
-            {
-                "name": "options",
-                "type": "Object",
-                "required": false,
-                "description": "Query options",
-                "properties": [
-                    {
-                        "name": "individuals",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Also climb `rdf:type*` (for individuals)"
-                    },
-                    {
-                        "name": "orderAncestors",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Return the chain ordered from the entity upward"
-                    },
-                    {
-                        "name": "withLabels",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Also fetch subject/parent labels"
-                    },
-                    {
-                        "name": "withoutImports",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Exclude imported graphs from the `FROM` clause"
-                    }
-                ]
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
-        "example": null
-    },
-    {
-        "name": "getNodesAncestorsOrDescendantsOld",
-        "module": "Sparql_OWL",
-        "description": "Legacy version of {@link module:Sparql_OWL.getNodesAncestorsOrDescendants}: returns",
-        "params": [
-            {
-                "name": "sourceLabel",
-                "type": "string",
-                "required": true,
-                "description": "OWL source name to query"
-            },
-            {
-                "name": "classIds",
-                "type": "(string|string[])",
-                "required": true,
-                "description": "Class URI(s) whose hierarchy is built"
-            },
-            {
-                "name": "options",
-                "type": "Object",
-                "required": false,
-                "description": "Query options",
-                "properties": [
-                    {
-                        "name": "excludeItself",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Use `+` instead of `*` (exclude the class itself)"
-                    },
-                    {
-                        "name": "withLabels",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Also fetch class/subClass/superClass labels"
-                    },
-                    {
-                        "name": "filter",
-                        "type": "string",
-                        "required": false,
-                        "description": "Extra SPARQL filter appended to the query"
-                    },
-                    {
-                        "name": "withoutImports",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Exclude imported graphs from the `FROM` clause"
-                    }
-                ]
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -545,110 +293,12 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|Object",
+            "description": "Throws an error or returns `{hierarchies, rawResult}`; each `rawResult` binding contains `subject` {string}, `class` {string}, `type` {string}, `classLabel` {string} (optional), `superClass` {string}, `superClassType` {string}, `superClassSubClass` {string}, `superClassLabel` {string} (optional), `subjectTypes` {string}."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
-        "example": null
-    },
-    {
-        "name": "getNodesTypesMap",
-        "module": "Sparql_OWL",
-        "description": "Returns a map of each resource URI to its (semicolon-joined) `rdf:type`/`rdfs:subClassOf`",
-        "params": [
-            {
-                "name": "sourceLabel",
-                "type": "string",
-                "required": true,
-                "description": "OWL source name to query"
-            },
-            {
-                "name": "ids",
-                "type": "(string|string[])",
-                "required": true,
-                "description": "Resource URI(s) whose types are fetched"
-            },
-            {
-                "name": "options",
-                "type": "Object",
-                "required": false,
-                "description": "Query options",
-                "properties": [
-                    {
-                        "name": "withoutImports",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Exclude imported graphs from the `FROM` clause"
-                    }
-                ]
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
-        "example": null
-    },
-    {
-        "name": "getFilteredTriples2",
-        "module": "Sparql_OWL",
-        "description": "Alternative to {@link module:Sparql_OWL.getFilteredTriples} that resolves the type and",
-        "params": [
-            {
-                "name": "sourceLabel",
-                "type": "string",
-                "required": true,
-                "description": "OWL source name to query"
-            },
-            {
-                "name": "subjectIds",
-                "type": "(string|string[])",
-                "required": false,
-                "description": "Subject URI(s) to match (optional)"
-            },
-            {
-                "name": "propertyIds",
-                "type": "(string|string[])",
-                "required": false,
-                "description": "Property URI(s) to match (optional)"
-            },
-            {
-                "name": "objectIds",
-                "type": "(string|string[])",
-                "required": false,
-                "description": "Object URI(s) to match (optional)"
-            },
-            {
-                "name": "options",
-                "type": "Object",
-                "required": false,
-                "description": "Query options",
-                "properties": [
-                    {
-                        "name": "withImports",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Include imported graphs in the `FROM` clause (imports are excluded by default here)"
-                    },
-                    {
-                        "name": "distinct",
-                        "type": "string",
-                        "required": false,
-                        "description": "Variables for the SELECT clause (defaults to `*`)"
-                    },
-                    {
-                        "name": "filter",
-                        "type": "string",
-                        "required": false,
-                        "description": "Extra SPARQL filter appended to the query"
-                    },
-                    {
-                        "name": "limit",
-                        "type": "number",
-                        "required": false,
-                        "description": "Result limit (defaults to `Config.queryLimit`)"
-                    }
-                ]
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -731,96 +381,12 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `prop` {string}, `object` {string}, `subjectType` {string} (optional), `subjectLabel` {string} (optional), `propLabel` {string} (optional), `objectType` {string} (optional), `objectValue` {string} (optional), `objectLabel` {string} (optional); `options.distinct` replaces this default variable list."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
-    },
-    {
-        "name": "getItems",
-        "module": "Sparql_OWL",
-        "description": "Returns every subject of the source with its label, `rdf:type` and taxonomy superclass",
-        "params": [
-            {
-                "name": "sourceLabel",
-                "type": "string",
-                "required": true,
-                "description": "OWL source name to query"
-            },
-            {
-                "name": "options",
-                "type": "Object",
-                "required": false,
-                "description": "Query options",
-                "properties": [
-                    {
-                        "name": "selectGraph",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Bind each triple's named graph"
-                    },
-                    {
-                        "name": "includeBlankNodes",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Include blank-node subjects"
-                    },
-                    {
-                        "name": "withoutImports",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Exclude imported graphs from the `FROM` clause"
-                    },
-                    {
-                        "name": "distinct",
-                        "type": "string",
-                        "required": false,
-                        "description": "Variables for the SELECT clause (defaults to `*`)"
-                    },
-                    {
-                        "name": "filter",
-                        "type": "string",
-                        "required": false,
-                        "description": "Extra SPARQL filter appended to the query"
-                    },
-                    {
-                        "name": "lang",
-                        "type": "string",
-                        "required": false,
-                        "description": "Restrict labels to this language"
-                    },
-                    {
-                        "name": "limit",
-                        "type": "number",
-                        "required": false,
-                        "description": "Result limit (defaults to `Config.queryLimit`)"
-                    }
-                ]
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
-        "example": null
-    },
-    {
-        "name": "listObjectProperties",
-        "module": "Sparql_OWL",
-        "description": "Lists all `owl:ObjectProperty` of a source with their label, super-property, domain and",
-        "params": [
-            {
-                "name": "sourceLabel",
-                "type": "string",
-                "required": true,
-                "description": "OWL source name to query"
-            },
-            {
-                "name": "options",
-                "type": "Object",
-                "required": false,
-                "description": "Reserved options object"
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
         "example": null
     },
     {
@@ -915,44 +481,12 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `domain` {string} (optional), `domainLabel` {string} (optional), `prop` {string}, `propLabel` {string} (optional), `range` {string} (optional), `rangeLabel` {string} (optional), `subProp` {string} (optional), `subPropLabel` {string} (optional), `inverseProp` {string} (optional), `inversePropLabel` {string} (optional)."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
-    },
-    {
-        "name": "getObjectSubProperties",
-        "module": "Sparql_OWL",
-        "description": "Returns the transitive sub-properties of given properties",
-        "params": [
-            {
-                "name": "sourceLabel",
-                "type": "string",
-                "required": true,
-                "description": "OWL source name to query"
-            },
-            {
-                "name": "propertyIds",
-                "type": "(string|string[])",
-                "required": true,
-                "description": "Property URI(s) whose sub-properties are fetched"
-            },
-            {
-                "name": "options",
-                "type": "Object",
-                "required": false,
-                "description": "Query options",
-                "properties": [
-                    {
-                        "name": "selectGraph",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Bind each triple's named graph"
-                    }
-                ]
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
         "example": null
     },
     {
@@ -1053,6 +587,10 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `subjectLabel` {string} (optional), `node` {string}, `prop` {string}, `propLabel` {string} (optional), `constraintType` {string}, `value` {string}, `valueLabel` {string} (optional), `cardinalityType` {string} (optional), `cardinalityValue` {string} (optional), `g` {string} (optional), `status` {string} (optional), `creationDate` {string} (optional), `creator` {string} (optional), `provenance` {string} (optional), `domainSourceLabel` {string} (optional), `rangeSourceLabel` {string} (optional). With `listPropertiesOnly`: `prop` {string}, `propLabel` {string} (optional). With `withoutBlankNodes`: `subject` {string}, `subjectLabel` {string} (optional), `prop` {string}, `propLabel` {string} (optional), `value` {string}, `valueLabel` {string} (optional), `constraintType` {string}. With `turtle`: RDF triples rather than bindings."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
         "example": null
@@ -1095,44 +633,12 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `node` {string}, `subjectLabel` {string} (optional), `nodeLabel` {string} (optional), `g` {string} (optional)."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
-    },
-    {
-        "name": "getCollectionNodes",
-        "module": "Sparql_OWL",
-        "description": "Returns the concepts belonging to a SKOS collection within an OWL source (mixed",
-        "params": [
-            {
-                "name": "sourceLabel",
-                "type": "string",
-                "required": true,
-                "description": "Source name to query"
-            },
-            {
-                "name": "collection",
-                "type": "string",
-                "required": true,
-                "description": "Collection URI whose members are fetched (empty = all subjects)"
-            },
-            {
-                "name": "options",
-                "type": "Object",
-                "required": false,
-                "description": "Query options",
-                "properties": [
-                    {
-                        "name": "filter",
-                        "type": "Object",
-                        "required": false,
-                        "description": "`{predicates}` to restrict the predicates returned"
-                    }
-                ]
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
         "example": null
     },
     {
@@ -1141,7 +647,7 @@
         "description": "Returns the `rdf:type` triples (with their graph) for given resources, batching the ids",
         "params": [
             {
-                "name": "source",
+                "name": "sourceLabel",
                 "type": "string",
                 "required": true,
                 "description": "Source name whose endpoint is queried"
@@ -1153,6 +659,10 @@
                 "description": "Resource URI(s) whose types are fetched"
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `type` {string}, and `g` {string}."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
         "example": null
@@ -1163,7 +673,7 @@
         "description": "Returns a map of each resource URI to a simplified OWL type — `\"NamedIndividual\"`,",
         "params": [
             {
-                "name": "source",
+                "name": "sourceLabel",
                 "type": "string",
                 "required": true,
                 "description": "Source name whose endpoint is queried"
@@ -1175,6 +685,10 @@
                 "description": "Resource URI(s) whose OWL type is determined"
             }
         ],
+        "returns": {
+            "type": "err|Object",
+            "description": "Throws an error or returns a map from each resource URI to `NamedIndividual`, `Class`, or `Restriction`."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
         "example": null
@@ -1229,64 +743,10 @@
                 ]
             }
         ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
-        "example": null
-    },
-    {
-        "name": "getNodesLabelTypesAndGraph",
-        "module": "Sparql_OWL",
-        "description": "Returns each resource's label plus its (comma-joined) types and graphs, using",
-        "params": [
-            {
-                "name": "sourceLabel",
-                "type": "string",
-                "required": true,
-                "description": "OWL source name to query"
-            },
-            {
-                "name": "ids",
-                "type": "(string|string[])",
-                "required": true,
-                "description": "Resource URI(s) to describe"
-            },
-            {
-                "name": "options",
-                "type": "Object",
-                "required": false,
-                "description": "Query options",
-                "properties": [
-                    {
-                        "name": "orderBy",
-                        "type": "string",
-                        "required": false,
-                        "description": "SPARQL ORDER BY expression (defaults to `?subjectLabel`)"
-                    }
-                ]
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
-        "example": null
-    },
-    {
-        "name": "getUrisLabelsMap",
-        "module": "Sparql_OWL",
-        "description": "Returns a map of URI → `rdfs:label` for given URIs (`?s rdfs:label ?sLabel`), falling back",
-        "params": [
-            {
-                "name": "source",
-                "type": "string",
-                "required": true,
-                "description": "Source name to query"
-            },
-            {
-                "name": "uris",
-                "type": "string[]",
-                "required": true,
-                "description": "URIs whose labels are fetched"
-            }
-        ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `restriction` {string}, `prop` {string}, `sourceClass` {string}, `constraintType` {string} (optional), `targetClass` {string} (optional)."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
         "example": null
@@ -1353,6 +813,10 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|Object",
+            "description": "Throws an error or returns a map from each source URI to its label."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
         "example": null
@@ -1437,38 +901,12 @@
                 "description": "Optional `(pageBindings, cb)` processor invoked per page; if omitted, pages are accumulated"
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns accumulated SPARQL results with variables: `id` {string}, `type` {string} (optional), `label` {string} (optional); returns an empty array when `processor` handles each page."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
-    },
-    {
-        "name": "getPredicates",
-        "module": "Sparql_OWL",
-        "description": "Lists the distinct predicates used in a source, with their graph and label",
-        "params": [
-            {
-                "name": "sourceLabel",
-                "type": "string",
-                "required": true,
-                "description": "OWL source name to query"
-            },
-            {
-                "name": "options",
-                "type": "Object",
-                "required": false,
-                "description": "Query options",
-                "properties": [
-                    {
-                        "name": "withoutImports",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Exclude imported graphs and the `GRAPH ?g` binding"
-                    }
-                ]
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
         "example": null
     },
     {
@@ -1515,72 +953,12 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `property` {string}, `propertyLabel` {string}, `g` {string} (optional)."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
-    },
-    {
-        "name": "getUrisNamedGraph",
-        "module": "Sparql_OWL",
-        "description": "Returns the named graph each given URI lives in (`GRAPH ?g { ?id ?p ?o }`), batching the",
-        "params": [
-            {
-                "name": "sourceLabel",
-                "type": "string",
-                "required": true,
-                "description": "Source name defining the import scope"
-            },
-            {
-                "name": "ids",
-                "type": "string[]",
-                "required": true,
-                "description": "URIs to locate"
-            },
-            {
-                "name": "options",
-                "type": "Object",
-                "required": false,
-                "description": "Query options",
-                "properties": [
-                    {
-                        "name": "onlySourceAndImports",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Restrict graphs to the source and its imports"
-                    },
-                    {
-                        "name": "withGraph",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Bind the graph in the `FROM` clause"
-                    },
-                    {
-                        "name": "withoutImports",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Exclude imported graphs from the `FROM` clause"
-                    }
-                ]
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
-        "example": null
-    },
-    {
-        "name": "getGraphsByRegex",
-        "module": "Sparql_OWL",
-        "description": "Finds graphs whose `owl:versionIRI` matches a regex pattern, returning the matching",
-        "params": [
-            {
-                "name": "pattern",
-                "type": "string",
-                "required": true,
-                "description": "Regular expression matched against each graph's version IRI"
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
         "example": null
     },
     {
@@ -1589,7 +967,7 @@
         "description": "Materialises the inverse of every restriction using a given property: fetches the",
         "params": [
             {
-                "name": "source",
+                "name": "sourceLabel",
                 "type": "string",
                 "required": true,
                 "description": "Source name whose graph is edited"
@@ -1613,6 +991,10 @@
                 "description": "Cardinality for the generated restrictions"
             }
         ],
+        "returns": {
+            "type": "err|number",
+            "description": "Throws an error or returns the number of generated triples inserted."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
         "example": null
@@ -1655,8 +1037,12 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|Object",
+            "description": "Throws an error or returns a map keyed by property URI with fields: `parentProp` {string}, `prop` {string}, `domain` {string} (optional), `range` {string} (optional), `domainLabel` {string} (optional), `rangeLabel` {string} (optional)."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -1691,68 +1077,12 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|Object",
+            "description": "Throws an error or returns a map keyed by property URI with fields: `prop` {string}, `propLabel` {string}, `subProps` {Array<string>}, `domain` {string} (optional), `domainLabel` {string} (optional), `range` {string} (optional), `rangeLabel` {string} (optional), `inverseProp` {string} (optional), `inversePropLabel` {string} (optional)."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
-    },
-    {
-        "name": "getInferredPropertiesDomainsAndRangesOld",
-        "module": "Sparql_OWL",
-        "description": "Legacy single-query version of {@link module:Sparql_OWL.getInferredPropertiesDomainsAndRanges},",
-        "params": [
-            {
-                "name": "sourceLabel",
-                "type": "string",
-                "required": true,
-                "description": "OWL source name to query"
-            },
-            {
-                "name": "options",
-                "type": "Object",
-                "required": true,
-                "description": "Query options",
-                "properties": [
-                    {
-                        "name": "filter",
-                        "type": "string",
-                        "required": false,
-                        "description": "Extra SPARQL filter appended to the query"
-                    }
-                ]
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
-        "example": null
-    },
-    {
-        "name": "getPropertiesWithoutDomainsAndRanges",
-        "module": "Sparql_OWL",
-        "description": "Returns the object properties that have no domain or range, even via super-properties or",
-        "params": [
-            {
-                "name": "sourceLabel",
-                "type": "string",
-                "required": true,
-                "description": "OWL source name to query"
-            },
-            {
-                "name": "options",
-                "type": "Object",
-                "required": true,
-                "description": "Query options",
-                "properties": [
-                    {
-                        "name": "withoutImports",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Exclude imported graphs from the `FROM` clause"
-                    }
-                ]
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
         "example": null
     },
     {
@@ -1805,82 +1135,10 @@
                 ]
             }
         ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
-        "example": null
-    },
-    {
-        "name": "getTriples",
-        "module": "Sparql_OWL",
-        "description": "Returns raw `?s ?p ?o` triples of a source (or explicit graph), with an optional filter,",
-        "params": [
-            {
-                "name": "sourceLabel",
-                "type": "string",
-                "required": true,
-                "description": "OWL source name to query (or null with `options.graphUri`)"
-            },
-            {
-                "name": "options",
-                "type": "Object",
-                "required": false,
-                "description": "Query options",
-                "properties": [
-                    {
-                        "name": "graphUri",
-                        "type": "string",
-                        "required": false,
-                        "description": "Explicit graph URI when no source is given"
-                    },
-                    {
-                        "name": "selectVars",
-                        "type": "string",
-                        "required": false,
-                        "description": "Variables for the SELECT clause (defaults to `*`)"
-                    },
-                    {
-                        "name": "filter",
-                        "type": "string",
-                        "required": false,
-                        "description": "Extra SPARQL filter appended to the query"
-                    },
-                    {
-                        "name": "orderBy",
-                        "type": "string",
-                        "required": false,
-                        "description": "SPARQL ORDER BY expression"
-                    }
-                ]
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
-        "example": null
-    },
-    {
-        "name": "getStoredQueries",
-        "module": "Sparql_OWL",
-        "description": "Returns the stored queries saved for a given scope from the stored-queries graph",
-        "params": [
-            {
-                "name": "source",
-                "type": "string",
-                "required": true,
-                "description": "Source name to query"
-            },
-            {
-                "name": "scope",
-                "type": "string",
-                "required": true,
-                "description": "Scope value matched against `slsv:hasScope`"
-            },
-            {
-                "name": "options",
-                "type": "Object",
-                "required": false,
-                "description": "Reserved options object"
-            }
-        ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `predicate` {string}, `object` {string}, `subjectLabel` {string} (optional), `predicateLabel` {string} (optional), `objectLabel` {string} (optional)."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
         "example": null
@@ -1911,8 +1169,12 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|string",
+            "description": "Throws an error or returns the source serialized as a Turtle string."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -1947,28 +1209,10 @@
                 ]
             }
         ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
-        "example": null
-    },
-    {
-        "name": "getDataTypePropertyValues",
-        "module": "Sparql_OWL",
-        "description": "Returns the distinct object values of a datatype property across the source",
-        "params": [
-            {
-                "name": "sourceLabel",
-                "type": "string",
-                "required": true,
-                "description": "OWL source name to query"
-            },
-            {
-                "name": "propertyUri",
-                "type": "string",
-                "required": true,
-                "description": "URI of the datatype property whose values are fetched"
-            }
-        ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `label` {string}, `id` {string} (optional when `options.otherProperty` is set)."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
         "example": null
@@ -1997,8 +1241,12 @@
                 "description": "Reserved options object"
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variable: `type` {string}."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -2025,24 +1273,12 @@
                 "description": "Reserved options object"
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `id` {string} and `label` {string}."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
-        "example": null
-    },
-    {
-        "name": "getLabelsMapFromLabelsGraph",
-        "module": "Sparql_OWL",
-        "description": "Returns a map of URI → label fetched from the dedicated labels graph",
-        "params": [
-            {
-                "name": "ids",
-                "type": "string[]",
-                "required": true,
-                "description": "URIs whose labels are fetched from the labels graph"
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -2057,28 +1293,10 @@
                 "description": "URI of the graph to clear"
             }
         ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
-        "example": null
-    },
-    {
-        "name": "getIndividualsOfClassDistinctProperties",
-        "module": "Sparql_OWL",
-        "description": "Builds (but does not yet execute) a query for the distinct properties used by individuals",
-        "params": [
-            {
-                "name": "sourceLabel",
-                "type": "string",
-                "required": true,
-                "description": "OWL source name to query"
-            },
-            {
-                "name": "classId",
-                "type": "string",
-                "required": true,
-                "description": "Class URI whose individuals' properties are inspected"
-            }
-        ],
+        "returns": {
+            "type": "err|undefined",
+            "description": "Throws an error or completes without a result after clearing the graph."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
         "example": null
@@ -2089,16 +1307,16 @@
         "description": "Intended to copy a resource's triples from one source to another. Currently fetches the",
         "params": [
             {
-                "name": "fromSource",
-                "type": "string",
+                "name": "fromSourceLabel",
+                "type": "any",
                 "required": true,
-                "description": "Source name to copy the resource from"
+                "description": ""
             },
             {
-                "name": "toSource",
-                "type": "string",
+                "name": "toSourceLabel",
+                "type": "any",
                 "required": true,
-                "description": "Destination source name"
+                "description": ""
             },
             {
                 "name": "subjectUri",
@@ -2107,62 +1325,12 @@
                 "description": "URI of the resource to copy"
             }
         ],
+        "returns": {
+            "type": "err|undefined",
+            "description": "Throws an error or completes without a result; returns `\"nothing to copy\"` as an error when no triples exist."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
-        "example": null
-    },
-    {
-        "name": "getAllDescendants",
-        "module": "Sparql_OWL",
-        "description": "Returns all descendants of given resources via a configurable taxonomy predicate, with",
-        "params": [
-            {
-                "name": "source",
-                "type": "string",
-                "required": true,
-                "description": "Source name to query"
-            },
-            {
-                "name": "resourcesIds",
-                "type": "(string|string[])",
-                "required": false,
-                "description": "Ancestor resource URI(s) whose descendants are fetched"
-            },
-            {
-                "name": "taxonomyPredicate",
-                "type": "string",
-                "required": false,
-                "description": "=\"rdfs:subClassOf\"] - Predicate defining the parent relation"
-            },
-            {
-                "name": "options",
-                "type": "Object",
-                "required": false,
-                "description": "Query options",
-                "properties": [
-                    {
-                        "name": "includeParent",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Include the starting resource(s) (`*` path)"
-                    },
-                    {
-                        "name": "depth",
-                        "type": "number",
-                        "required": false,
-                        "description": "Limit traversal to this depth (`{0,depth}` path)"
-                    },
-                    {
-                        "name": "filter",
-                        "type": "string",
-                        "required": false,
-                        "description": "Extra SPARQL filter appended to the query"
-                    }
-                ]
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
         "example": null
     },
     {
@@ -2183,6 +1351,10 @@
                 "description": "SPARQL filter restricting the inner subjects"
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variable: `g` {string}."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
         "example": null
@@ -2205,8 +1377,38 @@
                 "description": "Target graph URI receiving the generated SKG triples"
             }
         ],
+        "returns": {
+            "type": "err|undefined",
+            "description": "Throws an error or completes without a result after generating the SKG triples."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
+        "example": null
+    },
+    {
+        "name": "getNodeLabel",
+        "module": "Sparql_OWL",
+        "description": "Returns the label and RDF type of one resource.",
+        "params": [
+            {
+                "name": "sourceLabel",
+                "type": "string",
+                "required": true,
+                "description": "OWL source name to query"
+            },
+            {
+                "name": "id",
+                "type": "string",
+                "required": true,
+                "description": "URI of the resource whose label is fetched"
+            }
+        ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `type` {string}, and `subjectLabel` {string}."
+        },
+        "responseSchema": "#/definitions/SparqlQueryResponse",
+        "expose": true,
         "example": null
     },
     {
@@ -2241,8 +1443,12 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `topConcept` {string}, `topConceptLabel` {string}."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -2289,8 +1495,12 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `subjectLabel` {string} (optional), `child1` {string}, `child1Label` {string} (optional), `child1Type` {string} (optional), depth-indexed `childN` {string} (optional), `childNLabel` {string} (optional), `childNType` {string} (optional); with `options.filterCollections`: `collection` {string}, `acollection` {string}, `collectionLabel` {string}, `acollectionLabel` {string}."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -2325,8 +1535,12 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `predicate` {string}, `object` {string}, `type` {string}; with a collection: `collection` {string}, `acollection` {string}, `collectionLabel` {string}, `acollectionLabel` {string}, `subjectLabel` {string}."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -2391,8 +1605,12 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `subjectLabel` {string} (optional), `type` {string} (optional), `broader1` {string} (optional), `broader1Label` {string} (optional), `broader1Type` {string} (optional), depth-indexed `broaderN` {string} (optional), `broaderNLabel` {string} (optional), `broaderNType` {string} (optional)."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -2433,8 +1651,12 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `id` {string}, `prop` {string}, `value` {string}, `valueLabel` {string} (optional), `propLabel` {string} (optional)."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -2469,8 +1691,12 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `x` {string}, `y` {string}, `subjectLabel` {string} (optional)."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -2491,8 +1717,12 @@
                 "description": "Concept URI whose ancestors are fetched"
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `broader` {string}, `broaderLabel` {string}, `type` {string}."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -2513,8 +1743,12 @@
                 "description": "Concept URI whose descendants are fetched"
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `narrower` {string}, `narrowerLabel` {string}, `type` {string}."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -2535,8 +1769,12 @@
                 "description": "Concept URI whose label is fetched"
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `type` {string}, `subjectLabel` {string}."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -2557,8 +1795,12 @@
                 "description": "Subject URIs whose triples are fetched"
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `prop` {string}, `value` {string}."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -2591,8 +1833,12 @@
                 "description": "Object URI to match (optional)"
             }
         ],
+        "returns": {
+            "type": "err|*",
+            "description": "Throws an error or returns the callback result."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -2607,6 +1853,10 @@
                 "description": "Triple descriptor with `subject`, `predicate`, `object`, `valueType`, and optional `sourceVariables.lang`"
             }
         ],
+        "returns": {
+            "type": "string",
+            "description": "A single `subject predicate object . ` SPARQL triple string"
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
         "example": null
@@ -2629,8 +1879,12 @@
                 "description": "Triple descriptor objects to insert"
             }
         ],
+        "returns": {
+            "type": "err|*",
+            "description": "Throws an error or returns the callback result."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -2651,8 +1905,12 @@
                 "description": "Replacement triple descriptors (all sharing the same subject)"
             }
         ],
+        "returns": {
+            "type": "err|*",
+            "description": "Throws an error or returns the callback result."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -2667,8 +1925,12 @@
                 "description": "Source name whose graph is emptied"
             }
         ],
+        "returns": {
+            "type": "err|*",
+            "description": "Throws an error or returns the callback result."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -2689,8 +1951,12 @@
                 "description": "Destination graph URI"
             }
         ],
+        "returns": {
+            "type": "err|*",
+            "description": "Throws an error or returns the callback result."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -2725,6 +1991,10 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "Array<Object>",
+            "description": "The same bindings with type/label cells filled in"
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
         "example": null
@@ -2741,8 +2011,12 @@
                 "description": "Source name to query"
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns an array of language codes."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -2757,6 +2031,10 @@
                 "description": "Source name to compute query variables for"
             }
         ],
+        "returns": {
+            "type": "Object",
+            "description": "Cached object with `prefixesStr` {string}, `fromStr` {string}, `broaderPredicate` {string}, `narrowerPredicate` {string}, `prefLabelPredicate` {string}, `topConceptFilter` {string}, `lang` {string}, `limit` {number}, `optionalDepth` {number}, `url` {string}, `queryOptions` {string}, `graphUri` {string}"
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
         "example": null
@@ -2779,6 +2057,10 @@
                 "description": "Controller-specific options"
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns the delegated controller's top-concept bindings."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
         "example": null
@@ -2807,6 +2089,10 @@
                 "description": "Controller-specific options"
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns the delegated controller's node triple bindings."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
         "example": null
@@ -2829,36 +2115,12 @@
                 "description": "Controller-specific options"
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns the delegated controller's item bindings."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
-    },
-    {
-        "name": "getCollectionNodes",
-        "module": "Sparql_generic",
-        "description": "Returns the member nodes of a collection (SKOS collection / grouping) by delegating to",
-        "params": [
-            {
-                "name": "sourceLabel",
-                "type": "string",
-                "required": true,
-                "description": "Source name to query"
-            },
-            {
-                "name": "collection",
-                "type": "string",
-                "required": true,
-                "description": "URI of the collection whose members are fetched"
-            },
-            {
-                "name": "options",
-                "type": "Object",
-                "required": false,
-                "description": "Controller-specific options"
-            }
-        ],
-        "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
         "example": null
     },
     {
@@ -2897,6 +2159,10 @@
                 "description": "Controller-specific options (merged with `{depth: 0, source}`)"
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns the concatenated children bindings from each slice."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
         "example": null
@@ -2937,6 +2203,10 @@
                 "description": "Controller-specific options (merged with `{depth: 0, source}`)"
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns the concatenated ancestor bindings from each slice; returns `[]` when the source has no controller."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
         "example": null
@@ -2959,8 +2229,12 @@
                 "description": "URI of the node whose ancestors are fetched"
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `broader` {string}, `broaderLabel` {string}, `type` {string}."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -2981,8 +2255,12 @@
                 "description": "URI of the node whose descendants are fetched"
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `narrower` {string}, `narrowerLabel` {string}, `type` {string}."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -3003,6 +2281,10 @@
                 "description": "URI of the node whose label is fetched"
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `type` {string}, `subjectLabel` {string}."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
         "example": null
@@ -3019,8 +2301,12 @@
                 "description": "Endpoint URL to query; defaults to the main server"
             }
         ],
+        "returns": {
+            "type": "err|Object",
+            "description": "Throws an error or returns a map of graph URI to `1`."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -3041,8 +2327,12 @@
                 "description": "Subject URIs whose triples are fetched"
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject` {string}, `prop` {string}, `value` {string}."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -3075,8 +2365,12 @@
                 "description": "Object to match: a URI/literal string or a literal descriptor (optional)"
             }
         ],
+        "returns": {
+            "type": "err|*",
+            "description": "Throws an error or returns the callback result; early-returns a string error when no filter is supplied."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -3091,6 +2385,10 @@
                 "description": "Triple descriptor with `subject`/`s`, `predicate`/`p`, `object`/`o`, and optional `lang`, `isString`, `valueType`"
             }
         ],
+        "returns": {
+            "type": "string",
+            "description": "A single `subject predicate object . ` SPARQL triple string"
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
         "example": null
@@ -3100,6 +2398,10 @@
         "module": "Sparql_generic",
         "description": "Builds a `PREFIX key: <uri>` string for every prefix declared in",
         "params": [],
+        "returns": {
+            "type": "string",
+            "description": "Concatenated PREFIX declarations for all default prefixes"
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
         "example": null
@@ -3148,8 +2450,12 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|*",
+            "description": "Throws an error or returns the inserted count (or the query string when `options.getSparqlOnly`)."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -3170,8 +2476,12 @@
                 "description": "SPARQL filter expression selecting the triples to delete; empty deletes all (after confirmation)"
             }
         ],
+        "returns": {
+            "type": "err|*",
+            "description": "Throws an error or returns the callback result."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -3192,8 +2502,12 @@
                 "description": "Destination graph URI"
             }
         ],
+        "returns": {
+            "type": "err|number",
+            "description": "Throws an error or returns the last batch size."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -3214,8 +2528,12 @@
                 "description": "Reserved options object"
             }
         ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `p` {string}, `pLabel` {string} (optional)."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -3304,8 +2622,12 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|number",
+            "description": "Throws an error or returns the number of triples inserted."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -3332,6 +2654,10 @@
                 "description": "Reserved (unused)"
             }
         ],
+        "returns": {
+            "type": "Array<Object>",
+            "description": "The same array, sorted ascending by the field value"
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
         "example": null
@@ -3360,6 +2686,10 @@
                 "description": "Reserved options object"
             }
         ],
+        "returns": {
+            "type": "Array<Object>",
+            "description": "The same bindings with `<field>Label` cells added where missing"
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
         "example": null
@@ -3402,6 +2732,10 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "Array<Object>",
+            "description": "The same bindings with type/label cells filled in"
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
         "example": null
@@ -3432,6 +2766,10 @@
                 "description": "SPARQL variable expression (including `?`) the filter applies to"
             }
         ],
+        "returns": {
+            "type": "string",
+            "description": "The language `FILTER` clause, or `\"\"` when no `options.lang` is given"
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
         "example": null
@@ -3480,6 +2818,10 @@
                 ]
             }
         ],
+        "returns": {
+            "type": "err|Object",
+            "description": "Throws an error or returns `{classesMap, labels}`; each `classesMap` entry has `id` {string}, `label` {string}, `lang` {string}, `skoslabels` {Array<string>}, `parents` {Array<string>}, `type` {string}."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
         "example": null
@@ -3490,14 +2832,18 @@
         "description": "For every item whose preferred label is capitalised, inserts a `skos:altLabel` triple",
         "params": [
             {
-                "name": "source",
+                "name": "sourceLabel",
                 "type": "string",
                 "required": true,
                 "description": "Source name to process"
             }
         ],
+        "returns": {
+            "type": "err|number",
+            "description": "Throws an error or returns the number of triples inserted."
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": false,
+        "expose": true,
         "example": null
     },
     {
@@ -3512,6 +2858,10 @@
                 "description": "Triple descriptors to serialise"
             }
         ],
+        "returns": {
+            "type": "void",
+            "description": ""
+        },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
         "example": null

@@ -45,12 +45,12 @@ var Sparql_common = (function () {
      * @function
      * @name getLangFilter
      * @memberof module:Sparql_common
-     * @param {string} source - Source name used to read `pref_lang`
+     * @param {string} sourceLabel - Source name used to read `pref_lang`
      * @param {string} conceptName - Variable name (without `?`) the language filter applies to
      * @returns {string} A ` FILTER (lang(?conceptName)='lang')` clause, or `""` if the source or `pref_lang` is missing
      */
-    self.getLangFilter = function (source, conceptName) {
-        var sourceObj = Config.sources[source];
+    self.getLangFilter = function (sourceLabel, conceptName) {
+        var sourceObj = Config.sources[sourceLabel];
         if (!sourceObj) {
             return "";
         }
@@ -312,7 +312,8 @@ var Sparql_common = (function () {
      * @param {Array<Object>} SparqlResults - Result bindings to enrich in place
      * @param {string} propVariable - Variable name holding the property URI (its label goes to `propVariable + "Label"`)
      * @param {Function} callback - Error-first callback `(err, SparqlResults)` returning the enriched results
-     * @returns {void}
+     * @returns {err|Array} Throws an error or returns the enriched `SparqlResults` bindings with `<propVariable>Label` {string} cells filled in.
+     * @expose
      */
     self.setSparqlResultPropertiesLabels = function (sourceLabel, SparqlResults, propVariable, callback) {
         if (SparqlResults.length == 0) {
@@ -741,16 +742,16 @@ var Sparql_common = (function () {
      * @function
      * @name setFilterGraph
      * @memberof module:Sparql_common
-     * @param {string} source - Source name whose `graphUri` scopes the pattern
+     * @param {string} sourceLabel - Source name whose `graphUri` scopes the pattern
      * @param {string} filter - SPARQL pattern fragment to wrap
      * @returns {string} The fragment wrapped in `GRAPH <...> {}`, or the unchanged fragment if the source is unknown
      */
-    self.setFilterGraph = function (source, filter) {
+    self.setFilterGraph = function (sourceLabel, filter) {
         var graphUri;
-        if (Config.basicVocabularies[source]) {
-            graphUri = Config.basicVocabularies[source].graphUri;
-        } else if (Config.sources[source]) {
-            graphUri = Config.sources[source].graphUri;
+        if (Config.basicVocabularies[sourceLabel]) {
+            graphUri = Config.basicVocabularies[sourceLabel].graphUri;
+        } else if (Config.sources[sourceLabel]) {
+            graphUri = Config.sources[sourceLabel].graphUri;
         } else {
             return filter;
         }
@@ -766,7 +767,7 @@ var Sparql_common = (function () {
      * @function
      * @name getFromStr
      * @memberof module:Sparql_common
-     * @param {string} source - Source name to scope the query to
+     * @param {string} sourceLabel - Source name to scope the query to
      * @param {boolean} [named] - Emit `FROM NAMED` instead of `FROM`
      * @param {boolean} [withoutImports] - Exclude imported graphs (defaults to `self.withoutImports`)
      * @param {Object} [options] - Extra scoping options
@@ -774,7 +775,7 @@ var Sparql_common = (function () {
      * @param {(string|string[])} [options.includeSources] - Additional source names whose graphs to add
      * @returns {string} A concatenation of `FROM`/`FROM NAMED` clauses, `""` when the source has no graph, or `"XXX no graphUri"` when the source is unknown
      */
-    self.getFromStr = function (source, named, withoutImports, options) {
+    self.getFromStr = function (sourceLabel, named, withoutImports, options) {
         if (!options) {
             options = {};
         }
@@ -785,10 +786,10 @@ var Sparql_common = (function () {
 
         var fromStr = "";
         var graphUris;
-        if (Config.basicVocabularies[source]) {
-            graphUris = Config.basicVocabularies[source].graphUri;
-        } else if (Config.sources[source]) {
-            graphUris = Config.sources[source].graphUri;
+        if (Config.basicVocabularies[sourceLabel]) {
+            graphUris = Config.basicVocabularies[sourceLabel].graphUri;
+        } else if (Config.sources[sourceLabel]) {
+            graphUris = Config.sources[sourceLabel].graphUri;
         } else {
             return "XXX no graphUri";
         }
@@ -806,11 +807,11 @@ var Sparql_common = (function () {
         if (withoutImports === undefined) {
             withoutImports = self.withoutImports;
         }
-        if (Config.sources[source]) {
-            var imports = Config.sources[source].imports;
+        if (Config.sources[sourceLabel]) {
+            var imports = Config.sources[sourceLabel].imports;
             if (Lineage_sources.fromAllWhiteboardSources) {
                 for (var source2 in Lineage_sources.loadedSources) {
-                    if (source2 != source) {
+                    if (source2 != sourceLabel) {
                         var graphUri = Config.sources[source2].graphUri;
                         if (graphUri) {
                             if (graphUri && fromStr.indexOf(graphUri) < 0) {
@@ -899,7 +900,8 @@ var Sparql_common = (function () {
      * @memberof module:Sparql_common
      * @param {string} uri - Resource URI to locate
      * @param {Function} callback - Error-first callback `(err, source)`; `source` is the owning source name, or `null` if the URI is in no graph
-     * @returns {void}
+     * @returns {err|string} Throws an error or returns the owning source name, or `null` if the URI is in no graph.
+     * @expose
      */
     self.getSourceFromUriInDefaultServer = function (uri, callback) {
         var query = "select ?g where  {graph ?g {<" + uri + "> ?p ?o}} limit 1";
@@ -994,7 +996,7 @@ var Sparql_common = (function () {
      * @param {Date} [endDate] - Range end; derived from `startDate` + `precision` when omitted
      * @param {Object} [options] - Filter options
      * @param {string} [options.precision] - One of `sec`, `min`, `hour`, `day`, `month`, `year` to derive the end date
-     * @returns {string} A SPARQL pattern binding `?dateValue` plus the range `filter(...)` clauses
+     * @returns {string} A SPARQL pattern binding `?dateValue` {string} plus the range `filter(...)` clauses
      */
     self.setDateRangeSparqlFilter = function (varName, startDate, endDate, options) {
         if (!options) {
@@ -1191,19 +1193,19 @@ var Sparql_common = (function () {
      * @function
      * @name getPrefixedLabelFromURI
      * @memberof module:Sparql_common
-     * @param {string} source - Source name whose first 3 characters form the prefix
+     * @param {string} sourceLabel - Source name whose first 3 characters form the prefix
      * @param {string} uri - URI whose local name is used
      * @returns {string} `"<prefix>:<localName>"`, the bare `uri` if no source, or `""` if no uri
      */
-    self.getPrefixedLabelFromURI = function (source, uri) {
+    self.getPrefixedLabelFromURI = function (sourceLabel, uri) {
         if (!uri) {
             return "";
         }
-        if (!source) {
+        if (!sourceLabel) {
             return uri;
         }
 
-        var sourcePrefix = source.substring(0, 3);
+        var sourcePrefix = sourceLabel.substring(0, 3);
         var label = self.getLabelFromURI(uri);
         return sourcePrefix + ":" + label;
     };

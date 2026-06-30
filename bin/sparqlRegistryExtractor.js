@@ -36,6 +36,7 @@ const paramTagRegex = /^@param\s+\{([^}]+)\}\s+(\[?[\w.]+\]?)\s*[-–]?\s*(.*)/;
 const responseSchemaTagRegex = /^@responseSchema\s+/;
 const exampleTagRegex = /^@example\s*/;
 const optionalBracketsRegex = /^\[|\]$/g;
+const returnsTagRegex = /^@returns?\s+\{([^}]+)\}\s*(.*)/;
 
 /**
  * Parse a raw JSDoc block into structured fields.
@@ -52,6 +53,7 @@ function parseJsDoc(rawJsDoc) {
     let responseSchema = null;
     let expose = false;
     let example = null;
+    let returns = null;
 
     for (const line of nonEmptyLines) {
         if (line.startsWith("@param")) {
@@ -93,10 +95,18 @@ function parseJsDoc(rawJsDoc) {
             if (!description) {
                 description = line;
             }
+        } else if (line.startsWith("@returns") || line.startsWith("@return")) {
+            const returnsMatch = line.match(returnsTagRegex);
+            if (returnsMatch) {
+                const [, type, description] = returnsMatch;
+                returns = {
+                    type: type.trim(),
+                    description: description.trim(),
+                };
+            }
         }
     }
-
-    return { description, params, responseSchema, expose, example };
+    return { description, params, responseSchema, expose, example, returns };
 }
 
 /**
@@ -155,6 +165,7 @@ function extractFunctions(source, moduleName) {
             module: moduleName,
             description: jsDoc.description || "",
             params: mergedParams,
+            returns: jsDoc.returns || null,
             responseSchema: jsDoc.responseSchema || DEFAULT_RESPONSE_SCHEMA,
             expose: jsDoc.expose,
             example: jsDoc.example || null,

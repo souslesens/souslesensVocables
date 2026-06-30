@@ -108,6 +108,54 @@ var Predicates_bot = (function () {
         return false;
     }
 
+    var owlObjectPropertyUri = "http://www.w3.org/2002/07/owl#ObjectProperty";
+    var owlDatatypePropertyUri = "http://www.w3.org/2002/07/owl#DatatypeProperty";
+    var owlAnnotationPropertyUri = "http://www.w3.org/2002/07/owl#AnnotationProperty";
+
+    /**
+     * @function classifyPropertyAsObject
+     * @name classifyPropertyAsObject
+     * @memberof Predicates_bot
+     * Decides whether a property takes a resource (object picker) or a literal (text input) as
+     * object. Uses the explicit rdf:type captured in `model.propertyTypes` first
+     * (owl:ObjectProperty / owl:DatatypeProperty / owl:AnnotationProperty), then falls back to the
+     * declared range, then defaults to object for untyped rangeless predicates.
+     * @param {Object} model - A Config.ontologiesVocabularyModels entry.
+     * @param {string} propertyId - Property URI.
+     * @returns {boolean} `true` for an object property (resource), `false` for a datatype/annotation property (literal).
+     */
+    function classifyPropertyAsObject(model, propertyId) {
+        var types = model.propertyTypes ? model.propertyTypes[propertyId] : null;
+        var nonObjectEntry = model.nonObjectProperties ? model.nonObjectProperties[propertyId] : null;
+        var range = nonObjectEntry ? nonObjectEntry.range : null;
+
+        if (types) {
+            if (types[owlObjectPropertyUri]) {
+                return true;
+            }
+            if (types[owlDatatypePropertyUri]) {
+                return false;
+            }
+            if (types[owlAnnotationPropertyUri]) {
+                if (range && !isLiteralRange(range)) {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        // No explicit OWL typing (e.g. plain rdf:Property like rdfs:subClassOf): rely on range.
+        if (range) {
+            if (isLiteralRange(range)) {
+                return false;
+            }
+            return true;
+        }
+        // No range and no OWL typing: default to object. chooseObjectFn's name heuristic
+        // (isLiteralProperty) still routes label/comment-like predicates to a text input.
+        return true;
+    }
+
     var knownLiteralProperties = [
         "http://purl.org/dc/elements/1.1/identifier",
         "http://purl.org/dc/elements/1.1/title",
@@ -287,18 +335,32 @@ var Predicates_bot = (function () {
                     }
                     var model = Config.ontologiesVocabularyModels[vocab];
                     if (model) {
-                        for (var key in model.properties) {
-                            var p = model.properties[key];
-                            if (!seen[p.id] && !model.nonObjectProperties[p.id]) {
-                                seen[p.id] = true;
-                                nodes.push({ id: p.id, text: p.label || p.id, parent: "__src__" + vocab, data: { id: p.id, isObjectProperty: true } });
+                        for (var objectKey in model.properties) {
+                            var objectProperty = model.properties[objectKey];
+                            if (seen[objectProperty.id]) {
+                                continue;
                             }
+                            // A predicate typed rdf:Property lands in BOTH model.properties and
+                            // model.nonObjectProperties. classifyPropertyAsObject uses the explicit
+                            // owl typing (then range) to tell object from datatype properties; skip
+                            // here when it is a datatype/annotation property so the loop below adds it.
+                            if (!classifyPropertyAsObject(model, objectProperty.id)) {
+                                continue;
+                            }
+                            seen[objectProperty.id] = true;
+                            nodes.push({ id: objectProperty.id, text: objectProperty.label || objectProperty.id, parent: "__src__" + vocab, data: { id: objectProperty.id, isObjectProperty: true } });
                         }
-                        for (var key2 in model.nonObjectProperties) {
-                            var p2 = model.nonObjectProperties[key2];
-                            if (!seen[p2.id]) {
-                                seen[p2.id] = true;
-                                nodes.push({ id: p2.id, text: p2.label || p2.id, parent: "__src__" + vocab, data: { id: p2.id, isObjectProperty: false } });
+                        for (var nonObjectKey in model.nonObjectProperties) {
+                            var nonObjectProperty = model.nonObjectProperties[nonObjectKey];
+                            if (!seen[nonObjectProperty.id]) {
+                                seen[nonObjectProperty.id] = true;
+                                var nonObjectIsObject = classifyPropertyAsObject(model, nonObjectProperty.id);
+                                nodes.push({
+                                    id: nonObjectProperty.id,
+                                    text: nonObjectProperty.label || nonObjectProperty.id,
+                                    parent: "__src__" + vocab,
+                                    data: { id: nonObjectProperty.id, isObjectProperty: nonObjectIsObject },
+                                });
                             }
                         }
                     }

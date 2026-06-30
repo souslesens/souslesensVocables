@@ -81,11 +81,43 @@ var OntologyModels = (function () {
                 Config.ontologiesVocabularyModels[source].classes = {};
                 Config.ontologiesVocabularyModels[source].properties = {};
                 Config.ontologiesVocabularyModels[source].nonObjectProperties = {};
+                Config.ontologiesVocabularyModels[source].propertyTypes = {};
 
                 var uniqueProperties = {};
                 var propsWithoutDomain = [];
                 var propsWithoutRange = [];
                 var inversePropsMap = [];
+
+                // Captures the explicit rdf:type(s) of each property (owl:ObjectProperty,
+                // owl:DatatypeProperty, owl:AnnotationProperty, rdf:Property). The properties /
+                // nonObjectProperties queries below cannot distinguish object from datatype
+                // properties because rdf:Property matches both, so consumers that must pick the
+                // right object widget rely on this map.
+                function loadPropertyTypes(callbackTypes) {
+                    var propertyTypesQuery =
+                        queryP +
+                        " SELECT distinct ?prop ?type FROM <" +
+                        graphUri +
+                        "> WHERE { ?prop rdf:type ?type. VALUES ?type { owl:ObjectProperty owl:DatatypeProperty owl:AnnotationProperty rdf:Property } }";
+                    Sparql_proxy.querySPARQL_GET_proxy(url, propertyTypesQuery, null, {}, function (err, result) {
+                        if (err) {
+                            return callbackTypes(err);
+                        }
+                        var model = Config.ontologiesVocabularyModels[source];
+                        if (!model.propertyTypes) {
+                            model.propertyTypes = {};
+                        }
+                        result.results.bindings.forEach(function (binding) {
+                            var propertyId = binding.prop.value;
+                            var typeId = binding.type.value;
+                            if (!model.propertyTypes[propertyId]) {
+                                model.propertyTypes[propertyId] = {};
+                            }
+                            model.propertyTypes[propertyId][typeId] = true;
+                        });
+                        callbackTypes();
+                    });
+                }
 
                 async.series(
                     [
@@ -112,6 +144,13 @@ var OntologyModels = (function () {
                                     }
                                     if (!Config.ontologiesVocabularyModels[source].nonObjectProperties) {
                                         Config.ontologiesVocabularyModels[source].nonObjectProperties = {};
+                                    }
+
+                                    // Backfill explicit property types for models cached before this map existed.
+                                    if (!Config.ontologiesVocabularyModels[source].propertyTypes) {
+                                        return loadPropertyTypes(function () {
+                                            return callbackEach();
+                                        });
                                     }
 
                                     return callbackEach();
@@ -192,6 +231,11 @@ var OntologyModels = (function () {
 
                                 callbackSeries();
                             });
+                        },
+
+                        // set explicit property types (object vs datatype vs annotation) for object-widget disambiguation
+                        function (callbackSeries) {
+                            loadPropertyTypes(callbackSeries);
                         },
 
                         // set model classes (if source not  declared in sources.json && classes.length<Config.ontologyModelMaxClasses)

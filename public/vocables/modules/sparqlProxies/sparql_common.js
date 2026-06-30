@@ -312,7 +312,7 @@ var Sparql_common = (function () {
      * @param {Array<Object>} SparqlResults - Result bindings to enrich in place
      * @param {string} propVariable - Variable name holding the property URI (its label goes to `propVariable + "Label"`)
      * @param {Function} callback - Error-first callback `(err, SparqlResults)` returning the enriched results
-     * @returns {err|Array} Throws an error or returns the enriched `SparqlResults` bindings with `<propVariable>Label` {string} cells filled in.
+     * @returns {err|Array} Throws an error or returns the enriched `SparqlResults` bindings with `<propVariable>Label` cells filled in.
      * @expose
      */
     self.setSparqlResultPropertiesLabels = function (sourceLabel, SparqlResults, propVariable, callback) {
@@ -996,7 +996,7 @@ var Sparql_common = (function () {
      * @param {Date} [endDate] - Range end; derived from `startDate` + `precision` when omitted
      * @param {Object} [options] - Filter options
      * @param {string} [options.precision] - One of `sec`, `min`, `hour`, `day`, `month`, `year` to derive the end date
-     * @returns {string} A SPARQL pattern binding `?dateValue` {string} plus the range `filter(...)` clauses
+     * @returns {string} A SPARQL pattern binding `?dateValue` plus the range `filter(...)` clauses
      */
     self.setDateRangeSparqlFilter = function (varName, startDate, endDate, options) {
         if (!options) {

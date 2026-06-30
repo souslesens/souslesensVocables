@@ -10,6 +10,7 @@
  * - Managing selection trees and hierarchies
  * - Supporting selection-based operations
  */
+import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 
 var Lineage_selection = (function () {
     var self = {};
@@ -228,7 +229,7 @@ var Lineage_selection = (function () {
         } else if (action == "deleteSelection") {
             self.modifyPredicates.deleteSelection();
         } else if (action == "exportCsv") {
-            alert("on construction");
+            self.exportCsv();
         } else if (action == "sparqlFilter") {
             self.getSparqlFilter();
         } else if (action == "SelectRootNodes") {
@@ -649,6 +650,29 @@ var Lineage_selection = (function () {
         $("#lineage_selection_selectedNodesTreeDiv").jstree(true).uncheck_all();
 
         $("#lineage_selection_selectedNodesTreeDiv").jstree(true).check_node(topNodes);
+    };
+
+    self.exportCsv = function () {
+        var nodeIds = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+        Sparql_OWL.getNodesSuperClassesAndDefinition(Lineage_sources.activeSource, nodeIds, null, function (err, bindings) {
+            if (err) {
+                return MainController.errorAlert(err);
+            }
+
+            var str = "uri\tlabel\tdefinition\tsuperClass1\tsuperClass2\tsuperClass3\tsuperClass4\n";
+            bindings.forEach(function (item) {
+                str += item.node.value + "\t";
+                str += (item.node_label ? item.node_label.value : "") + "\t";
+                str += (item.definition ? item.definition.value : "") + "\t";
+                str += (item.superClass1Label ? item.superClass1Label.value : "") + "\t";
+                str += (item.superClass2Label ? item.superClass2Label.value : "") + "\t";
+                str += (item.superClass3Label ? item.superClass3Label.value : "") + "\t";
+                str += (item.superClass4Label ? item.superClass4Label.value : "") + "\n";
+            });
+
+            var fileName = Lineage_sources.activeSource + "_whiteboard classes and definitions.txt";
+            Export.downloadText(str, fileName);
+        });
     };
 
     return self;

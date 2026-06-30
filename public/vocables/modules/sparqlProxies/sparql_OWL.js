@@ -694,7 +694,6 @@ var Sparql_OWL = (function () {
                     classIds.forEach(function (id) {
                         hierarchies = {};
 
-
                         hierarchies[id] = [];
 
                         result.results.bindings.forEach(function (item) {

@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.10.0](https://github.com/souslesens/souslesensVocables/compare/3.9.0...3.10.0) (2026-07-01)
+
+
+### Features
+
+* **AI:** add --in-place mode to encryptKey (encrypt apiKey directly in mainConfig.json) ([71cb4fc](https://github.com/souslesens/souslesensVocables/commit/71cb4fcf204dbf6d10e270b5bb017263a07eb4bf))
+* **AI:** alignment route + Ollama adapter for panorama AI treatment ([68ac211](https://github.com/souslesens/souslesensVocables/commit/68ac2119d22af312f353eefb35ec08ffd12b2bf8))
+* **AI:** support encrypted LLM API key (AES-256-GCM via SLS_SECRET_KEY) ([910d317](https://github.com/souslesens/souslesensVocables/commit/910d31788b8e77fc27743a9c830b4af2a1ad8de0))
+
+
+### Bug Fixes
+
+* **AI:** classify non-exacts in batches to avoid LLM output truncation ([c6463e0](https://github.com/souslesens/souslesensVocables/commit/c6463e03ab7da10e81a19783e10d83e764b275b5))
+* **getSourceTaxonomy:** buildParentChain self referenced on hierarchy ([04ec030](https://github.com/souslesens/souslesensVocables/commit/04ec0301353a224247c6b99d91e3164c5439b19c))
+* **mappingModeler:** don't hide subclassOf links on column mappings ([204c40d](https://github.com/souslesens/souslesensVocables/commit/204c40d2198e626437514b2539dc51050d474b44))
+* **mappingModeler:** subclassof and rdf:type treament as relations in jstree ([3e66801](https://github.com/souslesens/souslesensVocables/commit/3e668015e6044254bbfb8558fde40609d13c16b9))
+* **remoteCodeRunner:** bug retrunQueryStr ([37cf557](https://github.com/souslesens/souslesensVocables/commit/37cf5576f0e3f497cc6e4bb07b447c8e13c2a62d))
+* **userDataWidget:** update user query ([bce1569](https://github.com/souslesens/souslesensVocables/commit/bce1569d99fd95c65bea9f910011e0f474152b3d))
+
 ## [3.9.0](https://github.com/souslesens/souslesensVocables/compare/3.8.0...3.9.0) (2026-06-26)
 
 

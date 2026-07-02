@@ -518,8 +518,9 @@ var Sparql_OWL = (function () {
         }
         query += " }}\n";
 
-        // what is the reason of this filter ?????
-        //  query += " filter( ?subjectGraph" + i + " in " + fromList + " ).\n";
+        // restrict ?subjectType to the FROM graphs: GRAPH ?subjectGraph with no FROM NAMED
+        // otherwise matches every named graph in the store (Virtuoso), leaking types from individuals in other graphs
+        query += " filter( ?subjectGraph" + i + " in " + fromList + " ).\n";
         query += " OPTIONAL {?subject rdfs:subClassOf ?subjectSuperClass.}\n";
         //query += " }\n";
         ancestorsDepth = Math.min(ancestorsDepth, self.ancestorsDepth);

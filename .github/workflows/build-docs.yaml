@@ -1,6 +1,13 @@
 name: build-and-deploy-docs
 on:
     - push
+
+# Serialize Pages deployments: concurrent runs (e.g. rapid merges to master) otherwise
+# collide on the github-pages environment and fail with "Deployment failed, try again later".
+concurrency:
+    group: "pages"
+    cancel-in-progress: false
+
 jobs:
     build:
         if: "github.ref == 'refs/heads/master'"

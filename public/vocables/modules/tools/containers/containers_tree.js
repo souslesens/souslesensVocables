@@ -362,16 +362,6 @@ var Containers_tree = (function () {
                 NodeInfosWidget.showNodeInfos(self.currentSource, self.currentContainer, "mainDialogDiv");
             },
         };
-        items["GraphNode"] = {
-            label: "Graph node",
-            action: function (_e) {
-                if (true || self.currentContainer.data.type == "Container") {
-                    Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { onlyOneLevel: true });
-                } else {
-                    Lineage_whiteboard.drawNodesAndParents(self.currentContainer, 0);
-                }
-            },
-        };
         items["GraphContainerDescendantAndLeaves"] = {
             label: "Graph  all descendants",
             action: function (_e) {

@@ -1725,7 +1725,7 @@ var Lineage_whiteboard = (function () {
      * @returns {void}
      */
     self.addNodesAndParentsToGraph = function (source, nodeIds, options, callback) {
-        if (!nodeIds) {
+        if (!nodeIds || nodeIds.length === 0) {
             if (!source) {
                 source = Lineage_sources.activeSource;
             }
@@ -1733,6 +1733,9 @@ var Lineage_whiteboard = (function () {
                 return alert("select a source");
             }
             nodeIds = self.getGraphIdsFromSource(source);
+        }
+        if (!nodeIds || nodeIds.length === 0) {
+            return UI.message("No nodes to expand", true);
         }
         UI.message("");
 

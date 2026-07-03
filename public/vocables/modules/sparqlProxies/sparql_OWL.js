@@ -487,6 +487,10 @@ var Sparql_OWL = (function () {
         } else if (ids) {
             strFilter = Sparql_common.setFilter("subject", ids, null, options);
         }
+        // without a ?subject anchor the query would dump the whole hierarchy of the FROM graphs: bail with empty result
+        if (!strFilter) {
+            return callback(null, []);
+        }
         options.selectGraph = false;
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports);
         const matches = fromStr.match(/<[^>]+>/g);
@@ -523,7 +527,7 @@ var Sparql_OWL = (function () {
 
         // restrict ?subjectType to the FROM graphs: GRAPH ?subjectGraph with no FROM NAMED
         // otherwise matches every named graph in the store (Virtuoso), leaking types from individuals in other graphs
-        //query += " filter( ?subjectGraph" + i + " in " + fromList + " ).\n";
+        query += " filter( ?subjectGraph" + i + " in " + fromList + " ).\n";
         query += " OPTIONAL {?subject rdfs:subClassOf ?subjectSuperClass.FILTER(!regex(str(?subjectSuperClass), '^_:b'))}\n";
         //query += " }\n";
         ancestorsDepth = Math.min(ancestorsDepth, self.ancestorsDepth);

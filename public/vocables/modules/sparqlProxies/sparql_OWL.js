@@ -479,6 +479,9 @@ var Sparql_OWL = (function () {
             options = {};
         }
         var strFilter = "";
+        if(words && words.length==0){
+            words=null;
+        }
         if (words) {
             strFilter = Sparql_common.setFilter("subject", null, words, options);
         } else if (ids) {
@@ -494,7 +497,7 @@ var Sparql_OWL = (function () {
 
         var selectStr = " * ";
         if (true || options.excludeType) {
-            selectStr = ' ?subject ?subjectLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes) (GROUP_CONCAT(?subjectSuperClass;SEPARATOR=",") AS ?subjectSuperClasses)';
+            selectStr = ' ?subject ?subjectLabel (GROUP_CONCAT(DISTINCT ?subjectType;SEPARATOR=",") AS ?subjectTypes) (GROUP_CONCAT(DISTINCT ?subjectSuperClass;SEPARATOR=",") AS ?subjectSuperClasses)';
             for (var i = 1; i <= ancestorsDepth; i++) {
                 selectStr += '(GROUP_CONCAT(?broaderGraph1;SEPARATOR=",") AS ?broaderGraphs' + i + " ) ?broader" + i + " ?broader" + i + "Label";
             }
@@ -520,8 +523,8 @@ var Sparql_OWL = (function () {
 
         // restrict ?subjectType to the FROM graphs: GRAPH ?subjectGraph with no FROM NAMED
         // otherwise matches every named graph in the store (Virtuoso), leaking types from individuals in other graphs
-        query += " filter( ?subjectGraph" + i + " in " + fromList + " ).\n";
-        query += " OPTIONAL {?subject rdfs:subClassOf ?subjectSuperClass.}\n";
+        //query += " filter( ?subjectGraph" + i + " in " + fromList + " ).\n";
+        query += " OPTIONAL {?subject rdfs:subClassOf ?subjectSuperClass.FILTER(!regex(str(?subjectSuperClass), '^_:b'))}\n";
         //query += " }\n";
         ancestorsDepth = Math.min(ancestorsDepth, self.ancestorsDepth);
 

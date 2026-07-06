@@ -466,7 +466,7 @@ var Sparql_OWL = (function () {
             if (!ancestorsDepth) {
                 ancestorsDepth = 1;
             }
-            ancestorsDepth = Math.min(ancestorsDepth, 4);
+            ancestorsDepth = Math.min(ancestorsDepth, 9);
         }
 
         if (!Config.sources[sourceLabel].graphUri) {
@@ -503,7 +503,7 @@ var Sparql_OWL = (function () {
         if (true || options.excludeType) {
             selectStr = ' ?subject ?subjectLabel (GROUP_CONCAT(DISTINCT ?subjectType;SEPARATOR=",") AS ?subjectTypes) (GROUP_CONCAT(DISTINCT ?subjectSuperClass;SEPARATOR=",") AS ?subjectSuperClasses)';
             for (var i = 1; i <= ancestorsDepth; i++) {
-                selectStr += '(GROUP_CONCAT(?broaderGraph1;SEPARATOR=",") AS ?broaderGraphs' + i + " ) ?broader" + i + " ?broader" + i + "Label";
+                selectStr += '(GROUP_CONCAT(DISTINCT ?broaderGraph' + i + ';SEPARATOR=",") AS ?broaderGraphs' + i + " ) ?broader" + i + " ?broader" + i + "Label";
             }
         }
         var query =
@@ -530,8 +530,7 @@ var Sparql_OWL = (function () {
         query += " filter( ?subjectGraph" + i + " in " + fromList + " ).\n";
         query += " OPTIONAL {?subject rdfs:subClassOf ?subjectSuperClass.FILTER(!regex(str(?subjectSuperClass), '^_:b'))}\n";
         //query += " }\n";
-        ancestorsDepth = Math.min(ancestorsDepth, self.ancestorsDepth);
-
+        //ancestorsDepth = Math.min(ancestorsDepth, self.ancestorsDepth);
         for (var i = 1; i <= ancestorsDepth; i++) {
             if (i == 1) {
                 //  query += "  OPTIONAL{?subject " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + "  ?broader" + i + ".";
@@ -546,11 +545,11 @@ var Sparql_OWL = (function () {
                 // query += " OPTIONAL{?broader" + i + " rdfs:label ?broader" + i + "Label.}";
             } else {
                 query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:subClassOf|rdf:type" + " ?broader" + i + ".";
-                //   "?broader" + i + " rdf:type owl:Class."
-                query += " ?broader" + i + " rdf:type ?broaderType" + i + ". filter(?broaderType" + i + " !=owl:Restriction) ";
-                // query += "OPTIONAL{?broader" + i + " rdfs:label ?broader" + i + "Label."
-                // + Sparql_common.getLangFilter(sourceLabel, "broader" + i + "Label") + "}";
+                query += "{GRAPH ?broaderGraph" + i + "{";
+                query += " ?broader" + i + " rdf:type ?broaderType" + i + ". filter(?broaderType" + i + " !=owl:Restriction)} filter (?broader" + i + " !=owl:Class)";
                 query += Sparql_common.getVariableLangLabel("broader" + i, true);
+                query += "}";
+                query += " filter( ?broaderGraph" + i + " in " + fromList + " ).\n";
             }
         }
 

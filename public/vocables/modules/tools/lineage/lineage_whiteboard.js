@@ -1733,13 +1733,13 @@ var Lineage_whiteboard = (function () {
                 return alert("select a source");
             }
             //nodeIds = self.getGraphIdsFromSource(source);
-             if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
-                nodeIds =null;
-            }else{
-                nodeIds = self.lineageVisjsGraph.data.nodes.get().map(function(node) { return node.id; });
+            if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
+                nodeIds = null;
+            } else {
+                nodeIds = self.lineageVisjsGraph.data.nodes.get().map(function (node) {
+                    return node.id;
+                });
             }
-      
-            
         }
         if (!nodeIds || nodeIds.length === 0) {
             return UI.message("No nodes to expand", true);

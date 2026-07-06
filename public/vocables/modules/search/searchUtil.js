@@ -366,20 +366,46 @@ indexes.push(source.toLowerCase());
         word2 = word2.replace(/\\\\/g, "\\");
         return word2;
     };
-    self.makeFuzzyQueryString = function (word) {
-        // to add  fuziness in query string elastic search, parameter isn't available
-        // It's needed to add ~n symbol to each word
-        // n is Levenshtein distance authorized for each word
+    /**
+     * Builds an ElasticSearch query_string fragment for a search term. By default each word
+     * gets Levenshtein fuzziness (word~n). When prefixOnly is true, each plain word becomes a
+     * prefix match (word*) instead, so partial typing (e.g. "abd") matches longer labels
+     * ("abdulnasser") — this prefix mode is used only by the lineage tool. A word already
+     * containing "*" is kept as-is in both modes (fuzziness would be invalid on a wildcard).
+     * @function
+     * @name makeFuzzyQueryString
+     * @memberof module:SearchUtil
+     * @param {string} word - Already escaped search term, possibly holding several words
+     * @param {boolean} [prefixOnly] - When true, use prefix matching (word*) instead of fuzziness
+     * @returns {string} query_string expression, e.g. "abd*" (prefix) or "abd~1" (fuzzy)
+     */
+    self.makeFuzzyQueryString = function (word, prefixOnly) {
+        // to add fuziness in query string elastic search, the parameter isn't available
+        // it is needed to add ~n symbol to each word, n being the authorized Levenshtein distance
         //https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-query-string-query#query-string-fuzziness
-        var splited_word = word.split(/\s+/);
-        var fuzzyWords = [];
-        splited_word.forEach((word) => {
-            if (word.length <= 7) {
-                return fuzzyWords.push(`${word}~1`);
+        var whitespaceRegex = /\s+/;
+        var splitWords = word.split(whitespaceRegex);
+        var queryParts = [];
+        splitWords.forEach(function (singleWord) {
+            if (singleWord.length === 0) {
+                return;
             }
-            return fuzzyWords.push(`${word}~2`);
+            // user-typed wildcard: keep as-is, fuzziness would be invalid on a wildcard
+            if (singleWord.indexOf("*") > -1) {
+                queryParts.push(singleWord);
+                return;
+            }
+            if (prefixOnly) {
+                queryParts.push(singleWord + "*");
+                return;
+            }
+            var fuzzyDistance = 2;
+            if (singleWord.length <= 7) {
+                fuzzyDistance = 1;
+            }
+            queryParts.push(singleWord + "~" + fuzzyDistance);
         });
-        return fuzzyWords.join(" ");
+        return queryParts.join(" ");
     };
 
     self.getWordBulkQuery = function (word, mode, indexes, options) {
@@ -462,7 +488,7 @@ indexes.push(source.toLowerCase());
             }
         } else {
             // fuzzy new way
-            var fuzzyWord = self.makeFuzzyQueryString(word);
+            var fuzzyWord = self.makeFuzzyQueryString(word, options.prefixSearch);
 
             /*    queryObj= {
 

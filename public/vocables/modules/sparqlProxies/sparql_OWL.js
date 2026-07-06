@@ -442,7 +442,8 @@ var Sparql_OWL = (function () {
      * Returns the ancestors of node(s) up to a given depth in an OWL hierarchy. Builds nested
      * `OPTIONAL` blocks chaining `?broaderN-1 rdfs:subClassOf|rdf:type ?broaderN` (excluding
      * `owl:Restriction`/`owl:Class`), grouping each node's types/superclasses/graphs via
-     * `GROUP_CONCAT`. Depth is capped (4 when the source has imports, else `self.ancestorsDepth`).
+     * `GROUP_CONCAT`. Depth is capped at 9 when the source has imports (Virtuoso allows at most 20
+     * GROUP BY / hash-join keys: 2 fixed + 2 per level, so 2 + 2*9 = 20).
      * @function
      * @name getNodeParents
      * @memberof module:Sparql_OWL
@@ -462,11 +463,11 @@ var Sparql_OWL = (function () {
      */
     self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
         if (Config.sources[sourceLabel].imports && Config.sources[sourceLabel].imports.length > 0) {
-            //limit at 4 ancestorsDepth when imports
+            //limit at 9 ancestorsDepth when imports (Virtuoso SQ186: max 20 GROUP BY keys = 2 + 2*depth)
             if (!ancestorsDepth) {
                 ancestorsDepth = 1;
             }
-            ancestorsDepth = Math.min(ancestorsDepth, 4);
+            ancestorsDepth = Math.min(ancestorsDepth, 9);
         }
 
         if (!Config.sources[sourceLabel].graphUri) {
@@ -479,10 +480,17 @@ var Sparql_OWL = (function () {
             options = {};
         }
         var strFilter = "";
+        if (words && words.length == 0) {
+            words = null;
+        }
         if (words) {
             strFilter = Sparql_common.setFilter("subject", null, words, options);
         } else if (ids) {
             strFilter = Sparql_common.setFilter("subject", ids, null, options);
+        }
+        // without a ?subject anchor the query would dump the whole hierarchy of the FROM graphs: bail with empty result
+        if (!strFilter) {
+            return callback(null, []);
         }
         options.selectGraph = false;
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports);
@@ -494,9 +502,10 @@ var Sparql_OWL = (function () {
 
         var selectStr = " * ";
         if (true || options.excludeType) {
-            selectStr = ' ?subject ?subjectLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes) (GROUP_CONCAT(?subjectSuperClass;SEPARATOR=",") AS ?subjectSuperClasses)';
+            selectStr =
+                ' ?subject ?subjectLabel (GROUP_CONCAT(DISTINCT ?subjectType;SEPARATOR=",") AS ?subjectTypes) (GROUP_CONCAT(DISTINCT ?subjectSuperClass;SEPARATOR=",") AS ?subjectSuperClasses)';
             for (var i = 1; i <= ancestorsDepth; i++) {
-                selectStr += '(GROUP_CONCAT(?broaderGraph1;SEPARATOR=",") AS ?broaderGraphs' + i + " ) ?broader" + i + " ?broader" + i + "Label";
+                selectStr += "(GROUP_CONCAT(DISTINCT ?broaderGraph" + i + ';SEPARATOR=",") AS ?broaderGraphs' + i + " ) ?broader" + i + " ?broader" + i + "Label";
             }
         }
         var query =
@@ -518,12 +527,12 @@ var Sparql_OWL = (function () {
         }
         query += " }}\n";
 
-        // what is the reason of this filter ?????
-        //  query += " filter( ?subjectGraph" + i + " in " + fromList + " ).\n";
-        query += " OPTIONAL {?subject rdfs:subClassOf ?subjectSuperClass.}\n";
+        // restrict ?subjectType to the FROM graphs: GRAPH ?subjectGraph with no FROM NAMED
+        // otherwise matches every named graph in the store (Virtuoso), leaking types from individuals in other graphs
+        query += " filter( ?subjectGraph" + i + " in " + fromList + " ).\n";
+        query += " OPTIONAL {?subject rdfs:subClassOf ?subjectSuperClass.FILTER(!regex(str(?subjectSuperClass), '^_:b'))}\n";
         //query += " }\n";
-        ancestorsDepth = Math.min(ancestorsDepth, self.ancestorsDepth);
-
+        //ancestorsDepth = Math.min(ancestorsDepth, self.ancestorsDepth);
         for (var i = 1; i <= ancestorsDepth; i++) {
             if (i == 1) {
                 //  query += "  OPTIONAL{?subject " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + "  ?broader" + i + ".";
@@ -538,11 +547,11 @@ var Sparql_OWL = (function () {
                 // query += " OPTIONAL{?broader" + i + " rdfs:label ?broader" + i + "Label.}";
             } else {
                 query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:subClassOf|rdf:type" + " ?broader" + i + ".";
-                //   "?broader" + i + " rdf:type owl:Class."
-                query += " ?broader" + i + " rdf:type ?broaderType" + i + ". filter(?broaderType" + i + " !=owl:Restriction) ";
-                // query += "OPTIONAL{?broader" + i + " rdfs:label ?broader" + i + "Label."
-                // + Sparql_common.getLangFilter(sourceLabel, "broader" + i + "Label") + "}";
+                query += "{GRAPH ?broaderGraph" + i + "{";
+                query += " ?broader" + i + " rdf:type ?broaderType" + i + ". filter(?broaderType" + i + " !=owl:Restriction)} filter (?broader" + i + " !=owl:Class)";
                 query += Sparql_common.getVariableLangLabel("broader" + i, true);
+                query += "}";
+                query += " filter( ?broaderGraph" + i + " in " + fromList + " ).\n";
             }
         }
 

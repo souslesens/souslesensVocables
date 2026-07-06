@@ -38,7 +38,7 @@ export default function () {
                     items: {
                         type: "object",
                         properties: {
-                            name: { type: "string", description: "Function name. Example: `getNodeChildren`." },
+                            name: { type: "string", description: "Function name. Example: `getNodeInfos`." },
                             module: { type: "string", description: "Module name. Example: `Sparql_OWL`." },
                             description: { type: "string" },
                             params: {

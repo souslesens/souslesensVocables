@@ -442,7 +442,8 @@ var Sparql_OWL = (function () {
      * Returns the ancestors of node(s) up to a given depth in an OWL hierarchy. Builds nested
      * `OPTIONAL` blocks chaining `?broaderN-1 rdfs:subClassOf|rdf:type ?broaderN` (excluding
      * `owl:Restriction`/`owl:Class`), grouping each node's types/superclasses/graphs via
-     * `GROUP_CONCAT`. Depth is capped (4 when the source has imports, else `self.ancestorsDepth`).
+     * `GROUP_CONCAT`. Depth is capped at 9 when the source has imports (Virtuoso allows at most 20
+     * GROUP BY / hash-join keys: 2 fixed + 2 per level, so 2 + 2*9 = 20).
      * @function
      * @name getNodeParents
      * @memberof module:Sparql_OWL
@@ -462,7 +463,7 @@ var Sparql_OWL = (function () {
      */
     self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
         if (Config.sources[sourceLabel].imports && Config.sources[sourceLabel].imports.length > 0) {
-            //limit at 4 ancestorsDepth when imports
+            //limit at 9 ancestorsDepth when imports (Virtuoso SQ186: max 20 GROUP BY keys = 2 + 2*depth)
             if (!ancestorsDepth) {
                 ancestorsDepth = 1;
             }

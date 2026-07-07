@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.11.0](https://github.com/souslesens/souslesensVocables/compare/3.10.0...3.11.0) (2026-07-07)
+
+
+### Bug Fixes
+
+* **lineage:** introduced bug in parent node ([3e1a6b5](https://github.com/souslesens/souslesensVocables/commit/3e1a6b5ffd9d2a743f128ed818cf723d388ffc30))
+* **lineage:** parents return also others sources parents. ([152a469](https://github.com/souslesens/souslesensVocables/commit/152a469a7ea804fa84dcd83a8cd697e7e4ed7bc2))
+* **MappingModeler:** tree and relations génération were erased by merge ([cd95010](https://github.com/souslesens/souslesensVocables/commit/cd950104c0af91599db8b97643f5a38e98032dcc))
+* **sparql_owl:** getNodeParents broader graphs and limit to 9 universal plafond of virtuoso ([476904e](https://github.com/souslesens/souslesensVocables/commit/476904e439379c781e72323adcc219c526b00d98))
+* **SParql_OWL:** getNOdeParents wasn't filtering by graph ([0518c17](https://github.com/souslesens/souslesensVocables/commit/0518c17db2c2c45b5ad2cc4d0ce31c56efc3e5e3))
+
 ## [3.10.0](https://github.com/souslesens/souslesensVocables/compare/3.9.0...3.10.0) (2026-07-01)
 
 

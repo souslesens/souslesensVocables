@@ -66,6 +66,19 @@ function cleanUpText(original: unknown): string {
         .replace(/\p{Diacritic}/gu, "");
 }
 
+const diacriticsRegex = /\p{Diacritic}/gu;
+const whitespaceRegex = /\s+/g;
+const unsafeFileNameCharsRegex = /[^a-zA-Z0-9._-]/g;
+const repeatedUnderscoresRegex = /_{2,}/g;
+
+function sanitizeFileName(rawFileName: string): string {
+    const withoutAccents = rawFileName.normalize("NFD").replace(diacriticsRegex, "");
+    const underscored = withoutAccents.replace(whitespaceRegex, "_");
+    const safeChars = underscored.replace(unsafeFileNameCharsRegex, "");
+    const collapsedUnderscores = safeChars.replace(repeatedUnderscoresRegex, "_");
+    return collapsedUnderscores || "file";
+}
+
 function jsonToDownloadUrl(json: unknown): string {
     const content = JSON.stringify(json, undefined, 2);
     const file = new Blob([content], { type: "application/json" });
@@ -94,4 +107,4 @@ export const roundMinMax = (x: number, min: number, max: number) => {
     return round;
 };
 
-export { fetchMe, identity, joinWhenArray, sanitizeValue, exhaustiveCheck, style, VisuallyHiddenInput, humanizeSize, cleanUpText, jsonToDownloadUrl };
+export { fetchMe, identity, joinWhenArray, sanitizeValue, exhaustiveCheck, style, VisuallyHiddenInput, humanizeSize, cleanUpText, jsonToDownloadUrl, sanitizeFileName };

@@ -2,6 +2,12 @@ import { readMainConfig } from "./config.js";
 import DigestClient from "digest-fetch";
 import fetch from "node-fetch";
 import { RDF_FORMATS_MIMETYPES, sleep } from "./utils.js";
+
+// Number of triples moved per SPARQL Update batch in moveGraph. Keeps each request small enough
+// to avoid the triplestore's query-execution timeout on graphs with many triples.
+const GRAPH_MOVE_BATCH_SIZE = 5000;
+const GRAPH_URI_REWRITE_BATCH_SIZE = 5000;
+
 class RdfDataModel {
     /**
      * @param {string} endpointUrl - url of endpoint
@@ -278,13 +284,134 @@ class RdfDataModel {
     };
 
     /**
-     * @param {string} graphUri - The Graph URI
-     * @param {string} graphPath - URL of data
-     * @returns {Promise<any>} - response
+     * Moves all triples from sourceGraphUri to targetGraphUri, batch by batch, so a single
+     * SPARQL Update statement never has to touch the whole graph at once (which times out on
+     * large graphs).
+     * @param {string} sourceGraphUri - The graph to move triples out of
+     * @param {string} targetGraphUri - The graph to move triples into
+     * @returns {Promise<void>}
      */
     moveGraph = async (sourceGraphUri, targetGraphUri) => {
-        await this.execQuery(`ADD <${sourceGraphUri}> TO <${targetGraphUri}>`);
-        await this.execQuery(`CLEAR GRAPH <${sourceGraphUri}>`);
+        let remainingTripleCount = await this.getTripleCount(sourceGraphUri);
+        while (remainingTripleCount > 0) {
+            const moveBatchQuery = `DELETE { GRAPH <${sourceGraphUri}> { ?subject ?predicate ?object } }
+                                     INSERT { GRAPH <${targetGraphUri}> { ?subject ?predicate ?object } }
+                                     WHERE {
+                                         {
+                                             SELECT ?subject ?predicate ?object
+                                             WHERE { GRAPH <${sourceGraphUri}> { ?subject ?predicate ?object } }
+                                             LIMIT ${GRAPH_MOVE_BATCH_SIZE}
+                                         }
+                                     }`;
+            await this.execQuery(moveBatchQuery);
+
+            const remainingTripleCountAfterBatch = await this.getTripleCount(sourceGraphUri);
+            if (remainingTripleCountAfterBatch >= remainingTripleCount) {
+                throw new Error(`moveGraph made no progress: ${remainingTripleCountAfterBatch} triples still in <${sourceGraphUri}>`);
+            }
+            remainingTripleCount = remainingTripleCountAfterBatch;
+        }
+    };
+
+    rewriteGraphResourceUris = async (graphUri, previousGraphUri, nextGraphUri) => {
+        await this._rewriteGraphIriReferences(graphUri, previousGraphUri, nextGraphUri, "exact");
+
+        const previousBaseUri = this._ensureTrailingSlash(previousGraphUri);
+        const nextBaseUri = this._ensureTrailingSlash(nextGraphUri);
+        await this._rewriteGraphIriReferences(graphUri, previousBaseUri, nextBaseUri, "prefix");
+    };
+
+    _ensureTrailingSlash = (uri) => {
+        if (uri.endsWith("/") || uri.endsWith("#")) {
+            return uri;
+        }
+        return `${uri}/`;
+    };
+
+    _getGraphIriReferenceCount = async (graphUri, previousIri, nextIri, matchMode) => {
+        const iriFilter = this._buildIriRewriteFilter(previousIri, nextIri, matchMode);
+        const query = `SELECT COUNT(*) as ?total
+                       WHERE {
+                           GRAPH <${graphUri}> {
+                               ?subject ?predicate ?object .
+                               FILTER(${iriFilter})
+                           }
+                       }`;
+        const json = await this.execQuery(query);
+        return Number(json[0]["total"]["value"]);
+    };
+
+    _rewriteGraphIriReferences = async (graphUri, previousIri, nextIri, matchMode) => {
+        if (previousIri === nextIri) {
+            return;
+        }
+        let remainingReferenceCount = await this._getGraphIriReferenceCount(graphUri, previousIri, nextIri, matchMode);
+        while (remainingReferenceCount > 0) {
+            const subjectExpression = this._buildRewrittenIriExpression("?subject", previousIri, nextIri, matchMode);
+            const predicateExpression = this._buildRewrittenIriExpression("?predicate", previousIri, nextIri, matchMode);
+            const objectExpression = this._buildRewrittenIriExpression("?object", previousIri, nextIri, matchMode);
+            const iriFilter = this._buildIriRewriteFilter(previousIri, nextIri, matchMode);
+            const rewriteBatchQuery = `DELETE { GRAPH <${graphUri}> { ?subject ?predicate ?object } }
+                                       INSERT { GRAPH <${graphUri}> { ?rewrittenSubject ?rewrittenPredicate ?rewrittenObject } }
+                                       WHERE {
+                                           {
+                                               SELECT ?subject ?predicate ?object
+                                               WHERE {
+                                                   GRAPH <${graphUri}> {
+                                                       ?subject ?predicate ?object .
+                                                       FILTER(${iriFilter})
+                                                   }
+                                               }
+                                               LIMIT ${GRAPH_URI_REWRITE_BATCH_SIZE}
+                                           }
+                                           BIND(${subjectExpression} AS ?rewrittenSubject)
+                                           BIND(${predicateExpression} AS ?rewrittenPredicate)
+                                           BIND(${objectExpression} AS ?rewrittenObject)
+                                       }`;
+            await this.execQuery(rewriteBatchQuery);
+
+            const remainingReferenceCountAfterBatch = await this._getGraphIriReferenceCount(graphUri, previousIri, nextIri, matchMode);
+            if (remainingReferenceCountAfterBatch >= remainingReferenceCount) {
+                throw new Error(`rewriteGraphResourceUris made no progress: ${remainingReferenceCountAfterBatch} references to <${previousIri}> still in <${graphUri}>`);
+            }
+            remainingReferenceCount = remainingReferenceCountAfterBatch;
+        }
+    };
+
+    _buildIriRewriteFilter = (previousIri, nextIri, matchMode) => {
+        const subjectCondition = this._buildIriMatchCondition("?subject", previousIri, nextIri, matchMode);
+        const predicateCondition = this._buildIriMatchCondition("?predicate", previousIri, nextIri, matchMode);
+        const objectCondition = this._buildIriMatchCondition("?object", previousIri, nextIri, matchMode);
+        return `${subjectCondition} || ${predicateCondition} || ${objectCondition}`;
+    };
+
+    // Only guard against re-matching already-rewritten IRIs when nextIri is nested under previousIri
+    // (e.g. moving a graph into a subfolder of its own URI: .../ -> .../test/). In that case, a
+    // rewritten IRI still starts with previousIri and would be rewritten again on the next batch,
+    // never converging. When nextIri is an ancestor of previousIri instead (.../ttest/ -> .../),
+    // every original IRI already starts with nextIri too, so adding the exclusion would wrongly
+    // match nothing at all.
+    _buildIriMatchCondition = (variableName, previousIri, nextIri, matchMode) => {
+        const previousIriLiteral = JSON.stringify(previousIri);
+        if (matchMode === "exact") {
+            return `(isIRI(${variableName}) && STR(${variableName}) = ${previousIriLiteral})`;
+        }
+        const isNextIriNestedUnderPreviousIri = nextIri.length > previousIri.length && nextIri.startsWith(previousIri);
+        if (!isNextIriNestedUnderPreviousIri) {
+            return `(isIRI(${variableName}) && STRSTARTS(STR(${variableName}), ${previousIriLiteral}))`;
+        }
+        const nextIriLiteral = JSON.stringify(nextIri);
+        return `(isIRI(${variableName}) && STRSTARTS(STR(${variableName}), ${previousIriLiteral}) && !STRSTARTS(STR(${variableName}), ${nextIriLiteral}))`;
+    };
+
+    _buildRewrittenIriExpression = (variableName, previousIri, nextIri, matchMode) => {
+        const iriMatchCondition = this._buildIriMatchCondition(variableName, previousIri, nextIri, matchMode);
+        const nextIriLiteral = JSON.stringify(nextIri);
+        if (matchMode === "exact") {
+            return `IF(${iriMatchCondition}, IRI(${nextIriLiteral}), ${variableName})`;
+        }
+        const previousIriSuffixStart = previousIri.length + 1;
+        return `IF(${iriMatchCondition}, IRI(CONCAT(${nextIriLiteral}, SUBSTR(STR(${variableName}), ${previousIriSuffixStart}))), ${variableName})`;
     };
 
     loadGraph = async (graphUri, graphPath) => {

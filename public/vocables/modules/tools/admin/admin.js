@@ -541,6 +541,52 @@ $("#sourceDivControlPanelDiv").html(html);*/
         });
     };
 
+    self.moveGraph = function () {
+        var sources = SourceSelectorWidget.getCheckedSources();
+        if (sources.length != 1) {
+            return alert("select a single source");
+        }
+
+        var source = sources[0];
+        if (!Config.sources[source]) {
+            return alert("source does not not exist");
+        }
+        var graphUriToMoveFrom = Config.sources[source].graphUri;
+        var graphUriToMoveInto = prompt("Enter the target graph URI. Triples will be moved FROM " + source + "'s graphUri (" + graphUriToMoveFrom + ") INTO this URI");
+        if (!graphUriToMoveInto) {
+            return;
+        }
+        if (!confirm("Move all triples FROM " + graphUriToMoveFrom + " INTO " + graphUriToMoveInto + " ?")) {
+            return;
+        }
+        if (!confirm("CONFIRM : move all triples FROM " + graphUriToMoveFrom + " INTO " + graphUriToMoveInto + " (the selected source graph will be cleared)")) {
+            return;
+        }
+
+        UI.message("moving triples from " + graphUriToMoveFrom + " into " + graphUriToMoveInto);
+        $.ajax({
+            type: "POST",
+            url: `${Config.apiUrl}/rdf/graphMove`,
+            data: JSON.stringify({ sourceGraphUri: graphUriToMoveFrom, targetGraphUri: graphUriToMoveInto, sourceName: source, rewriteResourceUris: true }),
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data, _textStatus, _jqXHR) {
+                if (data.source) {
+                    Config.sources[source] = data.source;
+                }
+                OntologyModels.clearOntologyModelCache(source, function (err, result) {
+                    if (err) {
+                        return MainController.errorAlert(err);
+                    }
+                    return UI.message("triples moved from " + graphUriToMoveFrom + " into " + graphUriToMoveInto, true);
+                });
+            },
+            error: function (err) {
+                return MainController.errorAlert(err.responseText);
+            },
+        });
+    };
+
     self.createSkgFromOntology = function () {
         var sources = SourceSelectorWidget.getCheckedSources();
         if (sources.length != 1) {

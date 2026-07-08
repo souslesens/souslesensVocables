@@ -3,6 +3,7 @@ import fsSync from "fs";
 import fs from "fs/promises";
 import { ulid } from "ulid";
 import os from "node:os";
+import { sanitizeFileName } from "./utils.js";
 
 const CHUNK_SIZE = 10 * 1024 * 1024; // 10 MB
 const UPLOAD_TIMEOUT = 30 * 60 * 1000; // 30 minutes
@@ -48,7 +49,8 @@ export default function () {
             if (!isChunked) {
                 const outputPath = path.join("data/CSV", req.body.path);
                 for (const file of Object.values(req.files)) {
-                    const filePath = path.join(outputPath, file.name);
+                    const sanitizedFileName = sanitizeFileName(file.name);
+                    const filePath = path.join(outputPath, sanitizedFileName);
                     if (!filePath.startsWith("data/CSV/") && !filePath.startsWith("data\\CSV\\")) {
                         return res.status(403).json({ done: false, message: "forbidden path" });
                     }
@@ -64,7 +66,7 @@ export default function () {
             const uploadId = req.body.uploadId;
             const chunkIndex = parseInt(req.body.chunkIndex, 10);
             const totalChunks = parseInt(req.body.totalChunks, 10);
-            const filename = req.body.filename;
+            const filename = req.body.filename ? sanitizeFileName(req.body.filename) : req.body.filename;
             const outputPath = path.join("data/CSV", req.body.path);
             const isLastChunk = req.body.last === "true";
 

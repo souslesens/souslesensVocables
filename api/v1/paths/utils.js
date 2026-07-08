@@ -3,6 +3,19 @@ import util from "util";
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
 import path from "path";
+const diacriticsRegex = /\p{Diacritic}/gu;
+const whitespaceRegex = /\s+/g;
+const unsafeFileNameCharsRegex = /[^a-zA-Z0-9._-]/g;
+const repeatedUnderscoresRegex = /_{2,}/g;
+
+const sanitizeFileName = (/** @type {string} */ rawFileName) => {
+    const withoutAccents = rawFileName.normalize("NFD").replace(diacriticsRegex, "");
+    const underscored = withoutAccents.replace(whitespaceRegex, "_");
+    const safeChars = underscored.replace(unsafeFileNameCharsRegex, "");
+    const collapsedUnderscores = safeChars.replace(repeatedUnderscoresRegex, "_");
+    return collapsedUnderscores || "file";
+};
+
 const sanitizePath = (/** @type {string} */ user_input) => {
     if (user_input.indexOf("\0") !== -1) {
         throw Error("Bad Input");
@@ -277,4 +290,5 @@ export {
     sortObjectByKey,
     fixBooleanInObject,
     getUploadedMime,
+    sanitizeFileName,
 };

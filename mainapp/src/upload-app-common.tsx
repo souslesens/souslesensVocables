@@ -4,7 +4,7 @@ import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { Alert, Button, MenuItem, Select, Stack, LinearProgress, Typography } from "@mui/material";
 import { Done, Folder } from "@mui/icons-material";
 
-import { VisuallyHiddenInput } from "./Utils";
+import { VisuallyHiddenInput, sanitizeFileName } from "./Utils";
 
 const CHUNK_SIZE = 10 * 1024 * 1024;
 
@@ -77,7 +77,8 @@ export function createUploadApp(config: UploadAppConfig) {
                 return;
             }
             const filesList = Array.from(event.currentTarget.files);
-            setFiles(filesList);
+            const sanitizedFiles = filesList.map((file) => new File([file], sanitizeFileName(file.name), { type: file.type }));
+            setFiles(sanitizedFiles);
             setUploadProgress(0);
             setIsUploading(false);
             setTotalChunks(0);

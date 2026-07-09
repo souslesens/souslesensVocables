@@ -5,6 +5,8 @@
 In development, souslesensVocable needs a Virtuoso instance, an ElasticSearch instance and
 a Sql and a Spacy server. We provide a `docker-compose.dev.yaml` to deploy this dependencies.
 
+**Elasticsearch Version Requirement:** SousLeSens Vocables requires Elasticsearch 8.x. The provided `docker-compose.dev.yaml` deploys Elasticsearch 8.15.0 automatically.
+
 SouslesensVocables is deployed locally using `node` and `npm`.
 
 ### Docker

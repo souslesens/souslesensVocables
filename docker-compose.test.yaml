@@ -27,12 +27,14 @@ services:
             - test-backend
 
     elasticsearch:
-        image: docker.elastic.co/elasticsearch/elasticsearch:7.17.4
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
         ports:
             - 9201:9200
         environment:
             ES_JAVA_OPTS: "-Xmx256m -Xms256m"
             discovery.type: single-node
+            xpack.security.enabled: "false"
+            xpack.security.enrollment.enabled: "false"
         networks:
             - test-backend
 

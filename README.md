@@ -9,6 +9,15 @@
 **SousLesensVocables is a set of tools developed to manage Thesaurus and Ontologies
 resources through SKOS , OWL and RDF standards and graph visualisation approaches.**
 
+## Requirements
+
+-   Node.js 18+
+-   Elasticsearch 8.x
+-   Virtuoso 7.2+
+-   PostgreSQL 14+
+
+**Note:** SousLeSens Vocables is only compatible with Elasticsearch 8. Elasticsearch 7 and earlier versions are not supported.
+
 It has functionalities to :
 
 -   read : visualize, navigate and export SKOS or OWL resources

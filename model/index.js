@@ -1,5 +1,5 @@
 import { readMainConfig } from "./config.js";
-import { Client as Client7 } from "es7";
+import { Client } from "@elastic/elasticsearch";
 import { chunk } from "./utils.js";
 
 class IndexModel {
@@ -21,19 +21,27 @@ class IndexModel {
         if (this.skipSslVerify) {
             process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
         }
-        let connInfo = { node: this.elasticsearchUrl };
+        let connInfo = {
+            node: this.elasticsearchUrl,
+            tls: { rejectUnauthorized: !this.skipSslVerify },
+        };
         if (this.elasticsearchUser && this.elasticsearchPassword) {
-            const auth = { username: this.elasticsearchUser, password: this.elasticsearchPassword };
-            connInfo = { ...connInfo, auth: auth };
+            connInfo = {
+                ...connInfo,
+                auth: {
+                    username: this.elasticsearchUser,
+                    password: this.elasticsearchPassword,
+                },
+            };
         }
-        const client = new Client7(connInfo);
+        const client = new Client(connInfo);
         return client;
     };
 
     getIndices = async () => {
         const client = this.getClient();
         const indices = await client.cat.indices({ format: "json" });
-        const indexNames = indices.body
+        const indexNames = indices
             .map((index) => {
                 return index.index;
             })
@@ -54,21 +62,19 @@ class IndexModel {
             const chunk = chunkedIndices[i];
             const payload = {
                 index: chunk,
-                body: {
-                    query: {
-                        terms: {
-                            "id.keyword": uris,
-                        },
+                query: {
+                    terms: {
+                        "id.keyword": uris,
                     },
-                    from: 0,
-                    size: 1000,
-                    _source: {
-                        excludes: ["attachment.content", "parents"],
-                    },
+                },
+                from: 0,
+                size: 1000,
+                _source: {
+                    excludes: ["attachment.content", "parents"],
                 },
             };
             const results = await client.search(payload);
-            const hits = results.body.hits.hits;
+            const hits = results.hits.hits;
             hits.forEach((hit) => {
                 allHits.push(hit);
             });
@@ -80,7 +86,7 @@ class IndexModel {
      * @param {string[]} indices - array of index to delete
      */
     deleteIndices = async (indices) => {
-        const client = new Client7({ node: this.elasticsearchUrl });
+        const client = this.getClient();
         for (const index of indices) {
             await client.indices.delete({ index: index });
         }

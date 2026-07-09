@@ -299,7 +299,6 @@ var elasticRestProxy = {
             options = {};
         }
         var elasticUrl;
-        var elasticVersion;
         async.series(
             [
                 //prepare payload
@@ -608,29 +607,6 @@ var elasticRestProxy = {
                     });
                 },
 
-                //check version
-                function (callbackSeries) {
-                    if (elasticVersion) {
-                        return callbackSeries();
-                    }
-                    var requestOptions = {
-                        method: "GET",
-                        headers: {
-                            "content-type": "application/json",
-                        },
-                        url: elasticUrl,
-                    };
-                    elasticRestProxy.forwardRequest(requestOptions, function (error, _response, _body) {
-                        if (error) {
-                            return callbackSeries(error);
-                        }
-                        var json = JSON.parse(_body);
-                        var versionStr = json.version.number;
-                        elasticVersion = parseInt(versionStr.split(".")[0]);
-                        return callbackSeries();
-                    });
-                },
-
                 function (callbackSeries) {
                     var bulkStr = "";
 
@@ -639,12 +615,7 @@ var elasticRestProxy = {
                             item.owlType = options.owlType;
                         }
                         var id = "R" + util.getRandomHexaId(10);
-                        if (elasticVersion < 8) {
-                            bulkStr += JSON.stringify({ index: { _index: indexName, _type: indexName, _id: id } }) + "\r\n";
-                        } else {
-                            bulkStr += JSON.stringify({ index: { _index: indexName, _id: id } }) + "\r\n";
-                        }
-
+                        bulkStr += JSON.stringify({ index: { _index: indexName, _id: id } }) + "\r\n";
                         bulkStr += JSON.stringify(item) + "\r\n";
                     });
 

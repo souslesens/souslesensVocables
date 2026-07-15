@@ -877,8 +877,16 @@ var TripleFactory = (function () {
                 }
             }
         });
-
+        var mappingNodes = MappingColumnsGraph.getNodesMap();
         edges.forEach(function (edge) {
+            var fromMappingNode = mappingNodes[edge.from];
+            if(!fromMappingNode.data || fromMappingNode.data.dataTable!=table)
+                return;
+
+            var toMappingNode = mappingNodes[edge.to];
+            var toClassNode=null;
+            if(toMappingNode.data && toMappingNode.data.type=="Class")
+                toClassNode=toMappingNode
             if (self.columnsMap[edge.from] && self.columnsMap[edge.to]) {
                 var jstreeEdgeLabel = edge.label === "a" ? "rdf:type" : edge.label;
                 var label = self.columnsMap[edge.from].label + "-" + jstreeEdgeLabel + "->" + self.columnsMap[edge.to].label;

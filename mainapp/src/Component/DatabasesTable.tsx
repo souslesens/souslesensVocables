@@ -91,10 +91,16 @@ const validateForm = (form: Database) => {
 };
 
 const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false, me = "" }: DatabaseFormProps) => {
-    const { updateModel } = useModel();
+    const { model, updateModel } = useModel();
     const [databaseModel, update] = useReducer(updateDatabase, { form: database });
     const [currentErrors, setErrors] = useState<Record<string, string>>({});
     const [open, setOpen] = useState(false);
+
+    const existingDatabases = SRD.withDefault([] as Database[], model.databases);
+    const isDuplicateName = (name: string) => {
+        const normalizedName = cleanUpText(name);
+        return existingDatabases.some((existing) => existing.id !== databaseModel.form.id && cleanUpText(existing.name ?? "") === normalizedName);
+    };
 
     const handleOpen = () => {
         update({ type: Type.ResetDatabase, payload: database });
@@ -105,6 +111,9 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
 
     const handleValidation: MouseEventHandler = (event) => {
         const errors = validateForm(databaseModel.form);
+        if (isDuplicateName(databaseModel.form.name ?? "")) {
+            errors.name = "A database with this name already exists";
+        }
         setErrors(errors);
 
         if (Object.keys(errors).length === 0) {
@@ -129,6 +138,9 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
         }
 
         const errors = validateForm({ ...databaseModel.form, [fieldName]: fieldValue });
+        if (fieldName === "name" && isDuplicateName(fieldValue as string)) {
+            errors.name = "A database with this name already exists";
+        }
         setErrors({ ...currentErrors, [fieldName]: errors[fieldName] });
 
         update({ type: Type.UserUpdatedField, payload: { id: fieldName, value: fieldValue } });

@@ -1725,14 +1725,24 @@ var Lineage_whiteboard = (function () {
      * @returns {void}
      */
     self.addNodesAndParentsToGraph = function (source, nodeIds, options, callback) {
-        if (!nodeIds) {
+        if (!nodeIds || nodeIds.length === 0) {
             if (!source) {
                 source = Lineage_sources.activeSource;
             }
             if (!source) {
                 return alert("select a source");
             }
-            nodeIds = self.getGraphIdsFromSource(source);
+            //nodeIds = self.getGraphIdsFromSource(source);
+            if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
+                nodeIds = null;
+            } else {
+                nodeIds = self.lineageVisjsGraph.data.nodes.get().map(function (node) {
+                    return node.id;
+                });
+            }
+        }
+        if (!nodeIds || nodeIds.length === 0) {
+            return UI.message("No nodes to expand", true);
         }
         UI.message("");
 
@@ -2744,10 +2754,15 @@ var Lineage_whiteboard = (function () {
                             }
                             if (type.indexOf("Class") > -1) {
                                 rdfType = "Class";
+                                var classModel = Config.ontologiesVocabularyModels[source] && Config.ontologiesVocabularyModels[source].classes[item.object.value];
+                                if (classModel && !item.objectLabel) {
+                                    label = classModel.label;
+                                }
                             }
-                            if (item.subjectType.value.indexOf("NamedIndividual")) {
+                            // false not on the subject but on the object
+                            /*if (item.subjectType.value.indexOf("NamedIndividual")) {
                                 rdfType = "NamedIndividual";
-                            }
+                            }*/
 
                             if (item.object.type == "bnode") {
                                 label = "";

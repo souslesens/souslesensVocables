@@ -635,8 +635,9 @@ defaultLang = 'en';*/
 
                                 if (value.indexOf("http") == 0 && value.indexOf(" ") == -1 && value.indexOf(",") == -1) {
                                     var uriLabel = valueLabelsMap[value];
-                                    var titleAttr = uriLabel ? " title='" + uriLabel.replace(/'/g, "&#39;") + "'" : "";
-                                    value = "<a target='" + self.getUriTarget(value) + "' href='" + value + "'" + titleAttr + ">" + value + "</a>";
+                                    var displayText = uriLabel || value;
+                                    var titleAttr = " title='" + value.replace(/'/g, "&#39;") + "'";
+                                    value = "<a target='" + self.getUriTarget(value) + "' href='" + value + "'" + titleAttr + ">" + displayText + "</a>";
                                 }
                                 if (renderedCount > 0) {
                                     valuesStr += "<br>";
@@ -669,8 +670,9 @@ defaultLang = 'en';*/
                                     var value = valueObject.value;
                                     if (value.indexOf("http") == 0 && value.indexOf(" ") == -1 && value.indexOf(",") == -1) {
                                         var uriLabel = valueLabelsMap[value];
-                                        var titleAttr = uriLabel ? " title='" + uriLabel.replace(/'/g, "&#39;") + "'" : "";
-                                        value = "<a target='" + NodeInfosWidget.getUriTarget(value) + "' href='" + value + "'" + titleAttr + ">" + value + "</a>";
+                                        var displayText = uriLabel || value;
+                                        var titleAttr = " title='" + value.replace(/'/g, "&#39;") + "'";
+                                        value = "<a target='" + NodeInfosWidget.getUriTarget(value) + "' href='" + value + "'" + titleAttr + ">" + displayText + "</a>";
                                     }
                                     var optionalStr = ""; //  complcated to manage lang together with edit and delete
                                     // var optionalStr = getOptionalStr(key,valueObject.predicateId);

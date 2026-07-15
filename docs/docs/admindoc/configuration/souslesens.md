@@ -49,12 +49,17 @@ The `mainConfig.json` contain all the `souslesensVocables` configuration.
     -   `user`: Virtuoso user
     -   `password`: Virtuoso password
 -   `Elasticsearch`: The Elasticsearch server configuration
+
+    **Compatibility:** Only Elasticsearch 8.x is supported. Elasticsearch 7 and earlier versions are not compatible.
+
     -   `url`: The ElasticSearch URL, with protocol and port
     -   `user`: The ElasticSearch user
     -   `password`: The ElasticSearch password
     -   `skipSslVerify`: Set to `false` to skip SSL verify (with self-signed certs)
     -   `other_servers`: List of other ElasticSearch nodes
     -   `searchChunkSize`: Size of chunk for the indices search
+
+    **Note:** Elasticsearch 8 enables security (SSL/TLS + authentication) by default. For development environments, you can disable it by setting `xpack.security.enabled: false` in your docker-compose configuration.
 -   `jowlServer`:
     -   `enabled`: `true` if the [JOWL](https://github.com/souslesens/jowl) server is enabled
     -   `url`: The JOWL URL, with protocol and port

@@ -8,6 +8,12 @@ with the [compose](https://docs.docker.com/compose/install/linux/) plugin.
 -   [install docker](https://docs.docker.com/get-started/get-docker/)
 -   [install compose plugin](https://docs.docker.com/compose/install/linux/)
 
+### Elasticsearch Version
+
+**Important:** SousLeSens Vocables requires Elasticsearch 8.x. Elasticsearch 7 and earlier versions are not supported.
+
+The docker-compose file automatically deploys Elasticsearch 8.15.0.
+
 ## Prepare the souslesensVocables git repository
 
 Clone the git repository

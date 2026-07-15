@@ -170,7 +170,7 @@
     {
         "name": "getNodeParents",
         "module": "Sparql_OWL",
-        "description": "Returns the ancestors of node(s) up to a given depth in an OWL hierarchy. Builds nested `OPTIONAL` blocks chaining `?broaderN-1 rdfs:subClassOf|rdf:type ?broaderN` (excluding `owl:Restriction`/`owl:Class`), grouping each node's types/superclasses/graphs via `GROUP_CONCAT`. Depth is capped (4 when the source has imports, else `self.ancestorsDepth`).",
+        "description": "Returns the ancestors of node(s) up to a given depth in an OWL hierarchy. Builds nested `OPTIONAL` blocks chaining `?broaderN-1 rdfs:subClassOf|rdf:type ?broaderN` (excluding `owl:Restriction`/`owl:Class`), grouping each node's types/superclasses/graphs via `GROUP_CONCAT`. Depth is capped at 9 when the source has imports (Virtuoso allows at most 20 GROUP BY / hash-join keys: 2 fixed + 2 per level, so 2 + 2*9 = 20).",
         "params": [
             {
                 "name": "sourceLabel",

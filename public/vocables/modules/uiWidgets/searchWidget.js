@@ -155,6 +155,9 @@ var SearchWidget = (function () {
             mode = "fuzzyMatch";
         }
 
+        // prefix search is enabled only in the lineage tool; other tools sharing this widget keep fuzzy matching
+        options.prefixSearch = !exactMatch && MainController.currentTool === "lineage";
+
         options.parentlabels = true;
 
         /*   if (classFilter) {

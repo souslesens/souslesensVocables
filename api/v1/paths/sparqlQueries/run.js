@@ -7,7 +7,7 @@ function getSparqlQueryRequestBodySchema() {
         type: "object",
         required: ["name", "module"],
         properties: {
-            name: { type: "string", description: "Function name from the catalog. Example: `getNodeChildren`." },
+            name: { type: "string", description: "Function name from the catalog. Example: `getNodeInfos`." },
             module: { type: "string", enum: ["Sparql_OWL", "Sparql_SKOS", "Sparql_generic"], description: "Module that owns the function." },
             params: {
                 type: "object",
@@ -16,11 +16,11 @@ function getSparqlQueryRequestBodySchema() {
             },
         },
         example: {
-            name: "getNodeChildren",
+            name: "getNodeInfos",
             module: "Sparql_OWL",
             params: {
                 sourceLabel: "BFO",
-                ids: "http://purl.obolibrary.org/obo/BFO_0000001",
+                conceptId: "http://purl.obolibrary.org/obo/BFO_0000001",
                 options: { limit: 50 },
             },
         },

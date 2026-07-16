@@ -1714,41 +1714,54 @@ var Lineage_whiteboard = (function () {
 
     /**
      * Adds nodes and their parent relationships to the graph for a given source and list of node IDs.
+     * When no node IDs are given, the whiteboard nodes are grouped by their own source and each group
+     * is queried on its own source graphs, so parents are found for nodes coming from any loaded source.
      * It fetches the parent-child relationships from the SPARQL endpoint and visualizes the nodes and edges in the graph.
      * @function
      * @name addNodesAndParentsToGraph
      * @memberof module:Lineage
      * @param {string} [source] - The source from which to fetch the data. If not provided, the active source is used.
-     * @param {Array<string>} nodeIds - An array of node IDs to add to the graph.
+     * @param {Array<string>} [nodeIds] - An array of node IDs to add to the graph. If not provided, all whiteboard nodes are used.
      * @param {Object} [options] - Optional configuration for the graph population.
      * @param {Function} [callback] - A callback function to be executed after the process is complete.
      * @returns {void}
      */
     self.addNodesAndParentsToGraph = function (source, nodeIds, options, callback) {
+        if (!source) {
+            source = Lineage_sources.activeSource;
+        }
+        if (!source) {
+            return alert("select a source");
+        }
+
+        // each source is queried on its own FROM graphs : the active source graphs
+        // do not necessarily contain the triples of nodes drawn from other loaded sources
+        var nodesBySource = {};
         if (!nodeIds || nodeIds.length === 0) {
-            if (!source) {
-                source = Lineage_sources.activeSource;
-            }
-            if (!source) {
-                return alert("select a source");
-            }
-            //nodeIds = self.getGraphIdsFromSource(source);
-            if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
-                nodeIds = null;
-            } else {
-                nodeIds = self.lineageVisjsGraph.data.nodes.get().map(function (node) {
-                    return node.id;
+            if (self.lineageVisjsGraph.isGraphNotEmpty()) {
+                self.lineageVisjsGraph.data.nodes.get().forEach(function (whiteboardNode) {
+                    var whiteboardNodeSource = source;
+                    if (whiteboardNode.data && whiteboardNode.data.source) {
+                        whiteboardNodeSource = whiteboardNode.data.source;
+                    }
+                    if (!Config.sources[whiteboardNodeSource]) {
+                        return;
+                    }
+                    if (!nodesBySource[whiteboardNodeSource]) {
+                        nodesBySource[whiteboardNodeSource] = [];
+                    }
+                    nodesBySource[whiteboardNodeSource].push(whiteboardNode.id);
                 });
             }
+        } else {
+            nodesBySource[source] = nodeIds;
         }
-        if (!nodeIds || nodeIds.length === 0) {
+
+        var sourcesToQuery = Object.keys(nodesBySource);
+        if (sourcesToQuery.length === 0) {
             return UI.message("No nodes to expand", true);
         }
         UI.message("");
-
-        var slices = common.array.slice(nodeIds, 300);
-
-        var memberPredicate = false;
 
         if (!options) {
             options = {};
@@ -1757,109 +1770,124 @@ var Lineage_whiteboard = (function () {
         options.includeSources = [MainController.currentSource];
         var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
 
-        var visjsData = { nodes: [], edges: [] };
+        var allVisjsData = { nodes: [], edges: [] };
         async.eachSeries(
-            slices,
-            function (slice, callbackEach) {
-                Sparql_OWL.getNodeParents(source, null, slice, 1, options, function (err, result) {
-                    if (err) {
-                        return callbackEach(err);
-                    }
-
-                    if (result.length == 0) {
-                        $("#waitImg").css("display", "none");
-                        UI.message("No data found", true);
-                        return callbackEach(null);
-                    }
-
-                    var shape = self.defaultShape;
-
-                    result.forEach(function (item) {
-                        if (item.broader1) {
-                            let nodeSource = source;
-                            let nodeColor = self.getSourceColor(nodeSource);
-
-                            if (!existingNodes[item.subject.value]) {
-                                existingNodes[item.subject.value] = 1;
-                                var node = {
-                                    id: item.subject.value,
-                                    label: item.subjectLabel.value,
-                                    shadow: self.nodeShadow,
-                                    shape: shape,
-                                    color: nodeColor,
-                                    size: Lineage_whiteboard.defaultShapeSize,
-                                    data: {
-                                        source: nodeSource,
-                                        label: item.subjectLabel.value,
-                                        id: item.subject.value,
-                                    },
-                                };
-
-                                visjsData.nodes.push(node);
+            sourcesToQuery,
+            function (groupSource, callbackSource) {
+                var slices = common.array.slice(nodesBySource[groupSource], 300);
+                async.eachSeries(
+                    slices,
+                    function (slice, callbackEach) {
+                        Sparql_OWL.getNodeParents(groupSource, null, slice, 1, options, function (err, result) {
+                            if (err) {
+                                // do not abort the whole expansion when one slice query fails, process the remaining slices and sources
+                                console.error(err);
+                                return callbackEach(null);
                             }
 
-                            if (!existingNodes[item.broader1.value]) {
-                                if (item.broader1 && (item.broader1.type == "bnode" || item.broader1.value.indexOf("_:") == 0)) {
-                                    //skip blank nodes
-                                    return;
-                                }
-                                let broaderSource = item.broaderGraphs1 ? Sparql_common.getSourceFromGraphUris(item.broaderGraphs1.value, source) : source;
-                                existingNodes[item.broader1.value] = 1;
-                                var node = {
-                                    id: item.broader1.value,
-                                    label: item.broader1Label.value,
-                                    shadow: self.nodeShadow,
-                                    shape: shape,
-                                    color: nodeColor,
-                                    size: Lineage_whiteboard.defaultShapeSize,
-                                    data: {
-                                        source: broaderSource,
-                                        label: item.broader1Label.value,
-                                        id: item.broader1.value,
-                                    },
-                                };
-
-                                visjsData.nodes.push(node);
-                            } else {
+                            if (result.length == 0) {
+                                $("#waitImg").css("display", "none");
+                                UI.message("No data found", true);
+                                return callbackEach(null);
                             }
 
-                            if (item.broader1.value != source) {
-                                var edgeId = item.subject.value + "_" + item.broader1.value;
-                                if (!existingNodes[edgeId]) {
-                                    existingNodes[edgeId] = 1;
-                                    var edge = {
-                                        id: edgeId,
-                                        from: item.subject.value,
-                                        label: "a",
-                                        to: item.broader1.value,
-                                        color: self.defaultEdgeColor,
-                                        arrows: {
-                                            to: {
-                                                enabled: true,
-                                                type: Lineage_whiteboard.defaultEdgeArrowType,
-                                                scaleFactor: 0.5,
+                            if (result.length >= (options.limit || Config.queryLimit)) {
+                                console.warn("addNodesAndParentsToGraph: query result truncated at " + result.length + " rows for source " + groupSource + ", some parents may be missing");
+                            }
+
+                            var shape = self.defaultShape;
+                            var visjsData = { nodes: [], edges: [] };
+
+                            result.forEach(function (item) {
+                                if (item.broader1) {
+                                    let nodeSource = groupSource;
+                                    let nodeColor = self.getSourceColor(nodeSource);
+
+                                    if (!existingNodes[item.subject.value]) {
+                                        existingNodes[item.subject.value] = 1;
+                                        var node = {
+                                            id: item.subject.value,
+                                            label: item.subjectLabel.value,
+                                            shadow: self.nodeShadow,
+                                            shape: shape,
+                                            color: nodeColor,
+                                            size: Lineage_whiteboard.defaultShapeSize,
+                                            data: {
+                                                source: nodeSource,
+                                                label: item.subjectLabel.value,
+                                                id: item.subject.value,
                                             },
-                                        },
-                                        data: { type: "parent", source: source },
-                                    };
-                                    visjsData.edges.push(edge);
-                                }
-                            }
-                        }
-                    });
+                                        };
 
-                    if (self.lineageVisjsGraph.isGraphNotEmpty()) {
-                        try {
-                            Lineage_whiteboard.addVisDataToGraph(visjsData);
-                            self.lineageVisjsGraph.data.edges.add(visjsData.edges);
-                        } catch (e) {
-                            console.log(e);
-                        }
-                    } else {
-                        Lineage_whiteboard.drawNewGraph(visjsData);
-                    }
-                    callbackEach();
-                });
+                                        visjsData.nodes.push(node);
+                                    }
+
+                                    if (!existingNodes[item.broader1.value]) {
+                                        if (item.broader1 && (item.broader1.type == "bnode" || item.broader1.value.indexOf("_:") == 0)) {
+                                            //skip blank nodes
+                                            return;
+                                        }
+                                        let broaderSource = item.broaderGraphs1 ? Sparql_common.getSourceFromGraphUris(item.broaderGraphs1.value, groupSource) : groupSource;
+                                        existingNodes[item.broader1.value] = 1;
+                                        var node = {
+                                            id: item.broader1.value,
+                                            label: item.broader1Label.value,
+                                            shadow: self.nodeShadow,
+                                            shape: shape,
+                                            color: nodeColor,
+                                            size: Lineage_whiteboard.defaultShapeSize,
+                                            data: {
+                                                source: broaderSource,
+                                                label: item.broader1Label.value,
+                                                id: item.broader1.value,
+                                            },
+                                        };
+
+                                        visjsData.nodes.push(node);
+                                    }
+
+                                    if (item.broader1.value != groupSource) {
+                                        var edgeId = item.subject.value + "_" + item.broader1.value;
+                                        if (!existingNodes[edgeId]) {
+                                            existingNodes[edgeId] = 1;
+                                            var edge = {
+                                                id: edgeId,
+                                                from: item.subject.value,
+                                                label: "a",
+                                                to: item.broader1.value,
+                                                color: self.defaultEdgeColor,
+                                                arrows: {
+                                                    to: {
+                                                        enabled: true,
+                                                        type: Lineage_whiteboard.defaultEdgeArrowType,
+                                                        scaleFactor: 0.5,
+                                                    },
+                                                },
+                                                data: { type: "parent", source: groupSource },
+                                            };
+                                            visjsData.edges.push(edge);
+                                        }
+                                    }
+                                }
+                            });
+
+                            allVisjsData.nodes = allVisjsData.nodes.concat(visjsData.nodes);
+                            allVisjsData.edges = allVisjsData.edges.concat(visjsData.edges);
+
+                            if (self.lineageVisjsGraph.isGraphNotEmpty()) {
+                                try {
+                                    Lineage_whiteboard.addVisDataToGraph(visjsData);
+                                } catch (e) {
+                                    console.log(e);
+                                }
+                            } else {
+                                Lineage_whiteboard.drawNewGraph(visjsData);
+                            }
+                            callbackEach();
+                        });
+                    },
+                    callbackSource,
+                );
             },
             function (err) {
                 $("#waitImg").css("display", "none");
@@ -1873,7 +1901,7 @@ var Lineage_whiteboard = (function () {
                     self.lineageVisjsGraph.network.fit();
                 }
                 if (callback) {
-                    callback(null, visjsData);
+                    callback(null, allVisjsData);
                 }
                 return UI.message("", true);
             },

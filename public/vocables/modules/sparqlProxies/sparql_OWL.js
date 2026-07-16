@@ -442,8 +442,8 @@ var Sparql_OWL = (function () {
      * Returns the ancestors of node(s) up to a given depth in an OWL hierarchy. Builds nested
      * `OPTIONAL` blocks chaining `?broaderN-1 rdfs:subClassOf|rdf:type ?broaderN` (excluding
      * `owl:Restriction`/`owl:Class`), grouping each node's types/superclasses/graphs via
-     * `GROUP_CONCAT`. Depth is capped at 9 when the source has imports (Virtuoso allows at most 20
-     * GROUP BY / hash-join keys: 2 fixed + 2 per level, so 2 + 2*9 = 20).
+     * `GROUP_CONCAT` with an explicit `GROUP BY` per (subject, broader, labels). Depth is capped
+     * at 9 (Virtuoso allows at most 20 GROUP BY / hash-join keys: 2 fixed + 2 per level, so 2 + 2*9 = 20).
      * @function
      * @name getNodeParents
      * @memberof module:Sparql_OWL
@@ -463,12 +463,12 @@ var Sparql_OWL = (function () {
      */
     self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
         if (Config.sources[sourceLabel].imports && Config.sources[sourceLabel].imports.length > 0) {
-            //limit at 9 ancestorsDepth when imports (Virtuoso SQ186: max 20 GROUP BY keys = 2 + 2*depth)
             if (!ancestorsDepth) {
                 ancestorsDepth = 1;
             }
-            ancestorsDepth = Math.min(ancestorsDepth, 9);
         }
+        //limit at 9 ancestorsDepth (Virtuoso SQ186: max 20 GROUP BY keys = 2 + 2*depth)
+        ancestorsDepth = Math.min(ancestorsDepth, 9);
 
         if (!Config.sources[sourceLabel].graphUri) {
             options.selectGraph = false;
@@ -530,7 +530,8 @@ var Sparql_OWL = (function () {
         // restrict ?subjectType to the FROM graphs: GRAPH ?subjectGraph with no FROM NAMED
         // otherwise matches every named graph in the store (Virtuoso), leaking types from individuals in other graphs
         query += " filter( ?subjectGraph" + i + " in " + fromList + " ).\n";
-        query += " OPTIONAL {?subject rdfs:subClassOf ?subjectSuperClass.FILTER(!regex(str(?subjectSuperClass), '^_:b'))}\n";
+        // isBlank also matches Virtuoso bnodes serialized as nodeID:// that the old '^_:b' regex missed
+        query += " OPTIONAL {?subject rdfs:subClassOf ?subjectSuperClass.FILTER(!isBlank(?subjectSuperClass))}\n";
         //query += " }\n";
         //ancestorsDepth = Math.min(ancestorsDepth, self.ancestorsDepth);
         for (var i = 1; i <= ancestorsDepth; i++) {
@@ -568,6 +569,14 @@ var Sparql_OWL = (function () {
         if (options.filterCollections) {
             query += "MINUS {?collection skos:member* ?aCollection.?acollection skos:member ?broader" + Sparql_common.getUriFilter("collection", options.filterCollections);
         }
+
+        // explicit GROUP BY : without it Virtuoso multiplies rows per (type, superClass, graph, label) combination
+        // and large subject batches overflow the query limit, silently losing subjects
+        var groupByStr = " GROUP BY ?subject ?subjectLabel";
+        for (var depthIndex = 1; depthIndex <= ancestorsDepth; depthIndex++) {
+            groupByStr += " ?broader" + depthIndex + " ?broader" + depthIndex + "Label";
+        }
+        query += groupByStr;
 
         var limit = options.limit || Config.queryLimit;
         query += " limit " + limit;

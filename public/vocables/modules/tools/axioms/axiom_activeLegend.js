@@ -742,10 +742,19 @@ var Axiom_activeLegend = (function () {
             data: { id: rootNodeId },
         });
 
+        var escapeAngleBrackets = function (label) {
+            if (!label || !label.replace) {
+                return label;
+            }
+            return label.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        };
+
         triples.forEach(function (triple, index) {
+            var subjectText = escapeAngleBrackets(triple.subject);
+            var objectText = escapeAngleBrackets(triple.object);
             jstreeData.push({
                 id: "triple" + index,
-                text: triple.subject + " <b>" + triple.predicate + "</b> " + triple.object,
+                text: subjectText + " <b>" + triple.predicate + "</b> " + objectText,
                 parent: "triplesRoot",
                 data: {
                     subject: triple.subject,
@@ -879,26 +888,24 @@ var Axiom_activeLegend = (function () {
 
             AxiomExtractor.deleteBasicAxioms(NodeInfosAxioms.currentSource, selectedTriples);
 
-            var remainingTriples = allTriples.filter(function (triple) {
-                return !selectedTriples.some(function (deleted) {
-                    return deleted.subject === triple.subject && deleted.predicate === triple.predicate && deleted.object === triple.object;
-                });
-            });
-
             var jstreeInstance = $("#axiomsTriplesJstree").jstree(true);
             checkedNodes.forEach(function (nodeId) {
                 jstreeInstance.delete_node(nodeId);
             });
 
-            Axioms_graph.clearGraph();
-            if (remainingTriples.length > 0) {
-                Axioms_graph.currentAxiomTriples = remainingTriples;
-                var rootNodeId = remainingTriples[0].subject;
-                var divId = "nodeInfosAxioms_graphDiv";
-                Axioms_graph.drawNodeAxioms2(NodeInfosAxioms.currentSource, rootNodeId, remainingTriples, divId, {});
-            }
-
             alert("triples deleted");
+
+            // redraw whole class axioms graph as in initial visualisation view
+            var classId = NodeInfosAxioms.currentResource.data.id;
+            AxiomExtractor.getClassAxiomsTriples(NodeInfosAxioms.currentSource, classId, function (err, classAxiomsTriples) {
+                if (err) {
+                    return MainController.errorAlert(err.responseText || err);
+                }
+                Axiom_UI.setView("visualisation");
+                Axioms_graph.clearGraph();
+                Axioms_graph.currentAxiomTriples = classAxiomsTriples;
+                Axioms_graph.drawNodeAxioms2(NodeInfosAxioms.currentSource, classId, classAxiomsTriples, "nodeInfosAxioms_graphDiv", {});
+            });
         });
     };
 
@@ -925,7 +932,7 @@ var Axiom_activeLegend = (function () {
             nodesMap[node.id] = node;
         });
 
-        if (visjsNode.data.axiomId || visjsNode.data.rootAxiom) {
+        if (visjsNode.data.axiomId > -1 || visjsNode.data.rootAxiom) {
             var visjsData = {
                 nodes: Axioms_graph.axiomsVisjsGraph.data.nodes.get(),
                 edges: Axioms_graph.axiomsVisjsGraph.data.edges.get(),
@@ -1118,21 +1125,19 @@ var Axiom_activeLegend = (function () {
 
                     Axiom_UI.axiomSaved = true;
 
-                    if (!self.showTriplesActivated) {
-                        Axioms_graph.currentAxiomTriples = triples;
-                        var rootNodeId = triples[0].subject;
-                        var divId = "nodeInfosAxioms_graphDiv";
-                        Axioms_graph.drawNodeAxioms2(self.currentSource, rootNodeId, triples, divId, {});
-                        self.showTriples();
-                    }
-
-                    if (self.showTriplesActivated) {
-                        $("#axiomEditor_deleteTriplesBtn").show();
-                    }
-
-                    if (callback) {
-                        return callback();
-                    }
+                    // redraw whole class axioms graph as in initial visualisation view
+                    var classId = NodeInfosAxioms.currentResource.data.id;
+                    AxiomExtractor.getClassAxiomsTriples(self.currentSource, classId, function (err, classAxiomsTriples) {
+                        if (err) {
+                            return MainController.errorAlert(err.responseText || err);
+                        }
+                        Axiom_UI.setView("visualisation");
+                        Axioms_graph.currentAxiomTriples = classAxiomsTriples;
+                        Axioms_graph.drawNodeAxioms2(self.currentSource, classId, classAxiomsTriples, "nodeInfosAxioms_graphDiv", {});
+                        if (callback) {
+                            return callback();
+                        }
+                    });
                 },
             );
 
@@ -1599,7 +1604,7 @@ var Axiom_activeLegend = (function () {
             }
             if (!blankNodeMapping[nodeId]) {
                 //  blankNodeMapping[nodeId] = "_:b" + generateHexaWithLetter(7);
-                blankNodeMapping[nodeId] = "<" + generateHexaWithLetter(10) + ">";
+                blankNodeMapping[nodeId] = "<_:b" + generateHexaWithLetter(10) + ">";
             }
             return blankNodeMapping[nodeId];
         }

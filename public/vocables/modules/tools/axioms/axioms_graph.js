@@ -111,6 +111,20 @@ var Axioms_graph = (function () {
                                 nodesMap[s].label = obj ? obj.label.replace(/_/g, " ") : null;
                             }
                         }
+
+                        // Register objects that are resources (not rdf:type targets, literals or rdf:nil) so that
+                        // referenced entities appearing only as objects (e.g. restriction onProperty properties or
+                        // fillers imported from another ontology) still get a graph node with its resolved label.
+                        var isTypePredicate = p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+                        var isRdfNil = o == "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil";
+                        var isLiteralObject = o.indexOf('"') == 0 || o.indexOf("^^") > -1;
+                        if (!isTypePredicate && !isRdfNil && !isLiteralObject && !nodesMap[o]) {
+                            nodesMap[o] = { id: o, axiomId: axiomIndex };
+                            if (o.indexOf("http") == 0) {
+                                var objectResource = Axiom_manager.allResourcesMap[o];
+                                nodesMap[o].label = objectResource ? objectResource.label.replace(/_/g, " ") : null;
+                            }
+                        }
                         if (p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" && !nodesMap[s].type) {
                             nodesMap[s].type = o;
                         } else if (p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" && o == "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil") {

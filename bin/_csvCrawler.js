@@ -190,5 +190,120 @@ var csvCrawler = {
             );
         });
     },
+
+    readCsvGenerator: async function* (filePath, options = {}) {
+        const batchSize = options.batchSize || 1000;
+        const maxLines = options.maxLines || null;
+
+        return new Promise((resolve, reject) => {
+            if (!fs.existsSync(filePath)) {
+                return reject(new Error("file does not exists :" + filePath));
+            }
+
+            util.getCsvFileSeparator(filePath, function (separator) {
+                if (!separator) {
+                    return reject(new Error("unable to determine column separator"));
+                }
+
+                const headers = [];
+                let batch = [];
+                let linesRead = 0;
+                let headersYielded = false;
+                let resolveNext = null;
+                let finished = false;
+                const queue = [];
+
+                const stream = fs.createReadStream(filePath);
+                const parser = csv({
+                    separator: separator,
+                    mapHeaders: ({ header }) => util.normalizeHeader(headers, header),
+                });
+
+                stream.on("error", (err) => {
+                    finished = true;
+                    if (resolveNext) {
+                        resolveNext({ done: true, value: err });
+                        resolveNext = null;
+                    }
+                    reject(err);
+                });
+
+                parser.on("error", (err) => {
+                    finished = true;
+                    if (resolveNext) {
+                        resolveNext({ done: true, value: err });
+                        resolveNext = null;
+                    }
+                    reject(err);
+                });
+
+                parser.on("header", (header) => {
+                    headers.push(header);
+                });
+
+                parser.on("data", (data) => {
+                    if (!headersYielded && headers.length > 0) {
+                        headersYielded = true;
+                        queue.push({ headers: [...headers], type: "headers" });
+                        if (resolveNext) {
+                            resolveNext({ done: false, value: queue.shift() });
+                            resolveNext = null;
+                        }
+                    }
+
+                    const emptyLine = headers.some((h) => data[h]);
+                    if (!emptyLine) return;
+
+                    linesRead++;
+                    batch.push(data);
+
+                    if (batch.length >= batchSize) {
+                        queue.push({ data: [...batch], type: "batch" });
+                        if (resolveNext) {
+                            resolveNext({ done: false, value: queue.shift() });
+                            resolveNext = null;
+                        }
+                        batch = [];
+                    }
+
+                    if (maxLines && linesRead >= maxLines) {
+                        stream.destroy();
+                        parser.destroy();
+                    }
+                });
+
+                parser.on("end", () => {
+                    if (batch.length > 0) {
+                        queue.push({ data: batch, type: "batch" });
+                        if (resolveNext) {
+                            resolveNext({ done: false, value: queue.shift() });
+                            resolveNext = null;
+                        }
+                    }
+                    finished = true;
+                    if (resolveNext) {
+                        resolveNext({ done: true });
+                    }
+                    resolve();
+                });
+
+                stream.pipe(parser);
+
+                const generator = async function* () {
+                    while (!finished || queue.length > 0) {
+                        if (queue.length > 0) {
+                            yield queue.shift();
+                        } else {
+                            await new Promise((resolve) => {
+                                resolveNext = resolve;
+                            });
+                        }
+                    }
+                };
+
+                resolve(generator());
+            });
+        }).then((gen) => gen);
+    },
 };
 export default csvCrawler;

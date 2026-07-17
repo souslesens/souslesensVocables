@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.12.0](https://github.com/souslesens/souslesensVocables/compare/3.11.0...3.12.0) (2026-07-17)
+
+
+### Bug Fixes
+
+* **admin:** overflow admin buttons ([4a4c4cb](https://github.com/souslesens/souslesensVocables/commit/4a4c4cbe649ee350df9083041bf4e65ee96333bf))
+* **Axioms:** improve delay of classes loading ([b69b23c](https://github.com/souslesens/souslesensVocables/commit/b69b23c9a0e905034c87ed7c119096b81beb2e34))
+* **Axioms:** little fixes of non blank nodes generation and fluidification of save/UI ([2e4a737](https://github.com/souslesens/souslesensVocables/commit/2e4a737806527bcfcc3893f9a078c69340d3909e))
+* **ConfigEditor:** no identical name in databases ([c9dfeaa](https://github.com/souslesens/souslesensVocables/commit/c9dfeaa3cb106abc324075ef64cadcc510abf9ed))
+* **lineage:** color in predicate display (ctrl+shift) for classes. ([c77e585](https://github.com/souslesens/souslesensVocables/commit/c77e585938264d65c06d628b67f3bb66a860e522))
+* **upload:** sanitize CSV filenames on select and on server ([cdc76de](https://github.com/souslesens/souslesensVocables/commit/cdc76de333c2becb34feded2fcc6d3b2a2e9033f))
+
 ## [3.11.0](https://github.com/souslesens/souslesensVocables/compare/3.10.0...3.11.0) (2026-07-07)
 
 

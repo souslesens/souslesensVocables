@@ -225,7 +225,7 @@ export default function () {
             "using the definitions table as context, and asks the LLM to assign one of: Exact match AI, SubclassOf, " +
             "SubclassOf inverse, Not match, Unknown. Provider and model come from `mainConfig.llm`. " +
             "Returns the classifications, per-category counts and token usage.",
-        security: [],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "postAlignment",
         parameters: [
             {

@@ -484,14 +484,16 @@ var Predicates_bot = (function () {
                 }
                 self.myBotEngine.showTree(jstreeData, null, { withCheckboxes: false, openAll: false, parentNodeIds: parentNodeIds }, null, function (selectedId, node) {
                     if (node && node.data && node.data.recentProperty) {
+                        // Recent entries prefill the property (and the previous object as an editable
+                        // default) but still route through the object step so the user can pick a
+                        // different object instead of re-creating the exact same triple.
                         self.params.selectedProperty = node.data.recentProperty;
                         self.params.selectedObject = node.data.recentObject;
                         self.params.isObjectProperty = null;
-                        self.params.skipObject = true;
                     } else {
                         self.params.selectedProperty = selectedId;
+                        self.params.selectedObject = null;
                         self.params.isObjectProperty = node && node.data && node.data.isObjectProperty !== undefined ? node.data.isObjectProperty : null;
-                        self.params.skipObject = false;
                     }
                     self.myBotEngine.nextStep();
                 });
@@ -501,12 +503,6 @@ var Predicates_bot = (function () {
         chooseObjectFn: function () {
             setDialogTitle("choose Object");
             $("#botPanel").parent().find("#previousButtonBot").show();
-
-            if (self.params.skipObject) {
-                self.params.skipObject = false;
-                executeSave();
-                return;
-            }
 
             var literalProp = isLiteralProperty(self.params.selectedProperty);
             if (!literalProp && self.params.isObjectProperty !== null && self.params.isObjectProperty !== undefined) {

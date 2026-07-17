@@ -188,32 +188,66 @@ var Axioms_suggestions = (function () {
         } else if (rangeClassId) {
             role = "domain";
         }
-        OntologyModels.getPropertyDomainsAndRanges(source, propId, role, function (err, result) {
-            if (err) return callback(err.responseText);
 
-            var data = [];
+        // ranges and domains constraints are already in memory (Config.ontologiesVocabularyModels)
+        // and the class hierarchy is preloaded by Axioms_manager.loadClassHierarchy at node axioms init,
+        // so everything is resolved in memory, no SPARQL query on click
+        var allSources = [source];
+        if (Config.sources[source] && Config.sources[source].imports) {
+            allSources = allSources.concat(Config.sources[source].imports);
+        }
 
-            if (role == "range" || role == null) {
-                var ranges = result.ranges;
-                for (var key in result.ranges) {
-                    result.ranges[key].resourceType = "Class";
-                    data.push(result.ranges[key]);
+        var matchingClassesMap = {};
+        allSources.forEach(function (constraintsSource) {
+            var vocabularyModel = Config.ontologiesVocabularyModels[constraintsSource];
+            if (!vocabularyModel) {
+                return;
+            }
+            var propertyConstraints = vocabularyModel.restrictions[propId] || [];
+            var otherConstraints = vocabularyModel.constraints[propId] || [];
+            if (!Array.isArray(otherConstraints)) {
+                otherConstraints = [otherConstraints];
+            }
+            propertyConstraints = propertyConstraints.concat(otherConstraints);
+
+            propertyConstraints.forEach(function (constraint) {
+                if (constraint.range && (!role || role == "range")) {
+                    matchingClassesMap[constraint.range] = { id: constraint.range, label: constraint.rangeLabel };
                 }
-            }
-            if (role == "domain" || role == null) {
-                var ranges = result.domains;
-                for (var key in result.domains) {
-                    result.domains[key].resourceType = "Class";
-                    data.push(result.domains[key]);
+                if (constraint.domain && (!role || role == "domain")) {
+                    matchingClassesMap[constraint.domain] = { id: constraint.domain, label: constraint.domainLabel };
                 }
-            }
-            if (data.length == 0) {
-                var allClasses = Axioms_manager.getAllClasses(NodeInfosAxioms.currentSource);
-                return callback(null, allClasses);
-            }
-            data = common.array.sort(data, "label");
-            return callback(null, data);
+            });
         });
+
+        var descendantIds = Axioms_manager.getClassDescendants(Object.keys(matchingClassesMap));
+        if (descendantIds) {
+            descendantIds.forEach(function (descendantId) {
+                if (!matchingClassesMap[descendantId]) {
+                    var resource = Axioms_manager.allResourcesMap[descendantId];
+                    matchingClassesMap[descendantId] = {
+                        id: descendantId,
+                        label: resource ? resource.label : Sparql_common.getLabelFromURI(descendantId),
+                    };
+                }
+            });
+        }
+
+        var data = [];
+        for (var classId in matchingClassesMap) {
+            matchingClassesMap[classId].resourceType = "Class";
+            if (!matchingClassesMap[classId].label) {
+                matchingClassesMap[classId].label = Sparql_common.getLabelFromURI(classId);
+            }
+            data.push(matchingClassesMap[classId]);
+        }
+
+        if (data.length == 0) {
+            var allClasses = Axioms_manager.getAllClasses(NodeInfosAxioms.currentSource);
+            return callback(null, allClasses);
+        }
+        data = common.array.sort(data, "label");
+        return callback(null, data);
     };
 
     self.getValidPropertiesForClasses = function (source, domainClassId, rangeClassId, options, callback) {

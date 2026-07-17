@@ -104,11 +104,38 @@ var Axioms_graph = (function () {
                             return "bnode";
                         }
 
+                        // resources from imports have no rdf:type triple in the axiom, resolve their type
+                        // from the resources map so they keep the same rendering as during axiom creation
+                        var resourceTypeUris = {
+                            Class: "http://www.w3.org/2002/07/owl#Class",
+                            ObjectProperty: "http://www.w3.org/2002/07/owl#ObjectProperty",
+                        };
+
                         if (!nodesMap[s]) {
                             nodesMap[s] = { id: s, axiomId: axiomIndex };
                             if (s.indexOf("http") == 0) {
                                 var obj = Axiom_manager.allResourcesMap[s];
                                 nodesMap[s].label = obj ? obj.label.replace(/_/g, " ") : null;
+                                if (obj && obj.resourceType && resourceTypeUris[obj.resourceType]) {
+                                    nodesMap[s].type = resourceTypeUris[obj.resourceType];
+                                }
+                            }
+                        }
+
+                        // Register objects that are resources (not rdf:type targets, literals or rdf:nil) so that
+                        // referenced entities appearing only as objects (e.g. restriction onProperty properties or
+                        // fillers imported from another ontology) still get a graph node with its resolved label.
+                        var isTypePredicate = p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+                        var isRdfNil = o == "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil";
+                        var isLiteralObject = o.indexOf('"') == 0 || o.indexOf("^^") > -1;
+                        if (!isTypePredicate && !isRdfNil && !isLiteralObject && !nodesMap[o]) {
+                            nodesMap[o] = { id: o, axiomId: axiomIndex };
+                            if (o.indexOf("http") == 0) {
+                                var objectResource = Axiom_manager.allResourcesMap[o];
+                                nodesMap[o].label = objectResource ? objectResource.label.replace(/_/g, " ") : null;
+                                if (objectResource && objectResource.resourceType && resourceTypeUris[objectResource.resourceType]) {
+                                    nodesMap[o].type = resourceTypeUris[objectResource.resourceType];
+                                }
                             }
                         }
                         if (p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" && !nodesMap[s].type) {

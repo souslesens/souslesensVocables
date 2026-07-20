@@ -2,6 +2,12 @@ import KGbuilder_main from "../../../../bin/KGbuilder/KGbuilder_main.js";
 import { processResponse } from "../utils.js";
 import userManager from "../../../../bin/user.js";
 
+function getNtExportFileName(source, table) {
+    var sourceName = source || "source";
+    var tableName = table || "table";
+    return (sourceName + "_" + tableName + ".nt").replace(/[\\/:*?"<>|]+/g, "_");
+}
+
 export default function () {
     let operations = {
         POST,
@@ -11,7 +17,20 @@ export default function () {
     async function POST(req, res, next) {
         try {
             const userInfo = await userManager.getUser(req.user);
-            KGbuilder_main.importTriplesFromCsvOrTable(userInfo.user, req.body.source, req.body.datasource, req.body.table, JSON.parse(req.body.options), function (err, result) {
+            var options = JSON.parse(req.body.options);
+            if (options.exportOnly && options.outputFormat == "nt") {
+                res.setHeader("Content-Type", "application/n-triples; charset=utf-8");
+                res.setHeader("Content-Disposition", 'attachment; filename="' + getNtExportFileName(req.body.source, req.body.table) + '"');
+                res.flushHeaders();
+                return KGbuilder_main.streamTriplesFromCsvOrTableAsNt(userInfo.user, req.body.source, req.body.datasource, req.body.table, options, res, function (err) {
+                    if (err) {
+                        return res.destroy(err);
+                    }
+                    res.end();
+                });
+            }
+
+            KGbuilder_main.importTriplesFromCsvOrTable(userInfo.user, req.body.source, req.body.datasource, req.body.table, options, function (err, result) {
                 processResponse(res, err, result);
             });
         } catch (e) {
@@ -25,8 +44,8 @@ export default function () {
         summary: "Generate KG triples from a CSV file or a SQL table",
         description:
             "Calls `KGbuilder_main.importTriplesFromCsvOrTable` to turn rows of `table` (either a SQL table inside `datasource` " +
-            "or a CSV file path) into RDF triples loaded into `source`'s named graph. `options` is a JSON-encoded string " +
-            "carrying mapping-time switches (e.g. `clientSocketId` for progress updates, column-to-property overrides).",
+            'or a CSV file path) into RDF triples loaded into `source`\'s named graph. With `exportOnly:true` and `outputFormat:"nt"`, ' +
+            "the route streams generated N-Triples to the response without writing to the triplestore.",
         operationId: "kgCreateTriplesFromCsvOrTable",
         parameters: [
             {
@@ -41,7 +60,8 @@ export default function () {
                         table: { type: "string", description: "Table name or CSV file name.", example: "assets" },
                         options: {
                             type: "string",
-                            description: "JSON-encoded options object.",
+                            description:
+                                'JSON-encoded options object. Use `sampleSize` for preview, or `exportOnly:true` with `outputFormat:"nt"` to return generated N-Triples without writing to the triplestore.',
                             example: '{"deleteOldGraph":false,"sampleSize":500,"clientSocketId":"abc-123"}',
                         },
                     },
@@ -76,7 +96,7 @@ export default function () {
                         totalTriplesCount: {
                             type: "object",
                             additionalProperties: { type: "integer" },
-                            description: "Map `tableName → number of triples loaded` for the regular (non-sample) run.",
+                            description: "Map `tableName → number of triples loaded` for the regular run. In export-only mode the response may return the total count as an integer.",
                         },
                     },
                     example: { sampleTriples: [], totalTriplesCount: { "assets.csv": 4321 } },

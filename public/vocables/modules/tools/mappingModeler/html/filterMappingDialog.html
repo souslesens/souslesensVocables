@@ -6,6 +6,7 @@
     <!-- <button class="w3-button slsv-button-3" onclick="TripleFactory.runSlsFilteredMappings()">Make triples</button>-->
 
     <button class="w3-button slsv-button-1" onclick="TripleFactory.runSlsFilteredMappings(true)">show Sample</button>
+    <button class="w3-button slsv-button-1" onclick="TripleFactory.runSlsFilteredMappings(false, { exportOnly: true, outputFormat: 'nt' })">Export NT</button>
     <button class="w3-button slsv-button-1" onclick="TripleFactory.runSlsFilteredMappings()" title="Save triples">Save in tripleStore</button>
     <br /><input type="checkbox" id="MappingModeler_indexAutoCBX" />index Automatically &nbsp; offset<input id="mappingTripleFactory_offset" value="0" />
 </div>

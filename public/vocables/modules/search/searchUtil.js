@@ -693,6 +693,58 @@ indexes.push(source.toLowerCase());
                             });
                         },
 
+                        // index classes of a source without taxonomy (no superClasses): attach them to owl:Thing
+                        function (callbackSeries) {
+                            if (taxonomyClasses.length > 0 || options.ids || Config.sources[sourceLabel].schemaType != "OWL") {
+                                return callbackSeries();
+                            }
+                            UI.message(sourceLabel + ": no taxonomy found, indexing all class labels under owl:Thing");
+                            Sparql_OWL.getClassesWithoutTaxonomy(sourceLabel, options, function (err, result) {
+                                if (err) {
+                                    return callbackEachSource(err);
+                                }
+                                var index = 0;
+                                var classesArray = [];
+                                for (var key in result.classesMap) {
+                                    classesArray.push(result.classesMap[key]);
+                                }
+                                var slices = common.array.slice(classesArray, 50);
+                                taxonomyClasses = classesArray;
+                                async.eachSeries(
+                                    slices,
+                                    function (data, callbackEach) {
+                                        if (data.length == 0) {
+                                            return callbackEach();
+                                        }
+
+                                        var replaceIndex = false;
+                                        if (index++ == 0) {
+                                            replaceIndex = true;
+                                        }
+                                        data.forEach(function (item) {
+                                            item.type = "Class";
+                                        });
+                                        self.indexData(sourceLabel.toLowerCase(), data, replaceIndex, function (err, result) {
+                                            if (err) {
+                                                return callbackEach(err);
+                                            }
+                                            if (!result) {
+                                                return callbackEach();
+                                            }
+                                            totalLines += result.length;
+                                            totalLinesAllsources += totalLines;
+                                            UI.message("indexed " + totalLines + "/" + classesArray.length + " in index " + sourceLabel.toLowerCase());
+
+                                            callbackEach();
+                                        });
+                                    },
+                                    function (err) {
+                                        return callbackSeries(err);
+                                    },
+                                );
+                            });
+                        },
+
                         // indexNamedIndividuals
                         function (callbackSeries) {
                             if (options.skipIndividuals) {

@@ -125,6 +125,7 @@ Backend modules are organized as Express.js route handlers and standalone utilit
 :maxdepth: 5
 :caption: Contents
 
+AI/index
 annotator/index
 axioms/index
 KG/index

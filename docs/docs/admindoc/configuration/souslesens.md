@@ -63,6 +63,9 @@ The `mainConfig.json` contain all the `souslesensVocables` configuration.
 -   `jowlServer`:
     -   `enabled`: `true` if the [JOWL](https://github.com/souslesens/jowl) server is enabled
     -   `url`: The JOWL URL, with protocol and port
+-   `llm`: The LLM provider configuration used by AI features.
+    -   `provider`: Active provider. Supported values: `anthropic`, `openrouter`, `ollama`.
+    -   `<provider>`: Provider-specific settings. The section name must match `provider`.
 -   `wiki`: The wiki configuration
     -   `url`: The wiki URL, with protocol and port
 -   `logs`: The logger configuration for the server
@@ -72,3 +75,56 @@ The `mainConfig.json` contain all the `souslesensVocables` configuration.
 -   `userData`: The configuration of the userData file management system
     -   `location`: the system used to store the file content (`file` or `database`)
     -   `maximumFileSize`: the maximum file content size allowed in the database (in bytes)
+
+### LLM provider configuration
+
+The AI integration is configured in `config/mainConfig.json` under the `llm` section. SLS reads and
+validates this section at startup from `model/config.js`, then `bin/AI/llmClient.js` selects the
+adapter matching `llm.provider`.
+
+Only one provider is active at a time:
+
+```json
+{
+    "llm": {
+        "provider": "anthropic",
+        "anthropic": {
+            "apiKey": "sk-ant-api03-...",
+            "defaultModel": "claude-sonnet-4-6",
+            "maxTokens": 1024,
+            "rateLimitTPM": 28000
+        }
+    }
+}
+```
+
+Supported providers:
+
+| Provider | Required settings | Optional settings |
+| --- | --- | --- |
+| `anthropic` | `apiKey`, `defaultModel` | `maxTokens`, `rateLimitTPM` |
+| `openrouter` | `apiKey`, `defaultModel` | `maxTokens`, `rateLimitTPM`, `appUrl`, `appName` |
+| `ollama` | `defaultModel` | `baseUrl`, `maxTokens`, `rateLimitTPM` |
+
+Defaults are defined in `model/config.js`. `ollama.baseUrl` defaults to `http://localhost:11434`.
+
+#### API key encryption
+
+LLM API keys can be stored encrypted in `mainConfig.json`. The server decrypts values prefixed with
+`enc:v1:` when `SLS_SECRET_KEY` is set.
+
+To print an encrypted key:
+
+```powershell
+$env:SLS_SECRET_KEY = "my-passphrase"
+node bin/AI/encryptKey.js sk-ant-api03-...
+```
+
+To encrypt the current `llm.<provider>.apiKey` in place:
+
+```powershell
+$env:SLS_SECRET_KEY = "my-passphrase"
+node bin/AI/encryptKey.js --in-place
+```
+
+The same `SLS_SECRET_KEY` must be available when the SLS server starts.

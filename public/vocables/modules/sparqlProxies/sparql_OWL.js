@@ -13,6 +13,7 @@
 import Sparql_common from "./sparql_common.js";
 import Sparql_generic from "./sparql_generic.js";
 import Sparql_proxy from "./sparql_proxy.js";
+import common from "../shared/common.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 
 /** The MIT License
@@ -2897,6 +2898,156 @@ var Sparql_OWL = (function () {
             if (result.query) return callback(null, result);
             return callback(null, result.results.bindings);
         });
+    };
+
+    /**
+     * Retrieves all OWL classes of a source that has no taxonomy (no rdfs:subClassOf hierarchy),
+     * attaching each class to owl:Thing so flat ontologies can still be indexed and searched.
+     * Used as a fallback by SearchUtil.generateElasticIndex when getSourceTaxonomy returns no class.
+     * @function
+     * @name getClassesWithoutTaxonomy
+     * @memberof module:Sparql_OWL
+     * @param {string} sourceLabel - Source name whose classes are retrieved
+     * @param {Object} [options] - Build options
+     * @param {string} [options.filter] - Extra SPARQL clause appended to the query
+     * @param {boolean} [options.withoutImports] - Exclude imported graphs from the `FROM` clause
+     * @param {Function} callback - Error-first callback `(err, {classesMap, labels})` where `classesMap` maps each class URI to `{id, label, lang, skoslabels, parents, type}` with `parents` set to `[sourceLabel, owl:Thing]`
+     * @returns {err|Object} Returns `{classesMap, labels}` through the callback; empty map for non-OWL sources.
+     * @expose
+     */
+    self.getClassesWithoutTaxonomy = function (sourceLabel, options, callback) {
+        if (!options) {
+            options = {};
+        }
+        var schemaType = Config.sources[sourceLabel].schemaType;
+        if (schemaType != "OWL") {
+            return callback(null, { classesMap: {}, labels: {} });
+        }
+
+        // flat ontology: owl:Thing is used as the single parent of every class
+        var owlThingUri = "http://www.w3.org/2002/07/owl#Thing";
+
+        var allClassesMap = {};
+        var allLabels = {};
+        var allData = [];
+
+        var resultSize = 1;
+        var limitSize = 500;
+        var offset = 0;
+
+        var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true);
+        var filter = options.filter || "";
+
+        var query =
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>SELECT distinct * \n" +
+            fromStr +
+            "WHERE {\n" +
+            "    ?subject rdf:type owl:Class .\n" +
+            "    ?subject rdfs:label ?subjectLabel .\n" +
+            filter +
+            "    OPTIONAL {\n" +
+            "        ?subject skos:prefLabel|skos:altLabel ?subjectAltLabel .\n" +
+            "    }\n" +
+            "}";
+
+        async.series(
+            [
+                // retrieve all class labels page by page
+                function (callbackSeries) {
+                    async.whilst(
+                        function (_test) {
+                            return resultSize > 0;
+                        },
+                        function (callbackWhilst) {
+                            var query2 = "" + query;
+                            query2 += " limit " + (limitSize + 1) + " offset " + offset;
+
+                            self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+                            var url = self.sparql_url + "?format=json&timeout=20000&debug=off&query=";
+                            Sparql_proxy.querySPARQL_GET_proxy(
+                                url,
+                                query2,
+                                "",
+                                {
+                                    source: sourceLabel,
+                                    dontCacheCurrentQuery: true,
+                                },
+                                function (err, result) {
+                                    if (err) {
+                                        console.error(query2);
+                                        return callbackWhilst(err);
+                                    }
+                                    result = result.results.bindings;
+                                    allData = allData.concat(result);
+                                    resultSize = result.length;
+                                    UI.message("retrieving " + sourceLabel + " class labels : " + allData.length);
+                                    offset += limitSize;
+                                    callbackWhilst();
+                                },
+                            );
+                        },
+                        function (err) {
+                            callbackSeries(err);
+                        },
+                    );
+                },
+
+                // format result
+                function (callbackSeries) {
+                    var skosLabelsMap = {};
+                    allData.forEach(function (item) {
+                        var subjectUri = item.subject.value;
+                        if (!skosLabelsMap[subjectUri]) {
+                            skosLabelsMap[subjectUri] = [];
+                        }
+                        if (item.subjectAltLabel && skosLabelsMap[subjectUri].indexOf(item.subjectAltLabel.value) < 0) {
+                            skosLabelsMap[subjectUri].push(item.subjectAltLabel.value);
+                        }
+                    });
+
+                    allData.forEach(function (item) {
+                        if (!item.subjectLabel) {
+                            return;
+                        }
+                        var subjectUri = item.subject.value;
+                        var conceptLabel = item.subjectLabel.value;
+                        var decapitalizedLabel = common.decapitalizeLabel(conceptLabel);
+                        if (decapitalizedLabel != conceptLabel) {
+                            if (skosLabelsMap[subjectUri].indexOf(conceptLabel) < 0) {
+                                skosLabelsMap[subjectUri].push(conceptLabel);
+                            }
+                            conceptLabel = decapitalizedLabel;
+                        }
+                        if (!allLabels[subjectUri]) {
+                            allLabels[subjectUri] = conceptLabel;
+                        }
+                        if (!allClassesMap[subjectUri]) {
+                            allClassesMap[subjectUri] = {
+                                id: subjectUri,
+                                label: conceptLabel,
+                                lang: item.subjectLabel["xml:lang"] || null,
+                                skoslabels: skosLabelsMap[subjectUri],
+                                parents: [sourceLabel, owlThingUri],
+                                type: "owl:Class",
+                            };
+                        } else {
+                            var newLang = item.subjectLabel["xml:lang"] || null;
+                            if (newLang === "en" && allClassesMap[subjectUri].lang !== "en") {
+                                allClassesMap[subjectUri].label = conceptLabel;
+                                allClassesMap[subjectUri].lang = "en";
+                            }
+                        }
+                    });
+                    callbackSeries();
+                },
+            ],
+            function (err) {
+                return callback(err, { classesMap: allClassesMap, labels: allLabels });
+            },
+        );
     };
 
     return self;

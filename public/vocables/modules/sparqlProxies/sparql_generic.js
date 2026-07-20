@@ -1348,7 +1348,7 @@ var Sparql_generic = (function () {
                                     allData = allData.concat(result);
                                     resultSize = result.length;
                                     totalCount += result.length;
-                                    //   UI.message(sourceLabel + "retreived triples :" + totalCount);
+                                    UI.message("retrieving " + sourceLabel + " taxonomy : " + totalCount + " triples");
                                     offset += limitSize;
                                     callbackWhilst();
                                 },

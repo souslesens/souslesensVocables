@@ -2937,6 +2937,7 @@ var Sparql_OWL = (function () {
 
         var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true);
         var filter = options.filter || "";
+        var indexedPredicates = Sparql_common.getIndexedPredicatesClauses(sourceLabel);
 
         var query =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
@@ -2950,8 +2951,9 @@ var Sparql_OWL = (function () {
             filter +
             "    OPTIONAL {\n" +
             "        ?subject skos:prefLabel|skos:altLabel ?subjectAltLabel .\n" +
-            "    }\n" +
-            "}";
+            "    }" +
+            indexedPredicates.optionalClauses +
+            "\n}";
 
         async.series(
             [
@@ -3006,6 +3008,7 @@ var Sparql_OWL = (function () {
                         if (item.subjectAltLabel && skosLabelsMap[subjectUri].indexOf(item.subjectAltLabel.value) < 0) {
                             skosLabelsMap[subjectUri].push(item.subjectAltLabel.value);
                         }
+                        Sparql_common.pushIndexedPredicateValues(item, indexedPredicates.variableNames, skosLabelsMap[subjectUri]);
                     });
 
                     allData.forEach(function (item) {

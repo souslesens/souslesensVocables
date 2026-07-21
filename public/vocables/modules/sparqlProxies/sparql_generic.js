@@ -1229,6 +1229,8 @@ var Sparql_generic = (function () {
         var allClassesMap = {};
         var allLabels = {};
         var allData = [];
+        // extra datatype properties (ex skos:notation) the source declares to enrich skoslabels
+        var indexedPredicates = schemaType == "OWL" ? Sparql_common.getIndexedPredicatesClauses(sourceLabel) : { optionalClauses: "", variableNames: [] };
 
         async.series(
             [
@@ -1283,8 +1285,9 @@ var Sparql_generic = (function () {
                             " filter (?firstParent!=owl:Class)\n" +
                             "    OPTIONAL {\n" +
                             "      ?subject skos:prefLabel|skos:altLabel ?subjectAltLabel .\n" +
-                            "    }\n" +
-                            "  }";
+                            "    }" +
+                            indexedPredicates.optionalClauses +
+                            "\n  }";
                     } else {
                         var query3 =
                             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
@@ -1382,6 +1385,9 @@ var Sparql_generic = (function () {
                         if (!skosLabelsMap[item.subject.value]) {
                             skosLabelsMap[item.subject.value] = [];
                         }
+                        // kept above the conceptLabel guard below: that guard always returns on this
+                        // loop (conceptLabel is only assigned in the next one), which would drop the values
+                        Sparql_common.pushIndexedPredicateValues(item, indexedPredicates.variableNames, skosLabelsMap[item.subject.value]);
 
                         if (!conceptLabel) {
                             return;

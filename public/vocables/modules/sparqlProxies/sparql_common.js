@@ -1207,6 +1207,59 @@ var Sparql_common = (function () {
         return sourcePrefix + ":" + label;
     };
 
+    /**
+     * Builds the OPTIONAL clauses fetching the extra datatype properties a source declares in
+     * `sources.json` as `indexedPredicates`. Their values are appended to the `skoslabels` field of
+     * the Elasticsearch documents so they become searchable alongside the usual alt labels.
+     * @function
+     * @name getIndexedPredicatesClauses
+     * @memberof module:Sparql_common
+     * @param {string} sourceLabel - Source whose `indexedPredicates` are read
+     * @param {string} [subjectVariableName="subject"] - SPARQL variable holding the indexed subject
+     * @returns {Object} `{optionalClauses, variableNames}`; both empty when the source declares none
+     */
+    self.getIndexedPredicatesClauses = function (sourceLabel, subjectVariableName) {
+        var sourceConfig = Config.sources[sourceLabel];
+        var indexedPredicates = sourceConfig ? sourceConfig.indexedPredicates : null;
+        if (!indexedPredicates || indexedPredicates.length == 0) {
+            return { optionalClauses: "", variableNames: [] };
+        }
+        if (!subjectVariableName) {
+            subjectVariableName = "subject";
+        }
+
+        var optionalClauses = "";
+        var variableNames = [];
+        indexedPredicates.forEach(function (predicateUri, predicateIndex) {
+            var variableName = "indexedPredicateValue" + predicateIndex;
+            variableNames.push(variableName);
+            optionalClauses += "\n    OPTIONAL { ?" + subjectVariableName + " <" + predicateUri + "> ?" + variableName + ". }";
+        });
+        return { optionalClauses: optionalClauses, variableNames: variableNames };
+    };
+
+    /**
+     * Pushes into `labels` the values bound by {@link getIndexedPredicatesClauses} for one SPARQL
+     * result row, skipping duplicates and unbound variables.
+     * @function
+     * @name pushIndexedPredicateValues
+     * @memberof module:Sparql_common
+     * @param {Object} binding - One SPARQL result row
+     * @param {string[]} variableNames - Variable names returned by `getIndexedPredicatesClauses`
+     * @param {string[]} labels - Array of labels to enrich (mutated in place)
+     */
+    self.pushIndexedPredicateValues = function (binding, variableNames, labels) {
+        variableNames.forEach(function (variableName) {
+            var predicateValue = binding[variableName];
+            if (!predicateValue || !predicateValue.value) {
+                return;
+            }
+            if (labels.indexOf(predicateValue.value) < 0) {
+                labels.push(predicateValue.value);
+            }
+        });
+    };
+
     return self;
 })();
 

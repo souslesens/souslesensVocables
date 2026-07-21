@@ -220,10 +220,7 @@ var Sparql_common = (function () {
                     }
                 });
 
-                var maxInClauseSize = 100;
-                var chunkedUriIds = uriIds.slice(0, maxInClauseSize);
-
-                chunkedUriIds.forEach(function (id, _index) {
+                uriIds.forEach(function (id, _index) {
                     if (!id) {
                         return;
                     }
@@ -255,7 +252,7 @@ var Sparql_common = (function () {
                 }
 
                 if (options.useFilterKeyWord) {
-                    if (chunkedUriIds.length == 1) {
+                    if (uriIds.length == 1) {
                         filters.push(" FILTER( ?" + varName + " =" + conceptIdsStr + ")");
                     } else {
                         filters.push(" FILTER( ?" + varName + " in (" + conceptIdsStr + "))");

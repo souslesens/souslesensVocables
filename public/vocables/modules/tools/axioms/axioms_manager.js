@@ -10,6 +10,7 @@ var Axioms_manager = (function () {
         self.allResourcesMap = {};
         self.allClasses = null;
         self.allProperties = null;
+        self.loadClassHierarchy(source);
 
         self.getAllClasses(source, function (err, result) {
             if (err) {
@@ -29,6 +30,72 @@ var Axioms_manager = (function () {
             if (callback) return callback(err, result);
         });
     };
+    /**
+     * loads once the direct rdfs:subClassOf pairs of the source (and its imports)
+     * so that class descendants can be resolved in memory without further SPARQL queries
+     */
+    self.loadClassHierarchy = function (source, callback) {
+        self.classChildrenMap = null;
+        var fromStr = Sparql_common.getFromStr(source, false, false);
+        var query =
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
+            "SELECT DISTINCT ?child ?parent " +
+            fromStr +
+            " WHERE { ?child rdfs:subClassOf ?parent. ?child a owl:Class. ?parent a owl:Class. }";
+
+        var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
+            if (err) {
+                if (callback) {
+                    return callback(err);
+                }
+                return console.error(err);
+            }
+            self.classChildrenMap = {};
+            result.results.bindings.forEach(function (binding) {
+                var parentUri = binding.parent.value;
+                var childUri = binding.child.value;
+                if (!self.classChildrenMap[parentUri]) {
+                    self.classChildrenMap[parentUri] = [];
+                }
+                self.classChildrenMap[parentUri].push(childUri);
+            });
+            if (callback) {
+                return callback(null, self.classChildrenMap);
+            }
+        });
+    };
+
+    /**
+     * resolves in memory all descendants of the given classes, using the hierarchy loaded by loadClassHierarchy
+     * returns null when the hierarchy is not loaded yet
+     */
+    self.getClassDescendants = function (classIds) {
+        if (!self.classChildrenMap) {
+            return null;
+        }
+        var descendants = {};
+
+        function recurse(classId) {
+            var children = self.classChildrenMap[classId];
+            if (!children) {
+                return;
+            }
+            children.forEach(function (childId) {
+                if (!descendants[childId]) {
+                    descendants[childId] = 1;
+                    recurse(childId);
+                }
+            });
+        }
+
+        classIds.forEach(function (classId) {
+            recurse(classId);
+        });
+        return Object.keys(descendants);
+    };
+
     self.getAllClasses = function (source, callback) {
         if (!source) {
             source = self.currentSource;

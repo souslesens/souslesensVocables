@@ -41,7 +41,7 @@ export default function () {
             "Reads the `bin/AI/prompts/classify_tests.md` prompt and sends it to the LLM provider " +
             "selected in `mainConfig.llm` (provider, model and API key). Takes no input. " +
             "Returns the model name, the raw LLM output and the token usage for the call.",
-        security: [],
+        security: [{ restrictAdmin: [] }],
         operationId: "getClassify",
         parameters: [],
         responses: {

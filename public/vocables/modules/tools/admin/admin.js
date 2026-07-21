@@ -13,6 +13,7 @@ import UIcontroller from "../mappingModeler/uiController.js";
 import CreateAnnotationPropertiesTemplate_bot from "../annotationPropertiesTemplate/createAnnotationPropertiesTemplate_bot.js";
 import AdminAnnotationPropertiesTemplate from "../annotationPropertiesTemplate/adminAnnotationPropertiesTemplate.js";
 import AssignAnnotationPropertiesTemplate_bot from "../annotationPropertiesTemplate/assignAnnotationPropertiesTemplate_bot.js";
+import IndexedPredicates_bot from "../../bots/indexedPredicates_bot.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Admin = (function () {
@@ -87,6 +88,13 @@ $("#sourceDivControlPanelDiv").html(html);*/
             skipIndividuals = true;
         }
 
+        // the indexed predicates are chosen once and applied to every checked source
+        IndexedPredicates_bot.start(sources, function () {
+            indexSources(sources, skipIndividuals);
+        });
+    };
+
+    function indexSources(sources, skipIndividuals) {
         async.eachSeries(
             sources,
             function (source, callbackEach) {
@@ -115,7 +123,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
                 $("#sourceSelector_jstreeDiv").jstree(true).uncheck_all();
             },
         );
-    };
+    }
 
     self.exportNT = function () {
         //   var sources =SourceSelectorWidget.getCheckedSources();

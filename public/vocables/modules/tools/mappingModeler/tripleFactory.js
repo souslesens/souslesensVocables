@@ -9,6 +9,7 @@ import UIcontroller from "./uiController.js";
 import DataSourceManager from "./dataSourcesManager.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import MappingColumnsGraph from "./mappingColumnsGraph.js";
+import IndexedPredicates_bot from "../../bots/indexedPredicates_bot.js";
 
 /**
  * The TripleFactory module handles the creation, filtering, and writing of RDF triples.
@@ -34,7 +35,7 @@ var TripleFactory = (function () {
             return alert("no graphUri for source " + graphSource);
         }
 
-        if (callback || confirm("index source " + graphSource)) {
+        function runIndexation() {
             UI.message("indexing graph...", false, true);
             SearchUtil.generateElasticIndex(graphSource, null, function (err, _result) {
                 if (err) {
@@ -51,6 +52,14 @@ var TripleFactory = (function () {
                     return callback();
                 }
             });
+        }
+
+        // a callback means a programmatic call: no user to answer the predicates bot
+        if (callback) {
+            return runIndexation();
+        }
+        if (confirm("index source " + graphSource)) {
+            IndexedPredicates_bot.start(graphSource, runIndexation);
         }
     };
 

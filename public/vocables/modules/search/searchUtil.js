@@ -396,7 +396,7 @@ indexes.push(source.toLowerCase());
                 return;
             }
             if (prefixOnly) {
-                queryParts.push(singleWord + "*");
+                queryParts.push("(" + singleWord + "* OR " + singleWord + ")");
                 return;
             }
             var fuzzyDistance = 2;

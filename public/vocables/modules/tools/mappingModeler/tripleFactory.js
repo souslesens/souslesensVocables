@@ -35,23 +35,46 @@ var TripleFactory = (function () {
         }
 
         if (callback || confirm("index source " + graphSource)) {
-            UI.message("indexing graph...", false, true);
-            SearchUtil.generateElasticIndex(graphSource, null, function (err, _result) {
-                if (err) {
-                    if (callback) {
-                        return callback(err.responseText);
-                    }
-                    return MainController.errorAlert(err.responseText);
-                }
-                UI.message("indexed graph " + Config.sources[graphSource].graphUri + " in index " + graphSource.toLowerCase(), true);
-                setTimeout(function () {
-                    UI.message("", false, true);
-                }, 5000);
-                if (callback) {
-                    return callback();
-                }
-            });
+            self.indexSourceGraph(graphSource, callback);
         }
+    };
+
+    /**
+     * Indexes a given source RDF graph in ElasticSearch, displaying progress and completion messages.
+     * Unlike {@link module:TripleFactory.indexGraph}, this does not prompt the user and targets an explicit source,
+     * so it can be triggered automatically at the end of a graph recreation.
+     * @function
+     * @name indexSourceGraph
+     * @memberof module:TripleFactory
+     * @param {string} graphSource - The SLS source name whose graph must be indexed.
+     * @param {function} [callback] - Error-first callback invoked once indexing finishes.
+     */
+    self.indexSourceGraph = function (graphSource, callback) {
+        if (!graphSource || !Config.sources[graphSource] || !Config.sources[graphSource].graphUri) {
+            var missingSourceError = "no graphUri for source " + graphSource;
+            if (callback) {
+                return callback(missingSourceError);
+            }
+            return alert(missingSourceError);
+        }
+
+        UI.message("indexing graph...", false, true);
+        SearchUtil.generateElasticIndex(graphSource, null, function (err, _result) {
+            if (err) {
+                var indexError = err.responseText || err;
+                if (callback) {
+                    return callback(indexError);
+                }
+                return MainController.errorAlert(indexError);
+            }
+            UI.message("indexed graph " + Config.sources[graphSource].graphUri + " in index " + graphSource.toLowerCase(), true);
+            setTimeout(function () {
+                UI.message("", false, true);
+            }, 5000);
+            if (callback) {
+                return callback();
+            }
+        });
     };
 
     /**
@@ -705,6 +728,9 @@ var TripleFactory = (function () {
                         if (!selectedIds || selectedIds.length === 0) {
                             return alert("Select at least one table");
                         }
+
+                        // ask once, before the deletion/generation starts, whether to reindex the source graph at the end
+                        MappingModeler.recreateIndexAfter = confirm("Would you like to index the graph after the generation of triples ?");
 
                         // all selected ?
                         var allSelected = selectedIds.length === tablesDisplayed.length;

@@ -55,6 +55,7 @@ var Sparql_proxy = (function () {
             options = {};
         }
 
+
         // Short-circuit: return the built query string without executing it.
         if (options.returnQueryStr === true) {
             return callback(null, { query: query });

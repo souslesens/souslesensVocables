@@ -220,82 +220,7 @@ var KGquery_graph = (function () {
         self.simulationOn = !self.simulationOn;
     };
 
-    /**
-     * Draws a common graph for all imported sources.
-     * Combines and deduplicates nodes and edges from multiple sources.
-     * @function
-     * @name DrawImportsCommonGraph
-     * @memberof module:KGquery_graph
-     * @returns {void}
-     */
-    // Deprecated method replaced by hypergraphMaker_bot
-    /* 
-    self.DrawImportsCommonGraph = function () {
-        var source = KGquery.currentSource;
-        var sources = [];
-        var imports = Config.sources[source].imports;
-        if (imports) {
-            sources = sources.concat(imports);
-        }
-        var visjsData = { nodes: [], edges: [] };
-        var uniqueNodes = {};
-        self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", { nodes: [], edges: [] }, self.visjsOptions);
-        async.eachSeries(
-            sources,
 
-            function (source, callbackEach) {
-                var visjsDataSource = { nodes: [], edges: [] };
-                self.downloadVisjsGraph(source, function (err, result) {
-                    if (err && err != "notFound") {
-                        return alert(err || err.responseText);
-                    }
-
-                    if (result) {
-                        visjsDataSource.nodes = result.nodes;
-                        visjsDataSource.edges = result.edges;
-                    }
-                    if (visjsDataSource.nodes) {
-                        visjsDataSource.nodes.forEach(function (node) {
-                            if (!uniqueNodes[node.id]) {
-                                uniqueNodes[node.id] = 1;
-                                node.x = null;
-                                node.y = null;
-                                //node.fixed = false;
-                                visjsData.nodes.push(node);
-                            }
-                        });
-                        visjsDataSource.edges.forEach(function (edge) {
-                            if (!uniqueNodes[edge.id]) {
-                                uniqueNodes[edge.id] = 1;
-                                visjsData.edges.push(edge);
-                            }
-                        });
-                    }
-                    self.visjsData = null;
-                    callbackEach();
-                });
-            },
-            function (err) {
-                if (err) {
-                    return MainController.errorAlert(err);
-                }
-
-                self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", visjsData, self.visjsOptions);
-
-                // cannot get colors from loadGraph ???!!
-                self.KGqueryGraph.draw(function () {
-                    self.simulationOn = true;
-                    var newNodes = [];
-                    visjsData.nodes.forEach(function (node) {
-                        newNodes.push({ id: node.id, color: node.color, shape: node.shape });
-                    });
-                    //  self.KGqueryGraph.data.nodes.update(visjsData.nodes);
-                });
-                KGquery_graph.message("xx3", true);
-            },
-        );
-    };
-    */
     /**
      * Gets the implicit model data in Vis.js format.
      * @function
@@ -928,63 +853,7 @@ var KGquery_graph = (function () {
                 },
                 true,
             );
-            /*UserDataWidget.listUserData(
-                {
-                    data_type: "KGmodelGraph",
-                    data_tool: "KGquery",
-                    data_source: MainController.currentSource,
-                },
-                function (err, result) {
-                    if (err) {
-                        return MainController.errorAlert(err || err.responseText);
-                    }
-                    if (result.length > 0) {
-                        // new method in userData
-                        // order to get last saved instance of our graph in user_data
-                        result = result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                        if (result[0]?.id) {
-                            UserDataWidget.loadUserDatabyId(result[0].id, function (err, result) {
-                                if (err) {
-                                    return callback("notFound");
-                                }
-                                if (!result || !result.data_content) {
-                                    return callback("notFound");
-                                }
-                                self.visjsData = result.data_content;
-                                self.currentUserDataModel = result;
-                                return callback(null, self.visjsData);
-                            });
-                        }
-                    } else {
-                        // get from file if the transition to userData is not done
 
-                        var visjsGraphFileName = source + "_KGmodelGraph.json";
-                        KGquery_graph.message("loading graph display");
-                        self.KGqueryGraph.loadGraph(
-                            visjsGraphFileName,
-                            null,
-                            function (err, result) {
-                                if (err) {
-                                    return callback("notFound");
-                                }
-                                self.visjsData = result;
-                                var display = "graph";
-                                if (result && result.options && result.options.output) {
-                                    display = result.options.output;
-                                }
-                                if (display == "list") {
-                                    $("#KGquery_displayGraphInList").prop("checked", false);
-                                } else {
-                                    $("#KGquery_displayGraphInList").prop("checked", true);
-                                }
-
-                                return callback(null, self.visjsData);
-                            },
-                            true,
-                        );
-                    }
-                },
-            );*/
         }
     };
     /**

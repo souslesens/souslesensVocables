@@ -1,11 +1,11 @@
 import BotEngineClass from "./_botEngineClass.js";
+import OntologyModels from "../shared/ontologyModels.js";
+import Sparql_common from "../sparqlProxies/sparql_common.js";
 
 /**
- * Pre-step of every manual indexation: lets the user either keep the predicates already configured
- * for the source, or pick extra datatype properties whose values are indexed into the `skoslabels`
- * field of the Elasticsearch documents, on top of the built-in rdfs:label / skos:prefLabel /
- * skos:altLabel. The selection is stored in `sources.json` as `indexedPredicates` and consumed at
- * indexation time by `Sparql_common.getIndexedPredicatesClauses`.
+ * Pre-step of every manual indexation: lets the user pick extra datatype and annotation
+ * properties that have string values in the source graph. The chosen values are indexed into the
+ * `skoslabels` field.
  */
 var IndexedPredicates_bot = (function () {
     var self = {};
@@ -14,33 +14,14 @@ var IndexedPredicates_bot = (function () {
     self.title = "Indexed predicates";
 
     self.workflow = {
-        chooseIndexationModeFn: {},
+        promptPredicatesSelectionFn: {},
     };
 
     self.functionTitles = {
-        chooseIndexationModeFn: "indexed predicates",
+        promptPredicatesSelectionFn: "indexed predicates",
     };
 
-    // Full URIs are stored because the indexation queries only declare the owl/rdf/rdfs/skos
-    // prefixes: a prefixed name from another vocabulary would break the generated SPARQL.
-    var indexablePredicates = [
-        { id: "http://www.w3.org/2004/02/skos/core#notation", label: "skos:notation", vocabulary: "skos" },
-        { id: "http://www.w3.org/2004/02/skos/core#hiddenLabel", label: "skos:hiddenLabel", vocabulary: "skos" },
-        { id: "http://www.w3.org/2004/02/skos/core#definition", label: "skos:definition", vocabulary: "skos" },
-        { id: "http://www.w3.org/2004/02/skos/core#example", label: "skos:example", vocabulary: "skos" },
-        { id: "http://www.w3.org/2000/01/rdf-schema#notation", label: "rdfs:notation", vocabulary: "rdfs" },
-        { id: "http://www.w3.org/2000/01/rdf-schema#comment", label: "rdfs:comment", vocabulary: "rdfs" },
-        { id: "http://purl.org/dc/terms/identifier", label: "dcterms:identifier", vocabulary: "dcterms" },
-        { id: "http://purl.org/dc/terms/title", label: "dcterms:title", vocabulary: "dcterms" },
-        { id: "http://purl.org/dc/terms/description", label: "dcterms:description", vocabulary: "dcterms" },
-        { id: "http://purl.org/dc/elements/1.1/identifier", label: "dc:identifier", vocabulary: "dc" },
-        { id: "http://purl.org/dc/elements/1.1/title", label: "dc:title", vocabulary: "dc" },
-    ];
-
-    var keepConfiguredModeId = "keepConfigured";
-    var customizeModeId = "customize";
-    // showTree ignores a validation with nothing checked, so emptying the list needs its own leaf
-    var clearSelectionNodeId = "__clearIndexedPredicates__";
+    var defaultIndexedPredicatesNodeId = "__defaultIndexedPredicates__";
 
     /**
      * @function start
@@ -56,130 +37,121 @@ var IndexedPredicates_bot = (function () {
         self.myBotEngine.init(IndexedPredicates_bot, self.workflow, null, function () {
             self.params = {
                 sources: sourcesToIndex,
+                currentSourceIndex: 0,
+                indexedPredicatesBySource: {},
                 indexationCallback: indexationCallback,
             };
             self.myBotEngine.nextStep();
         });
     };
 
-    function getConfiguredPredicates(source) {
-        return (Config.sources[source] && Config.sources[source].indexedPredicates) || [];
+    function getCurrentSource() {
+        return self.params.sources[self.params.currentSourceIndex];
     }
 
-    function buildPredicatesJstreeData(source) {
-        var configuredPredicates = getConfiguredPredicates(source);
-        var jstreeData = [{ id: clearSelectionNodeId, text: "none (index labels only)", parent: "#", data: { id: clearSelectionNodeId } }];
-        var vocabularyNodeIds = {};
+    function moveToNextSourceOrRunIndexation() {
+        self.params.currentSourceIndex += 1;
+        if (self.params.currentSourceIndex < self.params.sources.length) {
+            return self.functions.promptPredicatesSelectionFn();
+        }
+        runIndexation();
+    }
 
-        indexablePredicates.forEach(function (predicate) {
-            var vocabularyNodeId = "__vocabulary__" + predicate.vocabulary;
-            if (!vocabularyNodeIds[vocabularyNodeId]) {
-                vocabularyNodeIds[vocabularyNodeId] = true;
-                jstreeData.push({ id: vocabularyNodeId, text: predicate.vocabulary, parent: "#", type: "Folder", data: { id: vocabularyNodeId } });
+    function getDefaultIndexedPredicateIdsMap() {
+        var defaultIndexedPredicateIdsMap = {};
+        Sparql_common.getDefaultIndexedPredicates().forEach(function (predicate) {
+            if (!predicate.id) {
+                return;
+            }
+            defaultIndexedPredicateIdsMap[predicate.id] = true;
+        });
+        return defaultIndexedPredicateIdsMap;
+    }
+
+    function buildPredicatesJstreeData(source, indexablePredicates) {
+        var jstreeData = [
+            {
+                id: defaultIndexedPredicatesNodeId,
+                text: "Default indexed properties",
+                parent: "#",
+                type: "Folder",
+                data: { id: defaultIndexedPredicatesNodeId },
+            },
+        ];
+        var predicateTypeNodeIds = {};
+
+        Sparql_common.getDefaultIndexedPredicates().forEach(function (predicate) {
+            if (!predicate.id) {
+                return;
             }
             jstreeData.push({
                 id: predicate.id,
                 text: predicate.label,
-                parent: vocabularyNodeId,
+                parent: defaultIndexedPredicatesNodeId,
+                type: "Property",
+                data: { id: predicate.id, isDefaultIndexedPredicate: true },
+                state: { checked: true, disabled: true },
+            });
+        });
+
+        indexablePredicates.forEach(function (predicate) {
+            var predicateTypeNodeId = "__propertyType__" + encodeURIComponent(predicate.typeUri || predicate.typeLabel);
+            if (!predicateTypeNodeIds[predicateTypeNodeId]) {
+                predicateTypeNodeIds[predicateTypeNodeId] = true;
+                jstreeData.push({
+                    id: predicateTypeNodeId,
+                    text: predicate.typeLabel,
+                    parent: "#",
+                    type: "Folder",
+                    data: { id: predicateTypeNodeId },
+                });
+            }
+            jstreeData.push({
+                id: predicate.id,
+                text: predicate.label,
+                parent: predicateTypeNodeId,
                 type: "Property",
                 data: { id: predicate.id },
                 // `checked` and not `selected`: JstreeWidget mounts the checkbox plugin with tie_selection false
-                state: { checked: configuredPredicates.indexOf(predicate.id) > -1 },
+                state: { checked: false },
             });
         });
         return jstreeData;
     }
 
-    /**
-     * Writes the selection back to sources.json for every source about to be indexed. Descriptors
-     * are re-fetched from the API instead of reusing `Config.sources`, whose `sparql_server.url` has
-     * been resolved from `_default` to the actual endpoint on load and must not be persisted that way.
-     */
-    function saveIndexedPredicates(sources, selectedPredicates, callback) {
-        $.ajax({
-            type: "GET",
-            url: Config.apiUrl + "/sources",
-            dataType: "json",
-            success: function (data) {
-                async.eachSeries(
-                    sources,
-                    function (source, callbackEachSource) {
-                        var sourceDescriptor = data.resources ? data.resources[source] : null;
-                        if (!sourceDescriptor) {
-                            return callbackEachSource("source " + source + " not found");
-                        }
-                        sourceDescriptor.name = sourceDescriptor.name || source;
-                        sourceDescriptor.indexedPredicates = selectedPredicates;
-
-                        $.ajax({
-                            type: "PUT",
-                            url: Config.apiUrl + "/sources/" + encodeURIComponent(source),
-                            data: JSON.stringify(sourceDescriptor),
-                            contentType: "application/json",
-                            dataType: "json",
-                            success: function () {
-                                Config.sources[source].indexedPredicates = selectedPredicates;
-                                callbackEachSource();
-                            },
-                            error: function (err) {
-                                callbackEachSource(err.responseText || err);
-                            },
-                        });
-                    },
-                    function (err) {
-                        callback(err);
-                    },
-                );
-            },
-            error: function (err) {
-                callback(err.responseText || err);
-            },
-        });
-    }
-
     function runIndexation() {
         self.myBotEngine.closeDialog();
         if (self.params.indexationCallback) {
-            self.params.indexationCallback();
+            self.params.indexationCallback(self.params.indexedPredicatesBySource);
         }
     }
 
     function promptPredicatesSelection() {
-        var jstreeData = buildPredicatesJstreeData(self.params.sources[0]);
+        var source = getCurrentSource();
 
-        self.myBotEngine.showTree(jstreeData, null, { withCheckboxes: true, openAll: true }, null, function (checkedIds) {
-            var selectedPredicates = checkedIds.filter(function (checkedId) {
-                return checkedId != clearSelectionNodeId;
-            });
-            if (checkedIds.indexOf(clearSelectionNodeId) > -1) {
-                selectedPredicates = [];
+        OntologyModels.getIndexablePredicates(source, null, function (err, indexablePredicates) {
+            if (err) {
+                return MainController.errorAlert(err);
             }
 
-            saveIndexedPredicates(self.params.sources, selectedPredicates, function (err) {
-                if (err) {
-                    return MainController.errorAlert(err);
+            var jstreeData = buildPredicatesJstreeData(source, indexablePredicates);
+            var defaultIndexedPredicateIdsMap = getDefaultIndexedPredicateIdsMap();
+
+            self.myBotEngine.showTree(jstreeData, null, { withCheckboxes: true, openAll: true }, null, function (checkedIds) {
+                var selectedPredicates = checkedIds.filter(function (checkedId) {
+                    return !defaultIndexedPredicateIdsMap[checkedId];
+                });
+
+                if (selectedPredicates.length > 0) {
+                    self.params.indexedPredicatesBySource[source] = selectedPredicates;
                 }
-                runIndexation();
+                moveToNextSourceOrRunIndexation();
             });
         });
     }
 
     self.functions = {
-        chooseIndexationModeFn: function () {
-            var configuredPredicates = getConfiguredPredicates(self.params.sources[0]);
-            var configuredCount = configuredPredicates.length;
-            var choices = [
-                { id: keepConfiguredModeId, label: "index with the configured predicates (" + configuredCount + ")" },
-                { id: customizeModeId, label: "choose the predicates to index" },
-            ];
-
-            self.myBotEngine.showList(choices, null, null, null, function (chosenMode) {
-                if (chosenMode == keepConfiguredModeId) {
-                    return runIndexation();
-                }
-                promptPredicatesSelection();
-            });
-        },
+        promptPredicatesSelectionFn: promptPredicatesSelection,
     };
 
     return self;

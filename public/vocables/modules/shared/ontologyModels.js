@@ -1582,6 +1582,51 @@ var OntologyModels = (function () {
         );
     };
 
+    self.getIndexablePredicates = function (source, options, callback) {
+        if (!options) {
+            options = {};
+        }
+
+        var defaultIndexedPredicateIdsMap = {};
+        Sparql_common.getDefaultIndexedPredicates().forEach(function (predicate) {
+            if (!predicate.id) {
+                return;
+            }
+            defaultIndexedPredicateIdsMap[predicate.id] = true;
+        });
+
+        self.getKGnonObjectProperties(source, options, function (err, nonObjectPropertiesMap) {
+            if (err) {
+                return callback(err);
+            }
+            var predicatesMap = {};
+            var predicates = [];
+
+            for (var classUri in nonObjectPropertiesMap) {
+                nonObjectPropertiesMap[classUri].properties.forEach(function (property) {
+                    if (defaultIndexedPredicateIdsMap[property.id]) {
+                        return;
+                    }
+                    var propertyTypeLabel = "Annotation properties";
+
+                    if (predicatesMap[property.id]) {
+                        return;
+                    }
+
+                    var predicate = {
+                        id: property.id,
+                        label: Sparql_common.getPrefixedNameFromUri(property.id) || property.label || Sparql_common.getLabelFromURI(property.id),
+                        typeUri: propertyTypeLabel,
+                        typeLabel: propertyTypeLabel,
+                    };
+                    predicatesMap[property.id] = predicate;
+                    predicates.push(predicate);
+                });
+            }
+            callback(null, predicates);
+        });
+    };
+
     self.getContainerBreakdownClasses = function (source, callback) {
         var fromStr = Sparql_common.getFromStr(source, false, true);
 

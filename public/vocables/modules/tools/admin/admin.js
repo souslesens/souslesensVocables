@@ -88,13 +88,12 @@ $("#sourceDivControlPanelDiv").html(html);*/
             skipIndividuals = true;
         }
 
-        // the indexed predicates are chosen once and applied to every checked source
-        IndexedPredicates_bot.start(sources, function () {
-            indexSources(sources, skipIndividuals);
+        IndexedPredicates_bot.start(sources, function (indexedPredicatesBySource) {
+            indexSources(sources, skipIndividuals, indexedPredicatesBySource);
         });
     };
 
-    function indexSources(sources, skipIndividuals) {
+    function indexSources(sources, skipIndividuals, indexedPredicatesBySource) {
         async.eachSeries(
             sources,
             function (source, callbackEach) {
@@ -102,13 +101,17 @@ $("#sourceDivControlPanelDiv").html(html);*/
                     return callbackEach();
                 }
                 $("#waitImg").css("display", "block");
+                var indexationOptions = {
+                    indexProperties: 1,
+                    indexNamedIndividuals: 1,
+                    skipIndividuals: skipIndividuals,
+                };
+                if (indexedPredicatesBySource && indexedPredicatesBySource[source]) {
+                    indexationOptions.indexedPredicates = indexedPredicatesBySource[source];
+                }
                 SearchUtil.generateElasticIndex(
                     source,
-                    {
-                        indexProperties: 1,
-                        indexNamedIndividuals: 1,
-                        skipIndividuals: skipIndividuals,
-                    },
+                    indexationOptions,
                     function (err, _result) {
                         UI.message("DONE " + source, true);
                         callbackEach(err);

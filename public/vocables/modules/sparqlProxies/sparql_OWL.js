@@ -2937,7 +2937,7 @@ var Sparql_OWL = (function () {
 
         var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true);
         var filter = options.filter || "";
-        var indexedPredicates = Sparql_common.getIndexedPredicatesClauses(sourceLabel);
+        var indexedPredicates = Sparql_common.getIndexedPredicatesClauses(sourceLabel, null, options);
 
         var query =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +

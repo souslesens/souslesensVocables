@@ -1093,9 +1093,13 @@ var Lineage_sources = (function () {
             if (!confirm("Refresh index for " + source + " ?")) {
                 return;
             }
-            IndexedPredicates_bot.start(source, function () {
+            IndexedPredicates_bot.start(source, function (indexedPredicatesBySource) {
                 $("#waitImg").css("display", "block");
-                SearchUtil.generateElasticIndex(source, { indexProperties: 1, indexNamedIndividuals: 1 }, function (err, _result) {
+                var indexationOptions = { indexProperties: 1, indexNamedIndividuals: 1 };
+                if (indexedPredicatesBySource[source]) {
+                    indexationOptions.indexedPredicates = indexedPredicatesBySource[source];
+                }
+                SearchUtil.generateElasticIndex(source, indexationOptions, function (err, _result) {
                     $("#waitImg").css("display", "none");
                     if (err) {
                         return MainController.errorAlert(err);

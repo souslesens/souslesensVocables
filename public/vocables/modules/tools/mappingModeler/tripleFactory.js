@@ -35,9 +35,13 @@ var TripleFactory = (function () {
             return alert("no graphUri for source " + graphSource);
         }
 
-        function runIndexation() {
+        function runIndexation(indexedPredicatesBySource) {
             UI.message("indexing graph...", false, true);
-            SearchUtil.generateElasticIndex(graphSource, null, function (err, _result) {
+            var indexationOptions = {};
+            if (indexedPredicatesBySource && indexedPredicatesBySource[graphSource]) {
+                indexationOptions.indexedPredicates = indexedPredicatesBySource[graphSource];
+            }
+            SearchUtil.generateElasticIndex(graphSource, indexationOptions, function (err, _result) {
                 if (err) {
                     if (callback) {
                         return callback(err.responseText);

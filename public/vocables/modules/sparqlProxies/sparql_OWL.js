@@ -1779,6 +1779,7 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.includeBlankNodes] - Include blank-node ids
      * @param {boolean} [options.withoutImports] - Exclude imported graphs from the `FROM` clause
      * @param {boolean} [options.skosPrefLabel] - Also fetch `skos:prefLabel`
+     * @param {string[]} [options.indexedPredicates] - Extra predicates fetched for indexation, see {@link module:Sparql_common.getIndexedPredicatesClauses}
      * @param {number} [options.processorFectchSize] - Page size (defaults to 2000)
      * @param {number} [options.limit] - Total result cap (defaults to `Config.queryLimit`)
      * @param {Function} [processor] - Optional `(pageBindings, cb)` processor invoked per page; if omitted, pages are accumulated
@@ -1794,13 +1795,19 @@ var Sparql_OWL = (function () {
             options.selectGraph = false;
         }
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports);
+        var indexedPredicates = Sparql_common.getIndexedPredicatesClauses("id", options);
+        // ?skosPrefLabel and the indexed predicates variables are bound in optional clauses below:
+        // without them in the projection the triplestore never returns their values
+        var selectedLabelVariablesStr = (options.skosPrefLabel ? " ?skosPrefLabel" : "") + indexedPredicates.selectVariablesStr;
         var query =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
             "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> " +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
             "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> " +
-            "SELECT distinct  ?id ?type ?label " +
+            "SELECT distinct  ?id ?type ?label" +
+            selectedLabelVariablesStr +
+            " " +
             fromStr +
             " WHERE {";
         if (options.selectGraph) {
@@ -1840,7 +1847,7 @@ var Sparql_OWL = (function () {
             skosPrefLabel = "OPTIONAL {?id skos:prefLabel ?skosPrefLabel}";
         }
 
-        query += "{ " + typeFilterStr + " " + optionalLabel + " {?id rdfs:label ?label " + langFilter + "}" + filter + " }" + skosPrefLabel + "}";
+        query += "{ " + typeFilterStr + " " + optionalLabel + " {?id rdfs:label ?label " + langFilter + "}" + filter + " }" + skosPrefLabel + indexedPredicates.optionalClauses + "}";
 
         var allData = [];
         var resultSize = 1;
@@ -2937,7 +2944,7 @@ var Sparql_OWL = (function () {
 
         var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true);
         var filter = options.filter || "";
-        var indexedPredicates = Sparql_common.getIndexedPredicatesClauses(sourceLabel, null, options);
+        var indexedPredicates = Sparql_common.getIndexedPredicatesClauses(null, options);
 
         var query =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +

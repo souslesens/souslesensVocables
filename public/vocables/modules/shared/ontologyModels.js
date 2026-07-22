@@ -1492,6 +1492,8 @@ var OntologyModels = (function () {
      * @param {boolean} [options.includeBasicVocabulariesInSourceQuery=false] - Add basic vocabulary graphs to each source query instead of querying them as independent data sources.
      * @param {boolean} [options.includePropertyTypes=false] - Return the RDF type of each property.
      * @param {boolean} [options.onlyStringLiteralValues=false] - Keep only predicates whose values are string literals.
+     * @param {number} [options.limit=100] - Max rows retrieved per queried source. The default keeps the
+     * KGquery model lookup cheap; raise it when the exhaustive predicate list matters.
      * @param {string} [options.filter] - Additional SPARQL FILTER clause injected into the query.
      * @param {Function} callback - `function(err, { [classUri]: { id, label, properties } })`
      */
@@ -1519,6 +1521,8 @@ var OntologyModels = (function () {
         if (options.filter) {
             filter = options.filter;
         }
+        var defaultKGnonObjectPropertiesLimit = 100;
+        var queryLimit = options.limit || defaultKGnonObjectPropertiesLimit;
         var selectedTypeVariableName = options.includePropertyTypes ? "?type " : "";
         var stringLiteralValueFilter = "";
         if (options.onlyStringLiteralValues) {
@@ -1564,7 +1568,8 @@ var OntologyModels = (function () {
                     "    ?s ?prop ?o. values ?prop{rdfs:label}    bind ( datatype(?o) as ?datatype )\n" +
                     stringLiteralValueFilter +
                     "  }" +
-                    "} limit 100";
+                    "} limit " +
+                    queryLimit;
 
                 let url = Config.sparql_server.url + "?format=json&query=";
                 Sparql_proxy.querySPARQL_GET_proxy(url, queryNew, null, {}, function (err, result) {
@@ -1606,23 +1611,32 @@ var OntologyModels = (function () {
         );
     };
 
+    /**
+     * Lists the predicates of a source whose values are string literals, so the user can pick the ones
+     * to index into the `skoslabels` Elasticsearch field. Predicates always indexed
+     * ({@link module:Sparql_common.getDefaultIndexedPredicates}) are excluded from the result.
+     * @function
+     * @name getIndexablePredicates
+     * @memberof module:OntologyModels
+     * @param {string} source - Source name whose predicates are listed
+     * @param {Object} [options] - Options forwarded to {@link getKGnonObjectProperties}
+     * @param {number} [options.limit] - Overrides the exhaustive scan limit
+     * @param {Function} callback - Error-first callback `(err, [{id, label, typeUri, typeLabel}])`
+     */
     self.getIndexablePredicates = function (source, options, callback) {
         if (!options) {
             options = {};
         }
 
-        var defaultIndexedPredicateIdsMap = {};
-        Sparql_common.getDefaultIndexedPredicates().forEach(function (predicate) {
-            if (!predicate.id) {
-                return;
-            }
-            defaultIndexedPredicateIdsMap[predicate.id] = true;
-        });
+        // the picker must list every string predicate of the source, not the cheap sample the
+        // KGquery model lookup settles for
+        var indexablePredicatesScanLimit = 10000;
+        var defaultIndexedPredicateIdsMap = Sparql_common.getDefaultIndexedPredicateIdsMap();
         var annotationPropertyUri = Sparql_common.getUriFromPrefixedName("owl:AnnotationProperty");
         var datatypePropertyUri = Sparql_common.getUriFromPrefixedName("owl:DatatypeProperty");
         var rdfPropertyUri = Sparql_common.getUriFromPrefixedName("rdf:Property");
 
-        var indexablePredicatesOptions = Object.assign({}, options, {
+        var indexablePredicatesOptions = Object.assign({ limit: indexablePredicatesScanLimit }, options, {
             includeBasicVocabulariesInSourceQuery: true,
             includePropertyTypes: true,
             onlyStringLiteralValues: true,
@@ -1637,7 +1651,7 @@ var OntologyModels = (function () {
 
             for (var classUri in nonObjectPropertiesMap) {
                 nonObjectPropertiesMap[classUri].properties.forEach(function (property) {
-                    if (defaultIndexedPredicateIdsMap[property.id]) {
+                    if (defaultIndexedPredicateIdsMap[property.id] || predicatesMap[property.id]) {
                         return;
                     }
                     var propertyTypeUri = property.type || annotationPropertyUri;
@@ -1646,10 +1660,6 @@ var OntologyModels = (function () {
                         propertyTypeLabel = "Datatype properties";
                     } else if (propertyTypeUri == rdfPropertyUri) {
                         propertyTypeLabel = "RDF properties";
-                    }
-
-                    if (predicatesMap[property.id]) {
-                        return;
                     }
 
                     var predicate = {

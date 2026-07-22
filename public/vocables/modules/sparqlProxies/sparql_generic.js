@@ -1229,8 +1229,8 @@ var Sparql_generic = (function () {
         var allClassesMap = {};
         var allLabels = {};
         var allData = [];
-        // extra datatype properties (ex skos:notation) the source declares to enrich skoslabels
-        var indexedPredicates = schemaType == "OWL" ? Sparql_common.getIndexedPredicatesClauses(sourceLabel, null, options) : { optionalClauses: "", variableNames: [] };
+        // extra datatype properties (ex skos:notation) the user selected to enrich skoslabels
+        var indexedPredicates = Sparql_common.getIndexedPredicatesClauses(null, options);
 
         async.series(
             [
@@ -1321,6 +1321,7 @@ var Sparql_generic = (function () {
                             where = "{" + where1 + "}\n UNION \n{" + where2 + "}";
                         }
                         query += where;
+                        query += indexedPredicates.optionalClauses;
                         query += "}";
                     }
 

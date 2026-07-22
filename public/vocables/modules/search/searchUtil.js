@@ -368,16 +368,30 @@ indexes.push(source.toLowerCase());
     };
     /**
      * Builds an ElasticSearch query_string fragment for a search term. By default each word
-     * gets Levenshtein fuzziness (word~n). When prefixOnly is true, each plain word becomes a
-     * prefix match (word*) instead, so partial typing (e.g. "abd") matches longer labels
-     * ("abdulnasser") — this prefix mode is used only by the lineage tool. A word already
-     * containing "*" is kept as-is in both modes (fuzziness would be invalid on a wildcard).
+     * gets Levenshtein fuzziness (word~n). When prefixOnly is true, each plain word becomes
+     * "(word* OR word)" instead, so partial typing ("abd") matches longer labels
+     * ("abdulnasser"). This prefix mode is used only by the lineage tool.
+     *
+     * The second branch of the OR is not redundant with the wildcard: the label field is
+     * indexed with the english_stemmed analyzer (see elasticRestProxy createIndex), while
+     * query_string leaves a wildcard term unanalyzed, so that term is matched against
+     * already stemmed tokens. Without the second branch, typing a whole word finds less than
+     * typing its beginning: "properties*" misses the indexed token "properti", where
+     * "propert*" matches it. The parentheses keep both branches grouped per word, the
+     * query_string running with default_operator AND.
+     *
+     * Both branches match a token, not the whole label, since english_stemmed splits on the
+     * standard tokenizer: "vice" matches "Machine vice" as well as "Vice". Restricting the
+     * matches to the beginning of the label would need another field, not another operator.
+     *
+     * A word already containing "*" is kept as-is in both modes (fuzziness would be invalid
+     * on a wildcard).
      * @function
      * @name makeFuzzyQueryString
      * @memberof module:SearchUtil
      * @param {string} word - Already escaped search term, possibly holding several words
-     * @param {boolean} [prefixOnly] - When true, use prefix matching (word*) instead of fuzziness
-     * @returns {string} query_string expression, e.g. "abd*" (prefix) or "abd~1" (fuzzy)
+     * @param {boolean} [prefixOnly] - When true, use prefix matching instead of fuzziness
+     * @returns {string} query_string expression, e.g. "(abd* OR abd)" (prefix) or "abd~1" (fuzzy)
      */
     self.makeFuzzyQueryString = function (word, prefixOnly) {
         // to add fuziness in query string elastic search, the parameter isn't available

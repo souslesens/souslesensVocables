@@ -201,9 +201,6 @@ export const ServerSourceSchema = z.object({
     published: z.boolean().default(false),
     imports: z.array(z.string()).default([]),
     taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
-    // extra datatype property URIs whose values enrich the skoslabels field at indexation time,
-    // edited from the vanilla app through IndexedPredicates_bot
-    indexedPredicates: z.array(z.string()).default([]),
     accessControl: z.string().default(""),
 });
 
@@ -231,7 +228,6 @@ const InputSourceSchemaBase = {
     published: z.boolean().default(false),
     imports: z.array(z.string()).default([]),
     taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
-    indexedPredicates: z.array(z.string()).default([]),
 };
 
 export const InputSourceSchema = z.object(InputSourceSchemaBase);

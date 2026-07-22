@@ -33,6 +33,14 @@ var Sparql_common = (function () {
         owl: "http://www.w3.org/2002/07/owl#",
     };
 
+    function getPrefixNamespaceUri(prefix) {
+        var namespaceUri = Config.defaultSparqlPrefixes && Config.defaultSparqlPrefixes[prefix] ? Config.defaultSparqlPrefixes[prefix] : self.basicPrefixes[prefix];
+        if (!namespaceUri) {
+            return null;
+        }
+        return namespaceUri.replace("<", "").replace(">", "");
+    }
+
     var checkClosingBrackets = function (str) {
         var c1 = (str.match(/\(/g) || []).length;
         var c2 = (str.match(/\)/g) || []).length;
@@ -1207,20 +1215,64 @@ var Sparql_common = (function () {
         return sourcePrefix + ":" + label;
     };
 
+    self.getUriFromPrefixedName = function (prefixedName) {
+        if (!prefixedName || prefixedName.indexOf(":") < 1) {
+            return null;
+        }
+        var prefix = prefixedName.substring(0, prefixedName.indexOf(":"));
+        var localName = prefixedName.substring(prefixedName.indexOf(":") + 1);
+        var namespaceUri = getPrefixNamespaceUri(prefix);
+        if (!namespaceUri) {
+            return null;
+        }
+        return namespaceUri + localName;
+    };
+
+    self.getPrefixedNameFromUri = function (uri) {
+        if (!uri) {
+            return "";
+        }
+        var defaultSparqlPrefixes = Config.defaultSparqlPrefixes || {};
+        for (var prefix in defaultSparqlPrefixes) {
+            var namespaceUri = getPrefixNamespaceUri(prefix);
+            if (namespaceUri && uri.indexOf(namespaceUri) == 0) {
+                return prefix + ":" + uri.substring(namespaceUri.length);
+            }
+        }
+        for (var basicPrefix in self.basicPrefixes) {
+            var basicNamespaceUri = getPrefixNamespaceUri(basicPrefix);
+            if (basicNamespaceUri && uri.indexOf(basicNamespaceUri) == 0) {
+                return basicPrefix + ":" + uri.substring(basicNamespaceUri.length);
+            }
+        }
+        return "";
+    };
+
+    self.getDefaultIndexedPredicates = function () {
+        var defaultIndexedPredicateNames = ["rdfs:label", "skos:prefLabel", "skos:altLabel"];
+        return defaultIndexedPredicateNames.map(function (prefixedName) {
+            return {
+                id: self.getUriFromPrefixedName(prefixedName),
+                label: prefixedName,
+            };
+        });
+    };
+
     /**
-     * Builds the OPTIONAL clauses fetching the extra datatype properties a source declares in
-     * `sources.json` as `indexedPredicates`. Their values are appended to the `skoslabels` field of
-     * the Elasticsearch documents so they become searchable alongside the usual alt labels.
+     * Builds the OPTIONAL clauses fetching the extra datatype properties selected for the current
+     * indexation run. Their values are appended to the `skoslabels` field of the Elasticsearch
+     * documents so they become searchable alongside the usual alt labels.
      * @function
      * @name getIndexedPredicatesClauses
      * @memberof module:Sparql_common
-     * @param {string} sourceLabel - Source whose `indexedPredicates` are read
+     * @param {string} sourceLabel - Indexed source name
      * @param {string} [subjectVariableName="subject"] - SPARQL variable holding the indexed subject
-     * @returns {Object} `{optionalClauses, variableNames}`; both empty when the source declares none
+     * @param {Object} [options] - Indexation options
+     * @param {string[]} [options.indexedPredicates] - Explicit predicates for this run
+     * @returns {Object} `{optionalClauses, variableNames}`; both empty when no predicates are selected
      */
-    self.getIndexedPredicatesClauses = function (sourceLabel, subjectVariableName) {
-        var sourceConfig = Config.sources[sourceLabel];
-        var indexedPredicates = sourceConfig ? sourceConfig.indexedPredicates : null;
+    self.getIndexedPredicatesClauses = function (sourceLabel, subjectVariableName, options) {
+        var indexedPredicates = options ? options.indexedPredicates : null;
         if (!indexedPredicates || indexedPredicates.length == 0) {
             return { optionalClauses: "", variableNames: [] };
         }

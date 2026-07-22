@@ -1230,7 +1230,7 @@ var Sparql_generic = (function () {
         var allLabels = {};
         var allData = [];
         // extra datatype properties (ex skos:notation) the source declares to enrich skoslabels
-        var indexedPredicates = schemaType == "OWL" ? Sparql_common.getIndexedPredicatesClauses(sourceLabel) : { optionalClauses: "", variableNames: [] };
+        var indexedPredicates = schemaType == "OWL" ? Sparql_common.getIndexedPredicatesClauses(sourceLabel, null, options) : { optionalClauses: "", variableNames: [] };
 
         async.series(
             [

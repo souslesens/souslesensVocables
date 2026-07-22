@@ -128,18 +128,14 @@ var Browse = (function () {
             if (e.which == 13) {
                 var term = $("#Browse_searchAllSourcesTermInput").val();
                 var exactMatch = $("#Browse_exactMatchCBX").prop("checked");
-                var mode = "fuzzyMatch";
-                if (exactMatch) {
-                    mode = "exactMatch";
-                }
+                // the user browses to reach one entity, the checkbox only says whether its label is
+                // known whole. The intent used to be built by appending "*" to the term, which sent
+                // it through the search untouched, losing the branch matching the stemmed tokens
+                var searchIntent = exactMatch ? SearchUtil.searchIntents.resolveKnown : SearchUtil.searchIntents.pickEntity;
                 var options = {
                     parentlabels: true,
                     skosLabels: true,
                     fields: ["label", "skoslabels"], // "parents.keyword", "parent.keyword", "id.keyword"]
-                    // prefix matching is asked here rather than by appending "*" to the term: a term
-                    // carrying its own wildcard is passed through untouched, losing the branch that
-                    // matches the stemmed tokens, so a whole word found less than its own beginning
-                    prefixSearch: mode == "fuzzyMatch",
                 };
                 if (!term || term == "") {
                     return alert(" enter a word ");
@@ -156,7 +152,7 @@ var Browse = (function () {
                 }
 
                 UI.setDialogTitle("#mainDialogDiv", title);
-                SearchUtil.getSimilarLabelsInSources(null, sources, [term], null, mode, options, function (_err, result) {
+                SearchUtil.getSimilarLabelsInSources(null, sources, [term], null, searchIntent, options, function (_err, result) {
                     if (_err) {
                         return MainController.errorAlert(err.responseText);
                     }
@@ -435,8 +431,7 @@ var Browse = (function () {
             fields: ["id.keyword"],
         };
         var term = hitId;
-        var mode = "exactMatch";
-        SearchUtil.getSimilarLabelsInSources(null, sources, [term], null, mode, options, function (_err, result) {
+        SearchUtil.getSimilarLabelsInSources(null, sources, [term], null, SearchUtil.searchIntents.resolveKnown, options, function (_err, result) {
             if (result && result.length > 0) {
                 var matches = result[0].matches;
                 if (Object.keys(matches).length == 0) {

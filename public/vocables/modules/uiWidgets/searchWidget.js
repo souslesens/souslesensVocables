@@ -146,20 +146,14 @@ var SearchWidget = (function () {
         var jstreeData = [];
         var uniqueIds = {};
 
-        var mode = "fuzzyMatch";
+        // the intent belongs to the caller, which knows what its user is doing with the result.
+        // It used to be deduced from MainController.currentTool, which made two callers of this
+        // widget filling the very same tree behave differently for no reason
+        var searchIntent = options.searchIntent || SearchUtil.searchIntents.findCandidates;
         if (exactMatch) {
-            mode = "exactMatch";
+            // a term holding a wildcard has nothing to match exactly, it stays tolerant
+            searchIntent = term.indexOf("*") > 1 ? SearchUtil.searchIntents.findCandidates : SearchUtil.searchIntents.resolveKnown;
         }
-
-        if (term.indexOf("*") > 1) {
-            mode = "fuzzyMatch";
-        }
-
-        // prefix search belongs to the caller: it says whether its user is picking an entity, which
-        // calls for strict matching, or looking for candidates, which calls for fuzziness. Deducing
-        // it from the current tool made two callers of the same widget behave differently for no
-        // reason. An exact match search overrides it, having no word to complete
-        options.prefixSearch = !exactMatch && options.prefixSearch === true;
 
         options.parentlabels = true;
 
@@ -170,7 +164,7 @@ var SearchWidget = (function () {
             options.skosLabels = 1;
         }
 
-        SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (_err, result) {
+        SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, searchIntent, options, function (_err, result) {
             if (_err) {
                 if (callback) {
                     return callback(_err);
@@ -617,9 +611,8 @@ var SearchWidget = (function () {
         if (!options) {
             options = {};
         }
-        // entry point of the classes tab: its user picks a class, so each word is matched on its
-        // prefix and never approximated
-        options.prefixSearch = true;
+        // entry point of the classes tab, whose user picks a class
+        options.searchIntent = SearchUtil.searchIntents.pickEntity;
         var term = options.term || $("#searchWidget_searchTermInput").val();
 
         if (term && term.trim()) {

@@ -376,7 +376,7 @@ var Standardizer = (function () {
                 var indexes = self.getSelectedIndexes();
 
                 self.currentWordsCount += words.length;
-                SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, 10000, {}, function (err, result) {
+                SearchUtil.getElasticSearchMatches(words, indexes, SearchUtil.searchIntents.resolveKnown, 0, 10000, {}, function (err, result) {
                     var html = self.processMatrixResult(words, result, indexes);
                     UI.message(" processed items: " + totalProcessed);
                     $("#KGmapping_matrixContainer").append(html);
@@ -468,7 +468,7 @@ var Standardizer = (function () {
                         });
 
                         var indexes = self.getSelectedIndexes(true);
-                        SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, {}, function (err, result) {
+                        SearchUtil.getElasticSearchMatches(words, indexes, SearchUtil.searchIntents.resolveKnown, 0, size, {}, function (err, result) {
                             if (err) return callbackWhilst(err);
                             //  self.getMatchesClassesByIndex(result)
                             self.addDictionaryMatches(objects, function (err, result2) {
@@ -1166,7 +1166,7 @@ var Standardizer = (function () {
                     UI.message("matching " + words.length + "words");
                     var size = 200;
 
-                    SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, {}, function (err, result) {
+                    SearchUtil.getElasticSearchMatches(words, indexes, SearchUtil.searchIntents.resolveKnown, 0, size, {}, function (err, result) {
                         if (err) return callbackSeries(err);
                         searchResultArray = result;
                         UI.message("matches found :" + searchResultArray.length);

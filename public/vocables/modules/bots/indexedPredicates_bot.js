@@ -57,18 +57,7 @@ var IndexedPredicates_bot = (function () {
         runIndexation();
     }
 
-    function getDefaultIndexedPredicateIdsMap() {
-        var defaultIndexedPredicateIdsMap = {};
-        Sparql_common.getDefaultIndexedPredicates().forEach(function (predicate) {
-            if (!predicate.id) {
-                return;
-            }
-            defaultIndexedPredicateIdsMap[predicate.id] = true;
-        });
-        return defaultIndexedPredicateIdsMap;
-    }
-
-    function buildPredicatesJstreeData(source, indexablePredicates) {
+    function buildPredicatesJstreeData(indexablePredicates) {
         var jstreeData = [
             {
                 id: defaultIndexedPredicatesNodeId,
@@ -76,6 +65,9 @@ var IndexedPredicates_bot = (function () {
                 parent: "#",
                 type: "Folder",
                 data: { id: defaultIndexedPredicatesNodeId },
+                // disabled on the folder too: unchecking it would cascade on its children, while these
+                // predicates are hard-coded in the indexation queries and indexed whatever the user does
+                state: { checked: true, disabled: true },
             },
         ];
         var predicateTypeNodeIds = {};
@@ -131,13 +123,19 @@ var IndexedPredicates_bot = (function () {
 
         OntologyModels.getIndexablePredicates(source, null, function (err, indexablePredicates) {
             if (err) {
-                return MainController.errorAlert(err);
+                // the indexation itself must not be cancelled because the predicates could not be listed
+                MainController.errorAlert(err);
+                return moveToNextSourceOrRunIndexation();
+            }
+            if (indexablePredicates.length == 0) {
+                return moveToNextSourceOrRunIndexation();
             }
 
-            var jstreeData = buildPredicatesJstreeData(source, indexablePredicates);
-            var defaultIndexedPredicateIdsMap = getDefaultIndexedPredicateIdsMap();
+            var jstreeData = buildPredicatesJstreeData(indexablePredicates);
+            var defaultIndexedPredicateIdsMap = Sparql_common.getDefaultIndexedPredicateIdsMap();
+            self.myBotEngine.insertBotMessage("Indexed predicates for " + source, { isQuestion: true });
 
-            self.myBotEngine.showTree(jstreeData, null, { withCheckboxes: true, openAll: true }, null, function (checkedIds) {
+            self.myBotEngine.showTree(jstreeData, null, { withCheckboxes: true, openAll: true, allowEmptySelection: true }, null, function (checkedIds) {
                 var selectedPredicates = checkedIds.filter(function (checkedId) {
                     return !defaultIndexedPredicateIdsMap[checkedId];
                 });

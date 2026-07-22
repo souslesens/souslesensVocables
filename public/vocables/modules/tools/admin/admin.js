@@ -109,14 +109,10 @@ $("#sourceDivControlPanelDiv").html(html);*/
                 if (indexedPredicatesBySource && indexedPredicatesBySource[source]) {
                     indexationOptions.indexedPredicates = indexedPredicatesBySource[source];
                 }
-                SearchUtil.generateElasticIndex(
-                    source,
-                    indexationOptions,
-                    function (err, _result) {
-                        UI.message("DONE " + source, true);
-                        callbackEach(err);
-                    },
-                );
+                SearchUtil.generateElasticIndex(source, indexationOptions, function (err, _result) {
+                    UI.message("DONE " + source, true);
+                    callbackEach(err);
+                });
             },
             function (err) {
                 if (err) {

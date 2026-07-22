@@ -19,6 +19,117 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+function getExpandedPrefixedName(value) {
+    var prefixedNameMatch = /^([A-Za-z][\w-]*):(.+)$/.exec(value);
+    if (!prefixedNameMatch) {
+        return value;
+    }
+
+    var prefix = prefixedNameMatch[1];
+    var localName = prefixedNameMatch[2];
+    var prefixUri = KGbuilder_triplesWriter.sparqlPrefixes[prefix];
+    if (!prefixUri) {
+        return value;
+    }
+
+    return "<" + prefixUri.replace(/[<>]/g, "") + localName + ">";
+}
+
+function formatNtResource(value) {
+    if (!value) {
+        return value;
+    }
+    if (value.startsWith("<") && value.endsWith(">")) {
+        var uriValue = value.substring(1, value.length - 1);
+        if (uriValue.startsWith("_:")) {
+            return uriValue;
+        }
+        return value;
+    }
+    if (value.startsWith("_:")) {
+        return value;
+    }
+    if (value.startsWith("http")) {
+        return "<" + value + ">";
+    }
+    return getExpandedPrefixedName(value);
+}
+
+function escapeNtLiteralValue(value) {
+    return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r/g, "\\r").replace(/\n/g, "\\n");
+}
+
+function formatNtLiteral(value) {
+    var literalValue = value;
+    var singleQuotedTypedLiteralMatch = /^'([\s\S]*)'\^\^(.+)$/.exec(literalValue);
+    if (singleQuotedTypedLiteralMatch) {
+        literalValue = '"' + escapeNtLiteralValue(singleQuotedTypedLiteralMatch[1]) + '"^^' + singleQuotedTypedLiteralMatch[2];
+    } else {
+        var singleQuotedLiteralMatch = /^'([\s\S]*)'$/.exec(literalValue);
+        if (singleQuotedLiteralMatch) {
+            literalValue = '"' + escapeNtLiteralValue(singleQuotedLiteralMatch[1]) + '"';
+        }
+    }
+
+    return literalValue.replace(/\^\^([A-Za-z][\w-]*:[^\s]+)$/g, function (_match, prefixedDataType) {
+        return "^^" + getExpandedPrefixedName(prefixedDataType);
+    });
+}
+
+function formatNtObject(value) {
+    if (!value) {
+        return value;
+    }
+    if (value.startsWith('"') || value.startsWith("'")) {
+        return formatNtLiteral(value);
+    }
+    return formatNtResource(value);
+}
+
+function serializeTripleAsNt(triple) {
+    var normalizedTriple = triple.trim();
+    var subjectEndIndex = normalizedTriple.indexOf(" ");
+    var predicateEndIndex = normalizedTriple.indexOf(" ", subjectEndIndex + 1);
+    if (subjectEndIndex < 0 || predicateEndIndex < 0) {
+        return normalizedTriple + " .";
+    }
+
+    var subjectValue = normalizedTriple.substring(0, subjectEndIndex).trim();
+    var predicateValue = normalizedTriple.substring(subjectEndIndex + 1, predicateEndIndex).trim();
+    var objectValue = normalizedTriple.substring(predicateEndIndex + 1).trim();
+
+    return formatNtResource(subjectValue) + " " + formatNtResource(predicateValue) + " " + formatNtObject(objectValue) + " .";
+}
+
+function serializeTriplesAsNt(triples) {
+    return triples
+        .filter(function (triple) {
+            return !!triple;
+        })
+        .map(function (triple) {
+            return serializeTripleAsNt(triple);
+        })
+        .join("\n");
+}
+
+function writeTriplesAsNtToStream(triples, stream, options, callback) {
+    var ntContent = serializeTriplesAsNt(triples);
+    if (!ntContent) {
+        return callback();
+    }
+
+    var chunk = ntContent + "\n";
+    if (options.hasWrittenNtChunk) {
+        chunk = "\n" + chunk;
+    }
+    options.hasWrittenNtChunk = true;
+
+    if (!stream.write(chunk)) {
+        return stream.once("drain", callback);
+    }
+    callback();
+}
+
 var KGbuilder_main = {
     /**
      * Generate triples from a CSV file or database
@@ -83,6 +194,7 @@ var KGbuilder_main = {
 
             tableProcessingParams.uniqueTriplesMap = {};
             var sampleTriples = [];
+            var exportTriples = [];
             var totalTriplesCount = {};
 
             /**
@@ -204,7 +316,14 @@ var KGbuilder_main = {
                                     if (err) {
                                         return callbackSeries(err);
                                     }
-                                    if (options.sampleSize) {
+                                    if (options.streamOutput) {
+                                        if (!totalTriplesCount[table]) totalTriplesCount[table] = 0;
+                                        totalTriplesCount[table] += result.totalTriplesCount;
+                                    } else if (options.exportOnly) {
+                                        exportTriples = exportTriples.concat(result.exportTriples || []);
+                                        if (!totalTriplesCount[table]) totalTriplesCount[table] = 0;
+                                        totalTriplesCount[table] += result.totalTriplesCount;
+                                    } else if (options.sampleSize) {
                                         // dont write return triples sample
                                         sampleTriples = result.sampleTriples;
                                     } else {
@@ -223,12 +342,39 @@ var KGbuilder_main = {
                 },
 
                 function (err) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    if (options.streamOutput) {
+                        return callback(null, {
+                            totalTriplesCount: totalTriplesCount,
+                        });
+                    }
+                    if (options.exportOnly && options.outputFormat == "nt") {
+                        return callback(null, {
+                            ntTriples: serializeTriplesAsNt(exportTriples),
+                            totalTriplesCount: exportTriples.length,
+                        });
+                    }
                     return callback(err, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
                 },
             );
 
             return;
         });
+    },
+
+    streamTriplesFromCsvOrTableAsNt: function (user, source, datasource, tables, options, stream, callback) {
+        options = options || {};
+        options.exportOnly = true;
+        options.outputFormat = "nt";
+        options.streamOutput = true;
+        options.hasWrittenNtChunk = false;
+        options.onTriplesBatch = function (triples, callbackBatch) {
+            writeTriplesAsNtToStream(triples, stream, options, callbackBatch);
+        };
+
+        KGbuilder_main.importTriplesFromCsvOrTable(user, source, datasource, tables, options, callback);
     },
 
     /**

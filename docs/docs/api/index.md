@@ -16,15 +16,15 @@ To generate or copy your bearer token:
 
 1. Open the user menu in the top-right corner and click **UserSettings**.
 
-   ![Open UserSettings from the user menu](images/media/api/open-user-settings.png)
+   ![Open UserSettings from the user menu](./images/media/api/open-user-settings.png)
 
-2. In the **User Settings** dialog, go to the **API TOKEN** section.
+2. In the **User Settings** dialog, select the **API TOKEN** tab.
 
-   ![Navigate to the API TOKEN section](images/media/api/user-settings-sections.png)
+   ![Select the API TOKEN tab](./images/media/api/user-settings-sections.png)
 
 3. Copy the current token from the **API Key** field, or click **RENEW** to generate a new one.
 
-   ![Copy or renew the API token](images/media/api/copy-or-renew-api-token.png)
+   ![Copy or renew the API token](./images/media/api/copy-or-renew-api-token.png)
 
 ```shell
 curl --header "authorization: Bearer xxx" http://sls.example.org/api/v1/users/me
@@ -32,6 +32,6 @@ curl --header "authorization: Bearer xxx" http://sls.example.org/api/v1/users/me
 
 ```{toctree}
 :maxdepth: 3
+ai.md
 userdata.md
 ```
-

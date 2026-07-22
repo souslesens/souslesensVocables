@@ -26,6 +26,7 @@ var TriplesMaker = {
     readAndProcessData: async function (user, tableProcessingParams, options, callback) {
         var totalTriplesCount = 0;
         var sampleTriples = [];
+        var exportTriples = [];
         var processedRecords = 0;
         var tableInfos = tableProcessingParams.tableInfos;
         TriplesMaker.uniqueSubjects = {};
@@ -46,7 +47,7 @@ var TriplesMaker = {
         };
         var oldTime = new Date();
         var startTime = oldTime;
-        var currentBatchRowIndex = 0;
+        var currentBatchRowIndex = options.offset || 0;
         if (tableProcessingParams.tableInfos.csvDataFilePath) {
             KGbuilder_socket.message(options.clientSocketId, "loading data from csv file " + tableInfos.table, false);
             TriplesMaker.readCsv(tableInfos.csvDataFilePath, options.sampleSize, function (err, result) {
@@ -91,6 +92,14 @@ var TriplesMaker = {
                                 // sample dont write triples return batchTriples
                                 sampleTriples = batchTriples;
                                 callbackEach();
+                            } else if (options.exportOnly) {
+                                totalTriplesCount += batchTriples.length;
+                                message.totalTriples = totalTriplesCount;
+                                if (options.onTriplesBatch) {
+                                    return options.onTriplesBatch(batchTriples, callbackEach);
+                                }
+                                exportTriples = exportTriples.concat(batchTriples);
+                                return callbackEach();
                             } else {
                                 /*KGbuilder_socket.message(
                                     options.clientSocketId,
@@ -130,7 +139,7 @@ var TriplesMaker = {
                         KGbuilder_socket.message(options.clientSocketId, message);
                         // KGbuilder_socket.message(options.clientSocketId, " DONE " + processedRecords + "records  from " + tableInfos.table + " : " + (totalTriplesCount) + " triples", false);
 
-                        return callback(err, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
+                        return callback(err, { sampleTriples: sampleTriples, exportTriples: exportTriples, totalTriplesCount: totalTriplesCount });
                     },
                 );
             });
@@ -232,6 +241,21 @@ var TriplesMaker = {
                                 sampleTriples: sampleTriples,
                                 totalTriplesCount: sampleTriples.length,
                             });
+                        } else if (options.exportOnly) {
+                            totalTriplesCount += batchTriples.length;
+                            message.totalTriples = totalTriplesCount;
+                            if (options.onTriplesBatch) {
+                                await new Promise(function (resolve, reject) {
+                                    options.onTriplesBatch(batchTriples, function (err) {
+                                        if (err) {
+                                            return reject(err);
+                                        }
+                                        resolve();
+                                    });
+                                });
+                            } else {
+                                exportTriples = exportTriples.concat(batchTriples);
+                            }
                         } else {
                             try {
                                 var batchTriplesCount;
@@ -281,7 +305,7 @@ var TriplesMaker = {
             message.operation = "finished";
             message.totalTriples = totalTriplesCount;
             KGbuilder_socket.message(options.clientSocketId, message);
-            return callback(null, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
+            return callback(null, { sampleTriples: sampleTriples, exportTriples: exportTriples, totalTriplesCount: totalTriplesCount });
         }
     },
 

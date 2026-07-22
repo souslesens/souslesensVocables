@@ -33,6 +33,14 @@ var Sparql_common = (function () {
         owl: "http://www.w3.org/2002/07/owl#",
     };
 
+    function getPrefixNamespaceUri(prefix) {
+        var namespaceUri = Config.defaultSparqlPrefixes && Config.defaultSparqlPrefixes[prefix] ? Config.defaultSparqlPrefixes[prefix] : self.basicPrefixes[prefix];
+        if (!namespaceUri) {
+            return null;
+        }
+        return namespaceUri.replace("<", "").replace(">", "");
+    }
+
     var checkClosingBrackets = function (str) {
         var c1 = (str.match(/\(/g) || []).length;
         var c2 = (str.match(/\)/g) || []).length;
@@ -770,6 +778,7 @@ var Sparql_common = (function () {
      * @param {Object} [options] - Extra scoping options
      * @param {string[]} [options.excludeImports] - Import source names to skip
      * @param {(string|string[])} [options.includeSources] - Additional source names whose graphs to add
+     * @param {boolean} [options.includeBasicVocabularies] - Add every graph declared in `Config.basicVocabularies`
      * @returns {string} A concatenation of `FROM`/`FROM NAMED` clauses, `""` when the source has no graph, or `"XXX no graphUri"` when the source is unknown
      */
     self.getFromStr = function (sourceLabel, named, withoutImports, options) {
@@ -860,6 +869,15 @@ var Sparql_common = (function () {
                     }
                 }
             });
+        }
+
+        if (options.includeBasicVocabularies) {
+            for (var basicVocabulary in Config.basicVocabularies) {
+                var basicVocabularyGraphUri = Config.basicVocabularies[basicVocabulary].graphUri;
+                if (basicVocabularyGraphUri && fromStr.indexOf("<" + basicVocabularyGraphUri + ">") < 0) {
+                    fromStr += from + "  <" + basicVocabularyGraphUri + "> ";
+                }
+            }
         }
 
         return fromStr;
@@ -1205,6 +1223,153 @@ var Sparql_common = (function () {
         var sourcePrefix = sourceLabel.substring(0, 3);
         var label = self.getLabelFromURI(uri);
         return sourcePrefix + ":" + label;
+    };
+
+    /**
+     * Resolves a prefixed name (`skos:prefLabel`) into its full URI, using `Config.defaultSparqlPrefixes`
+     * then the module `basicPrefixes` as fallback.
+     * @function
+     * @name getUriFromPrefixedName
+     * @memberof module:Sparql_common
+     * @param {string} prefixedName - Prefixed name to resolve
+     * @returns {string|null} The full URI, or `null` when the prefix is unknown or the name is not prefixed
+     */
+    self.getUriFromPrefixedName = function (prefixedName) {
+        if (!prefixedName || prefixedName.indexOf(":") < 1) {
+            return null;
+        }
+        var prefix = prefixedName.substring(0, prefixedName.indexOf(":"));
+        var localName = prefixedName.substring(prefixedName.indexOf(":") + 1);
+        var namespaceUri = getPrefixNamespaceUri(prefix);
+        if (!namespaceUri) {
+            return null;
+        }
+        return namespaceUri + localName;
+    };
+
+    /**
+     * Shortens a URI into a prefixed name (`skos:prefLabel`). When several declared namespaces match,
+     * the longest one wins, so a namespace nested in another one is never shadowed.
+     * @function
+     * @name getPrefixedNameFromUri
+     * @memberof module:Sparql_common
+     * @param {string} uri - URI to shorten
+     * @returns {string} The prefixed name, or `""` when no declared namespace matches
+     */
+    self.getPrefixedNameFromUri = function (uri) {
+        if (!uri) {
+            return "";
+        }
+        var knownPrefixes = Object.keys(Config.defaultSparqlPrefixes || {}).concat(Object.keys(self.basicPrefixes));
+        var longestMatchingPrefix = null;
+        var longestMatchingNamespaceUri = "";
+        knownPrefixes.forEach(function (prefix) {
+            var namespaceUri = getPrefixNamespaceUri(prefix);
+            if (!namespaceUri || uri.indexOf(namespaceUri) != 0) {
+                return;
+            }
+            if (namespaceUri.length > longestMatchingNamespaceUri.length) {
+                longestMatchingPrefix = prefix;
+                longestMatchingNamespaceUri = namespaceUri;
+            }
+        });
+        if (!longestMatchingPrefix) {
+            return "";
+        }
+        return longestMatchingPrefix + ":" + uri.substring(longestMatchingNamespaceUri.length);
+    };
+
+    /**
+     * The predicates always indexed into the `skoslabels` field, whatever the user selects: they are
+     * hard-coded in the indexation queries themselves.
+     * @function
+     * @name getDefaultIndexedPredicates
+     * @memberof module:Sparql_common
+     * @returns {Array} `[{id, label}]` where `id` is the full URI and `label` the prefixed name
+     */
+    self.getDefaultIndexedPredicates = function () {
+        var defaultIndexedPredicateNames = ["rdfs:label", "skos:prefLabel", "skos:altLabel"];
+        return defaultIndexedPredicateNames.map(function (prefixedName) {
+            return {
+                id: self.getUriFromPrefixedName(prefixedName),
+                label: prefixedName,
+            };
+        });
+    };
+
+    /**
+     * Same predicates as {@link getDefaultIndexedPredicates}, as a `{[predicateUri]: true}` lookup map
+     * to filter them out of the selectable predicates.
+     * @function
+     * @name getDefaultIndexedPredicateIdsMap
+     * @memberof module:Sparql_common
+     * @returns {Object} Map of the default indexed predicate URIs
+     */
+    self.getDefaultIndexedPredicateIdsMap = function () {
+        var defaultIndexedPredicateIdsMap = {};
+        self.getDefaultIndexedPredicates().forEach(function (predicate) {
+            if (!predicate.id) {
+                return;
+            }
+            defaultIndexedPredicateIdsMap[predicate.id] = true;
+        });
+        return defaultIndexedPredicateIdsMap;
+    };
+
+    /**
+     * Builds the OPTIONAL clauses fetching the extra datatype properties selected for the current
+     * indexation run. Their values are appended to the `skoslabels` field of the Elasticsearch
+     * documents so they become searchable alongside the usual alt labels.
+     * @function
+     * @name getIndexedPredicatesClauses
+     * @memberof module:Sparql_common
+     * @param {string} [subjectVariableName="subject"] - SPARQL variable holding the indexed subject
+     * @param {Object} [options] - Indexation options
+     * @param {string[]} [options.indexedPredicates] - Explicit predicates for this run
+     * @returns {Object} `{optionalClauses, variableNames, selectVariablesStr}`; all empty when no predicate is selected.
+     * `selectVariablesStr` is only needed by queries selecting explicit variables instead of `*`
+     */
+    self.getIndexedPredicatesClauses = function (subjectVariableName, options) {
+        var indexedPredicates = options ? options.indexedPredicates : null;
+        if (!indexedPredicates || indexedPredicates.length == 0) {
+            return { optionalClauses: "", variableNames: [], selectVariablesStr: "" };
+        }
+        if (!subjectVariableName) {
+            subjectVariableName = "subject";
+        }
+
+        var optionalClauses = "";
+        var variableNames = [];
+        var selectVariablesStr = "";
+        indexedPredicates.forEach(function (predicateUri, predicateIndex) {
+            var variableName = "indexedPredicateValue" + predicateIndex;
+            variableNames.push(variableName);
+            selectVariablesStr += " ?" + variableName;
+            optionalClauses += "\n    OPTIONAL { ?" + subjectVariableName + " <" + predicateUri + "> ?" + variableName + ". }";
+        });
+        return { optionalClauses: optionalClauses, variableNames: variableNames, selectVariablesStr: selectVariablesStr };
+    };
+
+    /**
+     * Pushes into `labels` the values bound by {@link getIndexedPredicatesClauses} for one SPARQL
+     * result row, skipping duplicates and unbound variables.
+     * @function
+     * @name pushIndexedPredicateValues
+     * @memberof module:Sparql_common
+     * @param {Object} binding - One SPARQL result row
+     * @param {string[]} variableNames - Variable names returned by `getIndexedPredicatesClauses`
+     * @param {string[]} labels - Array of labels to enrich (mutated in place)
+     */
+    self.pushIndexedPredicateValues = function (binding, variableNames, labels) {
+        variableNames.forEach(function (variableName) {
+            var predicateValue = binding[variableName];
+            if (!predicateValue || !predicateValue.value) {
+                return;
+            }
+            if (labels.indexOf(predicateValue.value) < 0) {
+                labels.push(predicateValue.value);
+            }
+        });
     };
 
     return self;

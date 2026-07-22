@@ -13,6 +13,7 @@ import UIcontroller from "../mappingModeler/uiController.js";
 import CreateAnnotationPropertiesTemplate_bot from "../annotationPropertiesTemplate/createAnnotationPropertiesTemplate_bot.js";
 import AdminAnnotationPropertiesTemplate from "../annotationPropertiesTemplate/adminAnnotationPropertiesTemplate.js";
 import AssignAnnotationPropertiesTemplate_bot from "../annotationPropertiesTemplate/assignAnnotationPropertiesTemplate_bot.js";
+import IndexedPredicates_bot from "../../bots/indexedPredicates_bot.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Admin = (function () {
@@ -87,6 +88,12 @@ $("#sourceDivControlPanelDiv").html(html);*/
             skipIndividuals = true;
         }
 
+        IndexedPredicates_bot.start(sources, function (indexedPredicatesBySource) {
+            indexSources(sources, skipIndividuals, indexedPredicatesBySource);
+        });
+    };
+
+    function indexSources(sources, skipIndividuals, indexedPredicatesBySource) {
         async.eachSeries(
             sources,
             function (source, callbackEach) {
@@ -94,18 +101,18 @@ $("#sourceDivControlPanelDiv").html(html);*/
                     return callbackEach();
                 }
                 $("#waitImg").css("display", "block");
-                SearchUtil.generateElasticIndex(
-                    source,
-                    {
-                        indexProperties: 1,
-                        indexNamedIndividuals: 1,
-                        skipIndividuals: skipIndividuals,
-                    },
-                    function (err, _result) {
-                        UI.message("DONE " + source, true);
-                        callbackEach(err);
-                    },
-                );
+                var indexationOptions = {
+                    indexProperties: 1,
+                    indexNamedIndividuals: 1,
+                    skipIndividuals: skipIndividuals,
+                };
+                if (indexedPredicatesBySource && indexedPredicatesBySource[source]) {
+                    indexationOptions.indexedPredicates = indexedPredicatesBySource[source];
+                }
+                SearchUtil.generateElasticIndex(source, indexationOptions, function (err, _result) {
+                    UI.message("DONE " + source, true);
+                    callbackEach(err);
+                });
             },
             function (err) {
                 if (err) {
@@ -115,7 +122,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
                 $("#sourceSelector_jstreeDiv").jstree(true).uncheck_all();
             },
         );
-    };
+    }
 
     self.exportNT = function () {
         //   var sources =SourceSelectorWidget.getCheckedSources();

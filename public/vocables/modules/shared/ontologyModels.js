@@ -1582,6 +1582,243 @@ var OntologyModels = (function () {
         );
     };
 
+    /**
+     * Lists the datatype/annotation predicates of a source that really carry string values, so the user
+     * can pick the ones to index into the `skoslabels` Elasticsearch field. Predicates always indexed
+     * ({@link module:Sparql_common.getDefaultIndexedPredicates}) are left out of the result.
+     *
+     * Deliberately does not reuse {@link getKGnonObjectProperties}: that query answers a different
+     * question (which properties does each class carry) and pays for a join on the instances, far too
+     * slow to make a user wait. Here the declarations are read from the schema, then the declared
+     * predicates are probed for an actual string value with an existence test.
+     *
+     * The result is deliberately not cached: it is asked for right before an indexation, when the data
+     * has just been loaded or edited, and a stale list would hide the very predicates being added.
+     * @function
+     * @name getIndexablePredicates
+     * @memberof module:OntologyModels
+     * @param {string} source - Source name whose predicates are listed
+     * @param {Object} [_options] - Unused, kept for the `(source, options, callback)` signature shared by the module
+     * @param {Function} callback - Error-first callback `(err, [{id, label, typeUri, typeLabel}])`
+     */
+    self.getIndexablePredicates = function (source, _options, callback) {
+        queryDeclaredNonObjectPredicates(source, function (err, declaredPredicates) {
+            if (err) {
+                return callback(err);
+            }
+            if (declaredPredicates.length == 0) {
+                return callback(null, []);
+            }
+            keepPredicatesHavingStringValues(source, declaredPredicates, callback);
+        });
+    };
+
+    /**
+     * Step 1 of {@link getIndexablePredicates}: the predicates declared as datatype, annotation or plain
+     * RDF properties. Declarations often live in an imported vocabulary graph while the values live in
+     * the source graph, hence the basic vocabularies added to the `FROM` clauses.
+     *
+     * The types are bound with `VALUES` rather than with a `FILTER` on `?type`: a filter makes the
+     * triplestore read every `rdf:type` triple of the graph, instances included, before discarding them.
+     * @param {string} source - Source name
+     * @param {Function} callback - Error-first callback `(err, [{id, typeUri}])`
+     */
+    function queryDeclaredNonObjectPredicates(source, callback) {
+        var fromStr = Sparql_common.getFromStr(source, false, false, { includeBasicVocabularies: true });
+        var query =
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "SELECT distinct ?prop ?type\n" +
+            fromStr +
+            " WHERE {\n" +
+            "    ?prop rdf:type ?type.\n" +
+            "    VALUES ?type { owl:DatatypeProperty owl:AnnotationProperty rdf:Property }\n" +
+            "    filter (?prop not in (rdf:type,<http://purl.org/dc/terms/created>,<http://purl.org/dc/terms/creator>,<http://purl.org/dc/terms/source>))\n" +
+            "}";
+
+        UI.message("loading source properties", false, true);
+        var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            var defaultIndexedPredicateIdsMap = Sparql_common.getDefaultIndexedPredicateIdsMap();
+            var propertyTypeSpecificityByUri = getPropertyTypeSpecificityByUri();
+            var declaredPredicatesByUri = {};
+            result.results.bindings.forEach(function (binding) {
+                var predicateUri = binding.prop.value;
+                if (defaultIndexedPredicateIdsMap[predicateUri]) {
+                    return;
+                }
+                var declaredPredicate = declaredPredicatesByUri[predicateUri];
+                if (!declaredPredicate) {
+                    declaredPredicatesByUri[predicateUri] = { id: predicateUri, typeUri: binding.type.value };
+                    return;
+                }
+                // a predicate often carries several type declarations (rdf:Property alongside
+                // owl:DatatypeProperty): the most specific one decides which group it is shown in,
+                // otherwise the group would depend on the order the triplestore returns the rows
+                if (propertyTypeSpecificityByUri[binding.type.value] > propertyTypeSpecificityByUri[declaredPredicate.typeUri]) {
+                    declaredPredicate.typeUri = binding.type.value;
+                }
+            });
+
+            var declaredPredicates = [];
+            for (var declaredPredicateUri in declaredPredicatesByUri) {
+                declaredPredicates.push(declaredPredicatesByUri[declaredPredicateUri]);
+            }
+            callback(null, declaredPredicates);
+        });
+    }
+
+    /**
+     * Step 2 of {@link getIndexablePredicates}: keeps the declared predicates having at least one triple
+     * whose value is a string in the source data.
+     *
+     * `FILTER EXISTS` is what makes it cheap: the triplestore only has to prove that one matching triple
+     * exists for each `?prop` of the `VALUES` list, so it stops at the first one instead of reading the
+     * whole predicate. Each URI and the value filter are written once for the whole query, where a union
+     * of `LIMIT 1` subqueries would repeat both for every predicate.
+     * @param {string} source - Source name
+     * @param {Array} declaredPredicates - Predicates returned by `queryDeclaredNonObjectPredicates`
+     * @param {Function} callback - Error-first callback `(err, [{id, label, typeUri, typeLabel}])`
+     */
+    function keepPredicatesHavingStringValues(source, declaredPredicates, callback) {
+        var fromStr = Sparql_common.getFromStr(source, false, false);
+        var declaredPredicatesByUri = {};
+        declaredPredicates.forEach(function (declaredPredicate) {
+            declaredPredicatesByUri[declaredPredicate.id] = declaredPredicate;
+        });
+
+        // numeric datatypes are covered by isNumeric, the others have to be named. Excluding non string
+        // datatypes rather than whitelisting xsd:string keeps the plain literals that some triplestores
+        // report without any datatype
+        var stringValueFilter = "filter (isLiteral(?value) && !isNumeric(?value) && datatype(?value) not in (xsd:boolean,xsd:date,xsd:dateTime,xsd:time,xsd:anyURI))";
+        var predicateBatches = buildPredicateBatches(declaredPredicates);
+        var indexablePredicates = [];
+        var probedPredicatesCount = 0;
+
+        async.eachSeries(
+            predicateBatches,
+            function (predicateBatch, callbackEach) {
+                var predicateUris = predicateBatch.map(function (declaredPredicate) {
+                    return "<" + declaredPredicate.id + ">";
+                });
+                var predicateUrisStr = predicateUris.join(" ");
+                var query =
+                    "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
+                    "SELECT ?prop\n" +
+                    fromStr +
+                    " WHERE {\n" +
+                    "    VALUES ?prop { " +
+                    predicateUrisStr +
+                    " }\n" +
+                    "    FILTER EXISTS { ?subject ?prop ?value. " +
+                    stringValueFilter +
+                    " }\n" +
+                    "}";
+
+                probedPredicatesCount += predicateBatch.length;
+                UI.message("looking for indexable properties : " + probedPredicatesCount + "/" + declaredPredicates.length, false, true);
+
+                var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
+                    if (err) {
+                        return callbackEach(err);
+                    }
+                    result.results.bindings.forEach(function (binding) {
+                        var declaredPredicate = declaredPredicatesByUri[binding.prop.value];
+                        if (!declaredPredicate) {
+                            return;
+                        }
+                        indexablePredicates.push(formatIndexablePredicate(declaredPredicate));
+                    });
+                    callbackEach();
+                });
+            },
+            function (err) {
+                UI.message("", true);
+                if (err) {
+                    return callback(err);
+                }
+                callback(null, indexablePredicates);
+            },
+        );
+    }
+
+    /**
+     * Splits the predicates to probe so that no query grows past the URL length a source configured with
+     * the GET method can carry. Cut on the summed URI length rather than on a number of predicates,
+     * since predicate URIs vary widely in length from one ontology to another.
+     * @param {Array} declaredPredicates - Predicates to probe
+     * @returns {Array} Batches of predicates
+     */
+    function buildPredicateBatches(declaredPredicates) {
+        // an URL-encoded query grows by about half, staying under the usual 8000 characters limit
+        var maxPredicateUrisLength = 4000;
+        var predicateBatches = [];
+        var currentBatch = [];
+        var currentBatchLength = 0;
+
+        declaredPredicates.forEach(function (declaredPredicate) {
+            var predicateUriLength = declaredPredicate.id.length + 3;
+            if (currentBatch.length > 0 && currentBatchLength + predicateUriLength > maxPredicateUrisLength) {
+                predicateBatches.push(currentBatch);
+                currentBatch = [];
+                currentBatchLength = 0;
+            }
+            currentBatch.push(declaredPredicate);
+            currentBatchLength += predicateUriLength;
+        });
+
+        if (currentBatch.length > 0) {
+            predicateBatches.push(currentBatch);
+        }
+        return predicateBatches;
+    }
+
+    /**
+     * The property types the picker groups predicates by, from the most specific to the most generic.
+     * A predicate declared several times is shown under its most specific type.
+     *
+     * The `rdf:Property` group is labelled after what the user finds in it and not after its
+     * declaration: it gathers whatever is not an OWL datatype or annotation property, from several
+     * vocabularies at once, so naming it after `rdf:Property` would tell the user nothing.
+     * @returns {Array} `[{uri, label}]` ordered by decreasing specificity
+     */
+    function getPropertyTypes() {
+        return [
+            { uri: Sparql_common.getUriFromPrefixedName("owl:DatatypeProperty"), label: "Datatype properties" },
+            { uri: Sparql_common.getUriFromPrefixedName("owl:AnnotationProperty"), label: "Annotation properties" },
+            { uri: Sparql_common.getUriFromPrefixedName("rdf:Property"), label: "Other properties" },
+        ];
+    }
+
+    function getPropertyTypeSpecificityByUri() {
+        var propertyTypes = getPropertyTypes();
+        var propertyTypeSpecificityByUri = {};
+        propertyTypes.forEach(function (propertyType, propertyTypeIndex) {
+            propertyTypeSpecificityByUri[propertyType.uri] = propertyTypes.length - propertyTypeIndex;
+        });
+        return propertyTypeSpecificityByUri;
+    }
+
+    function formatIndexablePredicate(declaredPredicate) {
+        var propertyTypes = getPropertyTypes();
+        var propertyTypeLabelsByUri = {};
+        propertyTypes.forEach(function (propertyType) {
+            propertyTypeLabelsByUri[propertyType.uri] = propertyType.label;
+        });
+        var mostGenericPropertyTypeLabel = propertyTypes[propertyTypes.length - 1].label;
+
+        return {
+            id: declaredPredicate.id,
+            label: Sparql_common.getPrefixedNameFromUri(declaredPredicate.id) || Sparql_common.getLabelFromURI(declaredPredicate.id),
+            typeUri: declaredPredicate.typeUri,
+            typeLabel: propertyTypeLabelsByUri[declaredPredicate.typeUri] || mostGenericPropertyTypeLabel,
+        };
+    }
+
     self.getContainerBreakdownClasses = function (source, callback) {
         var fromStr = Sparql_common.getFromStr(source, false, true);
 

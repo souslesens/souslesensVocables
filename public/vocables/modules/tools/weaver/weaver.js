@@ -212,6 +212,8 @@ var Weaver = (function () {
             var options = {
                 term: term,
                 searchedSources: [Lineage_sources.activeSource],
+                // same intent as the classes tab it fills: picking a class, not gathering candidates
+                prefixSearch: true,
                 jstreeDiv: "LineageNodesJsTreeDiv",
                 contextMenu: self.contextMenu(),
             };

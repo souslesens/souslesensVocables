@@ -422,6 +422,38 @@ indexes.push(source.toLowerCase());
         return queryParts.join(" ");
     };
 
+    /**
+     * Builds the ElasticSearch query of one searched word. The shape of the query is driven by the
+     * intent of the caller, not by the tool it runs in, each intent being carried by a mode and by
+     * options.prefixSearch:
+     *
+     * - picking a known entity, where an approximate match would designate the wrong one: mode
+     *   fuzzyMatch with prefixSearch, so each word is matched on its prefix and never approximated.
+     *   Used by the classes tab, the shortest path search, weaver and browse.
+     * - looking for candidates that could match, where missing one costs more than showing a wrong
+     *   one: mode fuzzyMatch alone, adding Levenshtein tolerance. Used by the similars of lineage,
+     *   by the bots and by the free search of the standardizer.
+     * - resolving a label or a URI already held, where any tolerance would corrupt the result: mode
+     *   exactMatch. Used by the batch alignments of the standardizer and by lineage_whiteboard.
+     *
+     * plurialTerm and match_phrase have no caller left in this repository and are kept for plugins.
+     * Both return before the filters and the language boost are applied, so options.onlyClasses and
+     * options.classFilter are ignored in these two modes.
+     *
+     * @function
+     * @name getWordBulkQuery
+     * @memberof module:SearchUtil
+     * @param {string} word - Searched word, a URI when it starts with http://
+     * @param {string} [mode] - exactMatch, fuzzyMatch, plurialTerm or match_phrase; falsy behaves as plurialTerm
+     * @param {string[]} indexes - Unused, the searched indexes are set in the header of the bulk query
+     * @param {Object} options - Search options
+     * @param {boolean} [options.prefixSearch] - Match each word on its prefix instead of approximating it
+     * @param {string[]} [options.fields] - Searched fields, defaults to label
+     * @param {boolean} [options.skosLabels] - Also search the skoslabels field
+     * @param {boolean} [options.onlyClasses] - Keep only the documents typed as Class
+     * @param {string} [options.classFilter] - Keep only the documents having this class as parent
+     * @returns {Object} ElasticSearch query object
+     */
     self.getWordBulkQuery = function (word, mode, indexes, options) {
         var fields = [];
 

@@ -20,6 +20,11 @@
 .logoInstance-icon {
     background-image: url(@logoInstance-icon);
     background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    height: 36px !important;
+    padding: 0 !important;
+    width: 52px !important;
 }
 .lineage-logo {
     background-image: url(@lineage-logo);

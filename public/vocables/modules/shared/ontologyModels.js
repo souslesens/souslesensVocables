@@ -1489,6 +1489,9 @@ var OntologyModels = (function () {
      * @param {Object} options
      * @param {boolean} [options.reload=false] - Force re-query even if already cached.
      * @param {boolean} [options.excludeBasicVocabularies=false] - Exclude rdf/rdfs/owl/skos vocabularies from the scan.
+     * @param {boolean} [options.includeBasicVocabulariesInSourceQuery=false] - Add basic vocabulary graphs to each source query instead of querying them as independent data sources.
+     * @param {boolean} [options.includePropertyTypes=false] - Return the RDF type of each property.
+     * @param {boolean} [options.onlyStringLiteralValues=false] - Keep only predicates whose values are string literals.
      * @param {string} [options.filter] - Additional SPARQL FILTER clause injected into the query.
      * @param {Function} callback - `function(err, { [classUri]: { id, label, properties } })`
      */
@@ -1496,7 +1499,8 @@ var OntologyModels = (function () {
         if (!options) {
             options = {};
         }
-        if (Config.ontologiesVocabularyModels[source].KGnonObjectProperties && !options.reload) {
+        var shouldUseKGqueryCache = !options.includeBasicVocabulariesInSourceQuery && !options.includePropertyTypes && !options.onlyStringLiteralValues;
+        if (shouldUseKGqueryCache && Config.ontologiesVocabularyModels[source].KGnonObjectProperties && !options.reload) {
             return callback(null, Config.ontologiesVocabularyModels[source].KGnonObjectProperties);
         }
         var metaDataProps = "&& ?prop not in (rdf:type,<http://purl.org/dc/terms/created>,<http://purl.org/dc/terms/creator>,<http://purl.org/dc/terms/source>)";
@@ -1505,7 +1509,7 @@ var OntologyModels = (function () {
         if (Config.sources[source].imports) {
             sources = sources.concat(Config.sources[source].imports);
         }
-        if (!options.excludeBasicVocabularies) {
+        if (!options.excludeBasicVocabularies && !options.includeBasicVocabulariesInSourceQuery) {
             for (var vocab in Config.basicVocabularies) {
                 sources.push(vocab);
             }
@@ -1515,17 +1519,28 @@ var OntologyModels = (function () {
         if (options.filter) {
             filter = options.filter;
         }
+        var selectedTypeVariableName = options.includePropertyTypes ? "?type " : "";
+        var stringLiteralValueFilter = "";
+        if (options.onlyStringLiteralValues) {
+            stringLiteralValueFilter = "    filter (isLiteral(?o) && datatype(?o) in (xsd:string,rdf:langString))\n";
+        }
         UI.message("loading KG nonObjectProperties", false, true);
         async.eachSeries(
             sources,
-            function (source, callbackEach) {
-                var sourceGraphUriFrom = Sparql_common.getFromStr(source, false, true);
+            function (queriedSource, callbackEach) {
+                var fromOptions = {};
+                if (options.includeBasicVocabulariesInSourceQuery) {
+                    fromOptions.includeBasicVocabularies = !options.excludeBasicVocabularies;
+                }
+                var sourceGraphUriFrom = Sparql_common.getFromStr(queriedSource, false, true, fromOptions);
                 var queryNew =
                     "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
                     "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
                     "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                     "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                    "SELECT   distinct ?class ?prop  ?datatype  " +
+                    "SELECT   distinct ?class ?prop " +
+                    selectedTypeVariableName +
+                    "?datatype  " +
                     sourceGraphUriFrom +
                     "  where {\n" +
                     " { ?s rdf:type ?class.}\n" + // ?class rdf:type owl:Class ." +
@@ -1534,6 +1549,7 @@ var OntologyModels = (function () {
                     " {\n" +
                     "   ?s ?prop ?o.\n" +
                     "      bind ( datatype(?o) as ?datatype )\n" +
+                    stringLiteralValueFilter +
                     "    ?prop rdf:type ?type. filter (?type in (<http://www.w3.org/2002/07/owl#DatatypeProperty>,rdf:Property,owl:AnnotationProperty)&& ?prop not in (rdf:type,<http://purl.org/dc/terms/created>,<http://purl.org/dc/terms/creator>,<http://purl.org/dc/terms/source>))\n" +
                     filter +
                     "}\n" +
@@ -1541,10 +1557,12 @@ var OntologyModels = (function () {
                     "  {\n" +
                     "    ?s ?prop ?o. values ?prop{rdf:value}" +
                     "    bind ( datatype(?o) as ?datatype )\n" +
+                    stringLiteralValueFilter +
                     "  }\n" +
                     " UNION\n" +
                     "  {\n" +
                     "    ?s ?prop ?o. values ?prop{rdfs:label}    bind ( datatype(?o) as ?datatype )\n" +
+                    stringLiteralValueFilter +
                     "  }" +
                     "} limit 100";
 
@@ -1563,11 +1581,15 @@ var OntologyModels = (function () {
                                 properties: [],
                             };
                         }
-                        nonObjectPropertiesmap[item.class.value].properties.push({
+                        var nonObjectProperty = {
                             label: item.propLabel.value,
                             id: item.prop.value,
                             datatype: item.datatype ? item.datatype.value : "string",
-                        });
+                        };
+                        if (item.type) {
+                            nonObjectProperty.type = item.type.value;
+                        }
+                        nonObjectPropertiesmap[item.class.value].properties.push(nonObjectProperty);
                     });
 
                     callbackEach();
@@ -1575,7 +1597,9 @@ var OntologyModels = (function () {
                 });
             },
             function (err) {
-                Config.ontologiesVocabularyModels[source].KGnonObjectProperties = nonObjectPropertiesmap;
+                if (shouldUseKGqueryCache) {
+                    Config.ontologiesVocabularyModels[source].KGnonObjectProperties = nonObjectPropertiesmap;
+                }
                 UI.message("", true);
                 return callback(null, nonObjectPropertiesmap);
             },
@@ -1594,8 +1618,17 @@ var OntologyModels = (function () {
             }
             defaultIndexedPredicateIdsMap[predicate.id] = true;
         });
+        var annotationPropertyUri = Sparql_common.getUriFromPrefixedName("owl:AnnotationProperty");
+        var datatypePropertyUri = Sparql_common.getUriFromPrefixedName("owl:DatatypeProperty");
+        var rdfPropertyUri = Sparql_common.getUriFromPrefixedName("rdf:Property");
 
-        self.getKGnonObjectProperties(source, options, function (err, nonObjectPropertiesMap) {
+        var indexablePredicatesOptions = Object.assign({}, options, {
+            includeBasicVocabulariesInSourceQuery: true,
+            includePropertyTypes: true,
+            onlyStringLiteralValues: true,
+        });
+
+        self.getKGnonObjectProperties(source, indexablePredicatesOptions, function (err, nonObjectPropertiesMap) {
             if (err) {
                 return callback(err);
             }
@@ -1607,7 +1640,13 @@ var OntologyModels = (function () {
                     if (defaultIndexedPredicateIdsMap[property.id]) {
                         return;
                     }
+                    var propertyTypeUri = property.type || annotationPropertyUri;
                     var propertyTypeLabel = "Annotation properties";
+                    if (propertyTypeUri == datatypePropertyUri) {
+                        propertyTypeLabel = "Datatype properties";
+                    } else if (propertyTypeUri == rdfPropertyUri) {
+                        propertyTypeLabel = "RDF properties";
+                    }
 
                     if (predicatesMap[property.id]) {
                         return;
@@ -1616,7 +1655,7 @@ var OntologyModels = (function () {
                     var predicate = {
                         id: property.id,
                         label: Sparql_common.getPrefixedNameFromUri(property.id) || property.label || Sparql_common.getLabelFromURI(property.id),
-                        typeUri: propertyTypeLabel,
+                        typeUri: propertyTypeUri,
                         typeLabel: propertyTypeLabel,
                     };
                     predicatesMap[property.id] = predicate;

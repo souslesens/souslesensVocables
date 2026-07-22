@@ -136,6 +136,10 @@ var Browse = (function () {
                     parentlabels: true,
                     skosLabels: true,
                     fields: ["label", "skoslabels"], // "parents.keyword", "parent.keyword", "id.keyword"]
+                    // prefix matching is asked here rather than by appending "*" to the term: a term
+                    // carrying its own wildcard is passed through untouched, losing the branch that
+                    // matches the stemmed tokens, so a whole word found less than its own beginning
+                    prefixSearch: mode == "fuzzyMatch",
                 };
                 if (!term || term == "") {
                     return alert(" enter a word ");
@@ -152,9 +156,6 @@ var Browse = (function () {
                 }
 
                 UI.setDialogTitle("#mainDialogDiv", title);
-                if (mode == "fuzzyMatch" && !term.endsWith("*")) {
-                    term += "*";
-                }
                 SearchUtil.getSimilarLabelsInSources(null, sources, [term], null, mode, options, function (_err, result) {
                     if (_err) {
                         return MainController.errorAlert(err.responseText);

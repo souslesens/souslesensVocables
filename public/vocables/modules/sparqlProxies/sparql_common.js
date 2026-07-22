@@ -778,6 +778,7 @@ var Sparql_common = (function () {
      * @param {Object} [options] - Extra scoping options
      * @param {string[]} [options.excludeImports] - Import source names to skip
      * @param {(string|string[])} [options.includeSources] - Additional source names whose graphs to add
+     * @param {boolean} [options.includeBasicVocabularies] - Add every graph declared in `Config.basicVocabularies`
      * @returns {string} A concatenation of `FROM`/`FROM NAMED` clauses, `""` when the source has no graph, or `"XXX no graphUri"` when the source is unknown
      */
     self.getFromStr = function (sourceLabel, named, withoutImports, options) {
@@ -868,6 +869,15 @@ var Sparql_common = (function () {
                     }
                 }
             });
+        }
+
+        if (options.includeBasicVocabularies) {
+            for (var basicVocabulary in Config.basicVocabularies) {
+                var basicVocabularyGraphUri = Config.basicVocabularies[basicVocabulary].graphUri;
+                if (basicVocabularyGraphUri && fromStr.indexOf("<" + basicVocabularyGraphUri + ">") < 0) {
+                    fromStr += from + "  <" + basicVocabularyGraphUri + "> ";
+                }
+            }
         }
 
         return fromStr;

@@ -1286,7 +1286,7 @@ var Lineage_whiteboard = (function () {
             labelsMap[node.data.label] = node;
         });
 
-        SearchUtil.getSimilarLabelsInSources(fromSource, [toSource], labels, ids, "exactMatch", null, function (err, result) {
+        SearchUtil.getSimilarLabelsInSources(fromSource, [toSource], labels, ids, SearchUtil.searchIntents.resolveKnown, null, function (err, result) {
             if (err) {
                 return MainController.errorAlert(err);
             }

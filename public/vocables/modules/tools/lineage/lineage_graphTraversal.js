@@ -222,6 +222,9 @@ var Lineage_graphTraversal = (function () {
             //  selectedSources: [Lineage_sources.activeSource],
             searchedSources: [Lineage_sources.activeSource],
             exactMatch: exactMatch,
+            // the user picks the end of a path, an approximate match would send the traversal
+            // to another entity than the one aimed at
+            prefixSearch: true,
             jstreeDiv: "lineage_shorterstPath_searchJsTreeDiv",
             selectTreeNodeFn: Lineage_graphTraversal.selectTreeNodeFn,
             contextMenu: Lineage_graphTraversal.contextMenufn,

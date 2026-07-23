@@ -155,11 +155,8 @@ var SearchWidget = (function () {
             mode = "fuzzyMatch";
         }
 
-        // prefix search belongs to the caller: it says whether its user is picking an entity, which
-        // calls for strict matching, or looking for candidates, which calls for fuzziness. Deducing
-        // it from the current tool made two callers of the same widget behave differently for no
-        // reason. An exact match search overrides it, having no word to complete
-        options.prefixSearch = !exactMatch && options.prefixSearch === true;
+        // prefix search is enabled only in the lineage tool; other tools sharing this widget keep fuzzy matching
+        options.prefixSearch = !exactMatch && MainController.currentTool === "lineage";
 
         options.parentlabels = true;
 
@@ -614,13 +611,7 @@ var SearchWidget = (function () {
     };
 
     self.searchOrShowTopConcepts = function (options, callback) {
-        if (!options) {
-            options = {};
-        }
-        // entry point of the classes tab: its user picks a class, so each word is matched on its
-        // prefix and never approximated
-        options.prefixSearch = true;
-        var term = options.term || $("#searchWidget_searchTermInput").val();
+        var term = (options && options.term) || $("#searchWidget_searchTermInput").val();
 
         if (term && term.trim()) {
             if (term.match(/[ -_.]/g)) term = '"' + term + '"';

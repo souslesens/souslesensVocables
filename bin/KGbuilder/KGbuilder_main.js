@@ -204,6 +204,10 @@ var KGbuilder_main = {
             async.eachSeries(
                 tables,
                 function (table, callbackEach) {
+                    if (options.ntExportLimitReached) {
+                        return callbackEach();
+                    }
+
                     var tableMappings = {};
 
                     async.series(
@@ -370,8 +374,37 @@ var KGbuilder_main = {
         options.outputFormat = "nt";
         options.streamOutput = true;
         options.hasWrittenNtChunk = false;
+        options.ntExportedTriplesCount = 0;
+        options.ntExportLimitReached = false;
         options.onTriplesBatch = function (triples, callbackBatch) {
-            writeTriplesAsNtToStream(triples, stream, options, callbackBatch);
+            if (options.ntExportLimitReached) {
+                return callbackBatch();
+            }
+
+            var maxNtExportTriples = options.maxNtExportTriples;
+            if (typeof maxNtExportTriples !== "number") {
+                options.ntExportedTriplesCount += triples.length;
+                return writeTriplesAsNtToStream(triples, stream, options, callbackBatch);
+            }
+
+            var remainingAllowedTriples = maxNtExportTriples - options.ntExportedTriplesCount;
+            var truncatedBatch = triples.slice(0, Math.max(remainingAllowedTriples, 0));
+            options.ntExportedTriplesCount += truncatedBatch.length;
+
+            writeTriplesAsNtToStream(truncatedBatch, stream, options, function (err) {
+                if (err) {
+                    return callbackBatch(err);
+                }
+                if (options.ntExportedTriplesCount >= maxNtExportTriples) {
+                    options.ntExportLimitReached = true;
+                    var truncationNotice = "\n# export truncated: reached profile export limit of " + maxNtExportTriples + " triples\n";
+                    if (!stream.write(truncationNotice)) {
+                        return stream.once("drain", callbackBatch);
+                    }
+                    return callbackBatch();
+                }
+                callbackBatch();
+            });
         };
 
         KGbuilder_main.importTriplesFromCsvOrTable(user, source, datasource, tables, options, callback);

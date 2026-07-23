@@ -1,6 +1,7 @@
 import KGbuilder_main from "../../../../bin/KGbuilder/KGbuilder_main.js";
 import { processResponse } from "../utils.js";
 import userManager from "../../../../bin/user.js";
+import { profileModel } from "../../../../model/profiles.js";
 
 function getNtExportFileName(source, table) {
     var sourceName = source || "source";
@@ -19,6 +20,7 @@ export default function () {
             const userInfo = await userManager.getUser(req.user);
             var options = JSON.parse(req.body.options);
             if (options.exportOnly && options.outputFormat == "nt") {
+                options.maxNtExportTriples = await profileModel.getMaxNtExportTriplesForUser(userInfo.user);
                 res.setHeader("Content-Type", "application/n-triples; charset=utf-8");
                 res.setHeader("Content-Disposition", 'attachment; filename="' + getNtExportFileName(req.body.source, req.body.table) + '"');
                 res.flushHeaders();

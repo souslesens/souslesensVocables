@@ -190,7 +190,7 @@ export const ServerSourceSchema = z.object({
     topClassFilter: z
         .string()
         .default(
-            "?topConcept rdf:type owl:Class. ?topConcept rdfs:subClassOf ?superClass filter (isUri(?superClass) && not exists{?superClass rdf:type owl:Class }) OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}"
+            "?topConcept rdf:type owl:Class. ?topConcept rdfs:subClassOf ?superClass filter (isUri(?superClass) && not exists{?superClass rdf:type owl:Class }) OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}",
         ),
     schemaType: z.string().default("OWL"),
     dataSource: dataSourceSchema.nullable(),

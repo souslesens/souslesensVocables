@@ -36,6 +36,7 @@ var Axioms_manager = (function () {
      */
     self.loadClassHierarchy = function (source, callback) {
         self.classChildrenMap = null;
+        self.classParentMap = null;
         var fromStr = Sparql_common.getFromStr(source, false, false);
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
@@ -53,6 +54,7 @@ var Axioms_manager = (function () {
                 return console.error(err);
             }
             self.classChildrenMap = {};
+            self.classParentMap = {};
             result.results.bindings.forEach(function (binding) {
                 var parentUri = binding.parent.value;
                 var childUri = binding.child.value;
@@ -60,6 +62,10 @@ var Axioms_manager = (function () {
                     self.classChildrenMap[parentUri] = [];
                 }
                 self.classChildrenMap[parentUri].push(childUri);
+                if (!self.classParentMap[childUri]) {
+                    self.classParentMap[childUri] = [];
+                }
+                self.classParentMap[childUri].push(parentUri);
             });
             if (callback) {
                 return callback(null, self.classChildrenMap);
@@ -94,6 +100,17 @@ var Axioms_manager = (function () {
             recurse(classId);
         });
         return Object.keys(descendants);
+    };
+
+    /**
+     * returns the direct rdfs:subClassOf parents of a class, using the hierarchy loaded by loadClassHierarchy
+     * returns an empty array when the hierarchy is not loaded yet or the class has no known parent
+     */
+    self.getDirectSuperClasses = function (classId) {
+        if (!self.classParentMap || !self.classParentMap[classId]) {
+            return [];
+        }
+        return self.classParentMap[classId];
     };
 
     self.getAllClasses = function (source, callback) {

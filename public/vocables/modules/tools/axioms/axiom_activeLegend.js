@@ -62,6 +62,11 @@ var Axiom_activeLegend = (function () {
                 var newObject = { id: "createClass", label: "_Create new Class_" };
                 var siblingObjectPropertyUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "ObjectProperty");
 
+                var highlightNodeIds = null;
+                if (Axioms_graph.currentGraphNode.data.subType == "http://www.w3.org/2002/07/owl#intersectionOf" || Axioms_graph.currentGraphNode.data.subType == "http://www.w3.org/2002/07/owl#unionOf") {
+                    highlightNodeIds = Axioms_manager.getDirectSuperClasses(NodeInfosAxioms.currentResource.data.id);
+                }
+
                 if (Axioms_graph.currentGraphNode.data.type == "Restriction" && siblingObjectPropertyUri) {
                     /** lors d'une restriction sule le range compte, pas le domaine ???**/
                     var domainClassUri = null; //self.getRestrictionSourceClass(Axioms_graph.currentGraphNode.id);
@@ -70,11 +75,11 @@ var Axiom_activeLegend = (function () {
                             return MainController.errorAlert(err);
                         }
                         // Axioms_suggestions.getValidClassesForProperty(siblingObjectPropertyUri, function (err, classes) {
-                        self.setSuggestionsSelect(classes, true, newObject);
+                        self.setSuggestionsSelect(classes, true, newObject, null, highlightNodeIds);
                     });
                 } else {
                     var classes = Axiom_manager.getAllClasses(self.currentSource);
-                    self.setSuggestionsSelect(classes, true, newObject);
+                    self.setSuggestionsSelect(classes, true, newObject, null, highlightNodeIds);
                 }
             } else if (node.data.type == "ObjectProperty") {
                 var newObject = { id: "createObjectProperty", label: "_Create new ObjectProperty_" };
@@ -174,7 +179,7 @@ var Axiom_activeLegend = (function () {
     if unique, filters exiting nodes in graph before showing list
     *
      */
-    self.setSuggestionsSelect = function (items, unique, newOption, drawGraphFn) {
+    self.setSuggestionsSelect = function (items, unique, newOption, drawGraphFn, highlightNodeIds) {
         if (unique) {
             var existingNodeIds = Axioms_graph.axiomsVisjsGraph.data.nodes.getIds();
             var filteredItems = [];
@@ -190,7 +195,7 @@ var Axiom_activeLegend = (function () {
             filteredItems.splice(0, 0, newOption);
         }
 
-        self.loadSuggestionSelectJstree(filteredItems, self.currentLegendNode.data.type);
+        self.loadSuggestionSelectJstree(filteredItems, self.currentLegendNode.data.type, highlightNodeIds);
 
         //   common.fillSelectOptions("axioms_legend_suggestionsSelect", filteredItems, false, "label", "id");
     };
@@ -1674,7 +1679,24 @@ var Axiom_activeLegend = (function () {
         });
     };
 
-    self.loadSuggestionSelectJstree = function (objects, parentName) {
+    /**
+     * highlights, in yellow, the anchors of the given node ids in a jstree
+     * used to show the superclass of the resource currently being edited when picking an IntersectionOf member class
+     */
+    self.highlightNodesInSuggestionsJstree = function (jstreeDiv, nodeIds) {
+        var jstreeInstance = $("#" + jstreeDiv).jstree(true);
+        if (!jstreeInstance) {
+            return;
+        }
+        nodeIds.forEach(function (nodeId) {
+            var nodeDom = jstreeInstance.get_node(nodeId, true);
+            if (nodeDom) {
+                nodeDom.children(".jstree-anchor").css("background-color", "yellow");
+            }
+        });
+    };
+
+    self.loadSuggestionSelectJstree = function (objects, parentName, highlightNodeIds) {
         if ($("#suggestionsSelectJstreeDiv").jstree()) {
             try {
                 $("#suggestionsSelectJstreeDiv").jstree().empty();
@@ -1864,6 +1886,10 @@ var Axiom_activeLegend = (function () {
             $("#axiomSuggestionsSearchBar").show();
             $("#axiomSuggestionsSearchInput").val("").trigger("focus");
             $("#axiomSuggestionsSelectDiv").css("overflow", "unset");
+
+            if (highlightNodeIds && highlightNodeIds.length > 0) {
+                self.highlightNodesInSuggestionsJstree("axiomSuggestionsSelectJstreeDiv", highlightNodeIds);
+            }
         });
     };
 

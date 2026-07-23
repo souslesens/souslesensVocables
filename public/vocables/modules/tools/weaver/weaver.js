@@ -1,7 +1,6 @@
 import Lineage_sources from "../lineage/lineage_sources.js";
 import MainController from "../../shared/mainController.js";
 import SearchWidget from "../../uiWidgets/searchWidget.js";
-import SearchUtil from "../../search/searchUtil.js";
 import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
 
 var Weaver = (function () {
@@ -214,7 +213,7 @@ var Weaver = (function () {
                 term: term,
                 searchedSources: [Lineage_sources.activeSource],
                 // same intent as the classes tab it fills: picking a class, not gathering candidates
-                searchIntent: SearchUtil.searchIntents.pickEntity,
+                prefixSearch: true,
                 jstreeDiv: "LineageNodesJsTreeDiv",
                 contextMenu: self.contextMenu(),
             };

@@ -10,23 +10,6 @@ var SearchUtil = (function () {
     self.existingIndexes = null;
     self.indexSourcesMap = {};
 
-    /**
-     * What a search is meant to achieve. A caller names its intent where it used to combine a mode
-     * with search options, so a call site tells what its search does without having to be followed
-     * down to the query it ends up building. Accepted wherever a mode is.
-     * @memberof module:SearchUtil
-     */
-    self.searchIntents = {
-        // the user has one entity in mind: an approximate match would designate another one, so
-        // every word is matched on its prefix and none is approximated
-        pickEntity: "pickEntity",
-        // gathering the entities that could correspond: missing one costs more than showing a wrong
-        // one, so spelling differences are tolerated
-        findCandidates: "findCandidates",
-        // a label or a URI already held has to be found back: any tolerance would corrupt the result
-        resolveKnown: "resolveKnown",
-    };
-
     self.initSourcesIndexesList = function (options, callback) {
         if (!options) {
             options = {};
@@ -440,47 +423,31 @@ indexes.push(source.toLowerCase());
     };
 
     /**
-     * Turns a search intent into the mode and the search options that serve it. A value that is not
-     * an intent is a mode, returned untouched: the modes are the historical vocabulary of this
-     * function and plugins still pass them.
-     * @function
-     * @name resolveSearchIntent
-     * @memberof module:SearchUtil
-     * @param {string} [modeOrIntent] - A value of self.searchIntents, or a mode
-     * @param {Object} options - Search options, given the query shape of the intent
-     * @returns {string} The mode to query with
-     */
-    self.resolveSearchIntent = function (modeOrIntent, options) {
-        var queryShapesByIntent = {
-            pickEntity: { mode: "fuzzyMatch", prefixSearch: true },
-            findCandidates: { mode: "fuzzyMatch", prefixSearch: false },
-            resolveKnown: { mode: "exactMatch", prefixSearch: false },
-        };
-
-        var queryShape = queryShapesByIntent[modeOrIntent];
-        if (!queryShape) {
-            return modeOrIntent;
-        }
-        options.prefixSearch = queryShape.prefixSearch;
-        return queryShape.mode;
-    };
-
-    /**
-     * Builds the ElasticSearch query of one searched word. Callers name what they are searching for
-     * through self.searchIntents, which decides the shape of the query.
+     * Builds the ElasticSearch query of one searched word. The shape of the query is driven by the
+     * intent of the caller, not by the tool it runs in, each intent being carried by a mode and by
+     * options.prefixSearch:
      *
-     * The modes this resolves to are also accepted directly, plugins passing them. Two of them have
-     * no caller left in this repository, plurialTerm and match_phrase, and no intent resolves to
-     * them. Both return before the filters and the language boost are applied, so
-     * options.onlyClasses and options.classFilter are ignored in these two modes.
+     * - picking a known entity, where an approximate match would designate the wrong one: mode
+     *   fuzzyMatch with prefixSearch, so each word is matched on its prefix and never approximated.
+     *   Used by the classes tab, the shortest path search, weaver and browse.
+     * - looking for candidates that could match, where missing one costs more than showing a wrong
+     *   one: mode fuzzyMatch alone, adding Levenshtein tolerance. Used by the similars of lineage,
+     *   by the bots and by the free search of the standardizer.
+     * - resolving a label or a URI already held, where any tolerance would corrupt the result: mode
+     *   exactMatch. Used by the batch alignments of the standardizer and by lineage_whiteboard.
+     *
+     * plurialTerm and match_phrase have no caller left in this repository and are kept for plugins.
+     * Both return before the filters and the language boost are applied, so options.onlyClasses and
+     * options.classFilter are ignored in these two modes.
      *
      * @function
      * @name getWordBulkQuery
      * @memberof module:SearchUtil
      * @param {string} word - Searched word, a URI when it starts with http://
-     * @param {string} [mode] - A value of self.searchIntents, or a mode: exactMatch, fuzzyMatch, plurialTerm or match_phrase; falsy behaves as plurialTerm
+     * @param {string} [mode] - exactMatch, fuzzyMatch, plurialTerm or match_phrase; falsy behaves as plurialTerm
      * @param {string[]} indexes - Unused, the searched indexes are set in the header of the bulk query
      * @param {Object} options - Search options
+     * @param {boolean} [options.prefixSearch] - Match each word on its prefix instead of approximating it
      * @param {string[]} [options.fields] - Searched fields, defaults to label
      * @param {boolean} [options.skosLabels] - Also search the skoslabels field
      * @param {boolean} [options.onlyClasses] - Keep only the documents typed as Class
@@ -488,7 +455,6 @@ indexes.push(source.toLowerCase());
      * @returns {Object} ElasticSearch query object
      */
     self.getWordBulkQuery = function (word, mode, indexes, options) {
-        mode = self.resolveSearchIntent(mode, options);
         var fields = [];
 
         if (true || word.indexOf("*") > -1) {

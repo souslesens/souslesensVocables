@@ -1051,8 +1051,8 @@ var Axiom_activeLegend = (function () {
         Axiom_UI.showLegendPanel();
     };
 
-    self.saveAxiom = function (callback) {
-        if (confirm("Save Axiom")) {
+    self.saveAxiom = function (callback, skipConfirm) {
+        if (skipConfirm || confirm("Save Axiom")) {
             var triples = self.getTriples({ all: true });
             if (triples.newNodesToStore && triples.newNodesToStore.length > 0) {
                 var orphans = triples.newNodesToStore.filter(function (node) {

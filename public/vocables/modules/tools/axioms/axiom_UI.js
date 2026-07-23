@@ -90,6 +90,31 @@ var Axiom_UI = (function () {
         }
     };
 
+    self.hasUnsavedAxiom = function () {
+        if (self.currentView !== "newAxiom" || self.axiomSaved) {
+            return false;
+        }
+        if (!window.Axiom_activeLegend || typeof Axiom_activeLegend.getTriples !== "function") {
+            return false;
+        }
+        var triples = Axiom_activeLegend.getTriples({ all: true });
+        return Array.isArray(triples) && triples.length > 0;
+    };
+
+    self.confirmCloseWithUnsavedAxiom = function (closeDialogFn) {
+        if (!self.hasUnsavedAxiom()) {
+            return true;
+        }
+        if (confirm("Vous avez créé un nouvel axiome non sauvegardé. Voulez-vous le sauvegarder avant de fermer cette fenêtre ?")) {
+            Axiom_activeLegend.saveAxiom(function () {
+                closeDialogFn();
+            }, true);
+            return false;
+        }
+        self.axiomSaved = true;
+        return true;
+    };
+
     self.showSuggestionsPanel = function () {
         $("#nodeInfosAxioms_activeLegendDiv").css("visibility", "hidden");
         $("#nodeInfosAxioms_newAxiomPanel").css("visibility", "visible");

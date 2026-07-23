@@ -72,6 +72,9 @@ var TriplesMaker = {
                 async.eachSeries(
                     result.data,
                     function (data, callbackEach) {
+                        if (options.ntExportLimitReached) {
+                            return callbackEach();
+                        }
                         if (options) {
                             options.currentBatchRowIndex = currentBatchRowIndex;
                         }
@@ -202,6 +205,9 @@ var TriplesMaker = {
             console.log("start");
             try {
                 for await (const batch of generator) {
+                    if (options.ntExportLimitReached) {
+                        break;
+                    }
                     // console.log("select time " + duration)
                     var data = batch;
                     resultSize = data.length;

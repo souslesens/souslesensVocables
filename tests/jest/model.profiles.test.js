@@ -65,6 +65,7 @@ describe("Test the Profilemodel module", () => {
             sourcesAccessControl: { "OWL/FOLDER_1": "read" },
             theme: "",
             quota: {},
+            maxNtExportTriples: 5000,
         });
     });
 
@@ -110,6 +111,7 @@ describe("Test the Profilemodel module", () => {
             sourcesAccessControl: {},
             theme: "",
             quota: {},
+            maxNtExportTriples: undefined,
         });
     });
 
@@ -125,6 +127,7 @@ describe("Test the Profilemodel module", () => {
             sourcesAccessControl: {},
             theme: "default",
             quota: {},
+            maxNtExportTriples: undefined,
         });
     });
 
@@ -202,6 +205,21 @@ describe("Test the Profilemodel module", () => {
             is_shared: true,
             access_control: "{}",
             quota: null,
+            max_nt_export_triples: null,
+            schema_types: [],
+        });
+    });
+
+    test("test _convertToDatabase with a maxNtExportTriples value", async () => {
+        expect(profileModel._convertToDatabase({ name: "test", maxNtExportTriples: 5000 })).toStrictEqual({
+            label: "test",
+            theme: "",
+            allowed_tools: [],
+            allowed_databases: [],
+            is_shared: true,
+            access_control: "{}",
+            quota: null,
+            max_nt_export_triples: 5000,
             schema_types: [],
         });
     });
@@ -230,6 +248,37 @@ describe("Test the Profilemodel module", () => {
                 isShared: true,
                 sourcesAccessControl: {},
                 quota: {},
+                maxNtExportTriples: undefined,
+            },
+        ]);
+    });
+
+    test("test _convertToLegacy with a maxNtExportTriples value", async () => {
+        const profile = {
+            id: 1,
+            label: "test",
+            theme: "SLS",
+            allowed_tools: [],
+            allowed_databases: [],
+            is_shared: true,
+            access_control: {},
+            schema_types: [],
+            max_nt_export_triples: 5000,
+        };
+
+        expect(profileModel._convertToLegacy(profile)).toStrictEqual([
+            "test",
+            {
+                id: "test",
+                name: "test",
+                theme: "SLS",
+                allowedSourceSchemas: [],
+                allowedTools: [],
+                allowedDatabases: [],
+                isShared: true,
+                sourcesAccessControl: {},
+                quota: {},
+                maxNtExportTriples: 5000,
             },
         ]);
     });
@@ -269,6 +318,7 @@ describe("Test the Profilemodel module", () => {
                         POST: 50,
                     },
                 },
+                maxNtExportTriples: undefined,
             },
         ]);
     });
@@ -323,5 +373,30 @@ describe("Test the Profilemodel module", () => {
         };
 
         expect(() => profileModel._checkProfile(invalidProfile)).toThrow();
+    });
+
+    test("getMaxNtExportTriplesForUser is unlimited for the admin login", async () => {
+        const result = await profileModel.getMaxNtExportTriplesForUser({ id: "42", login: "admin", groups: [] });
+        expect(result).toBeUndefined();
+    });
+
+    test("getMaxNtExportTriplesForUser is unlimited for an user holding the admin profile", async () => {
+        const result = await profileModel.getMaxNtExportTriplesForUser({ id: "42", login: "someone", groups: ["admin"] });
+        expect(result).toBeUndefined();
+    });
+
+    test("getMaxNtExportTriplesForUser returns the profile's cap for a single-profile user", async () => {
+        const result = await profileModel.getMaxNtExportTriplesForUser({ id: "42", login: "someone", groups: ["read_folder_1"] });
+        expect(result).toBe(5000);
+    });
+
+    test("getMaxNtExportTriplesForUser returns the highest cap across a multi-profile user", async () => {
+        const result = await profileModel.getMaxNtExportTriplesForUser({ id: "42", login: "someone", groups: ["read_folder_1", "readwrite_folder_1"] });
+        expect(result).toBe(5000);
+    });
+
+    test("getMaxNtExportTriplesForUser is unlimited when no profile of the user sets a cap", async () => {
+        const result = await profileModel.getMaxNtExportTriplesForUser({ id: "42", login: "someone", groups: ["all_forbidden"] });
+        expect(result).toBeUndefined();
     });
 });

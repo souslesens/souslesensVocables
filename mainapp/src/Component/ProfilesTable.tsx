@@ -571,6 +571,8 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
             Object.entries(quotaObj).map(([route, methods]) => [route, Object.fromEntries(Object.entries(methods).map(([method, { quota }]) => [method, quota]))]),
         );
         profileModel.profileForm.quota = simplifiedQuotaObj;
+        const rawMaxNtExportTriples = profileModel.profileForm.maxNtExportTriples;
+        profileModel.profileForm.maxNtExportTriples = rawMaxNtExportTriples || rawMaxNtExportTriples === 0 ? Number(rawMaxNtExportTriples) : undefined;
 
         void saveProfile(profileModel.profileForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
         const mode = create ? "create" : "edit";
@@ -862,6 +864,18 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                 </MenuItem>
                             ))}
                         </TextField>
+                        <Box display="flex" alignItems="center" gap={1}>
+                            <TextField
+                                fullWidth
+                                type="number"
+                                id="maxNtExportTriples"
+                                label="Max NT export triples"
+                                value={profileModel.profileForm.maxNtExportTriples ?? ""}
+                                onChange={handleFieldUpdate("maxNtExportTriples")}
+                                InputProps={{ inputProps: { min: 0 } }}
+                            />
+                            <HelpTooltip title="Caps how many triples a MappingModeler N-Triples export can contain for this profile. Leave empty for no limit." />
+                        </Box>
                         {/* Quota editor */}
                         <FormControl sx={{ mt: 2 }}>
                             <Box>

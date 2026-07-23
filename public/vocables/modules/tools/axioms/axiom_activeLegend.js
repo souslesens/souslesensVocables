@@ -63,7 +63,10 @@ var Axiom_activeLegend = (function () {
                 var siblingObjectPropertyUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "ObjectProperty");
 
                 var highlightNodeIds = null;
-                if (Axioms_graph.currentGraphNode.data.subType == "http://www.w3.org/2002/07/owl#intersectionOf" || Axioms_graph.currentGraphNode.data.subType == "http://www.w3.org/2002/07/owl#unionOf") {
+                if (
+                    Axioms_graph.currentGraphNode.data.subType == "http://www.w3.org/2002/07/owl#intersectionOf" ||
+                    Axioms_graph.currentGraphNode.data.subType == "http://www.w3.org/2002/07/owl#unionOf"
+                ) {
                     highlightNodeIds = Axioms_manager.getDirectSuperClasses(NodeInfosAxioms.currentResource.data.id);
                 }
 

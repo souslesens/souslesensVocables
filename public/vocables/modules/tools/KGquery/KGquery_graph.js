@@ -220,7 +220,6 @@ var KGquery_graph = (function () {
         self.simulationOn = !self.simulationOn;
     };
 
-
     /**
      * Gets the implicit model data in Vis.js format.
      * @function
@@ -853,7 +852,6 @@ var KGquery_graph = (function () {
                 },
                 true,
             );
-
         }
     };
     /**

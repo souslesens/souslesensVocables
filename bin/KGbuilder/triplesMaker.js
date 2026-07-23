@@ -185,7 +185,12 @@ var TriplesMaker = {
                 operationDuration: 0,
                 totalDuration: 0,
             };
-            const conn = await databaseModel.getUserConnection(user, tableInfos.dbID);
+            var conn;
+            try {
+                conn = await databaseModel.getUserConnection(user, tableInfos.dbID);
+            } catch (err) {
+                return callback(err);
+            }
             var connectionObject = { connection: conn, user: user, dbId: tableInfos.dbID };
             let generator = databaseModel.batchSelectGenerator(connectionObject, tableInfos.table, {
                 select: select,

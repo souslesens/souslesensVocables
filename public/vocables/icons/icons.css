@@ -22,9 +22,9 @@
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
-    height: 36px !important;
+    height: 57px !important;
     padding: 0 !important;
-    width: 52px !important;
+    width: 80px !important;
 }
 .lineage-logo {
     background-image: url(@lineage-logo);

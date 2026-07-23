@@ -5,7 +5,6 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import common from "../../shared/common.js";
 import Lineage_whiteboard from "./lineage_whiteboard.js";
 import SearchWidget from "../../uiWidgets/searchWidget.js";
-import SearchUtil from "../../search/searchUtil.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
@@ -225,7 +224,7 @@ var Lineage_graphTraversal = (function () {
             exactMatch: exactMatch,
             // the user picks the end of a path, an approximate match would send the traversal
             // to another entity than the one aimed at
-            searchIntent: SearchUtil.searchIntents.pickEntity,
+            prefixSearch: true,
             jstreeDiv: "lineage_shorterstPath_searchJsTreeDiv",
             selectTreeNodeFn: Lineage_graphTraversal.selectTreeNodeFn,
             contextMenu: Lineage_graphTraversal.contextMenufn,

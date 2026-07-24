@@ -552,7 +552,7 @@ indexes.push(source.toLowerCase());
             var preferredLang = Config && Config.default_lang ? Config.default_lang : "en";
             queryObj.bool.should.push({ term: { lang: { value: preferredLang, boost: 3 } } });
         }
-        console.log(JSON.stringify(queryObj))
+        console.log(JSON.stringify(queryObj));
         return queryObj;
     };
 

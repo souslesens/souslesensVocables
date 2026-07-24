@@ -476,7 +476,7 @@ var TriplesMaker = {
                 var property = TriplesMaker.getPropertyUri(edge.data.id);
 
                 if (edge.isRestriction) {
-                    var triples = TriplesMaker.getRestrictionTriples(subjectUri, property, objectUri, edge.restrictionType, tableProcessingParams);
+                    var triples = TriplesMaker.getRestrictionTriples(subjectUri, property, objectUri, edge.restrictionType, tableProcessingParams, { cardinality: edge.cardinality });
                     triples.forEach(function (triple) {
                         addTriple(triple.s, triple.p, triple.o);
                         if (!tableProcessingParams.isSampleData) {
@@ -804,6 +804,12 @@ var TriplesMaker = {
 
         var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
 
+        // lineage stores the restriction predicate as an owl: prefixed name resolved via PREFIX header;
+        // triplesMaker has no owl: prefix declared, so expand owl:* to the full owl namespace URI (identical triple)
+        var owlNamespaceUri = "http://www.w3.org/2002/07/owl#";
+        var restrictionPredicateUri = restrictionType.indexOf("owl:") === 0 ? owlNamespaceUri + restrictionType.substring("owl:".length) : restrictionType;
+        var restrictionPredicateTerm = "<" + restrictionPredicateUri + ">";
+
         triples.push({
             s: blankNode,
             p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
@@ -818,7 +824,7 @@ var TriplesMaker = {
         if (options.cardinality && options.cardinality.value) {
             triples.push({
                 s: blankNode,
-                p: "<" + restrictionType + ">",
+                p: restrictionPredicateTerm,
                 o: '"' + options.cardinality.value + '"^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>',
             });
             triples.push({
@@ -829,7 +835,7 @@ var TriplesMaker = {
         } else {
             triples.push({
                 s: blankNode,
-                p: "<" + restrictionType + ">",
+                p: restrictionPredicateTerm,
                 o: objectUri,
             });
         }

@@ -935,7 +935,7 @@ var Lineage_createRelation = (function () {
 
                     allTriples = allTriples.concat(restrictionTriples);
                     if (options.additionalTriples) {
-                        allTriplesallTriples.concat(options.additionalTriples);
+                        allTriples = allTriples.concat(options.additionalTriples);
                     }
 
                     Sparql_generic.insertTriples(inSource, allTriples, null, function (err, _result) {

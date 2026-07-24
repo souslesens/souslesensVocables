@@ -15,6 +15,8 @@ var DataSourceManager = (function () {
     self.currentConfig = {};
     self.currentSlsvSource = {};
     self.statsMap = {};
+    // in-memory cache of triple stats per source: instant paint on reopen, always refreshed in background
+    self.statsMapBySource = {};
     var mappingsDir = "mappings";
     self.umountKGUploadApp = null;
 
@@ -812,8 +814,34 @@ var DataSourceManager = (function () {
                 statsMap[item.table.value] = item.triples.value;
             });
             self.statsMap = statsMap;
+            self.statsMapBySource[source] = statsMap;
             return callback(null, statsMap);
         });
+    };
+
+    /**
+     * Patches CSV datasource labels in the tree with fresh triple counts, without rebuilding the tree.
+     * Database table labels read self.statsMap lazily on expand, so they need no patching here.
+     * @param {object} statsMap map: datasource/table name -> triples count
+     */
+    self.updateTreeStats = function (statsMap) {
+        if (!statsMap || !self.dataSourcejstreeDivId) {
+            return;
+        }
+        var tree = $("#" + self.dataSourcejstreeDivId).jstree(true);
+        if (!tree) {
+            return;
+        }
+        for (var tableName in statsMap) {
+            var node = tree.get_node(tableName);
+            if (!node) {
+                continue;
+            }
+            var nTriples = statsMap[tableName];
+            var strStats = nTriples ? "<b> " + nTriples + " Triples</b>" : "";
+            var label = "<span style='color:blue'>" + tableName + strStats + "</span>";
+            tree.rename_node(node, label);
+        }
     };
     return self;
 })();

@@ -26,7 +26,7 @@ import { Assignment, CheckBox, CheckBoxOutlineBlank, Close, Done, ExpandMore, Mi
 import { ulid } from "ulid";
 import { z } from "zod";
 
-import { defaultSource, ServerSource, ServerSourceSchema, sourceHelp } from "../Source";
+import { defaultSource, getElasticSearchIndexNameFromSourceName, ServerSource, ServerSourceSchema, sourceHelp, sourceNameCompatibleWithElasticsearchIndexRegex } from "../Source";
 import { getUsers, User } from "../User";
 import { HeadersList } from "./HeadersList";
 import { HelpTooltip } from "./HelpModal";
@@ -100,19 +100,31 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
 
     const handleValidation = (data: ServerSource) => {
         const schema = ServerSourceSchema.superRefine((value: ServerSource, context) => {
-            if (value.name.includes(" ")) {
-                context.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "Name cannot contain spaces",
-                    path: ["name"],
-                });
-            }
-            if (!edit && sourcesNames.includes(value.name)) {
-                context.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "This name is already used by another source",
-                    path: ["name"],
-                });
+            if (!edit) {
+                const sourceIndexName = getElasticSearchIndexNameFromSourceName(value.name);
+                const existingSourceIndexNames = sourcesNames.map((existingSourceName) => getElasticSearchIndexNameFromSourceName(existingSourceName));
+
+                if (sourceIndexName === "admin") {
+                    context.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: "Name can't be admin",
+                        path: ["name"],
+                    });
+                }
+                if (!sourceNameCompatibleWithElasticsearchIndexRegex.test(value.name)) {
+                    context.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: "Name must contain 2 to 255 alphanum, - or _ chars, and start with an alphanum char",
+                        path: ["name"],
+                    });
+                }
+                if (existingSourceIndexNames.includes(sourceIndexName)) {
+                    context.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: "This name is already used by another source once lowercased",
+                        path: ["name"],
+                    });
+                }
             }
             if (sourcesPrefixes.includes(value.prefix)) {
                 if (!edit || value.prefix !== source.prefix) {

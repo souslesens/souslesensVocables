@@ -9,5 +9,6 @@ create table if not exists profiles(
        is_shared         boolean default true,
        access_control    json default '{}'::json,
        schema_types      schema_type[],
-       quota             json default '{}'::json
+       quota             json default '{}'::json,
+       max_nt_export_triples integer
 );

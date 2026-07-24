@@ -109,8 +109,8 @@ var CreateRestriction_bot = (function () {
         chooseConstraintTypeFn: function () {
             var choices = [
                 { id: "owl:someValuesFrom", label: "owl:someValuesFrom" },
-                { id: "owl:allValuesFrom ", label: "owl:allValuesFrom " },
-                { id: "owl:hasValue ", label: "owl:hasValue " },
+                { id: "owl:allValuesFrom", label: "owl:allValuesFrom" },
+                { id: "owl:hasValue", label: "owl:hasValue" },
                 { id: "owl:maxQualifiedCardinality", label: "owl:maxQualifiedCardinality" },
                 { id: "owl:minQualifiedCardinality", label: "owl:minQualifiedCardinality" },
                 { id: "owl:qualifiedCardinality", label: "owl:qualifiedCardinality" },

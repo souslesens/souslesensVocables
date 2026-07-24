@@ -73,6 +73,11 @@ var MappingParser = {
                 fromNodeData = allColumnsMappings[fromNodeData.definedInColumn];
             }
             if (fromNodeData && MappingParser.columnsMappingsObjects.includes(fromNodeData.type)) {
+                if (!allColumnsMappings[edge.from]) {
+                    // Skip broken edge (no column mapping for 'from') instead of crashing.
+                    console.warn("[mappingsParser] skipped broken edge: from=" + edge.from + " to=" + edge.to);
+                    return;
+                }
                 if (allColumnsMappings[edge.from].mappings.length == 0) {
                     var toNodeData = nodesMap[edge.to];
 

@@ -625,7 +625,9 @@ class BotEngineClass {
                 .find("#botTreeValidateBtn")
                 .on("click", () => {
                     const checkedNodes = JstreeWidget.getjsTreeCheckedNodes(treeDivId);
-                    if (checkedNodes.length === 0) {
+                    // without allowEmptySelection an empty validation is a misclick; with it, checking
+                    // nothing is a legitimate answer and must not leave the user stuck on a dead button
+                    if (checkedNodes.length === 0 && !treeOptions.allowEmptySelection) {
                         return;
                     }
 

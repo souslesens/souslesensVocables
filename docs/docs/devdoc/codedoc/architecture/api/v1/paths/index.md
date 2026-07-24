@@ -15,6 +15,7 @@ Each subdirectory represents a coherent set of endpoints (such as users, authent
 
 ## Contents
 
+- [AI routes](ai.md)
 - [Core routes](core.md)
 - [Authentication](auth/index.md)
 - [Administration](admin/index.md)
@@ -37,6 +38,7 @@ Each subdirectory represents a coherent set of endpoints (such as users, authent
 :maxdepth: 5
 :caption: Contents
 
+ai
 admin/index
 annotator/index
 auth/index
@@ -59,8 +61,10 @@ users/index
 
 ## Files in this directory
 
+- `alignment.js`
 - `annotate.js`
 - `blenderSources.js`
+- `classify.js`
 - `config.js`
 - `copygraph.js`
 - `databases.js`

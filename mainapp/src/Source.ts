@@ -5,6 +5,11 @@ const endpoint = "/api/v1/admin/sources";
 const userEndpoint = "/api/v1/sources";
 const indicesEndpoint = "/api/v1/elasticsearch/indices";
 const graphsEndpoint = "/api/v1/sparql/graphs";
+export const sourceNameCompatibleWithElasticsearchIndexRegex = /^[A-Za-z0-9][A-Za-z0-9_-]{1,254}$/;
+
+export function getElasticSearchIndexNameFromSourceName(sourceName: string): string {
+    return sourceName.toLowerCase();
+}
 
 type Response = { message: string; resources: ServerSource[] };
 
@@ -182,7 +187,11 @@ export const ServerSourceSchema = z.object({
     graphUri: z.string().url().optional().or(z.literal("")),
     sparql_server: SparqlServerSchema,
     controller: z.string().default("Sparql_OWL"),
-    topClassFilter: z.string().default("?topConcept rdf:type owl:Class ."),
+    topClassFilter: z
+        .string()
+        .default(
+            "?topConcept rdf:type owl:Class. ?topConcept rdfs:subClassOf ?superClass filter (isUri(?superClass) && not exists{?superClass rdf:type owl:Class }) OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}",
+        ),
     schemaType: z.string().default("OWL"),
     dataSource: dataSourceSchema.nullable(),
     schema: z.unknown().nullable(),
@@ -232,14 +241,14 @@ export const InputSourceSchemaCreate = z.object({
     name: z
         .string()
         .nonempty({ message: "Required" })
-        .refine((val) => val !== "admin", { message: "Name can't be admin" })
-        .refine((val) => val.match(/.{2,254}/i), { message: "Name can only contain between 2 and 255 chars" })
-        .refine((val) => val.match(/^[a-z0-9]/i), { message: "Name have to start with alphanum char" })
-        .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
+        .refine((val) => getElasticSearchIndexNameFromSourceName(val) !== "admin", { message: "Name can't be admin" })
+        .refine((val) => sourceNameCompatibleWithElasticsearchIndexRegex.test(val), {
+            message: "Name must contain 2 to 255 alphanum, - or _ chars, and start with an alphanum char",
+        }),
 });
 
 export const sourceHelp = {
-    name: "The source name can only contain alphanum and - or _ chars and must be unique",
+    name: "The source name must contain 2 to 255 alphanum, - or _ chars, start with an alphanum char, and be unique once lowercased",
     prefix: "Prefix used for the Base URI. Must contain lowercase alphanum chars and -",
     baseUri: "Base URI",
     graphUri: "Graph URI is mandatory when using the default SPARQL server",

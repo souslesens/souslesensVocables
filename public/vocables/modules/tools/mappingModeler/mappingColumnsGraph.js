@@ -263,6 +263,10 @@ var MappingColumnsGraph = (function () {
             self.drawGraphCanvas(self.graphDiv, visjsData);
         }
 
+        if (self.visjsGraph.network) {
+            self.visjsGraph.network.redraw();
+        }
+
         // MappingModeler.hideForbiddenResources(newResource.data.type);
         JstreeWidget.empty("suggestionsSelectJstreeDiv");
         self.currentGraphNode = newResource;

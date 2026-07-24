@@ -368,16 +368,30 @@ indexes.push(source.toLowerCase());
     };
     /**
      * Builds an ElasticSearch query_string fragment for a search term. By default each word
-     * gets Levenshtein fuzziness (word~n). When prefixOnly is true, each plain word becomes a
-     * prefix match (word*) instead, so partial typing (e.g. "abd") matches longer labels
-     * ("abdulnasser") — this prefix mode is used only by the lineage tool. A word already
-     * containing "*" is kept as-is in both modes (fuzziness would be invalid on a wildcard).
+     * gets Levenshtein fuzziness (word~n). When prefixOnly is true, each plain word becomes
+     * "(word* OR word)" instead, so partial typing ("abd") matches longer labels
+     * ("abdulnasser"). This prefix mode is used only by the lineage tool.
+     *
+     * The second branch of the OR is not redundant with the wildcard: the label field is
+     * indexed with the english_stemmed analyzer (see elasticRestProxy createIndex), while
+     * query_string leaves a wildcard term unanalyzed, so that term is matched against
+     * already stemmed tokens. Without the second branch, typing a whole word finds less than
+     * typing its beginning: "properties*" misses the indexed token "properti", where
+     * "propert*" matches it. The parentheses keep both branches grouped per word, the
+     * query_string running with default_operator AND.
+     *
+     * Both branches match a token, not the whole label, since english_stemmed splits on the
+     * standard tokenizer: "vice" matches "Machine vice" as well as "Vice". Restricting the
+     * matches to the beginning of the label would need another field, not another operator.
+     *
+     * A word already containing "*" is kept as-is in both modes (fuzziness would be invalid
+     * on a wildcard).
      * @function
      * @name makeFuzzyQueryString
      * @memberof module:SearchUtil
      * @param {string} word - Already escaped search term, possibly holding several words
-     * @param {boolean} [prefixOnly] - When true, use prefix matching (word*) instead of fuzziness
-     * @returns {string} query_string expression, e.g. "abd*" (prefix) or "abd~1" (fuzzy)
+     * @param {boolean} [prefixOnly] - When true, use prefix matching instead of fuzziness
+     * @returns {string} query_string expression, e.g. "(abd* OR abd)" (prefix) or "abd~1" (fuzzy)
      */
     self.makeFuzzyQueryString = function (word, prefixOnly) {
         // to add fuziness in query string elastic search, the parameter isn't available
@@ -396,7 +410,7 @@ indexes.push(source.toLowerCase());
                 return;
             }
             if (prefixOnly) {
-                queryParts.push(singleWord + "*");
+                queryParts.push("(" + singleWord + "* OR " + singleWord + ")");
                 return;
             }
             var fuzzyDistance = 2;
@@ -538,7 +552,7 @@ indexes.push(source.toLowerCase());
             var preferredLang = Config && Config.default_lang ? Config.default_lang : "en";
             queryObj.bool.should.push({ term: { lang: { value: preferredLang, boost: 3 } } });
         }
-        console.log(JSON.stringify(queryObj))
+        console.log(JSON.stringify(queryObj));
         return queryObj;
     };
 
@@ -694,6 +708,58 @@ indexes.push(source.toLowerCase());
                             });
                         },
 
+                        // index classes of a source without taxonomy (no superClasses): attach them to owl:Thing
+                        function (callbackSeries) {
+                            if (taxonomyClasses.length > 0 || options.ids || Config.sources[sourceLabel].schemaType != "OWL") {
+                                return callbackSeries();
+                            }
+                            UI.message(sourceLabel + ": no taxonomy found, indexing all class labels under owl:Thing");
+                            Sparql_OWL.getClassesWithoutTaxonomy(sourceLabel, options, function (err, result) {
+                                if (err) {
+                                    return callbackEachSource(err);
+                                }
+                                var index = 0;
+                                var classesArray = [];
+                                for (var key in result.classesMap) {
+                                    classesArray.push(result.classesMap[key]);
+                                }
+                                var slices = common.array.slice(classesArray, 50);
+                                taxonomyClasses = classesArray;
+                                async.eachSeries(
+                                    slices,
+                                    function (data, callbackEach) {
+                                        if (data.length == 0) {
+                                            return callbackEach();
+                                        }
+
+                                        var replaceIndex = false;
+                                        if (index++ == 0) {
+                                            replaceIndex = true;
+                                        }
+                                        data.forEach(function (item) {
+                                            item.type = "Class";
+                                        });
+                                        self.indexData(sourceLabel.toLowerCase(), data, replaceIndex, function (err, result) {
+                                            if (err) {
+                                                return callbackEach(err);
+                                            }
+                                            if (!result) {
+                                                return callbackEach();
+                                            }
+                                            totalLines += result.length;
+                                            totalLinesAllsources += totalLines;
+                                            UI.message("indexed " + totalLines + "/" + classesArray.length + " in index " + sourceLabel.toLowerCase());
+
+                                            callbackEach();
+                                        });
+                                    },
+                                    function (err) {
+                                        return callbackSeries(err);
+                                    },
+                                );
+                            });
+                        },
+
                         // indexNamedIndividuals
                         function (callbackSeries) {
                             if (options.skipIndividuals) {
@@ -706,10 +772,17 @@ indexes.push(source.toLowerCase());
 
                             var totalLines = 0;
                             UI.message("indexing namedIndividuals");
+                            var indexedPredicateVariableNames = Sparql_common.getIndexedPredicatesClauses("id", options).variableNames;
 
                             var processor = function (data, callbackProcessor) {
                                 var individualsToIndex = [];
+                                // a subject holding several optional values (prefLabel, indexed predicates) comes back
+                                // on as many rows: they are merged into one document instead of one document per row.
+                                // The type stays part of the key: a multi typed individual keeps one document per type
+                                var individualsByUriAndType = {};
                                 data.forEach(function (item) {
+                                    var individualUri = item.id.value;
+                                    var individualUriAndType = individualUri + " " + item.type.value;
                                     var parent;
                                     var parents;
 
@@ -721,17 +794,31 @@ indexes.push(source.toLowerCase());
                                         parents = [sourceLabel, item.type.value];
                                     }
 
-                                    var skosLabel = item.skosPrefLabel ? item.skosPrefLabel.value : null;
-                                    individualsToIndex.push({
-                                        id: item.id.value,
-                                        label: item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value),
-                                        lang: item.label ? item.label["xml:lang"] : null,
-                                        skoslabels: [skosLabel],
-                                        parent: parent,
-                                        parents: parents,
-                                        type: "NamedIndividual",
-                                        //  type: item.type2.value,
-                                    });
+                                    if (!individualsByUriAndType[individualUriAndType]) {
+                                        individualsByUriAndType[individualUriAndType] = {
+                                            id: individualUri,
+                                            label: item.label ? item.label.value : Sparql_common.getLabelFromURI(individualUri),
+                                            lang: item.label ? item.label["xml:lang"] : null,
+                                            skoslabels: [],
+                                            parent: parent,
+                                            parents: parents,
+                                            type: "NamedIndividual",
+                                            //  type: item.type2.value,
+                                        };
+                                        individualsToIndex.push(individualsByUriAndType[individualUriAndType]);
+                                    }
+
+                                    var individualToIndex = individualsByUriAndType[individualUriAndType];
+                                    var skosLabels = individualToIndex.skoslabels;
+                                    // labels in other languages arrive on their own row: kept as alt labels
+                                    // so merging the rows does not make them unsearchable
+                                    if (item.label && item.label.value != individualToIndex.label && skosLabels.indexOf(item.label.value) < 0) {
+                                        skosLabels.push(item.label.value);
+                                    }
+                                    if (item.skosPrefLabel && skosLabels.indexOf(item.skosPrefLabel.value) < 0) {
+                                        skosLabels.push(item.skosPrefLabel.value);
+                                    }
+                                    Sparql_common.pushIndexedPredicateValues(item, indexedPredicateVariableNames, skosLabels);
                                 });
 
                                 self.indexData(sourceLabel.toLowerCase(), individualsToIndex, false, function (err, result) {
@@ -762,6 +849,7 @@ indexes.push(source.toLowerCase());
                                     processorFectchSize: 100,
                                     skosPrefLabel: true,
                                     withoutImports: true,
+                                    indexedPredicates: options.indexedPredicates,
                                 },
                                 processor,
                                 function (err, result) {

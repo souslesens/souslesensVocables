@@ -23,6 +23,7 @@ const ProfileObject = z
         allowedDatabases: z.string().array().optional(),
         isShared: z.boolean().default(true),
         quota: z.record(z.string(), z.record(z.string(), z.union([z.number(), z.object({ quota: z.number(), wholeProfileQuota: z.boolean() })]))).optional(),
+        maxNtExportTriples: z.number().int().positive().optional(),
         _type: z.string().default("profile"),
     })
     .strict();
@@ -67,6 +68,7 @@ class ProfileModel {
         is_shared: profile.isShared !== undefined ? profile.isShared : true,
         access_control: JSON.stringify(profile.sourcesAccessControl || {}),
         quota: profile.quota ? JSON.stringify(profile.quota) : null,
+        max_nt_export_triples: profile.maxNtExportTriples ?? null,
         schema_types: profile.allowedSourceSchemas || [],
     });
 
@@ -91,6 +93,7 @@ class ProfileModel {
             isShared: typeof profile.is_shared === "number" ? profile.is_shared === 1 : profile.is_shared,
             sourcesAccessControl: typeof profile.access_control === "string" ? JSON.parse(profile.access_control) : profile.access_control,
             quota: typeof profile.quota === "string" ? JSON.parse(profile.quota) : profile.quota || {},
+            maxNtExportTriples: profile.max_nt_export_triples ?? undefined,
         },
     ];
 
@@ -333,6 +336,29 @@ class ProfileModel {
             }
         }
         return { maxQuota, profile: profileWithMaxQuota, wholeProfile: wholeProfileQuota };
+    };
+
+    /**
+     * Return the max number of triples a user may export as N-Triples, across all their profiles.
+     * Admin users (login "admin" or holding the "admin" profile) are never capped.
+     * @param {UserAccount} user - the user whose profiles are inspected
+     * @returns {Promise<number|undefined>} - maximum allowed triples, or undefined if unlimited
+     */
+    getMaxNtExportTriplesForUser = async (user) => {
+        if (user.login === "admin" || user.groups?.includes("admin")) {
+            return undefined;
+        }
+
+        const userProfiles = await this.getUserProfiles(user);
+        let maxNtExportTriples;
+
+        for (const profile of Object.values(userProfiles)) {
+            if (typeof profile.maxNtExportTriples === "number" && (maxNtExportTriples === undefined || profile.maxNtExportTriples > maxNtExportTriples)) {
+                maxNtExportTriples = profile.maxNtExportTriples;
+            }
+        }
+
+        return maxNtExportTriples;
     };
 }
 

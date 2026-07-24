@@ -2634,7 +2634,7 @@ var Lineage_whiteboard = (function () {
         }
         var filter = "";
         if ((!properties || properties.length == 0) && !options.filter) {
-            filter = " FILTER( ?prop not in(rdf:type, rdfs:subClassOf,rdfs:member))";
+            filter = " FILTER( ?prop not in(rdf:type, rdfs:subClassOf,rdfs:member) && ?subjectType!=owl:Restriction)";
         }
         if (!options) {
             options = {};

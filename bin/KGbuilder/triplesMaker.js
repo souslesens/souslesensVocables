@@ -767,7 +767,10 @@ var TriplesMaker = {
             return [];
         }
 
-        var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
+        var blankNode = "<_:b" + util.getRandomHexaId(15) + ">";
+        if(restrictionType.startsWith("http")){
+            restrictionType="<" + restrictionType + ">"
+        }
 
         triples.push({
             s: blankNode,
@@ -783,7 +786,7 @@ var TriplesMaker = {
         if (options.cardinality && options.cardinality.value) {
             triples.push({
                 s: blankNode,
-                p: "<" + restrictionType + ">",
+                p: restrictionType,
                 o: '"' + options.cardinality.value + '"^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>',
             });
             triples.push({
@@ -794,7 +797,7 @@ var TriplesMaker = {
         } else {
             triples.push({
                 s: blankNode,
-                p: "<" + restrictionType + ">",
+                p: restrictionType ,
                 o: objectUri,
             });
         }

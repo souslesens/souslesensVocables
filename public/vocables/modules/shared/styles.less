@@ -245,6 +245,28 @@ html {
 .lineage-tab > div > .w3-display-right {
     right: 0px;
 }
+
+/* Classes and Containers panels: keep the search/options header fixed and scroll
+   only inside the jstree region, instead of scrolling the whole lateral panel.
+   The flex column lives on the inner root (not on #classesTab/#containersTab, whose
+   inline display is toggled by UI.openTab), so height:100% drives the chain. */
+#classesTab,
+#containersTab {
+    overflow: hidden;
+}
+#Lineage_ClassesTab,
+#LineageContainersTab {
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+.Lineage_classes_jstreeContainer,
+.Lineage_containers_jstreeContainer {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+}
 .messageDiv {
     font-size: 14px;
     font-family: Helvetica, sans-serif;

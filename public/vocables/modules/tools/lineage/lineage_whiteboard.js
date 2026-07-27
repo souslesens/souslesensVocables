@@ -3383,7 +3383,9 @@ restrictionSource = Config.predicatesSource;
             html = "...";
             // '<span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.expandIndividual();"> Expand individual</span>';
         } else if (node.data && node.data.rdfType === "literal") {
-            html = '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showNodeInfos();"> Node infos</span>';
+            html =
+                '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showNodeInfos();"> Node infos</span>' +
+                '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from whiteboard</span>';
         } else if (node.data && node.data.graphPopupMenusFn) {
             html = node.data.graphPopupMenusFn();
         } else {

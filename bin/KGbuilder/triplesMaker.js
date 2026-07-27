@@ -857,6 +857,9 @@ var TriplesMaker = {
         if (!options) {
             options = {};
         }
+
+        if(subjectUri==null)
+            return [];
         var metaDataTriples = [];
         metaDataTriples.push(subjectUri + " " + "<http://purl.org/dc/terms/created>" + " " + dateTime);
         metaDataTriples.push(subjectUri + " <" + TriplesMaker.mappingFilePredicate + "> '" + table + "'");

@@ -414,6 +414,21 @@ const KGbuilder_triplesWriter = {
                     }
                 });
             },
+            Restriction: function () {
+                var seenRestrictionNodes = {};
+                bindings.forEach(function (binding) {
+                    if (binding.restr && binding.p && binding.o) {
+                        var restrictionNode = "<" + binding.restr.value + ">";
+                        var predicateUri = "<" + binding.p.value + ">";
+                        var objectValue = binding.o.type === "uri" ? "<" + binding.o.value + ">" : '"' + binding.o.value + '"';
+                        sampleTriples.push(restrictionNode + " " + predicateUri + " " + objectValue);
+                        if (binding.class && !seenRestrictionNodes[binding.restr.value]) {
+                            seenRestrictionNodes[binding.restr.value] = true;
+                            sampleTriples.push("<" + binding.class.value + "> rdfs:subClassOf " + restrictionNode);
+                        }
+                    }
+                });
+            },
             otherPredicate: function () {
                 bindings.forEach(function (binding) {
                     var subjectUri = "<" + binding.s.value + ">";
@@ -525,6 +540,34 @@ const KGbuilder_triplesWriter = {
                         "} " +
                         "}",
                     deleteClause: "DELETE { " + "GRAPH <" + graphUri + "> { " + "?sub <" + item.propertyUri + "> ?obj . " + "} " + "}",
+                };
+            },
+            Restriction: function () {
+                // mappingModeler restrictions are generated per row: each row-class ?class (subClassOf the source column's
+                // parent class item.startingClass) gets: ?class rdfs:subClassOf ?restr ; ?restr a owl:Restriction ;
+                // owl:onProperty <prop> ; (someValuesFrom|allValuesFrom|hasValue|onClass) ?target ; ?target subClassOf the
+                // target column's parent class item.endingClass. Scope by both parent classes + property to isolate this edge.
+                var subjectParentClass = "<" + item.startingClass + ">";
+                var propertyUri = "<" + item.propertyUri + ">";
+                var targetParentClass = "<" + item.endingClass + ">";
+                var restrictionMatch =
+                    "?class rdfs:subClassOf " +
+                    subjectParentClass +
+                    " . " +
+                    "?class rdfs:subClassOf ?restr . " +
+                    "?restr rdf:type owl:Restriction . " +
+                    "?restr owl:onProperty " +
+                    propertyUri +
+                    " . " +
+                    "VALUES ?targetLink { owl:someValuesFrom owl:allValuesFrom owl:hasValue owl:onClass } " +
+                    "?restr ?targetLink ?target . " +
+                    "?target rdfs:subClassOf " +
+                    targetParentClass +
+                    " . ";
+                return {
+                    selectVars: "?class ?restr ?p ?o",
+                    whereClause: "WHERE { " + "GRAPH <" + graphUri + "> { " + restrictionMatch + "?restr ?p ?o . " + "} " + "}",
+                    deleteClause: "DELETE { " + "GRAPH <" + graphUri + "> { " + "?class rdfs:subClassOf ?restr . " + "?restr ?p ?o . " + "} " + "}",
                 };
             },
             ClassRelation: function () {

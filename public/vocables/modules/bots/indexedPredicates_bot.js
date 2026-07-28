@@ -1,11 +1,12 @@
 import BotEngineClass from "./_botEngineClass.js";
 import OntologyModels from "../shared/ontologyModels.js";
-import Sparql_common from "../sparqlProxies/sparql_common.js";
 
 /**
- * Pre-step of every manual indexation: lets the user pick extra datatype and annotation
- * properties that have string values in the source graph. The chosen values are indexed into the
- * `skoslabels` field.
+ * Pre-step of every manual indexation: first asks whether the default indexed predicates are enough
+ * or extra ones should be picked. Only in the second case are the indexable predicates of the source
+ * looked up (the lookup probes the data, too slow to impose on a user who only wants the defaults)
+ * and shown in a tree, under a single "Other predicates" folder. The chosen values are indexed into
+ * the `skoslabels` field.
  */
 var IndexedPredicates_bot = (function () {
     var self = {};
@@ -14,14 +15,19 @@ var IndexedPredicates_bot = (function () {
     self.title = "Indexed predicates";
 
     self.workflow = {
-        promptPredicatesSelectionFn: {},
+        promptIndexationModeFn: {
+            promptPredicatesSelectionFn: {},
+        },
     };
 
     self.functionTitles = {
+        promptIndexationModeFn: "predicates to index",
         promptPredicatesSelectionFn: "indexed predicates",
     };
 
-    var defaultIndexedPredicatesNodeId = "__defaultIndexedPredicates__";
+    var otherPredicatesNodeId = "__otherPredicates__";
+    var indexDefaultPredicatesChoiceId = "defaultPredicates";
+    var pickOtherPredicatesChoiceId = "otherPredicates";
 
     /**
      * @function start
@@ -52,56 +58,50 @@ var IndexedPredicates_bot = (function () {
     function moveToNextSourceOrRunIndexation() {
         self.params.currentSourceIndex += 1;
         if (self.params.currentSourceIndex < self.params.sources.length) {
-            return self.functions.promptPredicatesSelectionFn();
+            return self.functions.promptIndexationModeFn();
         }
         runIndexation();
     }
 
+    /**
+     * First step, once per source: default predicates only, or pick extra ones. The indexable
+     * predicates lookup probes the source data, so it only runs when the user asks for extra
+     * predicates; answering "default" starts the indexation without any predicate query.
+     */
+    function promptIndexationMode() {
+        var source = getCurrentSource();
+        self.myBotEngine.insertBotMessage("Predicates to index for " + source, { isQuestion: true });
+        var indexationModeChoices = [
+            { id: indexDefaultPredicatesChoiceId, label: "Default predicates" },
+            { id: pickOtherPredicatesChoiceId, label: "Default predicates + other indexable predicates" },
+        ];
+        self.myBotEngine.showList(indexationModeChoices, null, null, false, function (selectedChoiceId) {
+            if (selectedChoiceId == pickOtherPredicatesChoiceId) {
+                return self.functions.promptPredicatesSelectionFn();
+            }
+            moveToNextSourceOrRunIndexation();
+        });
+    }
+
+    // the default indexed predicates are not shown: they are hard-coded in the indexation queries
+    // and indexed whatever the user does, the tree only offers the extra ones
     function buildPredicatesJstreeData(indexablePredicates) {
+        // a single folder whatever the declared property types: the user picks predicates by what
+        // they contain, not by how the ontology declares them
         var jstreeData = [
             {
-                id: defaultIndexedPredicatesNodeId,
-                text: "Default indexed properties",
+                id: otherPredicatesNodeId,
+                text: "Other predicates",
                 parent: "#",
                 type: "Folder",
-                data: { id: defaultIndexedPredicatesNodeId },
-                // disabled on the folder too: unchecking it would cascade on its children, while these
-                // predicates are hard-coded in the indexation queries and indexed whatever the user does
-                state: { checked: true, disabled: true },
+                data: { id: otherPredicatesNodeId },
             },
         ];
-        var predicateTypeNodeIds = {};
-
-        Sparql_common.getDefaultIndexedPredicates().forEach(function (predicate) {
-            if (!predicate.id) {
-                return;
-            }
-            jstreeData.push({
-                id: predicate.id,
-                text: predicate.label,
-                parent: defaultIndexedPredicatesNodeId,
-                type: "Property",
-                data: { id: predicate.id, isDefaultIndexedPredicate: true },
-                state: { checked: true, disabled: true },
-            });
-        });
-
         indexablePredicates.forEach(function (predicate) {
-            var predicateTypeNodeId = "__propertyType__" + encodeURIComponent(predicate.typeUri || predicate.typeLabel);
-            if (!predicateTypeNodeIds[predicateTypeNodeId]) {
-                predicateTypeNodeIds[predicateTypeNodeId] = true;
-                jstreeData.push({
-                    id: predicateTypeNodeId,
-                    text: predicate.typeLabel,
-                    parent: "#",
-                    type: "Folder",
-                    data: { id: predicateTypeNodeId },
-                });
-            }
             jstreeData.push({
                 id: predicate.id,
                 text: predicate.label,
-                parent: predicateTypeNodeId,
+                parent: otherPredicatesNodeId,
                 type: "Property",
                 data: { id: predicate.id },
                 // `checked` and not `selected`: JstreeWidget mounts the checkbox plugin with tie_selection false
@@ -132,12 +132,17 @@ var IndexedPredicates_bot = (function () {
             }
 
             var jstreeData = buildPredicatesJstreeData(indexablePredicates);
-            var defaultIndexedPredicateIdsMap = Sparql_common.getDefaultIndexedPredicateIdsMap();
+            var indexablePredicateIdsMap = {};
+            indexablePredicates.forEach(function (indexablePredicate) {
+                indexablePredicateIdsMap[indexablePredicate.id] = true;
+            });
             self.myBotEngine.insertBotMessage("Indexed predicates for " + source, { isQuestion: true });
 
             self.myBotEngine.showTree(jstreeData, null, { withCheckboxes: true, openAll: true, allowEmptySelection: true }, null, function (checkedIds) {
+                // keeps out the default predicates, hard coded in the indexation queries, and the
+                // folder ids a whole-folder check would put among the checked nodes
                 var selectedPredicates = checkedIds.filter(function (checkedId) {
-                    return !defaultIndexedPredicateIdsMap[checkedId];
+                    return indexablePredicateIdsMap[checkedId];
                 });
 
                 if (selectedPredicates.length > 0) {
@@ -149,6 +154,7 @@ var IndexedPredicates_bot = (function () {
     }
 
     self.functions = {
+        promptIndexationModeFn: promptIndexationMode,
         promptPredicatesSelectionFn: promptPredicatesSelection,
     };
 

@@ -1056,6 +1056,22 @@ var TripleFactory = (function () {
                     });
                     return;
                 }
+                // restriction edge: both endpoints are classes. A Class node carries the class URI in data.id;
+                // a column typed as owl:Class resolves its class via getColumnClass.
+                if (edge.data && edge.data.restrictionType && fromMappingNode && fromMappingNode.data && toMappingNode && toMappingNode.data) {
+                    var restrictionStartingClass = fromMappingNode.data.type === "Class" ? fromMappingNode.data.id : MappingColumnsGraph.getColumnClass(fromMappingNode);
+                    var restrictionEndingClass = toMappingNode.data.type === "Class" ? toMappingNode.data.id : MappingColumnsGraph.getColumnClass(toMappingNode);
+                    if (restrictionStartingClass && restrictionEndingClass) {
+                        filterMappingIds.push({
+                            id: item.id,
+                            type: "Restriction",
+                            startingClass: restrictionStartingClass,
+                            endingClass: restrictionEndingClass,
+                            propertyUri: edge.data.id,
+                        });
+                    }
+                    return;
+                }
                 var startingClass;
                 if (edge.from && mappingNodes[edge.from]) {
                     startingClass = MappingColumnsGraph.getColumnClass(mappingNodes[edge.from]);

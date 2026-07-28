@@ -4,6 +4,7 @@ import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import common from "../../shared/common.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
+import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import KGquery_nodeSelector from "./KGquery_nodeSelector.js";
 import UserDataWidget from "../../uiWidgets/userDataWidget.js";
 import DataSourceManager from "../mappingModeler/dataSourcesManager.js";
@@ -1098,14 +1099,15 @@ var KGquery_graph = (function () {
      *     if two subclasses share an outgoing edge (same target + same property) or an
      *     incoming edge (same source + same property), that edge is promoted to the
      *     superclass level and stored in `commonSubClassEdges`.
-     *  3. **Superclass node injection** — a new vis.js node is created for every
-     *     superclass that has at least one grouped subclass. Its `data.subclasses` lists
-     *     the grouped children; its `data.nonObjectProperties` is the union of all
-     *     subclasses' datatype properties.
-     *  4. **Subclass hiding + edge rewriting** — grouped subclass nodes are hidden
+     *  3. **Subclass hiding + edge rewriting** — grouped subclass nodes are hidden
      *     (`hidden: true`); promoted edges have their `from`/`to` replaced by the
      *     superclass URI when the original endpoint was itself a grouped subclass, and
      *     their `id` is rebuilt as `from_propertyIdto`.
+     *  4. **Superclass node injection** — labels of the regrouping superclasses are fetched
+     *     with `Sparql_OWL.getUrisLabelsMap` (source + imports), then a new vis.js node is
+     *     created for every superclass that has at least one grouped subclass. Its
+     *     `data.subclasses` lists the grouped children; its `data.nonObjectProperties` is
+     *     the union of all subclasses' datatype properties.
      *
      * @function
      * @name manageSubclasses
@@ -1245,42 +1247,7 @@ var KGquery_graph = (function () {
             }
         });
 
-        // --- Phase 3: inject a synthetic node for each non-empty superclass group ---
-        Object.keys(subclassGrouped).forEach(function (superClassUri) {
-            if (subclassGrouped[superClassUri].length === 0) {
-                return;
-            }
-            var label = Sparql_common.getLabelFromURI(superClassUri);
-            var textMeasureCtx = document.createElement("canvas").getContext("2d");
-            textMeasureCtx.font = "14px arial,verdana,sans-serif";
-            var textWidthCanvas = textMeasureCtx.measureText(label).width;
-            var nodeOptions = {
-                shape: self.visjsNodeOptions.shape,
-                color: Lineage_whiteboard.getSourceColor(source),
-                font: { align: "left" },
-                widthConstraint: { minimum: textWidthCanvas + 30 },
-                data: {
-                    subclasses: subclassGrouped[superClassUri],
-                    source: source,
-                },
-            };
-            var node = VisjsUtil.getVisjsNode(source, superClassUri, label, null, nodeOptions);
-            node.data.id = superClassUri;
-            node.data.label = label;
-            // Merge datatype properties from all grouped subclasses
-            node.data.nonObjectProperties = subclassGrouped[superClassUri].reduce(function (acc, subClassUri) {
-                var subclassNode = visjsData.nodes.find(function (n) {
-                    return n.id === subClassUri;
-                });
-                if (subclassNode && subclassNode.data && subclassNode.data.nonObjectProperties) {
-                    return acc.concat(subclassNode.data.nonObjectProperties);
-                }
-                return acc;
-            }, []);
-            visjsData.nodes.push(node);
-        });
-
-        // --- Phase 4a: hide grouped subclass nodes ---
+        // --- Phase 3a: hide grouped subclass nodes ---
         // Reverse map: subClassUri → superClassUri (needed by both 4a and 4b)
         var subclassToSuperclassMap = {};
         Object.keys(subclassGrouped).forEach(function (superClassUri) {
@@ -1302,7 +1269,7 @@ var KGquery_graph = (function () {
             }
         });
 
-        // --- Phase 4b: for each edge touching a grouped subclass, keep the original edge AND add a
+        // --- Phase 3b: for each edge touching a grouped subclass, keep the original edge AND add a
         //     superclass-substituted copy so both the subclass and its superclass stay connected ---
 
         Object.keys(commonSubClassEdges).forEach(function (superClassUri) {
@@ -1330,7 +1297,7 @@ var KGquery_graph = (function () {
             });
         });
 
-        // --- Phase 4c: catch edges touching a grouped subclass that Phase 2 missed.
+        // --- Phase 3c: catch edges touching a grouped subclass that Phase 2 missed.
         //     Emit every distinct promotion variant:
         //     (Super(from), to), (from, Super(to)), (Super(from), Super(to)).
         var rawEdgesSnapshot = visjsData.edges.slice();
@@ -1383,7 +1350,59 @@ var KGquery_graph = (function () {
             }
         });
 
-        return callback();
+        // --- Phase 4: inject a synthetic node for each non-empty superclass group ---
+        // Labels are queried from the triple store (source + imports) instead of being derived from
+        // the URI, because regrouping superclasses usually come from an imported ontology whose URI
+        // local name is an opaque code (BFO_0000019 instead of "quality").
+        var groupedSuperClassUris = [];
+        Object.keys(subclassGrouped).forEach(function (superClassUri) {
+            if (subclassGrouped[superClassUri].length > 0) {
+                groupedSuperClassUris.push(superClassUri);
+            }
+        });
+        if (groupedSuperClassUris.length === 0) {
+            return callback();
+        }
+
+        Sparql_OWL.getUrisLabelsMap(source, groupedSuperClassUris, function (err, superClassLabelsMap) {
+            if (err) {
+                // labels are cosmetic : keep building the graph with the URI local names
+                console.log("Error getting superclasses labels : " + err);
+                superClassLabelsMap = {};
+            }
+            groupedSuperClassUris.forEach(function (superClassUri) {
+                var label = superClassLabelsMap[superClassUri] || Sparql_common.getLabelFromURI(superClassUri);
+                var textMeasureCtx = document.createElement("canvas").getContext("2d");
+                textMeasureCtx.font = "14px arial,verdana,sans-serif";
+                var textWidthCanvas = textMeasureCtx.measureText(label).width;
+                var nodeOptions = {
+                    shape: self.visjsNodeOptions.shape,
+                    color: Lineage_whiteboard.getSourceColor(source),
+                    font: { align: "left" },
+                    widthConstraint: { minimum: textWidthCanvas + 30 },
+                    data: {
+                        subclasses: subclassGrouped[superClassUri],
+                        source: source,
+                    },
+                };
+                var node = VisjsUtil.getVisjsNode(source, superClassUri, label, null, nodeOptions);
+                node.data.id = superClassUri;
+                node.data.label = label;
+                // Merge datatype properties from all grouped subclasses
+                node.data.nonObjectProperties = subclassGrouped[superClassUri].reduce(function (acc, subClassUri) {
+                    var subclassNode = visjsData.nodes.find(function (n) {
+                        return n.id === subClassUri;
+                    });
+                    if (subclassNode && subclassNode.data && subclassNode.data.nonObjectProperties) {
+                        return acc.concat(subclassNode.data.nonObjectProperties);
+                    }
+                    return acc;
+                }, []);
+                visjsData.nodes.push(node);
+            });
+
+            callback();
+        });
     };
     /**
      * Gets the original label of an edge (without cardinality suffix)

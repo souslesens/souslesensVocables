@@ -9,6 +9,10 @@
             <button class="slsv-button-1" onclick="KGquery.checkRequirements()">check</button>
             <button class="slsv-button-1" onclick=" KGquery_nodeSelector.showImplicitModelInJstree(KGquery_graph.visjsData);">+</button>
         </div>
+        <div style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center">
+            <button class="slsv-button-1" onclick="SavedQueriesWidget.save(KGquery.currentSource)">Save query</button>
+            <button class="slsv-button-1" onclick="SavedQueriesWidget.list()">Load query</button>
+        </div>
         <div>
             <input type="checkbox" id="KGquery_displayGraphInList" onchange="KGquery_graph.onDisplayGraphInListCBXchange()" />
             Select nodes in list

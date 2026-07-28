@@ -229,7 +229,7 @@ var MappingColumnsGraph = (function () {
             if (self.currentGraphNode && self.currentGraphNode.data) {
                 if ((newResource.data.type == "Class" || newResource.data.type == "superClass") && self.currentGraphNode) {
                     var label, type;
-                    if (self.currentGraphNode.data.type == "Class") {
+                    if (self.currentGraphNode.data.type == "Class" || self.isClassColumn(self.currentGraphNode)) {
                         label = "subClassOf";
                         type = "rdfs:subClassOf";
                     } else {

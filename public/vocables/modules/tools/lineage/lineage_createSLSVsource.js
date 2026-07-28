@@ -113,8 +113,9 @@ var Lineage_createSLSVsource = (function () {
                 headers: {},
             },
             controller: "Sparql_OWL",
-            topClassFilter:
-                "?topConcept rdf:type owl:Class. ?topConcept rdfs:subClassOf ?superClass filter (isUri(?superClass) && not exists{?superClass rdf:type owl:Class }) OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}",
+            // Empty means "use the default top-class query computed by Sparql_OWL.getTopConcepts
+            // from the source taxonomyPredicates".
+            topClassFilter: "",
             schemaType: "OWL",
             dataSource: {
                 type: "",

@@ -187,11 +187,9 @@ export const ServerSourceSchema = z.object({
     graphUri: z.string().url().optional().or(z.literal("")),
     sparql_server: SparqlServerSchema,
     controller: z.string().default("Sparql_OWL"),
-    topClassFilter: z
-        .string()
-        .default(
-            "?topConcept rdf:type owl:Class. ?topConcept rdfs:subClassOf ?superClass filter (isUri(?superClass) && not exists{?superClass rdf:type owl:Class }) OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}",
-        ),
+    /* Empty means "use the default top-class query computed by Sparql_OWL.getTopConcepts
+     * from the source taxonomyPredicates". */
+    topClassFilter: z.string().default(""),
     schemaType: z.string().default("OWL"),
     dataSource: dataSourceSchema.nullable(),
     schema: z.unknown().nullable(),

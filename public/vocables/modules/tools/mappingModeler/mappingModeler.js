@@ -1673,6 +1673,19 @@ var MappingModeler = (function () {
         });
     };
 
+    /**
+     * Refreshes the source ontology model and redraws the Column Mappings classes tree, so classes
+     * created elsewhere (e.g. in lineage) appear without reloading the whole page. Forces the
+     * Classes view then delegates the model refresh and single redraw to refreshSourceOntologyModel.
+     * @function
+     * @name refreshColumnsClassesTree
+     * @memberof module:MappingModeler
+     */
+    self.refreshColumnsClassesTree = function () {
+        self.currentResourceType = "Class";
+        self.refreshSourceOntologyModel();
+    };
+
     // self.socketMessage = function (message) {
     //     if (typeof message == "string") {
     //         UI.message(message);

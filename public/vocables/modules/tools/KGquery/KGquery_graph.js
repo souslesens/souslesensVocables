@@ -15,6 +15,8 @@ import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
 var KGquery_graph = (function () {
     var self = {};
     self.visjsData = null;
+    // source the cached visjsData was built for, so switching source does not redisplay the previous graph
+    self.visjsDataSource = null;
 
     self.labelsMap = {};
 
@@ -99,6 +101,7 @@ var KGquery_graph = (function () {
         // Check for pending KGmodelGraph userdata
         if (KGquery._pendingKGmodelGraph && KGquery._pendingKGmodelGraph.data_content) {
             self.visjsData = KGquery._pendingKGmodelGraph.data_content;
+            self.visjsDataSource = source;
             KGquery._pendingKGmodelGraph = null;
             $("#waitImg").css("display", "none");
             self.drawModel(options?.displayGraphInList);
@@ -658,6 +661,7 @@ var KGquery_graph = (function () {
             self.visjsData = {};
             self.visjsData.nodes = self.KGqueryGraph.data.nodes.get();
             self.visjsData.edges = self.KGqueryGraph.data.edges.get();
+            self.visjsDataSource = KGquery.currentSource;
             if (callback) {
                 callback();
             }
@@ -822,8 +826,8 @@ var KGquery_graph = (function () {
             self.visjsOptions,
         );
 
-        //use Cache
-        if (self.visjsData) {
+        //use Cache only when it was built for the requested source
+        if (self.visjsData && self.visjsDataSource == source) {
             return callback(null, self.visjsData);
         } else {
             KGquery_graph.message("loading graph display");
@@ -838,6 +842,7 @@ var KGquery_graph = (function () {
                         return callback("notFound");
                     }
                     self.visjsData = result;
+                    self.visjsDataSource = source;
                     var display = "graph";
                     if (result && result.options && result.options.output) {
                         display = result.options.output;
@@ -972,11 +977,13 @@ var KGquery_graph = (function () {
                     });
                     visjsData.nodes = newNodes;
                     self.visjsData = visjsData;
+                    self.visjsDataSource = source;
                     callbackSeries();
                 },
             ],
             function (err) {
                 self.visjsData = visjsData;
+                self.visjsDataSource = source;
                 return callback(err, visjsData);
             },
         );
@@ -1446,6 +1453,7 @@ var KGquery_graph = (function () {
             }
 
             self.visjsData = data;
+            self.visjsDataSource = KGquery.currentSource;
             var displayGraphInList = $("#KGquery_displayGraphInList").prop("checked");
             self.drawModel(displayGraphInList);
         });
@@ -1881,6 +1889,7 @@ var KGquery_graph = (function () {
             return;
         }
         self.visjsData = { nodes: [], edges: [] };
+        self.visjsDataSource = KGquery.currentSource;
 
         self.KGqueryGraph = null;
         self.drawModel(null, function () {

@@ -654,7 +654,7 @@ var KGquery = (function () {
                             if (!self.outputCsv && totalSize >= csvSize) {
                                 self.outputCsv = true;
                             }
-                            UI.message("retreived " + totalSize);
+                            UI.message(totalSize == 0 ? "retrieving results..." : "retrieving results... " + totalSize );
                             // only one batch for sample size
                             if (options.sampleSize && totalSize > 0) {
                                 limitCondition = false;
@@ -689,6 +689,7 @@ var KGquery = (function () {
                             );
                         },
                         function (err) {
+                            UI.message(totalSize == 0 ? "no result found" : totalSize + " results retrieved");
                             callbackSeries(null, data);
                         },
                     );

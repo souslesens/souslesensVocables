@@ -9,6 +9,7 @@ import UIcontroller from "./uiController.js";
 import DataSourceManager from "./dataSourcesManager.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import MappingColumnsGraph from "./mappingColumnsGraph.js";
+import IndexedPredicates_bot from "../../bots/indexedPredicates_bot.js";
 
 /**
  * The TripleFactory module handles the creation, filtering, and writing of RDF triples.
@@ -34,8 +35,14 @@ var TripleFactory = (function () {
             return alert("no graphUri for source " + graphSource);
         }
 
-        if (callback || confirm("index source " + graphSource)) {
-            self.indexSourceGraph(graphSource, callback);
+        // a callback means a programmatic call: no user to answer the predicates bot
+        if (callback) {
+            return self.indexSourceGraph(graphSource, callback);
+        }
+        if (confirm("index source " + graphSource)) {
+            IndexedPredicates_bot.start(graphSource, function (indexedPredicatesBySource) {
+                self.indexSourceGraph(graphSource, null, indexedPredicatesBySource);
+            });
         }
     };
 
@@ -48,8 +55,10 @@ var TripleFactory = (function () {
      * @memberof module:TripleFactory
      * @param {string} graphSource - The SLS source name whose graph must be indexed.
      * @param {function} [callback] - Error-first callback invoked once indexing finishes.
+     * @param {Object} [indexedPredicatesBySource] - Optional map source -> indexable predicates (from
+     *   IndexedPredicates_bot); when it holds an entry for graphSource, only those predicates are indexed.
      */
-    self.indexSourceGraph = function (graphSource, callback) {
+    self.indexSourceGraph = function (graphSource, callback, indexedPredicatesBySource) {
         if (!graphSource || !Config.sources[graphSource] || !Config.sources[graphSource].graphUri) {
             var missingSourceError = "no graphUri for source " + graphSource;
             if (callback) {
@@ -59,7 +68,11 @@ var TripleFactory = (function () {
         }
 
         UI.message("indexing graph...", false, true);
-        SearchUtil.generateElasticIndex(graphSource, null, function (err, _result) {
+        var indexationOptions = {};
+        if (indexedPredicatesBySource && indexedPredicatesBySource[graphSource]) {
+            indexationOptions.indexedPredicates = indexedPredicatesBySource[graphSource];
+        }
+        SearchUtil.generateElasticIndex(graphSource, indexationOptions, function (err, _result) {
             if (err) {
                 var indexError = err.responseText || err;
                 if (callback) {
@@ -101,6 +114,35 @@ var TripleFactory = (function () {
         });
     };
 
+    function submitNtExportForm(payload) {
+        var iframeName = "mappingModeler_ntExportFrame";
+        var iframe = document.getElementsByName(iframeName)[0];
+        if (!iframe) {
+            iframe = document.createElement("iframe");
+            iframe.name = iframeName;
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+        }
+
+        var form = document.createElement("form");
+        form.method = "POST";
+        form.action = `${Config.apiUrl}/kg/triples`;
+        form.target = iframeName;
+        form.style.display = "none";
+
+        Object.keys(payload).forEach(function (fieldName) {
+            var input = document.createElement("input");
+            input.type = "hidden";
+            input.name = fieldName;
+            input.value = payload[fieldName];
+            form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+    }
+
     /**
      * Runs the filtered mappings for the SLS (Semantic Linked Set) based on the selected nodes in the tree view.
      * It filters and creates unique mappings by checking the selected attributes and mapping nodes.
@@ -108,7 +150,8 @@ var TripleFactory = (function () {
      * @name runSlsFilteredMappings
      * @memberof module:TripleFactory
      */
-    self.runSlsFilteredMappings = function (isSample) {
+    self.runSlsFilteredMappings = function (isSample, runOptions) {
+        runOptions = runOptions || {};
         var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("detailedMappings_filterMappingsTree");
         if (checkedNodes.length == 0) {
             return alert(" no mappings selected");
@@ -137,51 +180,55 @@ var TripleFactory = (function () {
             return MainController.errorAlert(err);
         }
 
-        TripleFactory.createTriples(
-            isSample,
-            MappingModeler.currentTable.name,
-            {
-                filterMappingIds: filterMappingIds,
-                offset: offset,
-            },
-            function (err, result) {
-                if (err) {
-                    MainController.errorAlert(err);
-                } else {
-                    // UI.message("Done", true);
-                    var indexAuto = $("#MappingModeler_indexAutoCBX").prop("checked");
+        var options = {
+            filterMappingIds: filterMappingIds,
+            offset: offset,
+        };
+        if (runOptions.exportOnly) {
+            options.exportOnly = true;
+            options.outputFormat = runOptions.outputFormat;
+        }
 
-                    if (!self.filterMappingIsSample && indexAuto) {
-                        SearchUtil.generateElasticIndex(
-                            MappingModeler.currentSLSsource,
-                            {
-                                indexProperties: 1,
-                                indexNamedIndividuals: 1,
-                            },
-                            () => {
-                                $.ajax({
-                                    type: "DELETE",
-                                    url: `${Config.apiUrl}/ontologyModels?source=${MappingModeler.currentSLSsource}`,
-
-                                    dataType: "json",
-                                    success: function (result, _textStatus, _jqXHR) {
-                                        delete Config.ontologiesVocabularyModels[MappingModeler.currentSLSsource];
-
-                                        //    UI.message("ALL DONE");
-                                    },
-                                    error: function (err) {
-                                        if (callback) {
-                                            return callback(err);
-                                        }
-                                        UI.message(err.responseText);
-                                    },
-                                });
-                            },
-                        );
-                    }
+        TripleFactory.createTriples(isSample, MappingModeler.currentTable.name, options, function (err, result) {
+            if (err) {
+                MainController.errorAlert(err);
+            } else {
+                if (runOptions.exportOnly) {
+                    return;
                 }
-            },
-        );
+                // UI.message("Done", true);
+                var indexAuto = $("#MappingModeler_indexAutoCBX").prop("checked");
+
+                if (!self.filterMappingIsSample && indexAuto) {
+                    SearchUtil.generateElasticIndex(
+                        MappingModeler.currentSLSsource,
+                        {
+                            indexProperties: 1,
+                            indexNamedIndividuals: 1,
+                        },
+                        () => {
+                            $.ajax({
+                                type: "DELETE",
+                                url: `${Config.apiUrl}/ontologyModels?source=${MappingModeler.currentSLSsource}`,
+
+                                dataType: "json",
+                                success: function (result, _textStatus, _jqXHR) {
+                                    delete Config.ontologiesVocabularyModels[MappingModeler.currentSLSsource];
+
+                                    //    UI.message("ALL DONE");
+                                },
+                                error: function (err) {
+                                    if (callback) {
+                                        return callback(err);
+                                    }
+                                    UI.message(err.responseText);
+                                },
+                            });
+                        },
+                    );
+                }
+            }
+        });
     };
 
     /**
@@ -315,7 +362,7 @@ var TripleFactory = (function () {
         if (!options) {
             options = {};
         }
-        if (!sampleData && table !== "*") {
+        if (!sampleData && !options.exportOnly && table !== "*") {
             if (!confirm("create triples for " + DataSourceManager.currentConfig.currentDataSource.name + " " + table || "")) {
                 return;
             }
@@ -346,12 +393,22 @@ var TripleFactory = (function () {
             options: JSON.stringify(options),
         };
 
-        UI.message("creating triples...");
-        $.ajax({
+        if (options.exportOnly && options.outputFormat == "nt") {
+            UI.message("exporting triples...");
+            submitNtExportForm(payload);
+            setTimeout(function () {
+                UI.message("", true);
+            }, 3000);
+            if (callback) {
+                return callback();
+            }
+            return;
+        }
+
+        var ajaxOptions = {
             type: "POST",
             url: `${Config.apiUrl}/kg/triples`,
             data: payload,
-            dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 if (sampleData) {
                     UIcontroller.activateRightPanel("generic");
@@ -373,7 +430,7 @@ var TripleFactory = (function () {
                     }
                 }
                 if (callback) {
-                    return callback();
+                    return callback(null, result);
                 }
             },
             error(err) {
@@ -382,7 +439,11 @@ var TripleFactory = (function () {
                 }
                 return MainController.errorAlert(err);
             },
-        });
+        };
+        ajaxOptions.dataType = "json";
+
+        UI.message("creating triples...");
+        $.ajax(ajaxOptions);
     };
 
     function getCurrentSource() {
@@ -1019,6 +1080,22 @@ var TripleFactory = (function () {
                         targetClassUri: toMappingNode.data.id,
                         propertyUri: edge.data.id || edge.data.type,
                     });
+                    return;
+                }
+                // restriction edge: both endpoints are classes. A Class node carries the class URI in data.id;
+                // a column typed as owl:Class resolves its class via getColumnClass.
+                if (edge.data && edge.data.restrictionType && fromMappingNode && fromMappingNode.data && toMappingNode && toMappingNode.data) {
+                    var restrictionStartingClass = fromMappingNode.data.type === "Class" ? fromMappingNode.data.id : MappingColumnsGraph.getColumnClass(fromMappingNode);
+                    var restrictionEndingClass = toMappingNode.data.type === "Class" ? toMappingNode.data.id : MappingColumnsGraph.getColumnClass(toMappingNode);
+                    if (restrictionStartingClass && restrictionEndingClass) {
+                        filterMappingIds.push({
+                            id: item.id,
+                            type: "Restriction",
+                            startingClass: restrictionStartingClass,
+                            endingClass: restrictionEndingClass,
+                            propertyUri: edge.data.id,
+                        });
+                    }
                     return;
                 }
                 var startingClass;

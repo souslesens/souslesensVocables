@@ -2634,7 +2634,7 @@ var Lineage_whiteboard = (function () {
         }
         var filter = "";
         if ((!properties || properties.length == 0) && !options.filter) {
-            filter = " FILTER( ?prop not in(rdf:type, rdfs:subClassOf,rdfs:member))";
+            filter = " FILTER( ?prop not in(rdf:type, rdfs:subClassOf,rdfs:member) && ?subjectType!=owl:Restriction)";
         }
         if (!options) {
             options = {};
@@ -3351,7 +3351,7 @@ restrictionSource = Config.predicatesSource;
         if (node && ((!node.from && node.data && node.data.type == "http://www.w3.org/2002/07/owl#ObjectProperty") || node.data.type == "DatatypeProperty")) {
             html =
                 '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showNodeInfos();"> Node infos</span>' +
-                '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from graph</span>';
+                '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from whiteboard</span>';
             $("#popupMenuWidgetDiv").html(html);
             return;
         }
@@ -3383,7 +3383,9 @@ restrictionSource = Config.predicatesSource;
             html = "...";
             // '<span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.expandIndividual();"> Expand individual</span>';
         } else if (node.data && node.data.rdfType === "literal") {
-            html = '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showNodeInfos();"> Node infos</span>';
+            html =
+                '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showNodeInfos();"> Node infos</span>' +
+                '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from whiteboard</span>';
         } else if (node.data && node.data.graphPopupMenusFn) {
             html = node.data.graphPopupMenusFn();
         } else {
@@ -3395,7 +3397,7 @@ restrictionSource = Config.predicatesSource;
 
             if (node.data && node.data.type == "container") {
                 html +=
-                    ' <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from graph</span>' +
+                    ' <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from whiteboard</span>' +
                     '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeOthersFromGraph();">Remove others</span>' +
                     '    <span  class="popupMenuItem" onclick="NodeRelations_bot.start();">Relations...</span>';
             } else {
@@ -3415,7 +3417,7 @@ restrictionSource = Config.predicatesSource;
                     //   "  <span  class=\"popupMenuItem\" onclick=\"Lineage_whiteboard.graphActions.showRestrictions();\">Inv Restr</span>" +
                     "   <hr>" +
                     '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.hideShowOthers();">Hide/show others</span>' +
-                    '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from graph</span>' +
+                    '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from whiteboard</span>' +
                     '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeOthersFromGraph();">Remove others</span>';
             }
         }

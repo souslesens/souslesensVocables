@@ -43,31 +43,6 @@ var Predicates_bot = (function () {
         });
     };
 
-    function loadRecents() {
-        var stored = localStorage.getItem("recentPredicatesBot");
-        if (!stored) {
-            return [];
-        }
-        try {
-            return JSON.parse(stored);
-        } catch (e) {
-            return [];
-        }
-    }
-
-    function storeRecent(property, object) {
-        var recents = loadRecents();
-        var entry = { property: property, object: object };
-        recents = recents.filter(function (r) {
-            return !(r.property === property && r.object === object);
-        });
-        recents.unshift(entry);
-        if (recents.length > 5) {
-            recents = recents.slice(0, 5);
-        }
-        localStorage.setItem("recentPredicatesBot", JSON.stringify(recents));
-    }
-
     function setDialogTitle(title) {
         $("#botPanel").dialog("option", "title", title);
     }
@@ -291,22 +266,13 @@ var Predicates_bot = (function () {
     }
 
     /**
-     * Builds a hierarchical jstree: optional "recents" group + "usual" group + one group per vocab source.
+     * Builds a hierarchical jstree: "usual" group + one group per vocab source.
      * Properties are leaf children under their source group.
      * @param {Function} callback - callback(err, jstreeNodes, parentNodeIds)
      */
     function buildPropertyJstreeData(callback) {
         var nodes = [{ id: "__src__usual", text: "usual", parent: "#", data: { id: "__src__usual" } }];
         var parentNodeIds = ["__src__usual"];
-        var recents = loadRecents();
-        if (recents.length > 0) {
-            nodes.unshift({ id: "__src__recents", text: "recents", parent: "#", data: { id: "__src__recents" } });
-            parentNodeIds.push("__src__recents");
-            recents.forEach(function (r) {
-                var nodeId = "__recent__" + r.property + "__" + r.object;
-                nodes.push({ id: nodeId, text: r.property + " → " + r.object, parent: "__src__recents", data: { id: nodeId, recentProperty: r.property, recentObject: r.object } });
-            });
-        }
         var seen = {};
 
         PredicatesSelectorWidget.usualProperties
@@ -451,7 +417,6 @@ var Predicates_bot = (function () {
                 if (err) {
                     return MainController.errorAlert(err);
                 }
-                storeRecent(self.params.selectedProperty, self.params.selectedObject);
                 self.myBotEngine.nextStep();
             });
         }
@@ -483,18 +448,9 @@ var Predicates_bot = (function () {
                     return MainController.errorAlert(err);
                 }
                 self.myBotEngine.showTree(jstreeData, null, { withCheckboxes: false, openAll: false, parentNodeIds: parentNodeIds }, null, function (selectedId, node) {
-                    if (node && node.data && node.data.recentProperty) {
-                        // Recent entries prefill the property (and the previous object as an editable
-                        // default) but still route through the object step so the user can pick a
-                        // different object instead of re-creating the exact same triple.
-                        self.params.selectedProperty = node.data.recentProperty;
-                        self.params.selectedObject = node.data.recentObject;
-                        self.params.isObjectProperty = null;
-                    } else {
-                        self.params.selectedProperty = selectedId;
-                        self.params.selectedObject = null;
-                        self.params.isObjectProperty = node && node.data && node.data.isObjectProperty !== undefined ? node.data.isObjectProperty : null;
-                    }
+                    self.params.selectedProperty = selectedId;
+                    self.params.selectedObject = null;
+                    self.params.isObjectProperty = node && node.data && node.data.isObjectProperty !== undefined ? node.data.isObjectProperty : null;
                     self.myBotEngine.nextStep();
                 });
             });

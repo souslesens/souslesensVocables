@@ -174,13 +174,16 @@ var MappingModeler = (function () {
                     return callbackSeries();
                 },
                 function (callbackSeries) {
+                    // Non-blocking stats: paint tree instantly from in-memory cache, refresh in background after tree loads.
                     if (self.skipStats) {
                         return callbackSeries();
                     }
-                    DataSourceManager.getTriplesStats(DataSourceManager.currentSlsvSource, function (err, result) {
-                        tableStatsMap = result || {};
-                        return callbackSeries();
-                    });
+                    var cachedStats = DataSourceManager.statsMapBySource[DataSourceManager.currentSlsvSource];
+                    if (cachedStats) {
+                        tableStatsMap = cachedStats;
+                        DataSourceManager.statsMap = cachedStats;
+                    }
+                    return callbackSeries();
                 },
                 function (callbackSeries) {
                     $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
@@ -200,6 +203,16 @@ var MappingModeler = (function () {
                         $($('#MappingModeler_leftTabs').children()[0]).find("li").addClass('lineage-tabDiv');
                         $($('#MappingModeler_leftTabs').children()[0]).find("a").css('text-decoration','none');*/
                         DataSourceManager.loaDataSourcesJstree(self.jstreeDivId, tableStatsMap, function (err) {
+                            // Background stats refresh (non-blocking): self-heals from any change source (mapping modeler, SPARQL, other tools).
+                            if (!self.skipStats) {
+                                DataSourceManager.getTriplesStats(DataSourceManager.currentSlsvSource, function (statsErr, freshStats) {
+                                    if (statsErr) {
+                                        return;
+                                    }
+                                    DataSourceManager.updateTreeStats(freshStats);
+                                    UI.message("Triple stats loaded");
+                                });
+                            }
                             return callbackSeries();
                         });
                         /*  $('#rightControlPanelDiv').load("./modules/tools/lineage/html/whiteBoardButtons.html", function () {

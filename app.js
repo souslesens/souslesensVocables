@@ -138,7 +138,7 @@ async function isPluginAllowed(tool, req, _res, next) {
     const userInfo = await userManager.getUser(req.user);
     const userTools = await profileModel.getUserTools(userInfo.user);
 
-    if (userTools.map((i) => i.name).includes(tool)) {
+    if (config.auth === "disabled" || userTools.map((i) => i.name).includes(tool)) {
         next();
     } else {
         throw {

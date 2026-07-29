@@ -275,11 +275,13 @@ class DatabaseModel {
      * @param {UserAccount} user -  a user account
      * @param {string} databaseId - the database id
      * @returns {Promise<any>} database connection
+     * @throws {Error} with a 403 status when the user is not allowed to access this database
      */
     getUserConnection = async (user, databaseId) => {
-        // return null if database is not allowed
         if (!(await this.isDatabaseAllowed(user, databaseId))) {
-            return null;
+            const error = new Error(`Access to database "${databaseId}" is not allowed for this user`);
+            error.status = 403;
+            throw error;
         }
 
         return await this.getAdminRestrictedConnection(databaseId);

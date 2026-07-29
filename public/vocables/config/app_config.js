@@ -55,7 +55,8 @@ var Config = (function () {
         },
         imports: [],
         controller: "Sparql_OWL",
-        topClassFilter: "?topConcept rdf:type  owl:Class ",
+        topClassFilter:
+            "?topConcept rdf:type owl:Class. ?topConcept rdfs:subClassOf ?superClass filter (isUri(?superClass) && not exists{?superClass rdf:type owl:Class }) OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}",
         schemaType: "OWL",
     };
 
@@ -406,6 +407,19 @@ var Config = (function () {
             "@background-color": "#F4F4F4",
             "@dark-background-color": "#E4E4E4",
             "@logoInstance-icon": "../../icons/KGA/KGALogo.png",
+            "@isDarkTheme": false,
+        },
+        SLSA: {
+            "@source-color": "#503AA8",
+            "@button1-color": "#FCB900",
+            "@button2-color": "#183078",
+            "@button3-color": "#168A63",
+            "@legend-color": "#503AA8",
+            "@background-color": "#BED8ED",
+            "@dark-background-color": "#8ED1FC",
+            "@border-color": "#183078",
+            "@isGradient": false,
+            "@logoInstance-icon": "../../icons/SLSA/SLSALogo.png",
             "@isDarkTheme": false,
         },
         "Total Energies": {

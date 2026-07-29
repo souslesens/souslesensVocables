@@ -15,6 +15,7 @@ import MainController from "../../shared/mainController.js";
 import SearchWidget from "../../uiWidgets/searchWidget.js";
 import Authentification from "../../shared/authentification.js";
 import UI from "../../../modules/shared/UI.js";
+import IndexedPredicates_bot from "../../bots/indexedPredicates_bot.js";
 
 /**
  * @module Lineage_sources
@@ -1092,13 +1093,19 @@ var Lineage_sources = (function () {
             if (!confirm("Refresh index for " + source + " ?")) {
                 return;
             }
-            $("#waitImg").css("display", "block");
-            SearchUtil.generateElasticIndex(source, { indexProperties: 1, indexNamedIndividuals: 1 }, function (err, _result) {
-                $("#waitImg").css("display", "none");
-                if (err) {
-                    return MainController.errorAlert(err);
+            IndexedPredicates_bot.start(source, function (indexedPredicatesBySource) {
+                $("#waitImg").css("display", "block");
+                var indexationOptions = { indexProperties: 1, indexNamedIndividuals: 1 };
+                if (indexedPredicatesBySource[source]) {
+                    indexationOptions.indexedPredicates = indexedPredicatesBySource[source];
                 }
-                UI.message("Index refreshed: " + source, true);
+                SearchUtil.generateElasticIndex(source, indexationOptions, function (err, _result) {
+                    $("#waitImg").css("display", "none");
+                    if (err) {
+                        return MainController.errorAlert(err);
+                    }
+                    UI.message("Index refreshed: " + source, true);
+                });
             });
         },
 

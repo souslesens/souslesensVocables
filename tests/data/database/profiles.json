@@ -18,7 +18,8 @@
         "access_control": {
             "OWL/FOLDER_1": "read"
         },
-        "schema_types": ["OWL"]
+        "schema_types": ["OWL"],
+        "max_nt_export_triples": 5000
     },
     {
         "id": "3",
@@ -29,7 +30,8 @@
         "access_control": {
             "OWL/FOLDER_1": "readwrite"
         },
-        "schema_types": ["OWL"]
+        "schema_types": ["OWL"],
+        "max_nt_export_triples": 2000
     },
     {
         "id": "4",

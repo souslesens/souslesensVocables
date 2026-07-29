@@ -13,10 +13,6 @@ export default function () {
             const userInfo = await userManager.getUser(req.user);
             const connection = await databaseModel.getUserConnection(userInfo.user, req.query.dbName);
 
-            if (!connection) {
-                return res.status(403).json({ error: "Access to this database is not allowed" });
-            }
-
             if (req.query.tableName) {
                 const database = await databaseModel.getDatabase(req.query.dbName);
                 const driver = databaseModel.getClientDriver(database.driver);
@@ -53,7 +49,7 @@ export default function () {
                 );
             }
         } catch (error) {
-            res.status(error.status || 500).json({ error: error });
+            res.status(error.status || 500).json({ error: error.message || error });
         }
     }
 

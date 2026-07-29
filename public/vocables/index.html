@@ -353,6 +353,11 @@
                             open: function (event, ui) {
                                 // Preserve dimensions set by individual tools
                             },
+                            beforeClose: function (event, ui) {
+                                return Axiom_UI.confirmCloseWithUnsavedAxiom(function () {
+                                    $("#mainDialogDiv").dialog("close");
+                                });
+                            },
                         });
 
                         $("#smallDialogDiv").dialog({
@@ -361,6 +366,11 @@
                             height: "auto",
                             width: "auto",
                             modal: false,
+                            beforeClose: function (event, ui) {
+                                return Axiom_UI.confirmCloseWithUnsavedAxiom(function () {
+                                    $("#smallDialogDiv").dialog("close");
+                                });
+                            },
                         });
                         $("#botPanel").dialog({
                             autoOpen: false,

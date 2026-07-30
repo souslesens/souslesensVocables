@@ -23,6 +23,7 @@ services:
             VOCABLES__ElasticSearch__url: http://elasticsearch:9200/
             VOCABLES__jowlServer__url: http://jowl:9170
             VOCABLES__slsPyApi__url: http://sls-py-api:8000
+            SLS_SECRET_KEY: ${SLS_SECRET_KEY:-}
         networks:
             - backend
 

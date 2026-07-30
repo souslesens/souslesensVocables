@@ -1281,8 +1281,8 @@ var Sparql_generic = (function () {
                             "  ?subject " +
                             parentType +
                             " ?firstParent." +
-                            " OPTIONAL {?subject rdfs:label ?subjectLabel.}" +
-                            //  Sparql_common.getVariableLangLabel("subject", false, true)
+                            " OPTIONAL {?subject skos:prefLabel|rdfs:label  ?subjectLabel.}" +
+
                             "OPTIONAL{?subject skos:altLabel ?skosAltLabel }";
 
                         if (options.filter) {

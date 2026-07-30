@@ -59,8 +59,11 @@ var KGquery = (function () {
     self.onLoaded = function () {
         UI.initMenuBar(KGquery.loadSource);
         KGquery_graph.visjsData = null;
+        KGquery_graph.visjsDataSource = null;
         UserDataWidget.currentTreeNode = null;
 
+        // the new source is only known in loadSource, forget the previous one so clearAll does not redraw its graph
+        KGquery.currentSource = null;
         KGquery.clearAll();
         UI.disableEditButtons();
         if (Config.clientCache.KGquery) {
@@ -139,6 +142,12 @@ var KGquery = (function () {
      */
     self.loadSource = function () {
         KGquery.currentSource = MainController.currentSource;
+        // empty the previous source graph now, it must not stay on screen while the new model loads
+        if (KGquery_graph.KGqueryGraph) {
+            KGquery_graph.KGqueryGraph.clearGraph();
+        }
+        KGquery_graph.visjsData = null;
+        KGquery_graph.visjsDataSource = null;
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
                 return MainController.errorAlert(err);
@@ -654,7 +663,7 @@ var KGquery = (function () {
                             if (!self.outputCsv && totalSize >= csvSize) {
                                 self.outputCsv = true;
                             }
-                            UI.message("retreived " + totalSize);
+                            UI.message(totalSize == 0 ? "retrieving results..." : "retrieving results... " + totalSize);
                             // only one batch for sample size
                             if (options.sampleSize && totalSize > 0) {
                                 limitCondition = false;
@@ -689,6 +698,7 @@ var KGquery = (function () {
                             );
                         },
                         function (err) {
+                            UI.message(totalSize == 0 ? "no result found" : totalSize + " results retrieved");
                             callbackSeries(null, data);
                         },
                     );

@@ -488,6 +488,49 @@ Files already read in session: no re-read unless modified.
 
 ## Code Readability Rules (MANDATORY)
 
+### Client code: everything lives on the IIFE `self` (MANDATORY)
+
+In `public/vocables/**`, a module is an IIFE returning `self`. Nothing may float in the closure
+next to `self`: no free `var`, no free `function`. Every constant, every state flag and every
+function must be a member of `self`, so the whole module surface is inspectable from the console
+and callable from HTML handlers.
+
+```javascript
+// WRONG — free constants and free function in the closure
+var BLANK_NODE_COLUMN_TYPES = ["RowIndex", "VirtualColumn"];
+var isSynchronizing = false;
+function isBlankNodeColumn(columnNodeData) { ... }
+
+// RIGHT
+self.blankNodeColumnTypes = ["RowIndex", "VirtualColumn"];
+self.isSynchronizingBlankNodeGroup = false;
+self.isBlankNodeColumn = function (columnNodeData) { ... };
+```
+
+Local variables inside a function body stay local, that is not what this rule is about.
+
+### No UPPER_CASE identifiers (MANDATORY)
+
+This project has no screaming constants. Constants use camelCase like everything else, whatever
+their scope, including regex constants and lookup tables. This rule overrides the generic
+"extract magic values to UPPER_CASE constants" convention.
+
+```javascript
+// WRONG
+var BLANK_NODE_URI_TYPES = ["blankNode", "randomIdentifier"];
+const PARAM_TAG_REGEX = /^@param/;
+
+// RIGHT
+self.blankNodeUriTypes = ["blankNode", "randomIdentifier"];
+var paramTagRegex = /^@param/;
+```
+
+### Keep the number of new functions low
+
+Before adding a function, check that it is not a two-line wrapper over another one you just wrote,
+and that an existing module does not already do it. Merge helpers that are always called together,
+and prefer a loop inside the caller over a private helper used once.
+
 ### No chained array/string methods
 
 Never chain `.split()`, `.map()`, `.filter()`, `.find()`, `.reduce()` one after another.

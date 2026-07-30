@@ -1303,6 +1303,8 @@ var Sparql_generic = (function () {
                         query += "}";
                     }
 
+
+
                     async.whilst(
                         function (_test) {
                             return resultSize > 0;

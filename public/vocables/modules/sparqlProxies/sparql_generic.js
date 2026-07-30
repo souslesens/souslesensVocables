@@ -1246,33 +1246,9 @@ var Sparql_generic = (function () {
                     var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true);
 
                     var filter = options.filter || "";
-
+                    var query = "";
                     if (schemaType == "OWL") {
-                        var queryOld =
-                            "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
-                            "SELECT distinct *  " +
-                            fromStr +
-                            "  WHERE {{  ?subject   rdfs:subClassOf+   ?firstParent.?subject rdfs:label ?subjectLabel.  ?firstParent rdf:type owl:Class. " +
-                            "filter(isIRI(?subject) && isIRI(?firstParent))" +
-                            filter +
-                            "OPTIONAL{?subject skos:altLabel \n" +
-                            "          ?skosAltLabel. } " +
-                            "} UNION " +
-                            "{  ?subject   rdfs:subClassOf  ?firstParent.    ?firstParent rdf:type owl:Class. ?subject <http://www.w3.org/2004/02/skos/core#prefLabel> ?subjectLabel. filter(isIRI(?subject) && isIRI(?firstParent)) filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))OPTIONAL{?subject skos:altLabel ?skosAltLabel }  " +
-                            filter +
-                            "}" +
-                            "UNION  {" +
-                            "    ?subject rdf:type owl:Class.?subject rdfs:label ?subjectLabel." +
-                            "filter(isIRI(?subject))" +
-                            filter +
-                            "  OPTIONAL{?subject skos:altLabel  ?skosAltLabel}" +
-                            "  filter( not exists{  ?subject   rdfs:subClassOf   ?aParent.  ?aParent rdf:type owl:Class.  })}" +
-                            "}";
-
-                        var query =
+                        query =
                             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
                             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
@@ -1289,7 +1265,7 @@ var Sparql_generic = (function () {
                             indexedPredicates.optionalClauses +
                             "\n  }";
                     } else {
-                        var query3 =
+                        query =
                             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
@@ -1300,12 +1276,7 @@ var Sparql_generic = (function () {
                         //     var where = "  ?subject " + parentType + " ?firstParent." + Sparql_common.getVariableLangLabel("subject", false, true) + "OPTIONAL{?subject skos:altLabel ?skosAltLabel }";
 
                         var where =
-                            "  ?subject " +
-                            parentType +
-                            " ?firstParent." +
-                            " OPTIONAL {?subject rdfs:label ?subjectLabel.}" +
-                            //  Sparql_common.getVariableLangLabel("subject", false, true)
-                            "OPTIONAL{?subject skos:altLabel ?skosAltLabel }";
+                            "  ?subject " + parentType + " ?firstParent." + " OPTIONAL {?subject skos:prefLabel|rdfs:label  ?subjectLabel.}" + "OPTIONAL{?subject skos:altLabel ?skosAltLabel }";
 
                         if (options.filter) {
                             where += " " + options.filter + " ";

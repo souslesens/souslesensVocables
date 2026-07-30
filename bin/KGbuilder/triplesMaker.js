@@ -339,11 +339,7 @@ var TriplesMaker = {
         }
 
         data.forEach(function (line, index) {
-            if (line.funct_loc == "GIR/FPSOA/CRS/SESD /43-NSD922080") {
-                var x = 3;
-            } else {
-                // return
-            }
+
 
             var lineColumnUrisMap = {};
             var rowIndex = index + options.currentBatchRowIndex;
@@ -857,6 +853,9 @@ var TriplesMaker = {
         if (!options) {
             options = {};
         }
+
+        if(subjectUri==null)
+            return [];
         var metaDataTriples = [];
         metaDataTriples.push(subjectUri + " " + "<http://purl.org/dc/terms/created>" + " " + dateTime);
         metaDataTriples.push(subjectUri + " <" + TriplesMaker.mappingFilePredicate + "> '" + table + "'");
@@ -881,6 +880,12 @@ var TriplesMaker = {
             return callback(null, { headers: headers, data: data });
         });
     },
+
+
+
+
+
+
 };
 
 export default TriplesMaker;

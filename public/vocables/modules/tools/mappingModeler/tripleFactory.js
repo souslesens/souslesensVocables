@@ -35,36 +35,59 @@ var TripleFactory = (function () {
             return alert("no graphUri for source " + graphSource);
         }
 
-        function runIndexation(indexedPredicatesBySource) {
-            UI.message("indexing graph...", false, true);
-            var indexationOptions = {};
-            if (indexedPredicatesBySource && indexedPredicatesBySource[graphSource]) {
-                indexationOptions.indexedPredicates = indexedPredicatesBySource[graphSource];
-            }
-            SearchUtil.generateElasticIndex(graphSource, indexationOptions, function (err, _result) {
-                if (err) {
-                    if (callback) {
-                        return callback(err.responseText);
-                    }
-                    return MainController.errorAlert(err.responseText);
-                }
-                UI.message("indexed graph " + Config.sources[graphSource].graphUri + " in index " + graphSource.toLowerCase(), true);
-                setTimeout(function () {
-                    UI.message("", false, true);
-                }, 5000);
-                if (callback) {
-                    return callback();
-                }
-            });
-        }
-
         // a callback means a programmatic call: no user to answer the predicates bot
         if (callback) {
-            return runIndexation();
+            return self.indexSourceGraph(graphSource, callback);
         }
         if (confirm("index source " + graphSource)) {
-            IndexedPredicates_bot.start(graphSource, runIndexation);
+            IndexedPredicates_bot.start(graphSource, function (indexedPredicatesBySource) {
+                self.indexSourceGraph(graphSource, null, indexedPredicatesBySource);
+            });
         }
+    };
+
+    /**
+     * Indexes a given source RDF graph in ElasticSearch, displaying progress and completion messages.
+     * Unlike {@link module:TripleFactory.indexGraph}, this does not prompt the user and targets an explicit source,
+     * so it can be triggered automatically at the end of a graph recreation.
+     * @function
+     * @name indexSourceGraph
+     * @memberof module:TripleFactory
+     * @param {string} graphSource - The SLS source name whose graph must be indexed.
+     * @param {function} [callback] - Error-first callback invoked once indexing finishes.
+     * @param {Object} [indexedPredicatesBySource] - Optional map source -> indexable predicates (from
+     *   IndexedPredicates_bot); when it holds an entry for graphSource, only those predicates are indexed.
+     */
+    self.indexSourceGraph = function (graphSource, callback, indexedPredicatesBySource) {
+        if (!graphSource || !Config.sources[graphSource] || !Config.sources[graphSource].graphUri) {
+            var missingSourceError = "no graphUri for source " + graphSource;
+            if (callback) {
+                return callback(missingSourceError);
+            }
+            return alert(missingSourceError);
+        }
+
+        UI.message("indexing graph...", false, true);
+        var indexationOptions = {};
+        if (indexedPredicatesBySource && indexedPredicatesBySource[graphSource]) {
+            indexationOptions.indexedPredicates = indexedPredicatesBySource[graphSource];
+        }
+        SearchUtil.generateElasticIndex(graphSource, indexationOptions, function (err, _result) {
+            if (err) {
+                var indexError = err.responseText || err;
+                if (callback) {
+                    return callback(indexError);
+                }
+                return MainController.errorAlert(indexError);
+            }
+            UI.message("indexed graph " + Config.sources[graphSource].graphUri + " in index " + graphSource.toLowerCase(), true);
+            setTimeout(function () {
+                UI.message("", false, true);
+            }, 5000);
+            if (callback) {
+                return callback();
+            }
+        });
     };
 
     /**
@@ -132,6 +155,9 @@ var TripleFactory = (function () {
         var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("detailedMappings_filterMappingsTree");
         if (checkedNodes.length == 0) {
             return alert(" no mappings selected");
+        }
+        if (!self.checkBlankNodeGroupsAreComplete("detailedMappings_filterMappingsTree", checkedNodes)) {
+            return;
         }
         var filterMappingIds = [];
         // a leaf predicate (id composite "columnId>predicate") fait cocher en cascade son parent colonne :
@@ -767,6 +793,9 @@ var TripleFactory = (function () {
                             return alert("Select at least one table");
                         }
 
+                        // ask once, before the deletion/generation starts, whether to reindex the source graph at the end
+                        MappingModeler.recreateIndexAfter = confirm("Would you like to index the graph after the generation of triples ?");
+
                         // all selected ?
                         var allSelected = selectedIds.length === tablesDisplayed.length;
 
@@ -891,6 +920,184 @@ var TripleFactory = (function () {
         Export.showDataTable(div, tableCols, tableData, null, { paging: true, divId: div }, function (err, datatable) {});
     };
 
+    // these mappings are materialized as blank nodes whose identifier is drawn randomly at each
+    // triples creation (see TriplesMaker.getColumnUri) : generating or deleting only a part of the
+    // triples attached to such a node desynchronizes them from the ones already in the store
+    self.blankNodeColumnTypes = ["RowIndex", "VirtualColumn"];
+    self.blankNodeUriTypes = ["blankNode", "randomIdentifier"];
+    self.isSynchronizingBlankNodeGroup = false;
+
+    self.isBlankNodeColumn = function (columnNodeData) {
+        if (!columnNodeData) {
+            return false;
+        }
+        if (self.blankNodeColumnTypes.indexOf(columnNodeData.type) > -1) {
+            return true;
+        }
+        return self.blankNodeUriTypes.indexOf(columnNodeData.uriType) > -1;
+    };
+
+    /**
+     * Builds the groups of tree entries that must always be selected together.
+     * Two blank node columns linked by a relation belong to the same group : regenerating one of them
+     * gives a new identifier to the blank node used on both sides of that relation, so the triples of
+     * the whole connected component have to be rebuilt at once.
+     */
+    self.buildBlankNodeGroups = function (blankNodeColumnIds, columnTreeEntryIds, relationTreeEntries) {
+        var linkedColumnIdsByColumnId = {};
+        Object.keys(blankNodeColumnIds).forEach(function (columnId) {
+            linkedColumnIdsByColumnId[columnId] = [];
+        });
+
+        relationTreeEntries.forEach(function (relationTreeEntry) {
+            var blankNodeEndpointIds = [];
+            relationTreeEntry.columnIds.forEach(function (columnId) {
+                if (blankNodeColumnIds[columnId] && blankNodeEndpointIds.indexOf(columnId) < 0) {
+                    blankNodeEndpointIds.push(columnId);
+                }
+            });
+            if (blankNodeEndpointIds.length < 2) {
+                return;
+            }
+            blankNodeEndpointIds.forEach(function (columnId) {
+                blankNodeEndpointIds.forEach(function (linkedColumnId) {
+                    if (columnId !== linkedColumnId) {
+                        linkedColumnIdsByColumnId[columnId].push(linkedColumnId);
+                    }
+                });
+            });
+        });
+
+        // connected components : walk the blank node columns tied by a relation
+        var groupIndexByColumnId = {};
+        var columnIdsByGroupIndex = [];
+        Object.keys(blankNodeColumnIds).forEach(function (startColumnId) {
+            if (groupIndexByColumnId[startColumnId] !== undefined) {
+                return;
+            }
+            var groupColumnIds = [];
+            var columnIdsToVisit = [startColumnId];
+            while (columnIdsToVisit.length > 0) {
+                var visitedColumnId = columnIdsToVisit.pop();
+                if (groupIndexByColumnId[visitedColumnId] !== undefined) {
+                    continue;
+                }
+                groupIndexByColumnId[visitedColumnId] = columnIdsByGroupIndex.length;
+                groupColumnIds.push(visitedColumnId);
+                linkedColumnIdsByColumnId[visitedColumnId].forEach(function (linkedColumnId) {
+                    if (groupIndexByColumnId[linkedColumnId] === undefined) {
+                        columnIdsToVisit.push(linkedColumnId);
+                    }
+                });
+            }
+            columnIdsByGroupIndex.push(groupColumnIds);
+        });
+
+        self.blankNodeGroups = [];
+        self.blankNodeGroupEntryIdsByEntryId = {};
+        columnIdsByGroupIndex.forEach(function (groupColumnIds) {
+            var groupEntryIds = [];
+            groupColumnIds.forEach(function (columnId) {
+                if (columnTreeEntryIds[columnId] && groupEntryIds.indexOf(columnId) < 0) {
+                    groupEntryIds.push(columnId);
+                }
+            });
+            relationTreeEntries.forEach(function (relationTreeEntry) {
+                var relationTouchesGroup = false;
+                relationTreeEntry.columnIds.forEach(function (columnId) {
+                    if (groupColumnIds.indexOf(columnId) > -1) {
+                        relationTouchesGroup = true;
+                    }
+                });
+                if (relationTouchesGroup && groupEntryIds.indexOf(relationTreeEntry.treeEntryId) < 0) {
+                    groupEntryIds.push(relationTreeEntry.treeEntryId);
+                }
+            });
+            if (groupEntryIds.length < 2) {
+                return;
+            }
+            self.blankNodeGroups.push(groupEntryIds);
+            groupEntryIds.forEach(function (treeEntryId) {
+                self.blankNodeGroupEntryIdsByEntryId[treeEntryId] = groupEntryIds;
+            });
+        });
+    };
+
+    /**
+     * Checks or unchecks in one go every tree entry sharing the same blank node,
+     * so that all the triples built on that blank node are always regenerated together.
+     */
+    self.synchronizeBlankNodeGroupSelection = function (divId, treeNode, mustBeChecked) {
+        if (self.isSynchronizingBlankNodeGroup || !treeNode || !self.blankNodeGroupEntryIdsByEntryId) {
+            return;
+        }
+        var groupEntryIds = self.blankNodeGroupEntryIdsByEntryId[treeNode.id];
+        if (!groupEntryIds) {
+            return;
+        }
+        var tree = $("#" + divId).jstree(true);
+        if (!tree) {
+            return;
+        }
+        self.isSynchronizingBlankNodeGroup = true;
+        groupEntryIds.forEach(function (groupEntryId) {
+            if (groupEntryId === treeNode.id) {
+                return;
+            }
+            if (mustBeChecked) {
+                tree.check_node(groupEntryId);
+            } else {
+                tree.uncheck_node(groupEntryId);
+            }
+        });
+        self.isSynchronizingBlankNodeGroup = false;
+        if (mustBeChecked) {
+            UI.message("blank node mappings selected together : their identifiers are regenerated at each run");
+        }
+    };
+
+    /**
+     * A blank node group is either fully selected or not selected at all : warns and returns false
+     * when the selection covers only a part of one of them.
+     */
+    self.checkBlankNodeGroupsAreComplete = function (divId, checkedNodes) {
+        if (!self.blankNodeGroups || self.blankNodeGroups.length === 0) {
+            return true;
+        }
+        var checkedEntryIds = {};
+        checkedNodes.forEach(function (checkedNode) {
+            checkedEntryIds[checkedNode.id] = true;
+        });
+        var tree = $("#" + divId).jstree(true);
+        var missingEntryLabels = [];
+        self.blankNodeGroups.forEach(function (groupEntryIds) {
+            var hasCheckedEntry = false;
+            var missingGroupEntryIds = [];
+            groupEntryIds.forEach(function (groupEntryId) {
+                if (checkedEntryIds[groupEntryId]) {
+                    hasCheckedEntry = true;
+                } else {
+                    missingGroupEntryIds.push(groupEntryId);
+                }
+            });
+            if (!hasCheckedEntry) {
+                return;
+            }
+            missingGroupEntryIds.forEach(function (missingGroupEntryId) {
+                var missingTreeNode = tree ? tree.get_node(missingGroupEntryId) : null;
+                missingEntryLabels.push(missingTreeNode ? missingTreeNode.text : missingGroupEntryId);
+            });
+        });
+        if (missingEntryLabels.length === 0) {
+            return true;
+        }
+        alert(
+            "Blank node mappings must be selected all together : their identifiers are regenerated at each run and partial selection would desynchronize the triples.\n\nMissing mappings :\n- " +
+                missingEntryLabels.join("\n- "),
+        );
+        return false;
+    };
+
     self.showFilterMappingsDialog = function (divId, table) {
         if (!divId) divId = "detailedMappings_filterMappingsTree";
         if (!table) table = MappingModeler.currentTable.name;
@@ -924,6 +1131,9 @@ var TripleFactory = (function () {
                 classLabelByDataId[classNode.data.id] = classNode.label;
             }
         });
+        // tree entries whose triples are built on a column mapping, needed to group the blank node ones
+        var columnTreeEntryIds = {};
+        var relationTreeEntries = [];
         nodes.forEach(function (node) {
             if (node.data && node.data.type === "Class") {
                 classNodesMap[node.id] = node;
@@ -952,8 +1162,44 @@ var TripleFactory = (function () {
                             parent: "Columns",
                             data: node.data,
                         });
+                        columnTreeEntryIds[node.id] = true;
                     }
                 }
+            }
+        });
+
+        var blankNodeColumnIds = {};
+        Object.keys(self.columnsMap).forEach(function (columnId) {
+            var columnNode = self.columnsMap[columnId];
+            var definingColumnNode = columnNode.data.definedInColumn ? allColumnNodesById[columnNode.data.definedInColumn] : null;
+            // uriType is inherited from the defining column at triples creation
+            if (self.isBlankNodeColumn(columnNode.data) || (definingColumnNode && self.isBlankNodeColumn(definingColumnNode.data))) {
+                blankNodeColumnIds[columnId] = true;
+            }
+        });
+
+        // otherPredicates leaves are lazily added when a column is clicked : a blank node column needs
+        // them upfront so that checking the column also checks all the predicates built on its blank node
+        Object.keys(blankNodeColumnIds).forEach(function (columnId) {
+            if (!columnTreeEntryIds[columnId]) {
+                return;
+            }
+            var otherPredicates = self.columnsMap[columnId].data.otherPredicates || [];
+            otherPredicates.forEach(function (otherPredicate) {
+                treeData.push({
+                    id: columnId + ">" + otherPredicate.property,
+                    text: otherPredicate.property,
+                    parent: columnId,
+                    data: { type: "otherPredicate" },
+                });
+            });
+            if (self.columnsMap[columnId].data.rdfsLabel) {
+                treeData.push({
+                    id: columnId + ">" + "rdfs:label",
+                    text: "rdfs:label",
+                    parent: columnId,
+                    data: { type: "rdfsLabel" },
+                });
             }
         });
 
@@ -969,6 +1215,7 @@ var TripleFactory = (function () {
                     text: label,
                     parent: "Relations",
                 });
+                relationTreeEntries.push({ treeEntryId: edge.id, columnIds: [edge.from, edge.to] });
             } else if (fromMappingNode && toClassNode && edge.data && (edge.data.type === "rdfs:subClassOf" || edge.data.type === "rdf:type")) {
                 var targetClassLabel = toClassNode.label || edge.to;
                 var effectiveRdfType = fromMappingNode.data.rdfType;
@@ -991,11 +1238,21 @@ var TripleFactory = (function () {
                         filterMappingId: edge.from + ">" + filterPredicate + ">" + toClassNode.data.id,
                     },
                 });
+                relationTreeEntries.push({ treeEntryId: edge.id, columnIds: [edge.from] });
             }
         });
+
+        self.buildBlankNodeGroups(blankNodeColumnIds, columnTreeEntryIds, relationTreeEntries);
+
         var options = {
             withCheckboxes: true,
             openAll: true,
+            onCheckNodeFn: function (event, obj) {
+                self.synchronizeBlankNodeGroupSelection(divId, obj ? obj.node : null, true);
+            },
+            onUncheckNodeFn: function (event, obj) {
+                self.synchronizeBlankNodeGroupSelection(divId, obj ? obj.node : null, false);
+            },
             selectTreeNodeFn: function (event, obj) {
                 // add otherpredicates onclick
                 if (obj.node.parent == "Columns") {
@@ -1043,6 +1300,9 @@ var TripleFactory = (function () {
         var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("detailedMappings_filterMappingsTree");
         if (checkedNodes.length == 0) {
             return alert(" no mappings selected");
+        }
+        if (!self.checkBlankNodeGroupsAreComplete("detailedMappings_filterMappingsTree", checkedNodes)) {
+            return;
         }
         var filterMappingIds = [];
         //don't select parent node when datatype property is selected

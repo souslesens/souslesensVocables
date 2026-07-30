@@ -1673,6 +1673,19 @@ var MappingModeler = (function () {
         });
     };
 
+    /**
+     * Refreshes the source ontology model and redraws the Column Mappings classes tree, so classes
+     * created elsewhere (e.g. in lineage) appear without reloading the whole page. Forces the
+     * Classes view then delegates the model refresh and single redraw to refreshSourceOntologyModel.
+     * @function
+     * @name refreshColumnsClassesTree
+     * @memberof module:MappingModeler
+     */
+    self.refreshColumnsClassesTree = function () {
+        self.currentResourceType = "Class";
+        self.refreshSourceOntologyModel();
+    };
+
     // self.socketMessage = function (message) {
     //     if (typeof message == "string") {
     //         UI.message(message);
@@ -1699,6 +1712,7 @@ var MappingModeler = (function () {
     self.recreateTotalTables = 0;
     self.recreateProcessedTables = 0;
     self.recreateTotalTriples = 0;
+    self.recreateIndexAfter = false;
 
     self.formatDuration = function (ms) {
         var totalSeconds = Math.round(ms / 1000);
@@ -1854,10 +1868,21 @@ var MappingModeler = (function () {
                     } else {
                         alert("created triples :" + self.recreateTotalTriples + " in source :" + self.recreateSource);
                     }
+                    var recreatedSource = self.recreateSource;
+                    var indexAfterRecreate = self.recreateIndexAfter;
                     self.recreateSource = null;
                     self.recreateTotalTables = 0;
                     self.recreateProcessedTables = 0;
                     self.recreateTotalTriples = 0;
+                    self.recreateIndexAfter = false;
+
+                    if (indexAfterRecreate) {
+                        TripleFactory.indexSourceGraph(recreatedSource, function (err) {
+                            if (err) {
+                                return MainController.errorAlert(err);
+                            }
+                        });
+                    }
                 }
             }
 

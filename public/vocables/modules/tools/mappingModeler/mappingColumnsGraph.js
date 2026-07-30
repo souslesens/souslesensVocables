@@ -229,7 +229,7 @@ var MappingColumnsGraph = (function () {
             if (self.currentGraphNode && self.currentGraphNode.data) {
                 if ((newResource.data.type == "Class" || newResource.data.type == "superClass") && self.currentGraphNode) {
                     var label, type;
-                    if (self.currentGraphNode.data.type == "Class") {
+                    if (self.currentGraphNode.data.type == "Class" || self.isClassColumn(self.currentGraphNode)) {
                         label = "subClassOf";
                         type = "rdfs:subClassOf";
                     } else {
@@ -1019,8 +1019,9 @@ var MappingColumnsGraph = (function () {
             self.visjsGraph.loadGraph(
                 "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json",
                 false,
-                function (err, result) {
+                function (err, result, rawText) {
                     if (err) {
+                        self.handleCorruptedMappingsFile(err, rawText);
                         if (callback) {
                             return callback(err);
                         }
@@ -1581,6 +1582,33 @@ var MappingColumnsGraph = (function () {
 
         return data;
     };
+    /**
+     * Handles a mappings JSON file that failed to parse: shows the exact parse error, warns the user
+     * that the raw (invalid) file will be downloaded so they can fix it and re-import it, then triggers
+     * the download of the raw content. Used when loadVisjsGraph cannot parse the source mappings file.
+     *
+     * @function
+     * @name handleCorruptedMappingsFile
+     * @memberof module:MappingColumnsGraph
+     * @param {string|Error} err - The JSON parse error (or its message).
+     * @param {string} [rawText] - The raw invalid file content, downloaded so the user can correct it.
+     * @returns {void}
+     */
+    self.handleCorruptedMappingsFile = function (err, rawText) {
+        var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
+        var errorMessage = err && err.message ? err.message : String(err);
+
+        alert("Error loading the mappings of source " + MappingModeler.currentSLSsource + ":\n\n" + errorMessage);
+
+        if (!rawText) {
+            return;
+        }
+
+        alert("The file '" + fileName + "' contains invalid JSON and could not be loaded.\n\n" + "It will now be downloaded so you can fix it and re-import it (mappings Import button).");
+
+        Export.downloadStringAsFile(rawText, fileName, "application/json");
+    };
+
     /**
      * Exports the current mappings from the Vis.js graph to a JSON file.
      * Saves the graph data before exporting

@@ -10,6 +10,16 @@ var KGquery_predicates = (function () {
         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
         "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>";
 
+    // filled by buildClassTypePredicate, projected by buildQuery
+    self.subClassVarNames = [];
+
+    self.getGraphNode = function (nodeUri) {
+        if (!KGquery_graph || !KGquery_graph.KGqueryGraph || !KGquery_graph.KGqueryGraph.data || !KGquery_graph.KGqueryGraph.data.nodes) {
+            return null;
+        }
+        return KGquery_graph.KGqueryGraph.data.nodes.get(nodeUri);
+    };
+
     /**
      * Builds the rdf:type predicate fragment for a class variable.
      * Handles three cases:
@@ -17,27 +27,42 @@ var KGquery_predicates = (function () {
      *  - synthetic superclass node      -> ?varClass rdfs:subClassOf <uri>. ?var rdf:type ?varClass.
      *  - hidden grouped subclass node   -> infer via its superclass (same subClassOf pattern,
      *                                       but using node.data.superclass as the URI).
+     * When the superclass has several subclasses, ?varClass takes more than one value and its
+     * instances would otherwise be indistinguishable in the result table: the class and its label
+     * are then added to the query so each row shows which subclass it comes from.
      * varName MUST start with "?".
      */
     self.buildClassTypePredicate = function (varName, classUri) {
-        var node = null;
-        if (KGquery_graph && KGquery_graph.KGqueryGraph && KGquery_graph.KGqueryGraph.data && KGquery_graph.KGqueryGraph.data.nodes) {
-            node = KGquery_graph.KGqueryGraph.data.nodes.get(classUri);
-        }
+        var node = self.getGraphNode(classUri);
         var effectiveUri = classUri;
         var useSubClassOf = false;
+        var subclassesCount = 0;
         if (node && node.data) {
             if (node.data.subclasses && node.data.subclasses.length > 0) {
                 useSubClassOf = true;
+                subclassesCount = node.data.subclasses.length;
             } else if (node.hidden && node.data.superclass) {
                 effectiveUri = node.data.superclass;
                 useSubClassOf = true;
+                var superclassNode = self.getGraphNode(effectiveUri);
+                if (superclassNode && superclassNode.data && superclassNode.data.subclasses) {
+                    subclassesCount = superclassNode.data.subclasses.length;
+                }
             }
         }
-        if (useSubClassOf) {
-            return varName + "Class rdfs:subClassOf <" + effectiveUri + ">.\n" + varName + " rdf:type " + varName + "Class.\n";
+        if (!useSubClassOf) {
+            return varName + " rdf:type <" + effectiveUri + ">.\n";
         }
-        return varName + " rdf:type <" + effectiveUri + ">.\n";
+
+        var classVarName = varName + "Class";
+        var predicate = classVarName + " rdfs:subClassOf <" + effectiveUri + ">.\n" + varName + " rdf:type " + classVarName + ".\n";
+        if (subclassesCount > 1) {
+            predicate += " OPTIONAL  {" + classVarName + " rdfs:label " + classVarName + "Label.}\n";
+            if (self.subClassVarNames.indexOf(classVarName) < 0) {
+                self.subClassVarNames.push(classVarName);
+            }
+        }
+        return predicate;
     };
 
     self.setRdfTypePredicates = function (queryElement, predicatesSubjectsMap) {
@@ -136,6 +161,7 @@ var KGquery_predicates = (function () {
     self.buildQuery = function (querySets, options) {
         var distinctSetTypes = [];
         var query = "";
+        self.subClassVarNames = [];
         //build query
 
         if (!options) {
@@ -260,6 +286,9 @@ var KGquery_predicates = (function () {
                         selectStr += " " + type;
                     }
                 });
+            });
+            self.subClassVarNames.forEach(function (classVarName) {
+                selectStr += " " + classVarName + " " + classVarName + "Label";
             });
             if (isJoin) {
                 selectStr += " ?querySet ";

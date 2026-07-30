@@ -1374,7 +1374,17 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             data: payload,
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
-                var data = JSON.parse(result);
+                var data;
+                try {
+                    data = JSON.parse(result);
+                } catch (parseError) {
+                    // malformed JSON file: propagate the exact parse error and the raw file text
+                    // (3rd arg) so the caller can surface it and let the user fix and re-import the file
+                    if (callback) {
+                        return callback(parseError.message, null, result);
+                    }
+                    return;
+                }
                 if (dataProcessorFn) {
                     data = dataProcessorFn(data);
                 }

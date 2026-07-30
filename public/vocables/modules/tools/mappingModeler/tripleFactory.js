@@ -1125,10 +1125,15 @@ var TripleFactory = (function () {
         self.columnsMap = {};
         var classNodesMap = {};
         var allColumnNodesById = {};
+        var classLabelByDataId = {};
+        nodes.forEach(function (classNode) {
+            if (classNode.data && classNode.data.type === "Class") {
+                classLabelByDataId[classNode.data.id] = classNode.label;
+            }
+        });
         // tree entries whose triples are built on a column mapping, needed to group the blank node ones
         var columnTreeEntryIds = {};
         var relationTreeEntries = [];
-
         nodes.forEach(function (node) {
             if (node.data && node.data.type === "Class") {
                 classNodesMap[node.id] = node;
@@ -1139,9 +1144,21 @@ var TripleFactory = (function () {
                     self.columnsMap[node.id] = node;
                     // add node to treeData only if node master or if he adding a new other predicate compared to the master node
                     if (!node.data.definedInColumn || (node.data.otherPredicates && node.data.otherPredicates.length > 0)) {
+                        // suffix the column with its associated class label, e.g. "cfihos_unique_id (unit of dimension)"
+                        var columnText = node.label;
+                        var columnClassId = MappingColumnsGraph.getColumnClass(node);
+                        if (columnClassId && classLabelByDataId[columnClassId]) {
+                            var columnClassLabel = classLabelByDataId[columnClassId];
+                            // drop the source prefix, keep only the class name (e.g. "CFI:unit of dimension" -> "unit of dimension")
+                            var prefixSeparatorIndex = columnClassLabel.indexOf(":");
+                            if (prefixSeparatorIndex > -1) {
+                                columnClassLabel = columnClassLabel.substring(prefixSeparatorIndex + 1);
+                            }
+                            columnText = node.label + " (" + columnClassLabel + ")";
+                        }
                         treeData.push({
                             id: node.id,
-                            text: node.label,
+                            text: columnText,
                             parent: "Columns",
                             data: node.data,
                         });

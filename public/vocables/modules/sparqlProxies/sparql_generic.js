@@ -1246,11 +1246,9 @@ var Sparql_generic = (function () {
                     var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true);
 
                     var filter = options.filter || "";
-                    var query =""
+                    var query = "";
                     if (schemaType == "OWL") {
-
-
-                         query =
+                        query =
                             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
                             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
@@ -1267,7 +1265,7 @@ var Sparql_generic = (function () {
                             indexedPredicates.optionalClauses +
                             "\n  }";
                     } else {
-                         query =
+                        query =
                             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
@@ -1278,12 +1276,7 @@ var Sparql_generic = (function () {
                         //     var where = "  ?subject " + parentType + " ?firstParent." + Sparql_common.getVariableLangLabel("subject", false, true) + "OPTIONAL{?subject skos:altLabel ?skosAltLabel }";
 
                         var where =
-                            "  ?subject " +
-                            parentType +
-                            " ?firstParent." +
-                            " OPTIONAL {?subject skos:prefLabel|rdfs:label  ?subjectLabel.}" +
-
-                            "OPTIONAL{?subject skos:altLabel ?skosAltLabel }";
+                            "  ?subject " + parentType + " ?firstParent." + " OPTIONAL {?subject skos:prefLabel|rdfs:label  ?subjectLabel.}" + "OPTIONAL{?subject skos:altLabel ?skosAltLabel }";
 
                         if (options.filter) {
                             where += " " + options.filter + " ";
@@ -1302,8 +1295,6 @@ var Sparql_generic = (function () {
                         query += indexedPredicates.optionalClauses;
                         query += "}";
                     }
-
-
 
                     async.whilst(
                         function (_test) {

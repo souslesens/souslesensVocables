@@ -339,8 +339,6 @@ var TriplesMaker = {
         }
 
         data.forEach(function (line, index) {
-
-
             var lineColumnUrisMap = {};
             var rowIndex = index + options.currentBatchRowIndex;
             var blankNodesMap = {};
@@ -854,8 +852,7 @@ var TriplesMaker = {
             options = {};
         }
 
-        if(subjectUri==null)
-            return [];
+        if (subjectUri == null) return [];
         var metaDataTriples = [];
         metaDataTriples.push(subjectUri + " " + "<http://purl.org/dc/terms/created>" + " " + dateTime);
         metaDataTriples.push(subjectUri + " <" + TriplesMaker.mappingFilePredicate + "> '" + table + "'");
@@ -880,12 +877,6 @@ var TriplesMaker = {
             return callback(null, { headers: headers, data: data });
         });
     },
-
-
-
-
-
-
 };
 
 export default TriplesMaker;

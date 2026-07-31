@@ -313,7 +313,7 @@
             "url": "_default"
         },
         "controller": "Sparql_OWL",
-        "topClassFilter": "?topConcept rdfs:subClassOf ?superClass filter( not exists {?superClass  rdfs:type <http://www.w3.org/2002/07/owl#Class>})",
+        "topClassFilter": "",
         "schemaType": "OWL",
         "schema": null,
         "color": "#bcbd22",
@@ -328,7 +328,7 @@
             "url": "_default"
         },
         "controller": "Sparql_OWL",
-        "topClassFilter": "?topConcept rdfs:subClassOf ?superClass filter( not exists {?superClass  rdfs:type <http://www.w3.org/2002/07/owl#Class>})",
+        "topClassFilter": "",
         "schemaType": "OWL",
         "schema": null,
         "color": "#bcbd22",

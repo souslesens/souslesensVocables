@@ -30,6 +30,17 @@ var Sparql_OWL = (function () {
     var self = {};
 
     self.ancestorsDepth = 6;
+
+    /**
+     * Query fragment used by getTopConcepts when a source declares no `topClassFilter`.
+     * Roots are the classes whose parent is not itself a class. The MINUS discards the rows whose
+     * parent is an owl:Restriction: Virtuoso exposes restrictions as `nodeID://` IRIs, so `isUri`
+     * does not filter them out.
+     */
+    self.defaultTopClassFilter =
+        "{?topConcept rdfs:subClassOf ?superClass. filter (isUri(?superClass) && NOT EXISTS {?superClass rdf:type owl:Class})}" +
+        " MINUS {?topConcept rdfs:subClassOf ?superClass. ?superClass rdf:type ?superClassType. filter(?superClassType = owl:Restriction)}";
+
     /**
      * Builds the SPARQL property path expressing the parent/child (taxonomy) relation for a
      * source. Uses `options.specificPredicates` if provided, otherwise the source's configured
@@ -97,14 +108,14 @@ var Sparql_OWL = (function () {
         return str;
     };
     /**
-     * Returns the top-level classes of an OWL source: `owl:Class` instances that have no parent
-     * via the source's taxonomy predicates. Blank nodes are excluded; labels are fetched optionally
+     * Returns the top-level classes of an OWL source: `owl:Class` instances whose `rdfs:subClassOf`
+     * parent is not a class. Blank nodes are excluded; labels are fetched optionally
      * and language-filtered.
      *
      * **Top-class filter priority** (first match wins):
      * 1. `options.skipTopClassFilter` → no filter at all
      * 2. `sources.json[source].topClassFilter` (non-empty, non-`"_default"`) → custom SPARQL filter string
-     * 3. Default: `?topConcept rdf:type owl:Class. FILTER(NOT EXISTS { ?topConcept <taxonomyPredicate> ?z })`
+     * 3. Default `Sparql_OWL.defaultTopClassFilter`: `?topConcept rdfs:subClassOf ?superClass` whose `?superClass` is neither an `owl:Class` nor an `owl:Restriction`
      *
      * **Other source-level config knobs** (`sources.json`):
      * - `schemaType: "KNOWLEDGE_GRAPH"` — omits the `?topConcept rdf:type owl:Class.` triple
@@ -137,7 +148,7 @@ var Sparql_OWL = (function () {
             if (topClassFilter && topClassFilter != "" && topClassFilter != "_default") {
                 strFilterTopConcept = topClassFilter;
             } else {
-                strFilterTopConcept = "?topConcept rdf:type  owl:Class. filter(NOT EXISTS {?topConcept " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?z}) ";
+                strFilterTopConcept = self.defaultTopClassFilter;
             }
         }
 

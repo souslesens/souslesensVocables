@@ -248,7 +248,7 @@ var GraphStore = {
                 },
                 editable: options.editable === "true",
                 controller: "Sparql_OWL",
-                topClassFilter: "?topConcept rdf:type owl:Class . ?topConcept rdfs:subClassOf ?superClass filter (isUri(?superClass) && not exists{?superClass rdf:type owl:Class })",
+                topClassFilter: "",
                 schemaType: "OWL",
                 allowIndividuals: options.allowIndividuals,
                 predicates: {
@@ -469,7 +469,7 @@ var GraphStore = {
                         },
                         editable: options.editable,
                         controller: "Sparql_OWL",
-                        topClassFilter: "?topConcept rdf:type owl:Class . ?topConcept rdfs:subClassOf ?superClass filter (isUri(?superClass) && not exists{?superClass rdf:type owl:Class })",
+                        topClassFilter: "",
                         schemaType: "OWL",
                         allowIndividuals: options.allowIndividuals,
                         predicates: {

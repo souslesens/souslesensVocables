@@ -42,7 +42,7 @@
     {
         "name": "getTopConcepts",
         "module": "Sparql_OWL",
-        "description": "Returns the top-level classes of an OWL source: `owl:Class` instances that have no parent via the source's taxonomy predicates. Blank nodes are excluded; labels are fetched optionally and language-filtered. **Top-class filter priority** (first match wins): 1. `options.skipTopClassFilter` → no filter at all 2. `sources.json[source].topClassFilter` (non-empty, non-`\"_default\"`) → custom SPARQL filter string 3. Default: `?topConcept rdf:type owl:Class. FILTER(NOT EXISTS { ?topConcept <taxonomyPredicate> ?z })` **Other source-level config knobs** (`sources.json`): - `schemaType: \"KNOWLEDGE_GRAPH\"` — omits the `?topConcept rdf:type owl:Class.` triple - `sparql_server.no_params` — sends query as plain URL body instead of `?query=` param",
+        "description": "Returns the top-level classes of an OWL source: `owl:Class` instances whose `rdfs:subClassOf` parent is not a class. Blank nodes are excluded; labels are fetched optionally and language-filtered. **Top-class filter priority** (first match wins): 1. `options.skipTopClassFilter` → no filter at all 2. `sources.json[source].topClassFilter` (non-empty, non-`\"_default\"`) → custom SPARQL filter string 3. Default `Sparql_OWL.defaultTopClassFilter`: `?topConcept rdfs:subClassOf ?superClass` whose `?superClass` is neither an `owl:Class` nor an `owl:Restriction` **Other source-level config knobs** (`sources.json`): - `schemaType: \"KNOWLEDGE_GRAPH\"` — omits the `?topConcept rdf:type owl:Class.` triple - `sparql_server.no_params` — sends query as plain URL body instead of `?query=` param",
         "params": [
             {
                 "name": "sourceLabel",
@@ -170,7 +170,7 @@
     {
         "name": "getNodeParents",
         "module": "Sparql_OWL",
-        "description": "Returns the ancestors of node(s) up to a given depth in an OWL hierarchy. Builds nested `OPTIONAL` blocks chaining `?broaderN-1 rdfs:subClassOf|rdf:type ?broaderN` (excluding `owl:Restriction`/`owl:Class`), grouping each node's types/superclasses/graphs via `GROUP_CONCAT`. Depth is capped at 9 when the source has imports (Virtuoso allows at most 20 GROUP BY / hash-join keys: 2 fixed + 2 per level, so 2 + 2*9 = 20).",
+        "description": "Returns the ancestors of node(s) up to a given depth in an OWL hierarchy. Builds nested `OPTIONAL` blocks chaining `?broaderN-1 rdfs:subClassOf|rdf:type ?broaderN` (excluding `owl:Restriction`/`owl:Class`), grouping each node's types/superclasses/graphs via `GROUP_CONCAT` with an explicit `GROUP BY` per (subject, broader, labels). Depth is capped at 9 (Virtuoso allows at most 20 GROUP BY / hash-join keys: 2 fixed + 2 per level, so 2 + 2*9 = 20).",
         "params": [
             {
                 "name": "sourceLabel",
@@ -881,6 +881,12 @@
                         "description": "Also fetch `skos:prefLabel`"
                     },
                     {
+                        "name": "indexedPredicates",
+                        "type": "string[]",
+                        "required": false,
+                        "description": "Extra predicates fetched for indexation, see {@link module:Sparql_common.getIndexedPredicatesClauses}"
+                    },
+                    {
                         "name": "processorFectchSize",
                         "type": "number",
                         "required": false,
@@ -1446,6 +1452,46 @@
         "returns": {
             "type": "err|Array",
             "description": "Throws an error or returns SPARQL results with variables: `node`, `node_label`, `definition` (optional), `superClass1Label` (optional), `superClass2Label` (optional), `superClass3Label` (optional), `superClass4Label` (optional), `description` (optional), `propLabel` (optional), `targetClass_label` (optional)."
+        },
+        "responseSchema": "#/definitions/SparqlQueryResponse",
+        "expose": true,
+        "example": null
+    },
+    {
+        "name": "getClassesWithoutTaxonomy",
+        "module": "Sparql_OWL",
+        "description": "Retrieves all OWL classes of a source that has no taxonomy (no rdfs:subClassOf hierarchy), attaching each class to owl:Thing so flat ontologies can still be indexed and searched. Used as a fallback by SearchUtil.generateElasticIndex when getSourceTaxonomy returns no class.",
+        "params": [
+            {
+                "name": "sourceLabel",
+                "type": "string",
+                "required": true,
+                "description": "Source name whose classes are retrieved"
+            },
+            {
+                "name": "options",
+                "type": "Object",
+                "required": false,
+                "description": "Build options",
+                "properties": [
+                    {
+                        "name": "filter",
+                        "type": "string",
+                        "required": false,
+                        "description": "Extra SPARQL clause appended to the query"
+                    },
+                    {
+                        "name": "withoutImports",
+                        "type": "boolean",
+                        "required": false,
+                        "description": "Exclude imported graphs from the `FROM` clause"
+                    }
+                ]
+            }
+        ],
+        "returns": {
+            "type": "err|Object",
+            "description": "Returns `{classesMap, labels}` through the callback; empty map for non-OWL sources."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,

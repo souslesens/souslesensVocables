@@ -223,7 +223,7 @@ async function loadConfig() {
         sparql_server: { url: "_default" },
         imports: [],
         controller: "Sparql_OWL",
-        topClassFilter: "?topConcept rdf:type owl:Class . ?topConcept rdfs:subClassOf ?superClass filter (isUri(?superClass) && not exists{?superClass rdf:type owl:Class })",
+        topClassFilter: "",
         schemaType: "OWL",
     };
     globalThis.Config.sources["_defaultSource"] = globalThis.Config._defaultSource;

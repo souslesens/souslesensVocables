@@ -4,38 +4,65 @@ import yargs from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
 
 /*
- * Historically most sources were created with `topClassFilter: "?topConcept rdf:type owl:Class ."`.
- * That filter selects every class of the ontology instead of its roots, so the Lineage tree opens
- * on a flat list of all classes.
+ * Historically sources were created with one of the boilerplate `topClassFilter` values below,
+ * either "?topConcept rdf:type owl:Class ." (which selects every class of the ontology instead of
+ * its roots, so the Lineage tree opens on a flat list) or an early root filter that keeps the
+ * owl:Restriction parents Virtuoso exposes as `nodeID://` IRIs.
  *
- * An empty `topClassFilter` makes Sparql_OWL.getTopConcepts fall back to the computed default
- * (`?topConcept rdf:type owl:Class. filter(NOT EXISTS {?topConcept <taxonomyPredicates> ?z})`),
- * which honours the taxonomy predicates declared on each source. See
- * public/vocables/modules/sparqlProxies/sparql_OWL.js getTopConcepts.
+ * An empty `topClassFilter` makes Sparql_OWL.getTopConcepts fall back to Sparql_OWL.defaultTopClassFilter,
+ * the maintained root query. See public/vocables/modules/sparqlProxies/sparql_OWL.js.
  *
- * Only the generic variants above are reset. Any hand-written filter (BFO, lis14, DUL, ...) is
- * preserved untouched.
+ * Only the generic variants listed below are reset. Any hand-written filter (BFO, lis14, DUL, ...)
+ * is preserved untouched.
  */
 
 const RESET_TOP_CLASS_FILTER_VALUE = "";
 
-const owlClassIriRegex = /<http:\/\/www\.w3\.org\/2002\/07\/owl#Class>/g;
-const whitespaceRunRegex = /\s+/g;
-const trailingDotRegex = /\s*\.\s*$/;
-
-/* Normalized forms considered equivalent to "give me every owl:Class", i.e. no real root filtering. */
-const genericTopClassFilterSignatures = new Set(["?topconcept rdf:type owl:class"]);
+const owlClassIriRegex = /<http:\/\/www\.w3\.org\/2002\/07\/owl#class>/g;
+const whitespaceRegex = /\s+/g;
+const trailingDotRegex = /\.$/;
 
 /**
- * Reduces a topClassFilter to a comparable signature: full owl:Class IRI collapsed to its prefixed
- * form, whitespace runs collapsed, trailing dot and case differences removed.
+ * Reduces a topClassFilter to a comparable signature: case, whitespace and trailing dot removed,
+ * full owl:Class IRI collapsed to its prefixed form, so that formatting variants of the same
+ * boilerplate filter share one signature.
  */
 const normalizeTopClassFilter = (topClassFilter) => {
-    const withPrefixedOwlClass = topClassFilter.replace(owlClassIriRegex, "owl:Class");
-    const withSingleSpaces = withPrefixedOwlClass.replace(whitespaceRunRegex, " ");
-    const withoutTrailingDot = withSingleSpaces.trim().replace(trailingDotRegex, "");
-    return withoutTrailingDot.toLowerCase();
+    const lowerCased = topClassFilter.toLowerCase();
+    const withPrefixedOwlClass = lowerCased.replace(owlClassIriRegex, "owl:class");
+    const withoutWhitespace = withPrefixedOwlClass.replace(whitespaceRegex, "");
+    return withoutWhitespace.replace(trailingDotRegex, "");
 };
+
+/*
+ * Filters written by the app itself rather than for a given ontology: "every owl:Class", the first
+ * root filter shipped in the bin source creators, its two rdfs:type typo variants, and the current
+ * root query pasted by hand into a few sources. All of them are what an empty topClassFilter now
+ * produces, so they carry no information and are reset.
+ */
+const genericTopClassFilters = [
+    "?topConcept rdf:type owl:Class .",
+    "?topConcept rdf:type owl:Class . ?topConcept rdfs:subClassOf ?superClass filter (isUri(?superClass) && not exists{?superClass rdf:type owl:Class })",
+    "?topConcept rdfs:subClassOf ?superClass filter( not exists {?superClass  rdfs:type <http://www.w3.org/2002/07/owl#Class>})",
+    "?topConcept rdfs:subClassOf ?superClass. filter( not exists {?superClass  rdfs:type <http://www.w3.org/2002/07/owl#Class>})",
+    `{{?topConcept rdf:type owl:Class.
+    ?topConcept rdfs:subClassOf ?superClass
+    filter (isUri(?superClass) &&  not exists{?superClass rdf:type owl:Class })
+    OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}
+
+    }MINUS
+  {
+    ?topConcept rdfs:subClassOf ?superClass.
+      ?superClass rdf:type ?superClassType filter(?superClassType=owl:Restriction).
+
+    }
+}`,
+];
+
+const genericTopClassFilterSignatures = new Set();
+for (const genericTopClassFilter of genericTopClassFilters) {
+    genericTopClassFilterSignatures.add(normalizeTopClassFilter(genericTopClassFilter));
+}
 
 const isGenericTopClassFilter = (topClassFilter) => {
     if (typeof topClassFilter !== "string" || topClassFilter.trim() === "") {

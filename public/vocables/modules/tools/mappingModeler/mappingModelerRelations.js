@@ -70,6 +70,18 @@ var MappingModelerRelations = (function () {
                 var fromColumn = classesMap[item?.subject?.value];
                 var toColumn = classesMap[item?.value?.value];
                 if (fromColumn && toColumn && item?.prop?.value) {
+                    // the restriction found in the model carries its own constraint type and, for qualified
+                    // cardinalities, the cardinality predicate itself (owl:onClass + owl:qualifiedCardinality)
+                    var modelRestrictionType = item?.constraintType?.value || null;
+                    var modelCardinality = null;
+                    if (item?.cardinalityType?.value && item?.cardinalityValue?.value) {
+                        modelRestrictionType = item.cardinalityType.value;
+                        modelCardinality = { type: item.cardinalityType.value, value: item.cardinalityValue.value };
+                    } else if (modelRestrictionType == "http://www.w3.org/2002/07/owl#onClass") {
+                        // owl:onClass alone is not a valid restriction constraint, it only qualifies a cardinality
+                        modelRestrictionType = "http://www.w3.org/2002/07/owl#someValuesFrom";
+                    }
+
                     fromColumn.forEach(function (fromColumnId) {
                         toColumn.forEach(function (toColumnId) {
                             if (nodesMap[fromColumnId].data.table != nodesMap[toColumnId].data.table) {
@@ -79,6 +91,8 @@ var MappingModelerRelations = (function () {
                                 fromColumn: { id: fromColumnId, label: nodesMap[fromColumnId].label },
                                 toColumn: { id: toColumnId, label: nodesMap[toColumnId].label },
                                 property: { id: item.prop.value, label: item.propLabel.value },
+                                restrictionType: modelRestrictionType,
+                                cardinality: modelCardinality,
                                 isAlreadyExisting: false,
                             };
                             var columnFromClass = nodesClassesMap[relationObject.fromColumn.id];
@@ -107,9 +121,18 @@ var MappingModelerRelations = (function () {
 
             relations.forEach(function (item) {
                 var state = item.isAlreadyExisting ? { disabled: true } : { disabled: false };
+                var restrictionLabel = "";
+                if (item.cardinality) {
+                    var cardinalityTypeParts = item.cardinality.type.split("#");
+                    var cardinalityTypeName = cardinalityTypeParts[cardinalityTypeParts.length - 1];
+                    restrictionLabel = " [" + cardinalityTypeName + " " + item.cardinality.value + "]";
+                } else if (item.restrictionType) {
+                    var restrictionTypeParts = item.restrictionType.split("#");
+                    restrictionLabel = " [" + restrictionTypeParts[restrictionTypeParts.length - 1] + "]";
+                }
                 jstreeData.push({
                     id: common.getRandomHexaId(5),
-                    text: item.fromColumn.label + "-" + item.property.label + "->" + item.toColumn.label,
+                    text: item.fromColumn.label + "-" + item.property.label + "->" + item.toColumn.label + restrictionLabel,
                     parent: "Restrictions",
                     data: item,
                     state: state,
@@ -143,47 +166,35 @@ var MappingModelerRelations = (function () {
             alert("Please select at least one relation");
             return;
         }
-        async.eachSeries(
-            relations,
-            function (item, callbackEach) {
-                var relation = item.data;
-                var fromClassId = MappingColumnsGraph.getColumnClass(relation.fromColumn.id);
-                var toClassId = MappingColumnsGraph.getColumnClass(relation.toColumn.id);
-                var isBothClasses = fromClassId && toClassId;
+        relations.forEach(function (item) {
+            var relation = item.data;
+            var fromClassId = MappingColumnsGraph.getColumnClass(relation.fromColumn.id);
+            var toClassId = MappingColumnsGraph.getColumnClass(relation.toColumn.id);
+            var isBothClasses = fromClassId && toClassId;
 
-                var buildAndAddEdge = function (restrictionType, cardinality) {
-                    var edge = MappingColumnsGraph.getVisjsObjectPropertyEdge(
-                        relation.fromColumn.id,
-                        relation.toColumn.id,
-                        relation.property.label,
-                        "diamond",
-                        relation.property.id,
-                        relation.property.id,
-                        MappingModeler.propertyColor,
-                        restrictionType,
-                        cardinality,
-                    );
-                    MappingColumnsGraph.addEdge([edge]);
-                    callbackEach();
-                };
+            // restriction type and cardinality come from the model restriction that suggested this relation,
+            // no dialog: the user is applying the model as is
+            var restrictionType = isBothClasses ? relation.restrictionType : null;
+            var cardinality = isBothClasses ? relation.cardinality : null;
 
-                if (isBothClasses) {
-                    MappingModeler.promptRestrictionType(DataSourcesManager.currentSlsvSource, fromClassId, relation.property.id, function (err, restrictionType, cardinality) {
-                        if (err) return callbackEach(err);
-                        buildAndAddEdge(restrictionType, cardinality);
-                    });
-                } else {
-                    buildAndAddEdge(null, null);
-                }
-            },
-            function (err) {
-                if (err) return MainController.errorAlert(err);
-                MappingColumnsGraph.saveVisjsGraph(function () {
-                    $("#MappingModeler_leftTabs").tabs("option", "active", 1);
-                    UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab");
-                });
-            },
-        );
+            var edge = MappingColumnsGraph.getVisjsObjectPropertyEdge(
+                relation.fromColumn.id,
+                relation.toColumn.id,
+                relation.property.label,
+                "diamond",
+                relation.property.id,
+                relation.property.id,
+                MappingModeler.propertyColor,
+                restrictionType,
+                cardinality,
+            );
+            MappingColumnsGraph.addEdge([edge]);
+        });
+
+        MappingColumnsGraph.saveVisjsGraph(function () {
+            $("#MappingModeler_leftTabs").tabs("option", "active", 1);
+            UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab");
+        });
     };
 
     return self;

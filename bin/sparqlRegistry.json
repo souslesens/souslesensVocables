@@ -42,7 +42,7 @@
     {
         "name": "getTopConcepts",
         "module": "Sparql_OWL",
-        "description": "Returns the top-level classes of an OWL source: `owl:Class` instances whose `rdfs:subClassOf` parent is not a class. Blank nodes are excluded; labels are fetched optionally and language-filtered. **Top-class filter priority** (first match wins): 1. `options.skipTopClassFilter` → no filter at all 2. `sources.json[source].topClassFilter` (non-empty, non-`\"_default\"`) → custom SPARQL filter string 3. Default `Sparql_OWL.defaultTopClassFilter`: `?topConcept rdfs:subClassOf ?superClass` whose `?superClass` is neither an `owl:Class` nor an `owl:Restriction` **Other source-level config knobs** (`sources.json`): - `schemaType: \"KNOWLEDGE_GRAPH\"` — omits the `?topConcept rdf:type owl:Class.` triple - `sparql_server.no_params` — sends query as plain URL body instead of `?query=` param",
+        "description": "Returns the top-level classes of an OWL source: `owl:Class` instances with no named parent class in the queried graphs. Blank nodes are excluded; labels are fetched optionally and language-filtered. **Top-class filter priority** (first match wins): 1. `options.skipTopClassFilter` → no filter at all 2. `sources.json[source].topClassFilter` (non-empty, non-`\"_default\"`) → custom SPARQL filter string 3. Default {@link module:Sparql_OWL.defaultTopClassFilter}: no parent that is a named class of the queried graphs **Other source-level config knobs** (`sources.json`): - `schemaType: \"KNOWLEDGE_GRAPH\"` — omits the `?topConcept rdf:type owl:Class.` triple - `sparql_server.no_params` — sends query as plain URL body instead of `?query=` param",
         "params": [
             {
                 "name": "sourceLabel",

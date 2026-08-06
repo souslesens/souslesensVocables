@@ -328,6 +328,14 @@ const apiDoc = {
                     description: "Map of route → method → quota value or quota config object.",
                     additionalProperties: true,
                 },
+                allowSourceCreation: {
+                    type: "boolean",
+                    description: "Lets the users of this profile create sources. Omitted, the right stored on the user account applies.",
+                },
+                maxNumberCreatedSource: {
+                    type: "number",
+                    description: "How many sources a user of this profile may own. Omitted, the limit stored on the user account applies.",
+                },
             },
         },
         DatabaseNames: {

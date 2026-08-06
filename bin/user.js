@@ -1,5 +1,6 @@
 import { config } from "../model/config.js";
 import { userModel } from "../model/users.js";
+import { profileModel } from "../model/profiles.js";
 
 const user = {
     getUser: async (reqUser) => {
@@ -19,6 +20,7 @@ const user = {
             if (adminUser === undefined) {
                 throw Error("Admin user not found in database. Ensure ensureAdminUserExists() was called at startup.");
             }
+            const adminSourceCreationRights = await user.resolveSourceCreationRights(adminUser);
             result = {
                 logged: true,
                 user: {
@@ -28,8 +30,8 @@ const user = {
                     token: adminUser.token,
                 },
                 authSource: "disabled",
-                allowSourceCreation: adminUser.allowSourceCreation,
-                maxNumberCreatedSource: adminUser.maxNumberCreatedSource,
+                allowSourceCreation: adminSourceCreationRights.allowSourceCreation,
+                maxNumberCreatedSource: adminSourceCreationRights.maxNumberCreatedSource,
                 auth: {},
             };
         } else if (logged) {
@@ -37,12 +39,13 @@ const user = {
             if (findUser === undefined) {
                 throw Error("could not find logged user " + reqUser);
             }
+            const sourceCreationRights = await user.resolveSourceCreationRights(findUser);
             result = {
                 logged: true,
                 user: { id: findUser.id, login: findUser.login, groups: findUser.groups, token: findUser.token },
                 authSource: config.auth,
-                allowSourceCreation: findUser.allowSourceCreation,
-                maxNumberCreatedSource: findUser.maxNumberCreatedSource,
+                allowSourceCreation: sourceCreationRights.allowSourceCreation,
+                maxNumberCreatedSource: sourceCreationRights.maxNumberCreatedSource,
                 auth: auth,
             };
         } else {
@@ -55,6 +58,22 @@ const user = {
         }
 
         return result;
+    },
+    /**
+     * The source creation rights live on the user account and on the profiles.
+     * A profile that defines them takes precedence, so an offer tier can lower
+     * the account defaults. The account values remain the fallback for the
+     * profiles that leave them undefined.
+     * @param {UserAccount} userAccount - the user account read from the database
+     * @returns {Promise<{ allowSourceCreation: boolean, maxNumberCreatedSource: number }>}
+     */
+    resolveSourceCreationRights: async (userAccount) => {
+        const profileRights = await profileModel.getSourceCreationRightsForUser(userAccount);
+
+        return {
+            allowSourceCreation: profileRights.allowSourceCreation ?? userAccount.allowSourceCreation,
+            maxNumberCreatedSource: profileRights.maxNumberCreatedSource ?? userAccount.maxNumberCreatedSource,
+        };
     },
     getProfiles: async (reqUser) => {
         const currentUser = await user.getUser(reqUser);

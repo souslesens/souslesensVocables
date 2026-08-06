@@ -1,5 +1,8 @@
 import { useState, useMemo, useReducer, ChangeEvent, SyntheticEvent, forwardRef, Ref, Dispatch, MouseEventHandler, useRef, useEffect } from "react";
 import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
     Alert,
     Snackbar,
     Box,
@@ -12,6 +15,7 @@ import {
     FormLabel,
     Grid,
     IconButton,
+    InputAdornment,
     InputLabel,
     MenuItem,
     Modal,
@@ -32,7 +36,7 @@ import {
     styled,
 } from "@mui/material";
 
-import { ChevronRight, Close, Done, Edit, ExpandMore, Delete as DeleteIcon } from "@mui/icons-material";
+import { ChevronRight, Close, Done, Edit, ExpandMore, Speed, Delete as DeleteIcon } from "@mui/icons-material";
 import { TreeView, TreeItem, TreeItemProps, TreeItemContentProps, useTreeItem } from "@mui/x-tree-view";
 
 import clsx from "clsx";
@@ -341,7 +345,7 @@ const enum Mode {
 
 export type Msg_ =
     | { type: Type.UserClickedModal; payload: { modal: boolean; profileForm?: Profile } }
-    | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string | string[] | boolean } }
+    | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string | string[] | boolean | undefined } }
     | { type: Type.UserUpdatedSourceAccessControl; payload: { treeStr: string; newValue: SourceAccessControl | null } }
     | { type: Type.UserClickedCheckAll; payload: { fieldname: string; value: boolean } };
 
@@ -448,6 +452,10 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
     const handleFieldUpdate = (fieldname: string) => (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement> | SelectChangeEvent<string[]>) => {
         if (fieldname === "isShared") {
             update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: (event.target as HTMLInputElement).checked } });
+        } else if (fieldname === "allowSourceCreation") {
+            // Three states: empty means the profile defines nothing and the user account rights apply
+            const selectedValue = event.target.value as string;
+            update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: selectedValue === "" ? undefined : selectedValue === "true" } });
         } else {
             update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
         }
@@ -573,6 +581,8 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         profileModel.profileForm.quota = simplifiedQuotaObj;
         const rawMaxNtExportTriples = profileModel.profileForm.maxNtExportTriples;
         profileModel.profileForm.maxNtExportTriples = rawMaxNtExportTriples || rawMaxNtExportTriples === 0 ? Number(rawMaxNtExportTriples) : undefined;
+        const rawMaxNumberCreatedSource = profileModel.profileForm.maxNumberCreatedSource;
+        profileModel.profileForm.maxNumberCreatedSource = rawMaxNumberCreatedSource || rawMaxNumberCreatedSource === 0 ? Number(rawMaxNumberCreatedSource) : undefined;
 
         void saveProfile(profileModel.profileForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
         const mode = create ? "create" : "edit";
@@ -864,120 +874,176 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                 </MenuItem>
                             ))}
                         </TextField>
-                        <Box display="flex" alignItems="center" gap={1}>
-                            <TextField
-                                fullWidth
-                                type="number"
-                                id="maxNtExportTriples"
-                                label="Max NT export triples"
-                                value={profileModel.profileForm.maxNtExportTriples ?? ""}
-                                onChange={handleFieldUpdate("maxNtExportTriples")}
-                                InputProps={{ inputProps: { min: 0 } }}
-                            />
-                            <HelpTooltip title="Caps how many triples a MappingModeler N-Triples export can contain for this profile. Leave empty for no limit." />
-                        </Box>
-                        {/* Quota editor */}
-                        <FormControl sx={{ mt: 2 }}>
-                            <Box>
-                                <Box display="flex" alignItems="center" gap={1}>
-                                    <Typography variant="subtitle1" gutterBottom>
-                                        API Rate Limits
-                                    </Typography>
-                                    <HelpTooltip title="Set the maximum number of requests allowed per minute for each API route. Whole Profile applies the limit to the total of all routes combined. Otherwise, each route has its own separate limit." />
-                                </Box>
-                                {quota.map((q, idx) => {
-                                    const selectedRouteInfo = routesInfo.find((r) => r.route === q.route);
-                                    const methodsAvailable = selectedRouteInfo?.methods || [];
+                        {/* Every cap applied to the users of this profile is grouped here */}
+                        <Accordion>
+                            <AccordionSummary expandIcon={<ExpandMore />} aria-controls="profile-limitations-content" id="profile-limitations-header">
+                                <Stack direction="row" spacing={1} useFlexGap>
+                                    <Speed />
+                                    {"Limitations"}
+                                </Stack>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <Stack spacing={3} useFlexGap>
+                                    <Stack spacing={2} useFlexGap>
+                                        <Typography variant="subtitle2">Sources</Typography>
+                                        <TextField
+                                            fullWidth
+                                            select
+                                            id="allowSourceCreation"
+                                            label="Allow source creation"
+                                            helperText="Empty: the right stored on each user account decides"
+                                            value={profileModel.profileForm.allowSourceCreation === undefined ? "" : String(profileModel.profileForm.allowSourceCreation)}
+                                            onChange={handleFieldUpdate("allowSourceCreation")}
+                                            InputProps={{
+                                                endAdornment: (
+                                                    <InputAdornment position="end" sx={{ mr: 3 }}>
+                                                        <HelpTooltip title="Whether this profile lets its users create sources. When a user holds several profiles, the most permissive one wins." />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        >
+                                            <MenuItem value="">&nbsp;</MenuItem>
+                                            <MenuItem value="true">Yes</MenuItem>
+                                            <MenuItem value="false">No</MenuItem>
+                                        </TextField>
+                                        <TextField
+                                            fullWidth
+                                            type="number"
+                                            id="maxNumberCreatedSource"
+                                            label="Max created sources"
+                                            helperText="Empty: the limit stored on each user account decides"
+                                            value={profileModel.profileForm.maxNumberCreatedSource ?? ""}
+                                            onChange={handleFieldUpdate("maxNumberCreatedSource")}
+                                            InputProps={{
+                                                inputProps: { min: 0 },
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <HelpTooltip title="How many sources a user of this profile may own. When several profiles set it, the highest one wins." />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    </Stack>
+                                    <Stack spacing={2} useFlexGap>
+                                        <Typography variant="subtitle2">Triples</Typography>
+                                        <TextField
+                                            fullWidth
+                                            type="number"
+                                            id="maxNtExportTriples"
+                                            label="Max NT export triples"
+                                            helperText="Empty: no limit"
+                                            value={profileModel.profileForm.maxNtExportTriples ?? ""}
+                                            onChange={handleFieldUpdate("maxNtExportTriples")}
+                                            InputProps={{
+                                                inputProps: { min: 0 },
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <HelpTooltip title="Caps how many triples a MappingModeler N-Triples export can contain for this profile." />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    </Stack>
+                                    <Box>
+                                        <Box display="flex" alignItems="center" gap={1} sx={{ mb: 1 }}>
+                                            <Typography variant="subtitle2">API rate limits</Typography>
+                                            <HelpTooltip title="Set the maximum number of requests allowed per minute for each API route. Whole Profile applies the limit to the total of all routes combined. Otherwise, each route has its own separate limit." />
+                                        </Box>
+                                        {quota.map((q, idx) => {
+                                            const selectedRouteInfo = routesInfo.find((r) => r.route === q.route);
+                                            const methodsAvailable = selectedRouteInfo?.methods || [];
 
-                                    return (
-                                        <Grid container spacing={1} alignItems="center" key={idx} sx={{ mb: 1 }}>
-                                            <Grid item xs={4}>
-                                                <Select
-                                                    fullWidth
-                                                    value={q.route}
-                                                    onChange={(e) => {
-                                                        const newQuota = [...quota];
-                                                        newQuota[idx].route = e.target.value;
-                                                        const newRouteInfo = routesInfo.find((r) => r.route === e.target.value);
-                                                        newQuota[idx].method = newRouteInfo?.methods[0] || "";
-                                                        setQuota(newQuota);
-                                                    }}
-                                                >
-                                                    {routesInfo
-                                                        .filter((routeInfo) => routeInfo.quotas.length > 0)
-                                                        .map((routeInfo) => (
-                                                            <MenuItem key={routeInfo.route} value={routeInfo.route}>
-                                                                {routeInfo.route}
-                                                            </MenuItem>
-                                                        ))}
-                                                </Select>
-                                            </Grid>
-                                            <Grid item xs={3}>
-                                                <Select
-                                                    fullWidth
-                                                    value={q.method || ""}
-                                                    disabled={!q.route}
-                                                    onChange={(e) => {
-                                                        const newQuota = [...quota];
-                                                        newQuota[idx].method = e.target.value;
-                                                        setQuota(newQuota);
-                                                    }}
-                                                >
-                                                    {methodsAvailable.map((method) => (
-                                                        <MenuItem key={method} value={method}>
-                                                            {method}
-                                                        </MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </Grid>
-                                            <Grid item xs={3}>
-                                                <TextField
-                                                    fullWidth
-                                                    type="number"
-                                                    label="Limit"
-                                                    value={q.limit}
-                                                    onChange={(e) => {
-                                                        const newQuota = [...quota];
-                                                        newQuota[idx].limit = e.target.value;
-                                                        setQuota(newQuota);
-                                                    }}
-                                                    InputProps={{ inputProps: { min: 0 } }}
-                                                />
-                                            </Grid>
-                                            <Grid item xs={2}>
-                                                <FormControlLabel
-                                                    control={
-                                                        <Checkbox
-                                                            checked={q.wholeProfileQuota}
+                                            return (
+                                                <Grid container spacing={1} alignItems="center" key={idx} sx={{ mb: 1 }}>
+                                                    <Grid item xs={4}>
+                                                        <Select
+                                                            fullWidth
+                                                            value={q.route}
                                                             onChange={(e) => {
                                                                 const newQuota = [...quota];
-                                                                newQuota[idx].wholeProfileQuota = e.target.checked;
+                                                                newQuota[idx].route = e.target.value;
+                                                                const newRouteInfo = routesInfo.find((r) => r.route === e.target.value);
+                                                                newQuota[idx].method = newRouteInfo?.methods[0] || "";
                                                                 setQuota(newQuota);
                                                             }}
+                                                        >
+                                                            {routesInfo
+                                                                .filter((routeInfo) => routeInfo.quotas.length > 0)
+                                                                .map((routeInfo) => (
+                                                                    <MenuItem key={routeInfo.route} value={routeInfo.route}>
+                                                                        {routeInfo.route}
+                                                                    </MenuItem>
+                                                                ))}
+                                                        </Select>
+                                                    </Grid>
+                                                    <Grid item xs={3}>
+                                                        <Select
+                                                            fullWidth
+                                                            value={q.method || ""}
+                                                            disabled={!q.route}
+                                                            onChange={(e) => {
+                                                                const newQuota = [...quota];
+                                                                newQuota[idx].method = e.target.value;
+                                                                setQuota(newQuota);
+                                                            }}
+                                                        >
+                                                            {methodsAvailable.map((method) => (
+                                                                <MenuItem key={method} value={method}>
+                                                                    {method}
+                                                                </MenuItem>
+                                                            ))}
+                                                        </Select>
+                                                    </Grid>
+                                                    <Grid item xs={3}>
+                                                        <TextField
+                                                            fullWidth
+                                                            type="number"
+                                                            label="Limit"
+                                                            value={q.limit}
+                                                            onChange={(e) => {
+                                                                const newQuota = [...quota];
+                                                                newQuota[idx].limit = e.target.value;
+                                                                setQuota(newQuota);
+                                                            }}
+                                                            InputProps={{ inputProps: { min: 0 } }}
                                                         />
-                                                    }
-                                                    label="Whole Profile"
-                                                />
-                                            </Grid>
-                                            <Grid item xs={1}>
-                                                <IconButton
-                                                    aria-label="delete quota entry"
-                                                    onClick={() => {
-                                                        const newQuota = quota.filter((_v, i) => i !== idx);
-                                                        setQuota(newQuota.length ? newQuota : [{ route: "", method: "", limit: "", wholeProfileQuota: false }]);
-                                                    }}
-                                                >
-                                                    <DeleteIcon />
-                                                </IconButton>
-                                            </Grid>
-                                        </Grid>
-                                    );
-                                })}
-                                <Button variant="outlined" onClick={() => setQuota([...quota, { route: "", method: "", limit: "", wholeProfileQuota: false }])}>
-                                    Add quota
-                                </Button>
-                            </Box>
-                        </FormControl>
+                                                    </Grid>
+                                                    <Grid item xs={2}>
+                                                        <FormControlLabel
+                                                            control={
+                                                                <Checkbox
+                                                                    checked={q.wholeProfileQuota}
+                                                                    onChange={(e) => {
+                                                                        const newQuota = [...quota];
+                                                                        newQuota[idx].wholeProfileQuota = e.target.checked;
+                                                                        setQuota(newQuota);
+                                                                    }}
+                                                                />
+                                                            }
+                                                            label="Whole Profile"
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={1}>
+                                                        <IconButton
+                                                            aria-label="delete quota entry"
+                                                            onClick={() => {
+                                                                const newQuota = quota.filter((_v, i) => i !== idx);
+                                                                setQuota(newQuota.length ? newQuota : [{ route: "", method: "", limit: "", wholeProfileQuota: false }]);
+                                                            }}
+                                                        >
+                                                            <DeleteIcon />
+                                                        </IconButton>
+                                                    </Grid>
+                                                </Grid>
+                                            );
+                                        })}
+                                        <Button variant="outlined" onClick={() => setQuota([...quota, { route: "", method: "", limit: "", wholeProfileQuota: false }])}>
+                                            Add quota
+                                        </Button>
+                                    </Box>
+                                </Stack>
+                            </AccordionDetails>
+                        </Accordion>
                         <Button disabled={zo.validation?.success === false || zo.customIssues.length > 0} type="submit" variant="contained" color="primary">
                             Save Profile
                         </Button>

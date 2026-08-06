@@ -66,6 +66,8 @@ describe("Test the Profilemodel module", () => {
             theme: "",
             quota: {},
             maxNtExportTriples: 5000,
+            allowSourceCreation: true,
+            maxNumberCreatedSource: 2,
         });
     });
 
@@ -112,6 +114,8 @@ describe("Test the Profilemodel module", () => {
             theme: "",
             quota: {},
             maxNtExportTriples: undefined,
+            allowSourceCreation: undefined,
+            maxNumberCreatedSource: undefined,
         });
     });
 
@@ -128,6 +132,8 @@ describe("Test the Profilemodel module", () => {
             theme: "default",
             quota: {},
             maxNtExportTriples: undefined,
+            allowSourceCreation: undefined,
+            maxNumberCreatedSource: undefined,
         });
     });
 
@@ -206,6 +212,8 @@ describe("Test the Profilemodel module", () => {
             access_control: "{}",
             quota: null,
             max_nt_export_triples: null,
+            create_source: null,
+            maximum_source: null,
             schema_types: [],
         });
     });
@@ -220,6 +228,24 @@ describe("Test the Profilemodel module", () => {
             access_control: "{}",
             quota: null,
             max_nt_export_triples: 5000,
+            create_source: null,
+            maximum_source: null,
+            schema_types: [],
+        });
+    });
+
+    test("test _convertToDatabase with source creation rights", async () => {
+        expect(profileModel._convertToDatabase({ name: "test", allowSourceCreation: true, maxNumberCreatedSource: 3 })).toStrictEqual({
+            label: "test",
+            theme: "",
+            allowed_tools: [],
+            allowed_databases: [],
+            is_shared: true,
+            access_control: "{}",
+            quota: null,
+            max_nt_export_triples: null,
+            create_source: true,
+            maximum_source: 3,
             schema_types: [],
         });
     });
@@ -249,6 +275,8 @@ describe("Test the Profilemodel module", () => {
                 sourcesAccessControl: {},
                 quota: {},
                 maxNtExportTriples: undefined,
+                allowSourceCreation: undefined,
+                maxNumberCreatedSource: undefined,
             },
         ]);
     });
@@ -279,6 +307,41 @@ describe("Test the Profilemodel module", () => {
                 sourcesAccessControl: {},
                 quota: {},
                 maxNtExportTriples: 5000,
+                allowSourceCreation: undefined,
+                maxNumberCreatedSource: undefined,
+            },
+        ]);
+    });
+
+    test("test _convertToLegacy with source creation rights", async () => {
+        const profile = {
+            id: 1,
+            label: "test",
+            theme: "SLS",
+            allowed_tools: [],
+            allowed_databases: [],
+            is_shared: true,
+            access_control: {},
+            schema_types: [],
+            create_source: 1,
+            maximum_source: 3,
+        };
+
+        expect(profileModel._convertToLegacy(profile)).toStrictEqual([
+            "test",
+            {
+                id: "test",
+                name: "test",
+                theme: "SLS",
+                allowedSourceSchemas: [],
+                allowedTools: [],
+                allowedDatabases: [],
+                isShared: true,
+                sourcesAccessControl: {},
+                quota: {},
+                maxNtExportTriples: undefined,
+                allowSourceCreation: true,
+                maxNumberCreatedSource: 3,
             },
         ]);
     });
@@ -319,6 +382,8 @@ describe("Test the Profilemodel module", () => {
                     },
                 },
                 maxNtExportTriples: undefined,
+                allowSourceCreation: undefined,
+                maxNumberCreatedSource: undefined,
             },
         ]);
     });
@@ -398,5 +463,29 @@ describe("Test the Profilemodel module", () => {
     test("getMaxNtExportTriplesForUser is unlimited when no profile of the user sets a cap", async () => {
         const result = await profileModel.getMaxNtExportTriplesForUser({ id: "42", login: "someone", groups: ["all_forbidden"] });
         expect(result).toBeUndefined();
+    });
+
+    test("getSourceCreationRightsForUser returns the rights of a single-profile user", async () => {
+        profileModel._clearProfileCaches();
+        const result = await profileModel.getSourceCreationRightsForUser({ id: "42", login: "someone", groups: ["read_folder_1"] });
+        expect(result).toStrictEqual({ allowSourceCreation: true, maxNumberCreatedSource: 2 });
+    });
+
+    test("getSourceCreationRightsForUser keeps the most permissive rights across profiles", async () => {
+        profileModel._clearProfileCaches();
+        const result = await profileModel.getSourceCreationRightsForUser({ id: "42", login: "someone", groups: ["readwrite_folder_1", "read_folder_1"] });
+        expect(result).toStrictEqual({ allowSourceCreation: true, maxNumberCreatedSource: 10 });
+    });
+
+    test("getSourceCreationRightsForUser leaves the rights undefined when no profile defines them", async () => {
+        profileModel._clearProfileCaches();
+        const result = await profileModel.getSourceCreationRightsForUser({ id: "42", login: "someone", groups: ["all_forbidden"] });
+        expect(result).toStrictEqual({ allowSourceCreation: undefined, maxNumberCreatedSource: undefined });
+    });
+
+    test("getSourceCreationRightsForUser forbids creation when the only profile forbids it", async () => {
+        profileModel._clearProfileCaches();
+        const result = await profileModel.getSourceCreationRightsForUser({ id: "42", login: "someone", groups: ["readwrite_folder_1"] });
+        expect(result).toStrictEqual({ allowSourceCreation: false, maxNumberCreatedSource: 10 });
     });
 });

@@ -19,7 +19,9 @@
             "OWL/FOLDER_1": "read"
         },
         "schema_types": ["OWL"],
-        "max_nt_export_triples": 5000
+        "max_nt_export_triples": 5000,
+        "create_source": true,
+        "maximum_source": 2
     },
     {
         "id": "3",
@@ -31,7 +33,9 @@
             "OWL/FOLDER_1": "readwrite"
         },
         "schema_types": ["OWL"],
-        "max_nt_export_triples": 2000
+        "max_nt_export_triples": 2000,
+        "create_source": false,
+        "maximum_source": 10
     },
     {
         "id": "4",

@@ -116,6 +116,8 @@ type ProfileJson = {
     theme?: string;
     quota?: Record<string, Record<string, number>>;
     maxNtExportTriples?: number;
+    allowSourceCreation?: boolean;
+    maxNumberCreatedSource?: number;
 };
 
 const decodeProfile = (key: string, profile: ProfileJson): Profile => {
@@ -131,6 +133,8 @@ const decodeProfile = (key: string, profile: ProfileJson): Profile => {
         theme: profile.theme,
         quota: profile.quota || {},
         maxNtExportTriples: profile.maxNtExportTriples,
+        allowSourceCreation: profile.allowSourceCreation,
+        maxNumberCreatedSource: profile.maxNumberCreatedSource,
     };
 };
 
@@ -153,6 +157,8 @@ const ProfileSchema = z.object({
     id: z.string().default(ulid()),
     quota: z.record(z.string(), z.record(z.string(), z.number())).optional().default({}),
     maxNtExportTriples: z.number().int().positive().optional(),
+    allowSourceCreation: z.boolean().optional(),
+    maxNumberCreatedSource: z.number().int().nonnegative().optional(),
 });
 
 export const ProfileSchemaCreate = ProfileSchema.merge(
@@ -179,6 +185,8 @@ export const defaultProfile = (uuid: string): Profile => {
         theme: "",
         quota: {},
         maxNtExportTriples: undefined,
+        allowSourceCreation: undefined,
+        maxNumberCreatedSource: undefined,
     };
 };
 export { getProfiles, deleteProfile, ProfileSchema };

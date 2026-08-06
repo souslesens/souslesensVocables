@@ -33,13 +33,18 @@ var Sparql_OWL = (function () {
 
     /**
      * Query fragment used by getTopConcepts when a source declares no `topClassFilter`.
-     * Roots are the classes whose parent is not itself a class. The MINUS discards the rows whose
-     * parent is an owl:Restriction: Virtuoso exposes restrictions as `nodeID://` IRIs, so `isUri`
-     * does not filter them out.
+     * A root is a class with no named parent class in the queried graphs: no `rdfs:subClassOf` at
+     * all (gufo:Individual, bfo:Entity), or only parents that are `owl:Thing`, an anonymous class
+     * expression, an owl:Restriction, or a class of an ontology that is not loaded.
+     *
+     * A parent is recognised as anonymous by the shape of its IRI, never by `isBlank`: stores
+     * disagree on it, Virtuoso renders genuine blank nodes as `nodeID://` in some graphs and `_:` in
+     * others, and the `<_:b123>` nodes minted on purpose by the ontology pipelines are plain IRIs
+     * that `isBlank` reports as named. Measured on ISO-14224-IOF, 2531 `_:` parents are reported
+     * blank and 21 are not.
      */
     self.defaultTopClassFilter =
-        "{?topConcept rdfs:subClassOf ?superClass. filter (isUri(?superClass) && NOT EXISTS {?superClass rdf:type owl:Class})}" +
-        " MINUS {?topConcept rdfs:subClassOf ?superClass. ?superClass rdf:type ?superClassType. filter(?superClassType = owl:Restriction)}";
+        " FILTER NOT EXISTS {?topConcept rdfs:subClassOf ?parentClass. ?parentClass rdf:type owl:Class. filter(!STRSTARTS(STR(?parentClass),'nodeID://') && !STRSTARTS(STR(?parentClass),'_:'))} ";
 
     /**
      * Builds the SPARQL property path expressing the parent/child (taxonomy) relation for a
@@ -108,14 +113,14 @@ var Sparql_OWL = (function () {
         return str;
     };
     /**
-     * Returns the top-level classes of an OWL source: `owl:Class` instances whose `rdfs:subClassOf`
-     * parent is not a class. Blank nodes are excluded; labels are fetched optionally
+     * Returns the top-level classes of an OWL source: `owl:Class` instances with no named parent
+     * class in the queried graphs. Blank nodes are excluded; labels are fetched optionally
      * and language-filtered.
      *
      * **Top-class filter priority** (first match wins):
      * 1. `options.skipTopClassFilter` → no filter at all
      * 2. `sources.json[source].topClassFilter` (non-empty, non-`"_default"`) → custom SPARQL filter string
-     * 3. Default `Sparql_OWL.defaultTopClassFilter`: `?topConcept rdfs:subClassOf ?superClass` whose `?superClass` is neither an `owl:Class` nor an `owl:Restriction`
+     * 3. Default {@link module:Sparql_OWL.defaultTopClassFilter}: no parent that is a named class of the queried graphs
      *
      * **Other source-level config knobs** (`sources.json`):
      * - `schemaType: "KNOWLEDGE_GRAPH"` — omits the `?topConcept rdf:type owl:Class.` triple
@@ -182,7 +187,9 @@ var Sparql_OWL = (function () {
             query += " GRAPH ?subjectGraph {";
         }
         if (Config.sources[sourceLabel].schemaType != "KNOWLEDGE_GRAPH") {
-            query += "?topConcept rdf:type owl:Class.";
+            // the trailing space matters: a topClassFilter starting with a keyword would otherwise
+            // be glued to the dot, and Virtuoso reads `owl:Class.FILTER` as one token
+            query += "?topConcept rdf:type owl:Class. ";
         }
         query += strFilterTopConcept + " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}" + "filter (!isBlank( ?topConcept))";
         if (options.filterCollections) {

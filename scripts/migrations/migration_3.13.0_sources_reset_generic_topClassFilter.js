@@ -35,28 +35,24 @@ const normalizeTopClassFilter = (topClassFilter) => {
 };
 
 /*
- * Filters written by the app itself rather than for a given ontology: "every owl:Class", the first
- * root filter shipped in the bin source creators, its two rdfs:type typo variants, and the current
- * root query pasted by hand into a few sources. All of them are what an empty topClassFilter now
- * produces, so they carry no information and are reset.
+ * Filters that carry no information specific to an ontology, only the ones whose reset cannot make
+ * a concept disappear from the tree on an instance we cannot inspect:
+ *  - "every owl:Class", which flattens the tree and matches the default on hierarchy-less ontologies
+ *  - the two hand-written `FILTER NOT EXISTS` variants, whose exclusion set contains the default's,
+ *    so resetting them can only reveal more roots
+ *  - the rdfs:type typo variants, which filter nothing at all and list the classes that do have a
+ *    parent, that is the exact opposite of a root
+ *
+ * The `isUri` filter of the bin source creators and the hand-pasted MINUS query are deliberately
+ * left alone: they are the only ones whose reset also removes entries (classes holding both a
+ * parent class and an untyped parent), so they stay a deliberate choice to revisit source by source.
  */
 const genericTopClassFilters = [
     "?topConcept rdf:type owl:Class .",
-    "?topConcept rdf:type owl:Class . ?topConcept rdfs:subClassOf ?superClass filter (isUri(?superClass) && not exists{?superClass rdf:type owl:Class })",
+    "?topConcept rdf:type owl:Class . FILTER NOT EXISTS { ?topConcept rdfs:subClassOf ?superClass.?superClass rdf:type owl:Class. }",
+    "FILTER NOT EXISTS { ?topConcept rdfs:subClassOf ?superClass.?superClass rdf:type owl:Class. }",
     "?topConcept rdfs:subClassOf ?superClass filter( not exists {?superClass  rdfs:type <http://www.w3.org/2002/07/owl#Class>})",
     "?topConcept rdfs:subClassOf ?superClass. filter( not exists {?superClass  rdfs:type <http://www.w3.org/2002/07/owl#Class>})",
-    `{{?topConcept rdf:type owl:Class.
-    ?topConcept rdfs:subClassOf ?superClass
-    filter (isUri(?superClass) &&  not exists{?superClass rdf:type owl:Class })
-    OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}
-
-    }MINUS
-  {
-    ?topConcept rdfs:subClassOf ?superClass.
-      ?superClass rdf:type ?superClassType filter(?superClassType=owl:Restriction).
-
-    }
-}`,
 ];
 
 const genericTopClassFilterSignatures = new Set();

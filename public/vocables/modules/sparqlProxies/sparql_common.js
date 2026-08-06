@@ -50,12 +50,15 @@ var Sparql_common = (function () {
     /**
      * Builds a `FILTER (lang(?var)='xx')` clause restricting a label variable to the
      * source's preferred language (`Config.sources[source].pref_lang`).
+     * Label variables are almost always bound through an `OPTIONAL`, and `lang()` on an unbound
+     * variable fails the whole filter: without the `bound` guard a source whose graph carries no
+     * label at all (DOLCE) returns nothing instead of returning its unlabelled concepts.
      * @function
      * @name getLangFilter
      * @memberof module:Sparql_common
      * @param {string} sourceLabel - Source name used to read `pref_lang`
      * @param {string} conceptName - Variable name (without `?`) the language filter applies to
-     * @returns {string} A ` FILTER (lang(?conceptName)='lang')` clause, or `""` if the source or `pref_lang` is missing
+     * @returns {string} A ` FILTER (!bound(?conceptName) || lang(?conceptName)='lang')` clause, or `""` if the source or `pref_lang` is missing
      */
     self.getLangFilter = function (sourceLabel, conceptName) {
         var sourceObj = Config.sources[sourceLabel];
@@ -66,7 +69,7 @@ var Sparql_common = (function () {
         if (!pref_lang) {
             return "";
         }
-        return " FILTER (lang(?" + conceptName + ")='" + pref_lang + "')";
+        return " FILTER (!bound(?" + conceptName + ") || lang(?" + conceptName + ")='" + pref_lang + "')";
     };
 
     /**

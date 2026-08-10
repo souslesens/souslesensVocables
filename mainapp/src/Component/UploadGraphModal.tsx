@@ -32,6 +32,7 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
     const [replaceGraph, setReplaceGraph] = useState<boolean>(true);
     const [errorMessage, setErrorMessage] = useState("");
     const [hasBlankNodes, setHasBlankNodes] = useState<boolean>(false);
+    const [blankNodesConverted, setBlankNodesConverted] = useState<boolean>(false);
     const cancelCurrentOperation = useRef(false);
     const [graphUrl, setGraphUrl] = useState<string>("");
 
@@ -54,6 +55,7 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
         const filesList = Array.from(event.currentTarget.files);
         setUploadFile(filesList);
         setHasBlankNodes(false);
+        setBlankNodesConverted(false);
     };
 
     const uploadSource = async (e: MouseEvent) => {
@@ -207,10 +209,13 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
                     throw new Error("Upload failed");
                 }
 
-                const json = (await res.json()) as { identifier: string; has_blank_nodes?: boolean };
+                const json = (await res.json()) as { identifier: string; has_blank_nodes?: boolean; blank_nodes_converted?: boolean };
                 chunkId = json.identifier;
                 if (json.has_blank_nodes === true) {
                     setHasBlankNodes(true);
+                }
+                if (json.blank_nodes_converted === true) {
+                    setBlankNodesConverted(true);
                 }
                 return true;
             }
@@ -270,6 +275,8 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
         setTransferPercent(0);
         setUploadFile([]);
         setErrorMessage("");
+        setHasBlankNodes(false);
+        setBlankNodesConverted(false);
         onClose();
     };
 
@@ -283,7 +290,11 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
                             {errorMessage}
                         </Alert>
                     ) : null}
-                    {hasBlankNodes ? <Alert severity="warning">Warning: This graph contains blank nodes. Consistency of blank nodes may be lost.</Alert> : null}
+                    {hasBlankNodes && blankNodesConverted ? (
+                        <Alert severity="info">Blank nodes were detected and converted to URIs.</Alert>
+                    ) : hasBlankNodes ? (
+                        <Alert severity="warning">Warning: This graph contains blank nodes. Consistency of blank nodes may be lost.</Alert>
+                    ) : null}
                     <Stack spacing={2} sx={{ pt: 1 }}>
                         <Stack spacing={1} direction="row" useFlexGap>
                             <Button color="info" component="label" disabled={transferPercent > 0} fullWidth role={undefined} startIcon={<Folder />} tabIndex={-1} variant="outlined">

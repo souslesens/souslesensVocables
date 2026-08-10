@@ -190,5 +190,73 @@ var csvCrawler = {
             );
         });
     },
+
+    /**
+     * Streaming variant of readCsv yielding batches of rows as they are parsed.
+     * Avoids buffering the whole file in memory: triples can be built while the
+     * file is still being read.
+     *
+     * @param {object} connector - { filePath }
+     * @param {number} maxLines - optional cap on total rows read
+     * @yields {Array<object>} batch of parsed rows (fetchSize = 1000)
+     */
+    readCsvBatchGenerator: async function* (connector, maxLines) {
+        if (!fs.existsSync(connector.filePath)) {
+            throw new Error("file does not exists :" + connector.filePath);
+        }
+        var separator = await new Promise(function (resolve) {
+            util.getCsvFileSeparator(connector.filePath, resolve);
+        });
+        if (!separator) {
+            throw new Error("unable to determine column separator");
+        }
+        var headers = [];
+        var fetchSize = 1000;
+        var batch = [];
+        var linesRead = 0;
+
+        var stream = fs.createReadStream(connector.filePath);
+        var parser = csv({
+            separator: separator,
+            mapHeaders: ({ header }) => util.normalizeHeader(headers, header),
+        });
+        stream.pipe(parser);
+        parser.on("header", function (header) {
+            headers.push(header);
+        });
+
+        try {
+            for await (var data of parser) {
+                var emptyLine = true;
+                for (var i = 0; i < headers.length; i++) {
+                    if (data[headers[i]]) {
+                        emptyLine = false;
+                        break;
+                    }
+                }
+                if (emptyLine) continue;
+
+                linesRead++;
+                batch.push(data);
+
+                if (maxLines && linesRead >= maxLines) {
+                    break;
+                }
+
+                if (batch.length >= fetchSize) {
+                    yield batch;
+                    batch = [];
+                }
+            }
+        } finally {
+            stream.destroy();
+            parser.destroy();
+        }
+
+        if (batch.length > 0) {
+            yield batch;
+        }
+    },
 };
+
 export default csvCrawler;

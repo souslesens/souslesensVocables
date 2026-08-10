@@ -104,6 +104,100 @@
         "example": null
     },
     {
+        "name": "getNodeChildren",
+        "module": "Sparql_OWL",
+        "description": "Returns the children of node(s) down to a given depth in an OWL class hierarchy. Matches `?child1 <taxonomyPredicate> ?subject` for the parent (`ids` or `words`), then chains nested `OPTIONAL` blocks `?childN+1 <taxonomyPredicate> ?childN` with their labels. A `filterCollections` option switches to a SKOS-collection-scoped variant.",
+        "params": [
+            {
+                "name": "sourceLabel",
+                "type": "string",
+                "required": true,
+                "description": "OWL source name to query"
+            },
+            {
+                "name": "words",
+                "type": "(string|string[])",
+                "required": true,
+                "description": "Label word(s) for fuzzy/exact parent match; mutually exclusive with `ids`"
+            },
+            {
+                "name": "ids",
+                "type": "(string|string[])",
+                "required": true,
+                "description": "Parent class URI(s) whose children are fetched"
+            },
+            {
+                "name": "descendantsDepth",
+                "type": "number",
+                "required": true,
+                "description": "Number of taxonomy levels to expand"
+            },
+            {
+                "name": "options",
+                "type": "Object",
+                "required": false,
+                "description": "Query options",
+                "properties": [
+                    {
+                        "name": "selectGraph",
+                        "type": "boolean",
+                        "required": false,
+                        "description": "Bind each triple's named graph"
+                    },
+                    {
+                        "name": "exactMatch",
+                        "type": "boolean",
+                        "required": false,
+                        "description": "Treat `words` as exact rather than regex matches"
+                    },
+                    {
+                        "name": "withoutImports",
+                        "type": "boolean",
+                        "required": false,
+                        "description": "Exclude imported graphs from the `FROM` clause"
+                    },
+                    {
+                        "name": "specificPredicates",
+                        "type": "(string|string[])",
+                        "required": false,
+                        "description": "Override taxonomy predicate(s) used for the parent/child relation"
+                    },
+                    {
+                        "name": "filter",
+                        "type": "string",
+                        "required": false,
+                        "description": "Extra SPARQL filter appended to the query"
+                    },
+                    {
+                        "name": "filterCollections",
+                        "type": "(string|string[])",
+                        "required": false,
+                        "description": "Restrict children to members of these SKOS collections"
+                    },
+                    {
+                        "name": "sort",
+                        "type": "string",
+                        "required": false,
+                        "description": "Variable name to order results by"
+                    },
+                    {
+                        "name": "limit",
+                        "type": "number",
+                        "required": false,
+                        "description": "Result limit (defaults to `Config.queryLimit`)"
+                    }
+                ]
+            }
+        ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject`, `subjectLabel` (optional), `child1`, `child1Label` (optional), `child1Type` (optional), `child1Graph` (optional), depth-indexed `childN` (optional), `childNLabel` (optional), `collection` (optional), `acollection` (optional), `collectionLabel` (optional), `acollectionLabel` (optional)."
+        },
+        "responseSchema": "#/definitions/SparqlQueryResponse",
+        "expose": true,
+        "example": null
+    },
+    {
         "name": "getNodeInfos",
         "module": "Sparql_OWL",
         "description": "Returns all triples describing a resource (`<conceptId> ?prop ?value`), optionally also the inverse triples where it is the object, with property/value labels. Can exclude blank nodes and OWL restrictions.",
@@ -299,6 +393,76 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
+        "example": null
+    },
+    {
+        "name": "getFilteredTriples2",
+        "module": "Sparql_OWL",
+        "description": "Alternative to {@link module:Sparql_OWL.getFilteredTriples} that resolves the type and label of subject, property and object from any graph, then matches the actual triples in the source's own graph. Filters by subject/property/object ids. Not historical — selected over `getFilteredTriples` on demand: `Lineage_whiteboard` toggles between the two via `options.getFilteredTriples2`, and `nodeRelations_bot` calls it directly to extract a node's distinct properties (`options.distinct = \"?prop ?propLabel\"`). Deliberately not `@expose`d: {@link module:Sparql_OWL.getFilteredTriples} is the API-facing variant. It batches large id lists, excludes literal objects by default and requires no `options` argument, whereas this one dereferences `options` unguarded and matches `?prop ?x ?propType` across every graph.",
+        "params": [
+            {
+                "name": "sourceLabel",
+                "type": "string",
+                "required": true,
+                "description": "OWL source name to query"
+            },
+            {
+                "name": "subjectIds",
+                "type": "(string|string[])",
+                "required": false,
+                "description": "Subject URI(s) to match (optional)"
+            },
+            {
+                "name": "propertyIds",
+                "type": "(string|string[])",
+                "required": false,
+                "description": "Property URI(s) to match (optional)"
+            },
+            {
+                "name": "objectIds",
+                "type": "(string|string[])",
+                "required": false,
+                "description": "Object URI(s) to match (optional)"
+            },
+            {
+                "name": "options",
+                "type": "Object",
+                "required": false,
+                "description": "Query options",
+                "properties": [
+                    {
+                        "name": "withImports",
+                        "type": "boolean",
+                        "required": false,
+                        "description": "Include imported graphs in the `FROM` clause (imports are excluded by default here)"
+                    },
+                    {
+                        "name": "distinct",
+                        "type": "string",
+                        "required": false,
+                        "description": "Variables for the SELECT clause (defaults to `*`)"
+                    },
+                    {
+                        "name": "filter",
+                        "type": "string",
+                        "required": false,
+                        "description": "Extra SPARQL filter appended to the query"
+                    },
+                    {
+                        "name": "limit",
+                        "type": "number",
+                        "required": false,
+                        "description": "Result limit (defaults to `Config.queryLimit`)"
+                    }
+                ]
+            }
+        ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `subject`, `subjectType`, `subjectLabel` (optional), `prop`, `x`, `propType`, `propLabel` (optional), `object`, `objectType`, `objectLabel` (optional), `g`."
+        },
+        "responseSchema": "#/definitions/SparqlQueryResponse",
+        "expose": false,
         "example": null
     },
     {
@@ -749,6 +913,32 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
+        "example": null
+    },
+    {
+        "name": "getUrisLabelsMap",
+        "module": "Sparql_OWL",
+        "description": "Returns a map of URI → `rdfs:label` for given URIs (`?s rdfs:label ?sLabel`), falling back to the URI's local name for any URI without a label. Deliberately not `@expose`d: {@link module:Sparql_OWL.getLabelsMap} is the API-facing variant. It paginates instead of capping at 10000 rows and accepts `options.lang`, which this one lacks — on a multilingual source each URI here keeps whichever label comes last. A URI list is expressed against `getLabelsMap` through `options.filter`, as `Sparql_generic` already does.",
+        "params": [
+            {
+                "name": "sourceLabel",
+                "type": "string",
+                "required": true,
+                "description": "Source name to query"
+            },
+            {
+                "name": "uris",
+                "type": "string[]",
+                "required": true,
+                "description": "URIs whose labels are fetched"
+            }
+        ],
+        "returns": {
+            "type": "err|Object",
+            "description": "Throws an error or returns a map from each requested URI to its label."
+        },
+        "responseSchema": "#/definitions/SparqlQueryResponse",
+        "expose": false,
         "example": null
     },
     {
@@ -1334,6 +1524,64 @@
         "returns": {
             "type": "err|undefined",
             "description": "Throws an error or completes without a result; returns `\"nothing to copy\"` as an error when no triples exist."
+        },
+        "responseSchema": "#/definitions/SparqlQueryResponse",
+        "expose": false,
+        "example": null
+    },
+    {
+        "name": "getAllDescendants",
+        "module": "Sparql_OWL",
+        "description": "Returns all descendants of given resources via a configurable taxonomy predicate, with each descendant's direct parent and labels. The path operator adapts to options (`+` default, `*` to include the parent, `{0,depth}` for bounded depth), and results are paginated in pages of 2000 with `async.whilst`. Deliberately not `@expose`d: {@link module:Sparql_OWL.getNodesAncestorsOrDescendants} is the API-facing variant. It covers both traversal directions through a single boolean instead of requiring the caller to spell out a taxonomy predicate, and it returns the hierarchy chains already rebuilt per input class. This one also drops the paging error (its final `async.whilst` callback ignores `err`), so a partial result cannot be told from a complete one — unacceptable on a public API.",
+        "params": [
+            {
+                "name": "sourceLabel",
+                "type": "string",
+                "required": true,
+                "description": "Source name to query"
+            },
+            {
+                "name": "resourcesIds",
+                "type": "(string|string[])",
+                "required": false,
+                "description": "Ancestor resource URI(s) whose descendants are fetched"
+            },
+            {
+                "name": "taxonomyPredicate",
+                "type": "string",
+                "required": false,
+                "description": "=\"rdfs:subClassOf\"] - Predicate defining the parent relation"
+            },
+            {
+                "name": "options",
+                "type": "Object",
+                "required": false,
+                "description": "Query options",
+                "properties": [
+                    {
+                        "name": "includeParent",
+                        "type": "boolean",
+                        "required": false,
+                        "description": "Include the starting resource(s) (`*` path)"
+                    },
+                    {
+                        "name": "depth",
+                        "type": "number",
+                        "required": false,
+                        "description": "Limit traversal to this depth (`{0,depth}` path)"
+                    },
+                    {
+                        "name": "filter",
+                        "type": "string",
+                        "required": false,
+                        "description": "Extra SPARQL filter appended to the query"
+                    }
+                ]
+            }
+        ],
+        "returns": {
+            "type": "err|Array",
+            "description": "Throws an error or returns SPARQL results with variables: `descendant`, `descendantParent`, `descendantLabel` (optional), `descendantParentLabel` (optional)."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,

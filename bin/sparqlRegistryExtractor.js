@@ -28,8 +28,16 @@ const MODULES_TO_EXTRACT = [
 // Group 3: raw parameter list
 // The capture forbids crossing a `*/`, so the matched JSDoc is the block directly
 // above `self.NAME` — never an earlier comment (e.g. the file's MIT header) bleeding in.
-const functionWithJsdocRegex = /\/\*\*((?:(?!\*\/)[\s\S])*?)\*\/\s*self\.(\w+)\s*=\s*function\s*\(([^)]*)\)/g;
+// Between `*/` and `self.NAME`, blank lines and `//` notes are tolerated: several functions carry
+// a pending-cleanup note there, and requiring pure whitespace silently dropped them from the
+// registry even though they were tagged `@expose`.
+const functionWithJsdocRegex = /\/\*\*((?:(?!\*\/)[\s\S])*?)\*\/(?:\s|\/\/[^\n]*)*self\.(\w+)\s*=\s*function\s*\(([^)]*)\)/g;
 const functionNoJsdocRegex = /(?<!\/\*\*[\s\S]{0,2000}\*\/\s*)self\.(\w+)\s*=\s*function\s*\(([^)]*)\)/g;
+
+// Used to report `@expose` blocks that no function declaration follows, which would otherwise
+// vanish from the registry without a trace.
+const jsdocBlockRegex = /\/\*\*(?:(?!\*\/)[\s\S])*?\*\//g;
+const exposeTagRegex = /@expose\b/;
 
 const jsdocLinePrefixRegex = /^\s*\*\s?/;
 const paramTagRegex = /^@param\s+\{([^}]+)\}\s+(\[?[\w.]+\]?)\s*[-–]?\s*(.*)/;
@@ -124,12 +132,14 @@ function parseJsDoc(rawJsDoc) {
 function extractFunctions(source, moduleName) {
     const entries = [];
     const seenNames = new Set();
+    const attachedJsDocOffsets = new Set();
 
     let match;
     functionWithJsdocRegex.lastIndex = 0;
 
     while ((match = functionWithJsdocRegex.exec(source)) !== null) {
         const [, rawJsDoc, functionName, rawParams] = match;
+        attachedJsDocOffsets.add(match.index);
 
         if (seenNames.has(functionName)) continue;
         seenNames.add(functionName);
@@ -178,7 +188,30 @@ function extractFunctions(source, moduleName) {
         });
     }
 
+    warnOnOrphanExposeBlocks(source, moduleName, attachedJsDocOffsets);
+
     return entries;
+}
+
+/**
+ * Report every `@expose` JSDoc block that no `self.NAME = function (...)` declaration follows.
+ * Such a block produces no registry entry, so the function stays invisible to the API even though
+ * its author asked for it to be exposed.
+ * @param {string} source - File content
+ * @param {string} moduleName
+ * @param {Set<number>} attachedJsDocOffsets - Start offsets of the blocks that did yield an entry
+ */
+function warnOnOrphanExposeBlocks(source, moduleName, attachedJsDocOffsets) {
+    jsdocBlockRegex.lastIndex = 0;
+    let block;
+    while ((block = jsdocBlockRegex.exec(source)) !== null) {
+        if (!exposeTagRegex.test(block[0])) continue;
+        if (attachedJsDocOffsets.has(block.index)) continue;
+
+        const textBeforeBlock = source.slice(0, block.index);
+        const lineNumber = textBeforeBlock.split("\n").length;
+        console.warn(`[${moduleName}] orphan @expose block at line ${lineNumber}: no "self.NAME = function (...)" follows it — the function will be missing from the registry`);
+    }
 }
 
 function main() {
@@ -197,7 +230,10 @@ function main() {
     }
 
     const outputPath = path.join(projectRoot, "bin", "sparqlRegistry.json");
-    fs.writeFileSync(outputPath, JSON.stringify(registry, null, 2));
+    // 4-space indent + trailing newline so the generated file is already Prettier-compliant
+    // (tabWidth 4 in .prettierrc.yaml) and `npm run prettier:check` stays green without a
+    // reformatting pass after every extraction.
+    fs.writeFileSync(outputPath, JSON.stringify(registry, null, 4) + "\n");
     console.log(`\nRegistry written to ${outputPath} (${registry.length} total entries)`);
     console.log(`Exposed (expose: true): ${registry.filter((e) => e.expose).length}`);
     console.log(`Without JSDoc description: ${registry.filter((e) => !e.description).length} — add @expose + description to include in API`);

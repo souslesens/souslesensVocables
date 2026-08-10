@@ -1,6 +1,7 @@
 import common from "../../shared/common.js";
 import Authentification from "../../shared/authentification.js";
 import CreateSLSVsource_bot from "../../bots/createSLSVsource_bot.js";
+import UI from "../../shared/UI.js";
 
 /**
  * @module Lineage_createSLSVsource
@@ -25,7 +26,62 @@ var Lineage_createSLSVsource = (function () {
      * @returns {void}
      */
     self.onLoaded = function () {
-        CreateSLSVsource_bot.start();
+        self.checkSourceCreationRights(function (err, refusalMessage) {
+            if (err) {
+                return MainController.errorAlert(err);
+            }
+            if (refusalMessage) {
+                $("#botPanel").html("<div style='padding: 15px; max-width: 400px;'>" + refusalMessage + "</div>");
+                return UI.openDialog("botPanel", { title: CreateSLSVsource_bot.title });
+            }
+            CreateSLSVsource_bot.start();
+        });
+    };
+
+    /**
+     * Checks the source creation rights before the bot starts, so the user is not
+     * refused by the API only after having filled every step of the workflow.
+     * Both conditions are enforced again server side in POST /api/v1/sources.
+     * @function
+     * @name checkSourceCreationRights
+     * @memberof Lineage_createSLSVsource
+     * @param {Function} callback - called with (err, refusalMessage), refusalMessage null when the user may create a source.
+     * @returns {void}
+     */
+    self.checkSourceCreationRights = function (callback) {
+        var currentUser = Authentification.currentUser;
+        var userGroups = currentUser.groupes || [];
+        if (currentUser.login === "admin" || userGroups.indexOf("admin") > -1) {
+            return callback(null, null);
+        }
+
+        if (!currentUser.allowSourceCreation) {
+            return callback(null, "Your profile does not allow creating sources.");
+        }
+
+        $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/sources?ownedOnly=true`,
+            dataType: "json",
+            success: function (data) {
+                var ownedSourcesCount = Object.keys(data.resources || {}).length;
+                var maxNumberCreatedSource = currentUser.maxNumberCreatedSource;
+                if (typeof maxNumberCreatedSource === "number" && ownedSourcesCount >= maxNumberCreatedSource) {
+                    return callback(
+                        null,
+                        "You already own " +
+                            ownedSourcesCount +
+                            " sources, your profile allows " +
+                            maxNumberCreatedSource +
+                            ". Delete one in UserSettings &gt; Sources, using the trash icon, to create a new one.",
+                    );
+                }
+                callback(null, null);
+            },
+            error: function (err) {
+                callback(err);
+            },
+        });
     };
 
     /**

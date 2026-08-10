@@ -92,7 +92,7 @@ export default function () {
 
             const userOwnedSources = await sourceModel.getOwnedSources(userInfo.user);
             if (!isAdmin && Object.keys(userOwnedSources).length >= userInfo.maxNumberCreatedSource) {
-                res.status(401).json({ message: "Cannot create another source, the maximal limit was reached." });
+                res.status(401).json({ message: "Cannot create another source, the maximal limit was reached. Delete one in UserSettings > Sources, using the trash icon, to create a new one." });
                 return;
             }
 

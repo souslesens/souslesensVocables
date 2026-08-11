@@ -15,8 +15,11 @@
  * policy this server holds is its own: V1 is read-only, so anything not declared `read` is refused.
  */
 
+import { z } from "zod";
+
 import { buildRegistry } from "../sparqlRegistryExtractor.js";
 import { mcpConfig } from "./config.js";
+import { resultShapeNames } from "./execute.js";
 
 // MCP tool names accept [a-zA-Z0-9_-].
 const toolNameRegex = /^[a-zA-Z0-9_-]{1,64}$/;
@@ -226,21 +229,66 @@ function sparqlToolDescriptor(registryEntry) {
 // handed an untyped parameter.
 const restParamTypes = ["string", "number", "boolean", "Object", "any", "string[]", "number[]", "boolean[]", "Object[]"];
 
+// Swagger validates the shape of an operation but treats every `x-` key as opaque, so a typo like
+// `paramz` or `statusHint` passes the SLS boot untouched and would simply produce a tool missing
+// the feature its author asked for. `.strict()` everywhere turns that into a named boot failure.
+const restParamDeclarationSchema = z
+    .object({
+        type: z.enum(restParamTypes),
+        description: z.string().min(1),
+        required: z.boolean().optional(),
+        default: z.any().optional(),
+        enum: z.array(z.any()).nonempty().optional(),
+    })
+    .strict();
+
+const restToolDeclarationSchema = z
+    .object({
+        name: z.string().regex(toolNameRegex),
+        access: z.enum(["read", "write"]),
+        description: z.string().min(1),
+        params: z.record(z.string(), restParamDeclarationSchema).optional(),
+        query: z.record(z.string(), z.any()).optional(),
+        body: z.record(z.string(), z.any()).optional(),
+        parseJsonPayload: z.boolean().optional(),
+        emptyListWhenNull: z.boolean().optional(),
+        resultShape: z.enum(resultShapeNames).optional(),
+        registryFunctionGuard: z
+            .object({
+                nameParam: z.string().min(1),
+                moduleParam: z.string().min(1),
+                requireAccess: z.enum(["read", "write"]),
+                allowedModules: z.array(z.string()).nonempty().optional(),
+            })
+            .strict()
+            .optional(),
+        statusHints: z.record(z.string(), z.string().min(1)).optional(),
+    })
+    .strict();
+
+const restDeclarationSchema = z.object({ tools: z.array(restToolDeclarationSchema).nonempty() }).strict();
+
+/**
+ * Turn a zod failure into one line per problem, each naming the path inside the declaration.
+ * @param {object} zodError
+ * @returns {string}
+ */
+function describeDeclarationProblems(zodError) {
+    const problems = [];
+    for (const issue of zodError.issues) {
+        const location = issue.path.length > 0 ? issue.path.join(".") : "x-mcp";
+        problems.push(`${location}: ${issue.message}`);
+    }
+    return problems.join("; ");
+}
+
 /**
  * Convert an `x-mcp` parameter declaration into a JSON Schema property.
- * @param {string} paramName
  * @param {object} paramDeclaration
- * @param {string} declarationOrigin - Route and method, for error messages
  * @returns {object}
  */
-function restParamSchema(paramName, paramDeclaration, declarationOrigin) {
-    if (!restParamTypes.includes(paramDeclaration.type)) {
-        throw new Error(`[mcp] ${declarationOrigin} declares parameter "${paramName}" with type "${paramDeclaration.type}". Accepted types: ${restParamTypes.join(", ")}.`);
-    }
+function restParamSchema(paramDeclaration) {
     const baseSchema = schemaForType(paramDeclaration.type);
-    if (baseSchema === null) {
-        throw new Error(`[mcp] ${declarationOrigin} declares parameter "${paramName}" with unusable type "${paramDeclaration.type}".`);
-    }
     const paramSchema = { ...baseSchema, description: paramDeclaration.description };
     if (paramDeclaration.enum) {
         paramSchema.enum = paramDeclaration.enum;
@@ -264,15 +312,12 @@ function restToolDescriptor(toolDeclaration, routePath, httpMethod) {
     if (toolDeclaration.access !== readAccess) {
         throw new Error(`[mcp] ${declarationOrigin} declares tool "${toolDeclaration.name}" with access "${toolDeclaration.access}". This server is read-only.`);
     }
-    if (!toolDeclaration.description) {
-        throw new Error(`[mcp] ${declarationOrigin} declares tool "${toolDeclaration.name}" without a description. An agent chooses a tool on its description alone.`);
-    }
 
     const properties = {};
     const requiredNames = [];
     const paramDefaults = {};
     for (const [paramName, paramDeclaration] of Object.entries(toolDeclaration.params || {})) {
-        properties[paramName] = restParamSchema(paramName, paramDeclaration, declarationOrigin);
+        properties[paramName] = restParamSchema(paramDeclaration);
         if (paramDeclaration.required) {
             requiredNames.push(paramName);
         }
@@ -328,11 +373,13 @@ async function fetchRestToolDescriptors() {
             if (!mcpDeclaration) {
                 continue;
             }
-            if (!Array.isArray(mcpDeclaration.tools) || mcpDeclaration.tools.length === 0) {
-                throw new Error(`[mcp] ${rawMethod.toUpperCase()} ${routePath} has an x-mcp key with no "tools" array.`);
+            const httpMethod = rawMethod.toUpperCase();
+            const parsedDeclaration = restDeclarationSchema.safeParse(mcpDeclaration);
+            if (!parsedDeclaration.success) {
+                throw new Error(`[mcp] the x-mcp declaration of ${httpMethod} ${routePath} is unusable — ${describeDeclarationProblems(parsedDeclaration.error)}`);
             }
-            for (const toolDeclaration of mcpDeclaration.tools) {
-                descriptors.push(restToolDescriptor(toolDeclaration, routePath, rawMethod.toUpperCase()));
+            for (const toolDeclaration of parsedDeclaration.data.tools) {
+                descriptors.push(restToolDescriptor(toolDeclaration, routePath, httpMethod));
             }
         }
     }

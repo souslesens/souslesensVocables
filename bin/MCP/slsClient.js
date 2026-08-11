@@ -20,6 +20,51 @@ function currentToken() {
     return store.token;
 }
 
+// ---------------------------------------------------------------------------
+// Concurrency cap
+//
+// Process-wide, not per session: what must be protected is the SLS backend, and it does not care
+// which MCP session a request came from. Waiting requests are queued, and the queue itself is
+// bounded so a runaway agent gets a readable refusal instead of unbounded memory growth.
+// ---------------------------------------------------------------------------
+
+let inFlightRequestCount = 0;
+const waitingRequestResolvers = [];
+
+/**
+ * Wait for a free slot.
+ * @returns {Promise<boolean>} False when the queue is full and the caller must give up
+ */
+function acquireRequestSlot() {
+    if (inFlightRequestCount < mcpConfig.maxConcurrentSlsRequests) {
+        inFlightRequestCount += 1;
+        return Promise.resolve(true);
+    }
+    if (waitingRequestResolvers.length >= mcpConfig.maxQueuedSlsRequests) {
+        return Promise.resolve(false);
+    }
+    return new Promise(function (resolveSlot) {
+        waitingRequestResolvers.push(resolveSlot);
+    });
+}
+
+function releaseRequestSlot() {
+    const nextResolver = waitingRequestResolvers.shift();
+    if (nextResolver) {
+        // The slot moves straight to the next waiter, so inFlightRequestCount stays accurate.
+        return nextResolver(true);
+    }
+    inFlightRequestCount -= 1;
+}
+
+/**
+ * Current pressure on the SLS backend, for GET /healthz.
+ * @returns {{inFlight: number, queued: number, maxConcurrent: number}}
+ */
+export function requestPressure() {
+    return { inFlight: inFlightRequestCount, queued: waitingRequestResolvers.length, maxConcurrent: mcpConfig.maxConcurrentSlsRequests };
+}
+
 function buildQueryString(queryParams) {
     const searchParams = new URLSearchParams();
     for (const [parameterName, parameterValue] of Object.entries(queryParams)) {
@@ -88,6 +133,32 @@ export async function slsRequest(method, routePath, options) {
         fetchOptions.body = JSON.stringify(requestOptions.body);
     }
 
+    const gotSlot = await acquireRequestSlot();
+    if (!gotSlot) {
+        return {
+            ok: false,
+            status: 429,
+            data: null,
+            errorMessage: `Too many SousLeSens requests in flight from this MCP server (${mcpConfig.maxConcurrentSlsRequests} at a time, ${mcpConfig.maxQueuedSlsRequests} queued). Wait for the calls already running, or narrow the work into fewer queries.`,
+            url: url,
+        };
+    }
+    try {
+        // The slot covers reading the body too: on a large SPARQL answer the backend is still
+        // streaming long after fetch() has resolved its headers.
+        return await sendAndRead(url, fetchOptions);
+    } finally {
+        releaseRequestSlot();
+    }
+}
+
+/**
+ * One request/response round trip, without the concurrency accounting.
+ * @param {string} url
+ * @param {object} fetchOptions
+ * @returns {Promise<{ok: boolean, status: number, data: *, errorMessage: string|null, url: string}>}
+ */
+async function sendAndRead(url, fetchOptions) {
     let response;
     try {
         response = await fetch(url, fetchOptions);

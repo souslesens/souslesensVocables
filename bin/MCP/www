@@ -18,7 +18,7 @@ import util from "../util.js";
 import { mcpConfig } from "./config.js";
 import { buildCatalog } from "./catalog.js";
 import { buildMcpServer } from "./mcpServer.js";
-import { callerContext } from "./slsClient.js";
+import { callerContext, requestPressure } from "./slsClient.js";
 
 const startedAt = Date.now();
 
@@ -81,6 +81,7 @@ app.get("/healthz", function (_request, response) {
         status: "ok",
         toolCount: catalog.tools.size,
         slsApiUrl: mcpConfig.slsApiUrl,
+        slsRequests: requestPressure(),
         uptimeSeconds: Math.round((Date.now() - startedAt) / 1000),
     });
 });

@@ -6,7 +6,10 @@
  * of the `anyOf` unions for no benefit.
  */
 
+import fs from "node:fs";
+import path from "node:path";
 import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 
@@ -15,6 +18,14 @@ import { executeTool } from "./execute.js";
 
 const requireJson = createRequire(import.meta.url);
 const packageJson = requireJson("../../package.json");
+
+// Returned with the initialize result, so every client hands it to the model at connection time,
+// without the user having to ask for anything. That is what separates it from an MCP prompt, which
+// is user-invoked and therefore cannot carry a rule the agent must never break.
+//
+// Strictly cross-cutting: what is true of one tool belongs to that tool's own description, which
+// comes from the SousLeSens code and is sent with tools/list anyway.
+const serverInstructions = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), "instructions.md"), "utf8");
 
 /**
  * Locate the paginable array inside an SLS answer, whatever its envelope.
@@ -112,7 +123,7 @@ function toCallToolResult(descriptor, result) {
  */
 export function buildMcpServer(catalog) {
     const catalogTools = catalog.tools;
-    const server = new Server({ name: "souslesens-vocables", version: packageJson.version }, { capabilities: { tools: { listChanged: false } } });
+    const server = new Server({ name: "souslesens-vocables", version: packageJson.version }, { capabilities: { tools: { listChanged: false } }, instructions: serverInstructions });
 
     server.setRequestHandler(ListToolsRequestSchema, async function () {
         const tools = [];

@@ -388,7 +388,7 @@
                     <td>global</td>
                     <td>nombre</td>
                     <td>Requêtes SPARQL en vol autorisées simultanément, les suivantes attendent en file</td>
-                    <td>Sémaphore sur <code>sparqlProxy</code>. Se règle sur <code>ServerThreads</code> et <code>MaxClientConnections</code> de <code>virtuoso.ini</code>. Remplace l'idée d'un plafond d'utilisateurs connectés, qui ne mesure pas la charge</td>
+                    <td>Sémaphore sur <code>sparqlProxy</code>. Se règle sur <code>ServerThreads</code> et <code>MaxClientConnections</code> de <code>virtuoso.ini</code>. Remplace l'idée d'un plafond d'utilisateurs connectés, qui ne mesure pas la charge. <b>Doit couvrir tous les clients</b>, y compris le serveur MCP et les agents qui l'utilisent, dont le débit d'appels dépasse largement celui de l'UI</td>
                 </tr>
             </tbody>
         </table>
@@ -408,6 +408,7 @@
             <li><b>La répartition</b> est assurée par le quota par utilisateur, déjà en place : il est déclaré sur le profil mais le bucket est keyé par <code>user.id</code> (<code>model/quota.js:201</code>), donc un script en boucle ne pénalise que son auteur. Sous réserve de corriger les défauts listés ci-dessous.</li>
         </ul>
         <p>Une seule chose manque côté application : <b>un timeout HTTP sur le proxy</b>. <code>bin/httpProxy.js</code> n'en pose aucun, donc une connexion Virtuoso pendante garderait un slot de sémaphore indéfiniment. C'est un timeout socket, distinct du timeout de requête SPARQL.</p>
+        <p><b>Un sémaphore côté client ne compte pas.</b> Un plafond posé dans un client, par exemple dans le serveur MCP, ne borne que ce process : trois instances MCP, plus le navigateur, plus Yasgui, additionnent leurs plafonds respectifs et Virtuoso n'est pas plus protégé. Pire, il donne l'illusion que le sujet est traité. La règle est la même que pour les droits : la limite se pose au point de passage unique, jamais chez l'appelant.</p>
 
         <h2>Défauts du quota actuel à corriger</h2>
         <ul>

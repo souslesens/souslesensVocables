@@ -172,12 +172,13 @@ legitimately runs writes for other clients. The guard declares that `name` and `
 catalog entry, so this server can refuse anything that is not `@expose read` in an allowed module
 before forwarding. Removing it hands agents every write in the registry.
 
-**The concurrency cap is deliberately low.** Four SLS requests in flight, 32 queued, past which a
-tool call comes back as a readable refusal rather than growing the queue. An agent iterating over a
-taxonomy fires calls far faster than the web UI ever did, and `bin/remoteCodeRunner.js` resolves the
-_current_ call's callback from a process-wide `unhandledRejection` handler, so concurrent SPARQL
-executions can cross there. Raising `MCP_MAX_CONCURRENT_SLS_REQUESTS` before that is fixed in the
-backend trades correctness for speed. `GET /healthz` reports the live pressure.
+**There is no client-side concurrency cap, on purpose.** An agent walking a taxonomy does fire calls
+faster than the web UI ever did, but several MCP processes, the browser and Yasgui all reach the
+same triple store: a per-process ceiling bounds only itself, while giving the impression the server
+is protected. Bounding SPARQL pressure belongs to the single point every client goes through, in the
+SLS backend — `maxConcurrentSparqlQueries` on `sparqlProxy`, in the offer-limits work. A ceiling here
+would put a second place in charge of a decision that has exactly one right home, which is the
+mistake this whole directory exists to avoid.
 
 **`query` templates are never agent-controlled.** `GET /data/file` and `GET /data/files` are generic
 readers over the whole data directory, and `dataController` joins the path without a traversal
@@ -214,15 +215,13 @@ source for a language through the function's own options instead.
 
 ## Environment variables
 
-| Variable                          | Default                        |
-| --------------------------------- | ------------------------------ |
-| `MCP_LISTEN_PORT`                 | `3011`                         |
-| `MCP_SLS_API_URL`                 | `http://localhost:3010/api/v1` |
-| `MCP_REQUEST_TIMEOUT_MS`          | `60000`                        |
-| `MCP_MAX_RESPONSE_BYTES`          | `100000`                       |
-| `MCP_DEFAULT_SPARQL_LIMIT`        | `200`                          |
-| `MCP_MAX_CONCURRENT_SLS_REQUESTS` | `4`                            |
-| `MCP_MAX_QUEUED_SLS_REQUESTS`     | `32`                           |
+| Variable                   | Default                        |
+| -------------------------- | ------------------------------ |
+| `MCP_LISTEN_PORT`          | `3011`                         |
+| `MCP_SLS_API_URL`          | `http://localhost:3010/api/v1` |
+| `MCP_REQUEST_TIMEOUT_MS`   | `60000`                        |
+| `MCP_MAX_RESPONSE_BYTES`   | `100000`                       |
+| `MCP_DEFAULT_SPARQL_LIMIT` | `200`                          |
 
 ## Tests
 
@@ -230,5 +229,5 @@ source for a language through the function's own options instead.
 SLS_MCP_URL=http://localhost:3011/mcp SLS_MCP_TEST_TOKEN=sls-… npm run test:mcp
 ```
 
-Needs a running SLS backend and a running MCP server. 19 checks, including the one that matters
+Needs a running SLS backend and a running MCP server. 18 checks, including the one that matters
 here: every advertised tool traces back to a code declaration.

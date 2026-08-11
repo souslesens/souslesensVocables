@@ -31,10 +31,4 @@ export const mcpConfig = {
     requestTimeoutMs: readPositiveNumber("MCP_REQUEST_TIMEOUT_MS", 60000),
     maxResponseBytes: readPositiveNumber("MCP_MAX_RESPONSE_BYTES", 100000),
     defaultSparqlLimit: readPositiveNumber("MCP_DEFAULT_SPARQL_LIMIT", 200),
-    // An agent iterating over a taxonomy fires calls far faster than the web UI ever did, and
-    // bin/remoteCodeRunner.js resolves the *current* call's callback from a process-wide
-    // unhandledRejection handler: concurrent SPARQL executions can cross there. Until that is fixed
-    // in the backend, this server keeps its own pressure on the API low and bounded.
-    maxConcurrentSlsRequests: readPositiveNumber("MCP_MAX_CONCURRENT_SLS_REQUESTS", 4),
-    maxQueuedSlsRequests: readPositiveNumber("MCP_MAX_QUEUED_SLS_REQUESTS", 32),
 };

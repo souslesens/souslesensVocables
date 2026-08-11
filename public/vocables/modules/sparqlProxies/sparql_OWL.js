@@ -1091,7 +1091,12 @@ var Sparql_OWL = (function () {
 
     /**
      * Returns object (or datatype) properties with their domains, ranges, sub-properties and
-     * inverse properties (plus all labels). The id filter can target the domain, range, prop or
+     * inverse properties: what links what to what in a source, which is how you answer "can these
+     * two classes be related, and through which property". Omit `domainIds` for the whole source's
+     * property schema. Annotation properties and plain RDF/OWL vocabulary legitimately have no
+     * declared domain or range, so an empty answer for one of those is not a defect.
+     *
+     * The id filter can target the domain, range, prop or
      * subProp depending on options, and a `searchType` mode searches by words on prop/domain/range.
      * With `addInverseRestrictions`, recursively merges the inverse-direction results.
      * @function
@@ -1114,6 +1119,7 @@ var Sparql_OWL = (function () {
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?domain`/`?prop`/`?range`/`?subProp`/`?inverseProp` (+labels)
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `domain` (optional), `domainLabel` (optional), `prop`, `propLabel` (optional), `range` (optional), `rangeLabel` (optional), `subProp` (optional), `subPropLabel` (optional), `inverseProp` (optional), `inversePropLabel` (optional).
      * @expose read
+     * @mcpTool sls_property_schema
      */
     self.getObjectPropertiesDomainAndRange = function (sourceLabel, domainIds, options, callback) {
         if (!options) {
@@ -1579,8 +1585,13 @@ var Sparql_OWL = (function () {
     };
 
     /**
-     * Returns, for given properties, the restrictions that use them and the source/target
-     * classes involved: `?restriction owl:onProperty ?prop`, `?sourceClass <taxonomyPredicate>
+     * Returns which classes actually use the given properties, and against which target classes:
+     * the reverse of asking a class what it declares. Takes **property** URIs, so a class URI
+     * simply returns nothing; get property URIs from
+     * {@link module:Sparql_generic.getDistinctPredicates} or
+     * {@link module:Sparql_OWL.getObjectPropertiesDomainAndRange}.
+     *
+     * Matches `?restriction owl:onProperty ?prop`, `?sourceClass <taxonomyPredicate>
      * ?restriction`, plus the constraint value (`owl:someValuesFrom`/`allValuesFrom`/`hasValue`/
      * cardinality) as `?targetClass`. Missing labels are filled afterwards.
      * @function
@@ -1596,6 +1607,7 @@ var Sparql_OWL = (function () {
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?prop`/`?restriction`/`?sourceClass`/`?targetClass` (+labels)
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `restriction`, `prop`, `sourceClass`, `constraintType` (optional), `targetClass` (optional).
      * @expose read
+     * @mcpTool sls_property_usage
      */
     self.getPropertiesRestrictionsDescription = function (sourceLabel, propIds, options, callback) {
         if (!options) {

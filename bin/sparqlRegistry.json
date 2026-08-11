@@ -572,7 +572,7 @@
     {
         "name": "getObjectPropertiesDomainAndRange",
         "module": "Sparql_OWL",
-        "description": "Returns object (or datatype) properties with their domains, ranges, sub-properties and inverse properties (plus all labels). The id filter can target the domain, range, prop or subProp depending on options, and a `searchType` mode searches by words on prop/domain/range. With `addInverseRestrictions`, recursively merges the inverse-direction results.",
+        "description": "Returns object (or datatype) properties with their domains, ranges, sub-properties and inverse properties: what links what to what in a source, which is how you answer \"can these two classes be related, and through which property\". Omit `domainIds` for the whole source's property schema. Annotation properties and plain RDF/OWL vocabulary legitimately have no declared domain or range, so an empty answer for one of those is not a defect. The id filter can target the domain, range, prop or subProp depending on options, and a `searchType` mode searches by words on prop/domain/range. With `addInverseRestrictions`, recursively merges the inverse-direction results.",
         "params": [
             {
                 "name": "sourceLabel",
@@ -668,7 +668,9 @@
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
         "example": null,
-        "access": "read"
+        "summary": "Returns object (or datatype) properties with their domains, ranges, sub-properties and inverse properties: what links what to what in a source, which is how you answer \"can these two classes be related, and through which property\". Omit `domainIds` for the whole source's property schema. Annotation properties and plain RDF/OWL vocabulary legitimately have no declared domain or range, so an empty answer for one of those is not a defect.",
+        "access": "read",
+        "mcpTool": "sls_property_schema"
     },
     {
         "name": "getObjectRestrictions",
@@ -884,7 +886,7 @@
     {
         "name": "getPropertiesRestrictionsDescription",
         "module": "Sparql_OWL",
-        "description": "Returns, for given properties, the restrictions that use them and the source/target classes involved: `?restriction owl:onProperty ?prop`, `?sourceClass <taxonomyPredicate> ?restriction`, plus the constraint value (`owl:someValuesFrom`/`allValuesFrom`/`hasValue`/ cardinality) as `?targetClass`. Missing labels are filled afterwards.",
+        "description": "Returns which classes actually use the given properties, and against which target classes: the reverse of asking a class what it declares. Takes **property** URIs, so a class URI simply returns nothing; get property URIs from {@link module:Sparql_generic.getDistinctPredicates} or {@link module:Sparql_OWL.getObjectPropertiesDomainAndRange}. Matches `?restriction owl:onProperty ?prop`, `?sourceClass <taxonomyPredicate> ?restriction`, plus the constraint value (`owl:someValuesFrom`/`allValuesFrom`/`hasValue`/ cardinality) as `?targetClass`. Missing labels are filled afterwards.",
         "params": [
             {
                 "name": "sourceLabel",
@@ -938,7 +940,9 @@
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
         "example": null,
-        "access": "read"
+        "summary": "Returns which classes actually use the given properties, and against which target classes: the reverse of asking a class what it declares. Takes **property** URIs, so a class URI simply returns nothing; get property URIs from {@link module:Sparql_generic.getDistinctPredicates} or {@link module:Sparql_OWL.getObjectPropertiesDomainAndRange}.",
+        "access": "read",
+        "mcpTool": "sls_property_usage"
     },
     {
         "name": "getUrisLabelsMap",
@@ -2555,7 +2559,7 @@
     {
         "name": "getNodeChildren",
         "module": "Sparql_generic",
-        "description": "Returns the children of node(s) down to a given depth, delegating to the source controller. The `ids` or `words` filter is split into slices of `self.slicesSize` and queried sequentially with `async.eachSeries`, concatenating the per-slice results. Example controller query (SKOS, with collection filtering): ```sparql select distinct ?child1 ?child1Label ?subjectLabel ?collLabel FROM <http://souslesens/thesaurus/TEST/> WHERE { ?child1 skos:broader ?subject. ?subject skos:prefLabel ?subjectLabel. OPTIONAL { ?child1 skos:prefLabel ?child1Label. } filter(?subject = <...>) } ORDER BY ?child1Label limit 1000 ```",
+        "description": "Returns the direct children of node(s) down to a given depth, delegating to the source controller, so it works on an OWL and on a SKOS source alike. The cheap way to walk a hierarchy one level at a time, where a full descendant closure would be wasteful. Like the ancestor call, `ids` and `words` are mutually exclusive. The filter is split into slices of `self.slicesSize` and queried sequentially with `async.eachSeries`, concatenating the per-slice results. Example controller query (SKOS, with collection filtering): ```sparql select distinct ?child1 ?child1Label ?subjectLabel ?collLabel FROM <http://souslesens/thesaurus/TEST/> WHERE { ?child1 skos:broader ?subject. ?subject skos:prefLabel ?subjectLabel. OPTIONAL { ?child1 skos:prefLabel ?child1Label. } filter(?subject = <...>) } ORDER BY ?child1Label limit 1000 ```",
         "params": [
             {
                 "name": "sourceLabel",
@@ -2595,8 +2599,9 @@
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
         "example": null,
-        "summary": "Returns the children of node(s) down to a given depth, delegating to the source controller. The `ids` or `words` filter is split into slices of `self.slicesSize` and queried sequentially with `async.eachSeries`, concatenating the per-slice results.",
-        "access": "read"
+        "summary": "Returns the direct children of node(s) down to a given depth, delegating to the source controller, so it works on an OWL and on a SKOS source alike. The cheap way to walk a hierarchy one level at a time, where a full descendant closure would be wasteful. Like the ancestor call, `ids` and `words` are mutually exclusive.",
+        "access": "read",
+        "mcpTool": "sls_node_children"
     },
     {
         "name": "getNodeParents",
@@ -2956,7 +2961,7 @@
     {
         "name": "getDistinctPredicates",
         "module": "Sparql_generic",
-        "description": "Lists the distinct predicates used in a source, with their optional labels. Runs `select distinct ?p ?pLabel WHERE { ?s ?p ?o. optional { ?p ?x ?pLabel. filter(?x in (skos:prefLabel, rdfs:label)) } }` then fills missing labels via {@link module:Sparql_generic.setBindingsOptionalProperties}.",
+        "description": "Lists the distinct predicates actually used in a source, with their labels: the answer to \"what can I even ask about this source\". The natural precursor to a triple query, since it gives the property URIs to filter on rather than guessing them. Runs `select distinct ?p ?pLabel WHERE { ?s ?p ?o. optional { ?p ?x ?pLabel. filter(?x in (skos:prefLabel, rdfs:label)) } }` then fills missing labels via {@link module:Sparql_generic.setBindingsOptionalProperties}.",
         "params": [
             {
                 "name": "sourceLabel",
@@ -2978,7 +2983,9 @@
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
         "example": null,
-        "access": "read"
+        "summary": "Lists the distinct predicates actually used in a source, with their labels: the answer to \"what can I even ask about this source\". The natural precursor to a triple query, since it gives the property URIs to filter on rather than guessing them.",
+        "access": "read",
+        "mcpTool": "sls_distinct_predicates"
     },
     {
         "name": "copyNodes",

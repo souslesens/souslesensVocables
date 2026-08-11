@@ -37,6 +37,18 @@ export default function () {
             '(`{ id: "0", login: "admin", groups: ["admin"], allowSourceCreation: true, maxNumberCreatedSource: 1000 }`).',
         security: [{ restrictLoggedUser: [] }],
         operationId: "getMe",
+        // `GET /auth/whoami` looks like the natural identity route but carries no security block and
+        // never reads the Authorization header, so a bearer-token client always gets logged:false.
+        "x-mcp": {
+            tools: [
+                {
+                    name: "sls_whoami",
+                    access: "read",
+                    description: "Identity and groups of the SLS account behind the bearer token of this session. Use it to explain to the user which rights are in play.",
+                    params: {},
+                },
+            ],
+        },
         parameters: [],
         responses: {
             200: {

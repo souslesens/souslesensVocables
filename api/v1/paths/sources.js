@@ -38,6 +38,18 @@ export default function () {
             "see the `Source` definition.",
         security: [{ restrictLoggedUser: [] }],
         operationId: "getUserSources",
+        "x-mcp": {
+            tools: [
+                {
+                    name: "sls_list_sources",
+                    access: "read",
+                    description:
+                        "Lists the SLS sources the caller may read, with their graphUri, schemaType, controller and imports. " +
+                        "Start here whenever a source name is unknown: every other tool takes one and rejects a name that does not exist.",
+                    params: {},
+                },
+            ],
+        },
         responses: {
             200: {
                 description: "Accessible sources, indexed by source name.",

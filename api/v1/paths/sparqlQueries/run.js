@@ -61,6 +61,34 @@ export default function () {
             "Access control is applied with the caller's user and source context before the SPARQL request is sent. " +
             "Use `GET /api/v1/sparqlQueries/catalog` to discover available functions and parameter schemas.",
         operationId: "runSparqlQuery",
+        // This route legitimately runs write functions for other clients. `registryFunctionGuard`
+        // tells the MCP server that `name` and `module` designate a catalog entry, so it can refuse
+        // anything that is not `@expose read` before forwarding — the read-only rule is the MCP's,
+        // not this route's.
+        "x-mcp": {
+            tools: [
+                {
+                    name: "sls_run_query_function",
+                    access: "read",
+                    description:
+                        "Runs any read function of the SPARQL catalog by name and module, with a params object keyed by parameter name. " +
+                        "Discover names and parameter contracts with sls_list_query_functions. " +
+                        "This is how you reach the rest of the ontology API: property domains and ranges, inferred constraints, individuals, dictionaries, distinct predicates.",
+                    params: {
+                        name: { type: "string", required: true, description: "Function name, for instance getDictionary." },
+                        module: {
+                            type: "string",
+                            required: true,
+                            enum: ["Sparql_generic", "Sparql_OWL"],
+                            description: "Owning module. Sparql_generic dispatches to the source controller and works on OWL and SKOS alike.",
+                        },
+                        params: { type: "Object", required: true, description: "Parameters keyed by name, including an `options` object when the function accepts one." },
+                    },
+                    body: { name: "{name}", module: "{module}", params: "{params}" },
+                    registryFunctionGuard: { nameParam: "name", moduleParam: "module", requireAccess: "read", allowedModules: ["Sparql_generic", "Sparql_OWL"] },
+                },
+            ],
+        },
         parameters: [
             {
                 in: "body",

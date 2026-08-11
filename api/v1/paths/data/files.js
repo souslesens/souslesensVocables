@@ -21,6 +21,21 @@ export default function () {
         summary: "List files inside a sub-directory of the data folder",
         description: "Returns the file names found under `dataDir/<dir>` via `dataController.getFilesList`. " + "Used by MappingModeler and the CSV picker to populate file-selection dialogs.",
         operationId: "dataListFiles",
+        // Same rule as `GET /data/file`: `dir` is derived from the agent's `source`, never supplied.
+        "x-mcp": {
+            tools: [
+                {
+                    name: "sls_mappings_list",
+                    access: "read",
+                    description: "Names of the mapping documents saved for a source, one per data source. Feed a name to sls_mapping_get without its .json extension.",
+                    params: { source: { type: "string", required: true, description: "SLS source name the mappings target." } },
+                    query: { dir: "mappings/{source}" },
+                    // getFilesList answers null when the directory does not exist, which simply
+                    // means the source has no mapping yet.
+                    emptyListWhenNull: true,
+                },
+            ],
+        },
         parameters: [{ name: "dir", in: "query", type: "string", required: true, description: "Sub-directory under the configured `dataDir`. Example: `CSV/maintenance`." }],
         responses: {
             200: {

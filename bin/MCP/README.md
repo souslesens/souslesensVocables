@@ -121,14 +121,14 @@ its author asked for. Instead the MCP server refuses to start and says where:
 [mcp] the x-mcp declaration of GET /data/files is unusable — tools.0: Unrecognized key(s) in object: 'statusHint'
 ```
 
-## The 18 tools
+## The 22 tools
 
 Every one of them traces back to a declaration in product code, and `GET /catalog` says which.
 
 | Declared in                      | Tools                                                                                                                                                                                                              |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `sparql_generic.js` (`@mcpTool`) | `sls_top_concepts`, `sls_node_infos`, `sls_node_parents`, `sls_source_taxonomy`                                                                                                                                    |
-| `sparql_OWL.js` (`@mcpTool`)     | `sls_node_definition`, `sls_node_descendants`, `sls_node_properties`, `sls_filtered_triples`                                                                                                                       |
+| `sparql_generic.js` (`@mcpTool`) | `sls_top_concepts`, `sls_node_infos`, `sls_node_parents`, `sls_node_children`, `sls_source_taxonomy`, `sls_distinct_predicates`                                                                                    |
+| `sparql_OWL.js` (`@mcpTool`)     | `sls_node_definition`, `sls_node_descendants`, `sls_node_properties`, `sls_filtered_triples`, `sls_property_schema`, `sls_property_usage`                                                                          |
 | `api/v1/paths/**` (`x-mcp`)      | `sls_list_sources`, `sls_whoami`, `sls_ontology_model`, `sls_kgquery_model`, `sls_mappings_list`, `sls_mapping_get`, `sls_search_labels`, `sls_list_indexes`, `sls_list_query_functions`, `sls_run_query_function` |
 
 `sls_search_labels` is the natural-language entry point: the node tools all need a URI, and
@@ -217,7 +217,7 @@ queried by URI, it is reached by looking for triples that point at it — and it
 
 - Config comes from environment variables, not `config/mainConfig.json` (whose zod schema is
   `.strict()`: an unknown key makes the main server exit at boot).
-- `tools/list` costs ~3 800 tokens for 18 tools (measured, 14 157 characters). The remaining lever
+- `tools/list` costs ~5 000 tokens for 22 tools (measured, 18 540 characters). The remaining lever
   is the JSDoc: a shorter summary paragraph, or `@mcpFixed` on options an agent should not choose.
 - Stateless transport: one server and one transport per request, no session map, no server-to-client
   notifications.

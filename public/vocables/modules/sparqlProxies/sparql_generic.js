@@ -178,8 +178,12 @@ var Sparql_generic = (function () {
     };
 
     /**
-     * Returns the children of node(s) down to a given depth, delegating to the source controller.
-     * The `ids` or `words` filter is split into slices of `self.slicesSize` and queried
+     * Returns the direct children of node(s) down to a given depth, delegating to the source
+     * controller, so it works on an OWL and on a SKOS source alike. The cheap way to walk a
+     * hierarchy one level at a time, where a full descendant closure would be wasteful. Like the
+     * ancestor call, `ids` and `words` are mutually exclusive.
+     *
+     * The filter is split into slices of `self.slicesSize` and queried
      * sequentially with `async.eachSeries`, concatenating the per-slice results.
      *
      * Example controller query (SKOS, with collection filtering):
@@ -201,6 +205,7 @@ var Sparql_generic = (function () {
      * @param {Function} callback - Error-first callback `(err, bulkResult)` with the concatenated children
      * @returns {err|Array} Throws an error or returns the concatenated children bindings from each slice.
      * @expose read
+     * @mcpTool sls_node_children
      */
     self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
         $("#waitImg").css("display", "block");
@@ -843,8 +848,11 @@ var Sparql_generic = (function () {
         );
     };
     /**
-     * Lists the distinct predicates used in a source, with their optional labels. Runs
-     * `select distinct ?p ?pLabel WHERE { ?s ?p ?o. optional { ?p ?x ?pLabel. filter(?x in
+     * Lists the distinct predicates actually used in a source, with their labels: the answer to
+     * "what can I even ask about this source". The natural precursor to a triple query, since it
+     * gives the property URIs to filter on rather than guessing them.
+     *
+     * Runs `select distinct ?p ?pLabel WHERE { ?s ?p ?o. optional { ?p ?x ?pLabel. filter(?x in
      * (skos:prefLabel, rdfs:label)) } }` then fills missing labels via
      * {@link module:Sparql_generic.setBindingsOptionalProperties}.
      * @function
@@ -855,6 +863,7 @@ var Sparql_generic = (function () {
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?p`/`?pLabel` bindings
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `p`, `pLabel` (optional).
      * @expose read
+     * @mcpTool sls_distinct_predicates
      */
     self.getDistinctPredicates = function (sourceLabel, options, callback) {
         $("#waitImg").css("display", "block");

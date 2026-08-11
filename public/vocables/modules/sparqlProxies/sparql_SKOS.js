@@ -41,7 +41,6 @@ var Sparql_SKOS = (function () {
      * @param {(string|string[])} [options.filterCollections] - Collection URI(s) the top concepts must belong to
      * @param {Function} callback - Error-first callback `(err, bindings)` with the top-concept bindings
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `topConcept`, `topConceptLabel`.
-     * @expose
      */
     self.getTopConcepts = function (sourceLabel, options, callback) {
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
@@ -98,7 +97,6 @@ var Sparql_SKOS = (function () {
      * @param {boolean} [options.noLang] - Skip the language filter on labels
      * @param {Function} callback - Error-first callback `(err, bindings)` with the children, label-enriched and sorted by `child1Label`
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `subjectLabel` (optional), `child1`, `child1Label` (optional), `child1Type` (optional), depth-indexed `childN` (optional), `childNLabel` (optional), `childNType` (optional); with `options.filterCollections`: `collection`, `acollection`, `collectionLabel`, `acollectionLabel`.
-     * @expose
      */
     self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
         $("#waitImg").css("display", "block");
@@ -180,7 +178,6 @@ var Sparql_SKOS = (function () {
      * @param {Object} [options.filter] - `{predicates}` to restrict the predicates returned
      * @param {Function} callback - Error-first callback `(err, bindings)` with the collection's concept bindings
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `predicate`, `object`, `type`; with a collection: `collection`, `acollection`, `collectionLabel`, `acollectionLabel`, `subjectLabel`.
-     * @expose
      */
     self.getCollectionNodes = function (sourceLabel, collection, options, callback) {
         $("#waitImg").css("display", "block");
@@ -271,7 +268,6 @@ var Sparql_SKOS = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with the ancestor bindings
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `subjectLabel` (optional), `type` (optional), `broader1` (optional), `broader1Label` (optional), `broader1Type` (optional), depth-indexed `broaderN` (optional), `broaderNLabel` (optional), `broaderNType` (optional).
-     * @expose
      */
     self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
         $("#waitImg").css("display", "block");
@@ -356,7 +352,6 @@ var Sparql_SKOS = (function () {
      * @param {boolean} [options.getValuesLabels] - Also fetch `skos:prefLabel` of values and properties
      * @param {Function} callback - Error-first callback `(err, bindings)` with the concept's triples
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `id`, `prop`, `value`, `valueLabel` (optional), `propLabel` (optional).
-     * @expose
      */
     self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
         $("#waitImg").css("display", "block");
@@ -401,7 +396,6 @@ var Sparql_SKOS = (function () {
      * @param {(string|string[])} [options.filterCollections] - Collection URI(s) the items must belong to
      * @param {Function} callback - Error-first callback `(err, bindings)` with the item bindings
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `x`, `y`, `subjectLabel` (optional).
-     * @expose
      */
     self.getItems = function (sourceLabel, options, callback) {
         $("#waitImg").css("display", "block");
@@ -460,7 +454,6 @@ var Sparql_SKOS = (function () {
      * @param {string} id - Concept URI whose ancestors are fetched
      * @param {Function} callback - Error-first callback `(err, bindings)` with the ancestor bindings
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `broader`, `broaderLabel`, `type`.
-     * @expose
      */
     self.getSingleNodeAllGenealogy = function (sourceLabel, id, callback) {
         if (Config.sources[sourceLabel].controllerName != "Sparql_SKOS") {
@@ -507,7 +500,6 @@ var Sparql_SKOS = (function () {
      * @param {string} id - Concept URI whose descendants are fetched
      * @param {Function} callback - Error-first callback `(err, bindings)` with the descendant bindings
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `narrower`, `narrowerLabel`, `type`.
-     * @expose
      */
     self.getSingleNodeAllDescendants = function (sourceLabel, id, callback) {
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
@@ -548,7 +540,6 @@ var Sparql_SKOS = (function () {
      * @param {string} id - Concept URI whose label is fetched
      * @param {Function} callback - Error-first callback `(err, bindings)` with the label/type bindings
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `type`, `subjectLabel`.
-     * @expose
      */
     self.getNodeLabel = function (sourceLabel, id, callback) {
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
@@ -587,7 +578,6 @@ var Sparql_SKOS = (function () {
      * @param {string[]} subjectIds - Subject URIs whose triples are fetched
      * @param {Function} callback - Error-first callback `(err, triples)` with the concatenated triple bindings
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `prop`, `value`.
-     * @expose
      */
     self.getNodesAllTriples = function (sourceLabel, subjectIds, callback) {
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
@@ -632,7 +622,6 @@ var Sparql_SKOS = (function () {
      * @param {string} objectUri - Object URI to match (optional)
      * @param {Function} callback - Error-first callback `(err, bindings)`
      * @returns {err|*} Throws an error or returns the callback result.
-     * @expose
      */
     self.deleteTriples = function (sourceLabel, subjectUri, predicateUri, objectUri, callback) {
         if (!subjectUri && !subjectUri && !subjectUri) return call("no subject predicate and object filter : cannot delete");
@@ -690,7 +679,6 @@ var Sparql_SKOS = (function () {
      * @param {Object[]} triples - Triple descriptor objects to insert
      * @param {Function} callback - Error-first callback `(err)`
      * @returns {err|*} Throws an error or returns the callback result.
-     * @expose
      */
     self.insertTriples = function (sourceLabel, triples, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;
@@ -719,7 +707,6 @@ var Sparql_SKOS = (function () {
      * @param {Object[]} triples - Replacement triple descriptors (all sharing the same subject)
      * @param {Function} callback - Error-first callback `(err)`
      * @returns {err|*} Throws an error or returns the callback result.
-     * @expose
      */
     self.update = function (sourceLabel, triples, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;
@@ -766,7 +753,6 @@ var Sparql_SKOS = (function () {
      * @param {string} sourceLabel - Source name whose graph is emptied
      * @param {Function} callback - Error-first callback `(err)`
      * @returns {err|*} Throws an error or returns the callback result.
-     * @expose
      */
     self.deleteGraph = function (sourceLabel, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;
@@ -788,7 +774,6 @@ var Sparql_SKOS = (function () {
      * @param {string} toGraphUri - Destination graph URI
      * @param {Function} callback - Error-first callback `(err)`
      * @returns {err|*} Throws an error or returns the callback result.
-     * @expose
      */
     self.copyGraph = function (fromSourceLabel, toGraphUri, callback) {
         var fromGraphUri = Config.sources[fromSourceLabel].graphUri;
@@ -851,7 +836,6 @@ var Sparql_SKOS = (function () {
      * @param {string} sourceLabel - Source name to query
      * @param {Function} callback - Error-first callback `(err, langs)` with the array of language codes
      * @returns {err|Array} Throws an error or returns an array of language codes.
-     * @expose
      */
     self.getSourceLangsList = function (sourceLabel, callback) {
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);

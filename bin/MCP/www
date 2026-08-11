@@ -1,0 +1,157 @@
+#!/usr/bin/env node
+/**
+ * Entry point of the SousLeSens MCP server.
+ *
+ * Independent Express process, own port, same source tree as the SLS backend. It never touches the
+ * users table nor the triple store: every tool call is forwarded to /api/v1 with the caller's own
+ * bearer token, so SLS stays the single authority on rights and quotas.
+ *
+ * Run: node bin/MCP/www   (or npm run start:mcp)
+ */
+
+import express from "express";
+import http from "node:http";
+import { randomUUID } from "node:crypto";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+
+import util from "../util.js";
+import { mcpConfig } from "./config.js";
+import { buildCatalog } from "./catalog.js";
+import { buildMcpServer } from "./mcpServer.js";
+import { callerContext } from "./slsClient.js";
+
+const startedAt = Date.now();
+
+// ---------------------------------------------------------------------------
+// Catalog, built once at startup
+// ---------------------------------------------------------------------------
+
+let catalog;
+try {
+    catalog = await buildCatalog();
+} catch (catalogError) {
+    console.error(catalogError.message);
+    process.exit(1);
+}
+
+console.log(
+    `[mcp] catalog: ${catalog.tools.size} tools — ${catalog.summary.promotedTools} promoted from @mcpTool, ${catalog.summary.restTools} from x-mcp route declarations. ` +
+        `${catalog.summary.reachableFunctions} read functions callable, out of ${catalog.summary.registryEntries} registry entries.`,
+);
+
+// ---------------------------------------------------------------------------
+// HTTP layer
+// ---------------------------------------------------------------------------
+
+const app = express();
+app.use(express.json({ limit: "2mb" }));
+
+// An MCP client that fails to authenticate reports a bare "HTTP 401", so the three ways of getting
+// it wrong must be told apart here or they are indistinguishable from the client side.
+const unsubstitutedPlaceholderRegex = /\$\{[^}]*\}|\$[A-Z_][A-Z0-9_]*/;
+
+/**
+ * Explain why an Authorization header cannot be used, or return null when it is usable.
+ * @param {string|undefined} rawHeader
+ * @returns {string|null}
+ */
+function describeAuthorizationProblem(rawHeader) {
+    if (!rawHeader || rawHeader.trim() === "") {
+        return "No Authorization header. Configure your MCP client with: Authorization: Bearer <SLS token>.";
+    }
+    if (unsubstitutedPlaceholderRegex.test(rawHeader)) {
+        return "The Authorization header still contains an unsubstituted variable placeholder: the environment variable referenced by your MCP client configuration is not set in the environment that launched the client. Put the token literally, or export the variable before starting the client.";
+    }
+
+    const parsedAuthorization = util.parseAuthorizationFromHeader(rawHeader);
+    if (!parsedAuthorization) {
+        return 'Malformed Authorization header. Expected two parts: "Bearer <SLS token>".';
+    }
+    if (parsedAuthorization[0] !== "Bearer") {
+        return `Unsupported authorization scheme "${parsedAuthorization[0]}". This server only accepts Bearer.`;
+    }
+    if (parsedAuthorization[1].trim() === "") {
+        return "The Authorization header carries an empty token. Generate one with POST /api/v1/users/token.";
+    }
+    return null;
+}
+
+app.get("/healthz", function (_request, response) {
+    response.status(200).json({
+        status: "ok",
+        toolCount: catalog.tools.size,
+        slsApiUrl: mcpConfig.slsApiUrl,
+        uptimeSeconds: Math.round((Date.now() - startedAt) / 1000),
+    });
+});
+
+app.get("/catalog", function (_request, response) {
+    const tools = [];
+    for (const descriptor of catalog.tools.values()) {
+        tools.push({
+            name: descriptor.name,
+            family: descriptor.family,
+            source: descriptor.family === "sparql" ? `${descriptor.module}.${descriptor.functionName}` : `${descriptor.httpMethod} ${descriptor.route}`,
+        });
+    }
+    response.status(200).json(tools);
+});
+
+app.post("/mcp", async function (request, response) {
+    const authorizationProblem = describeAuthorizationProblem(request.headers.authorization);
+    if (authorizationProblem) {
+        console.warn(`[mcp] 401: ${authorizationProblem}`);
+        response.setHeader("WWW-Authenticate", "Bearer");
+        return response.status(401).json({ error: authorizationProblem });
+    }
+
+    const parsedAuthorization = util.parseAuthorizationFromHeader(request.headers.authorization);
+
+    // Stateless: one server and one transport per request, so there is no session map to age out
+    // and no place where a token could be cached beyond the request.
+    const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
+    const server = buildMcpServer(catalog);
+    response.on("close", function () {
+        transport.close();
+        server.close();
+    });
+
+    const requestContext = { token: parsedAuthorization[1], requestId: randomUUID() };
+    try {
+        await server.connect(transport);
+        await callerContext.run(requestContext, function () {
+            return transport.handleRequest(request, response, request.body);
+        });
+    } catch (transportError) {
+        console.error("[mcp] request failed:", transportError.message);
+        if (!response.headersSent) {
+            response.status(500).json({ error: "MCP request failed", detail: transportError.message });
+        }
+    }
+});
+
+function rejectSessionRoute(_request, response) {
+    response.status(405).json({ error: "This MCP server is stateless: only POST /mcp is supported." });
+}
+app.get("/mcp", rejectSessionRoute);
+app.delete("/mcp", rejectSessionRoute);
+
+// ---------------------------------------------------------------------------
+// Listen
+// ---------------------------------------------------------------------------
+
+const httpServer = http.createServer(app);
+httpServer.on("error", function (error) {
+    if (error.code === "EADDRINUSE") {
+        console.error(`[mcp] port ${mcpConfig.listenPort} is already in use`);
+        process.exit(1);
+    }
+    if (error.code === "EACCES") {
+        console.error(`[mcp] port ${mcpConfig.listenPort} requires elevated privileges`);
+        process.exit(1);
+    }
+    throw error;
+});
+httpServer.listen(mcpConfig.listenPort, function () {
+    console.log(`[mcp] listening on http://localhost:${mcpConfig.listenPort}/mcp — SLS API: ${mcpConfig.slsApiUrl}`);
+});

@@ -24,6 +24,16 @@ export default function () {
             "The search UI uses this list to detect which sources have a full-text index available and to populate " +
             "the multi-source search picker.",
         operationId: "getElasticsearchIndices",
+        "x-mcp": {
+            tools: [
+                {
+                    name: "sls_list_indexes",
+                    access: "read",
+                    description: "Index names accepted by sls_search_labels. They are lowercase and do not always match the SLS source name, so read this list rather than guessing.",
+                    params: {},
+                },
+            ],
+        },
 
         responses: {
             200: {

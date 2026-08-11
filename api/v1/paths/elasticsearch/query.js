@@ -49,6 +49,34 @@ export default function () {
             "indices outside that scope are rejected. Used by the search UI (`_search`) and by the source-cleanup " +
             "flow (`_delete_by_query`).",
         operationId: "elasticsearchQuery",
+        // The agent never composes Elasticsearch DSL: the tool below freezes the whole query shape
+        // and only interpolates its declared parameters, so `_delete_by_query` and any other
+        // operation of this route stay out of reach.
+        "x-mcp": {
+            tools: [
+                {
+                    name: "sls_search_labels",
+                    access: "read",
+                    description:
+                        "Turns a natural-language phrase into concrete ontology node URIs, scored and typo-tolerant, across one or more Elasticsearch indices. " +
+                        "Recommended FIRST call for any domain term: every node tool needs a URI, and this is what produces one from a user's words. " +
+                        "Returns ranked hits with score, index, id, label, type and parents.",
+                    params: {
+                        text: { type: "string", required: true, description: "Phrase to search for." },
+                        indexes: {
+                            type: "string[]",
+                            required: true,
+                            description: "Index names to search. Get them from sls_list_indexes: they are lowercase and do not always match the SLS source name.",
+                        },
+                        size: { type: "number", description: "Maximum number of hits.", default: 10 },
+                        fuzziness: { type: "string", description: 'Edit distance tolerated: "AUTO", "0" for exact matching, "1" or "2".', default: "AUTO" },
+                    },
+                    body: { url: "_search", indexes: "{indexes}", query: { size: "{size}", query: { match: { label: { query: "{text}", fuzziness: "{fuzziness}" } } } } },
+                    resultShape: "elasticHits",
+                    statusHints: { 500: "Elasticsearch is unreachable or the index does not exist. Check the index name with sls_list_indexes." },
+                },
+            ],
+        },
         parameters: [
             {
                 name: "body",

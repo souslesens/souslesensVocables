@@ -99,15 +99,40 @@ function isBindingCell(candidate) {
     return otherKeys.every((key) => bindingCellMetadataKeys.includes(key));
 }
 
+// Virtuoso does not answer `type: "bnode"` reliably and hands blank nodes back as `nodeID://…`
+// IRIs, so the value has to be tested too. `_:` covers the stores that do it the standard way.
+const blankNodeValueRegex = /^(nodeID:\/\/|_:)/;
+
+/**
+ * Flatten one row of bindings, keeping the metadata that would otherwise be lost as sibling keys.
+ *
+ * A cell's value is all an agent normally needs, but three things it carries do change an answer:
+ * the language of a label, the datatype of a literal, and whether an identifier is a blank node,
+ * which decides whether the agent can query it directly or must reach it through an inverse
+ * lookup. Each is emitted only when present, so the common cell still costs one key.
+ * @param {object} row
+ * @returns {object|null} Null when the row held no binding cell at all
+ */
 function flattenBindingRow(row) {
     const flatRow = {};
     let sawCell = false;
     for (const [variableName, cell] of Object.entries(row)) {
-        if (isBindingCell(cell)) {
-            flatRow[variableName] = cell.value;
-            sawCell = true;
-        } else {
+        if (!isBindingCell(cell)) {
             flatRow[variableName] = cell;
+            continue;
+        }
+        sawCell = true;
+        flatRow[variableName] = cell.value;
+
+        const languageTag = cell["xml:lang"] || cell.lang;
+        if (languageTag) {
+            flatRow[`${variableName}Lang`] = languageTag;
+        }
+        if (cell.datatype) {
+            flatRow[`${variableName}Datatype`] = cell.datatype;
+        }
+        if (cell.type === "bnode" || (typeof cell.value === "string" && blankNodeValueRegex.test(cell.value))) {
+            flatRow[`${variableName}IsBlankNode`] = true;
         }
     }
     return sawCell ? flatRow : null;
@@ -173,7 +198,42 @@ function shapeElasticHits(elasticResponse) {
     return { totalMatches: totalMatches, hits: flatHits };
 }
 
-const resultShapers = { elasticHits: shapeElasticHits };
+/**
+ * Reduce the source registry to what an agent needs to pick a source and query it correctly.
+ *
+ * Declared by a route through `x-mcp.resultShape: "sourceCards"`. Drops the operational fields
+ * (`color`, `owner`, `published`, `prefix`, `sparql_server`) that carry nothing for an agent and,
+ * across the whole accessible list, cost more than everything else combined.
+ * @param {*} sourcesResponse - `{resources: {name: sourceEntry}}`
+ * @returns {object[]}
+ */
+function shapeSourceCards(sourcesResponse) {
+    const sourceEntries = sourcesResponse && sourcesResponse.resources ? sourcesResponse.resources : {};
+
+    const cards = [];
+    for (const [sourceName, sourceEntry] of Object.entries(sourceEntries)) {
+        const card = { name: sourceName, schemaType: sourceEntry.schemaType, controller: sourceEntry.controller, graphUri: sourceEntry.graphUri };
+        if (sourceEntry.imports && sourceEntry.imports.length > 0) {
+            card.imports = sourceEntry.imports;
+        }
+        // The language a source labels its concepts in, and the predicate it uses for the
+        // hierarchy: the two things that change how an answer about it must be read. Both are
+        // routinely left empty in sources.json, and an empty string tells an agent nothing.
+        if (sourceEntry.predicates) {
+            if (sourceEntry.predicates.lang) {
+                card.lang = sourceEntry.predicates.lang;
+            }
+            if (sourceEntry.predicates.broaderPredicate) {
+                card.broaderPredicate = sourceEntry.predicates.broaderPredicate;
+            }
+        }
+        cards.push(card);
+    }
+    cards.sort((firstCard, secondCard) => firstCard.name.localeCompare(secondCard.name));
+    return cards;
+}
+
+const resultShapers = { elasticHits: shapeElasticHits, sourceCards: shapeSourceCards };
 
 // Exported so catalog.js can reject an `x-mcp` asking for a shape nobody implements, at boot rather
 // than on the first call.

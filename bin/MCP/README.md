@@ -140,18 +140,32 @@ that no `@mcpTool` promotes. They are not MCP machinery — they are `GET /sparq
 
 ## Files
 
-| File           | Role                                                                                |
-| -------------- | ----------------------------------------------------------------------------------- |
-| `www`          | entry point: Express app, `POST /mcp`, `GET /healthz`, `GET /catalog`               |
-| `mcpServer.js` | MCP protocol handlers (`tools/list`, `tools/call`) and the response size guard      |
-| `catalog.js`   | registry + `x-mcp` → MCP descriptors. SLS types → JSON Schema. No domain knowledge. |
-| `execute.js`   | one tool call → one SLS API request; template filling, flattening, read-only guard  |
-| `slsClient.js` | fetch wrapper, caller context, HTTP status → actionable message                     |
-| `config.js`    | environment configuration                                                           |
+| File              | Role                                                                                |
+| ----------------- | ----------------------------------------------------------------------------------- |
+| `www`             | entry point: Express app, `POST /mcp`, `GET /healthz`, `GET /catalog`               |
+| `mcpServer.js`    | MCP protocol handlers (`tools/list`, `tools/call`) and the response size guard      |
+| `catalog.js`      | registry + `x-mcp` → MCP descriptors. SLS types → JSON Schema. No domain knowledge. |
+| `execute.js`      | one tool call → one SLS API request; template filling, flattening, read-only guard  |
+| `slsClient.js`    | fetch wrapper, caller context, HTTP status → actionable message                     |
+| `config.js`       | environment configuration                                                           |
+| `instructions.md` | cross-cutting rules, returned with `initialize` (see below)                         |
 
 The single behaviour this server owns is its own policy: **V1 is read-only**, so anything not
 declared `read` is refused. That is a property of this server, not of SousLeSens, which is exactly
 why it lives here and not in a tag.
+
+### Instructions, not a prompt
+
+`instructions.md` is returned with the `initialize` result, so every client hands it to the model at
+connection time without the user asking for anything. An MCP _prompt_ is user-invoked, like a slash
+command: a rule the agent must never break cannot live there, because nothing guarantees it is ever
+read.
+
+It is therefore strictly cross-cutting — ground every claim, an empty result is not an absence,
+truncation means narrow rather than retry bigger, what the sibling keys mean. Anything true of one
+tool belongs to that tool's description, which comes from the SousLeSens code and is sent with
+`tools/list` anyway. Repeating it here would recreate the second source of truth this design exists
+to prevent, and would cost tokens twice.
 
 ## Things a reviewer will want to "fix" — don't
 
@@ -192,9 +206,12 @@ so `sls_top_concepts` works on an OWL and on a SKOS source alike. Exposing both 
 give a caller a chance to pick the wrong one.
 
 **SPARQL bindings are flattened, deliberately.** A binding cell is `{value, type?, "xml:lang"?}` and
-only the value carries meaning for an agent. Flattening cuts a real payload roughly in half
-(measured: 37 900 → 22 625 characters on a 226-row dictionary). The `xml:lang` tag is lost; ask the
-source for a language through the function's own options instead.
+the value is normally all an agent needs. Flattening cuts a real payload roughly in half (measured:
+37 900 → 22 625 characters on a 226-row dictionary). What would otherwise be lost comes back as
+sibling keys, emitted only when present so the common cell still costs one key: `<column>Lang`,
+`<column>Datatype`, and `<column>IsBlankNode`. That last one matters — a blank node cannot be
+queried by URI, it is reached by looking for triples that point at it — and it is not derived from
+`type` alone, because Virtuoso hands blank nodes back as `nodeID://…` IRIs.
 
 ## Known gaps of this V1
 
@@ -209,8 +226,9 @@ source for a language through the function's own options instead.
 - `POST /sparqlProxy` (dynamic SPARQL) carries no `x-mcp`: it needs three guards first — MCP-side
   URL resolution against SSRF, refusal of UPDATE forms, and refusal of sources that are not on the
   default endpoint.
-- No prompt files yet. They are the third input of the design: cross-tool, business-level guidance
-  that belongs to no single function or route.
+- No MCP prompts yet. `instructions.md` covers the rules an agent must never break, because it is
+  delivered automatically; prompts are user-invoked and suit task templates, which is a separate
+  piece of work.
 - No resources, no OAuth.
 
 ## Environment variables
@@ -229,5 +247,5 @@ source for a language through the function's own options instead.
 SLS_MCP_URL=http://localhost:3011/mcp SLS_MCP_TEST_TOKEN=sls-… npm run test:mcp
 ```
 
-Needs a running SLS backend and a running MCP server. 18 checks, including the one that matters
+Needs a running SLS backend and a running MCP server. 21 checks, including the one that matters
 here: every advertised tool traces back to a code declaration.

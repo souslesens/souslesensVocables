@@ -63,10 +63,20 @@ async function main() {
     }
     record("tools/list", listed.tools.length > 0, `${listed.tools.length} tools`);
 
+    // Delivered with the initialize result, so the model gets it without the user asking.
+    const instructions = client.getInstructions();
+    record("server instructions are delivered at initialize", Boolean(instructions) && instructions.length > 200, instructions ? `${instructions.length} chars` : "absent");
+
     const sourcesResult = await client.callTool({ name: "sls_list_sources", arguments: {} });
     const sourcesEnvelope = readEnvelope(sourcesResult);
-    const accessibleSources = sourcesEnvelope && sourcesEnvelope.data && sourcesEnvelope.data.resources ? Object.keys(sourcesEnvelope.data.resources) : [];
+    const sourceCards = sourcesEnvelope && Array.isArray(sourcesEnvelope.data) ? sourcesEnvelope.data : [];
+    const accessibleSources = sourceCards.map((sourceCard) => sourceCard.name);
     record("sls_list_sources", !sourcesResult.isError && accessibleSources.length > 0, `${accessibleSources.length} sources`);
+
+    // The card keeps what an agent picks a source on, and drops the operational fields.
+    const firstCard = sourceCards[0] || {};
+    const cardIsShaped = Boolean(firstCard.name && firstCard.schemaType) && !("color" in firstCard) && !("sparql_server" in firstCard) && !("owner" in firstCard);
+    record("sls_list_sources returns shaped cards", cardIsShaped, JSON.stringify(firstCard).slice(0, 100));
 
     const sourceForQueries = accessibleSources.includes(testSource) ? testSource : accessibleSources[0];
     if (!sourceForQueries) {
@@ -85,6 +95,24 @@ async function main() {
     const firstRow = topConceptRows[0] || {};
     const firstValue = Object.values(firstRow)[0];
     record("SPARQL bindings are flattened", topConceptRows.length === 0 || typeof firstValue === "string", topConceptRows.length === 0 ? "no row to check" : JSON.stringify(firstRow).slice(0, 90));
+
+    // Language tags, datatypes and blank-node markers survive flattening as sibling keys. A node's
+    // own triples are where a language-tagged label reliably shows up.
+    const firstConcept = topConceptRows[0] ? topConceptRows[0].topConcept : null;
+    if (firstConcept) {
+        const nodeInfosResult = await client.callTool({ name: "sls_node_infos", arguments: { sourceLabel: sourceForQueries, conceptId: firstConcept, options: { getValuesLabels: true } } });
+        const nodeInfosEnvelope = readEnvelope(nodeInfosResult);
+        const nodeInfoRows = nodeInfosEnvelope && Array.isArray(nodeInfosEnvelope.data) ? nodeInfosEnvelope.data : [];
+        const siblingKeys = new Set();
+        for (const nodeInfoRow of nodeInfoRows) {
+            for (const columnName of Object.keys(nodeInfoRow)) {
+                if (columnName.endsWith("Lang") || columnName.endsWith("Datatype") || columnName.endsWith("IsBlankNode")) {
+                    siblingKeys.add(columnName);
+                }
+            }
+        }
+        record("flattening keeps language, datatype and blank-node markers", siblingKeys.size > 0, [...siblingKeys].join(", ") || "none produced by this source");
+    }
 
     const listFunctionsResult = await client.callTool({ name: "sls_list_query_functions", arguments: {} });
     const listFunctionsEnvelope = readEnvelope(listFunctionsResult);

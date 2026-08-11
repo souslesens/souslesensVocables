@@ -154,6 +154,20 @@ async function main() {
     const descendantsOptions = descendantsTool && descendantsTool.inputSchema.properties.options.properties;
     record("@mcpFixed keys are absent from the input schema", Boolean(descendantsOptions) && !("descendants" in descendantsOptions) && !("excludeItself" in descendantsOptions), "");
 
+    // More parallel calls than the concurrency cap allows: the excess must queue and still answer,
+    // not be dropped. A refusal only appears past the queue bound, which is far above this.
+    const parallelCalls = [];
+    for (let callIndex = 0; callIndex < 10; callIndex += 1) {
+        parallelCalls.push(client.callTool({ name: "sls_list_sources", arguments: {} }));
+    }
+    const parallelResults = await Promise.all(parallelCalls);
+    const failedParallelCalls = parallelResults.filter((parallelResult) => parallelResult.isError);
+    record("calls beyond the concurrency cap queue instead of failing", failedParallelCalls.length === 0, `${parallelResults.length} parallel calls, ${failedParallelCalls.length} failed`);
+
+    const healthResponse = await fetch(mcpUrl.replace(/\/mcp$/, "/healthz"));
+    const health = await healthResponse.json();
+    record("healthz reports request pressure", Boolean(health.slsRequests) && health.slsRequests.maxConcurrent > 0, JSON.stringify(health.slsRequests));
+
     const kgModelResult = await client.callTool({ name: "sls_kgquery_model", arguments: { source: sourceForQueries } });
     const kgModelEnvelope = readEnvelope(kgModelResult);
     const kgModelIsParsed = Boolean(kgModelEnvelope && kgModelEnvelope.data && typeof kgModelEnvelope.data === "object");

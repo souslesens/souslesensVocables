@@ -113,6 +113,14 @@ dropped. Parameter types use the same vocabulary as the JSDoc (`string`, `number
 Optional keys: `parseJsonPayload`, `emptyListWhenNull`, `resultShape`, `statusHints`,
 `registryFunctionGuard`.
 
+The whole block is validated by a strict zod schema at startup. Swagger treats every `x-` key as
+opaque, so a typo would otherwise pass the SLS boot and simply produce a tool missing the feature
+its author asked for. Instead the MCP server refuses to start and says where:
+
+```text
+[mcp] the x-mcp declaration of GET /data/files is unusable — tools.0: Unrecognized key(s) in object: 'statusHint'
+```
+
 ## The 18 tools
 
 Every one of them traces back to a declaration in product code, and `GET /catalog` says which.
@@ -164,6 +172,13 @@ legitimately runs writes for other clients. The guard declares that `name` and `
 catalog entry, so this server can refuse anything that is not `@expose read` in an allowed module
 before forwarding. Removing it hands agents every write in the registry.
 
+**The concurrency cap is deliberately low.** Four SLS requests in flight, 32 queued, past which a
+tool call comes back as a readable refusal rather than growing the queue. An agent iterating over a
+taxonomy fires calls far faster than the web UI ever did, and `bin/remoteCodeRunner.js` resolves the
+_current_ call's callback from a process-wide `unhandledRejection` handler, so concurrent SPARQL
+executions can cross there. Raising `MCP_MAX_CONCURRENT_SLS_REQUESTS` before that is fixed in the
+backend trades correctness for speed. `GET /healthz` reports the live pressure.
+
 **`query` templates are never agent-controlled.** `GET /data/file` and `GET /data/files` are generic
 readers over the whole data directory, and `dataController` joins the path without a traversal
 guard. Only the frozen `graphs/` and `mappings/<source>` prefixes are reachable. Declaring a tool
@@ -199,13 +214,15 @@ source for a language through the function's own options instead.
 
 ## Environment variables
 
-| Variable                   | Default                        |
-| -------------------------- | ------------------------------ |
-| `MCP_LISTEN_PORT`          | `3011`                         |
-| `MCP_SLS_API_URL`          | `http://localhost:3010/api/v1` |
-| `MCP_REQUEST_TIMEOUT_MS`   | `60000`                        |
-| `MCP_MAX_RESPONSE_BYTES`   | `100000`                       |
-| `MCP_DEFAULT_SPARQL_LIMIT` | `200`                          |
+| Variable                          | Default                        |
+| --------------------------------- | ------------------------------ |
+| `MCP_LISTEN_PORT`                 | `3011`                         |
+| `MCP_SLS_API_URL`                 | `http://localhost:3010/api/v1` |
+| `MCP_REQUEST_TIMEOUT_MS`          | `60000`                        |
+| `MCP_MAX_RESPONSE_BYTES`          | `100000`                       |
+| `MCP_DEFAULT_SPARQL_LIMIT`        | `200`                          |
+| `MCP_MAX_CONCURRENT_SLS_REQUESTS` | `4`                            |
+| `MCP_MAX_QUEUED_SLS_REQUESTS`     | `32`                           |
 
 ## Tests
 
@@ -213,5 +230,5 @@ source for a language through the function's own options instead.
 SLS_MCP_URL=http://localhost:3011/mcp SLS_MCP_TEST_TOKEN=sls-… npm run test:mcp
 ```
 
-Needs a running SLS backend and a running MCP server. 17 checks, including the one that matters
+Needs a running SLS backend and a running MCP server. 19 checks, including the one that matters
 here: every advertised tool traces back to a code declaration.

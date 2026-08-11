@@ -175,6 +175,10 @@ function shapeElasticHits(elasticResponse) {
 
 const resultShapers = { elasticHits: shapeElasticHits };
 
+// Exported so catalog.js can reject an `x-mcp` asking for a shape nobody implements, at boot rather
+// than on the first call.
+export const resultShapeNames = Object.keys(resultShapers);
+
 // ---------------------------------------------------------------------------
 // SPARQL family
 // ---------------------------------------------------------------------------

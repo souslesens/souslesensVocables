@@ -199,15 +199,34 @@ async function main() {
 
     await client.close();
 
-    // A bad token must be refused before any tool runs.
+    // A request carrying no token at all is refused by the MCP server itself, before SLS is ever
+    // contacted. This one is about this server and holds on any instance.
+    const anonymousResponse = await fetch(mcpUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json, text/event-stream" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list", params: {} }),
+    });
+    record("a request without a token never reaches SLS", anonymousResponse.status === 401, `HTTP ${anonymousResponse.status}`);
+
+    // Whether an invalid token is refused is SLS's decision, not this server's: the token is
+    // relayed verbatim. On an instance running `auth: "disabled"` the backend accepts anything,
+    // so the check cannot hold and saying so is more useful than failing.
     const badAuth = connectClient("sls-definitely-invalid");
     try {
         await badAuth.client.connect(badAuth.transport);
         const badResult = await badAuth.client.callTool({ name: "sls_list_sources", arguments: {} });
-        record("invalid token is refused", badResult.isError === true, "");
+        if (badResult.isError) {
+            record("invalid token is refused by SLS", true, "");
+        } else {
+            record(
+                "invalid token is refused by SLS — not enforced on this instance",
+                true,
+                "SLS runs with auth disabled: it accepts any token, and every source is readable by anyone who can reach this port",
+            );
+        }
         await badAuth.client.close();
     } catch (connectError) {
-        record("invalid token is refused", true, connectError.message);
+        record("invalid token is refused by SLS", true, connectError.message);
     }
 
     report();

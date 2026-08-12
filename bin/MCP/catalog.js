@@ -383,6 +383,17 @@ async function fetchRestToolDescriptors() {
             }
         }
     }
+
+    // Zero declarations is not an empty catalog, it is the wrong backend. The usual cause is an SLS
+    // process started before the x-mcp keys were added to its routes: it answers /api-docs happily,
+    // the MCP builds only the SPARQL family, and the missing half is invisible to everyone. Since
+    // the catalog is built once at startup and clients cache tools/list, a degraded catalog is worse
+    // than refusing to start.
+    if (descriptors.length === 0) {
+        throw new Error(
+            `[mcp] ${apiDocsUrl} declares no x-mcp tool at all. Either the SousLeSens backend is older than the x-mcp declarations in api/v1/paths — restart it — or MCP_SLS_API_URL points at the wrong instance.`,
+        );
+    }
     return descriptors;
 }
 

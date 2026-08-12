@@ -247,5 +247,5 @@ queried by URI, it is reached by looking for triples that point at it — and it
 SLS_MCP_URL=http://localhost:3011/mcp SLS_MCP_TEST_TOKEN=sls-… npm run test:mcp
 ```
 
-Needs a running SLS backend and a running MCP server. 21 checks, including the one that matters
+Needs a running SLS backend and a running MCP server. 22 checks, including the one that matters
 here: every advertised tool traces back to a code declaration.

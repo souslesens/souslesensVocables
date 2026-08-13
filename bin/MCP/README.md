@@ -141,11 +141,22 @@ Every one of them traces back to a declaration in product code, and `GET /catalo
 | `api/v1/paths/**` (`x-mcp`)      | `sls_list_sources`, `sls_whoami`, `sls_ontology_model`, `sls_kgquery_model`, `sls_mappings_list`, `sls_mapping_get`, `sls_search_labels`, `sls_list_indexes`, `sls_list_query_functions`, `sls_run_query_function` |
 
 `sls_search_labels` is the natural-language entry point: the node tools all need a URI, and
-full-text label search is what produces one from a user's phrase.
+full-text label search is what produces one from a user's phrase. It takes any number of indices in
+one call — 474 indices answered in the same 380 ms as 10 — so searching the whole platform is how an
+agent finds which source holds a term, not a fallback after guessing wrong. `sls_list_indexes` feeds
+it that list, and freezes `accessibleOnly=true` because one index the caller has no source for makes
+`validateElasticSearchIndices` reject the _entire_ search, not just that index. On the reference
+instance the filter takes the list from 474 names to 146.
 
 `sls_list_query_functions` and `sls_run_query_function` reach the 34 read functions of the registry
 that no `@mcpTool` promotes. They are not MCP machinery — they are `GET /sparqlQueries/catalog` and
 `POST /sparqlQueries/run`, declared like any other route.
+
+The listing is deliberately not promoted to 34 tools. `tools/list` is resent on every turn, whereas
+a `sls_list_query_functions` result is paid once and stays in the transcript: promoting the whole
+registry would cost about 10 000 tokens per turn against 2 189 tokens once. Its compact mode sends
+the first _sentence_ of each function, not the first paragraph — enough to choose, and `name=<fn>`
+still returns the full documentation and parameter contract before the call.
 
 ## Files
 

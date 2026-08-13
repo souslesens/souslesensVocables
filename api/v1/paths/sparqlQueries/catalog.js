@@ -12,6 +12,11 @@ function loadRegistry() {
 
 const moduleListSeparatorRegex = /\s*,\s*/;
 
+// Splits on a period followed by whitespace or end of text. `?` and `!` are deliberately not
+// sentence terminators here: the descriptions are full of SPARQL variables (`?prop ?value`), and
+// treating `?` as an end of sentence cuts them mid-pattern.
+const firstSentenceRegex = /^.*?\.(?=\s|$)/s;
+
 export default function () {
     async function GET(req, res, _next) {
         try {
@@ -45,12 +50,18 @@ export default function () {
                 return res.status(200).json(selectedEntries);
             }
 
-            const compactEntries = selectedEntries.map((entry) => ({
-                name: entry.name,
-                module: entry.module,
-                access: entry.access,
-                description: entry.summary || entry.description,
-            }));
+            // One sentence is what it takes to *choose* a function; the rest of the paragraph
+            // describes how it queries, which only matters once the caller asks for the full entry.
+            const compactEntries = selectedEntries.map((entry) => {
+                const fullDescription = entry.summary || entry.description;
+                const sentenceMatch = fullDescription.match(firstSentenceRegex);
+                return {
+                    name: entry.name,
+                    module: entry.module,
+                    access: entry.access,
+                    description: sentenceMatch ? sentenceMatch[0] : fullDescription,
+                };
+            });
             res.status(200).json(compactEntries);
         } catch (error) {
             console.error(error);
@@ -64,7 +75,7 @@ export default function () {
             "Lists the SPARQL query functions shared from SousLeSens for reuse by external clients. " +
             "Only functions explicitly marked with `@expose` are returned. " +
             "Each catalog entry gives the function name, owning module, parameter contract, response schema, and example needed before calling `run` or `codeRequest`. " +
-            "The query parameters narrow that list; `compact` trades the parameter contract for a one-paragraph summary, which is what a client needs to *choose* a function before asking for its full entry.",
+            "The query parameters narrow that list; `compact` trades the parameter contract for a one-sentence summary, which is what a client needs to *choose* a function before asking for its full entry.",
         operationId: "catalogSparqlQueries",
         // The MCP server derives its discovery tool from here. `access=read` is frozen so a write
         // operation can never be listed to an agent. Nothing else is filtered: which functions
@@ -75,8 +86,8 @@ export default function () {
                     name: "sls_list_query_functions",
                     access: "read",
                     description:
-                        "Lists the SPARQL functions callable through sls_run_query_function, with their module and a one-paragraph summary. " +
-                        "Pass name to get one function's full parameter contract before calling it. " +
+                        "Lists the SPARQL functions callable through sls_run_query_function, with their module and a one-sentence summary. " +
+                        "Pass name to get that function's full documentation and parameter contract, which you need before calling it. " +
                         "Use it whenever the dedicated tools do not cover what you need: it reaches far more of the ontology API than they do.",
                     params: {
                         name: { type: "string", description: "Exact function name: returns its full documentation and parameter contract instead of the summary." },
@@ -97,7 +108,7 @@ export default function () {
                 type: "string",
                 required: false,
                 enum: ["true"],
-                description: "Return `{name, module, access, description}` only, the description being the first paragraph of the function's documentation. Ignored when `name` is given.",
+                description: "Return `{name, module, access, description}` only, the description being the first sentence of the function's documentation. Ignored when `name` is given.",
             },
         ],
         responses: {

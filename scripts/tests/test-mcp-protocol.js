@@ -163,6 +163,24 @@ async function main() {
         record("sls_search_labels skipped", true, `no index named "${sourceForQueries.toLowerCase()}"`);
     }
 
+    // sls_list_indexes exists to be poured straight into sls_search_labels. One index the caller
+    // has no source for makes validateElasticSearchIndices reject the whole multi-index search, so
+    // "the list is searchable as a whole" is the only assertion that proves the filtering works.
+    if (availableIndexes.length > 0) {
+        const wideSearchResult = await client.callTool({ name: "sls_search_labels", arguments: { text: "pump", indexes: availableIndexes, size: 5 } });
+        const wideSearchEnvelope = readEnvelope(wideSearchResult);
+        const wideSearchHits = wideSearchEnvelope && wideSearchEnvelope.data && Array.isArray(wideSearchEnvelope.data.hits) ? wideSearchEnvelope.data.hits : [];
+        const searchedIndexes = new Set();
+        for (const hit of wideSearchHits) {
+            searchedIndexes.add(hit.index);
+        }
+        record(
+            "every index listed can be searched in one call",
+            !wideSearchResult.isError,
+            wideSearchResult.isError ? readEnvelope(wideSearchResult) : `${availableIndexes.length} indices at once, hits from ${searchedIndexes.size} of them`,
+        );
+    }
+
     const forbiddenSourceResult = await client.callTool({ name: "sls_top_concepts", arguments: { sourceLabel: "__no_such_source__" } });
     record("unknown source is refused by SLS", forbiddenSourceResult.isError === true, "");
 

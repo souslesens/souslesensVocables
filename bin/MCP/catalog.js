@@ -254,6 +254,7 @@ const restToolDeclarationSchema = z
         emptyListWhenNull: z.boolean().optional(),
         resultShape: z.enum(resultShapeNames).optional(),
         maxResponseBytes: z.number().positive().optional(),
+        navigableDocument: z.boolean().optional(),
         registryFunctionGuard: z
             .object({
                 nameParam: z.string().min(1),
@@ -300,6 +301,21 @@ function restParamSchema(paramDeclaration) {
     return paramSchema;
 }
 
+// Added to a tool whose route declares `navigableDocument`. A whole-document answer has no narrower
+// tool to fall back on — there is no "part of a mapping file" endpoint — so the way not to read all
+// of it is to reach inside it, the way an agent greps a source file instead of opening it. The
+// underscore says plainly that these two are the MCP server's own, not the route's parameters.
+const documentNavigationProperties = {
+    _select: {
+        type: "string",
+        description: "Return only this part of the document: a top-level key, or a dotted path such as `nodes.0`. The keys are what an oversized answer lists back to you.",
+    },
+    _grep: {
+        type: "string",
+        description: "Return only the entries whose key or content contains this text, case-insensitive. Applied after _select. Plain text, not a regular expression.",
+    },
+};
+
 /**
  * Convert one entry of a route's `x-mcp.tools` into an MCP tool descriptor.
  * @param {object} toolDeclaration
@@ -326,6 +342,9 @@ function restToolDescriptor(toolDeclaration, routePath, httpMethod) {
             paramDefaults[paramName] = paramDeclaration.default;
         }
     }
+    if (toolDeclaration.navigableDocument) {
+        Object.assign(properties, documentNavigationProperties);
+    }
 
     return {
         name: toolDeclaration.name,
@@ -342,6 +361,7 @@ function restToolDescriptor(toolDeclaration, routePath, httpMethod) {
         emptyListWhenNull: Boolean(toolDeclaration.emptyListWhenNull),
         resultShape: toolDeclaration.resultShape || null,
         maxResponseBytes: toolDeclaration.maxResponseBytes || null,
+        navigableDocument: Boolean(toolDeclaration.navigableDocument),
         registryFunctionGuard: toolDeclaration.registryFunctionGuard || null,
         statusHints: toolDeclaration.statusHints || {},
     };

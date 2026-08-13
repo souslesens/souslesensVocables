@@ -197,6 +197,33 @@ async function main() {
     const kgModelIsParsed = Boolean(kgModelEnvelope && kgModelEnvelope.data && typeof kgModelEnvelope.data === "object");
     record("sls_kgquery_model", !kgModelResult.isError && kgModelIsParsed, kgModelResult.isError ? "no KGquery model saved for this source" : "parsed as an object");
 
+    // A whole-document tool has no narrower tool to fall back on, so it is read from the inside.
+    const navigableTools = listed.tools.filter((tool) => tool.inputSchema.properties._select);
+    record("only document tools carry _select and _grep", navigableTools.length > 0 && navigableTools.length < listed.tools.length, navigableTools.map((tool) => tool.name).join(", "));
+
+    if (kgModelIsParsed) {
+        const documentKeys = Object.keys(kgModelEnvelope.data);
+        const selectedResult = await client.callTool({ name: "sls_kgquery_model", arguments: { source: sourceForQueries, _select: documentKeys[0] } });
+        const selectedEnvelope = readEnvelope(selectedResult);
+        const wholeSize = JSON.stringify(kgModelEnvelope.data).length;
+        const selectedSize = selectedEnvelope ? JSON.stringify(selectedEnvelope.data).length : wholeSize;
+        record("_select returns one part of the document", !selectedResult.isError && selectedSize < wholeSize, `${documentKeys[0]}: ${selectedSize} of ${wholeSize} chars`);
+
+        const grepResult = await client.callTool({ name: "sls_kgquery_model", arguments: { source: sourceForQueries, _grep: documentKeys[0].toUpperCase() } });
+        const grepEnvelope = readEnvelope(grepResult);
+        const grepMatchedByKey = Boolean(grepEnvelope && grepEnvelope.data && grepEnvelope.data.matchedEntries > 0);
+        record(
+            "_grep matches on the key, case-insensitively",
+            !grepResult.isError && grepMatchedByKey,
+            grepEnvelope && grepEnvelope.data ? `${grepEnvelope.data.matchedEntries} of ${grepEnvelope.data.totalEntries}` : "",
+        );
+
+        const badSelectResult = await client.callTool({ name: "sls_kgquery_model", arguments: { source: sourceForQueries, _select: "__no_such_key__" } });
+        const badSelectEnvelope = readEnvelope(badSelectResult);
+        const namesTheKeys = Boolean(badSelectEnvelope && badSelectEnvelope.error && badSelectEnvelope.error.includes(documentKeys[0]));
+        record("_select on an unknown key lists the real ones", badSelectResult.isError === true && namesTheKeys, "");
+    }
+
     await client.close();
 
     // A request carrying no token at all is refused by the MCP server itself, before SLS is ever

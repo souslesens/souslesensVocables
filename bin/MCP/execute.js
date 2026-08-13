@@ -277,6 +277,90 @@ async function executeSparqlTool(descriptor, toolArguments) {
 }
 
 // ---------------------------------------------------------------------------
+// Document navigation
+//
+// For a whole-document answer there is no narrower tool to fall back on: nothing serves a part of a
+// mapping file. So the way to avoid reading all of it is to reach inside it, which is what `_select`
+// and `_grep` do — the same move an agent makes when it greps a source file instead of opening it.
+// ---------------------------------------------------------------------------
+
+/**
+ * Walk a dotted path into a document.
+ * @param {*} document
+ * @param {string} selectPath
+ * @returns {{value: *, error: string|null}}
+ */
+function selectDocumentPath(document, selectPath) {
+    const pathSegments = selectPath.split(".");
+    let currentValue = document;
+
+    for (const segment of pathSegments) {
+        if (!currentValue || typeof currentValue !== "object") {
+            return { value: null, error: `"${selectPath}" cannot be followed: "${segment}" is not inside an object or an array.` };
+        }
+        if (!(segment in currentValue)) {
+            const availableKeys = Object.keys(currentValue).slice(0, 40);
+            return { value: null, error: `"${selectPath}" has no "${segment}". Available at that level: ${availableKeys.join(", ")}${Object.keys(currentValue).length > 40 ? ", …" : ""}.` };
+        }
+        currentValue = currentValue[segment];
+    }
+    return { value: currentValue, error: null };
+}
+
+/**
+ * Keep the entries of an object or an array whose key or content contains a text.
+ *
+ * Plain substring, case-insensitive, never a regular expression: an agent-supplied pattern is an
+ * agent-supplied way to make the server work hard for nothing.
+ * @param {*} document
+ * @param {string} grepText
+ * @returns {object}
+ */
+function grepDocument(document, grepText) {
+    const needle = grepText.toLowerCase();
+
+    if (Array.isArray(document)) {
+        const matchedItems = document.filter((item) => JSON.stringify(item).toLowerCase().includes(needle));
+        return { grep: grepText, totalEntries: document.length, matchedEntries: matchedItems.length, entries: matchedItems };
+    }
+    if (document && typeof document === "object") {
+        const matchedEntries = {};
+        let matchedCount = 0;
+        for (const [key, value] of Object.entries(document)) {
+            const serializedValue = JSON.stringify(value);
+            if (key.toLowerCase().includes(needle) || (serializedValue && serializedValue.toLowerCase().includes(needle))) {
+                matchedEntries[key] = value;
+                matchedCount += 1;
+            }
+        }
+        return { grep: grepText, totalEntries: Object.keys(document).length, matchedEntries: matchedCount, entries: matchedEntries };
+    }
+    return { grep: grepText, totalEntries: 0, matchedEntries: 0, entries: null };
+}
+
+/**
+ * Apply `_select` then `_grep` to a document answer.
+ * @param {*} document
+ * @param {object} toolArguments
+ * @returns {{value: *, error: string|null}}
+ */
+function navigateDocument(document, toolArguments) {
+    let currentValue = document;
+
+    if (toolArguments._select) {
+        const selection = selectDocumentPath(currentValue, toolArguments._select);
+        if (selection.error) {
+            return { value: null, error: selection.error };
+        }
+        currentValue = selection.value;
+    }
+    if (toolArguments._grep) {
+        currentValue = grepDocument(currentValue, toolArguments._grep);
+    }
+    return { value: currentValue, error: null };
+}
+
+// ---------------------------------------------------------------------------
 // REST family
 // ---------------------------------------------------------------------------
 
@@ -362,23 +446,36 @@ async function executeRestTool(descriptor, registryByKey, toolArguments) {
         const hint = descriptor.statusHints[result.status];
         return hint ? { ...result, errorMessage: hint } : result;
     }
-    if (descriptor.parseJsonPayload && typeof result.data === "string") {
+
+    let shapedData = result.data;
+    if (descriptor.parseJsonPayload && typeof shapedData === "string") {
         // dataController.readFile answers with the raw file text; hand the agent a real object.
         try {
-            return { ...result, data: JSON.parse(result.data) };
+            shapedData = JSON.parse(shapedData);
         } catch (parseError) {
             return { ...result, ok: false, errorMessage: `The file returned by SLS is not valid JSON (${parseError.message}).` };
         }
     }
-    if (descriptor.emptyListWhenNull && result.data === null) {
-        return { ...result, data: [] };
+    if (descriptor.emptyListWhenNull && shapedData === null) {
+        shapedData = [];
     }
     if (descriptor.resultShape) {
         const shaper = resultShapers[descriptor.resultShape];
         if (!shaper) {
             throw new Error(`[mcp] route ${descriptor.route} asks for result shape "${descriptor.resultShape}", which this server does not implement.`);
         }
-        return { ...result, data: shaper(result.data) };
+        shapedData = shaper(shapedData);
+    }
+    // Navigation runs last, on the document the agent would otherwise have received whole.
+    if (descriptor.navigableDocument && (toolArguments._select || toolArguments._grep)) {
+        const navigated = navigateDocument(shapedData, toolArguments);
+        if (navigated.error) {
+            return { ...result, ok: false, data: null, errorMessage: navigated.error };
+        }
+        return { ...result, data: navigated.value };
+    }
+    if (shapedData !== result.data) {
+        return { ...result, data: shapedData };
     }
     return { ...result, data: flattenSparqlResult(result.data) };
 }

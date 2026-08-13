@@ -110,8 +110,17 @@ interpolated; anything else is a frozen literal, and a key whose placeholders ha
 dropped. Parameter types use the same vocabulary as the JSDoc (`string`, `number`, `boolean`,
 `Object`, `any`, `string[]`, …) — the Swagger spelling `"object"` is refused, naming the route.
 
-Optional keys: `parseJsonPayload`, `emptyListWhenNull`, `resultShape`, `statusHints`,
-`registryFunctionGuard`.
+Optional keys: `parseJsonPayload`, `emptyListWhenNull`, `resultShape`, `statusHints`, `maxResponseBytes`,
+`registryFunctionGuard`, `navigableDocument`.
+
+`navigableDocument` adds `_select` and `_grep` to that tool alone, and is for the routes that return
+a whole document — a mapping file, a KGquery model, an ontology model. They are the only tools with
+nowhere narrower to go: nothing serves a part of a mapping file, so the way not to read all of it is
+to read it from the inside, the way an agent greps a source file instead of opening it. `_select`
+takes a top-level key or a dotted path and answers with the keys that exist when the path is wrong;
+`_grep` keeps the entries whose key or content contains a plain, case-insensitive substring — never
+a regular expression, since an agent-supplied pattern is an agent-supplied way to make the server
+work for nothing. The underscore says these two belong to this server, not to the route.
 
 The whole block is validated by a strict zod schema at startup. Swagger treats every `x-` key as
 opaque, so a typo would otherwise pass the SLS boot and simply produce a tool missing the feature
@@ -217,7 +226,7 @@ queried by URI, it is reached by looking for triples that point at it — and it
 
 - Config comes from environment variables, not `config/mainConfig.json` (whose zod schema is
   `.strict()`: an unknown key makes the main server exit at boot).
-- `tools/list` costs ~5 000 tokens for 22 tools (measured, 18 540 characters). The remaining lever
+- `tools/list` costs ~5 300 tokens for 22 tools (measured, 19 677 characters). The remaining lever
   is the JSDoc: a shorter summary paragraph, or `@mcpFixed` on options an agent should not choose.
 - Stateless transport: one server and one transport per request, no session map, no server-to-client
   notifications.
@@ -251,5 +260,5 @@ queried by URI, it is reached by looking for triples that point at it — and it
 SLS_MCP_URL=http://localhost:3011/mcp SLS_MCP_TEST_TOKEN=sls-… npm run test:mcp
 ```
 
-Needs a running SLS backend and a running MCP server. 22 checks, including the one that matters
+Needs a running SLS backend and a running MCP server. 26 checks, including the one that matters
 here: every advertised tool traces back to a code declaration.

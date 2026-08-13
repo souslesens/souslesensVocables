@@ -130,7 +130,7 @@ its author asked for. Instead the MCP server refuses to start and says where:
 [mcp] the x-mcp declaration of GET /data/files is unusable — tools.0: Unrecognized key(s) in object: 'statusHint'
 ```
 
-## The 22 tools
+## The 23 tools
 
 Every one of them traces back to a declaration in product code, and `GET /catalog` says which.
 
@@ -245,7 +245,7 @@ queried by URI, it is reached by looking for triples that point at it — and it
 
 - Config comes from environment variables, not `config/mainConfig.json` (whose zod schema is
   `.strict()`: an unknown key makes the main server exit at boot).
-- `tools/list` costs ~5 300 tokens for 22 tools (measured, 19 677 characters). The remaining lever
+- `tools/list` costs ~5 800 tokens for 23 tools (measured, 21 403 characters). The remaining lever
   is the JSDoc: a shorter summary paragraph, or `@mcpFixed` on options an agent should not choose.
 - Stateless transport: one server and one transport per request, no session map, no server-to-client
   notifications.

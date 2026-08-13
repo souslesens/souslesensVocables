@@ -20,11 +20,11 @@ import { Strategy as KeyCloakStrategy } from "passport-keycloak-oauth2-oidc";
 import ULID from "ulid";
 
 // Get config
-import { readMainConfig } from "../model/config.js";
-
-const config = readMainConfig();
+import { mainConfigModel } from "../model/mainConfig.js";
+const config = await mainConfigModel.getConfig();
 
 const getUserAccount = async (source, username) => {
+    const config = await mainConfigModel.getConfig();
     const userAccount = await userModel.findUserAccount(username);
     let account;
 

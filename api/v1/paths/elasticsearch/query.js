@@ -86,7 +86,9 @@ export default function () {
                     description:
                         "Counts how many labels match a phrase in each index, exhaustively, in one call. " +
                         'This is the tool for "which sources talk about X": it returns every index holding a match with its count, where a ranked search returns only a global top-K ' +
-                        "and silently drops the sources that rank lower. Returns no URI — follow up with sls_search_labels on the indices worth reading.",
+                        "and silently drops the sources that rank lower. Returns no URI — follow up with sls_search_labels on the indices worth reading. " +
+                        'A multi-word phrase counts labels containing every word, not any of them, so "centrifugal pump" is not a synonym of "pump" here — unlike in sls_search_labels, ' +
+                        "which ranks partial matches instead of dropping them.",
                     params: {
                         text: { type: "string", required: true, description: "Phrase to count matches for." },
                         indexes: { type: "string[]", required: true, description: "Index names to cover, from sls_list_indexes. Pass all of them: the cost does not grow with the count." },
@@ -94,10 +96,20 @@ export default function () {
                     },
                     // size 0 asks Elasticsearch for the aggregation without any document, and the
                     // terms size caps the number of indices reported — well above the cluster's count.
+                    //
+                    // operator "and" because Elasticsearch defaults a match query to OR: counting
+                    // "centrifugal pump" would then count every label holding either word, which on
+                    // this instance returned exactly the figures of "pump" alone — 22 sources and
+                    // 5 488 matches in the largest, against 14 and 120 once both words are required.
+                    // A one-word phrase is unaffected.
                     body: {
                         url: "_search",
                         indexes: "{indexes}",
-                        query: { size: 0, query: { match: { label: { query: "{text}", fuzziness: "{fuzziness}" } } }, aggs: { sources: { terms: { field: "_index", size: 1000 } } } },
+                        query: {
+                            size: 0,
+                            query: { match: { label: { query: "{text}", fuzziness: "{fuzziness}", operator: "and" } } },
+                            aggs: { sources: { terms: { field: "_index", size: 1000 } } },
+                        },
                     },
                     resultShape: "elasticIndexCounts",
                     statusHints: { 500: "Elasticsearch is unreachable or one of the indices does not exist. Check the names with sls_list_indexes." },

@@ -66,7 +66,10 @@ export default function () {
                         indexes: {
                             type: "string[]",
                             required: true,
-                            description: "Index names to search. Get them from sls_list_indexes: they are lowercase and do not always match the SLS source name.",
+                            description:
+                                "Index names to search, from sls_list_indexes. Pass as many as the question allows: one call over ten indices costs the same as one call over one, " +
+                                "and the hits come back ranked across all of them with their index named. When you do not already know which source holds the term, pass every index " +
+                                "sls_list_indexes returned rather than trying them one at a time.",
                         },
                         size: { type: "number", description: "Maximum number of hits.", default: 10 },
                         fuzziness: { type: "string", description: 'Edit distance tolerated: "AUTO", "0" for exact matching, "1" or "2".', default: "AUTO" },

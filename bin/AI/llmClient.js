@@ -97,7 +97,7 @@ function createMessage(params, callback) {
     getAdapter()
         .then(({ adapter, rateLimitTPM }) =>
             withRetry(async () => {
-                const inputTokens = await adapter.countTokens({ system: params.system, messages: params.messages });
+                const inputTokens = await adapter.countTokens({ system: params.system, messages: params.messages, tools: params.tools });
                 await waitForBudget(inputTokens, rateLimitTPM);
                 return new Promise((resolve, reject) => {
                     adapter.createMessage(params, (err, result) => {

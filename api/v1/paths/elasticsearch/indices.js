@@ -9,14 +9,11 @@ export default function () {
     async function GET(req, res, _next) {
         try {
             const indices = await indexModel.getIndices();
-            if (req.query.all === "true") {
-                return res.status(200).send(indices);
-            }
 
-            // Filtering is the default because the list exists to be fed back to the search routes,
-            // and an index the caller has no source for is not skipped there: it makes
-            // validateElasticSearchIndices reject the *whole* multi-index query. This is the same
-            // intersection the search UI already does client-side in SearchUtil.initSourcesIndexesList.
+            // The list exists to be fed back to the search routes, and an index the caller has no
+            // source for is not skipped there: it makes validateElasticSearchIndices reject the
+            // *whole* multi-index query. This is the same intersection the search UI already does
+            // client-side in SearchUtil.initSourcesIndexesList.
             ConfigManager.getUserSources(req, res, function (accessError, userSources) {
                 if (accessError) {
                     return;
@@ -40,10 +37,9 @@ export default function () {
         description:
             "Returns the index names reported by `indexModel.getIndices` (lowercase, as Elasticsearch stores them) " +
             "that match a source the caller can read. The search UI uses this list to detect which sources have a " +
-            "full-text index available and to populate the multi-source search picker. " +
-            "Pass `all=true` for the raw cluster listing, which also contains indices no caller can query — orphans " +
-            "of deleted sources, whiteboard indices, sources outside the caller's profile — and is only useful to " +
-            "administer the cluster itself.",
+            "full-text index available and to populate the multi-source search picker. Indices matching no readable " +
+            "source — orphans of deleted sources, whiteboard indices, sources outside the caller's profile — are left " +
+            "out: passing one to the search routes fails the whole query.",
         operationId: "getElasticsearchIndices",
         "x-mcp": {
             tools: [
@@ -58,16 +54,6 @@ export default function () {
                 },
             ],
         },
-        parameters: [
-            {
-                name: "all",
-                in: "query",
-                type: "string",
-                required: false,
-                enum: ["true"],
-                description: "Return every index of the cluster, including those matching no source the caller can read.",
-            },
-        ],
 
         responses: {
             200: {

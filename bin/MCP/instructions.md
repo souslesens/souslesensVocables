@@ -18,10 +18,16 @@ Almost every tool takes a node URI, not a word. `sls_search_labels` turns a phra
 candidates and is the normal first call on any domain term; `sls_list_indexes` gives it the index
 names, which are lowercase and do not always match the source name.
 
-Search across every index at once unless the user named a source. One call over ten indices costs
-what one call over one costs, the hits come back ranked together and each one names its index — so
-searching the whole platform is how you find out which source holds a term, not something to do
-only after guessing wrong.
+Two different questions, two different tools. "Does this exist, and where is the best match" is a
+ranked search: `sls_search_labels` over every index at once, since one call over ten indices costs
+what one call over one costs. "Which sources talk about this" is `sls_count_labels_by_source`, also
+one call over every index.
+
+Never answer the second question with the first. A ranked search returns a single global top-K, so
+one index whose label is exactly the searched word takes every slot and the other sources drop out
+with no trace. A `totalMatches` far above the hits you received means exactly that: you are looking
+at a fraction. Count by source first, then search the indices worth reading, one at a time if their
+hits matter.
 
 Once a node is resolved, reuse the source it came from for every later call about that URI. Asking
 the wrong source is the most common way to get nothing back.

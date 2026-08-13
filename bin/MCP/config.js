@@ -25,9 +25,36 @@ function readPositiveNumber(variableName, fallback) {
     return parsedValue;
 }
 
+const originSeparatorRegex = /\s*,\s*/;
+
+/**
+ * Browser origins allowed to call this server.
+ *
+ * Defaults to the origin serving the SLS API, since the only page that has a legitimate reason to
+ * speak MCP from a browser is the SLS UI itself. `MCP_ALLOWED_ORIGINS` overrides with a
+ * comma-separated list, and the literal value "none" turns cross-origin access off entirely.
+ */
+function readAllowedOrigins(slsApiUrl) {
+    const rawValue = readString("MCP_ALLOWED_ORIGINS", "");
+    if (rawValue === "none") {
+        return [];
+    }
+    if (rawValue !== "") {
+        return rawValue.split(originSeparatorRegex);
+    }
+    try {
+        return [new URL(slsApiUrl).origin];
+    } catch {
+        return [];
+    }
+}
+
+const slsApiUrl = readString("MCP_SLS_API_URL", "http://localhost:3010/api/v1").replace(trailingSlashRegex, "");
+
 export const mcpConfig = {
     listenPort: readPositiveNumber("MCP_LISTEN_PORT", 3011),
-    slsApiUrl: readString("MCP_SLS_API_URL", "http://localhost:3010/api/v1").replace(trailingSlashRegex, ""),
+    slsApiUrl: slsApiUrl,
+    allowedOrigins: readAllowedOrigins(slsApiUrl),
     requestTimeoutMs: readPositiveNumber("MCP_REQUEST_TIMEOUT_MS", 60000),
     // Default budget for one tool result. Not a statement about the client's context window, which
     // this server cannot know and which is shared between every call of a conversation. A route

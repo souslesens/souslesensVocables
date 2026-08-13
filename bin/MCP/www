@@ -44,6 +44,36 @@ console.log(
 // ---------------------------------------------------------------------------
 
 const app = express();
+
+// CORS, so the SLS UI can run an agent loop in the browser and speak MCP directly.
+//
+// The origin is echoed back rather than answered with "*", and `Access-Control-Allow-Credentials`
+// is deliberately absent: this server authenticates with an Authorization header, never a cookie,
+// so no ambient credential can be replayed by a page that merely happens to be open. Requests
+// without an Origin header (every non-browser MCP client) are untouched and keep working.
+const corsAllowedHeaders = "Content-Type, Authorization, Accept, Mcp-Session-Id, Mcp-Protocol-Version, Last-Event-Id";
+const corsExposedHeaders = "Mcp-Session-Id, Mcp-Protocol-Version";
+
+app.use(function (request, response, next) {
+    const requestOrigin = request.headers.origin;
+    if (requestOrigin) {
+        if (mcpConfig.allowedOrigins.includes(requestOrigin)) {
+            response.setHeader("Access-Control-Allow-Origin", requestOrigin);
+            response.setHeader("Vary", "Origin");
+            response.setHeader("Access-Control-Allow-Headers", corsAllowedHeaders);
+            response.setHeader("Access-Control-Expose-Headers", corsExposedHeaders);
+            response.setHeader("Access-Control-Max-Age", "600");
+        } else {
+            console.warn(`[mcp] cross-origin request refused from "${requestOrigin}". Allowed: ${mcpConfig.allowedOrigins.join(", ") || "(none)"}. Set MCP_ALLOWED_ORIGINS to change.`);
+        }
+    }
+    if (request.method === "OPTIONS") {
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        return response.status(204).end();
+    }
+    return next();
+});
+
 app.use(express.json({ limit: "2mb" }));
 
 // An MCP client that fails to authenticate reports a bare "HTTP 401", so the three ways of getting
@@ -154,4 +184,5 @@ httpServer.on("error", function (error) {
 });
 httpServer.listen(mcpConfig.listenPort, function () {
     console.log(`[mcp] listening on http://localhost:${mcpConfig.listenPort}/mcp — SLS API: ${mcpConfig.slsApiUrl}`);
+    console.log(`[mcp] browser origins allowed: ${mcpConfig.allowedOrigins.join(", ") || "(none — set MCP_ALLOWED_ORIGINS)"}`);
 });

@@ -28,11 +28,20 @@ the user a concept is missing, suspect in this order: the wrong source, then a f
 needs turned off, then a relation expressed in a form the tool does not walk — in OWL a class often
 states what it can be linked to through a restriction rather than a direct triple.
 
-## Truncation means narrow, not retry bigger
+## Truncation is not a smaller answer
 
-`truncation.truncated: true` in the envelope means the answer was cut to fit a byte budget. Add
-constraints: more URIs, a predicate, a tighter filter. Raising `options.limit` does not help, since
-several of the underlying queries ignore it, which is precisely why the cut happens here.
+`truncation.truncated: true` means the reply was cut to fit a byte budget, and what was cut cannot
+be fetched afterwards. Raising `options.limit` does not help, since several of the underlying
+queries ignore it, which is precisely why the cut happens here.
+
+For rows, `totalRows` says how many exist and `returnedRows` how many you got. If a narrower query
+can still answer the question, run it. If it cannot — because that total is simply how large the
+answer is — say the figure to the user and ask what to restrict it to. Never present a truncated
+prefix as if it were the whole set.
+
+For a document, half of it is broken JSON, so you receive `oversizedDocumentStructure` instead: one
+line per top-level key with its size. Use it to tell the user what the document holds and to pick a
+more specific tool for the part that matters.
 
 ## Read the sibling keys
 

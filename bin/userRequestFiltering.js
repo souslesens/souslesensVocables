@@ -427,15 +427,19 @@ var UserRequestFiltering = {
     },
     validateElasticSearchIndices: function (userInfo, indices, userSourcesMap, acl, callback) {
         var indicesMap = {};
-        for (var source in userSourcesMap) {
-            indicesMap[source.toLowerCase()] = { source: source, acl: source.accessControl == "readwrite" ? "w" : "r" };
+        for (var sourceName in userSourcesMap) {
+            // `userSourcesMap` is keyed by source name and the access control lives on the value.
+            // Reading `accessControl` off the key graded every index read-only, so every `acl == "w"`
+            // validation failed. getUserGraphUrisMap above has the correct shape.
+            var source = userSourcesMap[sourceName];
+            indicesMap[sourceName.toLowerCase()] = { source: sourceName, acl: source.accessControl == "readwrite" ? "w" : "r" };
         }
 
         var error = null;
         if (!indices) {
             var indices = [];
-            for (var source in userSourcesMap) {
-                indices.push(source.toLowerCase());
+            for (var accessibleSourceName in userSourcesMap) {
+                indices.push(accessibleSourceName.toLowerCase());
             }
             return callback(error, indices);
         }

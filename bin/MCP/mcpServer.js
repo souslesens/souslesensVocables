@@ -4,6 +4,17 @@
  * The low-level `Server` is used rather than `McpServer`: our input schemas are JSON Schema
  * generated from the SPARQL registry, and round-tripping them through Zod would lose the fidelity
  * of the `anyOf` unions for no benefit.
+ *
+ * **No progress notification, deliberately, and what it would take.** A slow SPARQL query returns
+ * nothing to the client until it completes, so a client whose own timeout is shorter than the query
+ * gives up with no explanation. The protocol answers this with `notifications/progress`, emitted on
+ * the SSE response of the POST already in flight: no session, no change to any SLS route, and
+ * nothing streamed — it only says "still working". It is not implemented because no timeout has
+ * been observed in use. Two things would change that: an SLS deployment slower than the one this
+ * was built against, or exposing the heavy queries. The heaviest of the catalog — `getDictionary`,
+ * `getLabelsMap`, `generateOWL` — are reachable through `sls_run_query_function` but no `@mcpTool`
+ * promotes them, and `getSourceTaxonomy`, which is promoted, measured 9 KB on BFO and 36 KB on
+ * IOF_core, well inside the budget. Revisit when a client actually cuts a call short.
  */
 
 import fs from "node:fs";

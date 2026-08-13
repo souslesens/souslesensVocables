@@ -37,6 +37,7 @@ export default function () {
                         "Prefer sls_kgquery_model or sls_source_taxonomy.",
                     params: { source: { type: "string", required: true, description: "SLS source name." } },
                     query: { source: "{source}" },
+                    navigableDocument: true,
                     statusHints: {
                         500: "No ontology model is cached for this source. It is only filled when a user opens the source in the SousLeSens web UI. Use sls_kgquery_model or sls_source_taxonomy instead.",
                     },

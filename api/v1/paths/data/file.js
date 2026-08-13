@@ -46,6 +46,7 @@ export default function () {
                     params: { source: { type: "string", required: true, description: "SLS source name." } },
                     query: { dir: "graphs/", fileName: "{source}_KGmodelGraph.json" },
                     parseJsonPayload: true,
+                    navigableDocument: true,
                     statusHints: { 500: "No KGquery model saved for this source. Build the model in the KGquery tool first, or explore the source with sls_source_taxonomy." },
                 },
                 {
@@ -58,6 +59,7 @@ export default function () {
                     },
                     query: { dir: "mappings/{source}", fileName: "{dataSource}.json" },
                     parseJsonPayload: true,
+                    navigableDocument: true,
                     statusHints: { 500: "No mapping file with that name for this source. List the available ones with sls_mappings_list." },
                 },
             ],

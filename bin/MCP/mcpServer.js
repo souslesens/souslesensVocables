@@ -159,7 +159,12 @@ function toCallToolResult(descriptor, result) {
     }
 
     const guarded = applySizeGuard(result.data, descriptor.maxResponseBytes || mcpConfig.maxResponseBytes);
-    const envelope = { tool: descriptor.name, data: guarded.payload, truncation: guarded.truncation };
+    const truncation = guarded.truncation;
+    if (truncation.truncated && descriptor.navigableDocument) {
+        // The only tools with nowhere narrower to go are the ones that can be read from inside.
+        truncation.hint = `${truncation.hint} Call this tool again with _select to take one part of it, or _grep to keep only the entries matching a term.`;
+    }
+    const envelope = { tool: descriptor.name, data: guarded.payload, truncation: truncation };
     return { content: [{ type: "text", text: JSON.stringify(envelope) }] };
 }
 

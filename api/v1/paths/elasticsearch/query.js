@@ -60,23 +60,47 @@ export default function () {
                     description:
                         "Turns a natural-language phrase into concrete ontology node URIs, scored and typo-tolerant, across one or more Elasticsearch indices. " +
                         "Recommended FIRST call for any domain term: every node tool needs a URI, and this is what produces one from a user's words. " +
-                        "Returns ranked hits with score, index, id, label, type and parents.",
+                        "Returns ranked hits with score, index, id, label, type and parents. " +
+                        'The ranking is global across the indices searched, not per index, so this answers "where is the best match" and never "which sources contain the term" — ' +
+                        "a single index whose label is exactly the searched word takes every slot. Use sls_count_labels_by_source for that second question, then come back here per index.",
                     params: {
                         text: { type: "string", required: true, description: "Phrase to search for." },
                         indexes: {
                             type: "string[]",
                             required: true,
                             description:
-                                "Index names to search, from sls_list_indexes. Pass as many as the question allows: one call over ten indices costs the same as one call over one, " +
-                                "and the hits come back ranked across all of them with their index named. When you do not already know which source holds the term, pass every index " +
-                                "sls_list_indexes returned rather than trying them one at a time.",
+                                "Index names to search, from sls_list_indexes. One call over ten indices costs the same as one call over one, so pass every plausible index " +
+                                "when you are looking for the best match. To cover a specific source, pass that index alone: in a wide search its hits are ranked against " +
+                                "everything else and can fall below the cut with no trace.",
                         },
-                        size: { type: "number", description: "Maximum number of hits.", default: 10 },
+                        size: { type: "number", description: "Maximum number of hits, counted across all indices together, not per index.", default: 10 },
                         fuzziness: { type: "string", description: 'Edit distance tolerated: "AUTO", "0" for exact matching, "1" or "2".', default: "AUTO" },
                     },
                     body: { url: "_search", indexes: "{indexes}", query: { size: "{size}", query: { match: { label: { query: "{text}", fuzziness: "{fuzziness}" } } } } },
                     resultShape: "elasticHits",
                     statusHints: { 500: "Elasticsearch is unreachable or the index does not exist. Check the index name with sls_list_indexes." },
+                },
+                {
+                    name: "sls_count_labels_by_source",
+                    access: "read",
+                    description:
+                        "Counts how many labels match a phrase in each index, exhaustively, in one call. " +
+                        'This is the tool for "which sources talk about X": it returns every index holding a match with its count, where a ranked search returns only a global top-K ' +
+                        "and silently drops the sources that rank lower. Returns no URI — follow up with sls_search_labels on the indices worth reading.",
+                    params: {
+                        text: { type: "string", required: true, description: "Phrase to count matches for." },
+                        indexes: { type: "string[]", required: true, description: "Index names to cover, from sls_list_indexes. Pass all of them: the cost does not grow with the count." },
+                        fuzziness: { type: "string", description: 'Edit distance tolerated: "AUTO", "0" for exact matching, "1" or "2".', default: "AUTO" },
+                    },
+                    // size 0 asks Elasticsearch for the aggregation without any document, and the
+                    // terms size caps the number of indices reported — well above the cluster's count.
+                    body: {
+                        url: "_search",
+                        indexes: "{indexes}",
+                        query: { size: 0, query: { match: { label: { query: "{text}", fuzziness: "{fuzziness}" } } }, aggs: { sources: { terms: { field: "_index", size: 1000 } } } },
+                    },
+                    resultShape: "elasticIndexCounts",
+                    statusHints: { 500: "Elasticsearch is unreachable or one of the indices does not exist. Check the names with sls_list_indexes." },
                 },
             ],
         },

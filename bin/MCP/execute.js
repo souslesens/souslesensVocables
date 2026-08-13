@@ -233,7 +233,33 @@ function shapeSourceCards(sourcesResponse) {
     return cards;
 }
 
-const resultShapers = { elasticHits: shapeElasticHits, sourceCards: shapeSourceCards };
+/**
+ * Reduce an Elasticsearch `_index` terms aggregation to one row per source.
+ *
+ * Declared by a route through `x-mcp.resultShape: "elasticIndexCounts"`. A ranked multi-index
+ * search answers "does this term exist", never "which sources hold it": it returns a single global
+ * top-K, and one index whose label is exactly the searched word takes every slot. The aggregation
+ * is the answer to the second question, and it costs one call.
+ * @param {*} elasticResponse - `{hits: {total}, aggregations: {sources: {buckets}}}`
+ * @returns {{totalMatches: number, sources: object[]}}
+ */
+function shapeElasticIndexCounts(elasticResponse) {
+    const aggregations = elasticResponse && elasticResponse.aggregations;
+    const sourcesAggregation = aggregations && aggregations.sources;
+    const buckets = sourcesAggregation && Array.isArray(sourcesAggregation.buckets) ? sourcesAggregation.buckets : [];
+
+    const countedSources = [];
+    for (const bucket of buckets) {
+        countedSources.push({ index: bucket.key, matches: bucket.doc_count });
+    }
+
+    const hitsEnvelope = elasticResponse && elasticResponse.hits;
+    const totalEnvelope = hitsEnvelope && hitsEnvelope.total;
+    const totalMatches = totalEnvelope && typeof totalEnvelope === "object" ? totalEnvelope.value : totalEnvelope;
+    return { totalMatches: totalMatches, sources: countedSources };
+}
+
+const resultShapers = { elasticHits: shapeElasticHits, elasticIndexCounts: shapeElasticIndexCounts, sourceCards: shapeSourceCards };
 
 // Exported so catalog.js can reject an `x-mcp` asking for a shape nobody implements, at boot rather
 // than on the first call.

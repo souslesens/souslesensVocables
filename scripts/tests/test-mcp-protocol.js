@@ -179,6 +179,18 @@ async function main() {
             !wideSearchResult.isError,
             wideSearchResult.isError ? readEnvelope(wideSearchResult) : `${availableIndexes.length} indices at once, hits from ${searchedIndexes.size} of them`,
         );
+
+        // The reason sls_count_labels_by_source exists: a ranked search returns one global top-K,
+        // so the sources that rank lower vanish without a trace. The count must see strictly more
+        // sources than the search did, or the two tools are answering the same question.
+        const countedResult = await client.callTool({ name: "sls_count_labels_by_source", arguments: { text: "pump", indexes: availableIndexes } });
+        const countedEnvelope = readEnvelope(countedResult);
+        const countedSources = countedEnvelope && countedEnvelope.data && Array.isArray(countedEnvelope.data.sources) ? countedEnvelope.data.sources : [];
+        record(
+            "counting by source sees the sources a ranked search hides",
+            !countedResult.isError && countedSources.length > searchedIndexes.size,
+            countedResult.isError ? readEnvelope(countedResult) : `${countedSources.length} sources counted against ${searchedIndexes.size} reached by the ranked search`,
+        );
     }
 
     const forbiddenSourceResult = await client.callTool({ name: "sls_top_concepts", arguments: { sourceLabel: "__no_such_source__" } });

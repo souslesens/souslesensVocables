@@ -134,19 +134,27 @@ its author asked for. Instead the MCP server refuses to start and says where:
 
 Every one of them traces back to a declaration in product code, and `GET /catalog` says which.
 
-| Declared in                      | Tools                                                                                                                                                                                                              |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `sparql_generic.js` (`@mcpTool`) | `sls_top_concepts`, `sls_node_infos`, `sls_node_parents`, `sls_node_children`, `sls_source_taxonomy`, `sls_distinct_predicates`                                                                                    |
-| `sparql_OWL.js` (`@mcpTool`)     | `sls_node_definition`, `sls_node_descendants`, `sls_node_properties`, `sls_filtered_triples`, `sls_property_schema`, `sls_property_usage`                                                                          |
-| `api/v1/paths/**` (`x-mcp`)      | `sls_list_sources`, `sls_whoami`, `sls_ontology_model`, `sls_kgquery_model`, `sls_mappings_list`, `sls_mapping_get`, `sls_search_labels`, `sls_list_indexes`, `sls_list_query_functions`, `sls_run_query_function` |
+| Declared in                      | Tools                                                                                                                                                                                                                                            |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `sparql_generic.js` (`@mcpTool`) | `sls_top_concepts`, `sls_node_infos`, `sls_node_parents`, `sls_node_children`, `sls_source_taxonomy`, `sls_distinct_predicates`                                                                                                                  |
+| `sparql_OWL.js` (`@mcpTool`)     | `sls_node_definition`, `sls_node_descendants`, `sls_node_properties`, `sls_filtered_triples`, `sls_property_schema`, `sls_property_usage`                                                                                                        |
+| `api/v1/paths/**` (`x-mcp`)      | `sls_list_sources`, `sls_whoami`, `sls_ontology_model`, `sls_kgquery_model`, `sls_mappings_list`, `sls_mapping_get`, `sls_search_labels`, `sls_count_labels_by_source`, `sls_list_indexes`, `sls_list_query_functions`, `sls_run_query_function` |
 
 `sls_search_labels` is the natural-language entry point: the node tools all need a URI, and
 full-text label search is what produces one from a user's phrase. It takes any number of indices in
-one call — 474 indices answered in the same 380 ms as 10 — so searching the whole platform is how an
-agent finds which source holds a term, not a fallback after guessing wrong. `sls_list_indexes` feeds
-it that list, and freezes `accessibleOnly=true` because one index the caller has no source for makes
+one call — 146 indices answer in the same 380 ms as 10. `sls_list_indexes` feeds it that list and
+filters it to the caller's sources, because one index the caller has no source for makes
 `validateElasticSearchIndices` reject the _entire_ search, not just that index. On the reference
-instance the filter takes the list from 474 names to 146.
+instance that filtering takes the list from 474 names to 146.
+
+`sls_count_labels_by_source` exists because those two facts do not add up to source coverage. A
+multi-index `_search` ranks globally and returns one top-K, so a single index whose label is exactly
+the searched word takes every slot: measured on this instance, searching "pump" over the 146 indices
+surfaced hits from 2 sources while 22 actually hold a match. The counting tool freezes a `size: 0`
+query with a `terms` aggregation on `_index`, which answers exhaustively in one call — the
+alternative an agent reaches for on its own is one search per index. This is the split the
+`instructions.md` "Start from a URI" section makes explicit: ranked search for _where is the best
+match_, aggregation for _which sources talk about this_.
 
 `sls_list_query_functions` and `sls_run_query_function` reach the 34 read functions of the registry
 that no `@mcpTool` promotes. They are not MCP machinery — they are `GET /sparqlQueries/catalog` and

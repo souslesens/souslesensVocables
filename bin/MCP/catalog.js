@@ -253,6 +253,7 @@ const restToolDeclarationSchema = z
         parseJsonPayload: z.boolean().optional(),
         emptyListWhenNull: z.boolean().optional(),
         resultShape: z.enum(resultShapeNames).optional(),
+        maxResponseBytes: z.number().positive().optional(),
         registryFunctionGuard: z
             .object({
                 nameParam: z.string().min(1),
@@ -340,6 +341,7 @@ function restToolDescriptor(toolDeclaration, routePath, httpMethod) {
         parseJsonPayload: Boolean(toolDeclaration.parseJsonPayload),
         emptyListWhenNull: Boolean(toolDeclaration.emptyListWhenNull),
         resultShape: toolDeclaration.resultShape || null,
+        maxResponseBytes: toolDeclaration.maxResponseBytes || null,
         registryFunctionGuard: toolDeclaration.registryFunctionGuard || null,
         statusHints: toolDeclaration.statusHints || {},
     };

@@ -221,8 +221,12 @@ queried by URI, it is reached by looking for triples that point at it — and it
   is the JSDoc: a shorter summary paragraph, or `@mcpFixed` on options an agent should not choose.
 - Stateless transport: one server and one transport per request, no session map, no server-to-client
   notifications.
-- The size guard only cuts rows from the tail. No offset paging, no per-cell truncation, no result
-  cache, no structured provenance.
+- What the size guard cuts cannot be fetched afterwards: no cursor, no result cache. Rows are halved
+  from the tail and the agent is told the total; an oversized document is replaced by its top-level
+  structure rather than half its JSON. A cursor would let an agent scan for one specific thing and
+  stop, which is the only case where reading past the cut is bounded — worth writing when that case
+  actually shows up, since a cursor also lets a naive agent read a whole ontology into its context.
+- No per-cell truncation, no structured provenance.
 - `POST /sparqlProxy` (dynamic SPARQL) carries no `x-mcp`: it needs three guards first — MCP-side
   URL resolution against SSRF, refusal of UPDATE forms, and refusal of sources that are not on the
   default endpoint.
@@ -238,7 +242,7 @@ queried by URI, it is reached by looking for triples that point at it — and it
 | `MCP_LISTEN_PORT`          | `3011`                         |
 | `MCP_SLS_API_URL`          | `http://localhost:3010/api/v1` |
 | `MCP_REQUEST_TIMEOUT_MS`   | `60000`                        |
-| `MCP_MAX_RESPONSE_BYTES`   | `100000`                       |
+| `MCP_MAX_RESPONSE_BYTES`   | `250000`                       |
 | `MCP_DEFAULT_SPARQL_LIMIT` | `200`                          |
 
 ## Tests

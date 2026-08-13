@@ -63,30 +63,63 @@ function findRows(payload) {
 }
 
 /**
+ * Describe a payload too large to send, one entry per top-level key.
+ *
+ * Half a document is not half an answer, it is broken JSON, so an oversized object is replaced by
+ * the map of what it holds. That is what lets an agent come back asking for the part it needs
+ * instead of being handed a string cut mid-token with nothing to act on.
+ * @param {object} payload
+ * @returns {object[]} `{key, type, entries?, bytes}`, largest first
+ */
+function describeOversizedObject(payload) {
+    const entries = [];
+    for (const [key, value] of Object.entries(payload)) {
+        const valueText = JSON.stringify(value);
+        const entry = { key: key, type: Array.isArray(value) ? "array" : typeof value, bytes: valueText === undefined ? 0 : valueText.length };
+        if (Array.isArray(value)) {
+            entry.entries = value.length;
+        } else if (value && typeof value === "object") {
+            entry.entries = Object.keys(value).length;
+        }
+        entries.push(entry);
+    }
+    entries.sort((firstEntry, secondEntry) => secondEntry.bytes - firstEntry.bytes);
+    return entries;
+}
+
+/**
  * Keep a tool result under the byte budget so a large answer cannot blow up the agent's context.
  *
- * V1 guard only: it cuts rows from the tail and says so. Offset paging, per-cell truncation and a
- * result cache are deliberately left out until the server has been exercised for real.
+ * The budget is not a statement about the client's context window, which this server cannot know:
+ * it is shared between every call of a conversation, so a generous ceiling plus a truncation that
+ * explains itself beats a ceiling tuned for the widest client.
+ *
+ * Rows and documents are cut differently on purpose. A prefix of rows is still usable, so rows are
+ * halved until they fit and the agent is told how many exist. A document has no usable prefix, so
+ * it is replaced by its structure. In both cases the answer says what it would take to get the rest,
+ * because "narrow the request" is not advice an agent can act on when it asked for a whole taxonomy.
  * @param {*} payload
  * @returns {{payload: *, truncation: object}}
  */
-function applySizeGuard(payload) {
+function applySizeGuard(payload, budgetBytes) {
     const initialText = JSON.stringify(payload);
     const initialBytes = initialText === undefined ? 0 : initialText.length;
-    if (initialBytes <= mcpConfig.maxResponseBytes) {
+    if (initialBytes <= budgetBytes) {
         return { payload: payload, truncation: { truncated: false, bytes: initialBytes } };
     }
 
     const rowsHolder = findRows(payload);
     if (!rowsHolder) {
-        const previewLength = Math.floor(mcpConfig.maxResponseBytes / 2);
+        const isDescribableObject = Boolean(payload) && typeof payload === "object";
         return {
-            payload: { truncatedPreview: initialText.slice(0, previewLength) },
+            payload: isDescribableObject ? { oversizedDocumentStructure: describeOversizedObject(payload) } : { oversizedValuePreview: initialText.slice(0, 2000) },
             truncation: {
                 truncated: true,
                 bytes: initialBytes,
-                maxResponseBytes: mcpConfig.maxResponseBytes,
-                hint: "Answer is a single large object, only a textual preview is returned. Narrow the request.",
+                maxResponseBytes: budgetBytes,
+                hint: isDescribableObject
+                    ? `This document is ${initialBytes} characters, over the ${budgetBytes} budget, and half a document is not an answer — its top-level structure is returned instead. Tell the user how large it is and ask which part they need, then fetch that part with a more specific tool.`
+                    : `This value is ${initialBytes} characters, over the ${budgetBytes} budget, and is not an object that can be summarised. Only its head is returned.`,
             },
         };
     }
@@ -95,7 +128,7 @@ function applySizeGuard(payload) {
     let keptCount = totalRows;
     let keptPayload = payload;
     let keptBytes = initialBytes;
-    while (keptCount > 0 && keptBytes > mcpConfig.maxResponseBytes) {
+    while (keptCount > 0 && keptBytes > budgetBytes) {
         keptCount = Math.floor(keptCount / 2);
         keptPayload = rowsHolder.replace(rowsHolder.rows.slice(0, keptCount));
         keptBytes = JSON.stringify(keptPayload).length;
@@ -108,8 +141,11 @@ function applySizeGuard(payload) {
             totalRows: totalRows,
             returnedRows: keptCount,
             bytes: keptBytes,
-            maxResponseBytes: mcpConfig.maxResponseBytes,
-            hint: "Result was cut to fit the response budget. Narrow the filters or lower options.limit.",
+            maxResponseBytes: budgetBytes,
+            hint:
+                `Rows ${keptCount + 1} to ${totalRows} were cut to fit the response budget, and there is no way to fetch them from here. ` +
+                `If a narrower query can answer the question — more URIs, a predicate, a filter — run it. If it cannot, because ${totalRows} is simply how large this answer is, ` +
+                `tell the user that figure and ask what to restrict it to rather than working from the first ${keptCount} rows as if they were the whole set.`,
         },
     };
 }
@@ -122,7 +158,7 @@ function toCallToolResult(descriptor, result) {
         };
     }
 
-    const guarded = applySizeGuard(result.data);
+    const guarded = applySizeGuard(result.data, descriptor.maxResponseBytes || mcpConfig.maxResponseBytes);
     const envelope = { tool: descriptor.name, data: guarded.payload, truncation: guarded.truncation };
     return { content: [{ type: "text", text: JSON.stringify(envelope) }] };
 }

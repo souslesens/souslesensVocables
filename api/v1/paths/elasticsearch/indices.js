@@ -9,13 +9,14 @@ export default function () {
     async function GET(req, res, _next) {
         try {
             const indices = await indexModel.getIndices();
-            if (req.query.accessibleOnly !== "true") {
+            if (req.query.all === "true") {
                 return res.status(200).send(indices);
             }
 
-            // Same intersection the search UI does client-side in SearchUtil.initSourcesIndexesList:
-            // an index the caller has no source for is rejected by validateElasticSearchIndices, and
-            // that rejection fails the *whole* multi-index query, not just the offending index.
+            // Filtering is the default because the list exists to be fed back to the search routes,
+            // and an index the caller has no source for is not skipped there: it makes
+            // validateElasticSearchIndices reject the *whole* multi-index query. This is the same
+            // intersection the search UI already does client-side in SearchUtil.initSourcesIndexesList.
             ConfigManager.getUserSources(req, res, function (accessError, userSources) {
                 if (accessError) {
                     return;
@@ -37,14 +38,13 @@ export default function () {
         security: [{ restrictLoggedUser: [], restrictQuota: [] }],
         summary: "List Elasticsearch indices known to the configured cluster",
         description:
-            "Returns every index name reported by `indexModel.getIndices` (lowercase, as Elasticsearch stores them). " +
-            "The search UI uses this list to detect which sources have a full-text index available and to populate " +
-            "the multi-source search picker. The full list includes indices the caller cannot query — orphan indices " +
-            "of deleted sources, whiteboard indices, sources outside the caller's profile — which is what the admin " +
-            "screens need; pass `accessibleOnly=true` to get only the indices the caller may actually search.",
+            "Returns the index names reported by `indexModel.getIndices` (lowercase, as Elasticsearch stores them) " +
+            "that match a source the caller can read. The search UI uses this list to detect which sources have a " +
+            "full-text index available and to populate the multi-source search picker. " +
+            "Pass `all=true` for the raw cluster listing, which also contains indices no caller can query — orphans " +
+            "of deleted sources, whiteboard indices, sources outside the caller's profile — and is only useful to " +
+            "administer the cluster itself.",
         operationId: "getElasticsearchIndices",
-        // `accessibleOnly` is frozen for the agent: an index it has no rights on is not merely
-        // skipped by /elasticsearch/query, it makes the entire multi-index search return 403.
         "x-mcp": {
             tools: [
                 {
@@ -55,18 +55,17 @@ export default function () {
                         "They are lowercase and do not always match the SLS source name, so read this list rather than guessing. " +
                         "sls_search_labels takes several of them in one call, so this is also how you search the whole platform at once.",
                     params: {},
-                    query: { accessibleOnly: "true" },
                 },
             ],
         },
         parameters: [
             {
-                name: "accessibleOnly",
+                name: "all",
                 in: "query",
                 type: "string",
                 required: false,
                 enum: ["true"],
-                description: "Keep only the indices matching a source the caller can read. Without it, every index of the cluster is returned.",
+                description: "Return every index of the cluster, including those matching no source the caller can read.",
             },
         ],
 

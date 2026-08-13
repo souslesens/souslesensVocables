@@ -29,6 +29,10 @@ with no trace. A `totalMatches` far above the hits you received means exactly th
 at a fraction. Count by source first, then search the indices worth reading, one at a time if their
 hits matter.
 
+`totalMatchesIsLowerBound: true` means the search engine stopped counting: the real total is at
+least `totalMatches`, never exactly it. Say "more than N", never "N". The per-source counts of
+`sls_count_labels_by_source` are exact regardless — only the grand total is capped.
+
 Once a node is resolved, reuse the source it came from for every later call about that URI. Asking
 the wrong source is the most common way to get nothing back.
 

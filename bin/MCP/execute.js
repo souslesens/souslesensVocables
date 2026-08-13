@@ -193,9 +193,28 @@ function shapeElasticHits(elasticResponse) {
         flatHits.push({ score: hit._score, index: hit._index, id: hitSource.id, label: hitSource.label, type: hitSource.type, parents: hitSource.parents });
     }
 
+    return { ...describeElasticTotal(hitsEnvelope), hits: flatHits };
+}
+
+/**
+ * Read an Elasticsearch hit total, saying so when the figure is only a floor.
+ *
+ * Elasticsearch stops counting at 10 000 and reports `{value: 10000, relation: "gte"}`. Returning
+ * the bare value invites an agent to state "10 000 labels match" as a fact — a fabricated figure
+ * built out of a real one, which is the failure mode `instructions.md` opens with.
+ * @param {*} hitsEnvelope - the `hits` object of an Elasticsearch response
+ * @returns {{totalMatches: number, totalMatchesIsLowerBound?: boolean}}
+ */
+function describeElasticTotal(hitsEnvelope) {
     const totalEnvelope = hitsEnvelope && hitsEnvelope.total;
-    const totalMatches = totalEnvelope && typeof totalEnvelope === "object" ? totalEnvelope.value : totalEnvelope;
-    return { totalMatches: totalMatches, hits: flatHits };
+    if (!totalEnvelope || typeof totalEnvelope !== "object") {
+        return { totalMatches: totalEnvelope };
+    }
+    const total = { totalMatches: totalEnvelope.value };
+    if (totalEnvelope.relation === "gte") {
+        total.totalMatchesIsLowerBound = true;
+    }
+    return total;
 }
 
 /**
@@ -253,10 +272,8 @@ function shapeElasticIndexCounts(elasticResponse) {
         countedSources.push({ index: bucket.key, matches: bucket.doc_count });
     }
 
-    const hitsEnvelope = elasticResponse && elasticResponse.hits;
-    const totalEnvelope = hitsEnvelope && hitsEnvelope.total;
-    const totalMatches = totalEnvelope && typeof totalEnvelope === "object" ? totalEnvelope.value : totalEnvelope;
-    return { totalMatches: totalMatches, sources: countedSources };
+    // The per-source counts are exact whatever the total says: only the grand total stops at 10 000.
+    return { ...describeElasticTotal(elasticResponse && elasticResponse.hits), sources: countedSources };
 }
 
 const resultShapers = { elasticHits: shapeElasticHits, elasticIndexCounts: shapeElasticIndexCounts, sourceCards: shapeSourceCards };

@@ -49,7 +49,7 @@ export default function () {
     }
 
     POST.apiDoc = {
-        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [], restrictVirtuosoLoad: [] }],
         summary: "Add and/or remove metadata triples on a source's graph",
         description:
             "Applies a delta on the metadata-level triples of the named graph attached to `source`: " +
@@ -127,7 +127,7 @@ export default function () {
         tags: ["RDF"],
     };
     GET.apiDoc = {
-        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [], restrictVirtuosoLoad: [] }],
         summary: "Read metadata triples of a source's graph",
         description: "Returns metadata-level triples (titles, creators, imports, versioning) of the named graph attached to `source`, " + "as fetched by `rdfDataModel.getRdfMetadata`.",
         operationId: "rdfGetGraphMetadata",

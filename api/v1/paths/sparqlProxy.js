@@ -76,7 +76,7 @@ export default function () {
             "When `body.POST` is truthy, the request is sent as POST and goes through `UserRequestFiltering.filterSparqlRequest` " +
             "which read `FROM` clauses to restrict the query to graphs the current user is allowed to read. ",
 
-        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [], restrictVirtuosoLoad: [] }],
         operationId: "sparqlProxyPost",
         parameters: [
             {
@@ -179,7 +179,7 @@ export default function () {
         description:
             "GET variant of the SPARQL proxy: forwards `query.url` with `query.options` to the target SPARQL server. " +
             "Same access-control filtering as the POST variant when the target matches the configured main `sparql_server.url`.",
-        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [], restrictVirtuosoLoad: [] }],
         operationId: "sparqlProxyGet",
         parameters: [
             {

@@ -27,7 +27,7 @@ export default function () {
     }
 
     GET.apiDoc = {
-        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [], restrictVirtuosoLoad: [] }],
         summary: "List RDF graphs accessible to the current user",
         description:
             "Returns the subset of named graphs present in the triplestore whose URI matches the `graphUri` " +

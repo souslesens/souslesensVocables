@@ -106,7 +106,8 @@
             "password": "changeme"
         },
         "virtuoso": {
-            "maxPending": 50
+            "maxPending": 20,
+            "maxLoad": 80
         }
     }
 }

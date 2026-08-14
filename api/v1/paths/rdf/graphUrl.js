@@ -75,7 +75,7 @@ export default function () {
     }
 
     POST.apiDoc = {
-        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [], restrictVirtuosoLoad: [] }],
         summary: "Load an RDF file from a remote URL into a source's graph",
         description:
             "Server-side fetch of `url` (typically a Turtle/RDF-XML/OWL file), persisted under " +

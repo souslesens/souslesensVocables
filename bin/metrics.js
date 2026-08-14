@@ -20,6 +20,7 @@ register.registerMetric(httpRequestsTotal);
 
 let virtuosoPending = 0;
 let maxPending = 50;
+let maxLoadThreshold = 80;
 
 const virtuosoSparqlPendingQueries = new client.Gauge({
     name: "virtuoso_sparql_pending_queries",
@@ -51,10 +52,18 @@ export function endVirtuosoRequest() {
     }
 }
 
-export function configureVirtuosoMetrics(max) {
+export function configureVirtuosoMetrics(max, maxLoad) {
     if (typeof max === "number" && max > 0) {
         maxPending = max;
     }
+    if (typeof maxLoad === "number" && maxLoad > 0 && maxLoad <= 100) {
+        maxLoadThreshold = maxLoad;
+    }
 }
 
-export { register, httpRequestDuration, httpRequestsTotal };
+export function getVirtuosoLoad() {
+    const load = (virtuosoPending / maxPending) * 100;
+    return Math.min(100, load);
+}
+
+export { register, httpRequestDuration, httpRequestsTotal, maxLoadThreshold };

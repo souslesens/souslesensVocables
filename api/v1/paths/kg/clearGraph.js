@@ -36,7 +36,7 @@ export default function () {
     }
 
     POST.apiDoc = {
-        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [], restrictVirtuosoLoad: [] }],
         summary: "Drop all triples from a KG named graph",
         description:
             "Wipes the entire content of `graphUri` via `KGtripleBuilder.clearGraph` (SPARQL `CLEAR GRAPH`). " + "Used before a full KG rebuild; does not remove the source descriptor itself.",

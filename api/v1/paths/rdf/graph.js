@@ -227,7 +227,7 @@ export default function () {
     }
 
     POST.apiDoc = {
-        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [], restrictVirtuosoLoad: [] }],
         summary: "Upload an RDF file into the graph of a source (chunked)",
         description:
             "Streams an RDF payload into the named graph attached to `source`. The endpoint supports chunked uploads: " +
@@ -263,7 +263,7 @@ export default function () {
     };
 
     GET.apiDoc = {
-        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [], restrictVirtuosoLoad: [] }],
         summary: "Stream the N-Triples content of a source's graph (paginated)",
         description:
             "Returns a slice of the RDF graph of `source` serialised as N-Triples. " +
@@ -303,7 +303,7 @@ export default function () {
     };
 
     DELETE.apiDoc = {
-        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [], restrictVirtuosoLoad: [] }],
         summary: "Drop the named graph attached to a source",
         description:
             "Issues a SPARQL `DROP GRAPH` on the `graphUri` of `source`. The source descriptor itself is **not** removed " +

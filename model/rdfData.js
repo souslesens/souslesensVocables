@@ -2,6 +2,7 @@ import { readMainConfig } from "./config.js";
 import DigestClient from "digest-fetch";
 import fetch from "node-fetch";
 import { RDF_FORMATS_MIMETYPES, sleep } from "./utils.js";
+import { trackVirtuosoRequest, endVirtuosoRequest } from "../bin/metrics.js";
 
 // Number of triples moved per SPARQL Update batch in moveGraph. Keeps each request small enough
 // to avoid the triplestore's query-execution timeout on graphs with many triples.
@@ -35,23 +36,29 @@ class RdfDataModel {
             format: RDF_FORMATS_MIMETYPES[format],
         });
         const url = new URL(`${this.endpointUrl}?${urlParams.toString()}`).href;
-        let response;
-        if (this.endpointUser && this.endpointPassword) {
-            const client = new DigestClient(this.endpointUser, this.endpointPassword, { basic: false });
-            response = await client.fetch(url);
-        } else {
-            response = await fetch(url);
-        }
-        if (response.status !== 200) {
-            throw new Error(await response.text());
-        }
-        if (format === "json") {
-            const json = await response.json();
-            const bindings = json["results"]["bindings"];
-            return bindings;
-        } else {
-            const nt = await response.text();
-            return nt;
+
+        trackVirtuosoRequest();
+        try {
+            let response;
+            if (this.endpointUser && this.endpointPassword) {
+                const client = new DigestClient(this.endpointUser, this.endpointPassword, { basic: false });
+                response = await client.fetch(url);
+            } else {
+                response = await fetch(url);
+            }
+            if (response.status !== 200) {
+                throw new Error(await response.text());
+            }
+            if (format === "json") {
+                const json = await response.json();
+                const bindings = json["results"]["bindings"];
+                return bindings;
+            } else {
+                const nt = await response.text();
+                return nt;
+            }
+        } finally {
+            endVirtuosoRequest();
         }
     };
 

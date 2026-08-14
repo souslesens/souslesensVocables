@@ -62,7 +62,11 @@ export default function () {
     }
 
     POST.apiDoc = {
-        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
+        // Admin like `classify` and `alignment`, the two other routes that spend the platform's LLM
+        // key, plus the per-account quota because one call here is one turn of a loop, not one
+        // answer. `restrictQuota` is declared first: it is the handler that reads the Bearer token
+        // into `req.user`, which `restrictAdmin` then reads to check the group.
+        security: [{ restrictQuota: [], restrictAdmin: [] }],
         summary: "Run one LLM turn, with optional tool calling",
         description:
             "Forwards `{system, messages, tools}` to the configured LLM provider through `bin/AI/llmClient.js`, which applies the shared rate limiter and " +

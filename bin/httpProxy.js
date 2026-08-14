@@ -15,11 +15,24 @@ import superagent from "superagent";
 import superagent_proxy from "superagent-proxy";
 superagent_proxy(superagent);
 import request from "request";
+import { config } from "../model/config.js";
+import { trackVirtuosoRequest, endVirtuosoRequest } from "./metrics.js";
+
 var proxy = null;
+
+function isVirtuosoUrl(url) {
+    return url && config.sparql_server && url.indexOf(config.sparql_server.url) === 0;
+}
+
 var httpProxy = {
     host: null,
 
     get: function (url, options, callback) {
+        const tracking = isVirtuosoUrl(url);
+        if (tracking) {
+            trackVirtuosoRequest();
+        }
+
         if (!options.headers) {
             options.headers = {};
             /* options.headers={  "Accept": 'application/sparql-results+json',
@@ -40,16 +53,22 @@ var httpProxy = {
         for (var key in options.headers) {
             request.set(key, options.headers[key]);
         }
-        request.end((err, res) => {
-            if (err) {
-                // console.log("HTTP_PROXY_GET_ERROR"+JSON.stringify(err, null, 2))
-                console.log("HTTP_PROXY_GET_ERROR" + err);
-                return callback(err);
+        request.end(async (err, res) => {
+            try {
+                if (err) {
+                    // console.log("HTTP_PROXY_GET_ERROR"+JSON.stringify(err, null, 2))
+                    console.log("HTTP_PROXY_GET_ERROR" + err);
+                    return callback(err);
+                }
+                if (res.text) {
+                    return callback(null, res.text.trim());
+                }
+                callback(null, res.body);
+            } finally {
+                if (tracking) {
+                    endVirtuosoRequest();
+                }
             }
-            if (res.text) {
-                return callback(null, res.text.trim());
-            }
-            callback(null, res.body);
         });
     },
 
@@ -73,6 +92,11 @@ var httpProxy = {
       ,*/
 
     post: function (url, headers, params, callback) {
+        const tracking = isVirtuosoUrl(url);
+        if (tracking) {
+            trackVirtuosoRequest();
+        }
+
         var options = {
             method: "POST",
 
@@ -110,46 +134,52 @@ var httpProxy = {
             console.log(" POST-----------USING  proxy---------" + proxy);
         }
 
-        request(options, function (error, response, body) {
-            if (error) {
-                console.log(error);
-                //  console.log("HTTP_PROXY_ERROR"+JSON.stringify(error, null, 2))
-                return callback(error);
-            } else if (response.statusCode != 200) {
-                return callback(body || "" + " " + response.statusMessage);
-            } else if (headers && headers["Accept"] && headers["Accept"].indexOf("json") < 0) {
-                return callback(null, body);
-            } else if (headers && headers["Content-Type"] && headers["Content-Type"].indexOf("text") > -1) {
-                return callback(null, body);
-            } else if (typeof body === "string") {
-                if (body == "") {
-                    return callback("undefined ERROR ");
-                }
-                body = body.trim();
-                var p = body.toLowerCase().indexOf("bindings");
-                var q = body.toLowerCase().indexOf("results");
-                if (p < 0 && q < 0) {
-                    // error virtuoso
-                    return callback(body);
-                }
-                // if ((body.toLowerCase().indexOf("error") > -1 && body.indexOf("error") < 30) || body.indexOf("{") < 0) return callback(body); //error
-
-                var err = null;
-                try {
-                    body = JSON.parse(body);
-                    //  return callback(null, obj);
-                } catch (e) {
-                    console.log(body);
-                    console.log(e);
-                    err = e.message;
-                    if (e.message.indexOf("Unexpected token V in JSON ") > -1) {
-                        err = e.message;
+        request(options, async function (error, response, body) {
+            try {
+                if (error) {
+                    console.log(error);
+                    //  console.log("HTTP_PROXY_ERROR"+JSON.stringify(error, null, 2))
+                    return callback(error);
+                } else if (response.statusCode != 200) {
+                    return callback(body || "" + " " + response.statusMessage);
+                } else if (headers && headers["Accept"] && headers["Accept"].indexOf("json") < 0) {
+                    return callback(null, body);
+                } else if (headers && headers["Content-Type"] && headers["Content-Type"].indexOf("text") > -1) {
+                    return callback(null, body);
+                } else if (typeof body === "string") {
+                    if (body == "") {
+                        return callback("undefined ERROR ");
                     }
-                } finally {
-                    return callback(err, body);
+                    body = body.trim();
+                    var p = body.toLowerCase().indexOf("bindings");
+                    var q = body.toLowerCase().indexOf("results");
+                    if (p < 0 && q < 0) {
+                        // error virtuoso
+                        return callback(body);
+                    }
+                    // if ((body.toLowerCase().indexOf("error") > -1 && body.indexOf("error") < 30) || body.indexOf("{") < 0) return callback(body); //error
+
+                    var err = null;
+                    try {
+                        body = JSON.parse(body);
+                        //  return callback(null, obj);
+                    } catch (e) {
+                        console.log(body);
+                        console.log(e);
+                        err = e.message;
+                        if (e.message.indexOf("Unexpected token V in JSON ") > -1) {
+                            err = e.message;
+                        }
+                    } finally {
+                        return callback(err, body);
+                    }
+                } else {
+                    return callback(null, body);
                 }
-            } else {
-                return callback(null, body);
+            } finally {
+                if (tracking) {
+                    endVirtuosoRequest();
+                }
             }
         });
     },

@@ -18,4 +18,43 @@ const httpRequestsTotal = new client.Counter({
 register.registerMetric(httpRequestDuration);
 register.registerMetric(httpRequestsTotal);
 
+let virtuosoPending = 0;
+let maxPending = 50;
+
+const virtuosoSparqlPendingQueries = new client.Gauge({
+    name: "virtuoso_sparql_pending_queries",
+    help: "Number of SPARQL requests currently in-flight to the Virtuoso server",
+    collect() {
+        this.set(virtuosoPending);
+    },
+});
+
+const virtuosoSparqlLoad = new client.Gauge({
+    name: "virtuoso_sparql_load",
+    help: "Virtuoso load ratio (0-100) derived from in-flight SPARQL requests; 0 at 0 pending, 100 at maxPending or more",
+    collect() {
+        const load = (virtuosoPending / maxPending) * 100;
+        this.set(Math.min(100, load));
+    },
+});
+
+register.registerMetric(virtuosoSparqlPendingQueries);
+register.registerMetric(virtuosoSparqlLoad);
+
+export function trackVirtuosoRequest() {
+    virtuosoPending++;
+}
+
+export function endVirtuosoRequest() {
+    if (virtuosoPending > 0) {
+        virtuosoPending--;
+    }
+}
+
+export function configureVirtuosoMetrics(max) {
+    if (typeof max === "number" && max > 0) {
+        maxPending = max;
+    }
+}
+
 export { register, httpRequestDuration, httpRequestsTotal };

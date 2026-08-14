@@ -336,59 +336,50 @@
                 </tr>
             </thead>
             <tbody>
+
+
+                Faire des paramètres par défaut
                 <tr class="sep"><td colspan="5">Sources</td></tr>
                 <tr>
                     <td class="var"><code>allowSourceCreation</code></td>
                     <td>profil</td>
                     <td>booléen</td>
                     <td>Autorise la création de sources</td>
-                    <td>Existe déjà sur le user, à dupliquer</td>
+                    <td>Existe déjà sur le user, à dupliquer   FAIT</td>
                 </tr>
                 <tr>
                     <td class="var"><code>maxNumberCreatedSource</code></td>
                     <td>profil</td>
                     <td>nombre</td>
                     <td>Nombre de sources créables, comptage dynamique via <code>getOwnedSources()</code></td>
-                    <td>Existe déjà sur le user, à dupliquer</td>
+                    <td>Existe déjà sur le user, à dupliquer   FAIT</td>
                 </tr>
 
                 <tr class="sep"><td colspan="5">Triplets</td></tr>
+                
                 <tr>
-                    <td class="var"><code>maxTriplesPerSource</code></td>
-                    <td>profil + user</td>
-                    <td>nombre</td>
-                    <td>Plafond de triplets stockés dans une source</td>
-                    <td>Vérifié à l'insert. <b>Nécessite un compteur persisté</b> : recompter les triplets d'un graphe à chaque écriture est trop coûteux</td>
-                </tr>
-                <tr>
-                    <td class="var"><code>maxTriplesTotal</code></td>
+                    <td class="var"><code>maxWritableTriplesPerUser</code></td>
                     <td>profil + user</td>
                     <td>nombre</td>
                     <td>Plafond de triplets tous graphes confondus</td>
-                    <td>Vérifié à l'insert. <b>Nécessite un compteur persisté</b>, somme des compteurs par source</td>
+                    <td> Uniquement pour mappingModeler et graphmanagement. 0 pour pas le droit</td>
                 </tr>
-                <tr>
-                    <td class="var"><code>allowTripleInsert</code></td>
-                    <td>profil</td>
-                    <td>booléen</td>
-                    <td>À faux, le mappingModeler exporte mais n'écrit pas dans le triplestore</td>
-                    <td>Palier basic, triplets non hébergés</td>
+                 <tr>
+                    <td class="var"><code>maxUploadTriplesPerUser</code></td>
+                    <td>profil + user</td>
+                    <td>nombre</td>
+                    <td>Plafond de triplets tous graphes confondus</td>
+                    <td> Uniquement pour mappingModeler et graphmanagement. 0 pour pas le droit</td>
                 </tr>
+               
 
                 <tr class="sep"><td colspan="5">UserData</td></tr>
+                
                 <tr>
-                    <td class="var"><code>maxUserDataPerSource</code></td>
+                    <td class="var"><code>maxUserDataRecordsPerUser</code></td>
                     <td>profil + user</td>
                     <td>nombre d'entrées</td>
-                    <td>Plafond d'entrées userData rattachées à une source, <b>0 désactive le stockage</b></td>
-                    <td>Comptage direct sur <code>data_source</code>. Le volume reste borné par <code>userData.maximumFileSize</code>, qui plafonne chaque entrée</td>
-                </tr>
-                <tr>
-                    <td class="var"><code>maxUserDataTotal</code></td>
-                    <td>profil + user</td>
-                    <td>nombre d'entrées</td>
-                    <td>Plafond d'entrées userData toutes sources</td>
-                    <td>Pas de compteur à stocker, un COUNT sur le propriétaire suffit</td>
+                    
                 </tr>
 
                 <tr class="sep"><td colspan="5">Instance, protection du serveur</td></tr>

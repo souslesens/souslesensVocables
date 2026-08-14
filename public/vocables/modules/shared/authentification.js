@@ -37,6 +37,8 @@ var authentication = (function () {
                         identifiant: data.user.login,
                         login: data.user.login,
                         groupes: data.user.groups,
+                        allowSourceCreation: data.allowSourceCreation,
+                        maxNumberCreatedSource: data.maxNumberCreatedSource,
                     };
                     $("#user-username").html(" " + authentication.currentUser.identifiant);
                     if (data.authSource == "keycloak") {

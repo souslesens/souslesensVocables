@@ -10,5 +10,7 @@ create table if not exists profiles(
        access_control    json default '{}'::json,
        schema_types      schema_type[],
        quota             json default '{}'::json,
-       max_nt_export_triples integer
+       max_nt_export_triples integer,
+       create_source     boolean,
+       maximum_source    integer
 );

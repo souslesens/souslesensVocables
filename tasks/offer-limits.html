@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Matrice d'offres : leviers techniques par colonne</title>
+<style>
+    :root {
+        color-scheme: light dark;
+        --bg: #ffffff;
+        --fg: #1b1f24;
+        --muted: #5b6470;
+        --border: #dfe3e8;
+        --head-bg: #f4f6f8;
+        --group-data: #dbeefb;
+        --group-tools: #fce6d4;
+        --group-ui: #ede4f6;
+        --group-inst: #e0e0e0;
+        --accent: #1f6feb;
+        --ok: #1a7f37;
+        --partial: #9a6700;
+        --missing: #b3261e;
+        --warn-bg: #fff4e5;
+        --warn-border: #e0a95f;
+    }
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --bg: #14171c;
+            --fg: #e6e9ee;
+            --muted: #9aa4b2;
+            --border: #2b313a;
+            --head-bg: #1c2129;
+            --group-data: #1b3244;
+            --group-tools: #3d2c1c;
+            --group-ui: #2d2440;
+            --group-inst: #2a2f36;
+            --accent: #6ea8ff;
+            --ok: #4ac26b;
+            --partial: #d9a441;
+            --missing: #ff7b72;
+            --warn-bg: #2e2413;
+            --warn-border: #8a6a2f;
+        }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        padding: 2rem 1.25rem 4rem;
+        background: var(--bg);
+        color: var(--fg);
+        font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    main { max-width: 1400px; margin: 0 auto; }
+
+    h1 { font-size: 1.45rem; margin: 0 0 .35rem; letter-spacing: -.01em; }
+
+    .lede { color: var(--muted); margin: 0 0 1.1rem; font-size: .9rem; max-width: 74ch; }
+
+    .legend { display: flex; flex-wrap: wrap; gap: 1.1rem; margin: 0 0 1.5rem; font-size: .84rem; color: var(--muted); }
+
+    .table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+
+    table { border-collapse: collapse; width: 100%; min-width: 1150px; font-size: .86rem; }
+
+    thead th {
+        background: var(--head-bg);
+        text-align: left;
+        font-weight: 600;
+        padding: .65rem .75rem;
+        border-bottom: 1px solid var(--border);
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+    }
+
+    tbody td { padding: .6rem .75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    tbody tr:last-child td { border-bottom: 0; }
+
+    tr.group td {
+        font-weight: 700;
+        font-size: .8rem;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border);
+        color: var(--fg);
+    }
+    tr.group.data td { background: var(--group-data); }
+    tr.group.tools td { background: var(--group-tools); }
+    tr.group.ui td { background: var(--group-ui); }
+    tr.group.inst td { background: var(--group-inst); }
+
+    td.col { font-weight: 600; }
+    td.offre { color: var(--muted); font-size: .82rem; }
+
+    code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: .82em;
+        color: var(--accent);
+        word-break: break-word;
+    }
+
+    .st { font-weight: 700; white-space: nowrap; }
+    .st-ok { color: var(--ok); }
+    .st-partial { color: var(--partial); }
+    .st-missing { color: var(--missing); }
+
+    .callout {
+        margin-top: 1.6rem;
+        padding: .9rem 1.1rem;
+        border: 1px solid var(--warn-border);
+        background: var(--warn-bg);
+        border-radius: 8px;
+        font-size: .88rem;
+        max-width: 88ch;
+    }
+    .callout h2 { font-size: .95rem; margin: 0 0 .5rem; }
+    .callout p { margin: .4rem 0; }
+
+    .recap { margin-top: 2rem; }
+    .recap h2 { font-size: 1.1rem; margin: 0 0 .3rem; }
+    .recap p.sub { color: var(--muted); font-size: .87rem; margin: 0 0 1rem; max-width: 78ch; }
+    .recap table { min-width: 820px; }
+    .recap td.var { white-space: nowrap; font-weight: 600; }
+    .recap tr.sep td { background: var(--head-bg); font-weight: 700; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+
+    .note { margin-top: 1.4rem; font-size: .87rem; color: var(--muted); max-width: 82ch; }
+    .note h2 { font-size: .95rem; color: var(--fg); margin: 0 0 .4rem; }
+    .note li { margin-bottom: .35rem; }
+</style>
+</head>
+<body>
+<main>
+    <h1>Matrice d'offres : ce qu'il faut brider, colonne par colonne</h1>
+    <p class="lede">Une ligne par colonne limitable de la matrice. Pour chacune : la décision retenue, le levier déjà présent dans le code, et le reste à faire.</p>
+
+    <div class="legend">
+        <span><b class="st st-ok">OK</b> levier en place</span>
+        <span><b class="st st-partial">À PORTER</b> existe, mais pas au bon niveau</span>
+        <span><b class="st st-missing">MANQUE</b> rien à ce jour</span>
+    </div>
+
+    <div class="table-scroll">
+    <table>
+        <thead>
+            <tr>
+                <th>Colonne de la matrice</th>
+                <th>Paliers visés</th>
+                <th>Décision</th>
+                <th>Levier existant</th>
+                <th>À faire</th>
+                <th>État</th>
+                <th>Niveau</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="group data"><td colspan="7">SLS server offer Data</td></tr>
+            <tr>
+                <td class="col">Ontologies</td>
+                <td class="offre">default only → limited → unlimited</td>
+                <td>Pas de nouveau compteur. Le nombre de sources créables existe déjà par user, il faut le porter aussi au profil. Le comptage reste dynamique.</td>
+                <td><code>allowSourceCreation</code> et <code>maxNumberCreatedSource</code> (<code>model/users.js:23-24</code>, défaut 5). Comptage dynamique via <code>getOwnedSources()</code> au POST.</td>
+                <td>Mêmes champs sur le profil, arbitrage profil vs user à la lecture</td>
+                <td class="st st-partial">À PORTER</td>
+                <td>profil + user</td>
+            </tr>
+            <tr>
+                <td class="col">Triples</td>
+                <td class="offre">– → limited → négocié → unlimited</td>
+                <td>Deux compteurs : max X triplets par source, et max global tous graphes.</td>
+                <td>Aucun. <code>maxNtExportTriples</code> ne borne que l'export NT, jamais l'insert.</td>
+                <td>Contrôle à l'insert, refus au-delà, sur les deux compteurs</td>
+                <td class="st st-missing">MANQUE</td>
+                <td>profil + user</td>
+            </tr>
+            <tr>
+                <td class="col">UserData</td>
+                <td class="offre">no → limited → full</td>
+                <td>Même schéma : max X userData par source, et max global.</td>
+                <td><code>userData.maximumFileSize</code>, global et par fichier seulement.</td>
+                <td>Compteurs par source et global, la valeur 0 servant de désactivation</td>
+                <td class="st st-missing">MANQUE</td>
+                <td>profil + user</td>
+            </tr>
+
+            <tr class="group tools"><td colspan="7">SLS product Tools</td></tr>
+            <tr>
+                <td class="col">OntoCreator</td>
+                <td class="offre">2 → 10 → full</td>
+                <td>Même levier que la colonne Ontologies : nombre de sources créables par profil, compteur dynamique. Rien de plus.</td>
+                <td>Voir ligne Ontologies</td>
+                <td>Voir ligne Ontologies</td>
+                <td class="st st-partial">À PORTER</td>
+                <td>profil</td>
+            </tr>
+            <tr>
+                <td class="col">Kgquery</td>
+                <td class="offre">default SKGs → full</td>
+                <td>Périmètre des sources déjà couvert. Les brides de coût se branchent au niveau SPARQL, pas dans KGquery.</td>
+                <td><code>sourcesAccessControl</code> pour le périmètre. <code>quota</code> req/min sur <code>sparqlProxy</code>.</td>
+                <td>Voir ligne SPARQL</td>
+                <td class="st st-ok">OK</td>
+                <td>profil</td>
+            </tr>
+            <tr>
+                <td class="col">SPARQL <span style="color:var(--muted);font-weight:400">(sous-jacent à Kgquery, Lineage, Yasgui)</span></td>
+                <td class="offre">limited → full</td>
+                <td>Rien à créer. Les deux brides existent, elles sont mal réglées.</td>
+                <td><code>sparqlDownloadLimit</code> à 10000 pour les lignes. <code>MaxQueryExecutionTime</code> de Virtuoso pour la durée, via <code>VIRT_QUERYEXECTIME</code>.</td>
+                <td>Régler <code>VIRT_QUERYEXECTIME</code> à une valeur utile, et poser un timeout HTTP dans <code>bin/httpProxy.js</code></td>
+                <td class="st st-partial">À RÉGLER</td>
+                <td>global</td>
+            </tr>
+            <tr>
+                <td class="col">mappingModeler</td>
+                <td class="offre">CSV, triplets non hébergés → CSV + save triples → full avec bases</td>
+                <td>Trois choses distinctes derrière une seule colonne.</td>
+                <td><code>allowedDatabases</code> couvre l'accès aux bases SQL.</td>
+                <td>Flag « export seul, insert interdit » pour le palier basic. Le volume généré est déjà couvert par le cap de triplets de la source</td>
+                <td class="st st-partial">À PORTER</td>
+                <td>profil</td>
+            </tr>
+            <tr>
+                <td class="col">Lineage</td>
+                <td class="offre">limited → full</td>
+                <td>À trancher : ce que recouvre « limited » n'est pas défini.</td>
+                <td><code>allowedTools</code>, on/off. <code>sourcesAccessControl</code> pour lecture/écriture.</td>
+                <td>Définir le contenu du palier limited avant tout développement</td>
+                <td class="st st-partial">À DÉFINIR</td>
+                <td>profil</td>
+            </tr>
+            <tr>
+                <td class="col">GraphManagement</td>
+                <td class="offre">no → yes → full</td>
+                <td>Les droits sources actuels suffisent : le droit de lecture donne le download, et l'upload comme le delete de graphe sont ouverts au non-admin uniquement sur les sources dont il est propriétaire. Pas de nouveau levier.</td>
+                <td><code>allowedTools</code> pour le on/off, <code>sourcesAccessControl</code> pour le download, <code>owner</code> et <code>getOwnedSources()</code> pour la propriété.</td>
+                <td>Câbler réellement ces droits sur les 4 routes d'écriture, voir l'encadré ci-dessous</td>
+                <td class="st st-missing">À CÂBLER</td>
+                <td>profil</td>
+            </tr>
+            <tr>
+                <td class="col">API's</td>
+                <td class="offre">no → full</td>
+                <td>Pas de flag d'accès. Le quota par route existant suffit à borner l'usage.</td>
+                <td><code>quota</code> par route et méthode, déjà éditable dans le profil et appliqué par utilisateur.</td>
+                <td>Rien à créer, corriger les défauts du quota actuel</td>
+                <td class="st st-ok">OK</td>
+                <td>profil</td>
+            </tr>
+            <tr>
+                <td class="col">ConfigEditor</td>
+                <td class="offre">no → full</td>
+                <td>Accès à l'outil.</td>
+                <td><code>allowedTools</code></td>
+                <td>–</td>
+                <td class="st st-ok">OK</td>
+                <td>profil</td>
+            </tr>
+            <tr>
+                <td class="col">Plugins</td>
+                <td class="offre">no → full</td>
+                <td>Plugins chargés.</td>
+                <td><code>allowedTools</code>, les plugins y figurent avec <code>type: "plugin"</code>.</td>
+                <td>–</td>
+                <td class="st st-ok">OK</td>
+                <td>profil</td>
+            </tr>
+
+            <tr class="group inst"><td colspan="7">SLS instances</td></tr>
+            <tr>
+                <td class="col">X users simultanés</td>
+                <td class="offre">public SaaS, X simultanés</td>
+                <td>Le but réel est de ne pas saturer Virtuoso, pas de compter les connectés. On borne donc les requêtes SPARQL en vol, pas les sessions.</td>
+                <td>Aucun. Le quota par route est un débit, il n'empêche pas N utilisateurs de tirer leur burst en même temps.</td>
+                <td>Sémaphore global sur <code>sparqlProxy</code>, mise en file au-delà</td>
+                <td class="st st-missing">MANQUE</td>
+                <td>profil</td>
+            </tr>
+
+            <tr class="group ui"><td colspan="7">Config Editor et UI, pour que tout ce qui précède soit pilotable</td></tr>
+            <tr>
+                <td class="col">Section Quota, profil</td>
+                <td class="offre">tous paliers</td>
+                <td>Regrouper tous les plafonds ci-dessus dans une section dédiée de l'éditeur de profil.</td>
+                <td>Les quotas req/min sont déjà éditables dans le profil.</td>
+                <td>Étendre la section aux nouveaux compteurs : triplets, userData, sources, sessions</td>
+                <td class="st st-partial">À ÉTENDRE</td>
+                <td>profil</td>
+            </tr>
+            <tr>
+                <td class="col">Section Quota, user</td>
+                <td class="offre">tous paliers</td>
+                <td>Même section dans l'éditeur d'utilisateur, pour les plafonds de stockage individuels.</td>
+                <td><code>allowSourceCreation</code> et <code>maxNumberCreatedSource</code> existent déjà sur le user.</td>
+                <td>Section complète, plus la règle d'arbitrage entre profil et user, voir la note ci-dessous</td>
+                <td class="st st-partial">À ÉTENDRE</td>
+                <td>user</td>
+            </tr>
+            <tr>
+                <td class="col">Exposition des quotas</td>
+                <td class="offre">tous paliers</td>
+                <td>L'utilisateur doit voir « usage X sur droit Y » avant de heurter le mur.</td>
+                <td>Headers <code>X-RateLimit-*</code>, non cumulatifs et non affichés.</td>
+                <td>Compta de consommation et affichage dans l'UI</td>
+                <td class="st st-missing">MANQUE</td>
+                <td>profil + user</td>
+            </tr>
+            <tr>
+                <td class="col">Bouton « Premium instance »</td>
+                <td class="offre">basic et standard</td>
+                <td>Chaque limite atteinte affiche un paywall menant au bouton, plutôt qu'une erreur sèche.</td>
+                <td>Aucun</td>
+                <td>Composant paywall réutilisable, branché sur chaque refus de quota</td>
+                <td class="st st-missing">MANQUE</td>
+                <td>profil</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <section class="recap">
+        <h2>Variables à créer</h2>
+        <p class="sub">Champs à ajouter, en camelCase comme le reste de <code>profiles.json</code>. Les variables présentes aux deux niveaux portent le même nom, l'arbitrage se fait à la lecture.</p>
+
+        <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>Variable</th>
+                    <th>Niveau</th>
+                    <th>Type</th>
+                    <th>Rôle</th>
+                    <th>Remarque</th>
+                </tr>
+            </thead>
+            <tbody>
+
+
+                Faire des paramètres par défaut
+                <tr class="sep"><td colspan="5">Sources</td></tr>
+                <tr>
+                    <td class="var"><code>allowSourceCreation</code></td>
+                    <td>profil</td>
+                    <td>booléen</td>
+                    <td>Autorise la création de sources</td>
+                    <td>Existe déjà sur le user, à dupliquer   FAIT</td>
+                </tr>
+                <tr>
+                    <td class="var"><code>maxNumberCreatedSource</code></td>
+                    <td>profil</td>
+                    <td>nombre</td>
+                    <td>Nombre de sources créables, comptage dynamique via <code>getOwnedSources()</code></td>
+                    <td>Existe déjà sur le user, à dupliquer   FAIT</td>
+                </tr>
+
+                <tr class="sep"><td colspan="5">Triplets</td></tr>
+                
+                <tr>
+                    <td class="var"><code>maxWritableTriplesPerUser</code></td>
+                    <td>profil + user</td>
+                    <td>nombre</td>
+                    <td>Plafond de triplets tous graphes confondus</td>
+                    <td> Uniquement pour mappingModeler et graphmanagement. 0 pour pas le droit</td>
+                </tr>
+                 <tr>
+                    <td class="var"><code>maxUploadTriplesPerUser</code></td>
+                    <td>profil + user</td>
+                    <td>nombre</td>
+                    <td>Plafond de triplets tous graphes confondus</td>
+                    <td> Uniquement pour mappingModeler et graphmanagement. 0 pour pas le droit</td>
+                </tr>
+               
+
+                <tr class="sep"><td colspan="5">UserData</td></tr>
+                
+                <tr>
+                    <td class="var"><code>maxUserDataRecordsPerUser</code></td>
+                    <td>profil + user</td>
+                    <td>nombre d'entrées</td>
+                    
+                </tr>
+
+                <tr class="sep"><td colspan="5">Instance, protection du serveur</td></tr>
+                <tr>
+                    <td class="var"><code>maxConcurrentSparqlQueries</code></td>
+                    <td>global</td>
+                    <td>nombre</td>
+                    <td>Requêtes SPARQL en vol autorisées simultanément, les suivantes attendent en file</td>
+                    <td>Sémaphore sur <code>sparqlProxy</code>. Se règle sur <code>ServerThreads</code> et <code>MaxClientConnections</code> de <code>virtuoso.ini</code>. Remplace l'idée d'un plafond d'utilisateurs connectés, qui ne mesure pas la charge</td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+    </section>
+
+    <div class="note">
+       
+        <h2>Deux problèmes à ne pas confondre</h2>
+        <p><b>Protéger le serveur</b> et <b>différencier les offres</b> demandent des mécanismes différents. La saturation de Virtuoso dépend des requêtes en vol et de leur coût, pas du nombre de comptes connectés : cent utilisateurs inactifs ne coûtent rien, cinq requêtes lourdes suffisent à saturer. Le premier problème se règle par un sémaphore global plus un timeout, le second par les quotas de profil. Un quota par profil ne protégera jamais le serveur, et un sémaphore global ne vendra jamais une offre.</p>
+        <p>Côté Virtuoso, l'édition libre n'impose aucun quota de requêtes par licence. Ce qui plafonne, c'est <code>ServerThreads</code> et <code>MaxClientConnections</code> dans <code>virtuoso.ini</code>, la RAM des buffers, et l'absence de cluster réservée à l'édition commerciale. Le sémaphore applicatif doit être calé sur ces valeurs.</p>
+
+        <h2>Ce que le sémaphore ne fait pas</h2>
+        <p>Il borne le nombre de requêtes en vol, pas leur durée ni leur répartition entre utilisateurs. Ses deux compléments existent déjà, aucun n'est une variable à créer.</p>
+        <ul>
+            <li><b>La durée</b> est plafonnée par Virtuoso lui-même, via <code>MaxQueryExecutionTime</code>, déjà piloté par <code>VIRT_QUERYEXECTIME</code> dans <code>docker-compose.yaml:44</code>. Deux réglages à revoir : la valeur par défaut vaut <code>20000</code> dans <code>env.template:34</code>, or Virtuoso compte en secondes, soit environ 5 h 30 ; et <code>docker-compose.dev.yaml:9</code> la met à <code>0</code>, donc illimitée. Le mécanisme est au bon endroit mais ne cape rien en l'état.</li>
+            <li><b>La répartition</b> est assurée par le quota par utilisateur, déjà en place : il est déclaré sur le profil mais le bucket est keyé par <code>user.id</code> (<code>model/quota.js:201</code>), donc un script en boucle ne pénalise que son auteur. Sous réserve de corriger les défauts listés ci-dessous.</li>
+        </ul>
+        <p>Une seule chose manque côté application : <b>un timeout HTTP sur le proxy</b>. <code>bin/httpProxy.js</code> n'en pose aucun, donc une connexion Virtuoso pendante garderait un slot de sémaphore indéfiniment. C'est un timeout socket, distinct du timeout de requête SPARQL.</p>
+
+        <h2>Défauts du quota actuel à corriger</h2>
+        <ul>
+            <li><b>Le quota global n'est pas appliqué.</b> Le compteur <code>global</code> est bien incrémenté dans <code>model/quota.js:207</code>, mais son résultat est jeté : <code>tryConsume</code> ne retourne que <code>userResult</code>. Dans <code>app.js:266</code>, <code>generalQuota</code> est consommé avec <code>wholeProfile</code> à faux, donc il retombe sur le bucket de l'utilisateur. Le quota censé protéger le serveur est en fait appliqué par utilisateur.</li>
+            <li><b>Deux quotas partagent une même clé.</b> Le quota de profil et <code>generalQuota</code> écrivent tous deux sur <code>user:&lt;id&gt;:route:method</code> avec des capacités différentes. <code>increment</code> réécrivant <code>entry.capacity</code> dès qu'elle diffère, les deux se chassent mutuellement et deux jetons sont consommés par requête.</li>
+            <li><b>C'est un débit, pas une concurrence.</b> Un token bucket accorde tout son burst d'un coup, donc N utilisateurs peuvent lancer N requêtes au même instant sans dépasser leur quota.</li>
+        </ul>
+
+        <h2>Autres chantiers séparés</h2>
+        <ul>
+            <li>
+                <b>Exploitation de l'instance</b> : limites de ressources des pods, taille du PVC, file d'attente des jobs longs (import, KGbuilder, reasoner, indexation), seuil de refus sur remplissage disque, dimensionnement de
+                <code>VIRT_NBUFFERS</code>. Dépend de la configuration Kubernetes privée de l'hébergeur. Un point à en rapatrier : <b>le nombre de répliques du pod vocables</b>, car les compteurs de quota vivent dans une
+                <code>Map</code> en mémoire du process, donc deux répliques doublent silencieusement le quota effectif.
+            </li>
+            <li><b>LLM</b> : aucun levier par profil aujourd'hui, à étudier.</li>
+        </ul>
+        <h2>Règle d'arbitrage à implémenter</h2>
+        <p>Un utilisateur peut porter plusieurs profils, et <code>getMaxQuotaForRoute</code> (<code>model/profiles.js:309</code>) retient <b>le maximum</b> entre eux, tout comme <code>getMaxNtExportTriplesForUser</code>. Ajouter un profil ne peut donc que desserrer une limite. Cela touche directement le quota mensuel API : il faut soit passer cette règle au minimum, soit faire du sous-quota user le plafond opposable.</p>
+    </div>
+</main>
+</body>
+</html>

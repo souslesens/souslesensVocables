@@ -24,6 +24,8 @@ const ProfileObject = z
         isShared: z.boolean().default(true),
         quota: z.record(z.string(), z.record(z.string(), z.union([z.number(), z.object({ quota: z.number(), wholeProfileQuota: z.boolean() })]))).optional(),
         maxNtExportTriples: z.number().int().positive().optional(),
+        allowSourceCreation: z.boolean().optional(),
+        maxNumberCreatedSource: z.number().int().nonnegative().optional(),
         _type: z.string().default("profile"),
     })
     .strict();
@@ -37,7 +39,8 @@ class ProfileModel {
         this._toolModel = toolModel;
         this._mainConfig = readMainConfig();
         this._quotaCache = { data: null, expiresAt: 0 };
-        this._quotaCacheTTL = 65000;
+        this._allProfilesCache = { data: null, expiresAt: 0 };
+        this._cacheTTL = 65000;
     }
 
     /**
@@ -69,6 +72,8 @@ class ProfileModel {
         access_control: JSON.stringify(profile.sourcesAccessControl || {}),
         quota: profile.quota ? JSON.stringify(profile.quota) : null,
         max_nt_export_triples: profile.maxNtExportTriples ?? null,
+        create_source: profile.allowSourceCreation ?? null,
+        maximum_source: profile.maxNumberCreatedSource ?? null,
         schema_types: profile.allowedSourceSchemas || [],
     });
 
@@ -81,21 +86,32 @@ class ProfileModel {
      * @param {Profile} profile - the profile to convert
      * @returns {Profile} - the converted object with the correct fields
      */
-    _convertToLegacy = (profile) => [
-        profile.label,
-        {
-            id: profile.label,
-            name: profile.label,
-            theme: profile.theme || "",
-            allowedSourceSchemas: typeof profile.schema_types === "string" ? JSON.parse(profile.schema_types) : profile.schema_types,
-            allowedTools: typeof profile.allowed_tools === "string" ? JSON.parse(profile.allowed_tools) : profile.allowed_tools,
-            allowedDatabases: typeof profile.allowed_databases === "string" ? JSON.parse(profile.allowed_databases) : profile.allowed_databases === null ? [] : profile.allowed_databases,
-            isShared: typeof profile.is_shared === "number" ? profile.is_shared === 1 : profile.is_shared,
-            sourcesAccessControl: typeof profile.access_control === "string" ? JSON.parse(profile.access_control) : profile.access_control,
-            quota: typeof profile.quota === "string" ? JSON.parse(profile.quota) : profile.quota || {},
-            maxNtExportTriples: profile.max_nt_export_triples ?? undefined,
-        },
-    ];
+    _convertToLegacy = (profile) => {
+        /* A profile that never set the source creation rights leaves the columns
+         * null, which must stay undefined so the user account rights apply. */
+        let allowSourceCreation;
+        if (profile.create_source !== null && profile.create_source !== undefined) {
+            allowSourceCreation = typeof profile.create_source === "number" ? profile.create_source === 1 : profile.create_source;
+        }
+
+        return [
+            profile.label,
+            {
+                id: profile.label,
+                name: profile.label,
+                theme: profile.theme || "",
+                allowedSourceSchemas: typeof profile.schema_types === "string" ? JSON.parse(profile.schema_types) : profile.schema_types,
+                allowedTools: typeof profile.allowed_tools === "string" ? JSON.parse(profile.allowed_tools) : profile.allowed_tools,
+                allowedDatabases: typeof profile.allowed_databases === "string" ? JSON.parse(profile.allowed_databases) : profile.allowed_databases === null ? [] : profile.allowed_databases,
+                isShared: typeof profile.is_shared === "number" ? profile.is_shared === 1 : profile.is_shared,
+                sourcesAccessControl: typeof profile.access_control === "string" ? JSON.parse(profile.access_control) : profile.access_control,
+                quota: typeof profile.quota === "string" ? JSON.parse(profile.quota) : profile.quota || {},
+                maxNtExportTriples: profile.max_nt_export_triples ?? undefined,
+                allowSourceCreation: allowSourceCreation,
+                maxNumberCreatedSource: profile.maximum_source ?? undefined,
+            },
+        ];
+    };
 
     /**
      * @returns {Promise<Record<string, Profile>>} a collection of profiles
@@ -139,12 +155,27 @@ class ProfileModel {
 
         const quotas = Object.fromEntries(results.map((r) => [r.label, r.quota && typeof r.quota === "string" ? JSON.parse(r.quota) : r.quota || {}]));
 
-        this._quotaCache = { data: quotas, expiresAt: Date.now() + this._quotaCacheTTL };
+        this._quotaCache = { data: quotas, expiresAt: Date.now() + this._cacheTTL };
         return quotas;
     };
 
-    _clearQuotaCache = () => {
+    /**
+     * getAllProfiles behind a short lived cache, for the rights resolved on every request.
+     * @returns {Promise<Record<string, Profile>>} a collection of profiles
+     */
+    _getAllProfilesCached = async () => {
+        if (Date.now() < this._allProfilesCache.expiresAt) {
+            return this._allProfilesCache.data;
+        }
+
+        const profiles = await this.getAllProfiles();
+        this._allProfilesCache = { data: profiles, expiresAt: Date.now() + this._cacheTTL };
+        return profiles;
+    };
+
+    _clearProfileCaches = () => {
         this._quotaCache = { data: null, expiresAt: 0 };
+        this._allProfilesCache = { data: null, expiresAt: 0 };
     };
 
     /**
@@ -229,7 +260,7 @@ class ProfileModel {
         cleanupConnection(conn);
 
         quotaModel.clearConfigCache();
-        this._clearQuotaCache();
+        this._clearProfileCaches();
 
         return true;
     };
@@ -252,7 +283,7 @@ class ProfileModel {
         cleanupConnection(conn);
 
         quotaModel.clearConfigCache();
-        this._clearQuotaCache();
+        this._clearProfileCaches();
 
         return true;
     };
@@ -273,7 +304,7 @@ class ProfileModel {
         const idx = await conn.insert(this._convertToDatabase(data)).into("profiles");
         cleanupConnection(conn);
 
-        this._clearQuotaCache();
+        this._clearProfileCaches();
 
         return idx[0];
     };
@@ -359,6 +390,37 @@ class ProfileModel {
         }
 
         return maxNtExportTriples;
+    };
+
+    /**
+     * Return the source creation rights carried by the profiles of a user.
+     * When several profiles define them, the most permissive value wins.
+     * A field stays undefined when no profile of the user defines it, so the
+     * caller falls back on the rights stored on the user account.
+     * @param {UserAccount} user - the user whose profiles are inspected
+     * @returns {Promise<{ allowSourceCreation: boolean|undefined, maxNumberCreatedSource: number|undefined }>}
+     */
+    getSourceCreationRightsForUser = async (user) => {
+        const allProfiles = await this._getAllProfilesCached();
+        let allowSourceCreation;
+        let maxNumberCreatedSource;
+
+        for (const profileName of user.groups || []) {
+            const profile = allProfiles[profileName];
+            if (profile === undefined) {
+                continue;
+            }
+
+            if (typeof profile.allowSourceCreation === "boolean") {
+                allowSourceCreation = allowSourceCreation || profile.allowSourceCreation;
+            }
+
+            if (typeof profile.maxNumberCreatedSource === "number" && (maxNumberCreatedSource === undefined || profile.maxNumberCreatedSource > maxNumberCreatedSource)) {
+                maxNumberCreatedSource = profile.maxNumberCreatedSource;
+            }
+        }
+
+        return { allowSourceCreation: allowSourceCreation, maxNumberCreatedSource: maxNumberCreatedSource };
     };
 }
 

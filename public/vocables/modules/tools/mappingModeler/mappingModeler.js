@@ -45,6 +45,9 @@ var MappingModeler = (function () {
      */
     self.jstreeDivId = "mappingModeler_dataSourcesJstreeDiv";
     self.columnsMappingsObjects = ["Column", "RowIndex", "VirtualColumn", "URI", "Class"];
+    // object properties already restricted in the model between the two columns of the relation being drawn,
+    // keyed by property URI : {restrictionType, cardinality}. These are the ones highlighted in yellow.
+    self.currentRelationModelRestrictionsMap = {};
     /**
      * ID of the legend container.
      * @type {string}
@@ -738,11 +741,15 @@ var MappingModeler = (function () {
                     );
                     MappingColumnsGraph.addEdge([edge]);
                     self.currentRelation = null;
+                    self.currentRelationModelRestrictionsMap = {};
                     MappingColumnsGraph.relationMessage();
                     JstreeWidget.empty("suggestionsSelectJstreeDiv");
                 };
 
-                if (isBothClasses) {
+                var modelRestriction = self.currentRelationModelRestrictionsMap[resourceUri];
+                if (isBothClasses && modelRestriction) {
+                    createEdge(modelRestriction.restrictionType, modelRestriction.cardinality);
+                } else if (isBothClasses) {
                     self.promptRestrictionType(self.currentSLSsource, self.currentRelation.from.classId, resourceUri, function (err, restrictionType, cardinality) {
                         createEdge(restrictionType, cardinality);
                     });
@@ -912,6 +919,7 @@ var MappingModeler = (function () {
                     if (err) {
                         MainController.errorAlert(err);
                     }
+                    self.currentRelationModelRestrictionsMap = {};
                     jstreeData.forEach(function (item) {
                         if (item?.data?.fromColumn?.id == self.currentRelation.from.id && item?.data?.toColumn?.id == self.currentRelation.to.id) {
                             var restrictionProperty = propertiesCopy.filter(function (prop) {
@@ -919,6 +927,17 @@ var MappingModeler = (function () {
                             });
                             if (restrictionProperty.length > 0) {
                                 restrictionProperty[0].highlight = "yellow";
+                                // property already restricted in the model : its constraint type and cardinality
+                                // will be reused as is when the user picks it, without asking anything.
+                                // a same property can carry several restrictions between the two classes, the
+                                // cardinality one is the most specific so it wins
+                                var alreadyMappedRestriction = self.currentRelationModelRestrictionsMap[item.data.property.id];
+                                if (!alreadyMappedRestriction || !alreadyMappedRestriction.cardinality) {
+                                    self.currentRelationModelRestrictionsMap[item.data.property.id] = {
+                                        restrictionType: item.data.restrictionType,
+                                        cardinality: item.data.cardinality,
+                                    };
+                                }
                             }
                         }
                     });

@@ -30,6 +30,22 @@ var Sparql_OWL = (function () {
     var self = {};
 
     self.ancestorsDepth = 6;
+
+    /**
+     * Query fragment used by getTopConcepts when a source declares no `topClassFilter`.
+     * A root is a class with no named parent class in the queried graphs: no `rdfs:subClassOf` at
+     * all (gufo:Individual, bfo:Entity), or only parents that are `owl:Thing`, an anonymous class
+     * expression, an owl:Restriction, or a class of an ontology that is not loaded.
+     *
+     * A parent is recognised as anonymous by the shape of its IRI, never by `isBlank`: stores
+     * disagree on it, Virtuoso renders genuine blank nodes as `nodeID://` in some graphs and `_:` in
+     * others, and the `<_:b123>` nodes minted on purpose by the ontology pipelines are plain IRIs
+     * that `isBlank` reports as named. Measured on ISO-14224-IOF, 2531 `_:` parents are reported
+     * blank and 21 are not.
+     */
+    self.defaultTopClassFilter =
+        " FILTER NOT EXISTS {?topConcept rdfs:subClassOf ?parentClass. ?parentClass rdf:type owl:Class. filter(!STRSTARTS(STR(?parentClass),'nodeID://') && !STRSTARTS(STR(?parentClass),'_:'))} ";
+
     /**
      * Builds the SPARQL property path expressing the parent/child (taxonomy) relation for a
      * source. Uses `options.specificPredicates` if provided, otherwise the source's configured
@@ -97,14 +113,14 @@ var Sparql_OWL = (function () {
         return str;
     };
     /**
-     * Returns the top-level classes of an OWL source: `owl:Class` instances that have no parent
-     * via the source's taxonomy predicates. Blank nodes are excluded; labels are fetched optionally
+     * Returns the top-level classes of an OWL source: `owl:Class` instances with no named parent
+     * class in the queried graphs. Blank nodes are excluded; labels are fetched optionally
      * and language-filtered.
      *
      * **Top-class filter priority** (first match wins):
      * 1. `options.skipTopClassFilter` → no filter at all
      * 2. `sources.json[source].topClassFilter` (non-empty, non-`"_default"`) → custom SPARQL filter string
-     * 3. Default: `?topConcept rdf:type owl:Class. FILTER(NOT EXISTS { ?topConcept <taxonomyPredicate> ?z })`
+     * 3. Default {@link module:Sparql_OWL.defaultTopClassFilter}: no parent that is a named class of the queried graphs
      *
      * **Other source-level config knobs** (`sources.json`):
      * - `schemaType: "KNOWLEDGE_GRAPH"` — omits the `?topConcept rdf:type owl:Class.` triple
@@ -137,7 +153,7 @@ var Sparql_OWL = (function () {
             if (topClassFilter && topClassFilter != "" && topClassFilter != "_default") {
                 strFilterTopConcept = topClassFilter;
             } else {
-                strFilterTopConcept = "?topConcept rdf:type  owl:Class. filter(NOT EXISTS {?topConcept " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?z}) ";
+                strFilterTopConcept = self.defaultTopClassFilter;
             }
         }
 
@@ -171,7 +187,9 @@ var Sparql_OWL = (function () {
             query += " GRAPH ?subjectGraph {";
         }
         if (Config.sources[sourceLabel].schemaType != "KNOWLEDGE_GRAPH") {
-            query += "?topConcept rdf:type owl:Class.";
+            // the trailing space matters: a topClassFilter starting with a keyword would otherwise
+            // be glued to the dot, and Virtuoso reads `owl:Class.FILTER` as one token
+            query += "?topConcept rdf:type owl:Class. ";
         }
         query += strFilterTopConcept + " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}" + "filter (!isBlank( ?topConcept))";
         if (options.filterCollections) {
@@ -792,6 +810,11 @@ var Sparql_OWL = (function () {
      * Not historical — selected over `getFilteredTriples` on demand: `Lineage_whiteboard` toggles
      * between the two via `options.getFilteredTriples2`, and `nodeRelations_bot` calls it directly
      * to extract a node's distinct properties (`options.distinct = "?prop ?propLabel"`).
+     *
+     * Deliberately not `@expose`d: {@link module:Sparql_OWL.getFilteredTriples} is the API-facing
+     * variant. It batches large id lists, excludes literal objects by default and requires no
+     * `options` argument, whereas this one dereferences `options` unguarded and matches `?prop ?x
+     * ?propType` across every graph.
      * @function
      * @name getFilteredTriples2
      * @memberof module:Sparql_OWL
@@ -806,10 +829,7 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with the matching triples and their labels/types
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `subjectType`, `subjectLabel` (optional), `prop`, `x`, `propType`, `propLabel` (optional), `object`, `objectType`, `objectLabel` (optional), `g`.
-     * @expose
      */
-
-    // know how getFIltered and getFiltered2 are different
     self.getFilteredTriples2 = function (sourceLabel, subjectIds, propertyIds, objectIds, options, callback) {
         var filterStr = "";
 
@@ -1621,6 +1641,12 @@ var Sparql_OWL = (function () {
     /**
      * Returns a map of URI → `rdfs:label` for given URIs (`?s rdfs:label ?sLabel`), falling back
      * to the URI's local name for any URI without a label.
+     *
+     * Deliberately not `@expose`d: {@link module:Sparql_OWL.getLabelsMap} is the API-facing
+     * variant. It paginates instead of capping at 10000 rows and accepts `options.lang`, which
+     * this one lacks — on a multilingual source each URI here keeps whichever label comes last.
+     * A URI list is expressed against `getLabelsMap` through `options.filter`, as
+     * `Sparql_generic` already does.
      * @function
      * @name getUrisLabelsMap
      * @memberof module:Sparql_OWL
@@ -1628,10 +1654,7 @@ var Sparql_OWL = (function () {
      * @param {string[]} uris - URIs whose labels are fetched
      * @param {Function} callback - Error-first callback `(err, labelsMap)` mapping URI → label
      * @returns {err|Object} Throws an error or returns a map from each requested URI to its label.
-     * @expose
      */
-
-    // compare with getLabelsMap and choose one
     self.getUrisLabelsMap = function (sourceLabel, uris, callback) {
         var sparql_url = Config.sources[sourceLabel].sparql_server.url;
         var fromStr = Sparql_common.getFromStr(sourceLabel);
@@ -2581,6 +2604,13 @@ var Sparql_OWL = (function () {
      * each descendant's direct parent and labels. The path operator adapts to options (`+`
      * default, `*` to include the parent, `{0,depth}` for bounded depth), and results are
      * paginated in pages of 2000 with `async.whilst`.
+     *
+     * Deliberately not `@expose`d: {@link module:Sparql_OWL.getNodesAncestorsOrDescendants} is the
+     * API-facing variant. It covers both traversal directions through a single boolean instead of
+     * requiring the caller to spell out a taxonomy predicate, and it returns the hierarchy chains
+     * already rebuilt per input class. This one also drops the paging error (its final
+     * `async.whilst` callback ignores `err`), so a partial result cannot be told from a complete
+     * one — unacceptable on a public API.
      * @function
      * @name getAllDescendants
      * @memberof module:Sparql_OWL
@@ -2593,9 +2623,7 @@ var Sparql_OWL = (function () {
      * @param {string} [options.filter] - Extra SPARQL filter appended to the query
      * @param {Function} callback - Error-first callback `(err, allResults)` with `?descendant`/`?descendantParent` (+labels)
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `descendant`, `descendantParent`, `descendantLabel` (optional), `descendantParentLabel` (optional).
-     * @expose
      */
-    // look with getNodeADesencantORAncestor
     self.getAllDescendants = function (sourceLabel, resourcesIds, taxonomyPredicate, options, callback) {
         if (!options) {
             options = {};

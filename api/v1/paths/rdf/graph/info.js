@@ -43,7 +43,7 @@ export default function () {
     }
 
     GET.apiDoc = {
-        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [], restrictVirtuosoLoad: [] }],
         summary: "Return graph URI and total triple count for a source",
         description:
             "Lightweight endpoint (a single `COUNT(*)` SPARQL query) used by the UI to display graph size before " +

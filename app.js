@@ -21,7 +21,7 @@ import userManager from "./bin/user.js";
 import "./bin/authentication.js";
 import { checkMainConfig, readMainConfig } from "./model/config.js";
 import util from "./bin/util.js";
-import { register, httpRequestDuration, httpRequestsTotal, configureVirtuosoMetrics } from "./bin/metrics.js";
+import { register, httpRequestDuration, httpRequestsTotal, configureVirtuosoMetrics, getVirtuosoLoad, maxLoadThreshold } from "./bin/metrics.js";
 
 const app = express();
 import * as Sentry from "@sentry/node";
@@ -35,7 +35,7 @@ import { attachResponseValidator } from "./bin/responseValidator.js";
 import session from "express-session";
 
 const config = readMainConfig();
-configureVirtuosoMetrics(config.metrics?.virtuoso?.maxPending ?? 50);
+configureVirtuosoMetrics(config.metrics?.virtuoso?.maxPending ?? 50, config.metrics?.virtuoso?.maxLoad ?? 80);
 checkMainConfig(config).then((isValid) => {
     if (!isValid) {
         process.exit(1);
@@ -279,6 +279,15 @@ openapi.initialize({
                     }
                     console.error(`Quota error for ${route} ${method}:`, error);
                 }
+            }
+            return Promise.resolve(true);
+        },
+        restrictVirtuosoLoad: async function (req, scope, definition) {
+            if (getVirtuosoLoad() >= maxLoadThreshold) {
+                throw {
+                    status: 429,
+                    message: `Virtuoso server is overloaded (load: ${getVirtuosoLoad().toFixed(1)}%, threshold: ${maxLoadThreshold}%)`,
+                };
             }
             return Promise.resolve(true);
         },

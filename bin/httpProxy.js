@@ -15,13 +15,13 @@ import superagent from "superagent";
 import superagent_proxy from "superagent-proxy";
 superagent_proxy(superagent);
 import request from "request";
-import { config } from "../model/config.js";
+import ConfigManager from "./configManager.js";
 import { trackVirtuosoRequest, endVirtuosoRequest } from "./metrics.js";
 
 var proxy = null;
 
 function isVirtuosoUrl(url) {
-    return url && config.sparql_server && url.indexOf(config.sparql_server.url) === 0;
+    return url && ConfigManager.config && ConfigManager.config.sparql_server && url.indexOf(ConfigManager.config.sparql_server.url) === 0;
 }
 
 var httpProxy = {

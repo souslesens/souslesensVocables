@@ -61,7 +61,7 @@ var MappingModelerRelations = (function () {
         var classes = null; // Object.keys(classesMap);
         var relations = [];
 
-        Sparql_OWL.getObjectRestrictions(DataSourcesManager.currentSlsvSource, classes, null, function (err, result) {
+        Sparql_OWL.getObjectRestrictions(DataSourcesManager.currentSlsvSource, classes, { includeInherited: true }, function (err, result) {
             if (err) {
                 if (callback) callback(err);
                 return;

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.14.1](https://github.com/souslesens/souslesensVocables/compare/3.14.0...3.14.1) (2026-08-17)
+
+
+### Bug Fixes
+
+* **ci:** update docker actions and remove unused QEMU setup ([6522f61](https://github.com/souslesens/souslesensVocables/commit/6522f617cf376444330d5d15ac73921523067fd1))
+
 ## [3.14.0](https://github.com/souslesens/souslesensVocables/compare/3.12.0...3.14.0) (2026-08-17)
 
 

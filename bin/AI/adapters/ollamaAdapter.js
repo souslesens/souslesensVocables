@@ -18,7 +18,10 @@ function estimateTokens({ system, messages }) {
         if (typeof message.content === "string") {
             totalCharacters += message.content.length;
         } else {
-            totalCharacters += JSON.stringify(message.content).length;
+            // JSON.stringify returns `undefined` for an absent content, and reading `.length` off it
+            // failed the estimate before the call, with a TypeError that says nothing about tokens.
+            const serializedContent = JSON.stringify(message.content);
+            totalCharacters += serializedContent ? serializedContent.length : 0;
         }
     });
     return Math.ceil(totalCharacters / AVERAGE_CHARS_PER_TOKEN);

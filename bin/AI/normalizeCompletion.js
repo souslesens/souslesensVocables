@@ -42,6 +42,12 @@ function normalizeAnthropicCompletion(response) {
 
 const normalizersByProvider = {
     anthropic: normalizeAnthropicCompletion,
+    // The OpenRouter adapter already rebuilds the OpenAI reply as Anthropic content blocks, so the
+    // same normalizer applies and no second flattener has to be kept in sync. That conversion
+    // belongs to the adapter rather than here because the request needs translating too: an
+    // OpenAI-style provider carries tool results as `role: "tool"` messages instead of blocks, and
+    // only the adapter sees the request.
+    openrouter: normalizeAnthropicCompletion,
 };
 
 /**

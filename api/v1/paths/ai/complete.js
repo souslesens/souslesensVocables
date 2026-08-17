@@ -22,14 +22,16 @@ export default function () {
 
             // Refused up front rather than after the call: this route always answers in the
             // normalized shape, so a provider with no normalizer cannot be served at all, with or
-            // without `tools`. Anthropic is the only one wired, because the divergence is not just
-            // the reply shape: OpenAI-style providers also carry tool results back as `role: "tool"`
-            // messages instead of content blocks, so the caller's whole loop would differ.
+            // without `tools`. A provider qualifies once its adapter speaks Anthropic content
+            // blocks in both directions, request included: an OpenAI-style provider carries tool
+            // results back as `role: "tool"` messages, and unless the adapter hides that, the
+            // caller's whole loop would differ and not just this reply's shape.
             if (!normalizersByProvider[provider]) {
+                const supportedProviders = Object.keys(normalizersByProvider);
                 return res.status(501).json({
-                    error: `This route is not implemented for LLM provider "${provider}". Set llm.provider to "anthropic" in config/mainConfig.json. Other routes (classify, alignment) are unaffected.`,
+                    error: `This route is not implemented for LLM provider "${provider}". Set llm.provider to one of ${supportedProviders.join(", ")} in config/mainConfig.json. Other routes (classify, alignment) are unaffected.`,
                     provider: provider,
-                    supportedProviders: Object.keys(normalizersByProvider),
+                    supportedProviders: supportedProviders,
                 });
             }
 
@@ -46,14 +48,27 @@ export default function () {
                 if (error) {
                     // The upstream status is reported in the body rather than as the response
                     // status: a 401 from the provider means the platform's API key is wrong, and
-                    // returning it as-is would tell the browser its own session expired.
+                    // returning it as-is would tell the browser its own session expired. The two
+                    // exceptions are the statuses the caller can act on: 429 says retry later, and
+                    // 413 says this conversation cannot fit the configured per-minute budget at all,
+                    // which retrying will never fix.
                     const upstreamStatus = error.status ?? null;
-                    const status = upstreamStatus === 429 ? 429 : 502;
+                    const isCallerActionable = upstreamStatus === 429 || upstreamStatus === 413;
+                    const status = isCallerActionable ? upstreamStatus : 502;
+                    console.warn(`[ai/complete] ${status}: ${error.message}`);
                     return res.status(status).json({ error: error.message, upstreamStatus: upstreamStatus });
                 }
 
-                const normalized = normalizeCompletion(provider, completion);
-                return res.status(200).json({ ...normalized, model: completion.model });
+                // Guarded rather than left to throw into the callback: normalising a completion whose
+                // shape the adapter did not guarantee must answer the request, not reject a promise
+                // inside llmClient with the HTTP call still open.
+                try {
+                    const normalized = normalizeCompletion(provider, completion);
+                    return res.status(200).json({ ...normalized, model: completion.model });
+                } catch (normalizationError) {
+                    console.error(`[ai/complete] could not normalize the ${provider} completion:`, normalizationError.message);
+                    return res.status(502).json({ error: `The ${provider} answer could not be read: ${normalizationError.message}` });
+                }
             });
         } catch (error) {
             res.status(500).json({ error: error.message });
@@ -72,8 +87,9 @@ export default function () {
             "Forwards `{system, messages, tools}` to the configured LLM provider through `bin/AI/llmClient.js`, which applies the shared rate limiter and " +
             "decrypts the API key. Exists so that an agent loop can run in the browser without the API key ever leaving the server: the caller drives the " +
             "conversation and executes the tools, this route only produces the model's next turn. " +
-            'Requires `llm.provider: "anthropic"`: other providers answer 501, since OpenAI-style providers carry tool results back as `role: "tool"` messages ' +
-            "instead of content blocks, which would change the caller's loop and not just this reply's shape. `classify` and `alignment` are unaffected by that restriction. " +
+            'The wire format is Anthropic content blocks whatever the provider: `llm.provider` may be "anthropic" or "openrouter" (which fronts any tool-calling ' +
+            "model it serves, Kimi and DeepSeek included), and the OpenRouter adapter translates both directions so the caller's loop never changes. Any other " +
+            "provider answers 501, with the supported list in the body. `classify` and `alignment` are unaffected by that restriction. " +
             "`content` is returned unchanged and must be echoed back verbatim as the next assistant message, tool_use blocks included, or the provider " +
             "rejects the tool results that follow it.",
         operationId: "aiComplete",
@@ -100,7 +116,8 @@ export default function () {
                         },
                         tools: {
                             type: "array",
-                            description: "Tool schemas offered to the model, in the provider's format. Anthropic only.",
+                            description:
+                                "Tool schemas offered to the model, in Anthropic format (`{name, description, input_schema}`). The OpenRouter adapter converts them to OpenAI function calling.",
                             items: { type: "object", additionalProperties: true },
                         },
                         maxTokens: {
@@ -157,7 +174,11 @@ export default function () {
                 },
             },
             400: { description: "`messages` missing or empty." },
-            429: { description: "Provider rate limit, or the caller's profile quota for this route." },
+            413: {
+                description:
+                    "This turn alone needs more tokens than the whole configured per-minute budget (`llm.<provider>.rateLimitTPM`). Retrying will not help: shorten the conversation or raise the limit.",
+            },
+            429: { description: "Provider rate limit, the shared per-minute token budget could not be freed in time, or the caller's profile quota for this route." },
             501: { description: "No LLM provider configured, or the configured provider is not supported by this route." },
             502: { description: "The LLM provider refused or is unreachable. `upstreamStatus` carries its status." },
         },

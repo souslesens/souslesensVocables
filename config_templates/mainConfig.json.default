@@ -104,6 +104,10 @@
             "enabled": true,
             "username": "prometheus",
             "password": "changeme"
+        },
+        "virtuoso": {
+            "maxPending": 20,
+            "maxLoad": 80
         }
     }
 }

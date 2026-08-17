@@ -200,6 +200,13 @@ const MainConfigObject = z
                         password: z.string().min(1),
                     })
                     .strict(),
+                virtuoso: z
+                    .object({
+                        maxPending: z.number().positive().default(50),
+                        maxLoad: z.number().positive().max(100).default(80),
+                    })
+                    .strict()
+                    .optional(),
             })
             .strict(),
     })

@@ -16,6 +16,9 @@ const apiDoc = {
         restrictQuota: {
             type: "basic",
         },
+        restrictVirtuosoLoad: {
+            type: "basic",
+        },
     },
     definitions: {
         AuthCheck: {

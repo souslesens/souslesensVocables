@@ -21,7 +21,7 @@ import userManager from "./bin/user.js";
 import "./bin/authentication.js";
 import { checkMainConfig, readMainConfig } from "./model/config.js";
 import util from "./bin/util.js";
-import { register, httpRequestDuration, httpRequestsTotal } from "./bin/metrics.js";
+import { register, httpRequestDuration, httpRequestsTotal, configureVirtuosoMetrics, getVirtuosoLoad, maxLoadThreshold } from "./bin/metrics.js";
 
 const app = express();
 import * as Sentry from "@sentry/node";
@@ -35,6 +35,7 @@ import { attachResponseValidator } from "./bin/responseValidator.js";
 import session from "express-session";
 
 const config = readMainConfig();
+configureVirtuosoMetrics(config.metrics?.virtuoso?.maxPending ?? 50, config.metrics?.virtuoso?.maxLoad ?? 80);
 checkMainConfig(config).then((isValid) => {
     if (!isValid) {
         process.exit(1);
@@ -281,6 +282,15 @@ openapi.initialize({
             }
             return Promise.resolve(true);
         },
+        restrictVirtuosoLoad: async function (req, scope, definition) {
+            if (getVirtuosoLoad() >= maxLoadThreshold) {
+                throw {
+                    status: 429,
+                    message: `Virtuoso server is overloaded (load: ${getVirtuosoLoad().toFixed(1)}%, threshold: ${maxLoadThreshold}%)`,
+                };
+            }
+            return Promise.resolve(true);
+        },
         restrictLoggedUser: async function (req, _scopes, _definition) {
             if (config.auth != "disabled") {
                 const token = req.headers.authorization;
@@ -456,8 +466,8 @@ const basicVocabularies = [
 ];
 
 async function loadBasicVocabularies() {
-    const existingGraphs = await rdfDataModel.getGraphs();
     try {
+        const existingGraphs = await rdfDataModel.getGraphs();
         for (const ontology of basicVocabularies) {
             const matchingGraph = existingGraphs.find((g) => g.name === ontology.graphUri);
             const hasGraph = !!matchingGraph?.count;
@@ -474,8 +484,8 @@ async function loadBasicVocabularies() {
 // Load default graph available in the "graphDownloadUrl" key
 // if no graph is already available in the Virtuoso
 async function loadDefaultGraphs() {
-    const sources = await sourceModel.getAllSources();
     try {
+        const sources = await sourceModel.getAllSources();
         const graphs = await rdfDataModel.getGraphs();
         for (const [, source] of Object.entries(sources)) {
             const graphDownloadUrl = source.graphDownloadUrl;
@@ -484,7 +494,6 @@ async function loadDefaultGraphs() {
                 const matchingGraph = graphs.find((g) => g.name === graphURI);
                 const hasGraph = !!matchingGraph?.count;
                 if (!hasGraph) {
-                    console.log(`Loading graph ${source.graphUri}`);
                     await rdfDataModel.loadGraph(source.graphUri, graphDownloadUrl);
                 }
             }
@@ -494,7 +503,9 @@ async function loadDefaultGraphs() {
     }
 }
 
-void loadBasicVocabularies();
-void loadDefaultGraphs();
+(async () => {
+    await loadBasicVocabularies();
+    await loadDefaultGraphs();
+})();
 
 export default app;

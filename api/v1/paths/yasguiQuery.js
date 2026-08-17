@@ -72,7 +72,7 @@ export default function () {
 
     POST.apiDoc = {
         summary: "Send a SPARQL query to a different domain",
-        security: [{ restrictLoggedUser: [], restrictQuota: [] }],
+        security: [{ restrictLoggedUser: [], restrictQuota: [], restrictVirtuosoLoad: [] }],
         operationId: "sparqlQuery",
         parameters: [
             {

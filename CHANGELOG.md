@@ -2,6 +2,46 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.14.0](https://github.com/souslesens/souslesensVocables/compare/3.12.0...3.14.0) (2026-08-17)
+
+
+### Features
+
+* **axioms:** confirm save before closing dialog with unsaved axiom ([1d37e18](https://github.com/souslesens/souslesensVocables/commit/1d37e18cd286499ae2cdaa4db0e404564534f212))
+* **axioms:** highlight superclass in classes tree during intersection/union editing ([40e797d](https://github.com/souslesens/souslesensVocables/commit/40e797d150968fdc28ed95174b6e2a27abf4d75d))
+* **mappingModeler:** cap N-Triples export size via per-profile setting ([61afa27](https://github.com/souslesens/souslesensVocables/commit/61afa27a3e2698fe17a0f67267fa8a3f9b0474d9))
+* **mappingModeler:** group blank node mappings in triple factory ([6eef29c](https://github.com/souslesens/souslesensVocables/commit/6eef29ca1944f4969d4da7f7b7c3db9735e87572))
+* **mappingModeler:** reuse model restrictions on relation creation ([7d73df7](https://github.com/souslesens/souslesensVocables/commit/7d73df714ce1d04aee386e3a1177bbd019bbcf2a))
+* **mappingModeler:** support deleting restrictions in delete specific triples ([bd3c9d2](https://github.com/souslesens/souslesensVocables/commit/bd3c9d2d35a4944931065eb1f575652cbc54678b))
+* **OntoCreator:** refuse source creation on tool entry (v1) ([be55081](https://github.com/souslesens/souslesensVocables/commit/be5508174bc81e187ba648433b89b927c39bf726))
+* **profiles:** port source creation rights to the profile level (v1) ([767684e](https://github.com/souslesens/souslesensVocables/commit/767684e670cdfee938a1351b210856d7c329d4ca))
+* **source:** improve default topClassFilter query to include subclass check ([86ed26f](https://github.com/souslesens/souslesensVocables/commit/86ed26fa9810a48e7a39730b67778115afb0a564))
+* **sparql:** centralize the default topClassFilter ([142b948](https://github.com/souslesens/souslesensVocables/commit/142b948481e08d6bd2d894b6cd41e6fe4dab01fb))
+
+
+### Bug Fixes
+
+* **browse:** ask for prefix search instead of appending a wildcard ([1b42e98](https://github.com/souslesens/souslesensVocables/commit/1b42e9827997ee6ee30525158d5fcd0c949a251f))
+* **configEditor:** validate source index names ([d69ece5](https://github.com/souslesens/souslesensVocables/commit/d69ece56bac5c6da9cbd6def8f51bd63cc03fe0b))
+* **databases:** throw explicit error instead of silent null on unauthorized db access ([63a11b0](https://github.com/souslesens/souslesensVocables/commit/63a11b0b461efed9b8dd48c113f319ae0642aa4f))
+* dynamic loading config ([5734596](https://github.com/souslesens/souslesensVocables/commit/57345960039741918590566efaddf9888c6362f1))
+* **KGbuilder:** guard against edge with no column mapping ([49cf118](https://github.com/souslesens/souslesensVocables/commit/49cf1181c1d6b92c1fb520d6d05996c9ab24c79b))
+* **KGquery:** clarify batch retrieval progress message ([d723cc4](https://github.com/souslesens/souslesensVocables/commit/d723cc4d228638b27dcb0d05fca36e20e4ae43e1))
+* **KGquery:** display the graph of the selected source on source change ([82940ac](https://github.com/souslesens/souslesensVocables/commit/82940ac1cf0ada27edb077ff6196a42f3008e41f))
+* **KGquery:** superclass label for merged nodes ([59838dd](https://github.com/souslesens/souslesensVocables/commit/59838ddc5fe6061a2e3f5280e19c44d7f053d86f))
+* **KGquery:** use rdfs:label for regrouping superclass nodes ([3a14bdb](https://github.com/souslesens/souslesensVocables/commit/3a14bdbf203b2f9832641749fcefc00db8be37e6))
+* **lineage:** keep source color on chips inside the popup ([6a1343a](https://github.com/souslesens/souslesensVocables/commit/6a1343affb39fdd1708a47523542d44437fac83a)), closes [#f4f4f4](https://github.com/souslesens/souslesensVocables/issues/f4f4f4)
+* **lineage:** scroll relation tree pane instead of whole dialog ([fcaf5fc](https://github.com/souslesens/souslesensVocables/commit/fcaf5fcaebc3bdcc1779a23d0c5e2479f22432e6))
+* **logo:** restore instance logo size to match footer button ([971e1c0](https://github.com/souslesens/souslesensVocables/commit/971e1c0c84e9ef53e56269653102690e847b8c34))
+* **mappingModeler:** link class columns with rdfs:subClassOf ([62a655f](https://github.com/souslesens/souslesensVocables/commit/62a655f19b9da7ef9746ab2c007004c75a60313a))
+* **mappingModeler:** redraw graph after adding resource node ([79c6ee4](https://github.com/souslesens/souslesensVocables/commit/79c6ee44849cd8f5b4e562baed4b2f7527159ef6))
+* **mappingModeler:** restore dropped cardinality in KG restriction triples ([760c0a9](https://github.com/souslesens/souslesensVocables/commit/760c0a9a2c0961f1dbb3c5ef090dfa3aea5131e6))
+* **migrations:** keep only the topClassFilter resets that cannot hide a concept ([f8a73e3](https://github.com/souslesens/souslesensVocables/commit/f8a73e3644e79f26a935a36aebba86507ab84521))
+* **sources:** reset generic topClassFilter to use default query ([e7fa9e2](https://github.com/souslesens/souslesensVocables/commit/e7fa9e212ae55d7d039ffee397a0f72ae5cb3f3a))
+* **sparql:** base the default top classes on named parent classes ([77d4cc7](https://github.com/souslesens/souslesensVocables/commit/77d4cc72a451a3a635c1823db9dee80d60e23345))
+* **sparql:** keep unlabelled concepts when a source sets pref_lang ([13105a2](https://github.com/souslesens/souslesensVocables/commit/13105a23e41df5d1b4617cb364501185e085467c))
+* **ui:** darken paletteIntense colors ([d4cae26](https://github.com/souslesens/souslesensVocables/commit/d4cae262ec95707e2634ef9e52185ad338d1eb57)), closes [#343434](https://github.com/souslesens/souslesensVocables/issues/343434) [#b51d8](https://github.com/souslesens/souslesensVocables/issues/b51d8)
+
 ## [3.12.0](https://github.com/souslesens/souslesensVocables/compare/3.11.0...3.12.0) (2026-07-17)
 
 

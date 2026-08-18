@@ -29,7 +29,10 @@
       "Read(//c/Users/kounnoughi/.claude/**)"
     ],
     "deny": [
-      "Bash(git push:*)",
+      "Bash(git push * master:*)",
+      "Bash(git push * master)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
       "Bash(gh pr create:*)",
       "Bash(gh pr merge:*)",
       "Bash(gh issue comment:*)"

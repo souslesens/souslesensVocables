@@ -14,6 +14,32 @@ function loadRegistry() {
     return requireJson(registryPath);
 }
 
+/**
+ * The SPARQL layer reports a failure in three shapes: an `Error`, the raw triplestore body as a
+ * string (`httpProxy` forwards it as-is when Virtuoso answers with an error instead of bindings),
+ * and the server-side ajax shim's `{ responseText }`. Only the first carries `message`, so reading
+ * `message` alone turned every triplestore syntax error into `[object Object]` and dropped the one
+ * sentence that says what to correct, which is the sentence an agent needs to fix its own query.
+ * @param {Error|string|object} executionError
+ * @returns {string} Text safe to hand back to the caller.
+ */
+function describeExecutionError(executionError) {
+    if (typeof executionError === "string") {
+        return executionError;
+    }
+    if (executionError && typeof executionError.responseText === "string" && executionError.responseText.length > 0) {
+        return executionError.responseText;
+    }
+    if (executionError && typeof executionError.message === "string" && executionError.message.length > 0) {
+        return executionError.message;
+    }
+    try {
+        return JSON.stringify(executionError);
+    } catch (_circularStructureError) {
+        return String(executionError);
+    }
+}
+
 async function runRegisteredSparqlQuery(req, res, returnQueryStr) {
     try {
         const { name, module: moduleName, params = {} } = req.body || {};
@@ -72,7 +98,7 @@ async function runRegisteredSparqlQuery(req, res, returnQueryStr) {
 
         RemoteCodeRunner.runVocablesFn({ moduleName, functionName: name, args: positionalArgs }, userContext, function (error, result) {
             if (error) {
-                return res.status(500).json({ message: error.message || String(error) });
+                return res.status(500).json({ message: describeExecutionError(error) });
             }
             res.status(200).json(result);
         });
@@ -82,4 +108,4 @@ async function runRegisteredSparqlQuery(req, res, returnQueryStr) {
     }
 }
 
-export { runRegisteredSparqlQuery };
+export { runRegisteredSparqlQuery, describeExecutionError };

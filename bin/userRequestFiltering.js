@@ -16,6 +16,18 @@ const parser = new SparqlParser({ skipValidation: true });
 import NodeSqlParser from "node-sql-parser";
 const sqlParser = new NodeSqlParser.Parser();
 
+// A SPARQL comment runs from # to the end of the line. Comments are stripped before any keyword
+// matching, otherwise a commented-out operation is enough to disguise the real one.
+const sparqlCommentLineRegex = /^#[^\n]*/gm;
+// The whole SPARQL prologue, not PREFIX alone: BASE is equally legal before SELECT, and refusing a
+// query for carrying one reads to the caller as "writes are forbidden", which sends it looking for a
+// permission problem instead of removing one line.
+const leadingPrologueDeclarationsRegex = /^(?:\s*(?:PREFIX\s+\S+\s*<[^>]*>|BASE\s*<[^>]*>)\s*)+/i;
+const selectOperationRegex = /^SELECT\b/i;
+// SPARQL 1.1 Update chains operations with `;`. Used both to check each operation of an update
+// independently, and to refuse a read that smuggles an update behind the leading SELECT.
+const chainedUpdateOperationRegex = /;\s*(?=DELETE|INSERT|CLEAR|LOAD|CREATE|DROP|COPY|MOVE|ADD)/i;
+
 // Splits a SPARQL update query at the first WHERE keyword found at brace depth 0.
 // Returns [updateClause, whereClause] where whereClause is null when no top-level WHERE exists.
 // Handles string literals so that { } inside "..." or '...' do not affect brace depth counting.
@@ -367,7 +379,32 @@ var UserRequestFiltering = {
     },
 
     stripSparqlComments: function (query) {
-        return query.replace(/^#[^\n]*/gm, "").trim();
+        return query.replace(sparqlCommentLineRegex, "").trim();
+    },
+
+    /**
+     * True when SELECT is the main operation of the query, comments and PREFIX declarations aside.
+     *
+     * Leading PREFIX lines are removed first so that a sub-SELECT nested inside an update does not
+     * pass for a read, as in `INSERT { ... } WHERE { { SELECT ... } }`. Calling this on an already
+     * stripped query is harmless: stripping comments twice changes nothing.
+     *
+     * An update chained behind the SELECT with `;` is refused too. That check cannot be left to
+     * `checkSelectQuery`, whose parser would reject the chain: `filterSparqlRequest` returns early
+     * for admins and never reaches it, so this is the only place that sees such a query. A `;`
+     * inside a literal followed by one of those keywords costs a false refusal, which is the safe
+     * direction to fail in.
+     *
+     * @param {string} query - SPARQL text, raw or comment-stripped.
+     * @returns {boolean}
+     */
+    isSelectQuery: function (query) {
+        var strippedQuery = UserRequestFiltering.stripSparqlComments(query);
+        var queryCore = strippedQuery.replace(leadingPrologueDeclarationsRegex, "").trim();
+        if (!selectOperationRegex.test(queryCore)) {
+            return false;
+        }
+        return !chainedUpdateOperationRegex.test(queryCore);
     },
 
     filterSparqlRequest: function (query, userSourcesMap, userInfo, callback) {
@@ -380,11 +417,9 @@ var UserRequestFiltering = {
         var strippedQuery = UserRequestFiltering.stripSparqlComments(query);
         var userGraphUrisMap = UserRequestFiltering.getUserGraphUrisMap(userSourcesMap);
 
-        // Route to checkSelectQuery only when SELECT/ASK/CONSTRUCT/DESCRIBE is the main operation.
-        // Strip leading PREFIX declarations first so a sub-SELECT inside an INSERT/DELETE WHERE clause
-        // does not trigger the SELECT branch (e.g. INSERT { ... } WHERE { { SELECT ... } }).
-        var queryCore = strippedQuery.replace(/^(\s*PREFIX\s+\S+\s*<[^>]*>\s*\n?)+/i, "").trim();
-        if (/^SELECT\b/i.test(queryCore)) {
+        // Route to checkSelectQuery only when SELECT is the main operation. The same discriminator
+        // is what /api/v1/sparql/select uses to refuse writes outright.
+        if (UserRequestFiltering.isSelectQuery(strippedQuery)) {
             UserRequestFiltering.checkSelectQuery(strippedQuery, userGraphUrisMap, function (err) {
                 if (err) {
                     return callback(err);
@@ -397,7 +432,7 @@ var UserRequestFiltering = {
             // e.g. DELETE DATA { GRAPH <g1> { ... } } ; INSERT DATA { GRAPH <g2> { ... } }
             // Without the split, only the first operation would be ACL-checked.
             // The lookahead (?=DELETE|INSERT|...) avoids splitting on ; inside literals or subexpressions.
-            var updateOperations = strippedQuery.split(/;\s*(?=DELETE|INSERT|CLEAR|LOAD|CREATE|DROP|COPY|MOVE|ADD)/i);
+            var updateOperations = strippedQuery.split(chainedUpdateOperationRegex);
             var errors = [];
 
             async.eachSeries(

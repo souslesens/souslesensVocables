@@ -264,6 +264,17 @@ const restToolDeclarationSchema = z
             })
             .strict()
             .optional(),
+        // Declares that this route returns one block of a larger result set, and that the MCP
+        // server may walk the rest by appending LIMIT and OFFSET to `queryParam`, one call per
+        // block, when the agent sets `enabledByParam`.
+        pagedCollection: z
+            .object({
+                enabledByParam: z.string().min(1),
+                queryParam: z.string().min(1),
+                batchSize: z.number().positive(),
+            })
+            .strict()
+            .optional(),
         statusHints: z.record(z.string(), z.string().min(1)).optional(),
     })
     .strict();
@@ -363,6 +374,7 @@ function restToolDescriptor(toolDeclaration, routePath, httpMethod) {
         maxResponseBytes: toolDeclaration.maxResponseBytes || null,
         navigableDocument: Boolean(toolDeclaration.navigableDocument),
         registryFunctionGuard: toolDeclaration.registryFunctionGuard || null,
+        pagedCollection: toolDeclaration.pagedCollection || null,
         statusHints: toolDeclaration.statusHints || {},
     };
 }
@@ -429,6 +441,63 @@ async function fetchRestToolDescriptors() {
  * crash-loop the container restart policy can act on.
  * @returns {Promise<{tools: Map<string, object>, registryByKey: Map<string, object>, summary: object}>}
  */
+// ---------------------------------------------------------------------------
+// Store family: one hand-written tool, reading what the size guard held back
+// ---------------------------------------------------------------------------
+
+/**
+ * The counterpart of the result store: every other tool can produce a `resultId`, this one spends it.
+ *
+ * Declared here rather than on a route because it never leaves this process. Its rows are already in
+ * memory, so serving them costs no HTTP call and no triple store work, and putting it behind an
+ * endpoint would only add a hop.
+ */
+function resultPageToolDescriptor() {
+    return {
+        name: "sls_result_page",
+        description:
+            "Searches and reads rows that did not fit an earlier answer. When a result is truncated its `truncation` block carries a `resultId` and a `nextOffset`: pass them here. " +
+            "Works for every tool, not just SPARQL. Rows are held in memory for a limited time and are lost when the server restarts, so read them in the same conversation or run the original tool again. " +
+            "`grep` is the reason to reach for this tool: it keeps only the rows containing a term, across every column at once, and is how you find the handful of rows you need inside thousands without reading them. " +
+            "Search before you page. Walking a large result offset by offset fills your context with rows you will not use, and an aggregate — COUNT, GROUP BY, DISTINCT — often answers the question " +
+            "without any of this. Page only when the question genuinely needs every row in order, and stop as soon as you have what you came for.",
+        inputSchema: {
+            type: "object",
+            properties: {
+                resultId: { type: "string", description: "Identifier from the `truncation.resultId` of an earlier answer." },
+                grep: {
+                    type: "string",
+                    description:
+                        "Keep only the rows containing this text, case-insensitive, matched against every column of the row. Plain text, not a regular expression. " +
+                        "Filtering happens before paging, so `offset` then walks the matches. The answer reports `matchedRows` next to `totalRows`, which tells you whether the term was too narrow or too broad.",
+                },
+                offset: {
+                    type: "number",
+                    description: "First row to read, zero-based. The earlier answer's `truncation.nextOffset` is where it stopped. Counts matches when `grep` is set.",
+                    default: 0,
+                },
+                limit: { type: "number", description: `How many rows to read. Defaults to ${mcpConfig.defaultSparqlLimit}; a page too large for the response budget is truncated and stored again.` },
+            },
+            required: ["resultId"],
+            additionalProperties: false,
+        },
+        annotations: readOnlyAnnotations,
+        family: "store",
+        route: null,
+        httpMethod: null,
+        query: null,
+        body: null,
+        paramDefaults: { offset: 0 },
+        parseJsonPayload: false,
+        emptyListWhenNull: false,
+        resultShape: null,
+        maxResponseBytes: null,
+        navigableDocument: false,
+        registryFunctionGuard: null,
+        statusHints: {},
+    };
+}
+
 export async function buildCatalog() {
     const registry = buildRegistry(true);
 
@@ -463,6 +532,8 @@ export async function buildCatalog() {
     for (const descriptor of restDescriptors) {
         addTool(descriptor);
     }
+
+    addTool(resultPageToolDescriptor());
 
     return {
         tools: tools,

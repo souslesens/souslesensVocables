@@ -60,5 +60,24 @@ export const mcpConfig = {
     // this server cannot know and which is shared between every call of a conversation. A route
     // whose document is legitimately larger raises it for itself through `x-mcp.maxResponseBytes`.
     maxResponseBytes: readPositiveNumber("MCP_MAX_RESPONSE_BYTES", 250000),
-    defaultSparqlLimit: readPositiveNumber("MCP_DEFAULT_SPARQL_LIMIT", 200),
+    // Row ceiling for anything an agent runs against the triple store: the `limit` option injected
+    // into catalog functions, and the LIMIT that /api/v1/sparql/select appends to a raw SELECT that
+    // declares none. One number for both, so a raw query and a catalog call answer at the same
+    // scale. Well under `maxResponseBytes`, which truncates whatever exceeds it anyway.
+    defaultSparqlLimit: readPositiveNumber("MCP_DEFAULT_SPARQL_LIMIT", 1000),
+    // Ceilings for the rows held back from oversized answers, see resultStore.js. In memory and
+    // lost on restart by design: persistence would buy little and cost a file lifecycle. The age
+    // ceiling is what matters on a long-lived server, the other two only cap a burst.
+    resultStoreTtlMs: readPositiveNumber("MCP_RESULT_STORE_TTL_MS", 900000),
+    resultStoreMaxResults: readPositiveNumber("MCP_RESULT_STORE_MAX_RESULTS", 20),
+    // Total across every stored result, not per result, so it bounds the process rather than one
+    // answer. Measured on this platform's triple store, a SPARQL binding row costs about 85 bytes
+    // serialised and closer to 400 as a live object, which puts this ceiling near 250 MB held at
+    // once in the worst case. Raise it and that figure moves with it.
+    resultStoreMaxRows: readPositiveNumber("MCP_RESULT_STORE_MAX_ROWS", 600000),
+    // Ceiling of one collected run, and the reason the platform can hand back a whole A-box extract
+    // without anyone opening KGquery. Kept below the store ceiling on purpose: a run larger than
+    // what the store accepts would be walked block by block and then dropped whole, which is the
+    // worst of both.
+    maxCollectedRows: readPositiveNumber("MCP_MAX_COLLECTED_ROWS", 500000),
 };

@@ -10,6 +10,7 @@
 
 import { mcpConfig } from "./config.js";
 import { slsRequest } from "./slsClient.js";
+import { readPage } from "./resultStore.js";
 
 const wholePlaceholderRegex = /^\{(\w+)\}$/;
 const templatePlaceholderRegex = /\{(\w+)\}/g;
@@ -297,6 +298,71 @@ function acceptsLimitOption(registryEntry) {
 }
 
 /**
+ * @param {*} payload - Flattened tool payload, in any of the three shapes the SPARQL layer returns
+ * @returns {number|null} Row count, or null when the payload carries no rows
+ */
+function countPayloadRows(payload) {
+    if (Array.isArray(payload)) {
+        return payload.length;
+    }
+    if (payload && payload.results && Array.isArray(payload.results.bindings)) {
+        return payload.results.bindings.length;
+    }
+    if (payload && Array.isArray(payload.rawResult)) {
+        return payload.rawResult.length;
+    }
+    return null;
+}
+
+/**
+ * A catalog function answers with rows and nothing else: no total, no flag, no sign that the limit
+ * in force is what ended the list. An agent that asked for 10000 and received exactly 10000 cannot
+ * tell a complete answer from the first page of half a million, and reports the prefix as the set.
+ * Measured case: 10000 notifications announced as the whole list, against 470468 in the graph.
+ *
+ * A row count equal to the limit is the one signal available here, and it is enough to refuse the
+ * claim. Below the limit nothing is said rather than "complete", because the endpoint's own cap can
+ * still have cut the answer without announcing it. `/sparql/select` says more because it discovers
+ * that cap; this path has no equivalent.
+ * @param {*} payload - Flattened tool payload
+ * @param {number|undefined} appliedRowLimit - `options.limit` actually sent to SLS
+ * @returns {object|null} Notice for the response envelope, or null when nothing can be claimed
+ */
+function rowCeilingNoticeForLimit(payload, appliedRowLimit) {
+    if (!appliedRowLimit) {
+        return null;
+    }
+    const returnedRows = countPayloadRows(payload);
+    if (returnedRows === null || returnedRows < appliedRowLimit) {
+        return null;
+    }
+
+    const verifyTheTotal =
+        `Establish the real total with sls_sparql_select and SELECT (COUNT(*) AS ?total) on the same pattern before quoting a figure, ` +
+        `then either raise options.limit to cover it, narrow the question, or hand the same pattern to sls_sparql_select with collect true, which walks the whole set.`;
+
+    if (returnedRows === appliedRowLimit) {
+        return {
+            returnedRows: returnedRows,
+            knownCeiling: appliedRowLimit,
+            atKnownCeiling: true,
+            complete: false,
+            hint: `Cut: ${returnedRows} rows is exactly the limit in force, so this is a prefix of the result, not the result. Never present it to the user as the whole set. ${verifyTheTotal}`,
+        };
+    }
+    // Overshoot rather than a cut: several catalog functions page internally and stop on the first
+    // page that crosses the limit, so they return whole pages and the limit bounded nothing. It is
+    // then no evidence either way, and claiming a cut here would cost the caller a needless re-query.
+    return {
+        returnedRows: returnedRows,
+        knownCeiling: appliedRowLimit,
+        atKnownCeiling: false,
+        complete: "unknown",
+        hint: `${returnedRows} rows came back for a limit of ${appliedRowLimit}: this function pages internally and returns whole pages, so the limit bounded nothing and says nothing about completeness. ${verifyTheTotal}`,
+    };
+}
+
+/**
  * Run a promoted registry function: agent arguments already use the function's own parameter names,
  * so only the `@mcpFixed` values and the default limit are added.
  * @param {object} descriptor
@@ -316,7 +382,11 @@ async function executeSparqlTool(descriptor, toolArguments) {
     }
 
     const result = await slsRequest("POST", "/sparqlQueries/run", { body: { name: descriptor.functionName, module: descriptor.module, params: namedParams } });
-    return result.ok ? { ...result, data: flattenSparqlResult(result.data) } : result;
+    if (!result.ok) {
+        return result;
+    }
+    const flattenedData = flattenSparqlResult(result.data);
+    return { ...result, data: flattenedData, rowCeiling: rowCeilingNoticeForLimit(flattenedData, namedParams.options?.limit) };
 }
 
 // ---------------------------------------------------------------------------
@@ -455,6 +525,8 @@ function resolveGuardedFunction(guard, registryByKey, toolArguments) {
  */
 async function executeRestTool(descriptor, registryByKey, toolArguments) {
     const effectiveArguments = { ...descriptor.paramDefaults, ...toolArguments };
+    // Stays undefined for every route that is not the generic runner, so those get no row notice.
+    let appliedRowLimit;
 
     if (descriptor.registryFunctionGuard) {
         const { registryEntry, refusal } = resolveGuardedFunction(descriptor.registryFunctionGuard, registryByKey, effectiveArguments);
@@ -471,6 +543,7 @@ async function executeRestTool(descriptor, registryByKey, toolArguments) {
                 options.limit = mcpConfig.defaultSparqlLimit;
             }
             suppliedParams.options = options;
+            appliedRowLimit = options.limit;
         }
         effectiveArguments.params = suppliedParams;
     }
@@ -518,9 +591,10 @@ async function executeRestTool(descriptor, registryByKey, toolArguments) {
         return { ...result, data: navigated.value };
     }
     if (shapedData !== result.data) {
-        return { ...result, data: shapedData };
+        return { ...result, data: shapedData, rowCeiling: rowCeilingNoticeForLimit(shapedData, appliedRowLimit) };
     }
-    return { ...result, data: flattenSparqlResult(result.data) };
+    const flattenedData = flattenSparqlResult(result.data);
+    return { ...result, data: flattenedData, rowCeiling: rowCeilingNoticeForLimit(flattenedData, appliedRowLimit) };
 }
 
 // ---------------------------------------------------------------------------
@@ -534,12 +608,158 @@ async function executeRestTool(descriptor, registryByKey, toolArguments) {
  * @param {object} toolArguments
  * @returns {Promise<{ok: boolean, status: number, data: *, errorMessage: string|null, url: string|null}>}
  */
+// ---------------------------------------------------------------------------
+// Paged collection
+// ---------------------------------------------------------------------------
+
+// Collecting past an endpoint's row ceiling only works if consecutive blocks agree on an order.
+// Without ORDER BY the endpoint may return them in an order of its choosing, and two blocks then
+// repeat or skip rows with nothing to show for it. KGquery does not enforce this because a person
+// watches its results scroll past; here they become a CSV the user takes for exact.
+const orderByRegex = /\bORDER\s+BY\b/i;
+const anyLimitOrOffsetRegex = /\b(LIMIT|OFFSET)\s+\d+/i;
+
+/**
+ * Walk a whole result set, one block per call to the underlying route.
+ *
+ * The loop lives here rather than behind the route on purpose, and the reason is the timeout rather
+ * than any question of layering. `slsRequest` gives each call to SLS `requestTimeoutMs` to answer.
+ * With the loop behind the route, that single stopwatch covered every block at once: fifty blocks
+ * of a second and a half blew a sixty-second budget and the whole walk was discarded, forty blocks
+ * of retrieved rows included. Raising the budget was the other way out and a bad trade, since it is
+ * shared by every tool and would make a genuinely stuck one hang for as long. Unpacking the fifty
+ * calls keeps each of them far inside the existing guard, which then goes on protecting everything.
+ *
+ * Blocks are appended to the query text rather than passed as route parameters: the route already
+ * honours a caller's own LIMIT, so nothing new has to be understood on the other side.
+ *
+ * @param {object} descriptor
+ * @param {Map<string, object>} registryByKey
+ * @param {object} toolArguments
+ */
+async function executeCollectedTool(descriptor, registryByKey, toolArguments) {
+    const queryParamName = descriptor.pagedCollection.queryParam;
+    const query = String(toolArguments[queryParamName] ?? "").trim();
+
+    if (anyLimitOrOffsetRegex.test(query)) {
+        return {
+            ok: false,
+            status: 400,
+            data: null,
+            errorMessage:
+                "Remove LIMIT and OFFSET from the query when collect is true: collecting walks the whole result set and manages them itself. Keep them for a single block, which is what collect false does.",
+            url: null,
+        };
+    }
+    // An ORDER BY is what an ordinary reading of "page through a result set" asks for, and it is
+    // precisely what makes the walk impossible here. Virtuoso refuses a sorted result once OFFSET
+    // plus LIMIT passes 10000: "SR353: Sorted TOP clause specifies more then 20000 rows to sort.
+    // Only 10000 are allowed." So an ordered walk dies on its second block and cannot reach the rest,
+    // which is the opposite of what collecting is for. Unsorted OFFSET paging has no such ceiling:
+    // measured against this platform's instance, OFFSET 90000 answers normally. That is also what
+    // `Sparql_OWL.getDictionary` has done for years, one page size and one strategy for the platform.
+    if (orderByRegex.test(query)) {
+        return {
+            ok: false,
+            status: 400,
+            data: null,
+            errorMessage:
+                'Remove the ORDER BY when collect is true. Virtuoso refuses a sorted result past 10000 rows (SR353, "Sorted TOP clause specifies more then N rows to sort"), so an ordered walk stops at the second block and never reaches the rest. ' +
+                "Collecting reads successive blocks in the endpoint's own scan order, which is stable for an unchanging store and is how this platform has always paged. " +
+                "Sort the rows after you have them all, or keep the ORDER BY and leave collect false when the whole result fits under 10000 rows.",
+            url: null,
+        };
+    }
+
+    const batchSize = descriptor.pagedCollection.batchSize;
+    const collectedBindings = [];
+    let responseVars = [];
+    let blockCount = 0;
+    let collectedElapsedMs = 0;
+    let stoppedOnCeiling = false;
+
+    while (true) {
+        const blockQuery = `${query} LIMIT ${batchSize} OFFSET ${collectedBindings.length}`;
+        const blockResult = await executeRestTool(descriptor, registryByKey, { ...toolArguments, [queryParamName]: blockQuery });
+        if (!blockResult.ok) {
+            // A block that fails after others succeeded still fails the call: half a walk answered
+            // as if it were whole is the outcome this whole mechanism exists to avoid.
+            return blockResult;
+        }
+        blockCount += 1;
+        collectedElapsedMs += blockResult.data?.elapsedMs ?? 0;
+        const blockBindings = blockResult.data?.results?.bindings;
+        if (!Array.isArray(blockBindings) || blockBindings.length === 0) {
+            break;
+        }
+        responseVars = blockResult.data.head?.vars ?? responseVars;
+        for (const binding of blockBindings) {
+            collectedBindings.push(binding);
+        }
+        if (collectedBindings.length >= mcpConfig.maxCollectedRows) {
+            stoppedOnCeiling = true;
+            break;
+        }
+    }
+
+    const rowCeiling = {
+        returnedRows: collectedBindings.length,
+        knownCeiling: mcpConfig.maxCollectedRows,
+        collectedBlocks: blockCount,
+        // Summed across the blocks: a collected run is many endpoint calls and the per-call figure
+        // would say nothing about what the walk cost.
+        elapsedMs: collectedElapsedMs,
+        atKnownCeiling: stoppedOnCeiling,
+        complete: !stoppedOnCeiling,
+    };
+    if (stoppedOnCeiling) {
+        rowCeiling.hint =
+            `Stopped at ${collectedBindings.length} rows, the collection ceiling, so more exist. This is the one cut that cannot be walked past from here. ` +
+            `Narrow the query, or split it on an indexed value and collect each part.`;
+    }
+
+    return { ok: true, status: 200, data: { head: { vars: responseVars }, results: { bindings: collectedBindings }, rowCeiling: rowCeiling }, errorMessage: null, url: null };
+}
+
+// ---------------------------------------------------------------------------
+// Store family
+// ---------------------------------------------------------------------------
+
+/**
+ * Serve a window of rows the size guard held back. Answered from this process alone: no SLS call,
+ * no triple store, so paging costs nothing but the tokens of the rows themselves.
+ * @param {object} toolArguments
+ */
+async function executeStoreTool(toolArguments) {
+    const page = readPage(toolArguments.resultId, toolArguments.offset ?? 0, toolArguments.limit ?? mcpConfig.defaultSparqlLimit, toolArguments.grep);
+    if (!page) {
+        // Expiry and a wrong identifier are one message on purpose: the agent's move is the same in
+        // both cases, and inviting it to guess at another identifier would be worse.
+        return {
+            ok: false,
+            status: 404,
+            data: null,
+            errorMessage:
+                `No stored result "${toolArguments.resultId}". Results are held in memory for a limited time and are lost when the server restarts, ` +
+                `so this one either expired or never existed. Run the tool that produced it again to get a fresh resultId.`,
+            url: null,
+        };
+    }
+    return { ok: true, status: 200, data: page, errorMessage: null, url: null };
+}
+
 export async function executeTool(catalog, descriptor, toolArguments) {
     if (descriptor.family === "sparql") {
         return executeSparqlTool(descriptor, toolArguments);
     }
     if (descriptor.family === "rest") {
+        if (descriptor.pagedCollection && toolArguments[descriptor.pagedCollection.enabledByParam]) {
+            return executeCollectedTool(descriptor, catalog.registryByKey, toolArguments);
+        }
         return executeRestTool(descriptor, catalog.registryByKey, toolArguments);
+    }
+    if (descriptor.family === "store") {
+        return executeStoreTool(toolArguments);
     }
     throw new Error(`unknown tool family "${descriptor.family}"`);
 }

@@ -45,7 +45,12 @@ function buildQueryString(queryParams) {
  * @returns {string}
  */
 function messageForStatus(status, payload) {
-    const slsMessage = payload && typeof payload === "object" && payload.message ? String(payload.message) : typeof payload === "string" ? payload : "";
+    // SLS routes report their reason under `message`, but `error` is what express's own handler and
+    // some routes use. Reading only `message` silently replaced a precise refusal with the generic
+    // sentence below, which sends an agent looking for a permission problem it does not have.
+    const payloadIsObject = payload !== null && typeof payload === "object";
+    const reportedReason = payloadIsObject ? payload.message || payload.error : payload;
+    const slsMessage = typeof reportedReason === "string" ? reportedReason : "";
 
     if (status === 401) {
         return "SLS rejected the token. Regenerate one with POST /api/v1/users/token and update the MCP client configuration.";
@@ -95,9 +100,24 @@ export async function slsRequest(method, routePath, options) {
     try {
         response = await fetch(url, fetchOptions);
     } catch (networkError) {
-        const isTimeout = networkError.name === "TimeoutError";
-        const reason = isTimeout ? `no answer within ${mcpConfig.requestTimeoutMs} ms` : networkError.message;
-        return { ok: false, status: 0, data: null, errorMessage: `SLS backend unreachable at ${mcpConfig.slsApiUrl} (${reason}).`, url: url };
+        // A deadline reached and a host that is not there are the same exception and were reported
+        // with the same word, "unreachable". They call for opposite moves. An agent told the platform
+        // was down stops and says so to the user, which is what happened on a query that was merely
+        // heavy: the backend answered every other call in milliseconds throughout.
+        if (networkError.name === "TimeoutError") {
+            return {
+                ok: false,
+                status: 0,
+                data: null,
+                errorMessage:
+                    `This call ran past the ${mcpConfig.requestTimeoutMs} ms deadline and was abandoned. The SousLeSens platform is not down and is very probably still evaluating it: ` +
+                    `nothing here is broken and nothing needs to be reported as an outage. What was asked for is too heavy to answer in one call, and running it again unchanged will end the same way. ` +
+                    `Make it cheaper instead: bind the pattern with an rdf:type, a known predicate or a single graph, or split it on an indexed value and run one part per call, ` +
+                    `one class or one property at a time, then merge the parts yourself.`,
+                url: url,
+            };
+        }
+        return { ok: false, status: 0, data: null, errorMessage: `SLS backend unreachable at ${mcpConfig.slsApiUrl} (${networkError.message}).`, url: url };
     }
 
     const rawText = await response.text();

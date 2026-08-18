@@ -75,12 +75,16 @@ export default function () {
                         "Discover names and parameter contracts with sls_list_query_functions. " +
                         "This is how you reach the rest of the ontology API: property domains and ranges, inferred constraints, individuals, dictionaries, distinct predicates.",
                     params: {
-                        name: { type: "string", required: true, description: "Function name, for instance getDictionary." },
+                        name: { type: "string", required: true, description: "Function name, copied from a sls_list_query_functions entry. For instance getNodeChildren." },
                         module: {
                             type: "string",
                             required: true,
                             enum: ["Sparql_generic", "Sparql_OWL"],
-                            description: "Owning module. Sparql_generic dispatches to the source controller and works on OWL and SKOS alike.",
+                            description:
+                                "Owning module, copied from the same sls_list_query_functions entry as `name`, never guessed. " +
+                                "Fourteen names exist in more than one module and several exist in only one, so only the listed pairing is callable: " +
+                                "getNodeChildren is in both Sparql_generic and Sparql_OWL, getDictionary is in Sparql_OWL alone. " +
+                                "Sparql_generic dispatches to the source controller and works on OWL and SKOS alike.",
                         },
                         params: { type: "Object", required: true, description: "Parameters keyed by name, including an `options` object when the function accepts one." },
                     },

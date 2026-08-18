@@ -23,6 +23,7 @@ import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
+import { storeRows } from "./resultStore.js";
 
 import { mcpConfig } from "./config.js";
 import { executeTool } from "./execute.js";
@@ -51,6 +52,20 @@ function findRows(payload) {
         return {
             rows: payload.results.bindings,
             replace: (keptRows) => ({ ...payload, results: { ...payload.results, bindings: keptRows } }),
+        };
+    }
+    // A page served by sls_result_page. Missing here, a page of wide rows was not recognised as rows
+    // at all and the whole page was replaced by its structure, so the caller received an answer with
+    // no `rows` key. The browser drain reads exactly that key, so a result whose rows were wide
+    // enough to overflow one page could never be drained: it stopped on its first read and the panel
+    // kept the handful of rows the first answer had carried.
+    //
+    // The counters are corrected along with the rows, or the page would announce a window it no
+    // longer carries and an agent paging by `nextOffset` would skip the rows that were cut.
+    if (payload && Array.isArray(payload.rows)) {
+        return {
+            rows: payload.rows,
+            replace: (keptRows) => ({ ...payload, rows: keptRows, returnedRows: keptRows.length, hasMore: true, nextOffset: (payload.offset || 0) + keptRows.length }),
         };
     }
     if (payload && Array.isArray(payload.resources)) {
@@ -98,10 +113,16 @@ function describeOversizedObject(payload) {
  * halved until they fit and the agent is told how many exist. A document has no usable prefix, so
  * it is replaced by its structure. In both cases the answer says what it would take to get the rest,
  * because "narrow the request" is not advice an agent can act on when it asked for a whole taxonomy.
+ *
+ * Cut rows go to the result store rather than to the bin, so the answer can name what it takes to
+ * read the rest instead of declaring it unreachable.
  * @param {*} payload
+ * @param {number} budgetBytes
+ * @param {string} toolName - Quoted back to the agent alongside the stored rows.
+ * @param {boolean} [rowsAlreadyStored] - True when the payload is a window of a stored result, so cutting it needs no second copy.
  * @returns {{payload: *, truncation: object}}
  */
-function applySizeGuard(payload, budgetBytes) {
+export function applySizeGuard(payload, budgetBytes, toolName, rowsAlreadyStored) {
     const initialText = JSON.stringify(payload);
     const initialBytes = initialText === undefined ? 0 : initialText.length;
     if (initialBytes <= budgetBytes) {
@@ -134,6 +155,47 @@ function applySizeGuard(payload, budgetBytes) {
         keptBytes = JSON.stringify(keptPayload).length;
     }
 
+    // A window of a stored result is already held under its own identifier, so storing it again
+    // duplicates rows the process has and, worse, ages the original out: the store keeps a bounded
+    // number of results and evicts the oldest, which during a drain is the very result being read.
+    // A hundred-thousand-row drain died around its twentieth page for exactly that reason.
+    if (rowsAlreadyStored) {
+        return {
+            payload: keptPayload,
+            truncation: {
+                truncated: true,
+                totalRows: totalRows,
+                returnedRows: keptCount,
+                bytes: keptBytes,
+                maxResponseBytes: budgetBytes,
+                hint:
+                    `Only the first ${keptCount} rows of the ${totalRows} you asked for fit this answer. The rest are still in the same stored result: ask again with the same resultId, ` +
+                    `the offset you used plus ${keptCount}. Rows this wide are why the window shrank, so a smaller limit costs nothing and avoids the cut.`,
+            },
+        };
+    }
+
+    // The cut rows are held rather than dropped, so "there is no way to fetch them" stops being
+    // true. When the store refuses them, because the set alone is larger than everything it may
+    // hold, the old advice is the honest one again and it is what the agent gets.
+    const resultId = storeRows(toolName, rowsHolder.rows);
+    if (!resultId) {
+        return {
+            payload: keptPayload,
+            truncation: {
+                truncated: true,
+                totalRows: totalRows,
+                returnedRows: keptCount,
+                bytes: keptBytes,
+                maxResponseBytes: budgetBytes,
+                hint:
+                    `Rows ${keptCount + 1} to ${totalRows} were cut to fit the response budget, and this answer is too large to be held for later reading. ` +
+                    `Narrow the question — more URIs, a predicate, a filter, or an aggregate such as COUNT or GROUP BY that answers it without listing every row. ` +
+                    `If it cannot be narrowed, tell the user that ${totalRows} is how large the answer is rather than working from the first ${keptCount} rows as if they were the whole set.`,
+            },
+        };
+    }
+
     return {
         payload: keptPayload,
         truncation: {
@@ -142,10 +204,13 @@ function applySizeGuard(payload, budgetBytes) {
             returnedRows: keptCount,
             bytes: keptBytes,
             maxResponseBytes: budgetBytes,
+            resultId: resultId,
+            nextOffset: keptCount,
             hint:
-                `Rows ${keptCount + 1} to ${totalRows} were cut to fit the response budget, and there is no way to fetch them from here. ` +
-                `If a narrower query can answer the question — more URIs, a predicate, a filter — run it. If it cannot, because ${totalRows} is simply how large this answer is, ` +
-                `tell the user that figure and ask what to restrict it to rather than working from the first ${keptCount} rows as if they were the whole set.`,
+                `Rows ${keptCount + 1} to ${totalRows} did not fit this answer, but they were kept: reach them with sls_result_page using resultId "${resultId}". ` +
+                `Search them rather than walk them — sls_result_page takes a \`grep\` term matched across every column, which finds the rows you need inside ${totalRows} without reading them. ` +
+                `Page with offset ${keptCount} only when the question really needs every row in order. An aggregate — COUNT, GROUP BY, DISTINCT — often answers it without either. ` +
+                `To hand the whole set to the user rather than read it yourself, say how many rows there are and let the client display or export them.`,
         },
     };
 }
@@ -158,13 +223,18 @@ function toCallToolResult(descriptor, result) {
         };
     }
 
-    const guarded = applySizeGuard(result.data, descriptor.maxResponseBytes || mcpConfig.maxResponseBytes);
+    const guarded = applySizeGuard(result.data, descriptor.maxResponseBytes || mcpConfig.maxResponseBytes, descriptor.name, descriptor.family === "store");
     const truncation = guarded.truncation;
     if (truncation.truncated && descriptor.navigableDocument) {
         // The only tools with nowhere narrower to go are the ones that can be read from inside.
         truncation.hint = `${truncation.hint} Call this tool again with _select to take one part of it, or _grep to keep only the entries matching a term.`;
     }
     const envelope = { tool: descriptor.name, data: guarded.payload, truncation: truncation };
+    // Sits beside `truncation` rather than inside `data`: several tools answer with a bare array, and
+    // wrapping that to carry a notice would change the shape every caller reads rows from.
+    if (result.rowCeiling) {
+        envelope.rowCeiling = result.rowCeiling;
+    }
     return { content: [{ type: "text", text: JSON.stringify(envelope) }] };
 }
 

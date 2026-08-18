@@ -5,6 +5,7 @@ import userManager from "../../../bin/user.js";
 import ConfigManager from "../../../bin/configManager.js";
 import RemoteCodeRunner from "../../../bin/remoteCodeRunner.js";
 import { profileModel } from "../../../model/profiles.js";
+import { describeExecutionError } from "../../../bin/sparqlQueriesRunner.js";
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const requireJson = createRequire(import.meta.url);
@@ -67,7 +68,7 @@ export async function runRegisteredSparqlQuery(req, res, returnQueryStr) {
 
         RemoteCodeRunner.runVocablesFn({ moduleName, functionName: name, args: positionalArgs }, userContext, function (error, result) {
             if (error) {
-                return res.status(500).json({ message: error.message || String(error) });
+                return res.status(500).json({ message: describeExecutionError(error) });
             }
             res.status(200).json(result);
         });

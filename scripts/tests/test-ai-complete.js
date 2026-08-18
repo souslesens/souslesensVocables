@@ -112,9 +112,11 @@ record("normalizer extracts tool calls", normalized.toolCalls.length === 1 && no
 // provider rejects the tool results that follow.
 record("normalizer keeps the raw blocks", normalized.content.length === 2 && normalized.content[1].type === "tool_use", normalized.content.map((block) => block.type).join(","));
 
+// `ollama` is the wired provider whose adapter does not speak tool calls, so the route must keep
+// refusing it. `openrouter` is covered by test-openrouter-tools.js and is supported now.
 let unsupportedProviderThrew = false;
 try {
-    normalizeCompletion("openrouter", cannedToolUseResponse);
+    normalizeCompletion("ollama", cannedToolUseResponse);
 } catch {
     unsupportedProviderThrew = true;
 }

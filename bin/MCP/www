@@ -76,6 +76,16 @@ app.use(function (request, response, next) {
 
 app.use(express.json({ limit: "2mb" }));
 
+// Without this, a body Express cannot parse (malformed JSON, or one over the 2 MB limit) falls to
+// the default error handler, which answers an HTML page. An MCP client reads that as a transport
+// failure with no cause, so the two are told apart here and answered in JSON.
+app.use(function (parseError, _request, response, _next) {
+    const isBodyTooLarge = parseError.type === "entity.too.large";
+    const detail = isBodyTooLarge ? "The request body is over the 2 MB limit." : `The request body is not valid JSON (${parseError.message}).`;
+    console.warn(`[mcp] 400: ${detail}`);
+    return response.status(isBodyTooLarge ? 413 : 400).json({ error: detail });
+});
+
 // An MCP client that fails to authenticate reports a bare "HTTP 401", so the three ways of getting
 // it wrong must be told apart here or they are indistinguishable from the client side.
 const unsubstitutedPlaceholderRegex = /\$\{[^}]*\}|\$[A-Z_][A-Z0-9_]*/;
@@ -141,9 +151,13 @@ app.post("/mcp", async function (request, response) {
     // and no place where a token could be cached beyond the request.
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
     const server = buildMcpServer(catalog);
+    // `close()` is asynchronous on both objects: leaving the promises unhandled means a transport
+    // that fails to shut down takes the whole process out on an unhandled rejection, one request
+    // after the one that actually caused it.
     response.on("close", function () {
-        transport.close();
-        server.close();
+        Promise.all([transport.close(), server.close()]).catch(function (closeError) {
+            console.error("[mcp] could not close the request transport:", closeError.message);
+        });
     });
 
     const requestContext = { token: parsedAuthorization[1], requestId: randomUUID() };
@@ -165,6 +179,24 @@ function rejectSessionRoute(_request, response) {
 }
 app.get("/mcp", rejectSessionRoute);
 app.delete("/mcp", rejectSessionRoute);
+
+// ---------------------------------------------------------------------------
+// Last-resort logging
+//
+// This process has no supervisor that would explain why it stopped. Node kills it on an unhandled
+// rejection with a stack and nothing else, so the two handlers below exist to name the process and
+// the moment before that happens, and to keep a rejection from taking the server down for a fault
+// that concerned one request.
+// ---------------------------------------------------------------------------
+
+process.on("unhandledRejection", function (reason) {
+    console.error("[mcp] unhandled promise rejection:", reason instanceof Error ? reason.stack : reason);
+});
+
+process.on("uncaughtException", function (error) {
+    console.error("[mcp] uncaught exception, shutting down:", error.stack || error.message);
+    process.exit(1);
+});
 
 // ---------------------------------------------------------------------------
 // Listen

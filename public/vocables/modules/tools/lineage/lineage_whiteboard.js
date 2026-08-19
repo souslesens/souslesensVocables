@@ -57,6 +57,11 @@ var Lineage_whiteboard = (function () {
     self.MoreOptionsShow = {};
     var graphContext = {};
 
+    // Optional plugin embedded in the lateral panel. Named here rather than imported: plugins are
+    // discovered at boot from the plugins directory, so an instance without it must simply leave
+    // its two containers empty. See mountChatbotPlugin.
+    self.chatbotPluginName = "sls-chatbot";
+
     self.propertyColors = {};
     self.defaultShape = "dot";
     self.defaultShapeSize = 5;
@@ -231,6 +236,7 @@ var Lineage_whiteboard = (function () {
         if (Lineage_legendOverlay && typeof Lineage_legendOverlay.destroy === "function") {
             Lineage_legendOverlay.destroy();
         }
+        self.unloadChatbotPlugin();
 
         $("#graphDiv").empty();
         $("#lateralPanelDiv").resizable("destroy");
@@ -280,6 +286,7 @@ var Lineage_whiteboard = (function () {
             }
             $("#lateralPanelDiv").load("./modules/tools/lineage/html/lateralPanel.html", function () {
                 Lineage_whiteboard.initWhiteboardTab();
+                Lineage_whiteboard.mountChatbotPlugin();
                 //  Lineage_whiteboard.initClassesTab();
 
                 if (self._pendingDataLoaded) {
@@ -5160,6 +5167,80 @@ attrs.color=self.getSourceColor(superClassValue)
             $("#Lineage_MoreActionsButtons").hide();
             self.MoreActionsShow = false;
             $("#Lineage_MoreActionsSection").addClass("TitleBoxLine");
+        }
+    };
+
+    /**
+     * @function
+     * @name mountChatbotPlugin
+     * @memberof module:Lineage_whiteboard
+     * Draws the chat bot plugin at the bottom of the lateral panel, on the instances that have it
+     * installed.
+     *
+     * A capability check rather than an import: plugins are discovered at boot from the plugins
+     * directory, so the dock stays empty wherever the plugin is absent. It sits below the tabs
+     * rather than in one of them, so the same conversation is at hand from Classes or Containers
+     * as from the Whiteboard. Mounted reduced, so it drops its frame and sends what the agent does
+     * to UI.message, and on the host whiteboard, so that nodes it is asked to show land on this
+     * graph.
+     * @returns {void}
+     */
+    self.mountChatbotPlugin = function () {
+        var chatbotTool = Config.userTools ? Config.userTools[self.chatbotPluginName] : null;
+        var chatbotController = chatbotTool ? chatbotTool.controller : null;
+        if (!chatbotController || typeof chatbotController.mount !== "function") {
+            return;
+        }
+        // After the mount, never before: mount() fills the dock asynchronously and replaces its
+        // content, which would throw away the handle resizable appends inside it.
+        chatbotController.mount("#lineage_chatbotDock", { reduced: true, hostWhiteboard: true }, self.makeChatbotDockResizable);
+    };
+
+    /**
+     * @function
+     * @name makeChatbotDockResizable
+     * @memberof module:Lineage_whiteboard
+     * Lets the chat bot dock be dragged taller or shorter by its top edge, the way the lateral
+     * panel itself is dragged wider or narrower.
+     *
+     * Until it is dragged the dock has no height of its own: it is as tall as the conversation
+     * needs, capped by the plugin. Dragging replaces that by an explicit height, so the cap is
+     * lifted at the same time — left in place it would fight every drag past it.
+     * @returns {void}
+     */
+    self.makeChatbotDockResizable = function () {
+        $("#lineage_chatbotDock").resizable({
+            handles: "n",
+            // Enough to keep the ask box and its fold handle; below that, use the fold.
+            minHeight: 70,
+            start: function () {
+                this.style.setProperty("--chatbot-max-height", "100%");
+                $(this).resizable("option", "maxHeight", Math.max(140, $("#lateralPanelDiv").height() - 160));
+            },
+            resize: function (event, ui) {
+                // The north handle normally moves the element up as it grows it. Here the dock is
+                // the last item of a flex column, so growing it already pushes it up on its own:
+                // letting jQuery UI also offset `top` would lift it off the bottom of the panel.
+                ui.position.top = ui.originalPosition.top;
+            },
+        });
+    };
+
+    /**
+     * @function
+     * @name unloadChatbotPlugin
+     * @memberof module:Lineage_whiteboard
+     * Stops the embedded chat bot when Lineage goes away.
+     *
+     * MainController only unloads the controller of the current tool, which here is Lineage, so
+     * without this an agent still running keeps its loop alive and writes into a removed panel.
+     * @returns {void}
+     */
+    self.unloadChatbotPlugin = function () {
+        var chatbotTool = Config.userTools ? Config.userTools[self.chatbotPluginName] : null;
+        var chatbotController = chatbotTool ? chatbotTool.controller : null;
+        if (chatbotController && typeof chatbotController.unload === "function") {
+            chatbotController.unload();
         }
     };
 

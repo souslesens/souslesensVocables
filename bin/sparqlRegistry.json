@@ -101,7 +101,9 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "summary": "Returns the top-level classes of an OWL source: `owl:Class` instances with no named parent class in the queried graphs. Blank nodes are excluded; labels are fetched optionally and language-filtered.",
+        "access": "read"
     },
     {
         "name": "getNodeChildren",
@@ -195,7 +197,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "read"
     },
     {
         "name": "getNodeInfos",
@@ -259,7 +262,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "read"
     },
     {
         "name": "getNodeParents",
@@ -335,12 +339,13 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "read"
     },
     {
         "name": "getNodesAncestorsOrDescendants",
         "module": "Sparql_OWL",
-        "description": "Returns the ancestor (or descendant) hierarchies of given class(es), supporting multiple hierarchy branches per class. Runs a nested `?class rdfs:subClassOf*[+] ?superClass` query (direction depends on `options.descendants`) and rebuilds, for each input class, its hierarchy as an array of hierarchy items in JS, skipping blank-node superclasses. Used by `OntologyModels` to fetch the hierarchies of a set of nodes (start/end nodes).",
+        "description": "Returns the ancestor or descendant hierarchy of given class(es), one ordered branch list per class, `options.descendants` choosing the direction: how you specialise a class or enumerate its subtypes. Returns nothing when the children are attached through an OWL restriction rather than a direct `rdfs:subClassOf`, in which case walk the restriction blank nodes with {@link module:Sparql_OWL.getFilteredTriples}. Runs a nested `?class rdfs:subClassOf*[+] ?superClass` query (direction depends on `options.descendants`) and rebuilds, for each input class, its hierarchy as an array of hierarchy items in JS, skipping blank-node superclasses. Used by `OntologyModels` to fetch the hierarchies of a set of nodes (start/end nodes).",
         "params": [
             {
                 "name": "sourceLabel",
@@ -393,7 +398,14 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "summary": "Returns the ancestor or descendant hierarchy of given class(es), one ordered branch list per class, `options.descendants` choosing the direction: how you specialise a class or enumerate its subtypes. Returns nothing when the children are attached through an OWL restriction rather than a direct `rdfs:subClassOf`, in which case walk the restriction blank nodes with {@link module:Sparql_OWL.getFilteredTriples}.",
+        "access": "read",
+        "mcpTool": "sls_node_descendants",
+        "mcpFixed": {
+            "options.descendants": true,
+            "options.excludeItself": true
+        }
     },
     {
         "name": "getFilteredTriples2",
@@ -463,12 +475,13 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
-        "example": null
+        "example": null,
+        "summary": "Alternative to {@link module:Sparql_OWL.getFilteredTriples} that resolves the type and label of subject, property and object from any graph, then matches the actual triples in the source's own graph. Filters by subject/property/object ids."
     },
     {
         "name": "getFilteredTriples",
         "module": "Sparql_OWL",
-        "description": "Returns triples filtered by any combination of subject/property/object ids, with subject, property and object labels and types. Literal objects are excluded by default. Subject or object id lists are sliced into `Sparql_generic.slicesSize` batches and queried with `async.eachSeries`, concatenating results. Canonical, widely used triple-fetch helper (Lineage, MappingModeler, bots). See {@link module:Sparql_OWL.getFilteredTriples2} for the cross-graph variant.",
+        "description": "Returns triples filtered by any combination of subject/property/object ids, with subject, property and object labels and types. The traversal workhorse: pass `objectIds` to find what points at a node, which is how OWL restriction blank nodes get resolved. Literal objects are excluded by default. Subject or object id lists are sliced into `Sparql_generic.slicesSize` batches and queried with `async.eachSeries`, concatenating results. Canonical, widely used triple-fetch helper (Lineage, MappingModeler, bots). See {@link module:Sparql_OWL.getFilteredTriples2} for the cross-graph variant.",
         "params": [
             {
                 "name": "sourceLabel",
@@ -551,12 +564,15 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "summary": "Returns triples filtered by any combination of subject/property/object ids, with subject, property and object labels and types. The traversal workhorse: pass `objectIds` to find what points at a node, which is how OWL restriction blank nodes get resolved. Literal objects are excluded by default.",
+        "access": "read",
+        "mcpTool": "sls_filtered_triples"
     },
     {
         "name": "getObjectPropertiesDomainAndRange",
         "module": "Sparql_OWL",
-        "description": "Returns object (or datatype) properties with their domains, ranges, sub-properties and inverse properties (plus all labels). The id filter can target the domain, range, prop or subProp depending on options, and a `searchType` mode searches by words on prop/domain/range. With `addInverseRestrictions`, recursively merges the inverse-direction results.",
+        "description": "Returns object (or datatype) properties with their domains, ranges, sub-properties and inverse properties: what links what to what in a source, which is how you answer \"can these two classes be related, and through which property\". Omit `domainIds` for the whole source's property schema. Annotation properties and plain RDF/OWL vocabulary legitimately have no declared domain or range, so an empty answer for one of those is not a defect. The id filter can target the domain, range, prop or subProp depending on options, and a `searchType` mode searches by words on prop/domain/range. With `addInverseRestrictions`, recursively merges the inverse-direction results.",
         "params": [
             {
                 "name": "sourceLabel",
@@ -651,12 +667,15 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "summary": "Returns object (or datatype) properties with their domains, ranges, sub-properties and inverse properties: what links what to what in a source, which is how you answer \"can these two classes be related, and through which property\". Omit `domainIds` for the whole source's property schema. Annotation properties and plain RDF/OWL vocabulary legitimately have no declared domain or range, so an empty answer for one of those is not a defect.",
+        "access": "read",
+        "mcpTool": "sls_property_schema"
     },
     {
         "name": "getObjectRestrictions",
         "module": "Sparql_OWL",
-        "description": "Returns OWL restrictions on classes: matches `?subject rdfs:subClassOf ?node`, `?node rdf:type owl:Restriction`, `?node owl:onProperty ?prop` and the constraint value (`owl:someValuesFrom`/`allValuesFrom`/`hasValue`/`onClass`) plus any cardinality. Property and value labels are filled afterwards (including from imported sources via {@link module:Sparql_OWL.getLabelsMap}).",
+        "description": "Returns the property triples a class carries as OWL restrictions: property, constraint type, target value and cardinality, with their labels. This is how a class declares its attributes, so it is the answer to \"what can I say about an instance of this class\". Returns nothing when the class carries no direct restriction, in which case try its parent. Matches `?subject rdfs:subClassOf ?node`, `?node rdf:type owl:Restriction`, `?node owl:onProperty ?prop` and the constraint value (`owl:someValuesFrom`/`allValuesFrom`/`hasValue`/`onClass`) plus any cardinality. Property and value labels are filled afterwards (including from imported sources via {@link module:Sparql_OWL.getLabelsMap}).",
         "params": [
             {
                 "name": "sourceLabel",
@@ -757,7 +776,10 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "summary": "Returns the property triples a class carries as OWL restrictions: property, constraint type, target value and cardinality, with their labels. This is how a class declares its attributes, so it is the answer to \"what can I say about an instance of this class\". Returns nothing when the class carries no direct restriction, in which case try its parent.",
+        "access": "read",
+        "mcpTool": "sls_node_properties"
     },
     {
         "name": "getNamedIndividuals",
@@ -803,7 +825,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "read"
     },
     {
         "name": "getNodesTypes",
@@ -829,7 +852,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
-        "example": null
+        "example": null,
+        "summary": "Returns the `rdf:type` triples (with their graph) for given resources, batching the ids into slices of 200 and concatenating results (`GRAPH ?g { ?subject rdf:type ?type }`)."
     },
     {
         "name": "getNodesOwlTypeMap",
@@ -855,12 +879,14 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "summary": "Returns a map of each resource URI to a simplified OWL type — `\"NamedIndividual\"`, `\"Class\"` or `\"Restriction\"` — derived from its concatenated `rdf:type` values, batching the ids into slices of 200.",
+        "access": "read"
     },
     {
         "name": "getPropertiesRestrictionsDescription",
         "module": "Sparql_OWL",
-        "description": "Returns, for given properties, the restrictions that use them and the source/target classes involved: `?restriction owl:onProperty ?prop`, `?sourceClass <taxonomyPredicate> ?restriction`, plus the constraint value (`owl:someValuesFrom`/`allValuesFrom`/`hasValue`/ cardinality) as `?targetClass`. Missing labels are filled afterwards.",
+        "description": "Returns which classes actually use the given properties, and against which target classes: the reverse of asking a class what it declares. Takes **property** URIs, so a class URI simply returns nothing; get property URIs from {@link module:Sparql_generic.getDistinctPredicates} or {@link module:Sparql_OWL.getObjectPropertiesDomainAndRange}. Matches `?restriction owl:onProperty ?prop`, `?sourceClass <taxonomyPredicate> ?restriction`, plus the constraint value (`owl:someValuesFrom`/`allValuesFrom`/`hasValue`/ cardinality) as `?targetClass`. Missing labels are filled afterwards.",
         "params": [
             {
                 "name": "sourceLabel",
@@ -913,7 +939,10 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "summary": "Returns which classes actually use the given properties, and against which target classes: the reverse of asking a class what it declares. Takes **property** URIs, so a class URI simply returns nothing; get property URIs from {@link module:Sparql_generic.getDistinctPredicates} or {@link module:Sparql_OWL.getObjectPropertiesDomainAndRange}.",
+        "access": "read",
+        "mcpTool": "sls_property_usage"
     },
     {
         "name": "getUrisLabelsMap",
@@ -939,7 +968,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
-        "example": null
+        "example": null,
+        "summary": "Returns a map of URI → `rdfs:label` for given URIs (`?s rdfs:label ?sLabel`), falling back to the URI's local name for any URI without a label."
     },
     {
         "name": "getLabelsMap",
@@ -1009,7 +1039,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "read"
     },
     {
         "name": "getDictionary",
@@ -1103,7 +1134,9 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "summary": "Returns the dictionary of a source — the list of its resources as `{id, label}` (plus the graph when `selectGraph`) — paginating in chunks of 2000 with `async.whilst`. Each page is either passed to a `processor` callback (for streaming) or accumulated and returned at the end. Supports type/label/blank-node filters and skos:prefLabel.",
+        "access": "read"
     },
     {
         "name": "getObjectProperties",
@@ -1155,7 +1188,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "read"
     },
     {
         "name": "generateInverseRestrictions",
@@ -1239,7 +1273,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "read"
     },
     {
         "name": "getInferredPropertiesDomainsAndRanges",
@@ -1279,7 +1314,9 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "summary": "Returns all object properties of a source with their inferred domains, ranges, sub-properties and inverse properties (and their labels), assembled from a multi-`UNION` query and folded into a per-property map. Domains/ranges of inverse properties are also covered.",
+        "access": "read"
     },
     {
         "name": "getAllTriples",
@@ -1371,7 +1408,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "read"
     },
     {
         "name": "getDistinctClassLabels",
@@ -1443,7 +1481,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "read"
     },
     {
         "name": "getIndividualsOfClass",
@@ -1475,7 +1514,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "read"
     },
     {
         "name": "clearGraph",
@@ -1585,7 +1625,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
-        "example": null
+        "example": null,
+        "summary": "Returns all descendants of given resources via a configurable taxonomy predicate, with each descendant's direct parent and labels. The path operator adapts to options (`+` default, `*` to include the parent, `{0,depth}` for bounded depth), and results are paginated in pages of 2000 with `async.whilst`."
     },
     {
         "name": "getGraphsWithSameClasses",
@@ -1611,7 +1652,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": false,
-        "example": null
+        "example": null,
+        "summary": "Finds the named graphs that share subjects with a source's graph: an inner `SELECT ?sub` over the source graph feeds an outer `GRAPH ?g { ?sub ?p ?obj }`, returning the distinct graphs containing those subjects."
     },
     {
         "name": "createSkgFromOntology",
@@ -1663,12 +1705,13 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "read"
     },
     {
         "name": "getNodesSuperClassesAndDefinition",
         "module": "Sparql_OWL",
-        "description": "Returns, for each given node, its label, definition (`dcterms:description`| `rdfs:isDefinedBy`|`skos:definition`) and up to four levels of OWL super-classes with their labels, by chaining nested `OPTIONAL` blocks on `rdfs:subClassOf` (each super-class is restricted to `rdf:type owl:Class`). Used by `Lineage_selection.exportCsv` to dump the whiteboard classes and their hierarchy/definition as a tab-separated file.",
+        "description": "Returns, for each given node, its label, textual definition (`dcterms:description`| `rdfs:isDefinedBy`|`skos:definition`) and up to four levels of OWL super-classes with their labels. The cheapest way to confirm you picked the right sense of a term before grounding an answer on it. OWL sources only. Built by chaining nested `OPTIONAL` blocks on `rdfs:subClassOf` (each super-class is restricted to `rdf:type owl:Class`). Used by `Lineage_selection.exportCsv` to dump the whiteboard classes and their hierarchy/definition as a tab-separated file.",
         "params": [
             {
                 "name": "sourceLabel",
@@ -1703,7 +1746,10 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "summary": "Returns, for each given node, its label, textual definition (`dcterms:description`| `rdfs:isDefinedBy`|`skos:definition`) and up to four levels of OWL super-classes with their labels. The cheapest way to confirm you picked the right sense of a term before grounding an answer on it. OWL sources only.",
+        "access": "read",
+        "mcpTool": "sls_node_definition"
     },
     {
         "name": "getClassesWithoutTaxonomy",
@@ -1743,7 +1789,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "read"
     },
     {
         "name": "getTopConcepts",
@@ -1782,7 +1829,7 @@
             "description": "Throws an error or returns SPARQL results with variables: `topConcept`, `topConceptLabel`."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
+        "expose": false,
         "example": null
     },
     {
@@ -1834,8 +1881,9 @@
             "description": "Throws an error or returns SPARQL results with variables: `subject`, `subjectLabel` (optional), `child1`, `child1Label` (optional), `child1Type` (optional), depth-indexed `childN` (optional), `childNLabel` (optional), `childNType` (optional); with `options.filterCollections`: `collection`, `acollection`, `collectionLabel`, `acollectionLabel`."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
-        "example": null
+        "expose": false,
+        "example": null,
+        "summary": "Returns the children of node(s) down to a given depth in a SKOS hierarchy. Builds nested `OPTIONAL` blocks chaining `?childN+1 skos:broader ?childN` (up to `optionalDepth`), each fetching the child's preferred label (optionally language-filtered) and `rdf:type`. The `ids`/`words` parent filter is required."
     },
     {
         "name": "getCollectionNodes",
@@ -1874,7 +1922,7 @@
             "description": "Throws an error or returns SPARQL results with variables: `subject`, `predicate`, `object`, `type`; with a collection: `collection`, `acollection`, `collectionLabel`, `acollectionLabel`, `subjectLabel`."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
+        "expose": false,
         "example": null
     },
     {
@@ -1944,7 +1992,7 @@
             "description": "Throws an error or returns SPARQL results with variables: `subject`, `subjectLabel` (optional), `type` (optional), `broader1` (optional), `broader1Label` (optional), `broader1Type` (optional), depth-indexed `broaderN` (optional), `broaderNLabel` (optional), `broaderNType` (optional)."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
+        "expose": false,
         "example": null
     },
     {
@@ -1990,7 +2038,7 @@
             "description": "Throws an error or returns SPARQL results with variables: `id`, `prop`, `value`, `valueLabel` (optional), `propLabel` (optional)."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
+        "expose": false,
         "example": null
     },
     {
@@ -2030,7 +2078,7 @@
             "description": "Throws an error or returns SPARQL results with variables: `subject`, `x`, `y`, `subjectLabel` (optional)."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
+        "expose": false,
         "example": null
     },
     {
@@ -2056,7 +2104,7 @@
             "description": "Throws an error or returns SPARQL results with variables: `subject`, `broader`, `broaderLabel`, `type`."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
+        "expose": false,
         "example": null
     },
     {
@@ -2082,7 +2130,7 @@
             "description": "Throws an error or returns SPARQL results with variables: `subject`, `narrower`, `narrowerLabel`, `type`."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
+        "expose": false,
         "example": null
     },
     {
@@ -2108,7 +2156,7 @@
             "description": "Throws an error or returns SPARQL results with variables: `subject`, `type`, `subjectLabel`."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
+        "expose": false,
         "example": null
     },
     {
@@ -2134,7 +2182,7 @@
             "description": "Throws an error or returns SPARQL results with variables: `subject`, `prop`, `value`."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
+        "expose": false,
         "example": null
     },
     {
@@ -2172,7 +2220,7 @@
             "description": "Throws an error or returns the callback result."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
+        "expose": false,
         "example": null
     },
     {
@@ -2218,7 +2266,7 @@
             "description": "Throws an error or returns the callback result."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
+        "expose": false,
         "example": null
     },
     {
@@ -2244,7 +2292,7 @@
             "description": "Throws an error or returns the callback result."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
+        "expose": false,
         "example": null
     },
     {
@@ -2264,7 +2312,7 @@
             "description": "Throws an error or returns the callback result."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
+        "expose": false,
         "example": null
     },
     {
@@ -2290,7 +2338,7 @@
             "description": "Throws an error or returns the callback result."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
+        "expose": false,
         "example": null
     },
     {
@@ -2350,7 +2398,7 @@
             "description": "Throws an error or returns an array of language codes."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
+        "expose": false,
         "example": null
     },
     {
@@ -2376,7 +2424,7 @@
     {
         "name": "getTopConcepts",
         "module": "Sparql_generic",
-        "description": "Returns the top-level concepts/classes of a source by delegating to its controller (`Sparql_OWL` or `Sparql_SKOS`).",
+        "description": "Returns the roots of a source's class or concept hierarchy by delegating to its controller (`Sparql_OWL` or `Sparql_SKOS`), so it works on an OWL and on a SKOS source alike. Returns nothing when every class of the source chains into an upper ontology such as BFO or IOF, because the default top-class filter then matches no node: retry with `options.skipTopClassFilter` in that case.",
         "params": [
             {
                 "name": "sourceLabel",
@@ -2388,7 +2436,27 @@
                 "name": "options",
                 "type": "Object",
                 "required": false,
-                "description": "Controller-specific options"
+                "description": "Controller-specific options",
+                "properties": [
+                    {
+                        "name": "skipTopClassFilter",
+                        "type": "boolean",
+                        "required": false,
+                        "description": "Do not apply any top-class filter"
+                    },
+                    {
+                        "name": "filter",
+                        "type": "string",
+                        "required": false,
+                        "description": "Extra SPARQL filter appended after the top-class filter"
+                    },
+                    {
+                        "name": "withoutImports",
+                        "type": "boolean",
+                        "required": false,
+                        "description": "Exclude imported graphs from the `FROM` clause"
+                    }
+                ]
             }
         ],
         "returns": {
@@ -2397,12 +2465,14 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "read",
+        "mcpTool": "sls_top_concepts"
     },
     {
         "name": "getNodeInfos",
         "module": "Sparql_generic",
-        "description": "Returns all properties/triples describing a node (or nodes) by delegating to the source controller. Used to inspect a resource's outgoing predicates and values.",
+        "description": "Returns every property and value describing a node (or nodes) by delegating to the source controller: the first call to make on an unfamiliar resource. Only outgoing triples are returned by default; set `options.inverseProperties` to also get the triples where the node is the object, which is how you discover what points at it.",
         "params": [
             {
                 "name": "sourceLabel",
@@ -2420,7 +2490,33 @@
                 "name": "options",
                 "type": "Object",
                 "required": false,
-                "description": "Controller-specific options"
+                "description": "Controller-specific options",
+                "properties": [
+                    {
+                        "name": "getValuesLabels",
+                        "type": "boolean",
+                        "required": false,
+                        "description": "Add `rdfs:label` of properties and values"
+                    },
+                    {
+                        "name": "inverseProperties",
+                        "type": "boolean",
+                        "required": false,
+                        "description": "Also return triples where the node is the object"
+                    },
+                    {
+                        "name": "noRestrictions",
+                        "type": "boolean",
+                        "required": false,
+                        "description": "Exclude values that are `owl:Restriction`"
+                    },
+                    {
+                        "name": "limit",
+                        "type": "number",
+                        "required": false,
+                        "description": "Result limit"
+                    }
+                ]
             }
         ],
         "returns": {
@@ -2429,7 +2525,9 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "read",
+        "mcpTool": "sls_node_infos"
     },
     {
         "name": "getItems",
@@ -2455,12 +2553,13 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "read"
     },
     {
         "name": "getNodeChildren",
         "module": "Sparql_generic",
-        "description": "Returns the children of node(s) down to a given depth, delegating to the source controller. The `ids` or `words` filter is split into slices of `self.slicesSize` and queried sequentially with `async.eachSeries`, concatenating the per-slice results. Example controller query (SKOS, with collection filtering): ```sparql select distinct ?child1 ?child1Label ?subjectLabel ?collLabel FROM <http://souslesens/thesaurus/TEST/> WHERE { ?child1 skos:broader ?subject. ?subject skos:prefLabel ?subjectLabel. OPTIONAL { ?child1 skos:prefLabel ?child1Label. } filter(?subject = <...>) } ORDER BY ?child1Label limit 1000 ```",
+        "description": "Returns the direct children of node(s) down to a given depth, delegating to the source controller, so it works on an OWL and on a SKOS source alike. The cheap way to walk a hierarchy one level at a time, where a full descendant closure would be wasteful. Like the ancestor call, `ids` and `words` are mutually exclusive. The filter is split into slices of `self.slicesSize` and queried sequentially with `async.eachSeries`, concatenating the per-slice results. Example controller query (SKOS, with collection filtering): ```sparql select distinct ?child1 ?child1Label ?subjectLabel ?collLabel FROM <http://souslesens/thesaurus/TEST/> WHERE { ?child1 skos:broader ?subject. ?subject skos:prefLabel ?subjectLabel. OPTIONAL { ?child1 skos:prefLabel ?child1Label. } filter(?subject = <...>) } ORDER BY ?child1Label limit 1000 ```",
         "params": [
             {
                 "name": "sourceLabel",
@@ -2499,12 +2598,15 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "summary": "Returns the direct children of node(s) down to a given depth, delegating to the source controller, so it works on an OWL and on a SKOS source alike. The cheap way to walk a hierarchy one level at a time, where a full descendant closure would be wasteful. Like the ancestor call, `ids` and `words` are mutually exclusive.",
+        "access": "read",
+        "mcpTool": "sls_node_children"
     },
     {
         "name": "getNodeParents",
         "module": "Sparql_generic",
-        "description": "Returns the ancestors of node(s) up to a given depth, delegating to the source controller. The `ids` or `words` filter is sliced into `self.slicesSize` chunks and queried sequentially, concatenating the per-slice results. Returns `[]` when the source has no controller.",
+        "description": "Returns the superclass or broader chain of node(s) up to a given depth, delegating to the source controller, so it works on an OWL and on a SKOS source alike. Use it to generalise from a node, or to find nodes by label: `ids` and `words` are mutually exclusive, pass `ids` to climb from known URIs and `words` to look up nodes whose label matches, exactly and inside this source only. The filter is sliced into `self.slicesSize` chunks and queried sequentially, concatenating the per-slice results. Returns `[]` when the source has no controller.",
         "params": [
             {
                 "name": "sourceLabel",
@@ -2543,7 +2645,10 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "summary": "Returns the superclass or broader chain of node(s) up to a given depth, delegating to the source controller, so it works on an OWL and on a SKOS source alike. Use it to generalise from a node, or to find nodes by label: `ids` and `words` are mutually exclusive, pass `ids` to climb from known URIs and `words` to look up nodes whose label matches, exactly and inside this source only.",
+        "access": "read",
+        "mcpTool": "sls_node_parents"
     },
     {
         "name": "getSingleNodeAllGenealogy",
@@ -2569,7 +2674,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "read"
     },
     {
         "name": "getSingleNodeAllDescendants",
@@ -2595,7 +2701,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "read"
     },
     {
         "name": "getNodeLabel",
@@ -2621,7 +2728,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "read"
     },
     {
         "name": "getEndPointAllGraphsMap",
@@ -2641,7 +2749,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "read"
     },
     {
         "name": "getNodesAllTriples",
@@ -2667,7 +2776,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "read"
     },
     {
         "name": "deleteTriples",
@@ -2705,7 +2815,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "write"
     },
     {
         "name": "triplesObjectToString",
@@ -2790,7 +2901,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "write"
     },
     {
         "name": "deleteTriplesWithFilter",
@@ -2816,7 +2928,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "write"
     },
     {
         "name": "copyGraph",
@@ -2842,12 +2955,13 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "write"
     },
     {
         "name": "getDistinctPredicates",
         "module": "Sparql_generic",
-        "description": "Lists the distinct predicates used in a source, with their optional labels. Runs `select distinct ?p ?pLabel WHERE { ?s ?p ?o. optional { ?p ?x ?pLabel. filter(?x in (skos:prefLabel, rdfs:label)) } }` then fills missing labels via {@link module:Sparql_generic.setBindingsOptionalProperties}.",
+        "description": "Lists the distinct predicates actually used in a source, with their labels: the answer to \"what can I even ask about this source\". The natural precursor to a triple query, since it gives the property URIs to filter on rather than guessing them. Runs `select distinct ?p ?pLabel WHERE { ?s ?p ?o. optional { ?p ?x ?pLabel. filter(?x in (skos:prefLabel, rdfs:label)) } }` then fills missing labels via {@link module:Sparql_generic.setBindingsOptionalProperties}.",
         "params": [
             {
                 "name": "sourceLabel",
@@ -2868,7 +2982,10 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "summary": "Lists the distinct predicates actually used in a source, with their labels: the answer to \"what can I even ask about this source\". The natural precursor to a triple query, since it gives the property URIs to filter on rather than guessing them.",
+        "access": "read",
+        "mcpTool": "sls_distinct_predicates"
     },
     {
         "name": "copyNodes",
@@ -2962,7 +3079,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "write"
     },
     {
         "name": "sortBindings",
@@ -3111,7 +3229,7 @@
     {
         "name": "getSourceTaxonomy",
         "module": "Sparql_generic",
-        "description": "Builds the complete subsumption taxonomy (class/concept hierarchy) of a source as a flat map of nodes with resolved ancestor chains. The parent predicate and concept type are chosen from the schema (`rdfs:subClassOf`/`owl:Class` for OWL, `skos:broader`/`skos:Concept` for SKOS, `rdf:type`/`owl:NamedIndividual` for KNOWLEDGE_GRAPH, or `options.parentType`). The hierarchy query is paginated (limit 500) with `async.whilst`; results are then folded into `allClassesMap` (collecting labels/altLabels per node), each node's direct parents are expanded into a single most-specific ancestor chain, and orphan parents are back-filled (labels fetched via {@link module:Sparql_OWL.getLabelsMap} for OWL).",
+        "description": "Builds the complete subsumption taxonomy (class/concept hierarchy) of a source as a flat map of nodes with resolved ancestor chains. The broadest overview of how a source is structured, and large on a big ontology. The parent predicate and concept type are chosen from the schema (`rdfs:subClassOf`/`owl:Class` for OWL, `skos:broader`/`skos:Concept` for SKOS, `rdf:type`/`owl:NamedIndividual` for KNOWLEDGE_GRAPH, or `options.parentType`). The hierarchy query is paginated (limit 500) with `async.whilst`; results are then folded into `allClassesMap` (collecting labels/altLabels per node), each node's direct parents are expanded into a single most-specific ancestor chain, and orphan parents are back-filled (labels fetched via {@link module:Sparql_OWL.getLabelsMap} for OWL).",
         "params": [
             {
                 "name": "sourceLabel",
@@ -3158,7 +3276,10 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "summary": "Builds the complete subsumption taxonomy (class/concept hierarchy) of a source as a flat map of nodes with resolved ancestor chains. The broadest overview of how a source is structured, and large on a big ontology.",
+        "access": "read",
+        "mcpTool": "sls_source_taxonomy"
     },
     {
         "name": "createDecapitalizedLabelTriples",
@@ -3178,7 +3299,8 @@
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
-        "example": null
+        "example": null,
+        "access": "write"
     },
     {
         "name": "triplesToTurtle",

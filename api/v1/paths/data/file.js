@@ -29,6 +29,41 @@ export default function () {
         summary: "Read the content of a file in the data folder",
         description: "Returns the parsed content (JSON when applicable, else raw text) of `dataDir/<dir>/<fileName>` " + "via `dataController.readFile`.",
         operationId: "dataReadFile",
+        // This route is a generic reader over the whole data folder and `dataController` joins the
+        // path without a traversal guard, so it is never exposed to agents as such: each MCP tool
+        // below freezes `dir` and derives `fileName`, and the MCP refuses any argument outside the
+        // `params` it declares. Adding a tool that lets an agent supply `dir` or `fileName` would
+        // hand it arbitrary read access to `dataDir`.
+        "x-mcp": {
+            tools: [
+                {
+                    name: "sls_kgquery_model",
+                    access: "read",
+                    description:
+                        "KGquery model of a source: the class and relation graph built in the KGquery tool and saved as JSON. " +
+                        "Nodes carry their datatype properties, edges their object properties and cardinalities. " +
+                        "The most compact description of how a source is actually queried.",
+                    params: { source: { type: "string", required: true, description: "SLS source name." } },
+                    query: { dir: "graphs/", fileName: "{source}_KGmodelGraph.json" },
+                    parseJsonPayload: true,
+                    navigableDocument: true,
+                    statusHints: { 500: "No KGquery model saved for this source. Build the model in the KGquery tool first, or explore the source with sls_source_taxonomy." },
+                },
+                {
+                    name: "sls_mapping_get",
+                    access: "read",
+                    description: "Mapping document of one data source towards a SLS source: per-table column mappings, URI patterns, joins and generated predicates.",
+                    params: {
+                        source: { type: "string", required: true, description: "SLS source name the mapping targets." },
+                        dataSource: { type: "string", required: true, description: "Data source name without the .json extension. List them with sls_mappings_list." },
+                    },
+                    query: { dir: "mappings/{source}", fileName: "{dataSource}.json" },
+                    parseJsonPayload: true,
+                    navigableDocument: true,
+                    statusHints: { 500: "No mapping file with that name for this source. List the available ones with sls_mappings_list." },
+                },
+            ],
+        },
         parameters: [
             { name: "dir", in: "query", type: "string", required: true, description: "Sub-directory under `dataDir`." },
             { name: "fileName", in: "query", type: "string", required: true, description: "File name including extension." },

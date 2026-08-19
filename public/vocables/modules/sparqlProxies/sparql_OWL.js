@@ -139,7 +139,7 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.returnQueryStr] - Return the SPARQL query string instead of executing it
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?topConcept`/`?topConceptLabel`(/`?subjectGraph`)
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `topConcept`, `topConceptLabel` (optional), `subjectGraph` (optional).
-     * @expose
+     * @expose read
      */
     self.getTopConcepts = function (sourceLabel, options, callback) {
         if (!options) {
@@ -252,7 +252,7 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?subject`/`?child1…`(labels), label-enriched
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `subjectLabel` (optional), `child1`, `child1Label` (optional), `child1Type` (optional), `child1Graph` (optional), depth-indexed `childN` (optional), `childNLabel` (optional), `collection` (optional), `acollection` (optional), `collectionLabel` (optional), `acollectionLabel` (optional).
-     * @expose
+     * @expose read
      */
 
     // To simplify delete collection ...
@@ -391,7 +391,7 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?prop`/`?value`(/labels/graph)
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `prop`, `value`, `propLabel` (optional), `valueLabel` (optional), `g` (optional).
-     * @expose
+     * @expose read
      */
     self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
         if (!options) {
@@ -478,7 +478,7 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `subjectLabel` (optional), `subjectTypes`, `subjectSuperClasses` (optional), `broader1`, `broader1Label` (optional), `broaderGraphs1`, and depth-indexed `broaderN` (optional), `broaderNLabel` (optional), `broaderGraphsN`.
      *
-     * @expose
+     * @expose read
      */
     self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
         if (Config.sources[sourceLabel].imports && Config.sources[sourceLabel].imports.length > 0) {
@@ -617,8 +617,13 @@ var Sparql_OWL = (function () {
     };
 
     /**
-     * Returns the ancestor (or descendant) hierarchies of given class(es), supporting multiple
-     * hierarchy branches per class. Runs a nested `?class rdfs:subClassOf*[+] ?superClass` query
+     * Returns the ancestor or descendant hierarchy of given class(es), one ordered branch list per
+     * class, `options.descendants` choosing the direction: how you specialise a class or enumerate
+     * its subtypes. Returns nothing when the children are attached through an OWL restriction
+     * rather than a direct `rdfs:subClassOf`, in which case walk the restriction blank nodes with
+     * {@link module:Sparql_OWL.getFilteredTriples}.
+     *
+     * Runs a nested `?class rdfs:subClassOf*[+] ?superClass` query
      * (direction depends on `options.descendants`) and rebuilds, for each input class, its
      * hierarchy as an array of hierarchy items in JS, skipping blank-node superclasses.
      * Used by `OntologyModels` to fetch the hierarchies of a set of nodes (start/end nodes).
@@ -634,7 +639,10 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.withoutImports] - Exclude imported graphs from the `FROM` clause
      * @param {Function} callback - Error-first callback `(err, {hierarchies, rawResult})` where `hierarchies` maps each class URI to its ordered hierarchy
      * @returns {err|Object} Throws an error or returns `{hierarchies, rawResult}`; each `rawResult` binding contains `subject`, `class`, `type`, `classLabel` (optional), `superClass`, `superClassType`, `superClassSubClass`, `superClassLabel` (optional), `subjectTypes`.
-     * @expose
+     * @expose read
+     * @mcpTool sls_node_descendants
+     * @mcpFixed options.descendants = true
+     * @mcpFixed options.excludeItself = true
      */
     self.getNodesAncestorsOrDescendants = function (sourceLabel, classIds, options, callback) {
         if (!options) {
@@ -904,10 +912,12 @@ var Sparql_OWL = (function () {
 
     /**
      * Returns triples filtered by any combination of subject/property/object ids, with subject,
-     * property and object labels and types. Literal objects are excluded by default. Subject or
-     * object id lists are sliced into `Sparql_generic.slicesSize` batches and queried with
-     * `async.eachSeries`, concatenating results.
+     * property and object labels and types. The traversal workhorse: pass `objectIds` to find what
+     * points at a node, which is how OWL restriction blank nodes get resolved. Literal objects are
+     * excluded by default.
      *
+     * Subject or object id lists are sliced into `Sparql_generic.slicesSize` batches and queried
+     * with `async.eachSeries`, concatenating results.
      * Canonical, widely used triple-fetch helper (Lineage, MappingModeler, bots).
      * See {@link module:Sparql_OWL.getFilteredTriples2} for the cross-graph variant.
      * @function
@@ -927,7 +937,8 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?subject`/`?prop`/`?object` and their labels
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `prop`, `object`, `subjectType` (optional), `subjectLabel` (optional), `propLabel` (optional), `objectType` (optional), `objectValue` (optional), `objectLabel` (optional).
-     * @expose
+     * @expose read
+     * @mcpTool sls_filtered_triples
      */
     self.getFilteredTriples = function (sourceLabel, subjectIds, propertyIds, objectIds, options, callback) {
         if (!options) {
@@ -1080,7 +1091,12 @@ var Sparql_OWL = (function () {
 
     /**
      * Returns object (or datatype) properties with their domains, ranges, sub-properties and
-     * inverse properties (plus all labels). The id filter can target the domain, range, prop or
+     * inverse properties: what links what to what in a source, which is how you answer "can these
+     * two classes be related, and through which property". Omit `domainIds` for the whole source's
+     * property schema. Annotation properties and plain RDF/OWL vocabulary legitimately have no
+     * declared domain or range, so an empty answer for one of those is not a defect.
+     *
+     * The id filter can target the domain, range, prop or
      * subProp depending on options, and a `searchType` mode searches by words on prop/domain/range.
      * With `addInverseRestrictions`, recursively merges the inverse-direction results.
      * @function
@@ -1102,7 +1118,8 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?domain`/`?prop`/`?range`/`?subProp`/`?inverseProp` (+labels)
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `domain` (optional), `domainLabel` (optional), `prop`, `propLabel` (optional), `range` (optional), `rangeLabel` (optional), `subProp` (optional), `subPropLabel` (optional), `inverseProp` (optional), `inversePropLabel` (optional).
-     * @expose
+     * @expose read
+     * @mcpTool sls_property_schema
      */
     self.getObjectPropertiesDomainAndRange = function (sourceLabel, domainIds, options, callback) {
         if (!options) {
@@ -1228,7 +1245,12 @@ var Sparql_OWL = (function () {
     };
 
     /**
-     * Returns OWL restrictions on classes: matches `?subject rdfs:subClassOf ?node`, `?node
+     * Returns the property triples a class carries as OWL restrictions: property, constraint type,
+     * target value and cardinality, with their labels. This is how a class declares its
+     * attributes, so it is the answer to "what can I say about an instance of this class".
+     * Returns nothing when the class carries no direct restriction, in which case try its parent.
+     *
+     * Matches `?subject rdfs:subClassOf ?node`, `?node
      * rdf:type owl:Restriction`, `?node owl:onProperty ?prop` and the constraint value
      * (`owl:someValuesFrom`/`allValuesFrom`/`hasValue`/`onClass`) plus any cardinality. Property
      * and value labels are filled afterwards (including from imported sources via
@@ -1253,7 +1275,8 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?subject`/`?prop`/`?value`/`?node`/`?constraintType` (+labels)
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `subjectLabel` (optional), `node`, `prop`, `propLabel` (optional), `constraintType`, `value`, `valueLabel` (optional), `cardinalityType` (optional), `cardinalityValue` (optional), `g` (optional), `status` (optional), `creationDate` (optional), `creator` (optional), `provenance` (optional), `domainSourceLabel` (optional), `rangeSourceLabel` (optional).
-     * @expose
+     * @expose read
+     * @mcpTool sls_node_properties
      */
     self.getObjectRestrictions = function (sourceLabel, subClassIds, options, callback) {
         if (!options) {
@@ -1413,7 +1436,7 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?subject`/`?node` (+labels)
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `node`, `subjectLabel` (optional), `nodeLabel` (optional), `g` (optional).
-     * @expose
+     * @expose read
      */
     self.getNamedIndividuals = function (sourceLabel, ids, options, callback) {
         if (!options) {
@@ -1509,7 +1532,7 @@ var Sparql_OWL = (function () {
      * @param {(string|string[])} ids - Resource URI(s) whose OWL type is determined
      * @param {Function} callback - Error-first callback `(err, typesMap)` mapping URI → `"NamedIndividual"`/`"Class"`/`"Restriction"`
      * @returns {err|Object} Throws an error or returns a map from each resource URI to `NamedIndividual`, `Class`, or `Restriction`.
-     * @expose
+     * @expose read
      */
     self.getNodesOwlTypeMap = function (sourceLabel, ids, callback) {
         if (!Array.isArray(ids)) {
@@ -1562,8 +1585,13 @@ var Sparql_OWL = (function () {
     };
 
     /**
-     * Returns, for given properties, the restrictions that use them and the source/target
-     * classes involved: `?restriction owl:onProperty ?prop`, `?sourceClass <taxonomyPredicate>
+     * Returns which classes actually use the given properties, and against which target classes:
+     * the reverse of asking a class what it declares. Takes **property** URIs, so a class URI
+     * simply returns nothing; get property URIs from
+     * {@link module:Sparql_generic.getDistinctPredicates} or
+     * {@link module:Sparql_OWL.getObjectPropertiesDomainAndRange}.
+     *
+     * Matches `?restriction owl:onProperty ?prop`, `?sourceClass <taxonomyPredicate>
      * ?restriction`, plus the constraint value (`owl:someValuesFrom`/`allValuesFrom`/`hasValue`/
      * cardinality) as `?targetClass`. Missing labels are filled afterwards.
      * @function
@@ -1578,7 +1606,8 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?prop`/`?restriction`/`?sourceClass`/`?targetClass` (+labels)
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `restriction`, `prop`, `sourceClass`, `constraintType` (optional), `targetClass` (optional).
-     * @expose
+     * @expose read
+     * @mcpTool sls_property_usage
      */
     self.getPropertiesRestrictionsDescription = function (sourceLabel, propIds, options, callback) {
         if (!options) {
@@ -1707,7 +1736,7 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Total result cap (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, labelsMap)` mapping URI → label
      * @returns {err|Object} Throws an error or returns a map from each source URI to its label.
-     * @expose
+     * @expose read
      */
     self.getLabelsMap = function (sourceLabel, options, callback) {
         if (!options) {
@@ -1808,7 +1837,7 @@ var Sparql_OWL = (function () {
      * @param {Function} [processor] - Optional `(pageBindings, cb)` processor invoked per page; if omitted, pages are accumulated
      * @param {Function} callback - Error-first callback `(err, allData)` with the accumulated bindings (empty when a processor is used)
      * @returns {err|Array} Throws an error or returns accumulated SPARQL results with variables: `id`, `type` (optional), `label` (optional).
-     * @expose
+     * @expose read
      */
     self.getDictionary = function (sourceLabel, options, processor, callback) {
         if (!options) {
@@ -1932,7 +1961,7 @@ var Sparql_OWL = (function () {
      * @param {string} [options.filter] - Extra SPARQL filter appended to the query
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?property` (+label)
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `property`, `propertyLabel`, `g` (optional).
-     * @expose
+     * @expose read
      */
     self.getObjectProperties = function (sourceLabel, options, callback) {
         if (!options) {
@@ -2031,7 +2060,7 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.withoutImports] - Exclude imported graphs from the `FROM` clause
      * @param {Function} callback - Error-first callback `(err, propsMap)` mapping property URI → `{parentProp, prop, domain, range, domainLabel, rangeLabel}`
      * @returns {err|Object} Throws an error or returns a map keyed by property URI with fields: `parentProp`, `prop`, `domain` (optional), `range` (optional), `domainLabel` (optional), `rangeLabel` (optional).
-     * @expose
+     * @expose read
      */
     self.getPropertiesInheritedConstraints = function (sourceLabel, properties, options, callback) {
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.withGraph, options.withoutImports);
@@ -2107,7 +2136,7 @@ var Sparql_OWL = (function () {
      * @param {string} [options.filter] - Extra SPARQL filter applied within each UNION branch
      * @param {Function} callback - Error-first callback `(err, propsMap)` mapping property URI → `{prop, propLabel, subProps, domain, domainLabel, range, rangeLabel, inverseProp, inversePropLabel}`
      * @returns {err|Object} Throws an error or returns a map keyed by property URI with fields: `prop`, `propLabel`, `subProps`, `domain` (optional), `domainLabel` (optional), `range` (optional), `rangeLabel` (optional), `inverseProp` (optional), `inversePropLabel` (optional).
-     * @expose
+     * @expose read
      */
     self.getInferredPropertiesDomainsAndRanges = function (sourceLabel, options, callback) {
         if (!options) {
@@ -2307,7 +2336,7 @@ var Sparql_OWL = (function () {
      * @param {string} [options.filter] - Reserved filter (currently unused in the query body)
      * @param {Function} callback - Error-first callback `(err, turtle)` with the full Turtle string
      * @returns {err|string} Throws an error or returns the source serialized as a Turtle string.
-     * @expose
+     * @expose read
      */
     self.generateOWL = function (sourceLabel, options, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;
@@ -2439,7 +2468,7 @@ var Sparql_OWL = (function () {
      * @param {Object} [options] - Reserved options object
      * @param {Function} callback - Error-first callback `(err, allBindings)` with the `?type` bindings
      * @returns {err|Array} Throws an error or returns SPARQL results with variable: `type`.
-     * @expose
+     * @expose read
      */
     self.getIndividualsType = function (sourceLabel, allIds, options, callback) {
         if (!options) {
@@ -2493,7 +2522,7 @@ var Sparql_OWL = (function () {
      * @param {Object} [options] - Reserved options object
      * @param {Function} callback - Error-first callback `(err, allBindings)` with `?id`/`?label`
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `id` and `label`.
-     * @expose
+     * @expose read
      */
     self.getIndividualsOfClass = function (sourceLabel, classIds, options, callback) {
         if (!options) {
@@ -2853,7 +2882,7 @@ var Sparql_OWL = (function () {
      * @param {string} id - URI of the resource whose label is fetched
      * @param {Function} callback - Error-first callback receiving the matching SPARQL bindings
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `type`, and `subjectLabel`.
-     * @expose
+     * @expose read
      */
     self.getNodeLabel = function (sourceLabel, id, callback) {
         var fromStr = Sparql_common.getFromStr(sourceLabel);
@@ -2879,9 +2908,12 @@ var Sparql_OWL = (function () {
     };
 
     /**
-     * Returns, for each given node, its label, definition (`dcterms:description`|
+     * Returns, for each given node, its label, textual definition (`dcterms:description`|
      * `rdfs:isDefinedBy`|`skos:definition`) and up to four levels of OWL super-classes with their
-     * labels, by chaining nested `OPTIONAL` blocks on `rdfs:subClassOf` (each super-class is
+     * labels. The cheapest way to confirm you picked the right sense of a term before grounding an
+     * answer on it. OWL sources only.
+     *
+     * Built by chaining nested `OPTIONAL` blocks on `rdfs:subClassOf` (each super-class is
      * restricted to `rdf:type owl:Class`). Used by `Lineage_selection.exportCsv` to dump the
      * whiteboard classes and their hierarchy/definition as a tab-separated file.
      * @function
@@ -2893,7 +2925,8 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.returnQueryStr] - Return the SPARQL query string instead of executing it
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?node`/`?node_label`/`?definition`/`?superClass1Label`…`?superClass4Label`
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `node`, `node_label`, `definition` (optional), `superClass1Label` (optional), `superClass2Label` (optional), `superClass3Label` (optional), `superClass4Label` (optional), `description` (optional), `propLabel` (optional), `targetClass_label` (optional).
-     * @expose
+     * @expose read
+     * @mcpTool sls_node_definition
      */
     self.getNodesSuperClassesAndDefinition = function (sourceLabel, nodeIds, options, callback) {
         if (!options) {
@@ -2948,7 +2981,7 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.withoutImports] - Exclude imported graphs from the `FROM` clause
      * @param {Function} callback - Error-first callback `(err, {classesMap, labels})` where `classesMap` maps each class URI to `{id, label, lang, skoslabels, parents, type}` with `parents` set to `[sourceLabel, owl:Thing]`
      * @returns {err|Object} Returns `{classesMap, labels}` through the callback; empty map for non-OWL sources.
-     * @expose
+     * @expose read
      */
     self.getClassesWithoutTaxonomy = function (sourceLabel, options, callback) {
         if (!options) {

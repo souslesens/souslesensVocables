@@ -1,0 +1,765 @@
+/**
+ * Executes one MCP tool call by translating it into an SLS API request.
+ *
+ * Nothing here re-implements an access control: bin/sparqlQueriesRunner.js already checks that the
+ * function is exposed, that the required parameters are present and that every source-shaped
+ * parameter belongs to the caller's allowed sources, before handing over to RemoteCodeRunner.
+ * This module only carries format conversion — templates in, SLS request out, flattened rows back —
+ * plus the one policy this server owns: V1 is read-only.
+ */
+
+import { mcpConfig } from "./config.js";
+import { slsRequest } from "./slsClient.js";
+import { readPage } from "./resultStore.js";
+
+const wholePlaceholderRegex = /^\{(\w+)\}$/;
+const templatePlaceholderRegex = /\{(\w+)\}/g;
+
+// A missing value means "this optional parameter was not supplied", which must remove the key
+// rather than send the literal placeholder to SLS.
+const unresolved = Symbol("unresolved");
+
+/**
+ * Resolve one template value against the agent's arguments.
+ *
+ * A string that is exactly one placeholder yields the raw value, so an array parameter stays an
+ * array; a string that merely contains placeholders is interpolated. Objects and arrays recurse,
+ * anything else is a frozen literal.
+ * @param {*} templateValue
+ * @param {object} toolArguments
+ * @returns {*} The resolved value, or the `unresolved` symbol when a placeholder has no value
+ */
+function resolveTemplate(templateValue, toolArguments) {
+    if (typeof templateValue === "string") {
+        const wholeMatch = templateValue.match(wholePlaceholderRegex);
+        if (wholeMatch) {
+            const rawValue = toolArguments[wholeMatch[1]];
+            return rawValue === undefined || rawValue === null ? unresolved : rawValue;
+        }
+        let sawMissingPlaceholder = false;
+        const interpolated = templateValue.replace(templatePlaceholderRegex, function (_wholeMatch, parameterName) {
+            const rawValue = toolArguments[parameterName];
+            if (rawValue === undefined || rawValue === null || rawValue === "") {
+                sawMissingPlaceholder = true;
+                return "";
+            }
+            return String(rawValue);
+        });
+        return sawMissingPlaceholder ? unresolved : interpolated;
+    }
+
+    if (Array.isArray(templateValue)) {
+        const resolvedItems = [];
+        for (const item of templateValue) {
+            const resolvedItem = resolveTemplate(item, toolArguments);
+            if (resolvedItem !== unresolved) {
+                resolvedItems.push(resolvedItem);
+            }
+        }
+        return resolvedItems;
+    }
+
+    if (templateValue && typeof templateValue === "object") {
+        return resolveTemplateObject(templateValue, toolArguments);
+    }
+
+    return templateValue;
+}
+
+function resolveTemplateObject(templateObject, toolArguments) {
+    const resolvedObject = {};
+    for (const [key, templateValue] of Object.entries(templateObject)) {
+        const resolvedValue = resolveTemplate(templateValue, toolArguments);
+        if (resolvedValue !== unresolved) {
+            resolvedObject[key] = resolvedValue;
+        }
+    }
+    return resolvedObject;
+}
+
+// ---------------------------------------------------------------------------
+// Result flattening
+// ---------------------------------------------------------------------------
+
+// Everything a binding cell may carry besides its value. Recognising the cell by "value plus only
+// these" rather than by the presence of `type` also catches the bare `{value}` cells that
+// Sparql_generic.setBindingsOptionalProperties synthesises for optional variables.
+const bindingCellMetadataKeys = ["type", "datatype", "xml:lang", "lang"];
+
+/**
+ * A SPARQL binding cell is `{value, type?, "xml:lang"?, datatype?}`. Only the value carries meaning
+ * for an agent, and keeping the wrapper multiplies the payload size for nothing.
+ * @param {*} candidate
+ * @returns {boolean}
+ */
+function isBindingCell(candidate) {
+    if (!candidate || typeof candidate !== "object" || Array.isArray(candidate) || !("value" in candidate)) {
+        return false;
+    }
+    const otherKeys = Object.keys(candidate).filter((key) => key !== "value");
+    return otherKeys.every((key) => bindingCellMetadataKeys.includes(key));
+}
+
+// Virtuoso does not answer `type: "bnode"` reliably and hands blank nodes back as `nodeID://…`
+// IRIs, so the value has to be tested too. `_:` covers the stores that do it the standard way.
+const blankNodeValueRegex = /^(nodeID:\/\/|_:)/;
+
+/**
+ * Flatten one row of bindings, keeping the metadata that would otherwise be lost as sibling keys.
+ *
+ * A cell's value is all an agent normally needs, but three things it carries do change an answer:
+ * the language of a label, the datatype of a literal, and whether an identifier is a blank node,
+ * which decides whether the agent can query it directly or must reach it through an inverse
+ * lookup. Each is emitted only when present, so the common cell still costs one key.
+ * @param {object} row
+ * @returns {object|null} Null when the row held no binding cell at all
+ */
+function flattenBindingRow(row) {
+    const flatRow = {};
+    let sawCell = false;
+    for (const [variableName, cell] of Object.entries(row)) {
+        if (!isBindingCell(cell)) {
+            flatRow[variableName] = cell;
+            continue;
+        }
+        sawCell = true;
+        flatRow[variableName] = cell.value;
+
+        const languageTag = cell["xml:lang"] || cell.lang;
+        if (languageTag) {
+            flatRow[`${variableName}Lang`] = languageTag;
+        }
+        if (cell.datatype) {
+            flatRow[`${variableName}Datatype`] = cell.datatype;
+        }
+        if (cell.type === "bnode" || (typeof cell.value === "string" && blankNodeValueRegex.test(cell.value))) {
+            flatRow[`${variableName}IsBlankNode`] = true;
+        }
+    }
+    return sawCell ? flatRow : null;
+}
+
+/**
+ * Reduce SPARQL bindings to plain `{variable: value}` rows, wherever they appear in the payload.
+ * Recognises the three shapes SLS actually returns: a bare array of bindings, the full
+ * `{head, results: {bindings}}` envelope, and `{hierarchies, rawResult}` from
+ * getNodesAncestorsOrDescendants.
+ * @param {*} payload
+ * @returns {*} The payload with its bindings flattened, unchanged when it holds none
+ */
+export function flattenSparqlResult(payload) {
+    if (Array.isArray(payload)) {
+        const flatRows = [];
+        let flattenedAny = false;
+        for (const row of payload) {
+            if (row && typeof row === "object" && !Array.isArray(row)) {
+                const flatRow = flattenBindingRow(row);
+                if (flatRow) {
+                    flatRows.push(flatRow);
+                    flattenedAny = true;
+                    continue;
+                }
+            }
+            flatRows.push(row);
+        }
+        return flattenedAny ? flatRows : payload;
+    }
+
+    if (!payload || typeof payload !== "object") {
+        return payload;
+    }
+
+    if (payload.results && Array.isArray(payload.results.bindings)) {
+        return { ...payload, results: { ...payload.results, bindings: flattenSparqlResult(payload.results.bindings) } };
+    }
+    if (Array.isArray(payload.rawResult)) {
+        return { ...payload, rawResult: flattenSparqlResult(payload.rawResult) };
+    }
+    return payload;
+}
+
+/**
+ * Reduce an Elasticsearch response to the ranked hits an agent can act on.
+ * Declared by a route through `x-mcp.resultShape: "elasticHits"`.
+ * @param {*} elasticResponse
+ * @returns {object}
+ */
+function shapeElasticHits(elasticResponse) {
+    const hitsEnvelope = elasticResponse && elasticResponse.hits;
+    const rawHits = hitsEnvelope && Array.isArray(hitsEnvelope.hits) ? hitsEnvelope.hits : [];
+
+    const flatHits = [];
+    for (const hit of rawHits) {
+        const hitSource = hit._source || {};
+        flatHits.push({ score: hit._score, index: hit._index, id: hitSource.id, label: hitSource.label, type: hitSource.type, parents: hitSource.parents });
+    }
+
+    return { ...describeElasticTotal(hitsEnvelope), hits: flatHits };
+}
+
+/**
+ * Read an Elasticsearch hit total, saying so when the figure is only a floor.
+ *
+ * Elasticsearch stops counting at 10 000 and reports `{value: 10000, relation: "gte"}`. Returning
+ * the bare value invites an agent to state "10 000 labels match" as a fact — a fabricated figure
+ * built out of a real one, which is the failure mode `instructions.md` opens with.
+ * @param {*} hitsEnvelope - the `hits` object of an Elasticsearch response
+ * @returns {{totalMatches: number, totalMatchesIsLowerBound?: boolean}}
+ */
+function describeElasticTotal(hitsEnvelope) {
+    const totalEnvelope = hitsEnvelope && hitsEnvelope.total;
+    if (!totalEnvelope || typeof totalEnvelope !== "object") {
+        return { totalMatches: totalEnvelope };
+    }
+    const total = { totalMatches: totalEnvelope.value };
+    if (totalEnvelope.relation === "gte") {
+        total.totalMatchesIsLowerBound = true;
+    }
+    return total;
+}
+
+/**
+ * Reduce the source registry to what an agent needs to pick a source and query it correctly.
+ *
+ * Declared by a route through `x-mcp.resultShape: "sourceCards"`. Drops the operational fields
+ * (`color`, `owner`, `published`, `prefix`, `sparql_server`) that carry nothing for an agent and,
+ * across the whole accessible list, cost more than everything else combined.
+ * @param {*} sourcesResponse - `{resources: {name: sourceEntry}}`
+ * @returns {object[]}
+ */
+function shapeSourceCards(sourcesResponse) {
+    const sourceEntries = sourcesResponse && sourcesResponse.resources ? sourcesResponse.resources : {};
+
+    const cards = [];
+    for (const [sourceName, sourceEntry] of Object.entries(sourceEntries)) {
+        const card = { name: sourceName, schemaType: sourceEntry.schemaType, controller: sourceEntry.controller, graphUri: sourceEntry.graphUri };
+        if (sourceEntry.imports && sourceEntry.imports.length > 0) {
+            card.imports = sourceEntry.imports;
+        }
+        // The language a source labels its concepts in, and the predicate it uses for the
+        // hierarchy: the two things that change how an answer about it must be read. Both are
+        // routinely left empty in sources.json, and an empty string tells an agent nothing.
+        if (sourceEntry.predicates) {
+            if (sourceEntry.predicates.lang) {
+                card.lang = sourceEntry.predicates.lang;
+            }
+            if (sourceEntry.predicates.broaderPredicate) {
+                card.broaderPredicate = sourceEntry.predicates.broaderPredicate;
+            }
+        }
+        cards.push(card);
+    }
+    cards.sort((firstCard, secondCard) => firstCard.name.localeCompare(secondCard.name));
+    return cards;
+}
+
+/**
+ * Reduce an Elasticsearch `_index` terms aggregation to one row per source.
+ *
+ * Declared by a route through `x-mcp.resultShape: "elasticIndexCounts"`. A ranked multi-index
+ * search answers "does this term exist", never "which sources hold it": it returns a single global
+ * top-K, and one index whose label is exactly the searched word takes every slot. The aggregation
+ * is the answer to the second question, and it costs one call.
+ * @param {*} elasticResponse - `{hits: {total}, aggregations: {sources: {buckets}}}`
+ * @returns {{totalMatches: number, sources: object[]}}
+ */
+function shapeElasticIndexCounts(elasticResponse) {
+    const aggregations = elasticResponse && elasticResponse.aggregations;
+    const sourcesAggregation = aggregations && aggregations.sources;
+    const buckets = sourcesAggregation && Array.isArray(sourcesAggregation.buckets) ? sourcesAggregation.buckets : [];
+
+    const countedSources = [];
+    for (const bucket of buckets) {
+        countedSources.push({ index: bucket.key, matches: bucket.doc_count });
+    }
+
+    // The per-source counts are exact whatever the total says: only the grand total stops at 10 000.
+    return { ...describeElasticTotal(elasticResponse && elasticResponse.hits), sources: countedSources };
+}
+
+const resultShapers = { elasticHits: shapeElasticHits, elasticIndexCounts: shapeElasticIndexCounts, sourceCards: shapeSourceCards };
+
+// Exported so catalog.js can reject an `x-mcp` asking for a shape nobody implements, at boot rather
+// than on the first call.
+export const resultShapeNames = Object.keys(resultShapers);
+
+// ---------------------------------------------------------------------------
+// SPARQL family
+// ---------------------------------------------------------------------------
+
+/**
+ * Whether a registry function accepts `options.limit`, which is where the default row cap goes.
+ * @param {object} registryEntry
+ * @returns {boolean}
+ */
+function acceptsLimitOption(registryEntry) {
+    const optionsParam = registryEntry.params.find((param) => param.name === "options");
+    return Boolean(optionsParam && optionsParam.properties && optionsParam.properties.some((optionProperty) => optionProperty.name === "limit"));
+}
+
+/**
+ * @param {*} payload - Flattened tool payload, in any of the three shapes the SPARQL layer returns
+ * @returns {number|null} Row count, or null when the payload carries no rows
+ */
+function countPayloadRows(payload) {
+    if (Array.isArray(payload)) {
+        return payload.length;
+    }
+    if (payload && payload.results && Array.isArray(payload.results.bindings)) {
+        return payload.results.bindings.length;
+    }
+    if (payload && Array.isArray(payload.rawResult)) {
+        return payload.rawResult.length;
+    }
+    return null;
+}
+
+/**
+ * A catalog function answers with rows and nothing else: no total, no flag, no sign that the limit
+ * in force is what ended the list. An agent that asked for 10000 and received exactly 10000 cannot
+ * tell a complete answer from the first page of half a million, and reports the prefix as the set.
+ * Measured case: 10000 notifications announced as the whole list, against 470468 in the graph.
+ *
+ * A row count equal to the limit is the one signal available here, and it is enough to refuse the
+ * claim. Below the limit nothing is said rather than "complete", because the endpoint's own cap can
+ * still have cut the answer without announcing it. `/sparql/select` says more because it discovers
+ * that cap; this path has no equivalent.
+ * @param {*} payload - Flattened tool payload
+ * @param {number|undefined} appliedRowLimit - `options.limit` actually sent to SLS
+ * @returns {object|null} Notice for the response envelope, or null when nothing can be claimed
+ */
+function rowCeilingNoticeForLimit(payload, appliedRowLimit) {
+    if (!appliedRowLimit) {
+        return null;
+    }
+    const returnedRows = countPayloadRows(payload);
+    if (returnedRows === null || returnedRows < appliedRowLimit) {
+        return null;
+    }
+
+    const verifyTheTotal =
+        `Establish the real total with sls_sparql_select and SELECT (COUNT(*) AS ?total) on the same pattern before quoting a figure, ` +
+        `then either raise options.limit to cover it, narrow the question, or hand the same pattern to sls_sparql_select with collect true, which walks the whole set.`;
+
+    if (returnedRows === appliedRowLimit) {
+        return {
+            returnedRows: returnedRows,
+            knownCeiling: appliedRowLimit,
+            atKnownCeiling: true,
+            complete: false,
+            hint: `Cut: ${returnedRows} rows is exactly the limit in force, so this is a prefix of the result, not the result. Never present it to the user as the whole set. ${verifyTheTotal}`,
+        };
+    }
+    // Overshoot rather than a cut: several catalog functions page internally and stop on the first
+    // page that crosses the limit, so they return whole pages and the limit bounded nothing. It is
+    // then no evidence either way, and claiming a cut here would cost the caller a needless re-query.
+    return {
+        returnedRows: returnedRows,
+        knownCeiling: appliedRowLimit,
+        atKnownCeiling: false,
+        complete: "unknown",
+        hint: `${returnedRows} rows came back for a limit of ${appliedRowLimit}: this function pages internally and returns whole pages, so the limit bounded nothing and says nothing about completeness. ${verifyTheTotal}`,
+    };
+}
+
+/**
+ * Run a promoted registry function: agent arguments already use the function's own parameter names,
+ * so only the `@mcpFixed` values and the default limit are added.
+ * @param {object} descriptor
+ * @param {object} toolArguments
+ */
+async function executeSparqlTool(descriptor, toolArguments) {
+    const namedParams = { ...toolArguments, ...descriptor.fixedParams };
+
+    const optionsParam = descriptor.registryEntry.params.find((param) => param.name === "options");
+    if (optionsParam) {
+        const suppliedOptions = toolArguments.options && typeof toolArguments.options === "object" ? toolArguments.options : {};
+        const options = { ...suppliedOptions, ...descriptor.fixedOptions };
+        if (acceptsLimitOption(descriptor.registryEntry) && options.limit === undefined) {
+            options.limit = mcpConfig.defaultSparqlLimit;
+        }
+        namedParams.options = options;
+    }
+
+    const result = await slsRequest("POST", "/sparqlQueries/run", { body: { name: descriptor.functionName, module: descriptor.module, params: namedParams } });
+    if (!result.ok) {
+        return result;
+    }
+    const flattenedData = flattenSparqlResult(result.data);
+    return { ...result, data: flattenedData, rowCeiling: rowCeilingNoticeForLimit(flattenedData, namedParams.options?.limit) };
+}
+
+// ---------------------------------------------------------------------------
+// Document navigation
+//
+// For a whole-document answer there is no narrower tool to fall back on: nothing serves a part of a
+// mapping file. So the way to avoid reading all of it is to reach inside it, which is what `_select`
+// and `_grep` do — the same move an agent makes when it greps a source file instead of opening it.
+// ---------------------------------------------------------------------------
+
+/**
+ * Walk a dotted path into a document.
+ * @param {*} document
+ * @param {string} selectPath
+ * @returns {{value: *, error: string|null}}
+ */
+function selectDocumentPath(document, selectPath) {
+    const pathSegments = selectPath.split(".");
+    let currentValue = document;
+
+    for (const segment of pathSegments) {
+        if (!currentValue || typeof currentValue !== "object") {
+            return { value: null, error: `"${selectPath}" cannot be followed: "${segment}" is not inside an object or an array.` };
+        }
+        if (!(segment in currentValue)) {
+            const availableKeys = Object.keys(currentValue).slice(0, 40);
+            return { value: null, error: `"${selectPath}" has no "${segment}". Available at that level: ${availableKeys.join(", ")}${Object.keys(currentValue).length > 40 ? ", …" : ""}.` };
+        }
+        currentValue = currentValue[segment];
+    }
+    return { value: currentValue, error: null };
+}
+
+/**
+ * Keep the entries of an object or an array whose key or content contains a text.
+ *
+ * Plain substring, case-insensitive, never a regular expression: an agent-supplied pattern is an
+ * agent-supplied way to make the server work hard for nothing.
+ * @param {*} document
+ * @param {string} grepText
+ * @returns {object}
+ */
+function grepDocument(document, grepText) {
+    const needle = grepText.toLowerCase();
+
+    if (Array.isArray(document)) {
+        const matchedItems = document.filter((item) => JSON.stringify(item).toLowerCase().includes(needle));
+        return { grep: grepText, totalEntries: document.length, matchedEntries: matchedItems.length, entries: matchedItems };
+    }
+    if (document && typeof document === "object") {
+        const matchedEntries = {};
+        let matchedCount = 0;
+        for (const [key, value] of Object.entries(document)) {
+            const serializedValue = JSON.stringify(value);
+            if (key.toLowerCase().includes(needle) || (serializedValue && serializedValue.toLowerCase().includes(needle))) {
+                matchedEntries[key] = value;
+                matchedCount += 1;
+            }
+        }
+        return { grep: grepText, totalEntries: Object.keys(document).length, matchedEntries: matchedCount, entries: matchedEntries };
+    }
+    return { grep: grepText, totalEntries: 0, matchedEntries: 0, entries: null };
+}
+
+/**
+ * Apply `_select` then `_grep` to a document answer.
+ * @param {*} document
+ * @param {object} toolArguments
+ * @returns {{value: *, error: string|null}}
+ */
+function navigateDocument(document, toolArguments) {
+    let currentValue = document;
+
+    if (toolArguments._select) {
+        const selection = selectDocumentPath(currentValue, toolArguments._select);
+        if (selection.error) {
+            return { value: null, error: selection.error };
+        }
+        currentValue = selection.value;
+    }
+    if (toolArguments._grep) {
+        currentValue = grepDocument(currentValue, toolArguments._grep);
+    }
+    return { value: currentValue, error: null };
+}
+
+// ---------------------------------------------------------------------------
+// REST family
+// ---------------------------------------------------------------------------
+
+/**
+ * Apply a route's `registryFunctionGuard`: the declaration says which arguments name a catalog
+ * function, and this server refuses anything that is not an `@expose read` entry of an allowed
+ * module. That is what keeps the generic runner from becoming a way around the read-only rule.
+ * @param {object} guard
+ * @param {Map<string, object>} registryByKey
+ * @param {object} toolArguments
+ * @returns {{registryEntry: object|null, refusal: object|null}}
+ */
+function resolveGuardedFunction(guard, registryByKey, toolArguments) {
+    const moduleName = toolArguments[guard.moduleParam];
+    const functionName = toolArguments[guard.nameParam];
+    const functionKey = `${moduleName}.${functionName}`;
+
+    if (guard.allowedModules && !guard.allowedModules.includes(moduleName)) {
+        const refusal = {
+            ok: false,
+            status: 403,
+            data: null,
+            errorMessage: `Module "${moduleName}" is not reachable from here. Use one of: ${guard.allowedModules.join(", ")}.`,
+            url: null,
+        };
+        return { registryEntry: null, refusal: refusal };
+    }
+
+    const registryEntry = registryByKey.get(functionKey);
+    if (!registryEntry || registryEntry.access !== guard.requireAccess) {
+        const refusal = {
+            ok: false,
+            status: 403,
+            data: null,
+            errorMessage: `"${functionKey}" is not callable: it is either unknown, not exposed, or a write operation. List the callable functions with sls_list_query_functions.`,
+            url: null,
+        };
+        return { registryEntry: null, refusal: refusal };
+    }
+    return { registryEntry: registryEntry, refusal: null };
+}
+
+/**
+ * The request is built only from the route's declared templates, so a query or body key the
+ * declaration does not mention can never be set by an agent.
+ * @param {object} descriptor
+ * @param {Map<string, object>} registryByKey
+ * @param {object} toolArguments
+ */
+async function executeRestTool(descriptor, registryByKey, toolArguments) {
+    const effectiveArguments = { ...descriptor.paramDefaults, ...toolArguments };
+    // Stays undefined for every route that is not the generic runner, so those get no row notice.
+    let appliedRowLimit;
+
+    if (descriptor.registryFunctionGuard) {
+        const { registryEntry, refusal } = resolveGuardedFunction(descriptor.registryFunctionGuard, registryByKey, effectiveArguments);
+        if (refusal) {
+            return refusal;
+        }
+        const suppliedParams = effectiveArguments.params && typeof effectiveArguments.params === "object" ? { ...effectiveArguments.params } : {};
+        const optionsParam = registryEntry.params.find((param) => param.name === "options");
+        if (optionsParam) {
+            const options = suppliedParams.options && typeof suppliedParams.options === "object" ? { ...suppliedParams.options } : {};
+            // The route injects returnQueryStr itself; an agent-supplied value would contradict it.
+            delete options.returnQueryStr;
+            if (acceptsLimitOption(registryEntry) && options.limit === undefined) {
+                options.limit = mcpConfig.defaultSparqlLimit;
+            }
+            suppliedParams.options = options;
+            appliedRowLimit = options.limit;
+        }
+        effectiveArguments.params = suppliedParams;
+    }
+
+    const requestOptions = {};
+    if (descriptor.query) {
+        requestOptions.query = resolveTemplateObject(descriptor.query, effectiveArguments);
+    }
+    if (descriptor.body) {
+        requestOptions.body = resolveTemplateObject(descriptor.body, effectiveArguments);
+    }
+
+    const result = await slsRequest(descriptor.httpMethod, descriptor.route, requestOptions);
+
+    if (!result.ok) {
+        const hint = descriptor.statusHints[result.status];
+        return hint ? { ...result, errorMessage: hint } : result;
+    }
+
+    let shapedData = result.data;
+    if (descriptor.parseJsonPayload && typeof shapedData === "string") {
+        // dataController.readFile answers with the raw file text; hand the agent a real object.
+        try {
+            shapedData = JSON.parse(shapedData);
+        } catch (parseError) {
+            return { ...result, ok: false, errorMessage: `The file returned by SLS is not valid JSON (${parseError.message}).` };
+        }
+    }
+    if (descriptor.emptyListWhenNull && shapedData === null) {
+        shapedData = [];
+    }
+    if (descriptor.resultShape) {
+        const shaper = resultShapers[descriptor.resultShape];
+        if (!shaper) {
+            throw new Error(`[mcp] route ${descriptor.route} asks for result shape "${descriptor.resultShape}", which this server does not implement.`);
+        }
+        shapedData = shaper(shapedData);
+    }
+    // Navigation runs last, on the document the agent would otherwise have received whole.
+    if (descriptor.navigableDocument && (toolArguments._select || toolArguments._grep)) {
+        const navigated = navigateDocument(shapedData, toolArguments);
+        if (navigated.error) {
+            return { ...result, ok: false, data: null, errorMessage: navigated.error };
+        }
+        return { ...result, data: navigated.value };
+    }
+    if (shapedData !== result.data) {
+        return { ...result, data: shapedData, rowCeiling: rowCeilingNoticeForLimit(shapedData, appliedRowLimit) };
+    }
+    const flattenedData = flattenSparqlResult(result.data);
+    return { ...result, data: flattenedData, rowCeiling: rowCeilingNoticeForLimit(flattenedData, appliedRowLimit) };
+}
+
+// ---------------------------------------------------------------------------
+// Dispatch
+// ---------------------------------------------------------------------------
+
+/**
+ * Dispatch one tool call.
+ * @param {{tools: Map<string, object>, registryByKey: Map<string, object>}} catalog
+ * @param {object} descriptor
+ * @param {object} toolArguments
+ * @returns {Promise<{ok: boolean, status: number, data: *, errorMessage: string|null, url: string|null}>}
+ */
+// ---------------------------------------------------------------------------
+// Paged collection
+// ---------------------------------------------------------------------------
+
+// Collecting past an endpoint's row ceiling only works if consecutive blocks agree on an order.
+// Without ORDER BY the endpoint may return them in an order of its choosing, and two blocks then
+// repeat or skip rows with nothing to show for it. KGquery does not enforce this because a person
+// watches its results scroll past; here they become a CSV the user takes for exact.
+const orderByRegex = /\bORDER\s+BY\b/i;
+const anyLimitOrOffsetRegex = /\b(LIMIT|OFFSET)\s+\d+/i;
+
+/**
+ * Walk a whole result set, one block per call to the underlying route.
+ *
+ * The loop lives here rather than behind the route on purpose, and the reason is the timeout rather
+ * than any question of layering. `slsRequest` gives each call to SLS `requestTimeoutMs` to answer.
+ * With the loop behind the route, that single stopwatch covered every block at once: fifty blocks
+ * of a second and a half blew a sixty-second budget and the whole walk was discarded, forty blocks
+ * of retrieved rows included. Raising the budget was the other way out and a bad trade, since it is
+ * shared by every tool and would make a genuinely stuck one hang for as long. Unpacking the fifty
+ * calls keeps each of them far inside the existing guard, which then goes on protecting everything.
+ *
+ * Blocks are appended to the query text rather than passed as route parameters: the route already
+ * honours a caller's own LIMIT, so nothing new has to be understood on the other side.
+ *
+ * @param {object} descriptor
+ * @param {Map<string, object>} registryByKey
+ * @param {object} toolArguments
+ */
+async function executeCollectedTool(descriptor, registryByKey, toolArguments) {
+    const queryParamName = descriptor.pagedCollection.queryParam;
+    const query = String(toolArguments[queryParamName] ?? "").trim();
+
+    if (anyLimitOrOffsetRegex.test(query)) {
+        return {
+            ok: false,
+            status: 400,
+            data: null,
+            errorMessage:
+                "Remove LIMIT and OFFSET from the query when collect is true: collecting walks the whole result set and manages them itself. Keep them for a single block, which is what collect false does.",
+            url: null,
+        };
+    }
+    // An ORDER BY is what an ordinary reading of "page through a result set" asks for, and it is
+    // precisely what makes the walk impossible here. Virtuoso refuses a sorted result once OFFSET
+    // plus LIMIT passes 10000: "SR353: Sorted TOP clause specifies more then 20000 rows to sort.
+    // Only 10000 are allowed." So an ordered walk dies on its second block and cannot reach the rest,
+    // which is the opposite of what collecting is for. Unsorted OFFSET paging has no such ceiling:
+    // measured against this platform's instance, OFFSET 90000 answers normally. That is also what
+    // `Sparql_OWL.getDictionary` has done for years, one page size and one strategy for the platform.
+    if (orderByRegex.test(query)) {
+        return {
+            ok: false,
+            status: 400,
+            data: null,
+            errorMessage:
+                'Remove the ORDER BY when collect is true. Virtuoso refuses a sorted result past 10000 rows (SR353, "Sorted TOP clause specifies more then N rows to sort"), so an ordered walk stops at the second block and never reaches the rest. ' +
+                "Collecting reads successive blocks in the endpoint's own scan order, which is stable for an unchanging store and is how this platform has always paged. " +
+                "Sort the rows after you have them all, or keep the ORDER BY and leave collect false when the whole result fits under 10000 rows.",
+            url: null,
+        };
+    }
+
+    const batchSize = descriptor.pagedCollection.batchSize;
+    const collectedBindings = [];
+    let responseVars = [];
+    let blockCount = 0;
+    let collectedElapsedMs = 0;
+    let stoppedOnCeiling = false;
+
+    while (true) {
+        const blockQuery = `${query} LIMIT ${batchSize} OFFSET ${collectedBindings.length}`;
+        const blockResult = await executeRestTool(descriptor, registryByKey, { ...toolArguments, [queryParamName]: blockQuery });
+        if (!blockResult.ok) {
+            // A block that fails after others succeeded still fails the call: half a walk answered
+            // as if it were whole is the outcome this whole mechanism exists to avoid.
+            return blockResult;
+        }
+        blockCount += 1;
+        collectedElapsedMs += blockResult.data?.elapsedMs ?? 0;
+        const blockBindings = blockResult.data?.results?.bindings;
+        if (!Array.isArray(blockBindings) || blockBindings.length === 0) {
+            break;
+        }
+        responseVars = blockResult.data.head?.vars ?? responseVars;
+        for (const binding of blockBindings) {
+            collectedBindings.push(binding);
+        }
+        if (collectedBindings.length >= mcpConfig.maxCollectedRows) {
+            stoppedOnCeiling = true;
+            break;
+        }
+    }
+
+    const rowCeiling = {
+        returnedRows: collectedBindings.length,
+        knownCeiling: mcpConfig.maxCollectedRows,
+        collectedBlocks: blockCount,
+        // Summed across the blocks: a collected run is many endpoint calls and the per-call figure
+        // would say nothing about what the walk cost.
+        elapsedMs: collectedElapsedMs,
+        atKnownCeiling: stoppedOnCeiling,
+        complete: !stoppedOnCeiling,
+    };
+    if (stoppedOnCeiling) {
+        rowCeiling.hint =
+            `Stopped at ${collectedBindings.length} rows, the collection ceiling, so more exist. This is the one cut that cannot be walked past from here. ` +
+            `Narrow the query, or split it on an indexed value and collect each part.`;
+    }
+
+    return { ok: true, status: 200, data: { head: { vars: responseVars }, results: { bindings: collectedBindings }, rowCeiling: rowCeiling }, errorMessage: null, url: null };
+}
+
+// ---------------------------------------------------------------------------
+// Store family
+// ---------------------------------------------------------------------------
+
+/**
+ * Serve a window of rows the size guard held back. Answered from this process alone: no SLS call,
+ * no triple store, so paging costs nothing but the tokens of the rows themselves.
+ * @param {object} toolArguments
+ */
+async function executeStoreTool(toolArguments) {
+    const page = readPage(toolArguments.resultId, toolArguments.offset ?? 0, toolArguments.limit ?? mcpConfig.defaultSparqlLimit, toolArguments.grep);
+    if (!page) {
+        // Expiry and a wrong identifier are one message on purpose: the agent's move is the same in
+        // both cases, and inviting it to guess at another identifier would be worse.
+        return {
+            ok: false,
+            status: 404,
+            data: null,
+            errorMessage:
+                `No stored result "${toolArguments.resultId}". Results are held in memory for a limited time and are lost when the server restarts, ` +
+                `so this one either expired or never existed. Run the tool that produced it again to get a fresh resultId.`,
+            url: null,
+        };
+    }
+    return { ok: true, status: 200, data: page, errorMessage: null, url: null };
+}
+
+export async function executeTool(catalog, descriptor, toolArguments) {
+    if (descriptor.family === "sparql") {
+        return executeSparqlTool(descriptor, toolArguments);
+    }
+    if (descriptor.family === "rest") {
+        if (descriptor.pagedCollection && toolArguments[descriptor.pagedCollection.enabledByParam]) {
+            return executeCollectedTool(descriptor, catalog.registryByKey, toolArguments);
+        }
+        return executeRestTool(descriptor, catalog.registryByKey, toolArguments);
+    }
+    if (descriptor.family === "store") {
+        return executeStoreTool(toolArguments);
+    }
+    throw new Error(`unknown tool family "${descriptor.family}"`);
+}

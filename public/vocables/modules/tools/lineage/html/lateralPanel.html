@@ -39,3 +39,9 @@
 <div id="propertiesTab" class="w3-container lineage-tab slsv-bg-pale" style="display: none"></div>
 
 <div id="containersTab" class="w3-container lineage-tab slsv-bg-pale" style="display: none"></div>
+
+<!-- Docked at the bottom of the panel, outside the tabs on purpose: the chat bot answers about the
+     graph, not about the tab in front of it, so it stays reachable from Classes or Containers just
+     as from the Whiteboard. Empty unless the sls-chatbot plugin is installed: see
+     Lineage_whiteboard.mountChatbotPlugin. -->
+<div id="lineage_chatbotDock" style="flex: 0 0 auto; display: flex; flex-direction: column"></div>

@@ -92,6 +92,11 @@ var MappingModeler = (function () {
      * @throws {Error} If any step in the initialization sequence fails.
      */
     self.onLoaded = function () {
+        // A read only source can also arrive from the url or from a tool switch, not only from a click in the source selector.
+        if (SourceSelectorWidget.refuseReadOnlySourceForMappingModeler(MainController.currentSource, "MappingModeler")) {
+            return SourceSelectorWidget.showSourceDialog(true);
+        }
+
         var tableStatsMap = {};
         async.series(
             [

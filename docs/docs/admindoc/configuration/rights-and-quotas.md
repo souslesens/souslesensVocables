@@ -11,18 +11,17 @@ configuration file, and the access right itself is computed rather than stored.
 
 ![How users, profiles, access rights, sources and databases relate](resources.svg)
 
-- A **user account** holds a list of **profile** names. It carries its own limits, used
-  only where no profile decides.
-- A **profile** grants tools, schema types, databases and source access, and carries the
-  limits that win over the account.
-- A **source** is a descriptor pointing at a named graph in the triplestore. Its `owner`
-  is a user login, and its `editable` flag can make it read-only for everyone but the
-  administrators.
-- The **access right on a source** is derived from the four inputs above every time it is
-  needed. Nothing stores it, which is why changing a profile takes effect immediately.
-- A **database** is an SQL connection the Mapping Modeler reads rows from, to turn them
-  into triples in the graph of a source. Access to it comes from the profile alone, never
-  from the source.
+- A **user account** owns sources, and carries limits used only where no profile decides.
+- A **profile** belongs to the user accounts that list it, and grants tools, schema types,
+  databases and source access. Its limits win over those of the account.
+- A **source** is a descriptor pointing at a named graph in the triplestore. Its
+  `editable` flag can make it read-only for everyone but the administrators.
+- The **access right on a source** is derived from ownership, the profiles, the `editable`
+  flag and the `admin` group, every time it is needed. Nothing stores it, which is why
+  changing a profile takes effect immediately.
+- A **database** is an SQL connection the Mapping Modeler reads rows from. Access to it
+  comes from the profile alone: no source points at a database, the tool is what brings
+  the two together at import time.
 - **User data** entries belong to a user and are capped by their own limit. The same table
   also stores the technical records of the triple accounting, owned by the admin account
   so they never weigh on anybody's allowance.

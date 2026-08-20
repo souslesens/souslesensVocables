@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 430" width="100%" role="img" aria-label="Relations between users, profiles, access rights, sources and databases">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 410" width="100%" role="img" aria-label="Relations between users, profiles, access rights, sources and databases">
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#5b6b7a" />
@@ -13,47 +13,42 @@
     </style>
   </defs>
 
-  <rect rx="6" class="box" x="30" y="20" width="230" height="80" />
+  <rect rx="6" class="box" x="30" y="20" width="230" height="66" />
   <text class="title" x="45" y="44">User account</text>
-  <text class="line" x="45" y="64">login, list of profiles</text>
-  <text class="line" x="45" y="82">limits used if no profile decides</text>
+  <text class="line" x="45" y="66">login, limits used if no profile decides</text>
 
   <rect rx="6" class="box" x="380" y="20" width="230" height="80" />
   <text class="title" x="395" y="44">Profile</text>
   <text class="line" x="395" y="64">tools, schemas, databases</text>
   <text class="line" x="395" y="82">source access control, limits</text>
 
-  <rect rx="6" class="derived" x="195" y="175" width="250" height="72" />
-  <text class="title" x="210" y="199">Access right on a source</text>
-  <text class="line" x="210" y="219">none, read or readwrite</text>
-  <text class="line" x="210" y="237">computed, never stored</text>
+  <rect rx="6" class="derived" x="195" y="170" width="250" height="72" />
+  <text class="title" x="210" y="194">Access right on a source</text>
+  <text class="line" x="210" y="214">none, read or readwrite</text>
+  <text class="line" x="210" y="232">computed, never stored</text>
 
-  <rect rx="6" class="box" x="30" y="322" width="230" height="86" />
-  <text class="title" x="45" y="346">Source</text>
-  <text class="line" x="45" y="366">graphUri, schemaType, group</text>
-  <text class="line" x="45" y="384">owner: a user login</text>
-  <text class="line" x="45" y="402">editable: false makes it read only</text>
+  <rect rx="6" class="box" x="30" y="300" width="230" height="70" />
+  <text class="title" x="45" y="324">Source</text>
+  <text class="line" x="45" y="346">graphUri, schemaType</text>
+  <text class="line" x="45" y="364">editable: false makes it read only</text>
 
-  <rect rx="6" class="box" x="380" y="322" width="230" height="86" />
-  <text class="title" x="395" y="346">Database</text>
-  <text class="line" x="395" y="366">SQL connection</text>
-  <text class="line" x="395" y="384">granted by the profile alone</text>
+  <rect rx="6" class="box" x="380" y="300" width="230" height="70" />
+  <text class="title" x="395" y="324">Database</text>
+  <text class="line" x="395" y="346">SQL connection</text>
+  <text class="line" x="395" y="364">granted by the profile alone</text>
 
-  <path class="edge" d="M 260 52 L 374 52" />
-  <text class="label" x="288" y="44">holds</text>
+  <path class="edge" d="M 374 53 L 266 53" />
+  <text class="label" x="285" y="45">belongs to</text>
 
-  <path class="edge" d="M 145 102 L 235 170" />
-  <text class="label" x="120" y="140">owns</text>
+  <path class="edge" d="M 60 90 L 60 294" />
+  <text class="label" x="70" y="200">owns</text>
 
-  <path class="edge" d="M 495 102 L 405 170" />
-  <text class="label" x="455" y="140">grants</text>
+  <path class="edge" d="M 470 104 L 412 166" />
+  <text class="label" x="450" y="145">grants</text>
 
-  <path class="edge" d="M 250 249 L 160 316" />
-  <text class="label" x="185" y="288">applies to</text>
+  <path class="edge" d="M 300 244 L 175 294" />
+  <text class="label" x="215" y="285">applies to</text>
 
-  <path class="edge" d="M 570 102 L 570 316" />
-  <text class="label" x="500" y="215">allowedDatabases</text>
-
-  <path class="edge" d="M 374 365 L 266 365" />
-  <text class="label" x="282" y="356">reads rows</text>
+  <path class="edge" d="M 570 104 L 570 294" />
+  <text class="label" x="490" y="205">allowedDatabases</text>
 </svg>

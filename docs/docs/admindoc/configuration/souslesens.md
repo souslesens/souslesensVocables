@@ -108,6 +108,13 @@ Supported providers:
 
 Defaults are defined in `model/config.js`. `ollama.baseUrl` defaults to `http://localhost:11434`.
 
+`maxTokens` is the ceiling on what the model may produce in a single turn, and it is the only
+authority on that: `POST /api/v1/ai/complete` clamps any value a caller asks for down to it, so the
+chat panel and any other client answer within the limit set here. It defaults to 1024, which cuts
+long answers off mid-sentence, and its maximum is 32768. When a turn does hit the ceiling the answer
+comes back with `stopReason: "max_tokens"` and the applied `maxTokens`, and the chat panel says so
+under the truncated text.
+
 #### API key encryption
 
 LLM API keys can be stored encrypted in `mainConfig.json`. The server decrypts values prefixed with

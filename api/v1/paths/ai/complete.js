@@ -2,11 +2,6 @@ import { readMainConfig } from "../../../../model/config.js";
 import llmClient from "../../../../bin/AI/llmClient.js";
 import { normalizeCompletion, normalizersByProvider } from "../../../../bin/AI/normalizeCompletion.js";
 
-// A single turn is capped well above a normal answer but far below the provider maximum: this route
-// runs inside an agent loop, so a caller that asks for the ceiling on every iteration burns the
-// platform's LLM budget in a handful of turns.
-const maxTokensCeiling = 16384;
-
 export default function () {
     let operations = {
         POST,
@@ -41,8 +36,15 @@ export default function () {
             }
 
             const tools = req.body.tools;
+
+            // `llm.<provider>.maxTokens` is the single authority on how long one turn may be. A
+            // caller may ask for less, never for more: this route runs inside an agent loop, so a
+            // caller free to raise the ceiling on every iteration would spend the platform's LLM
+            // budget past what the administrator configured. Omitting `maxTokens` is the normal
+            // case and yields exactly the configured value.
+            const configuredMaxTokens = config.llm[provider]?.maxTokens;
             const requestedMaxTokens = req.body.maxTokens;
-            const maxTokens = requestedMaxTokens ? Math.min(requestedMaxTokens, maxTokensCeiling) : undefined;
+            const maxTokens = requestedMaxTokens && configuredMaxTokens ? Math.min(requestedMaxTokens, configuredMaxTokens) : (requestedMaxTokens ?? configuredMaxTokens);
 
             return llmClient.createMessage({ system: req.body.system, messages: messages, tools: tools, maxTokens: maxTokens, model: req.body.model }, function (error, completion) {
                 if (error) {
@@ -64,7 +66,10 @@ export default function () {
                 // inside llmClient with the HTTP call still open.
                 try {
                     const normalized = normalizeCompletion(provider, completion);
-                    return res.status(200).json({ ...normalized, model: completion.model });
+                    // The ceiling travels with the answer: `stopReason: "max_tokens"` alone tells the
+                    // caller the text is cut without telling it at what, and the caller cannot read
+                    // the server configuration to find out.
+                    return res.status(200).json({ ...normalized, model: completion.model, maxTokens: maxTokens });
                 } catch (normalizationError) {
                     console.error(`[ai/complete] could not normalize the ${provider} completion:`, normalizationError.message);
                     return res.status(502).json({ error: `The ${provider} answer could not be read: ${normalizationError.message}` });
@@ -122,7 +127,10 @@ export default function () {
                         },
                         maxTokens: {
                             type: "integer",
-                            description: `Output ceiling for this turn. Capped at ${maxTokensCeiling}; falls back to the provider's configured maxTokens when omitted.`,
+                            description:
+                                "Optional output ceiling for this turn, and only ever a lower one: the effective value is " +
+                                "`min(this, llm.<provider>.maxTokens)`. Omit it, which is the normal case, to get the configured value. " +
+                                "The value actually applied is returned as `maxTokens` in the answer.",
                         },
                         model: {
                             type: "string",
@@ -142,7 +150,13 @@ export default function () {
                 schema: {
                     type: "object",
                     properties: {
-                        stopReason: { type: "string", description: "`end_turn`, `tool_use`, `max_tokens`. `tool_use` means the caller must run the tools and send the results back." },
+                        stopReason: {
+                            type: "string",
+                            description:
+                                "`end_turn`, `tool_use`, `max_tokens`. `tool_use` means the caller must run the tools and send the results back. " +
+                                "`max_tokens` means the model was cut at the `maxTokens` returned here and `text` is a fragment: the caller must say so to its user.",
+                        },
+                        maxTokens: { type: "integer", description: "Output ceiling applied to this turn, from `llm.<provider>.maxTokens` unless the caller asked for a lower one." },
                         text: { type: "string", description: "Concatenation of the text blocks, for display." },
                         toolCalls: {
                             type: "array",

@@ -11,9 +11,10 @@ configuration file, and the access right itself is computed rather than stored.
 
 ![How users, profiles, access rights, sources and databases relate](resources.svg)
 
-- A **user account** owns sources, and carries limits used only where no profile decides.
-- A **profile** belongs to the user accounts that list it, and grants tools, schema types,
-  databases and source access. Its limits win over those of the account.
+- A **user account** belongs to the profiles listed on it, owns sources, and carries
+  limits used only where no profile decides.
+- A **profile** grants tools, schema types, databases and source access to the accounts
+  that belong to it. Its limits win over those of the account.
 - A **source** is a descriptor pointing at a named graph in the triplestore. Its
   `editable` flag can make it read-only for everyone but the administrators.
 - The **access right on a source** is derived from ownership, the profiles, the `editable`

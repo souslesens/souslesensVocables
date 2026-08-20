@@ -37,7 +37,7 @@
   <text class="line" x="395" y="346">SQL connection</text>
   <text class="line" x="395" y="364">granted by the profile alone</text>
 
-  <path class="edge" d="M 374 53 L 266 53" />
+  <path class="edge" d="M 266 53 L 374 53" />
   <text class="label" x="285" y="45">belongs to</text>
 
   <path class="edge" d="M 60 90 L 60 294" />

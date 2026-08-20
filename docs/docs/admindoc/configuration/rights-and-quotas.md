@@ -4,6 +4,29 @@ This page describes who may write where, how much a user is allowed to hold, and
 those figures are computed. It records the decisions behind the implementation, not only
 the fields to fill in.
 
+## The resources involved
+
+Five resources decide everything on this page. Three are stored, one is a plain
+configuration file, and the access right itself is computed rather than stored.
+
+![How users, profiles, access rights, sources and databases relate](resources.svg)
+
+- A **user account** holds a list of **profile** names. It carries its own limits, used
+  only where no profile decides.
+- A **profile** grants tools, schema types, databases and source access, and carries the
+  limits that win over the account.
+- A **source** is a descriptor pointing at a named graph in the triplestore. Its `owner`
+  is a user login, and its `editable` flag can make it read-only for everyone but the
+  administrators.
+- The **access right on a source** is derived from the four inputs above every time it is
+  needed. Nothing stores it, which is why changing a profile takes effect immediately.
+- A **database** is an SQL connection the Mapping Modeler reads rows from, to turn them
+  into triples in the graph of a source. Access to it comes from the profile alone, never
+  from the source.
+- **User data** entries belong to a user and are capped by their own limit. The same table
+  also stores the technical records of the triple accounting, owned by the admin account
+  so they never weigh on anybody's allowance.
+
 ## What each user may do today
 
 The columns are the five situations a user can be in for a given source. They are read
@@ -15,17 +38,17 @@ except the administrators, its owner included.
 | Operation                                         | Administrator | Owner of the source | `readwrite` profile | `read` profile | Source `editable: false` | Limit that applies                            |
 | ------------------------------------------------- | ------------- | ------------------- | ------------------- | -------------- | ------------------------ | --------------------------------------------- |
 | Read a source (Lineage, KGquery, SPARQL `SELECT`) | yes           | yes                 | yes                 | yes            | yes                      | none                                          |
-| Mapping Modeler — write triples                   | yes           | yes                 | yes                 | no             | no                       | `maxWritableTriplesPerUser`                   |
-| Mapping Modeler — delete triples                  | yes           | yes                 | yes                 | no             | no                       | none, it frees quota                          |
-| Graph Management — upload a graph                 | yes           | yes                 | yes                 | no             | no                       | `maxUploadTriplesPerUser`                     |
-| Graph Management — delete or clear a graph        | yes           | yes                 | yes                 | no             | no                       | none, it frees quota                          |
+| Mapping Modeler, write triples                    | yes           | yes                 | yes                 | no             | no                       | `maxWritableTriplesPerUser`                   |
+| Mapping Modeler, delete triples                   | yes           | yes                 | yes                 | no             | no                       | none, it frees quota                          |
+| Graph Management, upload a graph                  | yes           | yes                 | yes                 | no             | no                       | `maxUploadTriplesPerUser`                     |
+| Graph Management, delete or clear a graph         | yes           | yes                 | yes                 | no             | no                       | none, it frees quota                          |
 | SPARQL update through the proxy                   | yes           | yes                 | yes                 | no             | no                       | none                                          |
 | N-Triples export                                  | yes           | yes                 | yes                 | yes            | yes                      | `maxNtExportTriples`, per export              |
-| Create a source                                   | yes           | —                   | —                   | —              | —                        | `allowSourceCreation`, `maxNumberCreatedSource` |
-| Save a user data entry                            | yes           | —                   | —                   | —              | —                        | `maxUserDataRecordsPerUser`                   |
+| Create a source                                   | yes           | n/a                 | n/a                 | n/a            | n/a                      | `allowSourceCreation`, `maxNumberCreatedSource` |
+| Save a user data entry                            | yes           | n/a                 | n/a                 | n/a            | n/a                      | `maxUserDataRecordsPerUser`                   |
 
-The last two operations are not attached to a source, hence the dashes: they depend only
-on the user.
+The last two operations are not attached to a source, hence the `n/a` cells: they depend
+only on the user.
 
 A few points the table cannot carry:
 
@@ -104,7 +127,7 @@ nonnegative rather than positive, and why the resolution uses `??` and never `||
 
 Nothing in the triplestore says who wrote a triple. Triples are inserted bare, an upload
 loads an opaque file, and the response of an `INSERT` reports the volume submitted rather
-than the volume stored — Virtuoso answers `N (or less) triples -- done` even when every
+than the volume stored. Virtuoso answers `N (or less) triples -- done` even when every
 triple was already present. A user's stock therefore cannot be recomputed by asking the
 store who owns what.
 
@@ -116,7 +139,7 @@ What the store can answer is how big a **bucket** is, right now:
 
 Beside each bucket we record, per user, the **share** they poured in, measured as the
 difference between two live measurements taken around their write. Usage is the sum of
-their shares, scaled down when the live measurement is smaller — which is what a deletion
+their shares, scaled down when the live measurement is smaller, which is what a deletion
 looks like, whichever path it took, including a hand-written SPARQL `DELETE` that no
 application hook could ever catch.
 
@@ -133,8 +156,8 @@ Consequences worth knowing:
   regardless of who deleted and of who had written the deleted triples. On a bucket with
   a single contributor, which is the common case, the figure is exact.
 - Emptying a bucket drops every share it held.
-- The upload bucket also collects what the Lineage tool writes — axioms, relations,
-  decorations — for want of a marker on those.
+- The upload bucket also collects what the Lineage tool writes, meaning axioms, relations
+  and decorations, for want of a marker on those.
 
 The share records live in the `user_data` table, owned by the admin account, which keeps
 them out of every other user's listing and out of reach of their deletions. They are read

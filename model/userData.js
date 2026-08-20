@@ -237,8 +237,8 @@ class UserDataModel {
     /**
      * How many records a user owns, for the quota that caps them.
      *
-     * Counts ownership, so the technical records the triple quota keeps here — owned by
-     * the admin account — never weigh on anybody's allowance.
+     * Counts ownership, so the technical records the triple quota keeps here, owned by
+     * the admin account, never weigh on anybody's allowance.
      *
      * @param {number} ownerId - the numeric identifier of the owner
      * @returns {Promise<number>}

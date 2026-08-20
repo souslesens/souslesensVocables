@@ -47,7 +47,7 @@ const QuotaLine = ({ row, quota }: { row: QuotaRow; quota: Quota }) => {
                     {isForbidden ? (
                         <Chip size="small" color="error" label="Not allowed" />
                     ) : isUnlimited ? (
-                        <Chip size="small" variant="outlined" label={quota.used === null ? "No limit" : `${formatNumber(quota.used)} — no limit`} />
+                        <Chip size="small" variant="outlined" label={quota.used === null ? "No limit" : `${formatNumber(quota.used)}, no limit`} />
                     ) : (
                         <Typography variant="body2">
                             {quota.used === null ? `${formatNumber(quota.cap as number)} max` : `${formatNumber(quota.used)} / ${formatNumber(quota.cap as number)}`}

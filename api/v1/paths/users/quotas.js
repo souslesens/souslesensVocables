@@ -24,8 +24,8 @@ export default function () {
             const ownedSources = await sourceModel.getOwnedSources(userInfo.user);
             const ownedUserData = await userDataModel.countOwnedBy(parseInt(userInfo.user.id));
 
-            /* Measured live against the triplestore, so a deletion made anywhere — the
-             * tools or a hand-written SPARQL DELETE — is already reflected here. */
+            /* Measured live against the triplestore, so a deletion made anywhere, by the
+             * tools or by a hand-written SPARQL DELETE, is already reflected here. */
             const mappingTriples = await tripleQuotaModel.usageFor(login, MAPPING_KIND);
             const uploadTriples = await tripleQuotaModel.usageFor(login, UPLOAD_KIND);
 

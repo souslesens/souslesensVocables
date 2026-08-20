@@ -4,6 +4,13 @@ import path from "path";
 
 export default defineConfig({
     plugins: [react()],
+    resolve: {
+        /* react-zorm resolves zod from the repository root while the webapp pins its own
+         * copy, and two copies mean `schema instanceof ZodObject` is false: the profile
+         * form then throws "Expected ZodObject at ... got ZodObject". One copy in the
+         * bundle, whatever npm hoists. */
+        dedupe: ["zod", "react", "react-dom"],
+    },
     build: {
         outDir: "static",
         rollupOptions: {
@@ -30,8 +37,9 @@ export default defineConfig({
         sourcemap: true,
     },
     server: {
+        port: parseInt(process.env.VITE_PORT || "5173"),
         proxy: {
-            "/api": "http://localhost:3010",
+            "/api": `http://localhost:${process.env.VITE_BACKEND_PORT || "3010"}`,
         },
     },
 });

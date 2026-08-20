@@ -1,6 +1,7 @@
 import { Writable } from "stream";
 
 const { default: KGbuilder_main } = await import("../../bin/KGbuilder/KGbuilder_main.js");
+const { default: TriplesMaker } = await import("../../bin/KGbuilder/triplesMaker.js");
 
 function createCapturingStream() {
     const chunks = [];
@@ -89,5 +90,27 @@ describe("KGbuilder_main.streamTriplesFromCsvOrTableAsNt triple cap", () => {
         await streamTriplesFromCsvOrTableAsNt({ maxNtExportTriples: 2 }, stream);
 
         expect(secondBatchWasWritten).toBe(false);
+    });
+});
+
+describe("TriplesMaker.canWriteMoreTriples", () => {
+    test("an import with no quota attached is never stopped", async () => {
+        expect(await TriplesMaker.canWriteMoreTriples({})).toBe(true);
+    });
+
+    test("batches are allowed while the budget holds", async () => {
+        const options = { writeQuota: { remaining: 500 } };
+        expect(await TriplesMaker.canWriteMoreTriples(options)).toBe(true);
+    });
+
+    test("a spent budget stops the import when the live usage confirms it", async () => {
+        const options = { writeQuota: { remaining: 0, refresh: async () => 0 } };
+        expect(await TriplesMaker.canWriteMoreTriples(options)).toBe(false);
+    });
+
+    test("a budget spent on triples the store already held is refilled, so replaying stays free", async () => {
+        const options = { writeQuota: { remaining: -200, refresh: async () => 50 } };
+        expect(await TriplesMaker.canWriteMoreTriples(options)).toBe(true);
+        expect(options.writeQuota.remaining).toBe(50);
     });
 });

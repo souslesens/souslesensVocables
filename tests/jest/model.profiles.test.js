@@ -68,6 +68,9 @@ describe("Test the Profilemodel module", () => {
             maxNtExportTriples: 5000,
             allowSourceCreation: true,
             maxNumberCreatedSource: 2,
+            maxWritableTriplesPerUser: 1000,
+            maxUploadTriplesPerUser: 500,
+            maxUserDataRecordsPerUser: 20,
         });
     });
 
@@ -116,6 +119,9 @@ describe("Test the Profilemodel module", () => {
             maxNtExportTriples: undefined,
             allowSourceCreation: undefined,
             maxNumberCreatedSource: undefined,
+            maxWritableTriplesPerUser: undefined,
+            maxUploadTriplesPerUser: undefined,
+            maxUserDataRecordsPerUser: undefined,
         });
     });
 
@@ -134,6 +140,9 @@ describe("Test the Profilemodel module", () => {
             maxNtExportTriples: undefined,
             allowSourceCreation: undefined,
             maxNumberCreatedSource: undefined,
+            maxWritableTriplesPerUser: undefined,
+            maxUploadTriplesPerUser: undefined,
+            maxUserDataRecordsPerUser: undefined,
         });
     });
 
@@ -214,6 +223,9 @@ describe("Test the Profilemodel module", () => {
             max_nt_export_triples: null,
             create_source: null,
             maximum_source: null,
+            max_writable_triples: null,
+            max_upload_triples: null,
+            max_user_data_records: null,
             schema_types: [],
         });
     });
@@ -230,6 +242,9 @@ describe("Test the Profilemodel module", () => {
             max_nt_export_triples: 5000,
             create_source: null,
             maximum_source: null,
+            max_writable_triples: null,
+            max_upload_triples: null,
+            max_user_data_records: null,
             schema_types: [],
         });
     });
@@ -246,6 +261,9 @@ describe("Test the Profilemodel module", () => {
             max_nt_export_triples: null,
             create_source: true,
             maximum_source: 3,
+            max_writable_triples: null,
+            max_upload_triples: null,
+            max_user_data_records: null,
             schema_types: [],
         });
     });
@@ -277,6 +295,9 @@ describe("Test the Profilemodel module", () => {
                 maxNtExportTriples: undefined,
                 allowSourceCreation: undefined,
                 maxNumberCreatedSource: undefined,
+                maxWritableTriplesPerUser: undefined,
+                maxUploadTriplesPerUser: undefined,
+                maxUserDataRecordsPerUser: undefined,
             },
         ]);
     });
@@ -309,6 +330,9 @@ describe("Test the Profilemodel module", () => {
                 maxNtExportTriples: 5000,
                 allowSourceCreation: undefined,
                 maxNumberCreatedSource: undefined,
+                maxWritableTriplesPerUser: undefined,
+                maxUploadTriplesPerUser: undefined,
+                maxUserDataRecordsPerUser: undefined,
             },
         ]);
     });
@@ -342,6 +366,9 @@ describe("Test the Profilemodel module", () => {
                 maxNtExportTriples: undefined,
                 allowSourceCreation: true,
                 maxNumberCreatedSource: 3,
+                maxWritableTriplesPerUser: undefined,
+                maxUploadTriplesPerUser: undefined,
+                maxUserDataRecordsPerUser: undefined,
             },
         ]);
     });
@@ -384,6 +411,9 @@ describe("Test the Profilemodel module", () => {
                 maxNtExportTriples: undefined,
                 allowSourceCreation: undefined,
                 maxNumberCreatedSource: undefined,
+                maxWritableTriplesPerUser: undefined,
+                maxUploadTriplesPerUser: undefined,
+                maxUserDataRecordsPerUser: undefined,
             },
         ]);
     });
@@ -465,27 +495,60 @@ describe("Test the Profilemodel module", () => {
         expect(result).toBeUndefined();
     });
 
-    test("getSourceCreationRightsForUser returns the rights of a single-profile user", async () => {
+    test("getLimitsForUser returns the limits of a single-profile user", async () => {
         profileModel._clearProfileCaches();
-        const result = await profileModel.getSourceCreationRightsForUser({ id: "42", login: "someone", groups: ["read_folder_1"] });
-        expect(result).toStrictEqual({ allowSourceCreation: true, maxNumberCreatedSource: 2 });
+        const result = await profileModel.getLimitsForUser({ id: "42", login: "someone", groups: ["read_folder_1"] });
+        expect(result).toStrictEqual({
+            allowSourceCreation: true,
+            maxNumberCreatedSource: 2,
+            maxWritableTriplesPerUser: 1000,
+            maxUploadTriplesPerUser: 500,
+            maxUserDataRecordsPerUser: 20,
+        });
     });
 
-    test("getSourceCreationRightsForUser keeps the most permissive rights across profiles", async () => {
+    test("getLimitsForUser keeps the most permissive limits across profiles", async () => {
         profileModel._clearProfileCaches();
-        const result = await profileModel.getSourceCreationRightsForUser({ id: "42", login: "someone", groups: ["readwrite_folder_1", "read_folder_1"] });
-        expect(result).toStrictEqual({ allowSourceCreation: true, maxNumberCreatedSource: 10 });
+        const result = await profileModel.getLimitsForUser({ id: "42", login: "someone", groups: ["readwrite_folder_1", "read_folder_1"] });
+        expect(result).toStrictEqual({
+            allowSourceCreation: true,
+            maxNumberCreatedSource: 10,
+            maxWritableTriplesPerUser: 5000,
+            // 500 beats the 0 carried by readwrite_folder_1: the highest cap wins.
+            maxUploadTriplesPerUser: 500,
+            // Only read_folder_1 defines this one, so it applies unopposed.
+            maxUserDataRecordsPerUser: 20,
+        });
     });
 
-    test("getSourceCreationRightsForUser leaves the rights undefined when no profile defines them", async () => {
+    test("getLimitsForUser leaves every limit undefined when no profile defines them", async () => {
         profileModel._clearProfileCaches();
-        const result = await profileModel.getSourceCreationRightsForUser({ id: "42", login: "someone", groups: ["all_forbidden"] });
-        expect(result).toStrictEqual({ allowSourceCreation: undefined, maxNumberCreatedSource: undefined });
+        const result = await profileModel.getLimitsForUser({ id: "42", login: "someone", groups: ["all_forbidden"] });
+        expect(result).toStrictEqual({
+            allowSourceCreation: undefined,
+            maxNumberCreatedSource: undefined,
+            maxWritableTriplesPerUser: undefined,
+            maxUploadTriplesPerUser: undefined,
+            maxUserDataRecordsPerUser: undefined,
+        });
     });
 
-    test("getSourceCreationRightsForUser forbids creation when the only profile forbids it", async () => {
+    test("getLimitsForUser forbids creation when the only profile forbids it", async () => {
         profileModel._clearProfileCaches();
-        const result = await profileModel.getSourceCreationRightsForUser({ id: "42", login: "someone", groups: ["readwrite_folder_1"] });
-        expect(result).toStrictEqual({ allowSourceCreation: false, maxNumberCreatedSource: 10 });
+        const result = await profileModel.getLimitsForUser({ id: "42", login: "someone", groups: ["readwrite_folder_1"] });
+        expect(result).toStrictEqual({
+            allowSourceCreation: false,
+            maxNumberCreatedSource: 10,
+            maxWritableTriplesPerUser: 5000,
+            maxUploadTriplesPerUser: 0,
+            maxUserDataRecordsPerUser: undefined,
+        });
+    });
+
+    test("getLimitsForUser keeps a cap of 0, which forbids rather than being missing", async () => {
+        profileModel._clearProfileCaches();
+        const result = await profileModel.getLimitsForUser({ id: "42", login: "someone", groups: ["readwrite_folder_1"] });
+        expect(result.maxUploadTriplesPerUser).toBe(0);
+        expect(result.maxUploadTriplesPerUser).not.toBeUndefined();
     });
 });

@@ -118,6 +118,9 @@ type ProfileJson = {
     maxNtExportTriples?: number;
     allowSourceCreation?: boolean;
     maxNumberCreatedSource?: number;
+    maxWritableTriplesPerUser?: number;
+    maxUploadTriplesPerUser?: number;
+    maxUserDataRecordsPerUser?: number;
 };
 
 const decodeProfile = (key: string, profile: ProfileJson): Profile => {
@@ -135,6 +138,9 @@ const decodeProfile = (key: string, profile: ProfileJson): Profile => {
         maxNtExportTriples: profile.maxNtExportTriples,
         allowSourceCreation: profile.allowSourceCreation,
         maxNumberCreatedSource: profile.maxNumberCreatedSource,
+        maxWritableTriplesPerUser: profile.maxWritableTriplesPerUser,
+        maxUploadTriplesPerUser: profile.maxUploadTriplesPerUser,
+        maxUserDataRecordsPerUser: profile.maxUserDataRecordsPerUser,
     };
 };
 
@@ -159,6 +165,10 @@ const ProfileSchema = z.object({
     maxNtExportTriples: z.number().int().positive().optional(),
     allowSourceCreation: z.boolean().optional(),
     maxNumberCreatedSource: z.number().int().nonnegative().optional(),
+    // Nonnegative and not positive: 0 is a value, it forbids.
+    maxWritableTriplesPerUser: z.number().int().nonnegative().optional(),
+    maxUploadTriplesPerUser: z.number().int().nonnegative().optional(),
+    maxUserDataRecordsPerUser: z.number().int().nonnegative().optional(),
 });
 
 export const ProfileSchemaCreate = ProfileSchema.merge(
@@ -187,6 +197,9 @@ export const defaultProfile = (uuid: string): Profile => {
         maxNtExportTriples: undefined,
         allowSourceCreation: undefined,
         maxNumberCreatedSource: undefined,
+        maxWritableTriplesPerUser: undefined,
+        maxUploadTriplesPerUser: undefined,
+        maxUserDataRecordsPerUser: undefined,
     };
 };
 export { getProfiles, deleteProfile, ProfileSchema };

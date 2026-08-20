@@ -8,10 +8,10 @@ create table if not exists users(
        profiles         text[],
        create_source    boolean default false,
        maximum_source   integer default 5,
+       -- No default, unlike the two above: an instance that never set these must
+       -- stay uncapped. Zero is a decision, it forbids.
+       max_writable_triples  integer,
+       max_upload_triples    integer,
+       max_user_data_records integer,
        auth             authentificator
 );
-
--- Add a view to retrieve the list of users without the private data
-create view public_users_list as
-       select id, login, create_source, maximum_source, auth, profiles
-       from users;

@@ -20,7 +20,7 @@ const user = {
             if (adminUser === undefined) {
                 throw Error("Admin user not found in database. Ensure ensureAdminUserExists() was called at startup.");
             }
-            const adminSourceCreationRights = await user.resolveSourceCreationRights(adminUser);
+            const adminLimits = await user.resolveUserLimits(adminUser);
             result = {
                 logged: true,
                 user: {
@@ -30,8 +30,7 @@ const user = {
                     token: adminUser.token,
                 },
                 authSource: "disabled",
-                allowSourceCreation: adminSourceCreationRights.allowSourceCreation,
-                maxNumberCreatedSource: adminSourceCreationRights.maxNumberCreatedSource,
+                ...adminLimits,
                 auth: {},
             };
         } else if (logged) {
@@ -39,13 +38,12 @@ const user = {
             if (findUser === undefined) {
                 throw Error("could not find logged user " + reqUser);
             }
-            const sourceCreationRights = await user.resolveSourceCreationRights(findUser);
+            const userLimits = await user.resolveUserLimits(findUser);
             result = {
                 logged: true,
                 user: { id: findUser.id, login: findUser.login, groups: findUser.groups, token: findUser.token },
                 authSource: config.auth,
-                allowSourceCreation: sourceCreationRights.allowSourceCreation,
-                maxNumberCreatedSource: sourceCreationRights.maxNumberCreatedSource,
+                ...userLimits,
                 auth: auth,
             };
         } else {
@@ -60,19 +58,25 @@ const user = {
         return result;
     },
     /**
-     * The source creation rights live on the user account and on the profiles.
-     * A profile that defines them takes precedence, so an offer tier can lower
-     * the account defaults. The account values remain the fallback for the
-     * profiles that leave them undefined.
+     * The limits live on the user account and on the profiles. A profile that
+     * defines one takes precedence, so an offer tier can lower the account
+     * defaults. The account values remain the fallback for the profiles that
+     * leave them undefined, and a limit left undefined on both sides caps nothing.
+     *
+     * `??` and never `||`: 0 is a cap that forbids, not a missing value.
+     *
      * @param {UserAccount} userAccount - the user account read from the database
-     * @returns {Promise<{ allowSourceCreation: boolean, maxNumberCreatedSource: number }>}
+     * @returns {Promise<{ allowSourceCreation: boolean, maxNumberCreatedSource: number, maxWritableTriplesPerUser: number|undefined, maxUploadTriplesPerUser: number|undefined, maxUserDataRecordsPerUser: number|undefined }>}
      */
-    resolveSourceCreationRights: async (userAccount) => {
-        const profileRights = await profileModel.getSourceCreationRightsForUser(userAccount);
+    resolveUserLimits: async (userAccount) => {
+        const profileLimits = await profileModel.getLimitsForUser(userAccount);
 
         return {
-            allowSourceCreation: profileRights.allowSourceCreation ?? userAccount.allowSourceCreation,
-            maxNumberCreatedSource: profileRights.maxNumberCreatedSource ?? userAccount.maxNumberCreatedSource,
+            allowSourceCreation: profileLimits.allowSourceCreation ?? userAccount.allowSourceCreation,
+            maxNumberCreatedSource: profileLimits.maxNumberCreatedSource ?? userAccount.maxNumberCreatedSource,
+            maxWritableTriplesPerUser: profileLimits.maxWritableTriplesPerUser ?? userAccount.maxWritableTriplesPerUser,
+            maxUploadTriplesPerUser: profileLimits.maxUploadTriplesPerUser ?? userAccount.maxUploadTriplesPerUser,
+            maxUserDataRecordsPerUser: profileLimits.maxUserDataRecordsPerUser ?? userAccount.maxUserDataRecordsPerUser,
         };
     },
     getProfiles: async (reqUser) => {

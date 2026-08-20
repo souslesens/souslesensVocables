@@ -427,6 +427,9 @@ var TripleFactory = (function () {
                         UI.message(result.result, true);
                     } else {
                         var message = result.totalTriplesCount[MappingModeler.currentTable.name] + " triples created in graph " + DataSourceManager.currentConfig.graphUri;
+                        if (result.writeQuotaReached) {
+                            message += "\n\n" + result.writeQuotaMessage;
+                        }
                         TripleFactory.refreshTabStat();
                         alert(message);
                         //  UI.message(message, true);

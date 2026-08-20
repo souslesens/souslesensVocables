@@ -204,7 +204,7 @@ var KGbuilder_main = {
             async.eachSeries(
                 tables,
                 function (table, callbackEach) {
-                    if (options.ntExportLimitReached) {
+                    if (options.ntExportLimitReached || options.writeQuotaReached) {
                         return callbackEach();
                     }
 

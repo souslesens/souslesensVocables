@@ -139,16 +139,10 @@ export const UsersTable = () => {
             ),
             success: (gotUsers: User[]) => {
                 const sortedUsers: User[] = gotUsers.slice().sort((a: User, b: User) => {
-                    let left = "";
-                    let right = "";
-
-                    if (a[orderBy] instanceof Array) {
-                        left = a[orderBy].toString();
-                        right = b[orderBy].toString();
-                    } else {
-                        left = a[orderBy] as string;
-                        right = b[orderBy] as string;
-                    }
+                    /* A column may hold an array, a number or nothing at all, since the
+                     * limits are left undefined on an account that does not cap. */
+                    const left = String(a[orderBy] ?? "");
+                    const right = String(b[orderBy] ?? "");
 
                     return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
                 });
@@ -277,6 +271,11 @@ const UserFormSchema = z.object({
     groups: z.array(z.string()),
     allowSourceCreation: z.boolean(),
     maxNumberCreatedSource: z.number(),
+    /* Optional, unlike the two above: an empty field means this account sets no cap
+     * and leaves the profile to decide. A typed 0 forbids. */
+    maxWritableTriplesPerUser: z.number().int().nonnegative().optional(),
+    maxUploadTriplesPerUser: z.number().int().nonnegative().optional(),
+    maxUserDataRecordsPerUser: z.number().int().nonnegative().optional(),
 });
 
 const UserFormEditShema = UserFormSchema.extend({
@@ -306,6 +305,12 @@ const UserFormDialog = ({ open, maybeuser: maybeUser, me = "", onClose }: UserFo
             if (value < 0 || isNaN(value)) {
                 value = 0;
             }
+        }
+        /* Cleared to undefined rather than floored to 0: here an empty field hands the
+         * decision back to the profile, while 0 forbids. */
+        if (["maxWritableTriplesPerUser", "maxUploadTriplesPerUser", "maxUserDataRecordsPerUser"].includes(fieldname) && !Array.isArray(event.target.value)) {
+            const parsed = parseInt(event.target.value);
+            value = event.target.value === "" || isNaN(parsed) ? (undefined as unknown as number) : Math.max(0, parsed);
         }
         setUserForm((prev) => ({
             ...prev,
@@ -427,6 +432,39 @@ const UserFormDialog = ({ open, maybeuser: maybeUser, me = "", onClose }: UserFo
                         }}
                         error={errors?.maxNumberCreatedSource !== undefined}
                         helperText={errors?.maxNumberCreatedSource}
+                    />
+                    <TextField
+                        id="max-writable-triples"
+                        type="number"
+                        label="Max triples written with Mapping Modeler"
+                        value={userForm.maxWritableTriplesPerUser ?? ""}
+                        onChange={handleFieldUpdate("maxWritableTriplesPerUser")}
+                        InputLabelProps={{ shrink: true }}
+                        inputProps={{ min: 0 }}
+                        error={errors?.maxWritableTriplesPerUser !== undefined}
+                        helperText={errors?.maxWritableTriplesPerUser ?? "Empty: the profile decides. 0: forbidden"}
+                    />
+                    <TextField
+                        id="max-upload-triples"
+                        type="number"
+                        label="Max uploaded triples"
+                        value={userForm.maxUploadTriplesPerUser ?? ""}
+                        onChange={handleFieldUpdate("maxUploadTriplesPerUser")}
+                        InputLabelProps={{ shrink: true }}
+                        inputProps={{ min: 0 }}
+                        error={errors?.maxUploadTriplesPerUser !== undefined}
+                        helperText={errors?.maxUploadTriplesPerUser ?? "Empty: the profile decides. 0: forbidden"}
+                    />
+                    <TextField
+                        id="max-user-data-records"
+                        type="number"
+                        label="Max user data entries"
+                        value={userForm.maxUserDataRecordsPerUser ?? ""}
+                        onChange={handleFieldUpdate("maxUserDataRecordsPerUser")}
+                        InputLabelProps={{ shrink: true }}
+                        inputProps={{ min: 0 }}
+                        error={errors?.maxUserDataRecordsPerUser !== undefined}
+                        helperText={errors?.maxUserDataRecordsPerUser ?? "Empty: the profile decides. 0: forbidden"}
                     />
                 </Stack>
             </DialogContent>

@@ -12,5 +12,10 @@ create table if not exists profiles(
        quota             json default '{}'::json,
        max_nt_export_triples integer,
        create_source     boolean,
-       maximum_source    integer
+       maximum_source    integer,
+       -- Null means the profile does not decide, and the user account applies.
+       -- Zero is a decision: it forbids.
+       max_writable_triples  integer,
+       max_upload_triples    integer,
+       max_user_data_records integer
 );

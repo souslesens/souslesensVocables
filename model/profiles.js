@@ -26,6 +26,10 @@ const ProfileObject = z
         maxNtExportTriples: z.number().int().positive().optional(),
         allowSourceCreation: z.boolean().optional(),
         maxNumberCreatedSource: z.number().int().nonnegative().optional(),
+        /* Nonnegative and not positive: 0 is a meaningful value here, it forbids. */
+        maxWritableTriplesPerUser: z.number().int().nonnegative().optional(),
+        maxUploadTriplesPerUser: z.number().int().nonnegative().optional(),
+        maxUserDataRecordsPerUser: z.number().int().nonnegative().optional(),
         _type: z.string().default("profile"),
     })
     .strict();
@@ -74,6 +78,9 @@ class ProfileModel {
         max_nt_export_triples: profile.maxNtExportTriples ?? null,
         create_source: profile.allowSourceCreation ?? null,
         maximum_source: profile.maxNumberCreatedSource ?? null,
+        max_writable_triples: profile.maxWritableTriplesPerUser ?? null,
+        max_upload_triples: profile.maxUploadTriplesPerUser ?? null,
+        max_user_data_records: profile.maxUserDataRecordsPerUser ?? null,
         schema_types: profile.allowedSourceSchemas || [],
     });
 
@@ -109,6 +116,9 @@ class ProfileModel {
                 maxNtExportTriples: profile.max_nt_export_triples ?? undefined,
                 allowSourceCreation: allowSourceCreation,
                 maxNumberCreatedSource: profile.maximum_source ?? undefined,
+                maxWritableTriplesPerUser: profile.max_writable_triples ?? undefined,
+                maxUploadTriplesPerUser: profile.max_upload_triples ?? undefined,
+                maxUserDataRecordsPerUser: profile.max_user_data_records ?? undefined,
             },
         ];
     };
@@ -314,6 +324,12 @@ class ProfileModel {
      * @returns {string} the theme currently defined for this profile
      */
     getThemeFromProfile = async (profileName) => {
+        /* An account may hold no profile at all, and the caller then passes groups[0],
+         * which is undefined. Knex refuses an undefined binding, so the default theme
+         * is decided here rather than through a query that cannot be built. */
+        if (!profileName) {
+            return this._mainConfig.theme.defaultTheme;
+        }
         const conn = getKnexConnection(this._mainConfig.database);
         const results = await conn.select("theme").from("profiles").where("label", profileName).first();
         cleanupConnection(conn);
@@ -392,18 +408,24 @@ class ProfileModel {
         return maxNtExportTriples;
     };
 
+    /** The numeric caps a profile may carry, and that a user may also carry on their account. */
+    static NUMERIC_LIMIT_FIELDS = ["maxNumberCreatedSource", "maxWritableTriplesPerUser", "maxUploadTriplesPerUser", "maxUserDataRecordsPerUser"];
+
     /**
-     * Return the source creation rights carried by the profiles of a user.
-     * When several profiles define them, the most permissive value wins.
+     * Return the limits carried by the profiles of a user.
+     * When several profiles define one, the most permissive value wins: creation is
+     * allowed if any profile allows it, and the highest cap is kept.
      * A field stays undefined when no profile of the user defines it, so the
-     * caller falls back on the rights stored on the user account.
+     * caller falls back on the value stored on the user account.
      * @param {UserAccount} user - the user whose profiles are inspected
-     * @returns {Promise<{ allowSourceCreation: boolean|undefined, maxNumberCreatedSource: number|undefined }>}
+     * @returns {Promise<{ allowSourceCreation: boolean|undefined, maxNumberCreatedSource: number|undefined, maxWritableTriplesPerUser: number|undefined, maxUploadTriplesPerUser: number|undefined, maxUserDataRecordsPerUser: number|undefined }>}
      */
-    getSourceCreationRightsForUser = async (user) => {
+    getLimitsForUser = async (user) => {
         const allProfiles = await this._getAllProfilesCached();
-        let allowSourceCreation;
-        let maxNumberCreatedSource;
+        const limits = { allowSourceCreation: undefined };
+        ProfileModel.NUMERIC_LIMIT_FIELDS.forEach((field) => {
+            limits[field] = undefined;
+        });
 
         for (const profileName of user.groups || []) {
             const profile = allProfiles[profileName];
@@ -412,15 +434,17 @@ class ProfileModel {
             }
 
             if (typeof profile.allowSourceCreation === "boolean") {
-                allowSourceCreation = allowSourceCreation || profile.allowSourceCreation;
+                limits.allowSourceCreation = limits.allowSourceCreation || profile.allowSourceCreation;
             }
 
-            if (typeof profile.maxNumberCreatedSource === "number" && (maxNumberCreatedSource === undefined || profile.maxNumberCreatedSource > maxNumberCreatedSource)) {
-                maxNumberCreatedSource = profile.maxNumberCreatedSource;
-            }
+            ProfileModel.NUMERIC_LIMIT_FIELDS.forEach((field) => {
+                if (typeof profile[field] === "number" && (limits[field] === undefined || profile[field] > limits[field])) {
+                    limits[field] = profile[field];
+                }
+            });
         }
 
-        return { allowSourceCreation: allowSourceCreation, maxNumberCreatedSource: maxNumberCreatedSource };
+        return limits;
     };
 }
 

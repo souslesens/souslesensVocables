@@ -81,7 +81,22 @@ export default () => {
         try {
             const userData = await cleanUserData.clean(req.body);
             const userInfo = await userManager.getUser(req.user);
-            const identifier = await userDataModel.insert({ ...userData, owned_by: parseInt(userInfo.user.id) });
+            const ownerId = parseInt(userInfo.user.id);
+
+            /* An undefined cap is no cap, and 0 forbids: both read straight from `??`
+             * comparisons, never from a falsy test. */
+            const recordCap = userInfo.maxUserDataRecordsPerUser;
+            if (recordCap !== undefined && recordCap !== null) {
+                const owned = await userDataModel.countOwnedBy(ownerId);
+                if (owned >= recordCap) {
+                    return res.status(403).json({
+                        message:
+                            recordCap === 0 ? "Your profile does not allow saving user data." : `You already own ${owned} entries, and your profile allows ${recordCap}. Delete one to save another.`,
+                    });
+                }
+            }
+
+            const identifier = await userDataModel.insert({ ...userData, owned_by: ownerId });
             if (identifier !== undefined) {
                 res.status(200).json({ message: "The resource has been inserted successfully", id: identifier });
             } else {

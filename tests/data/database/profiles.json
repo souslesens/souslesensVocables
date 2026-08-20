@@ -21,7 +21,10 @@
         "schema_types": ["OWL"],
         "max_nt_export_triples": 5000,
         "create_source": true,
-        "maximum_source": 2
+        "maximum_source": 2,
+        "max_writable_triples": 1000,
+        "max_upload_triples": 500,
+        "max_user_data_records": 20
     },
     {
         "id": "3",
@@ -35,7 +38,9 @@
         "schema_types": ["OWL"],
         "max_nt_export_triples": 2000,
         "create_source": false,
-        "maximum_source": 10
+        "maximum_source": 10,
+        "max_writable_triples": 5000,
+        "max_upload_triples": 0
     },
     {
         "id": "4",

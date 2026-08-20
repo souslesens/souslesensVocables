@@ -2,6 +2,7 @@ import { rdfDataModel } from "../../../../model/rdfData.js";
 import { mainConfigModel } from "../../../../model/mainConfig.js";
 import userManager from "../../../../bin/user.js";
 import { sourceModel } from "../../../../model/sources.js";
+import { tripleQuotaModel, UPLOAD_KIND } from "../../../../model/tripleQuota.js";
 import { ulid } from "ulid";
 import path from "path";
 import fs from "fs";
@@ -136,12 +137,27 @@ export default function () {
             const userSources = await sourceModel.getUserSources(userInfo.user);
 
             if (!Object.keys(userSources).includes(sourceName)) {
-                if (userSources[sourceName].accessControl != "readwrite") {
-                    res.status(503).send({ error: `Not authorized to write ${sourceName}` });
-                }
-                return;
+                return res.status(404).send({ error: `${sourceName} not found` });
+            }
+            /* Checked on its own branch: nested inside the one above, as it used to be,
+             * it could only run when the source was unreachable, where reading its
+             * accessControl threw. */
+            if (userSources[sourceName].accessControl != "readwrite") {
+                return res.status(403).send({ error: `Not authorized to write ${sourceName}` });
             }
             const graphUri = userSources[sourceName].graphUri;
+
+            /* Before the LOAD, so nothing is written by someone who is already over.
+             * Chunked uploads check on every chunk, which bounds the overshoot to one. */
+            const allowance = await tripleQuotaModel.checkAllowance(userInfo.user.login, UPLOAD_KIND, userInfo.maxUploadTriplesPerUser);
+            if (!allowance.allowed) {
+                return res.status(403).send({
+                    error:
+                        allowance.cap === 0
+                            ? "Your profile does not allow uploading graphs."
+                            : `You already hold ${allowance.usage.toLocaleString("en-US")} uploaded triples, and your profile allows ${allowance.cap.toLocaleString("en-US")}. Delete some before uploading more.`,
+                });
+            }
 
             if (clean) {
                 fs.rmSync(tmpPath);
@@ -158,7 +174,12 @@ export default function () {
             // N‑Triples can be uploaded directly.
             // upload it immediately and clean temporary files.
             if (uploadedMime === "application/n-triples" || last) {
+                const uploadBucket = { kind: UPLOAD_KIND, graphUri: graphUri };
+                const sizeBefore = await tripleQuotaModel.snapshot([uploadBucket]);
                 await uploadChunkAndClean(tmpPath, uploadedPath, filePathToUpload, graphUri, config);
+                /* Measured rather than counted from the file: the payload is opaque, and
+                 * re-loading triples the graph already held adds none. */
+                await tripleQuotaModel.recordSince(userInfo.user.login, [uploadBucket], sizeBefore).catch((quotaError) => console.error("Could not record the upload quota share", quotaError));
                 // clean
                 if (fs.existsSync(tmpPath)) fs.rmSync(tmpPath);
             }
@@ -187,15 +208,17 @@ export default function () {
         }
 
         try {
-            if (!Object.keys(userSources).includes(sourceName)) {
-                if (userSources[sourceName].accessControl != "readwrite") {
-                    res.status(503).send({ error: `Not authorized to delete ${sourceName}` });
-                }
-                return;
+            /* On its own branch: nested inside a "source not found" test that the guard
+             * above already answered, it could never run. */
+            if (userSources[sourceName].accessControl != "readwrite") {
+                return res.status(403).send({ error: `Not authorized to delete ${sourceName}` });
             }
 
             const graphUri = userSources[sourceName].graphUri;
             await rdfDataModel.deleteGraph(graphUri);
+            /* The graph is gone, so every share recorded against it is too, whoever
+             * wrote them and whoever pressed the button. */
+            await tripleQuotaModel.resetGraph(graphUri).catch((quotaError) => console.error("Could not clear the quota shares of the deleted graph", quotaError));
             res.status(200).send({ message: `${sourceName} deleted` });
         } catch (error) {
             console.error(error);

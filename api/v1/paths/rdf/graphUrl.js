@@ -2,6 +2,7 @@ import { rdfDataModel } from "../../../../model/rdfData.js";
 import { mainConfigModel } from "../../../../model/mainConfig.js";
 import userManager from "../../../../bin/user.js";
 import { sourceModel } from "../../../../model/sources.js";
+import { tripleQuotaModel, UPLOAD_KIND } from "../../../../model/tripleQuota.js";
 import path from "path";
 import fs from "fs";
 
@@ -24,12 +25,24 @@ export default function () {
             const userSources = await sourceModel.getUserSources(userInfo.user);
 
             if (!Object.keys(userSources).includes(sourceName)) {
-                if (userSources[sourceName].accessControl != "readwrite") {
-                    res.status(503).send({ error: `Not authorized to write ${sourceName}` });
-                }
-                return;
+                return res.status(404).send({ error: `${sourceName} not found` });
+            }
+            /* On its own branch: nested inside the test above, it could only run when
+             * the source was unreachable, where reading its accessControl threw. */
+            if (userSources[sourceName].accessControl != "readwrite") {
+                return res.status(403).send({ error: `Not authorized to write ${sourceName}` });
             }
             const graphUri = userSources[sourceName].graphUri;
+
+            const allowance = await tripleQuotaModel.checkAllowance(userInfo.user.login, UPLOAD_KIND, userInfo.maxUploadTriplesPerUser);
+            if (!allowance.allowed) {
+                return res.status(403).send({
+                    error:
+                        allowance.cap === 0
+                            ? "Your profile does not allow uploading graphs."
+                            : `You already hold ${allowance.usage.toLocaleString("en-US")} uploaded triples, and your profile allows ${allowance.cap.toLocaleString("en-US")}. Delete some before uploading more.`,
+                });
+            }
 
             // create exposed directory if not exists
             if (!fs.existsSync(uploadedPath)) {
@@ -42,7 +55,12 @@ export default function () {
             // Load file into triplestore
             const slsUrlForTriplestore = config.souslesensUrlForVirtuoso ? config.souslesensUrlForVirtuoso : config.souslesensUrl;
             const fileToUploadUrl = `${slsUrlForTriplestore}/upload/rdf/${filename}`;
+            const uploadBucket = { kind: UPLOAD_KIND, graphUri: graphUri };
+            const sizeBefore = await tripleQuotaModel.snapshot([uploadBucket]);
             await rdfDataModel.loadGraph(graphUri, fileToUploadUrl);
+            /* Measured, since the fetched payload is opaque and may hold triples the
+             * graph already had, which add nothing. */
+            await tripleQuotaModel.recordSince(userInfo.user.login, [uploadBucket], sizeBefore).catch((quotaError) => console.error("Could not record the upload quota share", quotaError));
             // clean
             fs.rmSync(filePathToUpload);
             res.status(200).send({ message: "ok" });

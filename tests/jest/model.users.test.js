@@ -38,6 +38,9 @@ describe("UserModelJson", () => {
                 groups: ["admin"],
                 allowSourceCreation: false,
                 maxNumberCreatedSource: 5,
+                maxWritableTriplesPerUser: undefined,
+                maxUploadTriplesPerUser: undefined,
+                maxUserDataRecordsPerUser: undefined,
                 source: "database",
             },
             owl_user: {
@@ -48,6 +51,9 @@ describe("UserModelJson", () => {
                 groups: ["owl_only"],
                 allowSourceCreation: false,
                 maxNumberCreatedSource: 5,
+                maxWritableTriplesPerUser: undefined,
+                maxUploadTriplesPerUser: undefined,
+                maxUserDataRecordsPerUser: undefined,
                 source: "database",
             },
             skos_user: {
@@ -58,6 +64,9 @@ describe("UserModelJson", () => {
                 groups: ["skos_only"],
                 allowSourceCreation: false,
                 maxNumberCreatedSource: 5,
+                maxWritableTriplesPerUser: undefined,
+                maxUploadTriplesPerUser: undefined,
+                maxUserDataRecordsPerUser: undefined,
                 source: "keycloak",
             },
             not_admin: {
@@ -68,6 +77,9 @@ describe("UserModelJson", () => {
                 groups: ["admin"],
                 allowSourceCreation: true,
                 maxNumberCreatedSource: 5,
+                maxWritableTriplesPerUser: undefined,
+                maxUploadTriplesPerUser: undefined,
+                maxUserDataRecordsPerUser: undefined,
                 source: "database",
             },
         });
@@ -255,6 +267,9 @@ describe("UserModelJson", () => {
             profiles: [],
             create_source: false,
             maximum_source: 5,
+            max_writable_triples: null,
+            max_upload_triples: null,
+            max_user_data_records: null,
             auth: "database",
         });
     });
@@ -270,6 +285,9 @@ describe("UserModelJson", () => {
                 groups: [],
                 allowSourceCreation: false,
                 maxNumberCreatedSource: 5,
+                maxWritableTriplesPerUser: undefined,
+                maxUploadTriplesPerUser: undefined,
+                maxUserDataRecordsPerUser: undefined,
                 source: "database",
             },
         ]);

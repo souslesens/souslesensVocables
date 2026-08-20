@@ -323,12 +323,34 @@ var SourceSelectorWidget = (function () {
         return sources;
     };
 
+    /**
+     * Mapping Modeler only writes triples, so a source declared read only in sources.json,
+     * or one the current user may only read, has nothing it can do there.
+     * Alerts and returns true when the source must be refused, so the caller stops.
+     * @param {string} source - the source the user picked
+     * @param {string} tool - the tool the source would be opened with
+     * @returns {boolean} true when the source was refused
+     */
+    self.refuseReadOnlySourceForMappingModeler = function (source, tool) {
+        if (tool != "MappingModeler" || !source) {
+            return false;
+        }
+        if (Lineage_sources.isSourceEditableForUser(source)) {
+            return false;
+        }
+        alert("Source " + source + " is read only: Mapping Modeler cannot write into it. Choose an editable source.");
+        return true;
+    };
+
     self.onSourceSelect = function (event, obj) {
         if (obj.event.type == "contextmenu") {
             return;
         }
         if (obj.node.type == "Folder") {
             $("#sourceSelector_jstreeDiv").jstree(true).open_node(obj.node.id);
+            return;
+        }
+        if (self.refuseReadOnlySourceForMappingModeler(obj.node.data.id, MainController.currentTool)) {
             return;
         }
         $("#" + self.currentTreeDiv).dialog("close");

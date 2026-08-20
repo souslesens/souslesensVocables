@@ -494,9 +494,34 @@ fixedColumns: true*/
         link.click();
         document.body.removeChild(link);
     };*/
-    self.exportDataToCSV = function (dataset) {
-        let csvContent = dataset.map((row) => row.map((cell) => `"${cell}"`).join(";")).join("\n");
-        self.downloadStringAsFile(csvContent, "export_data.csv", "text/csv;charset=utf-8;");
+    self.csvQuoteRegex = /"/g;
+    self.csvFieldSeparator = ";";
+    self.defaultCsvFileName = "export_data.csv";
+
+    /**
+     * Write rows of cells to a CSV file the browser downloads.
+     *
+     * Quoting every field protects the separators and the line breaks inside it, but a quote that
+     * belongs to the data has to be doubled as well, which this used to skip. The cost was not
+     * theoretical: a definition reading `valve dite "papillon"` came back out as `valve dite
+     * papillon`, quietly, in a file that opened without complaint. And when a separator happened to
+     * fall between two of those quotes, the parser split the field and every column after it moved
+     * along by one. Both are silent, which is what makes them worth the doubling.
+     *
+     * @param {Array<Array<*>>} dataset - Rows of cells. A null or undefined cell writes as empty.
+     * @param {string} [fileName] - Defaults to export_data.csv.
+     */
+    self.exportDataToCSV = function (dataset, fileName) {
+        const csvLines = [];
+        for (const row of dataset) {
+            const quotedCells = [];
+            for (const cell of row) {
+                const cellText = cell === null || cell === undefined ? "" : String(cell);
+                quotedCells.push('"' + cellText.replace(self.csvQuoteRegex, '""') + '"');
+            }
+            csvLines.push(quotedCells.join(self.csvFieldSeparator));
+        }
+        self.downloadStringAsFile(csvLines.join("\n"), fileName || self.defaultCsvFileName, "text/csv;charset=utf-8;");
     };
 
     self.showExportPopUp = function (visjsGraph) {

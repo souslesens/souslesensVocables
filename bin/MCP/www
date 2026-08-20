@@ -1,0 +1,220 @@
+#!/usr/bin/env node
+/**
+ * Entry point of the SousLeSens MCP server.
+ *
+ * Independent Express process, own port, same source tree as the SLS backend. It never touches the
+ * users table nor the triple store: every tool call is forwarded to /api/v1 with the caller's own
+ * bearer token, so SLS stays the single authority on rights and quotas.
+ *
+ * Run: node bin/MCP/www   (or npm run start:mcp)
+ */
+
+import express from "express";
+import http from "node:http";
+import { randomUUID } from "node:crypto";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+
+import util from "../util.js";
+import { mcpConfig } from "./config.js";
+import { buildCatalog } from "./catalog.js";
+import { buildMcpServer } from "./mcpServer.js";
+import { callerContext } from "./slsClient.js";
+
+const startedAt = Date.now();
+
+// ---------------------------------------------------------------------------
+// Catalog, built once at startup
+// ---------------------------------------------------------------------------
+
+let catalog;
+try {
+    catalog = await buildCatalog();
+} catch (catalogError) {
+    console.error(catalogError.message);
+    process.exit(1);
+}
+
+console.log(
+    `[mcp] catalog: ${catalog.tools.size} tools — ${catalog.summary.promotedTools} promoted from @mcpTool, ${catalog.summary.restTools} from x-mcp route declarations. ` +
+        `${catalog.summary.reachableFunctions} read functions callable, out of ${catalog.summary.registryEntries} registry entries.`,
+);
+
+// ---------------------------------------------------------------------------
+// HTTP layer
+// ---------------------------------------------------------------------------
+
+const app = express();
+
+// CORS, so the SLS UI can run an agent loop in the browser and speak MCP directly.
+//
+// The origin is echoed back rather than answered with "*", and `Access-Control-Allow-Credentials`
+// is deliberately absent: this server authenticates with an Authorization header, never a cookie,
+// so no ambient credential can be replayed by a page that merely happens to be open. Requests
+// without an Origin header (every non-browser MCP client) are untouched and keep working.
+const corsAllowedHeaders = "Content-Type, Authorization, Accept, Mcp-Session-Id, Mcp-Protocol-Version, Last-Event-Id";
+const corsExposedHeaders = "Mcp-Session-Id, Mcp-Protocol-Version";
+
+app.use(function (request, response, next) {
+    const requestOrigin = request.headers.origin;
+    if (requestOrigin) {
+        if (mcpConfig.allowedOrigins.includes(requestOrigin)) {
+            response.setHeader("Access-Control-Allow-Origin", requestOrigin);
+            response.setHeader("Vary", "Origin");
+            response.setHeader("Access-Control-Allow-Headers", corsAllowedHeaders);
+            response.setHeader("Access-Control-Expose-Headers", corsExposedHeaders);
+            response.setHeader("Access-Control-Max-Age", "600");
+        } else {
+            console.warn(`[mcp] cross-origin request refused from "${requestOrigin}". Allowed: ${mcpConfig.allowedOrigins.join(", ") || "(none)"}. Set MCP_ALLOWED_ORIGINS to change.`);
+        }
+    }
+    if (request.method === "OPTIONS") {
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        return response.status(204).end();
+    }
+    return next();
+});
+
+app.use(express.json({ limit: "2mb" }));
+
+// Without this, a body Express cannot parse (malformed JSON, or one over the 2 MB limit) falls to
+// the default error handler, which answers an HTML page. An MCP client reads that as a transport
+// failure with no cause, so the two are told apart here and answered in JSON.
+app.use(function (parseError, _request, response, _next) {
+    const isBodyTooLarge = parseError.type === "entity.too.large";
+    const detail = isBodyTooLarge ? "The request body is over the 2 MB limit." : `The request body is not valid JSON (${parseError.message}).`;
+    console.warn(`[mcp] 400: ${detail}`);
+    return response.status(isBodyTooLarge ? 413 : 400).json({ error: detail });
+});
+
+// An MCP client that fails to authenticate reports a bare "HTTP 401", so the three ways of getting
+// it wrong must be told apart here or they are indistinguishable from the client side.
+const unsubstitutedPlaceholderRegex = /\$\{[^}]*\}|\$[A-Z_][A-Z0-9_]*/;
+
+/**
+ * Explain why an Authorization header cannot be used, or return null when it is usable.
+ * @param {string|undefined} rawHeader
+ * @returns {string|null}
+ */
+function describeAuthorizationProblem(rawHeader) {
+    if (!rawHeader || rawHeader.trim() === "") {
+        return "No Authorization header. Configure your MCP client with: Authorization: Bearer <SLS token>.";
+    }
+    if (unsubstitutedPlaceholderRegex.test(rawHeader)) {
+        return "The Authorization header still contains an unsubstituted variable placeholder: the environment variable referenced by your MCP client configuration is not set in the environment that launched the client. Put the token literally, or export the variable before starting the client.";
+    }
+
+    const parsedAuthorization = util.parseAuthorizationFromHeader(rawHeader);
+    if (!parsedAuthorization) {
+        return 'Malformed Authorization header. Expected two parts: "Bearer <SLS token>".';
+    }
+    if (parsedAuthorization[0] !== "Bearer") {
+        return `Unsupported authorization scheme "${parsedAuthorization[0]}". This server only accepts Bearer.`;
+    }
+    if (parsedAuthorization[1].trim() === "") {
+        return "The Authorization header carries an empty token. Generate one with POST /api/v1/users/token.";
+    }
+    return null;
+}
+
+app.get("/healthz", function (_request, response) {
+    response.status(200).json({
+        status: "ok",
+        toolCount: catalog.tools.size,
+        slsApiUrl: mcpConfig.slsApiUrl,
+        uptimeSeconds: Math.round((Date.now() - startedAt) / 1000),
+    });
+});
+
+app.get("/catalog", function (_request, response) {
+    const tools = [];
+    for (const descriptor of catalog.tools.values()) {
+        tools.push({
+            name: descriptor.name,
+            family: descriptor.family,
+            source: descriptor.family === "sparql" ? `${descriptor.module}.${descriptor.functionName}` : `${descriptor.httpMethod} ${descriptor.route}`,
+        });
+    }
+    response.status(200).json(tools);
+});
+
+app.post("/mcp", async function (request, response) {
+    const authorizationProblem = describeAuthorizationProblem(request.headers.authorization);
+    if (authorizationProblem) {
+        console.warn(`[mcp] 401: ${authorizationProblem}`);
+        response.setHeader("WWW-Authenticate", "Bearer");
+        return response.status(401).json({ error: authorizationProblem });
+    }
+
+    const parsedAuthorization = util.parseAuthorizationFromHeader(request.headers.authorization);
+
+    // Stateless: one server and one transport per request, so there is no session map to age out
+    // and no place where a token could be cached beyond the request.
+    const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
+    const server = buildMcpServer(catalog);
+    // `close()` is asynchronous on both objects: leaving the promises unhandled means a transport
+    // that fails to shut down takes the whole process out on an unhandled rejection, one request
+    // after the one that actually caused it.
+    response.on("close", function () {
+        Promise.all([transport.close(), server.close()]).catch(function (closeError) {
+            console.error("[mcp] could not close the request transport:", closeError.message);
+        });
+    });
+
+    const requestContext = { token: parsedAuthorization[1], requestId: randomUUID() };
+    try {
+        await server.connect(transport);
+        await callerContext.run(requestContext, function () {
+            return transport.handleRequest(request, response, request.body);
+        });
+    } catch (transportError) {
+        console.error("[mcp] request failed:", transportError.message);
+        if (!response.headersSent) {
+            response.status(500).json({ error: "MCP request failed", detail: transportError.message });
+        }
+    }
+});
+
+function rejectSessionRoute(_request, response) {
+    response.status(405).json({ error: "This MCP server is stateless: only POST /mcp is supported." });
+}
+app.get("/mcp", rejectSessionRoute);
+app.delete("/mcp", rejectSessionRoute);
+
+// ---------------------------------------------------------------------------
+// Last-resort logging
+//
+// This process has no supervisor that would explain why it stopped. Node kills it on an unhandled
+// rejection with a stack and nothing else, so the two handlers below exist to name the process and
+// the moment before that happens, and to keep a rejection from taking the server down for a fault
+// that concerned one request.
+// ---------------------------------------------------------------------------
+
+process.on("unhandledRejection", function (reason) {
+    console.error("[mcp] unhandled promise rejection:", reason instanceof Error ? reason.stack : reason);
+});
+
+process.on("uncaughtException", function (error) {
+    console.error("[mcp] uncaught exception, shutting down:", error.stack || error.message);
+    process.exit(1);
+});
+
+// ---------------------------------------------------------------------------
+// Listen
+// ---------------------------------------------------------------------------
+
+const httpServer = http.createServer(app);
+httpServer.on("error", function (error) {
+    if (error.code === "EADDRINUSE") {
+        console.error(`[mcp] port ${mcpConfig.listenPort} is already in use`);
+        process.exit(1);
+    }
+    if (error.code === "EACCES") {
+        console.error(`[mcp] port ${mcpConfig.listenPort} requires elevated privileges`);
+        process.exit(1);
+    }
+    throw error;
+});
+httpServer.listen(mcpConfig.listenPort, function () {
+    console.log(`[mcp] listening on http://localhost:${mcpConfig.listenPort}/mcp — SLS API: ${mcpConfig.slsApiUrl}`);
+    console.log(`[mcp] browser origins allowed: ${mcpConfig.allowedOrigins.join(", ") || "(none — set MCP_ALLOWED_ORIGINS)"}`);
+});

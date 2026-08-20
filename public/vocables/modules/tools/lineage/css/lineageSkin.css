@@ -399,3 +399,23 @@
 #lineage_drawnSources::-webkit-scrollbar-track {
     background-color: @background-color;
 }
+
+/* Grip for dragging the chat bot dock taller or shorter. jQuery UI's own handle is seven
+   transparent pixels straddling the edge, which is not something a user finds by accident:
+   this makes it a visible bar, and clear of the fold button just below it. */
+#lineage_chatbotDock > .ui-resizable-n {
+    height: 9px;
+    top: -9px;
+    background: @background-color;
+    border-top: 1px solid @button1-color;
+    cursor: n-resize;
+}
+#lineage_chatbotDock > .ui-resizable-n::after {
+    content: "";
+    display: block;
+    width: 34px;
+    height: 3px;
+    margin: 3px auto 0;
+    border-radius: 2px;
+    background: @button1-color;
+}

@@ -26,6 +26,24 @@ export default function () {
             "Returns the in-memory ontology model previously POSTed for `source`. The cache is server-process " + "lifetime only (no disk persistence) — restart the server and the cache is empty.",
         security: [{ restrictLoggedUser: [] }],
         operationId: "getOntologyModel",
+        "x-mcp": {
+            tools: [
+                {
+                    name: "sls_ontology_model",
+                    access: "read",
+                    description:
+                        "Cached ontology model of a source: classes, properties, constraints and restrictions in one payload. " +
+                        "This cache lives in the SLS server process and is filled only when a user opens the source in the web UI, so it is often empty. " +
+                        "Prefer sls_kgquery_model or sls_source_taxonomy.",
+                    params: { source: { type: "string", required: true, description: "SLS source name." } },
+                    query: { source: "{source}" },
+                    navigableDocument: true,
+                    statusHints: {
+                        500: "No ontology model is cached for this source. It is only filled when a user opens the source in the SousLeSens web UI. Use sls_kgquery_model or sls_source_taxonomy instead.",
+                    },
+                },
+            ],
+        },
         parameters: [{ name: "source", in: "query", type: "string", required: true, description: "Source name. Example: `IOF_core`." }],
         responses: {
             200: {

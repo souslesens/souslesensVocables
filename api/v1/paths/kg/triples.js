@@ -2,11 +2,30 @@ import KGbuilder_main from "../../../../bin/KGbuilder/KGbuilder_main.js";
 import { processResponse } from "../utils.js";
 import userManager from "../../../../bin/user.js";
 import { profileModel } from "../../../../model/profiles.js";
+import { sourceModel } from "../../../../model/sources.js";
+import { tripleQuotaModel, MAPPING_KIND } from "../../../../model/tripleQuota.js";
 
 function getNtExportFileName(source, table) {
     var sourceName = source || "source";
     var tableName = table || "table";
     return (sourceName + "_" + tableName + ".nt").replace(/[\\/:*?"<>|]+/g, "_");
+}
+
+/** `table` is one name or several; KGbuilder_main normalises it the same way. */
+function asTableList(table) {
+    if (table === undefined || table === null) {
+        return [];
+    }
+    return Array.isArray(table) ? table : [table];
+}
+
+/** The buckets a write on these tables of this source touches. */
+async function mappingBuckets(user, sourceName, tables) {
+    const source = await sourceModel.getOneUserSource(user, sourceName);
+    if (!source || !source.graphUri) {
+        return [];
+    }
+    return tables.map((table) => ({ kind: MAPPING_KIND, graphUri: source.graphUri, table: table }));
 }
 
 export default function () {
@@ -32,8 +51,51 @@ export default function () {
                 });
             }
 
+            if (!(await sourceModel.canWrite(userInfo.user, { name: req.body.source }))) {
+                return res.status(403).json({ message: `You are not allowed to write triples into ${req.body.source}.` });
+            }
+
+            /* Refused before anything is written when the cap is already reached. An import
+             * that starts under the cap is then bounded batch by batch, the volume it will
+             * produce being unknown until its rows have been read. */
+            const login = userInfo.user.login;
+            const allowance = await tripleQuotaModel.checkAllowance(login, MAPPING_KIND, userInfo.maxWritableTriplesPerUser);
+            if (!allowance.allowed) {
+                return res.status(403).json({
+                    message:
+                        allowance.cap === 0
+                            ? "Your profile does not allow writing triples with the Mapping Modeler."
+                            : `You already hold ${allowance.usage.toLocaleString("en-US")} triples written with the Mapping Modeler, and your profile allows ${allowance.cap.toLocaleString("en-US")}. Delete some before writing more.`,
+                });
+            }
+
+            if (allowance.cap !== undefined) {
+                /* Spent by the writer batch after batch. Once exhausted it is refilled from
+                 * the live usage, because a batch that re-inserted triples already in the
+                 * store spent nothing: replaying a mapping must stay free. */
+                options.writeQuota = {
+                    remaining: allowance.cap - allowance.usage,
+                    refresh: async () => allowance.cap - (await tripleQuotaModel.usageFor(login, MAPPING_KIND, { fresh: true })),
+                };
+            }
+
+            const buckets = await mappingBuckets(userInfo.user, req.body.source, asTableList(req.body.table));
+            const sizesBefore = await tripleQuotaModel.snapshot(buckets);
+
             KGbuilder_main.importTriplesFromCsvOrTable(userInfo.user, req.body.source, req.body.datasource, req.body.table, options, function (err, result) {
-                processResponse(res, err, result);
+                if (err) {
+                    return processResponse(res, err, result);
+                }
+                if (options.writeQuotaReached) {
+                    result.writeQuotaReached = true;
+                    result.writeQuotaMessage = `Import stopped: it would have taken you past your limit of ${allowance.cap.toLocaleString("en-US")} triples written with the Mapping Modeler.`;
+                }
+                /* What the store gained, not what was submitted: re-running a mapping
+                 * someone else already ran inserts nothing and must cost nothing. */
+                tripleQuotaModel
+                    .recordSince(login, buckets, sizesBefore)
+                    .catch((quotaError) => console.error("Could not record the triple quota share", quotaError))
+                    .finally(() => processResponse(res, err, result));
             });
         } catch (e) {
             res.status(e.status || 500).json(e);
@@ -141,7 +203,34 @@ export default function () {
             if (!req.body.options) {
                 req.body.options = "{}";
             }
-            KGbuilder_main.deleteKGBuilderTriples(req.body.source, JSON.parse(req.body.tables), JSON.parse(req.body.options), function (err, result) {
+            const deletingUser = await userManager.getUser(req.user);
+            if (!(await sourceModel.canWrite(deletingUser.user, { name: req.body.source }))) {
+                return res.status(403).json({ message: `You are not allowed to delete triples from ${req.body.source}.` });
+            }
+            const tables = JSON.parse(req.body.tables);
+            KGbuilder_main.deleteKGBuilderTriples(req.body.source, tables, JSON.parse(req.body.options), async function (err, result) {
+                if (err) {
+                    return processResponse(res, err, result);
+                }
+                try {
+                    const deletedTables = asTableList(tables);
+                    /* An undefined table means "every mapping bucket of this graph", the
+                     * same reach the deletion itself has when no table is named. */
+                    const buckets = await mappingBuckets(deletingUser.user, req.body.source, deletedTables.length > 0 ? deletedTables : [undefined]);
+                    for (const bucket of buckets) {
+                        /* The deletion may be partial: "delete specific triples" names the
+                         * table but only removes the mappings that were checked. The shares
+                         * are therefore dropped only once the bucket is truly empty, and a
+                         * partial deletion is left to the live measurement, which scales
+                         * every contributor down on its own. */
+                        const remaining = await tripleQuotaModel.measureBucket(bucket, { fresh: true });
+                        if (remaining === 0) {
+                            await tripleQuotaModel.resetBucket(bucket);
+                        }
+                    }
+                } catch (quotaError) {
+                    console.error("Could not clear the triple quota shares", quotaError);
+                }
                 processResponse(res, err, result);
             });
         } catch (e) {

@@ -16,6 +16,33 @@ var TriplesMaker = {
     uniqueSubjects: {},
 
     /**
+     * Whether another batch may be written against the caller's triple quota.
+     *
+     * `options.writeQuota` is set by the route that knows the user's limit, and holds the
+     * triples still allowed. It is spent with what each batch submits, which overstates
+     * the cost whenever the store already held those triples; so once it looks exhausted
+     * it is refilled from the live usage before giving up. The import therefore overruns
+     * by at most one batch, the volume it will produce not being knowable beforehand.
+     *
+     * @param {object} options - the import options, carrying `writeQuota` or not
+     * @returns {Promise<boolean>} false when the limit is reached and the import must stop
+     */
+    canWriteMoreTriples: async function (options) {
+        var writeQuota = options.writeQuota;
+        if (!writeQuota) {
+            return true;
+        }
+        if (writeQuota.remaining > 0) {
+            return true;
+        }
+        if (typeof writeQuota.refresh !== "function") {
+            return false;
+        }
+        writeQuota.remaining = await writeQuota.refresh();
+        return writeQuota.remaining > 0;
+    },
+
+    /**
      *
      *     read data in batches then create triples from mappings then write them in tripleStore eventually
      * @param tableInfos defines parameters to connect to the table
@@ -72,7 +99,7 @@ var TriplesMaker = {
                 async.eachSeries(
                     result.data,
                     function (data, callbackEach) {
-                        if (options.ntExportLimitReached) {
+                        if (options.ntExportLimitReached || options.writeQuotaReached) {
                             return callbackEach();
                         }
                         if (options) {
@@ -110,29 +137,38 @@ var TriplesMaker = {
                                     false,
                                 );*/
 
-                                modelUtils.redoIfFailureCallback(
-                                    KGbuilder_triplesWriter.writeTriples,
-                                    10,
-                                    5,
-                                    null,
-                                    function (err, writtenTriples) {
-                                        if (err) {
-                                            return callbackEach(err);
-                                        }
-                                        totalTriplesCount += writtenTriples;
-                                        var currentTime = new Date();
-                                        message.batchTriples = writtenTriples;
-                                        message.operation = "writeTriples";
-                                        message.operationDuration = currentTime - oldTime;
-                                        message.totalDuration += message.operationDuration;
-                                        KGbuilder_socket.message(options.clientSocketId, message);
-                                        oldTime = new Date();
+                                TriplesMaker.canWriteMoreTriples(options).then(function (mayWrite) {
+                                    if (!mayWrite) {
+                                        options.writeQuotaReached = true;
                                         return callbackEach();
-                                    },
-                                    batchTriples,
-                                    tableProcessingParams.sourceInfos.graphUri,
-                                    tableProcessingParams.sourceInfos.sparqlServerUrl,
-                                );
+                                    }
+                                    modelUtils.redoIfFailureCallback(
+                                        KGbuilder_triplesWriter.writeTriples,
+                                        10,
+                                        5,
+                                        null,
+                                        function (err, writtenTriples) {
+                                            if (err) {
+                                                return callbackEach(err);
+                                            }
+                                            totalTriplesCount += writtenTriples;
+                                            if (options.writeQuota) {
+                                                options.writeQuota.remaining -= writtenTriples;
+                                            }
+                                            var currentTime = new Date();
+                                            message.batchTriples = writtenTriples;
+                                            message.operation = "writeTriples";
+                                            message.operationDuration = currentTime - oldTime;
+                                            message.totalDuration += message.operationDuration;
+                                            KGbuilder_socket.message(options.clientSocketId, message);
+                                            oldTime = new Date();
+                                            return callbackEach();
+                                        },
+                                        batchTriples,
+                                        tableProcessingParams.sourceInfos.graphUri,
+                                        tableProcessingParams.sourceInfos.sparqlServerUrl,
+                                    );
+                                });
                             }
                         });
                     },
@@ -205,7 +241,7 @@ var TriplesMaker = {
             console.log("start");
             try {
                 for await (const batch of generator) {
-                    if (options.ntExportLimitReached) {
+                    if (options.ntExportLimitReached || options.writeQuotaReached) {
                         break;
                     }
                     // console.log("select time " + duration)
@@ -268,6 +304,10 @@ var TriplesMaker = {
                                 exportTriples = exportTriples.concat(batchTriples);
                             }
                         } else {
+                            if (!(await TriplesMaker.canWriteMoreTriples(options))) {
+                                options.writeQuotaReached = true;
+                                break;
+                            }
                             try {
                                 var batchTriplesCount;
                                 await modelUtils.redoIfFailure(async function () {
@@ -280,6 +320,9 @@ var TriplesMaker = {
 
                                 var currentTime = new Date();
                                 totalTriplesCount += batchTriplesCount;
+                                if (options.writeQuota) {
+                                    options.writeQuota.remaining -= batchTriplesCount;
+                                }
                                 message.totalTriples = totalTriplesCount;
                                 message.operation = "writeTriples";
                                 message.batchTriples = batchTriplesCount;

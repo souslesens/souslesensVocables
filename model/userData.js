@@ -234,6 +234,25 @@ class UserDataModel {
         return results;
     };
 
+    /**
+     * How many records a user owns, for the quota that caps them.
+     *
+     * Counts ownership, so the technical records the triple quota keeps here, owned by
+     * the admin account, never weigh on anybody's allowance.
+     *
+     * @param {number} ownerId - the numeric identifier of the owner
+     * @returns {Promise<number>}
+     */
+    countOwnedBy = async (ownerId) => {
+        const connection = getKnexConnection(this._mainConfig.database);
+        try {
+            const result = await connection("user_data").where("owned_by", ownerId).count({ total: "*" }).first();
+            return Number(result.total);
+        } finally {
+            cleanupConnection(connection);
+        }
+    };
+
     insert = async (userData) => {
         const data = this._check(userData);
 

@@ -1,5 +1,7 @@
 import path from "path";
 import kGbuilder from "../../../bin/KG/KGbuilder.js";
+import userManager from "../../../bin/user.js";
+import { sourceModel } from "../../../model/sources.js";
 
 // Route POST /kg: not used client-side (no calls found in public/).
 // Likely deprecated — active routes are sub-paths /kg/data, /kg/model, /kg/triples, /kg/mappings, /kg/clearGraph.
@@ -8,7 +10,12 @@ export default function () {
         POST,
     };
 
-    function POST(req, res, _next) {
+    async function POST(req, res, _next) {
+        const userInfo = await userManager.getUser(req.user);
+        if (!(await sourceModel.canWrite(userInfo.user, { graphUri: req.body.adlGraphUri }))) {
+            return res.status(403).json({ message: `You are not allowed to write ${req.body.adlGraphUri}.` });
+        }
+
         kGbuilder.buidlKG(req.body.mappingFileNames, req.body.sparqlServerUrl, req.body.adlGraphUri, req.body.replaceGraph, req.body.dataSource, req.body.options, function (err, result) {
             if (err) {
                 return res.status(400).json({ error: err });

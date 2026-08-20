@@ -161,7 +161,12 @@ class SourceModel {
                 }
             })
             .map(([sourceName, source]) => {
-                return [sourceName, { ...source, accessControl: sortedAndReducedAllowedSources[sourceName] }];
+                /* `editable: false` marks a source as read-only for everyone but the
+                 * administrators, whatever the profiles or the ownership grant. Settled
+                 * here, the only place a non-admin access control is decided, so every
+                 * route and the SPARQL proxy filter inherit the restriction. */
+                const accessControl = source.editable === false ? "read" : sortedAndReducedAllowedSources[sourceName];
+                return [sourceName, { ...source, accessControl: accessControl }];
             });
         return Object.fromEntries(filterSourcesList);
     };
@@ -189,10 +194,35 @@ class SourceModel {
      */
     getUserSources = async (user) => {
         const allSources = await this._read();
-        if (user.login === "admin" || user.groups.includes("admin")) {
+        if (this.isAdmin(user)) {
             return await this._getAdminSources(allSources);
         }
         return await this._getAllowedSources(allSources, user);
+    };
+
+    /**
+     * @param {UserAccount} user - a user account
+     * @returns {boolean} true when the user holds every right on every source
+     */
+    isAdmin = (user) => {
+        return user.login === "admin" || (user.groups || []).includes("admin");
+    };
+
+    /**
+     * Whether the user may write into a source, designated by its name or by its
+     * named graph. Administrators may write anywhere, a graph that no source
+     * declares included.
+     * @param {UserAccount} user - a user account
+     * @param {{name?: string, graphUri?: string}} target - the source written into
+     * @returns {Promise<boolean>} true when the write is allowed
+     */
+    canWrite = async (user, target) => {
+        if (this.isAdmin(user)) {
+            return true;
+        }
+        const userSources = await this.getUserSources(user);
+        const source = target.name !== undefined ? userSources[target.name] : Object.values(userSources).find((userSource) => userSource.graphUri === target.graphUri);
+        return source !== undefined && source.accessControl === "readwrite";
     };
 
     /**

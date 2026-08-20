@@ -53,7 +53,9 @@ export default function () {
             if (err) {
                 return res.status(400).json({ error: err });
             }
-            if (userInfo.user.groups.indexOf("admin") < 0) return res.status(403);
+            if (userInfo.user.groups.indexOf("admin") < 0) {
+                return res.status(403).json({ message: "Only an administrator may import a graph." });
+            }
             if (ConfigManager.config) {
                 var sparqlServerConnection = { url: ConfigManager.config.sparql_server.url };
                 if (ConfigManager.config.sparql_server.user) {

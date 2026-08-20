@@ -583,6 +583,13 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         profileModel.profileForm.maxNtExportTriples = rawMaxNtExportTriples || rawMaxNtExportTriples === 0 ? Number(rawMaxNtExportTriples) : undefined;
         const rawMaxNumberCreatedSource = profileModel.profileForm.maxNumberCreatedSource;
         profileModel.profileForm.maxNumberCreatedSource = rawMaxNumberCreatedSource || rawMaxNumberCreatedSource === 0 ? Number(rawMaxNumberCreatedSource) : undefined;
+        /* `=== 0` on every one of them: an empty field means "this profile does not
+         * decide", while a typed 0 is a decision that forbids. */
+        const numericLimits = ["maxWritableTriplesPerUser", "maxUploadTriplesPerUser", "maxUserDataRecordsPerUser"] as const;
+        numericLimits.forEach((field) => {
+            const raw = profileModel.profileForm[field];
+            profileModel.profileForm[field] = raw || raw === 0 ? Number(raw) : undefined;
+        });
 
         void saveProfile(profileModel.profileForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
         const mode = create ? "create" : "edit";
@@ -879,7 +886,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                             <AccordionSummary expandIcon={<ExpandMore />} aria-controls="profile-limitations-content" id="profile-limitations-header">
                                 <Stack direction="row" spacing={1} useFlexGap>
                                     <Speed />
-                                    {"Limitations"}
+                                    {"Quotas"}
                                 </Stack>
                             </AccordionSummary>
                             <AccordionDetails>
@@ -939,6 +946,60 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                                 endAdornment: (
                                                     <InputAdornment position="end">
                                                         <HelpTooltip title="Caps how many triples a MappingModeler N-Triples export can contain for this profile." />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                        <TextField
+                                            fullWidth
+                                            type="number"
+                                            id="maxWritableTriplesPerUser"
+                                            label="Max triples written with Mapping Modeler"
+                                            helperText="Empty: no limit. 0: forbidden"
+                                            value={profileModel.profileForm.maxWritableTriplesPerUser ?? ""}
+                                            onChange={handleFieldUpdate("maxWritableTriplesPerUser")}
+                                            InputProps={{
+                                                inputProps: { min: 0 },
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <HelpTooltip title="How many triples a user of this profile may hold through the Mapping Modeler, counted live and freed when they delete them. When several profiles set it, the highest one wins." />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                        <TextField
+                                            fullWidth
+                                            type="number"
+                                            id="maxUploadTriplesPerUser"
+                                            label="Max uploaded triples"
+                                            helperText="Empty: no limit. 0: forbidden"
+                                            value={profileModel.profileForm.maxUploadTriplesPerUser ?? ""}
+                                            onChange={handleFieldUpdate("maxUploadTriplesPerUser")}
+                                            InputProps={{
+                                                inputProps: { min: 0 },
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <HelpTooltip title="How many uploaded triples a user of this profile may hold, across the graphs they loaded into. When several profiles set it, the highest one wins." />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    </Stack>
+                                    <Stack spacing={2} useFlexGap>
+                                        <Typography variant="subtitle2">User data</Typography>
+                                        <TextField
+                                            fullWidth
+                                            type="number"
+                                            id="maxUserDataRecordsPerUser"
+                                            label="Max user data entries"
+                                            helperText="Empty: no limit. 0: forbidden"
+                                            value={profileModel.profileForm.maxUserDataRecordsPerUser ?? ""}
+                                            onChange={handleFieldUpdate("maxUserDataRecordsPerUser")}
+                                            InputProps={{
+                                                inputProps: { min: 0 },
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <HelpTooltip title="How many user data entries a user of this profile may own. When several profiles set it, the highest one wins." />
                                                     </InputAdornment>
                                                 ),
                                             }}

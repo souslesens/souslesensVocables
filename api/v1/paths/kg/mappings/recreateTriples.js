@@ -24,6 +24,10 @@ export default function () {
                 return res.status(404).json({ error: "Unknown source '" + source + "'" });
             }
 
+            if (!(await sourceModel.canWrite(userInfo.user, { name: source }))) {
+                return res.status(403).json({ message: `You are not allowed to recreate the triples of ${source}.` });
+            }
+
             const out = await recreateGraph.recreateGraphTriples({
                 user: userInfo.user,
                 source: source,

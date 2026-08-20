@@ -95,6 +95,7 @@ const getKnexConnection = (database) => {
         ...readSchema("010-profiles").map((data) => createDatabaseFromSchema(connection, data)),
         ...readSchema("011-profiles-view").map((data) => createDatabaseFromSchema(connection, data)),
         ...readSchema("020-users").map((data) => createDatabaseFromSchema(connection, data)),
+        ...readSchema("021-users-view").map((data) => createDatabaseFromSchema(connection, data)),
         ...readSchema("030-user-data").map((data) => createDatabaseFromSchema(connection, data)),
         ...readSchema("031-user-data-view").map((data) => createDatabaseFromSchema(connection, data)),
     ])

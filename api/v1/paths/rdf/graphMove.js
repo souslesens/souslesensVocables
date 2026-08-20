@@ -1,5 +1,6 @@
 import { rdfDataModel } from "../../../../model/rdfData.js";
 import { sourceModel } from "../../../../model/sources.js";
+import userManager from "../../../../bin/user.js";
 
 export default function () {
     let operations = {
@@ -14,6 +15,16 @@ export default function () {
         }
 
         try {
+            /* Both ends are written: the moved graph is emptied and the target one filled,
+             * so neither may be a source the caller only reads. */
+            const userInfo = await userManager.getUser(req.user);
+            const movedGraphs = [sourceGraphUri, targetGraphUri];
+            for (const graphUri of movedGraphs) {
+                if (!(await sourceModel.canWrite(userInfo.user, { graphUri: graphUri }))) {
+                    return res.status(403).json({ message: `You are not allowed to write ${graphUri}.` });
+                }
+            }
+
             let updatedSource = null;
             if (sourceName) {
                 const sources = await sourceModel.getAllSources();

@@ -111,6 +111,40 @@ describe("SourceModel", () => {
         expect(source === undefined).toBe(true);
     });
 
+    test("A source marked not editable stays read even when the profile grants readwrite", async () => {
+        tracker.on.select("profiles_list").response(dbProfiles);
+
+        const jdoe = {
+            login: "jdoe",
+            groups: ["readwrite_folder_1"],
+        };
+        const sources = await sourceModel.getUserSources(jdoe);
+        expect(sources["SOURCE_1"].accessControl).toStrictEqual("readwrite");
+        expect(sources["SOURCE_2"].accessControl).toStrictEqual("read");
+    });
+
+    test("canWrite follows the access control of the source", async () => {
+        tracker.on.select("profiles_list").response(dbProfiles);
+
+        const jdoe = {
+            login: "jdoe",
+            groups: ["readwrite_folder_1"],
+        };
+        expect(await sourceModel.canWrite(jdoe, { name: "SOURCE_1" })).toBe(true);
+        expect(await sourceModel.canWrite(jdoe, { name: "SOURCE_2" })).toBe(false);
+        expect(await sourceModel.canWrite(jdoe, { name: "SOURCE_3" })).toBe(false);
+        expect(await sourceModel.canWrite(jdoe, { graphUri: "http://data.exemple.org/source_1" })).toBe(true);
+        expect(await sourceModel.canWrite(jdoe, { graphUri: "http://data.exemple.org/source_2" })).toBe(false);
+        expect(await sourceModel.canWrite(jdoe, { graphUri: "http://data.exemple.org/unknown" })).toBe(false);
+    });
+
+    test("canWrite lets an administrator write anywhere, read-only sources included", async () => {
+        const admin = { login: "someone", groups: ["admin"] };
+        expect(await sourceModel.canWrite(admin, { name: "SOURCE_2" })).toBe(true);
+        expect(await sourceModel.canWrite(admin, { graphUri: "http://data.exemple.org/source_2" })).toBe(true);
+        expect(await sourceModel.canWrite(admin, { graphUri: "http://data.exemple.org/unknown" })).toBe(true);
+    });
+
     test("get owned user sources", async () => {
         tracker.on.select("profiles_list").response(dbProfiles);
         const user = { login: "admin", groups: [] };

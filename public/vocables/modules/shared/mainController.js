@@ -157,7 +157,7 @@ var MainController = (function () {
                         if (paramsMap.sourcesFile) {
                             Config.currentProfile.sourcesFile = paramsMap.sourcesFile;
                         }
-                        if (paramsMap.tool && paramsMap.source) {
+                        if (paramsMap.tool && paramsMap.source && Config.userTools[paramsMap.tool]) {
                             Config.userTools[paramsMap.tool].urlParam_source = paramsMap.source;
                         }
                         callbackSeries();
@@ -275,6 +275,12 @@ var MainController = (function () {
                     toolId = clickedElement.nextSibling.innerHTML;
                 }
             }
+        }
+
+        // outil non autorisé pour le profil : retour à la page d'accueil sans paramètres
+        if (!Config.userTools[toolId]) {
+            window.location.href = window.location.origin + window.location.pathname;
+            return;
         }
 
         if (self.currentTool != null) {
@@ -518,7 +524,10 @@ var MainController = (function () {
         var message = "";
         // rajouter le status de l'erreur
         if (typeof err == "object") {
-            message = (err.status || "500") + " : " + (err.responseText || err.message);
+            // Une réponse qui explique pourquoi elle refuse est écrite pour l'utilisateur :
+            // la montrer telle quelle plutôt que le corps JSON précédé du code HTTP.
+            var serverMessage = err.responseJSON ? err.responseJSON.message || err.responseJSON.error : null;
+            message = serverMessage ? serverMessage : (err.status || "500") + " : " + (err.responseText || err.message);
         } else if (typeof err == "string") {
             message = err;
         } else {

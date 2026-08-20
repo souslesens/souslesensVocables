@@ -110,6 +110,9 @@ const apiDoc = {
                 token: { type: "string" },
                 allowSourceCreation: { type: "boolean" },
                 maxNumberCreatedSource: { type: "number" },
+                maxWritableTriplesPerUser: { type: "number" },
+                maxUploadTriplesPerUser: { type: "number" },
+                maxUserDataRecordsPerUser: { type: "number" },
             },
             required: ["login", "groups"],
             title: "User Model",
@@ -123,6 +126,9 @@ const apiDoc = {
                 groups: { type: "array", items: { type: "string" } },
                 allowSourceCreation: { type: "boolean" },
                 maxNumberCreatedSource: { type: "number" },
+                maxWritableTriplesPerUser: { type: "number" },
+                maxUploadTriplesPerUser: { type: "number" },
+                maxUserDataRecordsPerUser: { type: "number" },
             },
             required: ["login", "groups"],
             title: "UserMe Model",
@@ -335,6 +341,18 @@ const apiDoc = {
                 maxNumberCreatedSource: {
                     type: "number",
                     description: "How many sources a user of this profile may own. Omitted, the limit stored on the user account applies.",
+                },
+                maxWritableTriplesPerUser: {
+                    type: "number",
+                    description: "How many triples a user of this profile may hold through the Mapping Modeler. 0 forbids writing any. Omitted, the limit stored on the user account applies.",
+                },
+                maxUploadTriplesPerUser: {
+                    type: "number",
+                    description: "How many uploaded triples a user of this profile may hold. 0 forbids uploading. Omitted, the limit stored on the user account applies.",
+                },
+                maxUserDataRecordsPerUser: {
+                    type: "number",
+                    description: "How many user data entries a user of this profile may own. 0 forbids saving any. Omitted, the limit stored on the user account applies.",
                 },
             },
         },

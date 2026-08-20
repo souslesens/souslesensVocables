@@ -59,6 +59,7 @@ export function createUploadApp(config: UploadAppConfig) {
         const [databases, setDatabases] = useState<DatabaseResponse[]>([]);
         const [files, setFiles] = useState<File[]>([]);
         const [selectedDatabase, setSelectedDatabase] = useState("_default");
+        const [areDatabasesLoading, setAreDatabasesLoading] = useState(true);
 
         const [error, setError] = useState(false);
         const [errorMessage, setErrorMessage] = useState("");
@@ -157,13 +158,34 @@ export function createUploadApp(config: UploadAppConfig) {
         };
 
         const fetchDatabases = async () => {
-            const response = await fetch("/api/v1/databases");
-            const json = (await response.json()) as { resources: DatabaseResponse[] };
-            setDatabases(json.resources);
+            setAreDatabasesLoading(true);
+            try {
+                const response = await fetch("/api/v1/databases");
+                const json = (await response.json()) as { resources: DatabaseResponse[] };
+                setDatabases(json.resources ?? []);
+            } catch (fetchError) {
+                setDatabases([]);
+                setError(true);
+                setErrorMessage((fetchError as Error).message || "Unable to load the list of databases");
+            } finally {
+                setAreDatabasesLoading(false);
+            }
         };
 
         const widget = (displayForm: string) => {
             if (displayForm === "database") {
+                if (areDatabasesLoading) {
+                    return <LinearProgress />;
+                }
+
+                if (databases.length === 0) {
+                    return (
+                        <Alert variant="outlined" severity="warning">
+                            You do not have access to any database. Ask an administrator to grant you access to at least one database.
+                        </Alert>
+                    );
+                }
+
                 return (
                     <Select
                         label="Select database"

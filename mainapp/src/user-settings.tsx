@@ -4,6 +4,7 @@ import { useEffect, useState, SyntheticEvent } from "react";
 import { Alert, Snackbar, Stack, Tab, Tabs } from "@mui/material";
 
 import { UserInfo } from "./Component/UserInfo";
+import { UserQuotas } from "./Component/UserQuotas";
 import { UserSources } from "./Component/UserSources";
 import UsersDataManagement from "./users-data-management";
 
@@ -19,6 +20,7 @@ enum Sections {
     Settings = "settings",
     Sources = "sources",
     UsersData = "usersData",
+    Quotas = "quotas",
 }
 
 export type Severity = "error" | "info" | "success" | "warning";
@@ -31,7 +33,7 @@ export type SnackInfo = {
 
 interface DispatcherProps {
     handleSnackbar: (msg: string, severity?: Severity) => void;
-    selectedTab: Sections.Settings | Sections.Sources | Sections.UsersData;
+    selectedTab: Sections;
 }
 
 const Dispatcher = ({ handleSnackbar, selectedTab }: DispatcherProps) => {
@@ -42,6 +44,8 @@ const Dispatcher = ({ handleSnackbar, selectedTab }: DispatcherProps) => {
             return <UserSources handleSnackbar={handleSnackbar} />;
         case Sections.UsersData:
             return <UsersDataManagement />;
+        case Sections.Quotas:
+            return <UserQuotas handleSnackbar={handleSnackbar} />;
     }
 };
 
@@ -90,6 +94,7 @@ export default function UserSettings() {
                 <Tab label="API token" value={Sections.Settings} />
                 <Tab label="Sources" value={Sections.Sources} />
                 <Tab label="Users Data" value={Sections.UsersData} />
+                <Tab label="Quotas" value={Sections.Quotas} />
             </Tabs>
             <Dispatcher handleSnackbar={handleSnackbar} selectedTab={selectedTab} />
         </Stack>

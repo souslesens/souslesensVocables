@@ -4,6 +4,45 @@ This page describes who may write where, how much a user is allowed to hold, and
 those figures are computed. It records the decisions behind the implementation, not only
 the fields to fill in.
 
+## What each user may do today
+
+The columns are the five situations a user can be in for a given source. They are read
+from left to right: being an administrator settles everything, then owning the source,
+then what the profiles grant. The last column overrides all the others but the first: a
+source declared with `"editable": false` in `sources.json` is read-only for everyone
+except the administrators, its owner included.
+
+| Operation                                         | Administrator | Owner of the source | `readwrite` profile | `read` profile | Source `editable: false` | Limit that applies                            |
+| ------------------------------------------------- | ------------- | ------------------- | ------------------- | -------------- | ------------------------ | --------------------------------------------- |
+| Read a source (Lineage, KGquery, SPARQL `SELECT`) | yes           | yes                 | yes                 | yes            | yes                      | none                                          |
+| Mapping Modeler — write triples                   | yes           | yes                 | yes                 | no             | no                       | `maxWritableTriplesPerUser`                   |
+| Mapping Modeler — delete triples                  | yes           | yes                 | yes                 | no             | no                       | none, it frees quota                          |
+| Graph Management — upload a graph                 | yes           | yes                 | yes                 | no             | no                       | `maxUploadTriplesPerUser`                     |
+| Graph Management — delete or clear a graph        | yes           | yes                 | yes                 | no             | no                       | none, it frees quota                          |
+| SPARQL update through the proxy                   | yes           | yes                 | yes                 | no             | no                       | none                                          |
+| N-Triples export                                  | yes           | yes                 | yes                 | yes            | yes                      | `maxNtExportTriples`, per export              |
+| Create a source                                   | yes           | —                   | —                   | —              | —                        | `allowSourceCreation`, `maxNumberCreatedSource` |
+| Save a user data entry                            | yes           | —                   | —                   | —              | —                        | `maxUserDataRecordsPerUser`                   |
+
+The last two operations are not attached to a source, hence the dashes: they depend only
+on the user.
+
+A few points the table cannot carry:
+
+- **Administrators are exempt from two limits only**, source creation and the N-Triples
+  export, which both test the `admin` group explicitly. The three triple and user data
+  limits have no such exemption: they apply to an administrator whose account or profile
+  sets them. In practice an administrator is uncapped because nobody sets them there.
+- **A SPARQL `INSERT` is subject to no triple quota.** The proxy checks the write right
+  per graph and stops there. Such triples belong to nobody, and the accounting explicitly
+  refuses to charge triples nobody recorded, so they inflate no one's usage.
+- **An export is capped per call, not per stock.** Beyond the cap the export is truncated
+  and carries a notice saying so, rather than being refused.
+- **Deleting frees quota immediately**, because the usage is measured against the store
+  rather than accumulated in a counter.
+- `maxNtExportTriples` is read from the profiles only, never from the user account,
+  unlike the four others.
+
 ## Access rights on a source
 
 Three things decide whether a user may read or write a source.

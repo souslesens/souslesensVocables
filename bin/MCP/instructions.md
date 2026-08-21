@@ -105,7 +105,7 @@ the SPARQL.
 Three failures, three different repairs, and they are not interchangeable.
 
 **A sort refused.** `SR353: Sorted TOP clause specifies more then N rows to sort. Only 10000 are
-allowed.` Nothing here is too large. The ceiling counts the rows the endpoint is *asked* to sort,
+allowed.` Nothing here is too large. The ceiling counts the rows the endpoint is _asked_ to sort,
 which is your LIMIT plus your OFFSET, never the rows the query returns. A query that declares no
 LIMIT receives the platform one, so an `ORDER BY` alone is refused even when the answer is 170 rows.
 Add an explicit `LIMIT 10000` or less and the identical query runs, or drop the `ORDER BY` and sort

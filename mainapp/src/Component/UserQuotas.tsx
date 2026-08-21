@@ -22,11 +22,11 @@ type QuotaRow = {
 };
 
 const rows: QuotaRow[] = [
-    { key: "sources", label: "Sources Allowed", explanation: "Deleting a source frees a slot." },
+    { key: "sources", label: "Private Sources ", explanation: "Deleting a source frees a slot." },
     { key: "mappingTriples", label: "Triples written with Mapping Modeler", explanation: "Deleting triples frees room." },
+    { key: "exportTriplesPerCall", label: "Mapping Modeler maximum exported Triples", explanation: "Limit for one export, nothing to use up." },
     { key: "uploadTriples", label: "Uploaded triples", explanation: "Deleting triples frees room." },
     { key: "userDataRecords", label: "User data entries", explanation: "Deleting an entry frees a slot." },
-    { key: "exportTriplesPerCall", label: "Mapping Modeler maximum exported Triples", explanation: "Limit for one export, nothing to use up." },
 ];
 
 const formatNumber = (value: number) => value.toLocaleString("en-US");

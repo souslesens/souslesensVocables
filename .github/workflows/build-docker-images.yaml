@@ -60,3 +60,5 @@ jobs:
               run: echo ${KUBECONFIG_B64} | base64 -d > ~/kubeconfig
             - name: helm-upgrade
               run: helm --kubeconfig ~/kubeconfig upgrade souslesens https://helm.logilab.fr/charts/web-app-2.1.0.tgz --wait --atomic --timeout=10m --reuse-values --set=image.tag=sha-${GITHUB_SHA::7}
+            - name: helm-upgrade-mcp-sls
+              run: helm --kubeconfig ~/kubeconfig upgrade mcp-sls https://helm.logilab.fr/charts/web-app-2.1.0.tgz --wait --atomic --timeout=10m --reuse-values --set=image.tag=sha-${GITHUB_SHA::7}

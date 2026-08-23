@@ -79,8 +79,6 @@ export default function () {
                                         return callbackSeries(err);
                                     }
                                     result = _result;
-
-                                    return callbackSeries();
                                 });
                             });
                         });

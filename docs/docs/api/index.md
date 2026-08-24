@@ -33,5 +33,6 @@ curl --header "authorization: Bearer xxx" http://sls.example.org/api/v1/users/me
 ```{toctree}
 :maxdepth: 3
 ai.md
+mcp.md
 userdata.md
 ```

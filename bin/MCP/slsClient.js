@@ -70,6 +70,30 @@ function messageForStatus(status, payload) {
     return slsMessage || `SLS returned ${status}.`;
 }
 
+// Set by /sparqlQueries/run with the facts about the queries it ran: how many, the LIMIT the last one
+// carried, how many rows it returned and the endpoint's own cap. Absent on every other route and on
+// any call that never reached the triple store, which is why a missing header is a normal state and
+// not an error.
+const sparqlExecutionHeaderName = "x-sls-sparql-execution";
+
+/**
+ * @param {Response} response
+ * @returns {object|null} Execution facts, or null when the route reported none
+ */
+function parseSparqlExecutionHeader(response) {
+    const headerValue = response.headers.get(sparqlExecutionHeaderName);
+    if (!headerValue) {
+        return null;
+    }
+    try {
+        return JSON.parse(headerValue);
+    } catch {
+        // A header this code cannot read leaves completeness unknown, which is a state every caller
+        // already handles. Failing the whole call over it would be worse than the doubt.
+        return null;
+    }
+}
+
 /**
  * Perform one request against the SLS API with the caller's bearer token.
  * @param {"GET"|"POST"} method
@@ -77,7 +101,7 @@ function messageForStatus(status, payload) {
  * @param {object} [options]
  * @param {object} [options.query] - Query parameters
  * @param {object} [options.body] - JSON body, POST only
- * @returns {Promise<{ok: boolean, status: number, data: *, errorMessage: string|null, url: string}>}
+ * @returns {Promise<{ok: boolean, status: number, data: *, errorMessage: string|null, url: string, sparqlExecution: object|null}>}
  */
 export async function slsRequest(method, routePath, options) {
     const requestOptions = options || {};
@@ -131,5 +155,7 @@ export async function slsRequest(method, routePath, options) {
     if (!response.ok) {
         return { ok: false, status: response.status, data: payload, errorMessage: messageForStatus(response.status, payload), url: url };
     }
-    return { ok: true, status: response.status, data: payload, errorMessage: null, url: url };
+    // Routes that reach the triple store report what bounded the answer beside it rather than in it,
+    // because their body shape varies per catalog function. See `sparqlExecutionHeader`.
+    return { ok: true, status: response.status, data: payload, errorMessage: null, url: url, sparqlExecution: parseSparqlExecutionHeader(response) };
 }

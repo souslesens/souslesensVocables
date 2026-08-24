@@ -139,6 +139,30 @@ async function main() {
     });
     record("sls_run_query_function", !escapeHatchResult.isError, "");
 
+    // Every answer that can be cut says so, whatever produced it. A function declaring no limit of its
+    // own is the case this checks: its ceiling lives in its query text and only the route can see it,
+    // so a missing notice here means an agent is again free to read a prefix as a total.
+    const escapeHatchEnvelope = readEnvelope(escapeHatchResult);
+    const escapeHatchCeiling = escapeHatchEnvelope && escapeHatchEnvelope.rowCeiling;
+    const completenessValues = [true, false, "unknown"];
+    record(
+        "sls_run_query_function reports a rowCeiling",
+        Boolean(escapeHatchCeiling) && completenessValues.includes(escapeHatchCeiling.complete),
+        escapeHatchCeiling ? JSON.stringify(escapeHatchCeiling).slice(0, 160) : "no rowCeiling on the answer",
+    );
+
+    // A ceiling of 1 is reached by any source holding a single top concept, which makes this the one
+    // assertion that a cut is actually detected rather than merely reported on.
+    const cutResult = await client.callTool({ name: "sls_top_concepts", arguments: { sourceLabel: sourceForQueries, options: { limit: 1 } } });
+    const cutEnvelope = readEnvelope(cutResult);
+    const cutCeiling = cutEnvelope && cutEnvelope.rowCeiling;
+    const cutRows = cutEnvelope && Array.isArray(cutEnvelope.data) ? cutEnvelope.data.length : 0;
+    record(
+        "a row count landing on the limit is reported as a cut",
+        cutRows < 1 || (Boolean(cutCeiling) && cutCeiling.complete === false && cutCeiling.atKnownCeiling === true),
+        cutCeiling ? JSON.stringify(cutCeiling).slice(0, 160) : "no rowCeiling on the answer",
+    );
+
     const blockedWriteResult = await client.callTool({
         name: "sls_run_query_function",
         arguments: { name: "deleteTriples", module: "Sparql_generic", params: { sourceLabel: sourceForQueries } },
@@ -178,6 +202,16 @@ async function main() {
             "every index listed can be searched in one call",
             !wideSearchResult.isError,
             wideSearchResult.isError ? readEnvelope(wideSearchResult) : `${availableIndexes.length} indices at once, hits from ${searchedIndexes.size} of them`,
+        );
+
+        // The ranking was cut at `size` and what fell below it is the weaker matches, which is exactly
+        // the part a caller searching one specific source came for. A search says so too, or it lies
+        // by omission the same way a truncated SPARQL answer does.
+        const wideSearchCeiling = wideSearchEnvelope && wideSearchEnvelope.rowCeiling;
+        record(
+            "sls_search_labels reports a rowCeiling",
+            wideSearchHits.length === 0 || (Boolean(wideSearchCeiling) && completenessValues.includes(wideSearchCeiling.complete)),
+            wideSearchCeiling ? JSON.stringify(wideSearchCeiling).slice(0, 160) : "no rowCeiling on the answer",
         );
 
         // The reason sls_count_labels_by_source exists: a ranked search returns one global top-K,

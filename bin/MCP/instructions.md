@@ -74,10 +74,16 @@ states what it can be linked to through a restriction rather than a direct tripl
 be fetched afterwards. Raising `options.limit` does not help, since several of the underlying
 queries ignore it, which is precisely why the cut happens here.
 
-For rows, `totalRows` says how many exist and `returnedRows` how many you got. If a narrower query
-can still answer the question, run it. If it cannot, because that total is simply how large the
-answer is, say the figure to the user and ask what to restrict it to. Never present a truncated
-prefix as if it were the whole set.
+For rows, `totalRows` says how many rows the tool handed back and `returnedRows` how many of them
+fitted. If a narrower query can still answer the question, run it. If it cannot, because that figure
+is simply how large the answer is, say it to the user and ask what to restrict it to. Never present a
+truncated prefix as if it were the whole set.
+
+`totalRows` counts the payload, never the result set. Two cuts can hit the same answer: the query can
+be capped before it ever reaches this server, and the rows it returned can then be too many to send
+you. `truncation` is the second cut only. When `rowCeiling` says `complete: false`, or when
+`totalRowsIsItselfCut` is set, `totalRows` is a limit wearing the costume of a count and quoting it to
+the user is the error this file exists to prevent.
 
 For a document, half of it is broken JSON, so you receive `oversizedDocumentStructure` instead: one
 line per top-level key with its size. Use it to tell the user what the document holds and to pick a
@@ -89,12 +95,28 @@ that walk possible. No LIMIT or OFFSET of your own, and **no ORDER BY**: Virtuos
 query once LIMIT plus OFFSET passes 10000, so an ordered walk fails on its second block and never
 reaches the rest. Sort the rows after collecting them if the user needs them ordered.
 
-A row count landing exactly on the limit you asked for is a cut, never a total. The `rowCeiling` key
-says it outright when it appears, and `complete: false` there means you are holding a prefix.
-Round figures deserve the same suspicion even without it: 1000, 10000 and 20000 are limits, not
-counts. Establish the real number with `sls_sparql_select` and `SELECT (COUNT(*) AS ?total)` on the
-same pattern before quoting one to the user. This is not hypothetical: 10000 notifications were
-once announced as the complete list, out of 470468.
+### `rowCeiling` is on every answer that can be cut, not only on `sls_sparql_select`
+
+Any tool that queries a triple store or a search index reports a `rowCeiling` block, and reading it
+is not optional. It has one key that decides what you may say:
+
+- `complete: true` means the whole set is in front of you. Quote it.
+- `complete: false` means you are holding a prefix. Never present it as the set. The `hint` names the
+  way to the rest.
+- `complete: "unknown"` means nothing here proves either way, usually because the endpoint's own cap
+  could not be established. It is not a soft yes. Treat it as a prefix until a count says otherwise.
+
+The tool that returned the rows does not know what bounded them, and this block is why you do: a
+catalog function may carry `limit 10000` in its own query text, page internally until it reaches a
+configured ceiling, or run under an endpoint that truncates at `ResultSetMaxRows` and announces
+nothing. `atKnownCeiling` says the answer landed exactly on the lowest of those, which is a cut.
+`sparqlRows` and `sparqlQueries`, when present, say how many rows were actually read and how many
+queries it took, which is how a function returning 50 grouped rows can still be sitting on a cut.
+
+Round figures deserve the same suspicion on their own: 1000, 10000 and 20000 are limits, not counts.
+Establish the real number with `sls_sparql_select` and `SELECT (COUNT(*) AS ?total)` on the same
+pattern before quoting one to the user. This is not hypothetical: 10000 notifications were once
+announced as the complete list, out of 100741.
 
 ## A refused query is a query to repair, not a result to report
 

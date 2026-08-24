@@ -75,14 +75,3 @@ any read function of the SPARQL query registry.
 
 Results are bounded. When an answer is too large it is cut, and the agent is told so along with the
 total, so that it narrows its question instead of asking again for more.
-
-## Troubleshooting
-
-| Symptom                                                  | Cause                                                                                                                                                                        |
-| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `401`                                                    | The token is expired or was renewed. Copy the current one from **UserSettings**, tab **API TOKEN**.                                                                          |
-| `403`                                                    | Your profile has no access to the source the agent asked for.                                                                                                                |
-| `429`                                                    | Your profile's quota for that route is exhausted. Slow down, or narrow the query.                                                                                            |
-| The call ran past the deadline                           | The question is too heavy to answer in one call. The platform is not down. Bind the query with a type, a known predicate or a single source, and ask for one part at a time. |
-| No tool at all, though the configuration file is written | The client was not restarted, or the server was registered in a scope tied to a working directory. Register it globally.                                                     |
-| The server complains about an unsubstituted placeholder  | The header contains a `${VARIABLE}` that the environment starting the client does not define. Write the token literally, or export the variable before starting the client.  |

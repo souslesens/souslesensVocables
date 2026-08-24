@@ -78,6 +78,9 @@ export default function () {
                     },
                     body: { url: "_search", indexes: "{indexes}", query: { size: "{size}", query: { match: { label: { query: "{text}", fuzziness: "{fuzziness}" } } } } },
                     resultShape: "elasticHits",
+                    // `size` hits back means the ranking was cut there, and the hits below the cut are
+                    // the ones a caller searching a specific source most often wanted.
+                    rowCeiling: { param: "size", escalation: "elastic" },
                     statusHints: { 500: "Elasticsearch is unreachable or the index does not exist. Check the index name with sls_list_indexes." },
                 },
                 {

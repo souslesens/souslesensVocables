@@ -235,6 +235,21 @@ function toCallToolResult(descriptor, result) {
     if (result.rowCeiling) {
         envelope.rowCeiling = result.rowCeiling;
     }
+
+    // Two different cuts land in the same envelope and only one of them is about the data. `truncation`
+    // counts the rows the tool handed this server, so `totalRows` is the size of the payload and never
+    // the size of the answer. On a query that was itself cut, quoting it states a limit as a count, and
+    // the hint above says in as many words to tell the user that figure. Measured: 10000 notifications
+    // reported as the whole set, against 100741, with the size guard's own sentence as the reason.
+    //
+    // The key stays, because `sls_result_page` pages against it. What changes is that it stops being
+    // read as a total the moment the other block says the query never returned one.
+    if (truncation.truncated && truncation.totalRows !== undefined && envelope.rowCeiling && envelope.rowCeiling.complete === false) {
+        truncation.totalRowsIsItselfCut = true;
+        truncation.hint =
+            `${truncation.hint} Read totalRows as the size of this cut answer and nothing more: rowCeiling says the query behind it was itself cut, ` +
+            `so ${truncation.totalRows} is a limit, not a count, and stating it to the user as the number of results would be wrong.`;
+    }
     return { content: [{ type: "text", text: JSON.stringify(envelope) }] };
 }
 

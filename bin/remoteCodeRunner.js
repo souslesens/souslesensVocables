@@ -35,6 +35,46 @@ function formatAjaxError(err) {
     return { responseText: err.toString ? err.toString() : String(err) };
 }
 
+// A catalog function decides its own LIMIT and never says which: some read `options.limit`, some
+// carry `limit 10000` in the query text, some page in blocks and stop on `Config.queryLimit`. So the
+// caller cannot know what bounded the answer it just received, and 10000 rows out of 100741 came
+// back looking like the whole set. Every one of those caps is visible at the only point they all
+// pass through, which is the query actually sent to the triple store, so it is measured here.
+//
+// Only the last query matters for the verdict. One query, one answer: a full last block is a cut.
+// A paging loop: a full last block means the loop stopped on a ceiling rather than on the end of the
+// data, and a partial one means it reached the end. The same test reads both.
+const trailingLimitRegex = /\bLIMIT\s+(\d+)\s*(?:OFFSET\s+\d+\s*)?$/i;
+
+/**
+ * Record what one query to the triple store asked for and what it returned. Inert outside a call
+ * that opened a record, so `runUserDataFunction` and any other caller are untouched.
+ * @param {object|undefined} sparqlExecution - Record opened by `runVocablesFn`
+ * @param {string} endpointUrl - Triple store the query went to
+ * @param {string} query - Query as sent, after user filtering
+ * @param {object} result - Parsed SPARQL response
+ */
+function recordSparqlExecution(sparqlExecution, endpointUrl, query, result) {
+    if (!sparqlExecution) {
+        return;
+    }
+    const bindings = result?.results?.bindings;
+    if (!Array.isArray(bindings)) {
+        return;
+    }
+    const limitMatch = query.trim().match(trailingLimitRegex);
+    // The SPARQL layer carries its response format in the URL it posts to. Stripped here so this
+    // endpoint is the same string /sparql/select probes, which is what makes the two share one cache
+    // entry and answer with the same ceiling.
+    const queryStringIndex = endpointUrl.indexOf("?");
+
+    sparqlExecution.endpointUrl = queryStringIndex === -1 ? endpointUrl : endpointUrl.slice(0, queryStringIndex);
+    sparqlExecution.queryCount += 1;
+    sparqlExecution.lastLimit = limitMatch ? Number(limitMatch[1]) : null;
+    sparqlExecution.lastRows = bindings.length;
+    sparqlExecution.totalRows += bindings.length;
+}
+
 /**
  * Add authentication to params if using default SPARQL server
  * @param {string} sparqlUrl
@@ -78,6 +118,7 @@ function handleSparqlPost(data, success, error) {
             if (err) {
                 if (error) error(formatAjaxError(err));
             } else {
+                recordSparqlExecution(context && context.sparqlExecution, sparqlUrl, filteredQuery, result);
                 if (success) success(result, "success", {});
             }
         });
@@ -366,7 +407,7 @@ const RemoteCodeRunner = {
      * User context is propagated via AsyncLocalStorage for concurrent-safe SPARQL filtering.
      * @param {object} request - { moduleName, functionName, args }
      * @param {object} userContext - { user, userSources } for SPARQL access filtering
-     * @param {function} callback - Error-first callback (err, result)
+     * @param {function} callback - Error-first callback (err, result, sparqlExecution)
      */
     runVocablesFn: function (request, userContext, callback) {
         const { moduleName, functionName, args = [] } = request;
@@ -376,14 +417,18 @@ const RemoteCodeRunner = {
             return callback(new Error(`Unknown vocables module: ${moduleName}. Allowed: ${Object.keys(VOCABLES_MODULE_PATHS).join(", ")}`));
         }
 
+        // What the function's own queries turn out to have asked the triple store for. Handed back as
+        // a third argument so a caller that ignores it keeps the signature it already had.
+        const sparqlExecution = { endpointUrl: null, queryCount: 0, lastLimit: null, lastRows: null, totalRows: 0 };
+
         let callbackCalled = false;
         const safeCallback = (err, result) => {
             if (callbackCalled) return;
             callbackCalled = true;
-            callback(err, result);
+            callback(err, result, sparqlExecution);
         };
 
-        callContextStorage.run({ userContext, resolve: safeCallback }, () => {
+        callContextStorage.run({ userContext, resolve: safeCallback, sparqlExecution: sparqlExecution }, () => {
             loadConfig()
                 .then(() => import(modulePath))
                 .then((mod) => {

@@ -4,7 +4,45 @@ import path from "node:path";
 import userManager from "./user.js";
 import ConfigManager from "./configManager.js";
 import RemoteCodeRunner from "./remoteCodeRunner.js";
+import { discoverEndpointLimits, endpointAuthForUrl } from "./endpointLimits.js";
 import { profileModel } from "../model/profiles.js";
+
+// What the executed queries turn out to have asked for, reported beside the answer rather than
+// inside it. The body of this route is whatever the catalog function returned, which is an array for
+// some functions, a plain object keyed by URI for others and SPARQL JSON for the rest, so there is no
+// one place in it to add a key. A header carries the same facts whatever the shape and no existing
+// client has to change.
+//
+// Facts only, never a verdict: the row count, the LIMIT that was in force and the endpoint's own cap.
+// Whoever reads them decides what to say about completeness, and the MCP server says it in terms of
+// the tools an agent can actually call next.
+const sparqlExecutionHeader = "x-sls-sparql-execution";
+
+/**
+ * Answer with the result and, when the call reached the triple store, the header describing what
+ * bounded it. A call that never queried, or whose ceiling could not be established, simply gets no
+ * header rather than a header full of nulls.
+ */
+function respondWithExecutionFacts(res, result, sparqlExecution, declaredEndpointMaxRows) {
+    if (!sparqlExecution || sparqlExecution.queryCount === 0) {
+        return res.status(200).json(result);
+    }
+
+    const endpointAuth = endpointAuthForUrl(sparqlExecution.endpointUrl);
+    discoverEndpointLimits(sparqlExecution.endpointUrl, endpointAuth, function (endpointLimits) {
+        const facts = {
+            queryCount: sparqlExecution.queryCount,
+            lastLimit: sparqlExecution.lastLimit,
+            lastRows: sparqlExecution.lastRows,
+            totalRows: sparqlExecution.totalRows,
+            // A declaration in sources.json wins over the probe, as it does on /sparql/select: it lets
+            // an operator state a cap the probe cannot see, such as one applied by a gateway.
+            endpointCeiling: declaredEndpointMaxRows ?? endpointLimits.rowCeiling,
+        };
+        res.set(sparqlExecutionHeader, JSON.stringify(facts));
+        res.status(200).json(result);
+    });
+}
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const requireJson = createRequire(import.meta.url);
@@ -84,6 +122,7 @@ async function runRegisteredSparqlQuery(req, res, returnQueryStr) {
         const sourceParamNameRegex = /source/i;
         const allowedSourceNames = Object.keys(userSources);
         const sourceParams = entry.params.filter((param) => sourceParamNameRegex.test(param.name));
+        let declaredEndpointMaxRows = null;
         for (const sourceParam of sourceParams) {
             const requestedSource = params[sourceParam.name];
             if (typeof requestedSource !== "string" || requestedSource.length === 0) {
@@ -92,15 +131,18 @@ async function runRegisteredSparqlQuery(req, res, returnQueryStr) {
             if (!allowedSourceNames.includes(requestedSource)) {
                 return res.status(403).json({ message: `Access denied: you are not allowed to access source '${requestedSource}'` });
             }
+            if (declaredEndpointMaxRows === null) {
+                declaredEndpointMaxRows = Number(userSources[requestedSource]?.sparql_server?.maxRows) || null;
+            }
         }
 
         const userContext = { user, userSources, tools: userTools };
 
-        RemoteCodeRunner.runVocablesFn({ moduleName, functionName: name, args: positionalArgs }, userContext, function (error, result) {
+        RemoteCodeRunner.runVocablesFn({ moduleName, functionName: name, args: positionalArgs }, userContext, function (error, result, sparqlExecution) {
             if (error) {
                 return res.status(500).json({ message: describeExecutionError(error) });
             }
-            res.status(200).json(result);
+            respondWithExecutionFacts(res, result, sparqlExecution, declaredEndpointMaxRows);
         });
     } catch (error) {
         console.error(error);

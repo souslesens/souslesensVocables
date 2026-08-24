@@ -311,55 +311,142 @@ function countPayloadRows(payload) {
     if (payload && Array.isArray(payload.rawResult)) {
         return payload.rawResult.length;
     }
+    if (payload && Array.isArray(payload.hits)) {
+        return payload.hits.length;
+    }
     return null;
 }
 
+// Above this many rows, an answer is large enough that mistaking a prefix for the whole set changes a
+// conclusion, so an unprovable claim of completeness is worth stating. Below it, saying so on every
+// call would be noise. Same threshold as /sparql/select, for the same reason.
+const rowCountWorthDoubting = 1000;
+
+// What to do about a cut, per family of tool. A hint that names the wrong next tool is worse than no
+// hint: it sends the agent to an endpoint that cannot answer the question it was told to ask.
+const escalationForSparql =
+    `Establish the real total with sls_sparql_select and SELECT (COUNT(*) AS ?total) on the same pattern before quoting a figure, ` +
+    `then either raise options.limit to cover it, narrow the question, or hand the same pattern to sls_sparql_select with collect true, which walks the whole set.`;
+const escalationForElastic =
+    `Hits are returned best-scoring first, so what is missing is the weaker matches, not a random remainder. ` +
+    `Raise size to see further down the ranking, or get exact per-index totals with sls_count_labels_by_source, which counts rather than lists.`;
+
 /**
- * A catalog function answers with rows and nothing else: no total, no flag, no sign that the limit
- * in force is what ended the list. An agent that asked for 10000 and received exactly 10000 cannot
- * tell a complete answer from the first page of half a million, and reports the prefix as the set.
- * Measured case: 10000 notifications announced as the whole list, against 470468 in the graph.
+ * Say what this answer does and does not prove about its own completeness.
  *
- * A row count equal to the limit is the one signal available here, and it is enough to refuse the
- * claim. Below the limit nothing is said rather than "complete", because the endpoint's own cap can
- * still have cut the answer without announcing it. `/sparql/select` says more because it discovers
- * that cap; this path has no equivalent.
- * @param {*} payload - Flattened tool payload
- * @param {number|undefined} appliedRowLimit - `options.limit` actually sent to SLS
- * @returns {object|null} Notice for the response envelope, or null when nothing can be claimed
+ * A tool that answers with rows and nothing else is the failure this exists to prevent: no total, no
+ * flag, no sign of what ended the list. An agent that asked for 10000 and received exactly 10000
+ * cannot tell a complete answer from the first page of half a million, and reports the prefix as the
+ * set. Measured case: 10000 notifications announced as the whole list, against 100741 in the graph.
+ *
+ * Three ceilings can cut an answer and the caller sees none of them: the limit this server injects,
+ * the one a catalog function carries in its own query text, and the endpoint's `ResultSetMaxRows`,
+ * which Virtuoso applies while announcing nothing. So `/sparqlQueries/run` measures the first two on
+ * the queries it actually sent and discovers the third, and reports all three in a header. With them,
+ * `complete` is a real answer. Without them the notice still goes out, saying "unknown" rather than
+ * nothing at all: silence is what an agent reads as completeness.
+ *
+ * @param {*} payload - Flattened tool payload, in any of the shapes the SPARQL layer returns
+ * @param {object} ceilingContext
+ * @param {number|undefined} ceilingContext.appliedRowLimit - Ceiling this server asked for, when it asked for one
+ * @param {object|null} [ceilingContext.sparqlExecution] - Facts reported by the route about the queries it ran
+ * @param {string} ceilingContext.escalation - What the agent should do next about a cut
+ * @returns {object|null} Notice for the response envelope, or null when the payload carries no rows
  */
-function rowCeilingNoticeForLimit(payload, appliedRowLimit) {
-    if (!appliedRowLimit) {
-        return null;
-    }
+export function rowCeilingNotice(payload, ceilingContext) {
     const returnedRows = countPayloadRows(payload);
-    if (returnedRows === null || returnedRows < appliedRowLimit) {
+    if (returnedRows === null) {
         return null;
     }
+    const { appliedRowLimit, sparqlExecution, escalation } = ceilingContext;
 
-    const verifyTheTotal =
-        `Establish the real total with sls_sparql_select and SELECT (COUNT(*) AS ?total) on the same pattern before quoting a figure, ` +
-        `then either raise options.limit to cover it, narrow the question, or hand the same pattern to sls_sparql_select with collect true, which walks the whole set.`;
+    // The route measured the queries themselves, which is the only account that covers a limit this
+    // server never chose. Only the last query decides: one query, one answer, and a full last block
+    // is a cut. A function that pages internally ends either on a ceiling, its last block full, or
+    // on the end of the data, its last block short. The same test reads both.
+    if (sparqlExecution && sparqlExecution.queryCount > 0) {
+        const { lastLimit, lastRows, totalRows, queryCount, endpointCeiling } = sparqlExecution;
+        let knownCeiling = null;
+        if (lastLimit && endpointCeiling) {
+            knownCeiling = Math.min(lastLimit, endpointCeiling);
+        } else if (lastLimit || endpointCeiling) {
+            knownCeiling = lastLimit || endpointCeiling;
+        }
 
-    if (returnedRows === appliedRowLimit) {
+        const atKnownCeiling = knownCeiling !== null && lastRows >= knownCeiling;
+        // Below a ceiling nobody declared, an unannounced cut and a whole answer are the same
+        // observation. Only a known endpoint cap turns "not at our limit" into "complete".
+        let completeness = "unknown";
+        if (atKnownCeiling) {
+            completeness = false;
+        } else if (endpointCeiling) {
+            completeness = true;
+        }
+
+        const notice = { returnedRows: returnedRows, knownCeiling: knownCeiling, atKnownCeiling: atKnownCeiling, complete: completeness };
+        // Rows the function read against rows it handed back: a function that groups or maps its
+        // bindings returns fewer, and without this the ceiling figures look unrelated to the answer.
+        if (totalRows !== returnedRows) {
+            notice.sparqlRows = totalRows;
+        }
+        if (queryCount > 1) {
+            notice.sparqlQueries = queryCount;
+        }
+
+        if (atKnownCeiling) {
+            const whichCeiling =
+                endpointCeiling && knownCeiling === endpointCeiling
+                    ? `the endpoint's own cap of ${endpointCeiling} rows, which it applies without announcing it`
+                    : `the LIMIT of ${knownCeiling} the query carried`;
+            notice.hint =
+                `Cut: the last query this call ran came back with ${lastRows} rows against ${whichCeiling}, so this is a prefix of the result, not the result. ` +
+                `Never present it to the user as the whole set. ${escalation}`;
+        } else if (completeness === "unknown" && returnedRows >= rowCountWorthDoubting) {
+            notice.hint =
+                `Possibly cut: nothing here proves this answer is whole, because this endpoint's own row cap could not be established and endpoints truncate silently. ` +
+                `Do not call it the whole set until a count agrees with it. ${escalation}`;
+        }
+        return notice;
+    }
+
+    // A search engine counts what it did not return, so completeness needs no inference here. The
+    // count is a floor rather than a figure past 10000 matches, and `describeElasticTotal` says so.
+    if (payload && typeof payload.totalMatches === "number" && !payload.totalMatchesIsLowerBound) {
+        const isComplete = returnedRows >= payload.totalMatches;
+        const notice = { returnedRows: returnedRows, knownCeiling: appliedRowLimit ?? null, atKnownCeiling: !isComplete, complete: isComplete };
+        if (!isComplete) {
+            notice.hint = `Cut: ${returnedRows} of ${payload.totalMatches} matches came back. ${escalation}`;
+        }
+        return notice;
+    }
+
+    // No account from the route: all that is left is the limit this server asked for, and the count.
+    if (appliedRowLimit && returnedRows === appliedRowLimit) {
         return {
             returnedRows: returnedRows,
             knownCeiling: appliedRowLimit,
             atKnownCeiling: true,
             complete: false,
-            hint: `Cut: ${returnedRows} rows is exactly the limit in force, so this is a prefix of the result, not the result. Never present it to the user as the whole set. ${verifyTheTotal}`,
+            hint: `Cut: ${returnedRows} rows is exactly the limit in force, so this is a prefix of the result, not the result. Never present it to the user as the whole set. ${escalation}`,
         };
     }
     // Overshoot rather than a cut: several catalog functions page internally and stop on the first
-    // page that crosses the limit, so they return whole pages and the limit bounded nothing. It is
-    // then no evidence either way, and claiming a cut here would cost the caller a needless re-query.
-    return {
-        returnedRows: returnedRows,
-        knownCeiling: appliedRowLimit,
-        atKnownCeiling: false,
-        complete: "unknown",
-        hint: `${returnedRows} rows came back for a limit of ${appliedRowLimit}: this function pages internally and returns whole pages, so the limit bounded nothing and says nothing about completeness. ${verifyTheTotal}`,
-    };
+    // page that crosses the limit, so they return whole pages and the limit bounded nothing.
+    if (appliedRowLimit && returnedRows > appliedRowLimit) {
+        return {
+            returnedRows: returnedRows,
+            knownCeiling: appliedRowLimit,
+            atKnownCeiling: false,
+            complete: "unknown",
+            hint: `${returnedRows} rows came back for a limit of ${appliedRowLimit}: this function pages internally and returns whole pages, so the limit bounded nothing and says nothing about completeness. ${escalation}`,
+        };
+    }
+
+    const notice = { returnedRows: returnedRows, knownCeiling: appliedRowLimit ?? null, atKnownCeiling: false, complete: "unknown" };
+    if (returnedRows >= rowCountWorthDoubting) {
+        notice.hint = `Possibly cut: this call reported no ceiling of its own, and ${returnedRows} rows is large enough that a silent truncation would change a conclusion. ${escalation}`;
+    }
+    return notice;
 }
 
 /**
@@ -386,7 +473,8 @@ async function executeSparqlTool(descriptor, toolArguments) {
         return result;
     }
     const flattenedData = flattenSparqlResult(result.data);
-    return { ...result, data: flattenedData, rowCeiling: rowCeilingNoticeForLimit(flattenedData, namedParams.options?.limit) };
+    const ceilingContext = { appliedRowLimit: namedParams.options?.limit, sparqlExecution: result.sparqlExecution, escalation: escalationForSparql };
+    return { ...result, data: flattenedData, rowCeiling: rowCeilingNotice(flattenedData, ceilingContext) };
 }
 
 // ---------------------------------------------------------------------------
@@ -525,8 +613,17 @@ function resolveGuardedFunction(guard, registryByKey, toolArguments) {
  */
 async function executeRestTool(descriptor, registryByKey, toolArguments) {
     const effectiveArguments = { ...descriptor.paramDefaults, ...toolArguments };
-    // Stays undefined for every route that is not the generic runner, so those get no row notice.
+    // A ceiling this server knows it asked for. The generic runner sets it from the injected
+    // `options.limit`; a route declaring `rowCeiling` sets it from the parameter it named. Routes that
+    // merely list what exists cap nothing and leave it undefined, so they get no notice: telling an
+    // agent that the list of sources might be cut would be a doubt about nothing.
     let appliedRowLimit;
+    let escalation = escalationForSparql;
+
+    if (descriptor.rowCeiling) {
+        appliedRowLimit = Number(effectiveArguments[descriptor.rowCeiling.param]) || undefined;
+        escalation = descriptor.rowCeiling.escalation === "elastic" ? escalationForElastic : escalationForSparql;
+    }
 
     if (descriptor.registryFunctionGuard) {
         const { registryEntry, refusal } = resolveGuardedFunction(descriptor.registryFunctionGuard, registryByKey, effectiveArguments);
@@ -590,11 +687,16 @@ async function executeRestTool(descriptor, registryByKey, toolArguments) {
         }
         return { ...result, data: navigated.value };
     }
+    // A route reporting nothing about its own ceilings and asked for none by this server has no
+    // completeness to claim either way, so it keeps the answer it has always returned.
+    const hasCeilingToReport = Boolean(result.sparqlExecution) || appliedRowLimit !== undefined;
+    const ceilingContext = { appliedRowLimit: appliedRowLimit, sparqlExecution: result.sparqlExecution, escalation: escalation };
+
     if (shapedData !== result.data) {
-        return { ...result, data: shapedData, rowCeiling: rowCeilingNoticeForLimit(shapedData, appliedRowLimit) };
+        return { ...result, data: shapedData, rowCeiling: hasCeilingToReport ? rowCeilingNotice(shapedData, ceilingContext) : null };
     }
     const flattenedData = flattenSparqlResult(result.data);
-    return { ...result, data: flattenedData, rowCeiling: rowCeilingNoticeForLimit(flattenedData, appliedRowLimit) };
+    return { ...result, data: flattenedData, rowCeiling: hasCeilingToReport ? rowCeilingNotice(flattenedData, ceilingContext) : null };
 }
 
 // ---------------------------------------------------------------------------

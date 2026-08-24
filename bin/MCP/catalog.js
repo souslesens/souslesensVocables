@@ -264,6 +264,17 @@ const restToolDeclarationSchema = z
             })
             .strict()
             .optional(),
+        // Declares that one of this tool's own parameters caps how many rows come back, so an answer
+        // holding exactly that many is a prefix rather than a total. Routes reaching the triple store
+        // need no declaration: /sparqlQueries/run reports the ceilings it applied in a header, which
+        // is the only account that covers a limit a catalog function carries in its own query text.
+        rowCeiling: z
+            .object({
+                param: z.string().min(1),
+                escalation: z.enum(["sparql", "elastic"]),
+            })
+            .strict()
+            .optional(),
         // Declares that this route returns one block of a larger result set, and that the MCP
         // server may walk the rest by appending LIMIT and OFFSET to `queryParam`, one call per
         // block, when the agent sets `enabledByParam`.
@@ -374,6 +385,7 @@ function restToolDescriptor(toolDeclaration, routePath, httpMethod) {
         maxResponseBytes: toolDeclaration.maxResponseBytes || null,
         navigableDocument: Boolean(toolDeclaration.navigableDocument),
         registryFunctionGuard: toolDeclaration.registryFunctionGuard || null,
+        rowCeiling: toolDeclaration.rowCeiling || null,
         pagedCollection: toolDeclaration.pagedCollection || null,
         statusHints: toolDeclaration.statusHints || {},
     };
@@ -494,6 +506,7 @@ function resultPageToolDescriptor() {
         maxResponseBytes: null,
         navigableDocument: false,
         registryFunctionGuard: null,
+        rowCeiling: null,
         statusHints: {},
     };
 }

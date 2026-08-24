@@ -111,7 +111,15 @@ dropped. Parameter types use the same vocabulary as the JSDoc (`string`, `number
 `Object`, `any`, `string[]`, …) — the Swagger spelling `"object"` is refused, naming the route.
 
 Optional keys: `parseJsonPayload`, `emptyListWhenNull`, `resultShape`, `statusHints`, `maxResponseBytes`,
-`registryFunctionGuard`, `navigableDocument`.
+`registryFunctionGuard`, `navigableDocument`, `rowCeiling`.
+
+`rowCeiling: { param, escalation }` names the tool's own parameter that caps how many rows come back,
+so an answer holding exactly that many is reported as a prefix instead of a total, and picks which
+next step the hint should name (`"sparql"` or `"elastic"`). Routes that reach the triple store need
+no declaration: `/sparqlQueries/run` measures the queries it actually sent and reports their ceilings
+in the `x-sls-sparql-execution` header, which is the only account that covers a limit a catalog
+function carries in its own query text. Routes that merely list what exists declare nothing and get
+no notice, since a doubt about the list of sources would be a doubt about nothing.
 
 `navigableDocument` adds `_select` and `_grep` to that tool alone, and is for the routes that return
 a whole document — a mapping file, a KGquery model, an ontology model. They are the only tools with
@@ -271,7 +279,8 @@ queried by URI, it is reached by looking for triples that point at it — and it
 | `MCP_SLS_API_URL`          | `http://localhost:3010/api/v1` |
 | `MCP_REQUEST_TIMEOUT_MS`   | `60000`                        |
 | `MCP_MAX_RESPONSE_BYTES`   | `250000`                       |
-| `MCP_DEFAULT_SPARQL_LIMIT` | `200`                          |
+| `MCP_DEFAULT_SPARQL_LIMIT` | `1000`                         |
+| `MCP_MAX_COLLECTED_ROWS`   | `500000`                       |
 
 ## Tests
 

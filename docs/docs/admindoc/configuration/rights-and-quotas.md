@@ -27,7 +27,7 @@ configuration file, and the access right itself is computed rather than stored.
   also stores the technical records of the triple accounting, owned by the admin account
   so they never weigh on anybody's allowance.
 
-## What each user may do today
+## Access Rights and Quotas Matrix
 
 The columns are the five situations a user can be in for a given source. They are read
 from left to right: being an administrator settles everything, then owning the source,
@@ -35,20 +35,23 @@ then what the profiles grant. The last column overrides all the others but the f
 source declared with `"editable": false` in `sources.json` is read-only for everyone
 except the administrators, its owner included.
 
-| Operation                                         | Administrator | Owner of the source | `readwrite` profile | `read` profile | Source `editable: false` | Limit that applies                            |
+| Operation                                         | Administrator | Owner of the source | `readwrite` profile | `read` profile | Source `editable: false` | Quota                           |
 | ------------------------------------------------- | ------------- | ------------------- | ------------------- | -------------- | ------------------------ | --------------------------------------------- |
-| Read a source (Lineage, KGquery, SPARQL `SELECT`) | yes           | yes                 | yes                 | yes            | yes                      | none                                          |
-| Mapping Modeler, write triples                    | yes           | yes                 | yes                 | no             | no                       | `maxWritableTriplesPerUser`                   |
-| Mapping Modeler, delete triples                   | yes           | yes                 | yes                 | no             | no                       | none, it frees quota                          |
-| Graph Management, upload a graph                  | yes           | yes                 | yes                 | no             | no                       | `maxUploadTriplesPerUser`                     |
-| Graph Management, delete or clear a graph         | yes           | yes                 | yes                 | no             | no                       | none, it frees quota                          |
-| SPARQL update through the proxy                   | yes           | yes                 | yes                 | no             | no                       | none                                          |
-| N-Triples export                                  | yes           | yes                 | yes                 | yes            | yes                      | `maxNtExportTriples`, per export              |
-| Create a source                                   | yes           | n/a                 | n/a                 | n/a            | n/a                      | `allowSourceCreation`, `maxNumberCreatedSource` |
-| Save a user data entry                            | yes           | n/a                 | n/a                 | n/a            | n/a                      | `maxUserDataRecordsPerUser`                   |
+| Read a source (Lineage, KGquery, SPARQL `SELECT`) | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | none                                          |
+| Mapping Modeler : write triples                    | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-no">no</span> | <span class="cell-no">no</span> | `maxWritableTriplesPerUser`                   |
+| Mapping Modeler : delete triples                   | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-no">no</span> | <span class="cell-no">no</span> | none, it frees quota                          |
+| Graph Management : upload a graph                  | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-no">no</span> | <span class="cell-no">no</span> | `maxUploadTriplesPerUser`                     |
+| Graph Management : delete or clear a graph         | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-no">no</span> | <span class="cell-no">no</span> | none, it frees quota                          |
+| SPARQL : update,insert                 | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-no">no</span> | <span class="cell-no">no</span> | none                                          |
+| Mapping Modeler : N-Triples export                                  | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | `maxNtExportTriples`, per export              |
+| Create a source                                   | <span class="cell-yes">yes</span> | not related          | depends on profile's `allowSourceCreation` | depends on profile's `allowSourceCreation` | not related               | `allowSourceCreation`, `maxNumberCreatedSource` |
+| Save a user data entry                            | <span class="cell-yes">yes</span> | not related          | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | not related               | `maxUserDataRecordsPerUser`                   |
 
-The last two operations are not attached to a source, hence the `n/a` cells: they depend
-only on the user.
+These two operations are not attached to a source, so the "owner of the source" and
+`editable: false` columns do not apply, marked "not related". They depend only on the
+user's own rights: `readwrite`/`read` cells report whether the profile grants the
+underlying flag (`allowSourceCreation` for source creation; every profile can save user
+data entries, subject only to the quota).
 
 A few points the table cannot carry:
 

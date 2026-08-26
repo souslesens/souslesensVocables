@@ -155,7 +155,7 @@ predicate properties.
 5.  **Axioms button**
 
 Displays on the whiteboard all nodes related to an axiom, grouped by
-axiom category (e.g., **SubClassOf**, **EquivalentClasses**, or
+axiom category (e.g., **subClassOf{0,5}*, **EquivalentClasses**, or
 **DisjointClasses**).
 
 **Whiteboard section**

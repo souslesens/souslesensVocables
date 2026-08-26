@@ -623,7 +623,7 @@ var Sparql_OWL = (function () {
      * rather than a direct `rdfs:subClassOf`, in which case walk the restriction blank nodes with
      * {@link module:Sparql_OWL.getFilteredTriples}.
      *
-     * Runs a nested `?class rdfs:subClassOf*[+] ?superClass` query
+     * Runs a nested `?class rdfs:subClassOf{0,5}[+] ?superClass` query
      * (direction depends on `options.descendants`) and rebuilds, for each input class, its
      * hierarchy as an array of hierarchy items in JS, skipping blank-node superclasses.
      * Used by `OntologyModels` to fetch the hierarchies of a set of nodes (start/end nodes).

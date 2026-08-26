@@ -3,6 +3,7 @@ import Axioms_graph from "./axioms_graph.js";
 import Export from "../../shared/export.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
+import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import axioms_manager from "./axioms_manager.js";
 
 const Axiom_editor = (function () {
@@ -263,6 +264,22 @@ const Axiom_editor = (function () {
     };
 
     self.addSuggestion = function (suggestion) {
+        self.appendAxiomElement(suggestion);
+        Axiom_editor.checkSyntax(function (err, result) {
+            if (result) {
+                //  Axiom_editor.drawTriples();
+            }
+        });
+    };
+
+    /**
+     * Renders one axiom element and updates the axiom context, without validating.
+     * Split out of `addSuggestion` so a whole axiom can be laid down in one pass and validated once,
+     * instead of one round trip to the validator per element.
+     * @param {Object|string} suggestion - `{id, label, resourceType}`, or a bare keyword string.
+     * @returns {void}
+     */
+    self.appendAxiomElement = function (suggestion) {
         var cssClass = null;
         if (suggestion.resourceType == "ObjectProperty") {
             cssClass = "axiom_Property";
@@ -339,10 +356,104 @@ const Axiom_editor = (function () {
         // $("#axiomsEditor_textDiv").append(separatorStr + spanStr);
         $("#axiomsEditor_input").before(separatorStr + spanStr);
         $("#axiomsEditor_input").val("");
-        Axiom_editor.checkSyntax(function (err, result) {
-            if (result) {
-                //  Axiom_editor.drawTriples();
+    };
+
+    /**
+     * Manchester syntax words that are neither a class nor a property, so no resource lookup applies.
+     *
+     * The OWL 2 Manchester Syntax grammar, W3C 2012, section 2. `triplesToManchester.js` writes the
+     * same words out of its URI tables when it renders triples the other way round; they are listed
+     * flat here because classifying a token needs the word, not the URI it came from.
+     *
+     * Only a classification, never a validation: `checkSyntax` asks the server's parser once the
+     * whole axiom is laid down. A word missing here is reported as an unresolved name rather than
+     * silently accepted.
+     */
+    self.manchesterKeywords = ["and", "or", "not", "some", "only", "value", "min", "max", "exactly", "that", "self", "inverse"];
+
+    /**
+     * Lay a whole axiom into the editor in one call, from its Manchester text.
+     *
+     * The editor is otherwise driven character by character through `onInputChar`, or element by
+     * element through `addSuggestion`, which a model cannot produce reliably and which validates
+     * once per element. Each token is resolved against the source's classes and properties, so a
+     * label the ontology does not carry is reported rather than rendered as an unusable element.
+     *
+     * @param {string} axiomText - Manchester expression. Resources are named by label, or by URI between angle brackets.
+     * @param {string} [source] - Source to resolve the labels against. Defaults to the editor's current source.
+     * @param {Function} callback - `callback(error, {elementCount, axiomText})`.
+     * @returns {void}
+     */
+    self.setAxiomFromText = function (axiomText, source, callback) {
+        if (!source) {
+            source = self.currentSource;
+        }
+        if (!axiomText) {
+            return callback("no axiom text");
+        }
+        // The editor keeps `currentNode` as a bare URI when opened on a node and as an object when
+        // a resource was clicked; `getAxiomContent` only reads the object form.
+        if (typeof self.currentNode === "string") {
+            self.currentNode = { id: self.currentNode, label: Sparql_common.getLabelFromURI(self.currentNode) };
+        }
+
+        self.getAllClasses(source, function (classesError, allClasses) {
+            if (classesError) {
+                return callback(classesError);
             }
+            self.getAllProperties(source, function (propertiesError, allProperties) {
+                if (propertiesError) {
+                    return callback(propertiesError);
+                }
+
+                var resourcesById = {};
+                var resourcesByLabel = {};
+                var allResources = allClasses.concat(allProperties);
+                allResources.forEach(function (resource) {
+                    resourcesById[resource.id] = resource;
+                    resourcesByLabel[resource.label.toLowerCase()] = resource;
+                });
+
+                // A URI between angle brackets, a parenthesis, or a run of anything else.
+                const axiomTokenRegex = /<[^>]+>|\(|\)|[^\s()]+/g;
+                var rawTokens = axiomText.match(axiomTokenRegex);
+                if (!rawTokens) {
+                    return callback("no axiom element in : " + axiomText);
+                }
+
+                var axiomElements = [];
+                var unresolvedTokens = [];
+                rawTokens.forEach(function (rawToken) {
+                    if (rawToken === "(" || rawToken === ")") {
+                        return axiomElements.push({ id: rawToken, label: rawToken });
+                    }
+                    if (self.manchesterKeywords.indexOf(rawToken.toLowerCase()) > -1) {
+                        return axiomElements.push({ id: rawToken.toLowerCase(), label: rawToken.toLowerCase() });
+                    }
+                    var isUriToken = rawToken.startsWith("<") && rawToken.endsWith(">");
+                    var resource = isUriToken ? resourcesById[rawToken.slice(1, -1)] : resourcesByLabel[rawToken.replace(/ /g, "_").toLowerCase()];
+                    if (!resource) {
+                        return unresolvedTokens.push(rawToken);
+                    }
+                    axiomElements.push({ id: resource.id, label: resource.label, resourceType: resource.resourceType });
+                });
+
+                if (unresolvedTokens.length > 0) {
+                    return callback("not a class, a property or a Manchester keyword in source " + source + " : " + unresolvedTokens.join(", "));
+                }
+
+                self.clearAll();
+                axiomElements.forEach(function (axiomElement) {
+                    self.appendAxiomElement(axiomElement);
+                });
+
+                self.checkSyntax(function (syntaxError) {
+                    if (syntaxError) {
+                        return callback(syntaxError);
+                    }
+                    return callback(null, { elementCount: axiomElements.length, axiomText: self.getAxiomText() });
+                });
+            });
         });
     };
 

@@ -621,13 +621,16 @@ var Lineage_properties = (function () {
      *
      * @param property : a specific property uri or null (all)
      */
-    self.drawRangeAndDomainsGraph = function (source, targetnodes, options, property) {
+    self.drawRangeAndDomainsGraph = function (source, targetnodes, options, property, callback) {
         if (targetnodes && targetnodes.length > 0) {
             options = options || {};
             options.filterNodes = targetnodes;
         }
         self.getPropertiesRangeAndDomain(source, property, options, function (err, result) {
             if (err) {
+                if (callback) {
+                    return callback(err);
+                }
                 return MainController.errorAlert(err);
             }
 
@@ -957,6 +960,9 @@ var Lineage_properties = (function () {
 
 */
             self.graphInited = true;
+            if (callback) {
+                return callback(null, visjsData.nodes.length);
+            }
         });
     };
 

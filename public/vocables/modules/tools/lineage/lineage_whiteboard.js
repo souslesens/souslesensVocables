@@ -1275,11 +1275,14 @@ var Lineage_whiteboard = (function () {
      * @param {any} _descendantsAlso - Flag to include descendants in the search for similar nodes.
      * @returns {void} Updates the graph with similar nodes and edges, or displays an alert in case of an error.
      */
-    self.drawSimilarsNodes = function (_similarType, _node, _sources, _descendantsAlso) {
+    self.drawSimilarsNodes = function (_similarType, _node, _sources, _descendantsAlso, callback) {
+        if (!callback) {
+            callback = function () {};
+        }
         var toSource = $("#sourcesTreeDiv").jstree().get_selected()[0];
         var fromSource = Lineage_sources.activeSource;
         if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
-            return;
+            return callback("no node on the whiteboard to compare");
         }
         var nodes = self.lineageVisjsGraph.data.nodes.get();
 
@@ -1295,7 +1298,8 @@ var Lineage_whiteboard = (function () {
 
         SearchUtil.getSimilarLabelsInSources(fromSource, [toSource], labels, ids, "exactMatch", null, function (err, result) {
             if (err) {
-                return MainController.errorAlert(err);
+                MainController.errorAlert(err);
+                return callback(err);
             }
 
             var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
@@ -1364,8 +1368,9 @@ var Lineage_whiteboard = (function () {
                 $("#accordion").accordion("option", { active: 2 });
                 Lineage_sources.registerSource(toSource);
             }
+            UI.message("", true);
+            return callback(null, visjsData.edges.length);
         });
-        UI.message("", true);
     };
 
     /**
@@ -1524,7 +1529,7 @@ var Lineage_whiteboard = (function () {
     self.graphNodeNeighborhood = function (nodeData, propFilter, callback) {
         var fromSource = Lineage_sources.activeSource;
         if (propFilter == "ranges") {
-            return graphNodeNeighborhoodRanges(nodeData);
+            return self.graphNodeNeighborhoodRanges(nodeData);
         }
         var ids;
         if (!nodeData) {
@@ -1928,6 +1933,7 @@ var Lineage_whiteboard = (function () {
      * @param {number} [options.depth=1] - The depth of the child nodes to retrieve.
      * @param {boolean} [options.dontClusterNodes=false] - If true, disables clustering of child nodes.
      * @param {string} [options.shape] - The shape to assign to the nodes.
+     * @param {boolean} [options.drawBeforeCallback=false] - Draw the children, then call back. Left false, the children are handed to the callback and nothing is drawn, which is what a caller wanting the data without the drawing relies on.
      * @param {Function} [callback] - A callback function to be executed after the process is complete.
      * @returns {void}
      */
@@ -1958,8 +1964,15 @@ var Lineage_whiteboard = (function () {
                 }
             });
         }
+        // Every early exit below answers the callback, empty-handed rather than not at all: a caller
+        // driving this from an agent loop waits on it, and a path that only writes a UI message
+        // leaves that loop hanging on nodes that simply have no children.
         if (parentIds.length == 0) {
-            return UI.message("no parent node selected");
+            UI.message("no parent node selected");
+            if (callback) {
+                return callback(null, { nodes: [], edges: [] });
+            }
+            return;
         }
 
         UI.message("");
@@ -1980,13 +1993,21 @@ var Lineage_whiteboard = (function () {
 
         Sparql_generic.getNodeChildren(source, null, parentIds, depth, options, function (err, result) {
             if (err) {
-                return UI.message(err);
+                UI.message(err);
+                if (callback) {
+                    return callback(err);
+                }
+                return;
             }
             var parentsMap = [];
 
             if (result.length == 0) {
                 $("#waitImg").css("display", "none");
-                return UI.message("No data found", true);
+                UI.message("No data found", true);
+                if (callback) {
+                    return callback(null, { nodes: [], edges: [] });
+                }
+                return;
             }
             if (result.length > self.showLimit) {
                 alert("Too may nodes (" + result.length + ") only " + self.showLimit + "can be shown ");
@@ -2521,7 +2542,10 @@ var Lineage_whiteboard = (function () {
      * @param {boolean} [_descendantsAlso] - A flag to include descendants as well.
      * @returns {void}
      */
-    self.drawObjectProperties = function (source, classIds, _descendantsAlso) {
+    self.drawObjectProperties = function (source, classIds, _descendantsAlso, callback) {
+        if (!callback) {
+            callback = function () {};
+        }
         if (!classIds) {
             if (!source) {
                 source = Lineage_sources.activeSource;
@@ -2535,7 +2559,7 @@ var Lineage_whiteboard = (function () {
             classIds = null;
         }
         var physics = true;
-        var graphSpatialisation = $("#Lineage_whiteboard_excludeRelationsFromGraphSpatializationCBX").prop("checked");
+        var excludeRelationsFromPhysic = $("#Lineage_whiteboard_excludeRelationsFromGraphSpatializationCBX").prop("checked");
         if (excludeRelationsFromPhysic) {
             physics = false;
         }
@@ -2550,14 +2574,16 @@ var Lineage_whiteboard = (function () {
                 },
                 function (err, result) {
                     if (err) {
-                        return UI.message(err);
+                        UI.message(err);
+                        return callback(err);
                     }
                     if (result.length == 0) {
                         $("#waitImg").css("display", "none");
-
-                        return UI.message("No data found", true);
+                        UI.message("No data found", true);
+                        return callback(null, 0);
                     }
                     self.drawProperties(result);
+                    return callback(null, result.length);
                 },
             );
         }
@@ -2577,7 +2603,8 @@ var Lineage_whiteboard = (function () {
                     item.prop = { value: item.prop.value };
                     item.propLabel = { value: item.propLabel.value };
                 });
-                drawProperties(result);
+                self.drawProperties(result);
+                return callback(null, result.length);
             });
         }
     };
@@ -3525,7 +3552,13 @@ restrictionSource = Config.predicatesSource;
 
         var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
         if (existingNodes[nodes[0].data.id]) {
-            return self.zoomGraphOnNode(nodes[0].data.id);
+            self.zoomGraphOnNode(nodes[0].data.id);
+            // The callback used to be skipped here, which left any caller waiting on it hanging
+            // whenever the first node happened to be drawn already.
+            if (callback) {
+                return callback();
+            }
+            return;
         }
 
         UI.message("");
@@ -3795,12 +3828,15 @@ self.zoomGraphOnNode(node.data[0].id, false);
      * @param {Object} [source] - The source of the lineage data. If not provided, the active source is used.
      * @returns {void}
      */
-    self.drawInferredClassesModel = function (source) {
+    self.drawInferredClassesModel = function (source, callback) {
         if (!source) {
             source = Lineage_sources.activeSource;
         }
         KGquery_graph.getImplicitModelVisjsData(source, function (err, visjsData) {
             if (err) {
+                if (callback) {
+                    return callback(err);
+                }
                 return MainController.errorAlert(err);
             }
             if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
@@ -3811,6 +3847,9 @@ self.zoomGraphOnNode(node.data[0].id, false);
             }
 
             $("#waitImg").css("display", "none");
+            if (callback) {
+                return callback(null, visjsData.nodes.length);
+            }
         });
     };
 
@@ -4272,18 +4311,11 @@ self.zoomGraphOnNode(node.data[0].id, false);
         removeFromGraph: function () {
             var nodesSelected = self.lineageVisjsGraph.network.getSelectedNodes();
             if (nodesSelected.length > 1) {
-                for (var i = 0; i < nodesSelected.length; i++) {
-                    var edgeIds = self.lineageVisjsGraph.network.getConnectedEdges(nodesSelected[i].id);
-                    self.lineageVisjsGraph.data.edges.remove(edgeIds);
-                    self.lineageVisjsGraph.removeNodes("id", nodesSelected[i], true);
-                }
-                Lineage_decoration.decorateByUpperOntologyByClass();
-                return;
+                // `getSelectedNodes` answers with ids, not node objects: reading `.id` off them used
+                // to leave every connected edge behind.
+                return self.removeNodesFromWhiteboard(nodesSelected);
             }
-            var edgeIds = self.lineageVisjsGraph.network.getConnectedEdges(Lineage_whiteboard.currentGraphNode.id);
-            self.lineageVisjsGraph.data.edges.remove(edgeIds);
-            self.lineageVisjsGraph.removeNodes("id", Lineage_whiteboard.currentGraphNode.id, true);
-            Lineage_decoration.decorateByUpperOntologyByClass();
+            self.removeNodesFromWhiteboard([Lineage_whiteboard.currentGraphNode.id]);
         },
 
         /**
@@ -4836,28 +4868,20 @@ attrs.color=self.getSourceColor(superClassValue)
          */
 
         saveWhiteboard: function () {
-            if (Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().length > 0) {
-                var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
-                var positions = Lineage_whiteboard.lineageVisjsGraph.network.getPositions();
-                var data = {
-                    nodes: nodes,
-                    edges: Lineage_whiteboard.lineageVisjsGraph.data.edges.get(),
-                    context: Lineage_whiteboard.lineageVisjsGraph.currentContext,
-                    positions: positions,
-                };
-                var data_path = "savedWhiteboards";
-                //UserDataWidget.currentTreeNode = null;
-                UserDataWidget.showSaveDialog(data_path, data, null, { title: "Save Whiteboard" }, function (err, result) {
-                    if (err) {
-                        return MainController.errorAlert(err);
-                    }
-                    UI.message("Whiteboard saved successfully");
-                });
-
-                //Lineage_whiteboard.lineageVisjsGraph.saveGraph(visjsFileName);
-            } else {
-                alert("No Whiteboard to save");
+            var data = Lineage_whiteboard.serializeWhiteboard();
+            if (!data) {
+                return alert("No Whiteboard to save");
             }
+            var data_path = "savedWhiteboards";
+            //UserDataWidget.currentTreeNode = null;
+            UserDataWidget.showSaveDialog(data_path, data, null, { title: "Save Whiteboard" }, function (err, result) {
+                if (err) {
+                    return MainController.errorAlert(err);
+                }
+                UI.message("Whiteboard saved successfully");
+            });
+
+            //Lineage_whiteboard.lineageVisjsGraph.saveGraph(visjsFileName);
         },
         /**
          * @function
@@ -4909,20 +4933,12 @@ attrs.color=self.getSourceColor(superClassValue)
          *
          */
         exportWhiteboard: function () {
-            if (Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().length > 0) {
-                var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
-                var positions = Lineage_whiteboard.lineageVisjsGraph.network.getPositions();
-                var data = {
-                    nodes: nodes,
-                    edges: Lineage_whiteboard.lineageVisjsGraph.data.edges.get(),
-                    context: Lineage_whiteboard.lineageVisjsGraph.currentContext,
-                    positions: positions,
-                };
-                var fileName = MainController.currentSource + "_whiteBoard.json";
-                Export.downloadJSON(data, fileName);
-            } else {
-                alert("No Whiteboard to save");
+            var data = Lineage_whiteboard.serializeWhiteboard();
+            if (!data) {
+                return alert("No Whiteboard to save");
             }
+            var fileName = MainController.currentSource + "_whiteBoard.json";
+            Export.downloadJSON(data, fileName);
         },
         /**
          * Display a whiteboard graph from a JSON file.
@@ -5205,7 +5221,7 @@ attrs.color=self.getSourceColor(superClassValue)
      *
      * Until it is dragged the dock has no height of its own: it is as tall as the conversation
      * needs, capped by the plugin. Dragging replaces that by an explicit height, so the cap is
-     * lifted at the same time — left in place it would fight every drag past it.
+     * lifted at the same time: left in place it would fight every drag past it.
      * @returns {void}
      */
     self.makeChatbotDockResizable = function () {
@@ -5316,41 +5332,181 @@ attrs.color=self.getSourceColor(superClassValue)
     self.addVisDataToGraph = function (visjsData) {
         if (Lineage_whiteboard.lineageVisjsGraph.options.layoutHierarchical) {
             // add level to Nodes if missing when layoutHierarchical
-
-            var oldNodesMap = {};
-            var newEdgesFromMap = {};
-            var newEdgesToMap = {};
-            var maxLevel = -1;
-            Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().forEach(function (node) {
-                if (!node.level) {
-                    node.level = -1;
-                }
-                maxLevel = Math.max(maxLevel, node.level);
-                oldNodesMap[node.id] = node;
-            });
-            visjsData.edges.forEach(function (edge) {
-                newEdgesFromMap[edge.from] = edge;
-                newEdgesToMap[edge.to] = edge;
-            });
-
-            visjsData.nodes.forEach(function (node) {
-                if (!node.level) {
-                    //   if( newEdgesFromMap[node.id] && newEdgesFromMap[node.id]  )
-                    node.level = -1; // maxLevel + 1
-                }
-            });
+            Lineage_whiteboard.lineageVisjsGraph.normalizeNodeLevels(visjsData.nodes);
         }
 
         Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
         Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
 
         if (visjsData.nodes.length > 0) {
+            // The upper ontology legend used to be applied to the first drawing only, so a board
+            // grown by successive additions ended up half decorated. Decorating what was just added
+            // keeps the colors meaning the same thing everywhere on the board.
+            Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
             Lineage_whiteboard.lineageVisjsGraph.network.focus(visjsData.nodes[0].id, {
                 scale: 1,
                 animation: true,
             });
             // self.zoomGraphOnNode(visjsData.nodes[0].id)
         }
+    };
+
+    /**
+     * The whiteboard as a plain object: what a save, an export and an undo snapshot all need.
+     * Positions come from the network and exist nowhere but this browser.
+     * @function
+     * @name serializeWhiteboard
+     * @memberof module:Lineage_whiteboard
+     * @returns {Object|null} `{nodes, edges, context, positions}`, or null when the board is empty.
+     */
+    self.serializeWhiteboard = function () {
+        var graph = self.lineageVisjsGraph;
+        if (!graph || !graph.data || !graph.data.nodes || graph.data.nodes.get().length === 0) {
+            return null;
+        }
+        return {
+            nodes: graph.data.nodes.get(),
+            edges: graph.data.edges.get(),
+            context: graph.currentContext,
+            positions: graph.network ? graph.network.getPositions() : {},
+        };
+    };
+
+    self.whiteboardSnapshot = null;
+
+    /**
+     * The five Lineage tabs, in the order of the lateral panel buttons: the div each one shows, the
+     * function that fills it, and the button that stays highlighted while it is open.
+     * `lateralPanel.html` calls `UI.openTab` directly and hands it the clicked button, so this table
+     * exists for callers that have no button to hand.
+     */
+    self.lineageTabs = {
+        whiteboard: { tabId: "whiteboardTab", initFunctionName: "initWhiteboardTab", buttonSelector: "#lineage-tab-buttons .whiteBoardIcon" },
+        classes: { tabId: "classesTab", initFunctionName: "initClassesTab", buttonSelector: "#lineage-tab-buttons .classesIcon" },
+        properties: { tabId: "propertiesTab", initFunctionName: "initPropertiesTab", buttonSelector: "#lineage-tab-buttons .propertiesIcon" },
+        query: { tabId: "queryTab", initFunctionName: "initQueryTab", buttonSelector: "#lineage-tab-buttons .queryIcon" },
+        containers: { tabId: "containersTab", initFunctionName: "initContainersTab", buttonSelector: "#lineage-tab-buttons .containersIcon" },
+    };
+
+    /**
+     * Whether anything is drawn. The graph object does not exist before the first drawing, so
+     * `lineageVisjsGraph.isGraphNotEmpty()` cannot be asked directly without this guard.
+     * @function
+     * @name isWhiteboardDrawn
+     * @memberof module:Lineage_whiteboard
+     * @returns {boolean}
+     */
+    self.isWhiteboardDrawn = function () {
+        if (!self.lineageVisjsGraph || !self.lineageVisjsGraph.data || !self.lineageVisjsGraph.data.nodes) {
+            return false;
+        }
+        return self.lineageVisjsGraph.isGraphNotEmpty();
+    };
+
+    /**
+     * Take nodes off the whiteboard, with the edges that reached them, and redraw the legend.
+     * Removing a node without its connected edges leaves the edges in the dataset, where they no
+     * longer show but are still counted and still saved.
+     * @function
+     * @name removeNodesFromWhiteboard
+     * @memberof module:Lineage_whiteboard
+     * @param {string[]} nodeIds - URIs of the nodes to remove.
+     * @returns {void}
+     */
+    self.removeNodesFromWhiteboard = function (nodeIds) {
+        nodeIds.forEach(function (nodeId) {
+            var connectedEdgeIds = self.lineageVisjsGraph.network.getConnectedEdges(nodeId);
+            self.lineageVisjsGraph.data.edges.remove(connectedEdgeIds);
+            self.lineageVisjsGraph.removeNodes("id", nodeId, true);
+        });
+        Lineage_decoration.decorateByUpperOntologyByClass();
+    };
+
+    /**
+     * Show one of the five Lineage tabs and fill it, naming the tab rather than its div and its init
+     * function. For callers that are not the lateral panel buttons, which call `UI.openTab` directly.
+     *
+     * `UI.openTab` highlights the button it is handed and unhighlights the others, so a caller with
+     * no button to hand would leave the panel with no tab looking open. The button is looked up from
+     * `lineageTabs` in that case.
+     * @function
+     * @name openLineageTab
+     * @memberof module:Lineage_whiteboard
+     * @param {string} tabName - One of the keys of `lineageTabs`.
+     * @param {Object} [buttonClicked] - The button element, when a click is what opened the tab.
+     * @returns {boolean} False when no such tab exists.
+     */
+    self.openLineageTab = function (tabName, buttonClicked) {
+        var openedTab = self.lineageTabs[tabName];
+        if (!openedTab) {
+            return false;
+        }
+        UI.openTab("lineage-tab", openedTab.tabId, self[openedTab.initFunctionName], buttonClicked || $(openedTab.buttonSelector));
+        return true;
+    };
+
+    /**
+     * Keep the board as it is now, so the next mutation can be undone.
+     * Only one snapshot is held: an agent adds in small steps and what a user asks to take back is
+     * the last one.
+     * @function
+     * @name saveWhiteboardSnapshot
+     * @memberof module:Lineage_whiteboard
+     * @returns {void}
+     */
+    self.saveWhiteboardSnapshot = function () {
+        self.whiteboardSnapshot = self.serializeWhiteboard();
+    };
+
+    /**
+     * Put back the board held by the last snapshot, dropping everything drawn since.
+     * @function
+     * @name restoreWhiteboardSnapshot
+     * @memberof module:Lineage_whiteboard
+     * @returns {boolean} False when no snapshot was taken, so the caller can say so.
+     */
+    self.restoreWhiteboardSnapshot = function () {
+        if (!self.whiteboardSnapshot) {
+            return false;
+        }
+        var restoredBoard = self.whiteboardSnapshot;
+        self.whiteboardSnapshot = null;
+        self.clearWhiteboard();
+        self.loadGraphFromJSON(restoredBoard);
+        return true;
+    };
+
+    /**
+     * Where the user is in Lineage right now: the tool state an agent cannot read from the server.
+     * @function
+     * @name getAgentContext
+     * @memberof module:Lineage_whiteboard
+     * @returns {Object} Active tab and source, loaded sources, board size, selection size.
+     */
+    self.getAgentContext = function () {
+        var openTabName = null;
+        for (var tabName in self.lineageTabs) {
+            if ($("#" + self.lineageTabs[tabName].tabId).css("display") === "block") {
+                openTabName = tabName;
+            }
+        }
+        var drawnNodes = self.isWhiteboardDrawn() ? self.lineageVisjsGraph.data.nodes.get() : [];
+        var drawnEdges = self.isWhiteboardDrawn() ? self.lineageVisjsGraph.data.edges.get() : [];
+        var loadedSources = Lineage_sources.loadedSources ? Object.keys(Lineage_sources.loadedSources) : [];
+        // Two selections live side by side: vis.js holds the one the mouse makes, Lineage_selection
+        // only the one a Ctrl+Alt click or a shift multi-select wrote. Reading the second alone
+        // reported nothing selected while nodes were haloed on the canvas.
+        var visSelectedNodes = self.isWhiteboardDrawn() && self.lineageVisjsGraph.network ? self.lineageVisjsGraph.network.getSelectedNodes() : [];
+        var trackedSelectedNodes = Lineage_selection.selectedNodes || [];
+        return {
+            activeSource: Lineage_sources.activeSource || null,
+            loadedSources: loadedSources,
+            activeTab: openTabName,
+            nodeCount: drawnNodes.length,
+            edgeCount: drawnEdges.length,
+            selectedNodeCount: visSelectedNodes.length > 0 ? visSelectedNodes.length : trackedSelectedNodes.length,
+            hasUndoSnapshot: self.whiteboardSnapshot !== null,
+        };
     };
 
     self.drawDataTypeProperties = function (source, classIds, options, callback) {

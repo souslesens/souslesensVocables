@@ -378,8 +378,40 @@ const VisjsGraphClass = function (graphDiv, data, options) {
      * new layout parameters
      * @returns {void}
      */
+    /**
+     * Gives a level to the nodes that have none, so a hierarchical layout can be applied. Vis.js
+     * refuses one otherwise: "nodes require either no predefined levels or levels have to be defined
+     * for all nodes". A whiteboard routinely holds both kinds at once, a taxonomy drawing levelling
+     * its nodes where a relations or properties drawing does not, so the levels have to be evened out
+     * before every switch to a hierarchical layout. An unknown level is -1 here as everywhere else.
+     * @function
+     * @name normalizeNodeLevels
+     * @memberof module:VisjsGraphClass
+     * @param {Array} [pendingNodes] - Nodes not added to the graph yet, levelled in place.
+     * @returns {void}
+     */
+    self.normalizeNodeLevels = function (pendingNodes) {
+        var unknownLevel = -1;
+        var newlyLevelledNodes = [];
+        self.data.nodes.get().forEach(function (node) {
+            if (node.level === undefined || node.level === null) {
+                newlyLevelledNodes.push({ id: node.id, level: unknownLevel });
+            }
+        });
+        self.data.nodes.update(newlyLevelledNodes);
+
+        if (pendingNodes) {
+            pendingNodes.forEach(function (pendingNode) {
+                if (pendingNode.level === undefined || pendingNode.level === null) {
+                    pendingNode.level = unknownLevel;
+                }
+            });
+        }
+    };
+
     self.setLayout = function (/** @type {string} */ layout) {
         if (layout == "hierarchical vertical") {
+            self.normalizeNodeLevels();
             self.currentContext.options.layoutHierarchical = {
                 direction: "UD",
                 sortMethod: "hubsize",
@@ -395,6 +427,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
             self.redraw();
         } else if (layout == "hierarchical horizontal") {
+            self.normalizeNodeLevels();
             self.currentContext.options.layoutHierarchical = {
                 direction: "LR",
                 sortMethod: "hubsize",

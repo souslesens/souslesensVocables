@@ -31,7 +31,7 @@ For every row of the non-exact matches table, compare the **source (from)** labe
 Assign exactly one of the following values per row:
 
 - **Exact match AI**: You are confident that the two labels refer to exactly the same object, concept, or service — i.e., they mean exactly the same thing.
-- **subClassOf{0,5}*: The **source (from)** class is a subclass of the **target (cible)** class, in the ontological / taxonomic sense (rdfs:subClassOf) — i.e., the source class is a more specific concept than the target class.
+- **subClassOf{0,5}\*: The **source (from)** class is a subclass of the **target (cible)\*\* class, in the ontological / taxonomic sense (rdfs:subClassOf) — i.e., the source class is a more specific concept than the target class.
 - **SubclassOf inverse**: The **target (cible)** class is a subclass of the **source (from)** class, in the ontological / taxonomic sense (rdfs:subClassOf) — i.e., the target class is a more specific concept than the source class.
 - **Not match**: There is no relationship of any of the types above between the two concepts.
 - **Unknown**: Use this when you are not confident enough to choose one of the categories above. It is preferable to mark a row as "Unknown" rather than to wrongly declare an "Exact match AI" or a "Not match" when you are unsure.

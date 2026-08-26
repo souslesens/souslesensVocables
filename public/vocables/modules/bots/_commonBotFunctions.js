@@ -252,7 +252,7 @@ var CommonBotFunctions = (function () {
      * @name showParentsDialog
      * @memberof module:CommonBotFunctions
      * Fetches all ancestor classes of a given class via a SPARQL property path
-     * query (rdfs:subClassOf*) and displays them as a hierarchical JsTree in a dialog.
+     * query (rdfs:subClassOf{0,5}) and displays them as a hierarchical JsTree in a dialog.
      * @param {string} classId - The URI of the class to get parents for.
      * @param {string} classLabel - The label of the class.
      * @param {Array} currentList - The current list of classes with {id, source} to resolve the source.
@@ -283,7 +283,7 @@ var CommonBotFunctions = (function () {
             " WHERE { " +
             "  <" +
             classId +
-            "> rdfs:subClassOf* ?child . " +
+            "> rdfs:subClassOf{0,5} ?child . " +
             "  ?child rdfs:subClassOf ?parent . " +
             "  ?parent rdf:type ?type . FILTER(?type != owl:Restriction) " +
             "  FILTER(!isBlank(?child)) " +

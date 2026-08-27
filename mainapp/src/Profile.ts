@@ -121,6 +121,7 @@ type ProfileJson = {
     maxWritableTriplesPerUser?: number;
     maxUploadTriplesPerUser?: number;
     maxUserDataRecordsPerUser?: number;
+    maxVirtuosoLoad?: number;
 };
 
 const decodeProfile = (key: string, profile: ProfileJson): Profile => {
@@ -141,6 +142,7 @@ const decodeProfile = (key: string, profile: ProfileJson): Profile => {
         maxWritableTriplesPerUser: profile.maxWritableTriplesPerUser,
         maxUploadTriplesPerUser: profile.maxUploadTriplesPerUser,
         maxUserDataRecordsPerUser: profile.maxUserDataRecordsPerUser,
+        maxVirtuosoLoad: profile.maxVirtuosoLoad,
     };
 };
 
@@ -169,6 +171,7 @@ const ProfileSchema = z.object({
     maxWritableTriplesPerUser: z.number().int().nonnegative().optional(),
     maxUploadTriplesPerUser: z.number().int().nonnegative().optional(),
     maxUserDataRecordsPerUser: z.number().int().nonnegative().optional(),
+    maxVirtuosoLoad: z.number().positive().max(100).optional(),
 });
 
 export const ProfileSchemaCreate = ProfileSchema.merge(
@@ -200,6 +203,7 @@ export const defaultProfile = (uuid: string): Profile => {
         maxWritableTriplesPerUser: undefined,
         maxUploadTriplesPerUser: undefined,
         maxUserDataRecordsPerUser: undefined,
+        maxVirtuosoLoad: undefined,
     };
 };
 export { getProfiles, deleteProfile, ProfileSchema };

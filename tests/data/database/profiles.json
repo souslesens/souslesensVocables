@@ -24,7 +24,8 @@
         "maximum_source": 2,
         "max_writable_triples": 1000,
         "max_upload_triples": 500,
-        "max_user_data_records": 20
+        "max_user_data_records": 20,
+        "max_virtuoso_load": 70
     },
     {
         "id": "3",
@@ -40,7 +41,8 @@
         "create_source": false,
         "maximum_source": 10,
         "max_writable_triples": 5000,
-        "max_upload_triples": 0
+        "max_upload_triples": 0,
+        "max_virtuoso_load": 90
     },
     {
         "id": "4",

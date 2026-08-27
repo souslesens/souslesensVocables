@@ -357,6 +357,11 @@ const apiDoc = {
                     type: "number",
                     description: "How many user data entries a user of this profile may own. 0 forbids saving any. Omitted, the limit stored on the user account applies.",
                 },
+                maxVirtuosoLoad: {
+                    type: "number",
+                    description:
+                        "Virtuoso load threshold (0-100) above which this profile's users are rejected with 429. Omitted, the global `config.metrics.virtuoso.maxLoad` applies. When several profiles set it, the highest one wins.",
+                },
             },
         },
         DatabaseNames: {

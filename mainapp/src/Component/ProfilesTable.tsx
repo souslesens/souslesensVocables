@@ -581,6 +581,8 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         profileModel.profileForm.quota = simplifiedQuotaObj;
         const rawMaxNtExportTriples = profileModel.profileForm.maxNtExportTriples;
         profileModel.profileForm.maxNtExportTriples = rawMaxNtExportTriples || rawMaxNtExportTriples === 0 ? Number(rawMaxNtExportTriples) : undefined;
+        const rawMaxVirtuosoLoad = profileModel.profileForm.maxVirtuosoLoad;
+        profileModel.profileForm.maxVirtuosoLoad = rawMaxVirtuosoLoad ? Number(rawMaxVirtuosoLoad) : undefined;
         const rawMaxNumberCreatedSource = profileModel.profileForm.maxNumberCreatedSource;
         profileModel.profileForm.maxNumberCreatedSource = rawMaxNumberCreatedSource || rawMaxNumberCreatedSource === 0 ? Number(rawMaxNumberCreatedSource) : undefined;
         /* `=== 0` on every one of them: an empty field means "this profile does not
@@ -1000,6 +1002,26 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                                 endAdornment: (
                                                     <InputAdornment position="end">
                                                         <HelpTooltip title="How many user data entries a user of this profile may own. When several profiles set it, the highest one wins." />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    </Stack>
+                                    <Stack spacing={2} useFlexGap>
+                                        <Typography variant="subtitle2">Virtuoso load</Typography>
+                                        <TextField
+                                            fullWidth
+                                            type="number"
+                                            id="maxVirtuosoLoad"
+                                            label="Max Virtuoso load (%)"
+                                            helperText="Empty: the global threshold applies"
+                                            value={profileModel.profileForm.maxVirtuosoLoad ?? ""}
+                                            onChange={handleFieldUpdate("maxVirtuosoLoad")}
+                                            InputProps={{
+                                                inputProps: { min: 1, max: 100 },
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <HelpTooltip title="Virtuoso load threshold (0-100) above which this profile's users are rejected with 429. When several profiles set it, the highest one wins." />
                                                     </InputAdornment>
                                                 ),
                                             }}

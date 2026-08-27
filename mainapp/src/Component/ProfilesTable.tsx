@@ -46,7 +46,7 @@ import { ZodIssue, z } from "zod";
 
 import { Msg, useModel } from "../Admin";
 import { SRD, success } from "srd";
-import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl, ProfileSchema, ProfileSchemaCreate, useDatabases, getProfiles } from "../Profile";
+import { defaultProfile, defaultQuotaLimits, saveProfile, Profile, deleteProfile, SourceAccessControl, ProfileSchema, ProfileSchemaCreate, useDatabases, getProfiles } from "../Profile";
 import { ServerSource } from "../Source";
 import { writeLog } from "../Log";
 import { identity, style, joinWhenArray, cleanUpText, jsonToDownloadUrl } from "../Utils";
@@ -54,6 +54,7 @@ import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { errorMessage } from "./errorMessage";
 import { HelpTooltip } from "./HelpModal";
+import { formatQuotaLimitDisplay, parseQuotaLimitInput } from "../formatQuotaLimit";
 
 type RouteInfo = {
     route: string;
@@ -459,6 +460,10 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         } else {
             update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
         }
+    };
+
+    const handleQuotaLimitFieldUpdate = (fieldname: string) => (event: ChangeEvent<HTMLInputElement>) => {
+        update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: parseQuotaLimitInput(event.target.value) } });
     };
 
     const sourceFilter = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -898,7 +903,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                             select
                                             id="allowSourceCreation"
                                             label="Allow source creation"
-                                            helperText="Empty: the right stored on each user account decides"
+                                            helperText={`Empty: ${defaultQuotaLimits.allowSourceCreation ? "allowed" : "forbidden"} by default`}
                                             value={profileModel.profileForm.allowSourceCreation === undefined ? "" : String(profileModel.profileForm.allowSourceCreation)}
                                             onChange={handleFieldUpdate("allowSourceCreation")}
                                             InputProps={{
@@ -915,14 +920,14 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                         </TextField>
                                         <TextField
                                             fullWidth
-                                            type="number"
+                                            type="text"
                                             id="maxNumberCreatedSource"
                                             label="Max created sources"
-                                            helperText="Empty: the limit stored on each user account decides"
-                                            value={profileModel.profileForm.maxNumberCreatedSource ?? ""}
-                                            onChange={handleFieldUpdate("maxNumberCreatedSource")}
+                                            helperText={`Empty: defaults to ${defaultQuotaLimits.maxNumberCreatedSource}`}
+                                            value={formatQuotaLimitDisplay(String(profileModel.profileForm.maxNumberCreatedSource ?? ""))}
+                                            onChange={handleQuotaLimitFieldUpdate("maxNumberCreatedSource")}
                                             InputProps={{
-                                                inputProps: { min: 0 },
+                                                inputMode: "numeric",
                                                 endAdornment: (
                                                     <InputAdornment position="end">
                                                         <HelpTooltip title="How many sources a user of this profile may own. When several profiles set it, the highest one wins." />
@@ -935,14 +940,14 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                         <Typography variant="subtitle2">Triples</Typography>
                                         <TextField
                                             fullWidth
-                                            type="number"
+                                            type="text"
                                             id="maxNtExportTriples"
                                             label="Max NT export triples"
-                                            helperText="Empty: no limit"
-                                            value={profileModel.profileForm.maxNtExportTriples ?? ""}
-                                            onChange={handleFieldUpdate("maxNtExportTriples")}
+                                            helperText={`Empty: forbidden by default (${defaultQuotaLimits.maxNtExportTriples}). Admins are exempt.`}
+                                            value={formatQuotaLimitDisplay(String(profileModel.profileForm.maxNtExportTriples ?? ""))}
+                                            onChange={handleQuotaLimitFieldUpdate("maxNtExportTriples")}
                                             InputProps={{
-                                                inputProps: { min: 0 },
+                                                inputMode: "numeric",
                                                 endAdornment: (
                                                     <InputAdornment position="end">
                                                         <HelpTooltip title="Caps how many triples a MappingModeler N-Triples export can contain for this profile." />
@@ -952,14 +957,14 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                         />
                                         <TextField
                                             fullWidth
-                                            type="number"
+                                            type="text"
                                             id="maxWritableTriplesPerUser"
                                             label="Max triples written with Mapping Modeler"
-                                            helperText="Empty: no limit. 0: forbidden"
-                                            value={profileModel.profileForm.maxWritableTriplesPerUser ?? ""}
-                                            onChange={handleFieldUpdate("maxWritableTriplesPerUser")}
+                                            helperText={`Empty: forbidden, same as ${defaultQuotaLimits.maxWritableTriplesPerUser}. Admins are exempt.`}
+                                            value={formatQuotaLimitDisplay(String(profileModel.profileForm.maxWritableTriplesPerUser ?? ""))}
+                                            onChange={handleQuotaLimitFieldUpdate("maxWritableTriplesPerUser")}
                                             InputProps={{
-                                                inputProps: { min: 0 },
+                                                inputMode: "numeric",
                                                 endAdornment: (
                                                     <InputAdornment position="end">
                                                         <HelpTooltip title="How many triples a user of this profile may hold through the Mapping Modeler, counted live and freed when they delete them. When several profiles set it, the highest one wins." />
@@ -969,14 +974,14 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                         />
                                         <TextField
                                             fullWidth
-                                            type="number"
+                                            type="text"
                                             id="maxUploadTriplesPerUser"
                                             label="Max uploaded triples"
-                                            helperText="Empty: no limit. 0: forbidden"
-                                            value={profileModel.profileForm.maxUploadTriplesPerUser ?? ""}
-                                            onChange={handleFieldUpdate("maxUploadTriplesPerUser")}
+                                            helperText={`Empty: forbidden, same as ${defaultQuotaLimits.maxUploadTriplesPerUser}. Admins are exempt.`}
+                                            value={formatQuotaLimitDisplay(String(profileModel.profileForm.maxUploadTriplesPerUser ?? ""))}
+                                            onChange={handleQuotaLimitFieldUpdate("maxUploadTriplesPerUser")}
                                             InputProps={{
-                                                inputProps: { min: 0 },
+                                                inputMode: "numeric",
                                                 endAdornment: (
                                                     <InputAdornment position="end">
                                                         <HelpTooltip title="How many uploaded triples a user of this profile may hold, across the graphs they loaded into. When several profiles set it, the highest one wins." />
@@ -989,14 +994,14 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                         <Typography variant="subtitle2">User data</Typography>
                                         <TextField
                                             fullWidth
-                                            type="number"
+                                            type="text"
                                             id="maxUserDataRecordsPerUser"
                                             label="Max user data entries"
-                                            helperText="Empty: no limit. 0: forbidden"
-                                            value={profileModel.profileForm.maxUserDataRecordsPerUser ?? ""}
-                                            onChange={handleFieldUpdate("maxUserDataRecordsPerUser")}
+                                            helperText={`Empty: forbidden, same as ${defaultQuotaLimits.maxUserDataRecordsPerUser}. Admins are exempt.`}
+                                            value={formatQuotaLimitDisplay(String(profileModel.profileForm.maxUserDataRecordsPerUser ?? ""))}
+                                            onChange={handleQuotaLimitFieldUpdate("maxUserDataRecordsPerUser")}
                                             InputProps={{
-                                                inputProps: { min: 0 },
+                                                inputMode: "numeric",
                                                 endAdornment: (
                                                     <InputAdornment position="end">
                                                         <HelpTooltip title="How many user data entries a user of this profile may own. When several profiles set it, the highest one wins." />
@@ -1058,15 +1063,15 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                                     <Grid item xs={3}>
                                                         <TextField
                                                             fullWidth
-                                                            type="number"
+                                                            type="text"
                                                             label="Limit"
-                                                            value={q.limit}
+                                                            value={formatQuotaLimitDisplay(q.limit)}
                                                             onChange={(e) => {
                                                                 const newQuota = [...quota];
-                                                                newQuota[idx].limit = e.target.value;
+                                                                newQuota[idx].limit = parseQuotaLimitInput(e.target.value);
                                                                 setQuota(newQuota);
                                                             }}
-                                                            InputProps={{ inputProps: { min: 0 } }}
+                                                            InputProps={{ inputMode: "numeric" }}
                                                         />
                                                     </Grid>
                                                     <Grid item xs={2}>

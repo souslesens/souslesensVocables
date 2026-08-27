@@ -5,9 +5,7 @@
         "password": "$2b$10$LhdaXF3tHrvA8b8fKMvNmeOSyogCBgN/L9XLN/vqjz6tgN5rSxMyy",
         "profiles": ["admin"],
         "auth": "database",
-        "token": "admin-token",
-        "create_source": false,
-        "maximum_source": 5
+        "token": "admin-token"
     },
     {
         "id": "2",
@@ -15,9 +13,7 @@
         "password": "$2b$10$ed6ZDHUbN7NfOGrufiDniudK9EMLCFg9qFgJ0N/T.nRTBPlA5Mm9C",
         "profiles": ["owl_only"],
         "auth": "database",
-        "token": "owl-token",
-        "create_source": false,
-        "maximum_source": 5
+        "token": "owl-token"
     },
     {
         "id": "3",
@@ -25,9 +21,7 @@
         "password": "",
         "profiles": ["skos_only"],
         "auth": "keycloak",
-        "token": "skos-token",
-        "create_source": false,
-        "maximum_source": 5
+        "token": "skos-token"
     },
     {
         "id": "4",
@@ -35,8 +29,6 @@
         "password": "",
         "profiles": ["admin"],
         "auth": "database",
-        "token": "",
-        "create_source": true,
-        "maximum_source": 5
+        "token": ""
     }
 ]

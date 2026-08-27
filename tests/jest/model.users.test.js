@@ -36,11 +36,6 @@ describe("UserModelJson", () => {
                 password: "",
                 token: "",
                 groups: ["admin"],
-                allowSourceCreation: false,
-                maxNumberCreatedSource: 5,
-                maxWritableTriplesPerUser: undefined,
-                maxUploadTriplesPerUser: undefined,
-                maxUserDataRecordsPerUser: undefined,
                 source: "database",
             },
             owl_user: {
@@ -49,11 +44,6 @@ describe("UserModelJson", () => {
                 password: "",
                 token: "",
                 groups: ["owl_only"],
-                allowSourceCreation: false,
-                maxNumberCreatedSource: 5,
-                maxWritableTriplesPerUser: undefined,
-                maxUploadTriplesPerUser: undefined,
-                maxUserDataRecordsPerUser: undefined,
                 source: "database",
             },
             skos_user: {
@@ -62,11 +52,6 @@ describe("UserModelJson", () => {
                 password: "",
                 token: "",
                 groups: ["skos_only"],
-                allowSourceCreation: false,
-                maxNumberCreatedSource: 5,
-                maxWritableTriplesPerUser: undefined,
-                maxUploadTriplesPerUser: undefined,
-                maxUserDataRecordsPerUser: undefined,
                 source: "keycloak",
             },
             not_admin: {
@@ -75,11 +60,6 @@ describe("UserModelJson", () => {
                 password: "",
                 token: "",
                 groups: ["admin"],
-                allowSourceCreation: true,
-                maxNumberCreatedSource: 5,
-                maxWritableTriplesPerUser: undefined,
-                maxUploadTriplesPerUser: undefined,
-                maxUserDataRecordsPerUser: undefined,
                 source: "database",
             },
         });
@@ -164,8 +144,6 @@ describe("UserModelJson", () => {
             password: "pass",
             groups: [],
             source: "",
-            allowSourceCreation: false,
-            maxNumberCreatedSource: 5,
         };
         const results = await userModel.addUserAccount(addedUser);
         expect(results).toStrictEqual(5);
@@ -177,8 +155,6 @@ describe("UserModelJson", () => {
             password: "",
             groups: [],
             source: "",
-            allowSourceCreation: false,
-            maxNumberCreatedSource: 5,
         };
 
         await expect(userModel.addUserAccount(user)).rejects.toThrow("The user already exists, try updating it");
@@ -205,8 +181,6 @@ describe("UserModelJson", () => {
             password: "pass",
             groups: [],
             source: "",
-            allowSourceCreation: false,
-            maxNumberCreatedSource: 5,
         };
 
         // FIXME: Why do we need to wrap this function?
@@ -219,8 +193,6 @@ describe("UserModelJson", () => {
             password: "",
             groups: [],
             source: "",
-            allowSourceCreation: false,
-            maxNumberCreatedSource: 5,
         };
 
         await expect(userModel.updateUserAccount(user)).rejects.toThrow("UserAccount does not exist, try adding it.");
@@ -265,11 +237,6 @@ describe("UserModelJson", () => {
             password: "",
             token: "",
             profiles: [],
-            create_source: false,
-            maximum_source: 5,
-            max_writable_triples: null,
-            max_upload_triples: null,
-            max_user_data_records: null,
             auth: "database",
         });
     });
@@ -283,11 +250,6 @@ describe("UserModelJson", () => {
                 password: "",
                 token: "",
                 groups: [],
-                allowSourceCreation: false,
-                maxNumberCreatedSource: 5,
-                maxWritableTriplesPerUser: undefined,
-                maxUploadTriplesPerUser: undefined,
-                maxUserDataRecordsPerUser: undefined,
                 source: "database",
             },
         ]);

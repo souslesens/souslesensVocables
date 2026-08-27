@@ -16,8 +16,6 @@ lines.forEach(function (line) {
             password: "$2b$10$ct4GGLWG7lsaEv6skZBHYu/bvy4i9bCyu3WzkgcLmi9huJKzYktXi",
             groups: ["admin"],
             source: "json",
-            allowSourceCreation: true,
-            maxNumberCreatedSource: 5,
             token: "sls-01hpz3zx3e6h221fkd77y5cpf2a4f0e",
         },
     };

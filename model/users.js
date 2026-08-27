@@ -20,13 +20,6 @@ const UserObject = z
         groups: z.string().array().optional(),
         token: z.string().optional(),
         source: z.string().default("database"),
-        allowSourceCreation: z.boolean().default(false),
-        maxNumberCreatedSource: z.number().default(5),
-        /* No default, unlike the two above: an instance that never set these must stay
-         * uncapped. And nonnegative rather than positive, because 0 forbids. */
-        maxWritableTriplesPerUser: z.number().int().nonnegative().optional(),
-        maxUploadTriplesPerUser: z.number().int().nonnegative().optional(),
-        maxUserDataRecordsPerUser: z.number().int().nonnegative().optional(),
         _type: z.string().default("user"),
     })
     .strict();
@@ -66,12 +59,6 @@ class UserModel {
         password: user.password || "",
         token: user.token || "",
         profiles: user.groups || [],
-        create_source: user.allowSourceCreation || false,
-        maximum_source: user.maxNumberCreatedSource || 5,
-        /* `??` and not `||`: 0 is a cap that forbids, not a missing value. */
-        max_writable_triples: user.maxWritableTriplesPerUser ?? null,
-        max_upload_triples: user.maxUploadTriplesPerUser ?? null,
-        max_user_data_records: user.maxUserDataRecordsPerUser ?? null,
         auth: user.source || "database",
     });
 
@@ -92,11 +79,6 @@ class UserModel {
             password: user.password || "",
             token: user.token || "",
             groups: (typeof user.profiles === "string" ? JSON.parse(user.profiles) : user.profiles) || [],
-            allowSourceCreation: (typeof user.create_source === "number" ? user.create_source === 1 : user.create_source) || false,
-            maxNumberCreatedSource: user.maximum_source || 5,
-            maxWritableTriplesPerUser: user.max_writable_triples ?? undefined,
-            maxUploadTriplesPerUser: user.max_upload_triples ?? undefined,
-            maxUserDataRecordsPerUser: user.max_user_data_records ?? undefined,
             source: user.auth || "database",
         },
     ];
@@ -255,8 +237,6 @@ class UserModel {
                 source: "database",
                 token: "admin",
                 password: "",
-                allowSourceCreation: true,
-                maxNumberCreatedSource: 999,
             });
             console.log("✅ Auto-created admin user for auth:disabled mode");
         }

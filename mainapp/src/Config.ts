@@ -10,6 +10,16 @@ const ConfigSchema = z.object({
     }),
     sparqlDownloadLimit: z.number().positive(),
     generalQuota: z.record(z.record(z.number().positive())).optional().default({}),
+    metrics: z
+        .object({
+            virtuoso: z
+                .object({
+                    maxPending: z.number().positive(),
+                    maxLoad: z.number().positive().max(100),
+                })
+                .optional(),
+        })
+        .optional(),
 });
 
 export type ConfigType = z.infer<typeof ConfigSchema>;

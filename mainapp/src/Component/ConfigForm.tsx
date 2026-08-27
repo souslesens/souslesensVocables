@@ -98,6 +98,8 @@ const ConfigForm = () => {
     const [defaultGroups, setDefaultGroups] = useState<string[]>([]);
     const [routesInfo, setRoutesInfo] = useState<RouteInfo[]>([]);
     const [generalQuota, setGeneralQuota] = useState<Array<{ route: string; method: string; limit: string }>>([{ route: "", method: "", limit: "" }]);
+    const [virtuosoMaxPending, setVirtuosoMaxPending] = useState<string>("50");
+    const [virtuosoMaxLoad, setVirtuosoMaxLoad] = useState<string>("80");
     const allThemes = useMemo(() => getAvailableThemes(), []);
 
     const notifier = useNotifier();
@@ -117,6 +119,8 @@ const ConfigForm = () => {
                     });
                 }
                 setGeneralQuota(generalQuotaEntries.length > 0 ? generalQuotaEntries : [{ route: "", method: "", limit: "" }]);
+                setVirtuosoMaxPending(String(config.metrics?.virtuoso?.maxPending ?? 50));
+                setVirtuosoMaxLoad(String(config.metrics?.virtuoso?.maxLoad ?? 80));
             })
             .catch((err) => {
                 console.error("Error loading config:", err);
@@ -167,6 +171,12 @@ const ConfigForm = () => {
             },
             sparqlDownloadLimit: 10000,
             generalQuota: generalQuotaObj,
+            metrics: {
+                virtuoso: {
+                    maxPending: Number(virtuosoMaxPending) || 50,
+                    maxLoad: Number(virtuosoMaxLoad) || 80,
+                },
+            },
         };
 
         void updateConfig(configData)
@@ -353,6 +363,41 @@ const ConfigForm = () => {
                                     <Button variant="outlined" onClick={() => setGeneralQuota([...generalQuota, { route: "", method: "", limit: "" }])}>
                                         Add quota
                                     </Button>
+                                </Box>
+                            </FormControl>
+                        </Stack>
+
+                        <Stack direction="column" spacing={{ xs: 2 }} useFlexGap>
+                            <FormControl sx={{ mt: 2 }}>
+                                <Box>
+                                    <Box display="flex" alignItems="center" gap={1}>
+                                        <Typography variant="subtitle1" gutterBottom>
+                                            Virtuoso load protection
+                                        </Typography>
+                                        <HelpTooltip title="Set the in-flight SPARQL request cap (maxPending) and the global load threshold (maxLoad, 0-100) above which protected endpoints reject requests with 429." />
+                                    </Box>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={6}>
+                                            <TextField
+                                                fullWidth
+                                                type="number"
+                                                label="Max pending SPARQL requests"
+                                                value={virtuosoMaxPending}
+                                                onChange={(e) => setVirtuosoMaxPending(e.target.value)}
+                                                InputProps={{ inputProps: { min: 1 } }}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <TextField
+                                                fullWidth
+                                                type="number"
+                                                label="Max load threshold (%)"
+                                                value={virtuosoMaxLoad}
+                                                onChange={(e) => setVirtuosoMaxLoad(e.target.value)}
+                                                InputProps={{ inputProps: { min: 0, max: 100 } }}
+                                            />
+                                        </Grid>
+                                    </Grid>
                                 </Box>
                             </FormControl>
                         </Stack>

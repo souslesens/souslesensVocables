@@ -24,6 +24,7 @@ export default function () {
             theme: config.theme,
             sparqlDownloadLimit: config.sparqlDownloadLimit,
             generalQuota: config.generalQuota || {},
+            metrics: { virtuoso: config.metrics?.virtuoso },
         };
 
         res.status(200).json(result);
@@ -34,7 +35,7 @@ export default function () {
         summary: "Return the public server configuration",
         description:
             "Returns the subset of `mainConfig` safe to expose to logged-in users (auth mode, default language, " +
-            "available tools, theme, version, SPARQL download limit, general quota, ...). Credentials of " +
+            "available tools, theme, version, SPARQL download limit, general quota, virtuoso metrics, ...). Credentials of " +
             "`sparql_server` (`user`, `password`) are stripped before returning.",
         operationId: "configGet",
         parameters: [],
@@ -56,6 +57,7 @@ export default function () {
                         theme: { defaultTheme: "default", selector: true },
                         sparqlDownloadLimit: 10000,
                         generalQuota: {},
+                        metrics: { virtuoso: { maxPending: 20, maxLoad: 80 } },
                     },
                 },
             },
@@ -65,10 +67,24 @@ export default function () {
 
     async function PUT(req, res, next) {
         try {
-            const { defaultGroups, tools_available, theme, generalQuota } = req.body;
+            const { defaultGroups, tools_available, theme, generalQuota, metrics } = req.body;
             const initialConfig = await mainConfigModel.getConfig();
-            await mainConfigModel.writeConfig({ ...initialConfig, defaultGroups, tools_available, theme, generalQuota: generalQuota || {} });
-            const newConfig = await mainConfigModel.getConfig({ ...initialConfig, defaultGroups, tools_available, theme, generalQuota: generalQuota || {} });
+            await mainConfigModel.writeConfig({
+                ...initialConfig,
+                defaultGroups,
+                tools_available,
+                theme,
+                generalQuota: generalQuota || {},
+                metrics: { ...initialConfig.metrics, virtuoso: metrics?.virtuoso ?? initialConfig.metrics?.virtuoso },
+            });
+            const newConfig = await mainConfigModel.getConfig({
+                ...initialConfig,
+                defaultGroups,
+                tools_available,
+                theme,
+                generalQuota: generalQuota || {},
+                metrics: { ...initialConfig.metrics, virtuoso: metrics?.virtuoso ?? initialConfig.metrics?.virtuoso },
+            });
             res.status(200).json(newConfig);
         } catch (error) {
             res.status(error.status || 500).json(error);
@@ -80,7 +96,8 @@ export default function () {
         security: [{ restrictAdmin: [] }],
         summary: "Update the writeable subset of the server configuration (admin)",
         description:
-            "Admin-only. Updates `defaultGroups`, `tools_available`, `theme` and `generalQuota` in `mainConfig.json`. " + "All other fields are preserved. Returns the new full configuration.",
+            "Admin-only. Updates `defaultGroups`, `tools_available`, `theme`, `generalQuota` and `metrics.virtuoso` in `mainConfig.json`. " +
+            "All other fields are preserved. Returns the new full configuration.",
         operationId: "configPut",
         parameters: [
             {
@@ -101,12 +118,27 @@ export default function () {
                             example: { defaultTheme: "default", selector: true },
                         },
                         generalQuota: { type: "object", example: {} },
+                        metrics: {
+                            type: "object",
+                            properties: {
+                                virtuoso: {
+                                    type: "object",
+                                    properties: {
+                                        maxPending: { type: "number", example: 20 },
+                                        maxLoad: { type: "number", example: 80 },
+                                    },
+                                    example: { maxPending: 20, maxLoad: 80 },
+                                },
+                            },
+                            example: { virtuoso: { maxPending: 20, maxLoad: 80 } },
+                        },
                     },
                     example: {
                         defaultGroups: ["admin"],
                         tools_available: ["lineage", "KGquery", "MappingModeler", "admin"],
                         theme: { defaultTheme: "default", selector: true },
                         generalQuota: {},
+                        metrics: { virtuoso: { maxPending: 20, maxLoad: 80 } },
                     },
                 },
             },

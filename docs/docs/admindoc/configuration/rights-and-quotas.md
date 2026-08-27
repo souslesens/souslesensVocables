@@ -226,3 +226,27 @@ The *Quotas* tab of the user settings shows, for each limit that has a usage, wh
 user currently holds and the cap resolved for them. The triple figures are measured
 against the triplestore when the page is opened, so a deletion made outside the
 application is already taken into account.
+
+## Virtuoso load protection
+
+A profile may carry a `maxVirtuosoLoad` (0-100, the *Max Virtuoso load (%)* field of the
+Config Editor). It is not a quota on a user's stock: it is the load threshold above which
+the heavy SPARQL and RDF endpoints of that profile's users are refused with `429` while
+the server is busy. It exists to shield the triplestore from a burst of expensive queries
+(upload, drop or stream of a graph, metadata, `graphUrl`, `shortestPath`, the SPARQL proxy
+and the YASGUI query).
+
+How the threshold is resolved for a given user:
+
+- An **administrator** — the `admin` login or any member of the `admin` group — is never
+  capped, whatever the profiles say.
+- Otherwise the **highest** `maxVirtuosoLoad` among the user's profiles applies. When
+  several profiles set it, the most permissive (the highest threshold) wins, mirroring how
+  the other limits are resolved.
+- When no profile of the user sets one, the **global** `config.metrics.virtuoso.maxLoad`
+  threshold applies (see [souslesens.md](souslesens.md)).
+
+A field left empty means "this profile does not set a threshold", so the global value
+applies. The estimated load behind the check is derived from the in-flight SPARQL requests
+exposed by the `virtuoso_sparql_load` metric; the refusal happens as soon as that estimate
+reaches the resolved threshold.

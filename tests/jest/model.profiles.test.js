@@ -71,6 +71,7 @@ describe("Test the Profilemodel module", () => {
             maxWritableTriplesPerUser: 1000,
             maxUploadTriplesPerUser: 500,
             maxUserDataRecordsPerUser: 20,
+            maxVirtuosoLoad: 70,
         });
     });
 
@@ -122,6 +123,7 @@ describe("Test the Profilemodel module", () => {
             maxWritableTriplesPerUser: undefined,
             maxUploadTriplesPerUser: undefined,
             maxUserDataRecordsPerUser: undefined,
+            maxVirtuosoLoad: undefined,
         });
     });
 
@@ -143,6 +145,7 @@ describe("Test the Profilemodel module", () => {
             maxWritableTriplesPerUser: undefined,
             maxUploadTriplesPerUser: undefined,
             maxUserDataRecordsPerUser: undefined,
+            maxVirtuosoLoad: undefined,
         });
     });
 
@@ -226,6 +229,7 @@ describe("Test the Profilemodel module", () => {
             max_writable_triples: null,
             max_upload_triples: null,
             max_user_data_records: null,
+            max_virtuoso_load: null,
             schema_types: [],
         });
     });
@@ -245,6 +249,7 @@ describe("Test the Profilemodel module", () => {
             max_writable_triples: null,
             max_upload_triples: null,
             max_user_data_records: null,
+            max_virtuoso_load: null,
             schema_types: [],
         });
     });
@@ -264,6 +269,7 @@ describe("Test the Profilemodel module", () => {
             max_writable_triples: null,
             max_upload_triples: null,
             max_user_data_records: null,
+            max_virtuoso_load: null,
             schema_types: [],
         });
     });
@@ -298,6 +304,7 @@ describe("Test the Profilemodel module", () => {
                 maxWritableTriplesPerUser: undefined,
                 maxUploadTriplesPerUser: undefined,
                 maxUserDataRecordsPerUser: undefined,
+                maxVirtuosoLoad: undefined,
             },
         ]);
     });
@@ -333,6 +340,7 @@ describe("Test the Profilemodel module", () => {
                 maxWritableTriplesPerUser: undefined,
                 maxUploadTriplesPerUser: undefined,
                 maxUserDataRecordsPerUser: undefined,
+                maxVirtuosoLoad: undefined,
             },
         ]);
     });
@@ -369,6 +377,7 @@ describe("Test the Profilemodel module", () => {
                 maxWritableTriplesPerUser: undefined,
                 maxUploadTriplesPerUser: undefined,
                 maxUserDataRecordsPerUser: undefined,
+                maxVirtuosoLoad: undefined,
             },
         ]);
     });
@@ -414,6 +423,7 @@ describe("Test the Profilemodel module", () => {
                 maxWritableTriplesPerUser: undefined,
                 maxUploadTriplesPerUser: undefined,
                 maxUserDataRecordsPerUser: undefined,
+                maxVirtuosoLoad: undefined,
             },
         ]);
     });
@@ -493,6 +503,31 @@ describe("Test the Profilemodel module", () => {
     test("getMaxNtExportTriplesForUser forbids when no profile of the user sets a cap", async () => {
         const result = await profileModel.getMaxNtExportTriplesForUser({ id: "42", login: "someone", groups: ["all_forbidden"] });
         expect(result).toBe(0);
+    });
+
+    test("getMaxVirtuosoLoadForUser is unlimited for the admin login", async () => {
+        const result = await profileModel.getMaxVirtuosoLoadForUser({ id: "42", login: "admin", groups: [] });
+        expect(result).toBeUndefined();
+    });
+
+    test("getMaxVirtuosoLoadForUser is unlimited for an user holding the admin profile", async () => {
+        const result = await profileModel.getMaxVirtuosoLoadForUser({ id: "42", login: "someone", groups: ["admin"] });
+        expect(result).toBeUndefined();
+    });
+
+    test("getMaxVirtuosoLoadForUser returns the profile's threshold for a single-profile user", async () => {
+        const result = await profileModel.getMaxVirtuosoLoadForUser({ id: "42", login: "someone", groups: ["read_folder_1"] });
+        expect(result).toBe(70);
+    });
+
+    test("getMaxVirtuosoLoadForUser returns the highest threshold across a multi-profile user", async () => {
+        const result = await profileModel.getMaxVirtuosoLoadForUser({ id: "42", login: "someone", groups: ["read_folder_1", "readwrite_folder_1"] });
+        expect(result).toBe(90);
+    });
+
+    test("getMaxVirtuosoLoadForUser is unlimited when no profile of the user sets a threshold", async () => {
+        const result = await profileModel.getMaxVirtuosoLoadForUser({ id: "42", login: "someone", groups: ["all_forbidden"] });
+        expect(result).toBeUndefined();
     });
 
     test("getLimitsForUser returns the limits of a single-profile user", async () => {

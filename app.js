@@ -226,6 +226,26 @@ app.get("/metrics", async (req, res) => {
 
 attachResponseValidator(app, apiDoc, { logPath: "logs/schema-mismatches.jsonl" });
 
+/* Resolves the user account from the Bearer token on the request, setting
+ * `req.user` when authentication is enabled. Shared by the security handlers
+ * because express-openapi runs them in parallel, so none can rely on another
+ * having populated `req.user` first. Returns `req.user` (possibly undefined). */
+async function resolveUserFromRequest(req) {
+    const token = req.headers.authorization;
+    if (token !== undefined) {
+        const output = util.parseAuthorizationFromHeader(token);
+
+        // Only accept the Bearer scheme from the Authorization header
+        if (output !== null && output[0] === "Bearer") {
+            const user = await userModel.findUserAccountFromToken(output[1]);
+            if (user) {
+                req.user = user[1];
+            }
+        }
+    }
+    return req.user;
+}
+
 openapi.initialize({
     apiDoc: apiDoc,
     app: app,
@@ -233,18 +253,7 @@ openapi.initialize({
     securityHandlers: {
         restrictQuota: async function (req, scope, definition) {
             if (config.auth != "disabled") {
-                const token = req.headers.authorization;
-                if (token !== undefined) {
-                    const output = util.parseAuthorizationFromHeader(token);
-
-                    // Only accept the Bearer scheme from the Authorization header
-                    if (output !== null && output[0] === "Bearer") {
-                        const user = await userModel.findUserAccountFromToken(output[1]);
-                        if (user) {
-                            req.user = user[1];
-                        }
-                    }
-                }
+                await resolveUserFromRequest(req);
 
                 const user = await userManager.getUser(req.user);
                 const route = req.baseUrl + req.path;
@@ -283,28 +292,34 @@ openapi.initialize({
             return Promise.resolve(true);
         },
         restrictVirtuosoLoad: async function (req, scope, definition) {
-            if (getVirtuosoLoad() >= maxLoadThreshold) {
+            let threshold = maxLoadThreshold;
+            if (config.auth != "disabled") {
+                await resolveUserFromRequest(req);
+                if (req.user) {
+                    const account = await userManager.getUser(req.user);
+                    const accountUser = account?.user;
+                    if (accountUser && (accountUser.login === "admin" || (accountUser.groups || []).includes("admin"))) {
+                        return Promise.resolve(true);
+                    }
+                    if (accountUser) {
+                        const profileThreshold = await profileModel.getMaxVirtuosoLoadForUser(accountUser);
+                        if (profileThreshold !== undefined) {
+                            threshold = profileThreshold;
+                        }
+                    }
+                }
+            }
+            if (getVirtuosoLoad() >= threshold) {
                 throw {
                     status: 429,
-                    message: `Virtuoso server is overloaded (load: ${getVirtuosoLoad().toFixed(1)}%, threshold: ${maxLoadThreshold}%)`,
+                    message: `Virtuoso server is overloaded (load: ${getVirtuosoLoad().toFixed(1)}%, threshold: ${threshold}%)`,
                 };
             }
             return Promise.resolve(true);
         },
         restrictLoggedUser: async function (req, _scopes, _definition) {
             if (config.auth != "disabled") {
-                const token = req.headers.authorization;
-                if (token !== undefined) {
-                    const output = util.parseAuthorizationFromHeader(token);
-
-                    // Only accept the Bearer scheme from the Authorization header
-                    if (output !== null && output[0] === "Bearer") {
-                        const user = await userModel.findUserAccountFromToken(output[1]);
-                        if (user) {
-                            req.user = user[1];
-                        }
-                    }
-                }
+                await resolveUserFromRequest(req);
 
                 if (config.auth == "keycloak") {
                     passport.authenticate("keycloak", { failureRedirect: "/login" });

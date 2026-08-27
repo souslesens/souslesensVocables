@@ -46,6 +46,7 @@ const ProfileObject = z
         maxWritableTriplesPerUser: z.number().int().nonnegative().optional(),
         maxUploadTriplesPerUser: z.number().int().nonnegative().optional(),
         maxUserDataRecordsPerUser: z.number().int().nonnegative().optional(),
+        maxVirtuosoLoad: z.number().positive().max(100).optional(),
         _type: z.string().default("profile"),
     })
     .strict();
@@ -97,6 +98,7 @@ class ProfileModel {
         max_writable_triples: profile.maxWritableTriplesPerUser ?? null,
         max_upload_triples: profile.maxUploadTriplesPerUser ?? null,
         max_user_data_records: profile.maxUserDataRecordsPerUser ?? null,
+        max_virtuoso_load: profile.maxVirtuosoLoad ?? null,
         schema_types: profile.allowedSourceSchemas || [],
     });
 
@@ -135,6 +137,7 @@ class ProfileModel {
                 maxWritableTriplesPerUser: profile.max_writable_triples ?? undefined,
                 maxUploadTriplesPerUser: profile.max_upload_triples ?? undefined,
                 maxUserDataRecordsPerUser: profile.max_user_data_records ?? undefined,
+                maxVirtuosoLoad: profile.max_virtuoso_load ?? undefined,
             },
         ];
     };
@@ -423,6 +426,29 @@ class ProfileModel {
         }
 
         return maxNtExportTriples ?? defaultQuotaLimits.maxNtExportTriples;
+    };
+
+    /**
+     * Return the max Virtuoso load threshold (0-100) a user may tolerate, across all their profiles.
+     * Admin users (login "admin" or holding the "admin" profile) are never capped.
+     * @param {UserAccount} user - the user whose profiles are inspected
+     * @returns {Promise<number|undefined>} - maximum allowed load threshold, or undefined if unlimited (admin or no profile defines one)
+     */
+    getMaxVirtuosoLoadForUser = async (user) => {
+        if (user.login === "admin" || user.groups?.includes("admin")) {
+            return undefined;
+        }
+
+        const userProfiles = await this.getUserProfiles(user);
+        let maxVirtuosoLoad;
+
+        for (const profile of Object.values(userProfiles)) {
+            if (typeof profile.maxVirtuosoLoad === "number" && (maxVirtuosoLoad === undefined || profile.maxVirtuosoLoad > maxVirtuosoLoad)) {
+                maxVirtuosoLoad = profile.maxVirtuosoLoad;
+            }
+        }
+
+        return maxVirtuosoLoad;
     };
 
     /** The numeric caps a profile may carry, and that a user may also carry on their account. */

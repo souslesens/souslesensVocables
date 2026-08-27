@@ -17,5 +17,6 @@ create table if not exists profiles(
        -- Zero is a decision: it forbids.
        max_writable_triples  integer,
        max_upload_triples    integer,
-       max_user_data_records integer
-);
+       max_user_data_records integer,
+       max_virtuoso_load     integer
+ );

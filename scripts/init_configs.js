@@ -23,8 +23,6 @@ if (!userModel.getUserAccount(USERNAME)) {
             source: "json",
             _type: "user",
             name: USERNAME,
-            allowSourceCreation: true,
-            maxNumberCreatedSource: 5,
         },
     };
 

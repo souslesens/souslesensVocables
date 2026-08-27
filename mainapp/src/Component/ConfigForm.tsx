@@ -28,6 +28,7 @@ import { RD, SRD, failure, loading, success } from "srd";
 import { ConfigType, getConfig, updateConfig } from "../Config";
 import { useZorm, fieldChain } from "react-zorm";
 import { errorMessage } from "./errorMessage";
+import { formatQuotaLimitDisplay, parseQuotaLimitInput } from "../formatQuotaLimit";
 import { HelpTooltip } from "./HelpModal";
 import { Profile, getProfiles } from "../Profile";
 import { Tool, getAllTools } from "../Tool";
@@ -324,15 +325,15 @@ const ConfigForm = () => {
                                                 <Grid item xs={4}>
                                                     <TextField
                                                         fullWidth
-                                                        type="number"
+                                                        type="text"
                                                         label="Limit"
-                                                        value={q.limit}
+                                                        value={formatQuotaLimitDisplay(q.limit)}
                                                         onChange={(e) => {
                                                             const newQuota = [...generalQuota];
-                                                            newQuota[idx].limit = e.target.value;
+                                                            newQuota[idx].limit = parseQuotaLimitInput(e.target.value);
                                                             setGeneralQuota(newQuota);
                                                         }}
-                                                        InputProps={{ inputProps: { min: 0 } }}
+                                                        InputProps={{ inputMode: "numeric" }}
                                                     />
                                                 </Grid>
                                                 <Grid item xs={1}>

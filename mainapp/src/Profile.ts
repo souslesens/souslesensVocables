@@ -162,10 +162,10 @@ const ProfileSchema = z.object({
     isShared: z.boolean().default(true),
     id: z.string().default(ulid()),
     quota: z.record(z.string(), z.record(z.string(), z.number())).optional().default({}),
-    maxNtExportTriples: z.number().int().positive().optional(),
     allowSourceCreation: z.boolean().optional(),
-    maxNumberCreatedSource: z.number().int().nonnegative().optional(),
     // Nonnegative and not positive: 0 is a value, it forbids.
+    maxNtExportTriples: z.number().int().nonnegative().optional(),
+    maxNumberCreatedSource: z.number().int().nonnegative().optional(),
     maxWritableTriplesPerUser: z.number().int().nonnegative().optional(),
     maxUploadTriplesPerUser: z.number().int().nonnegative().optional(),
     maxUserDataRecordsPerUser: z.number().int().nonnegative().optional(),
@@ -181,6 +181,22 @@ export const ProfileSchemaCreate = ProfileSchema.merge(
 );
 
 export type SourceAccessControl = z.infer<typeof SourceAccessControlSchema>;
+
+/**
+ * What the server falls back to when no profile of a user sets a limit
+ * (`bin/user.js:resolveUserLimits`, `model/profiles.js:getMaxNtExportTriplesForUser`).
+ * An administrator is exempt from all five regardless of this. Single source for the
+ * Config Editor's quota helper texts, so they can never drift from what the server
+ * actually enforces.
+ */
+export const defaultQuotaLimits = {
+    allowSourceCreation: false,
+    maxNumberCreatedSource: 2,
+    maxNtExportTriples: 0,
+    maxWritableTriplesPerUser: 0,
+    maxUploadTriplesPerUser: 0,
+    maxUserDataRecordsPerUser: 0,
+};
 
 export const defaultProfile = (uuid: string): Profile => {
     return {

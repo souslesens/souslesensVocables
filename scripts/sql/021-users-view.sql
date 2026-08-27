@@ -3,7 +3,5 @@
 -- column has to drop the view and read it again, which it cannot do from a file
 -- that also creates the type and the table.
 create view public_users_list as
-       select id, login, create_source, maximum_source,
-              max_writable_triples, max_upload_triples, max_user_data_records,
-              auth, profiles
+       select id, login, auth, profiles
        from users;

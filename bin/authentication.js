@@ -32,11 +32,9 @@ const getUserAccount = async (source, username) => {
     if (!userAccount) {
         account = {
             _type: "user",
-            allowSourceCreation: false,
             groups: config.defaultGroups ? config.defaultGroups : [],
             id: ULID.ulid(),
             login: username,
-            maxNumberCreatedSource: 5,
             password: "",
             source: source,
         };

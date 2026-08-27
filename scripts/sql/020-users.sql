@@ -6,12 +6,5 @@ create table if not exists users(
        password         text,
        token            text default '',
        profiles         text[],
-       create_source    boolean default false,
-       maximum_source   integer default 5,
-       -- No default, unlike the two above: an instance that never set these must
-       -- stay uncapped. Zero is a decision, it forbids.
-       max_writable_triples  integer,
-       max_upload_triples    integer,
-       max_user_data_records integer,
        auth             authentificator
 );

@@ -11,10 +11,9 @@ configuration file, and the access right itself is computed rather than stored.
 
 ![How users, profiles, access rights, sources and databases relate](resources.svg)
 
-- A **user account** belongs to the profiles listed on it, owns sources, and carries
-  limits used only where no profile decides.
+- A **user account** belongs to the profiles listed on it and owns sources.
 - A **profile** grants tools, schema types, databases and source access to the accounts
-  that belong to it. Its limits win over those of the account.
+  that belong to it, and carries every limit.
 - A **source** is a descriptor pointing at a named graph in the triplestore. Its
   `editable` flag can make it read-only for everyone but the administrators.
 - The **access right on a source** is derived from ownership, the profiles, the `editable`
@@ -42,6 +41,7 @@ except the administrators, its owner included.
 | Mapping Modeler : delete triples                   | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-no">no</span> | <span class="cell-no">no</span> | none, it frees quota                          |
 | Graph Management : upload a graph                  | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-no">no</span> | <span class="cell-no">no</span> | `maxUploadTriplesPerUser`                     |
 | Graph Management : delete or clear a graph         | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-no">no</span> | <span class="cell-no">no</span> | none, it frees quota                          |
+| Graph Management : download a graph                | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | none                                          |
 | SPARQL : update,insert                 | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-no">no</span> | <span class="cell-no">no</span> | none                                          |
 | Mapping Modeler : N-Triples export                                  | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | <span class="cell-yes">yes</span> | `maxNtExportTriples`, per export              |
 | Create a source                                   | <span class="cell-yes">yes</span> | not related          | depends on profile's `allowSourceCreation` | depends on profile's `allowSourceCreation` | not related               | `allowSourceCreation`, `maxNumberCreatedSource` |
@@ -55,10 +55,9 @@ data entries, subject only to the quota).
 
 A few points the table cannot carry:
 
-- **Administrators are exempt from two limits only**, source creation and the N-Triples
-  export, which both test the `admin` group explicitly. The three triple and user data
-  limits have no such exemption: they apply to an administrator whose account or profile
-  sets them. In practice an administrator is uncapped because nobody sets them there.
+- **Administrators are exempt from all five limits**, whatever the profiles say. The
+  exemption tests the `admin` group explicitly, both for source creation/export and for
+  the three triple and user data limits.
 - **A SPARQL `INSERT` is subject to no triple quota.** The proxy checks the write right
   per graph and stops there. Such triples belong to nobody, and the accounting explicitly
   refuses to charge triples nobody recorded, so they inflate no one's usage.
@@ -66,8 +65,7 @@ A few points the table cannot carry:
   and carries a notice saying so, rather than being refused.
 - **Deleting frees quota immediately**, because the usage is measured against the store
   rather than accumulated in a counter.
-- `maxNtExportTriples` is read from the profiles only, never from the user account,
-  unlike the four others.
+- All five limits, `maxNtExportTriples` included, are read from the profiles only.
 
 ## Access rights on a source
 
@@ -95,9 +93,13 @@ attaches an `accessControl` value to each source of a user. Every consumer inher
 it: the API routes that write, the SPARQL proxy that filters `INSERT`, `DELETE`, `LOAD`
 and `CLEAR` per graph, and the tools that grey out what cannot be written.
 
-A write route asks `sourceModel.canWrite(user, {name})` or
-`sourceModel.canWrite(user, {graphUri})` and answers `403` when the answer is no. The
-graph form exists for the routes that only know a graph URI, such as clearing a graph.
+A write route resolves the same `accessControl` value one of two ways. The Mapping
+Modeler route (`kg/triples.js`) asks `sourceModel.canWrite(user, {name})` directly and
+answers `403` when the answer is no. The Graph Management routes (`rdf/graph.js`,
+`rdf/graphUrl.js`) read `accessControl` off `sourceModel.getUserSources(user)` themselves
+instead of calling `canWrite`, and answer `503` when it is not `"readwrite"`. Both paths
+resolve from the same `_getAllowedSources` data, so the access decision itself never
+differs between them, only the status code returned on refusal.
 
 ## The five limits
 
@@ -109,22 +111,54 @@ graph form exists for the routes that only know a graph URI, such as clearing a 
 | `maxUploadTriplesPerUser`   | Triples the user holds through a graph upload                   |
 | `maxUserDataRecordsPerUser` | User data entries the user owns                                 |
 
-They exist both on the profile and on the user account, and are set from the Config
-Editor: the *Limitations* drawer of a profile, and the corresponding fields of a user.
+They exist on the profile only, and are set from the *Limitations* drawer of a profile in
+the Config Editor.
 
 `maxNtExportTriples` is a sixth limit of a different nature: it caps a single N-Triples
 export rather than a stock, so there is nothing to accumulate against it.
 
 ### How a limit is resolved
 
-A profile that sets a limit takes precedence over the account, so an offer tier can lower
-the defaults stored on the accounts. When several profiles set the same limit, the most
-permissive wins. A limit left undefined on the profile falls back to the account, and a
-limit undefined on both sides caps nothing: an instance that never configured any of this
-behaves exactly as it did before.
+A user may hold several profiles. When more than one sets the same limit, the most
+permissive wins: creation is allowed if any profile allows it, and the highest numeric cap
+is kept.
 
-Zero is a value, not an absence: it forbids. This is why the fields are validated as
-nonnegative rather than positive, and why the resolution uses `??` and never `||`.
+An administrator (the `admin` login or any member of the `admin` group) is exempt from
+every limit, whatever the profiles say.
+
+For anyone else, a limit left undefined by every profile of the user falls back to a
+hard-coded default. A profile has to opt a non-admin user into the four `0` defaults
+explicitly; leaving them unset blocks the Mapping Modeler write, the upload, saving user
+data, and the N-Triples export respectively.
+
+### Default quotas
+
+The table below is `defaultQuotaLimits`. It lives in `model/profiles.js`, the value the
+server actually enforces, mirrored by hand as an identically-named constant in
+`mainapp/src/Profile.ts`, which the Config Editor reads to build its quota helper texts.
+The two cannot share one module across the server/browser boundary, so changing a default
+means editing both and keeping them equal.
+
+| Limit                       | Default for a non-admin with no profile setting it | Administrator          |
+| ---------------------------- | ---------------------------------------------------- | ----------------------- |
+| `allowSourceCreation`       | `false` (forbidden)                                  | `true`, always          |
+| `maxNumberCreatedSource`    | `2`                                                   | unlimited                |
+| `maxWritableTriplesPerUser` | `0` (forbidden)                                       | unlimited                |
+| `maxUploadTriplesPerUser`   | `0` (forbidden)                                       | unlimited                |
+| `maxUserDataRecordsPerUser` | `0` (forbidden)                                       | unlimited                |
+| `maxNtExportTriples`        | `0` (forbidden)                                       | unlimited                |
+
+An instance that never touches the *Limitations* drawer of any profile therefore starts
+locked down for everyone but the administrators: no source creation, no Mapping Modeler
+write, no upload, no user data, no N-Triples export. Each has to be opted into explicitly,
+per profile.
+
+Zero is a value, not an absence: it forbids. This is why all five numeric fields
+(`maxNumberCreatedSource`, `maxWritableTriplesPerUser`, `maxUploadTriplesPerUser`,
+`maxUserDataRecordsPerUser`, `maxNtExportTriples`) are validated as nonnegative rather
+than positive, so a profile can set `0` explicitly through the Config Editor, not just
+inherit it as the implicit default. The resolution itself uses `??` and never `||`, so an
+explicit `0` is never mistaken for a missing value.
 
 ## Counting the triples a user holds
 

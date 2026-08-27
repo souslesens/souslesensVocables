@@ -96,22 +96,13 @@ const decodeUser = (user: UserJSON): User => {
         password: user.password,
         groups: user.groups,
         source: user.source ? user.source : "database",
-        allowSourceCreation: user.allowSourceCreation,
-        maxNumberCreatedSource: user.maxNumberCreatedSource,
-        maxWritableTriplesPerUser: user.maxWritableTriplesPerUser,
-        maxUploadTriplesPerUser: user.maxUploadTriplesPerUser,
-        maxUserDataRecordsPerUser: user.maxUserDataRecordsPerUser,
         _type: "user",
     };
 };
 
-/* The three caps are optional and have no default, unlike the two above them: an
- * account that never set one is not capped, and the profile decides alone. */
-type UserLimits = { maxWritableTriplesPerUser?: number; maxUploadTriplesPerUser?: number; maxUserDataRecordsPerUser?: number };
+type UserJSON = { id?: string; login: string; password: string; groups: string[]; source?: string };
 
-type UserJSON = { id?: string; login: string; password: string; groups: string[]; source?: string; allowSourceCreation: boolean; maxNumberCreatedSource: number } & UserLimits;
-
-export type User = { id: string; _type: string; login: string; password: string; groups: string[]; source: string; allowSourceCreation: boolean; maxNumberCreatedSource: number } & UserLimits;
+export type User = { id: string; _type: string; login: string; password: string; groups: string[]; source: string };
 
 const newUser = (key: string): User => {
     return {
@@ -121,11 +112,6 @@ const newUser = (key: string): User => {
         password: "",
         groups: [],
         source: "database",
-        allowSourceCreation: false,
-        maxNumberCreatedSource: 5,
-        maxWritableTriplesPerUser: undefined,
-        maxUploadTriplesPerUser: undefined,
-        maxUserDataRecordsPerUser: undefined,
     };
 };
 

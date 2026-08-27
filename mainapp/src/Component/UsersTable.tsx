@@ -21,7 +21,6 @@ import {
     Select,
     MenuItem,
     Checkbox,
-    FormControlLabel,
     SelectChangeEvent,
     Dialog,
     DialogTitle,
@@ -139,8 +138,6 @@ export const UsersTable = () => {
             ),
             success: (gotUsers: User[]) => {
                 const sortedUsers: User[] = gotUsers.slice().sort((a: User, b: User) => {
-                    /* A column may hold an array, a number or nothing at all, since the
-                     * limits are left undefined on an account that does not cap. */
                     const left = String(a[orderBy] ?? "");
                     const right = String(b[orderBy] ?? "");
 
@@ -150,8 +147,6 @@ export const UsersTable = () => {
                     const { groups, _type, password, ...restOfProperties } = user;
                     const data = {
                         ...restOfProperties,
-                        maxNumberCreatedSource: restOfProperties.maxNumberCreatedSource.toString(),
-                        allowSourceCreation: restOfProperties.allowSourceCreation ? "1" : "0",
                         profiles: groups.join(";"),
                     };
 
@@ -269,13 +264,6 @@ const UserFormSchema = z.object({
     login: z.string().nonempty(),
     password: z.string().nonempty(),
     groups: z.array(z.string()),
-    allowSourceCreation: z.boolean(),
-    maxNumberCreatedSource: z.number(),
-    /* Optional, unlike the two above: an empty field means this account sets no cap
-     * and leaves the profile to decide. A typed 0 forbids. */
-    maxWritableTriplesPerUser: z.number().int().nonnegative().optional(),
-    maxUploadTriplesPerUser: z.number().int().nonnegative().optional(),
-    maxUserDataRecordsPerUser: z.number().int().nonnegative().optional(),
 });
 
 const UserFormEditShema = UserFormSchema.extend({
@@ -296,22 +284,7 @@ const UserFormDialog = ({ open, maybeuser: maybeUser, me = "", onClose }: UserFo
     }, [open, maybeUser]);
 
     const handleFieldUpdate = (fieldname: string) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string | string[]>) => {
-        let value: string | string[] | boolean | number = event.target.value;
-        if (fieldname === "allowSourceCreation") {
-            value = event.target.value === "true" ? false : true;
-        }
-        if (fieldname === "maxNumberCreatedSource" && !Array.isArray(event.target.value)) {
-            value = parseInt(event.target.value);
-            if (value < 0 || isNaN(value)) {
-                value = 0;
-            }
-        }
-        /* Cleared to undefined rather than floored to 0: here an empty field hands the
-         * decision back to the profile, while 0 forbids. */
-        if (["maxWritableTriplesPerUser", "maxUploadTriplesPerUser", "maxUserDataRecordsPerUser"].includes(fieldname) && !Array.isArray(event.target.value)) {
-            const parsed = parseInt(event.target.value);
-            value = event.target.value === "" || isNaN(parsed) ? (undefined as unknown as number) : Math.max(0, parsed);
-        }
+        const value: string | string[] = event.target.value;
         setUserForm((prev) => ({
             ...prev,
             [fieldname]: value,
@@ -413,59 +386,6 @@ const UserFormDialog = ({ open, maybeuser: maybeUser, me = "", onClose }: UserFo
                         </Select>
                         <FormHelperText>{errors?.groups}</FormHelperText>
                     </FormControl>
-                    <FormControl>
-                        <FormControlLabel
-                            control={<Checkbox value={userForm.allowSourceCreation} checked={userForm.allowSourceCreation} onChange={handleFieldUpdate("allowSourceCreation")} />}
-                            label="Allow the user to create sources"
-                        />
-                        <FormHelperText>{errors?.allowSourceCreation}</FormHelperText>
-                    </FormControl>
-                    <TextField
-                        id="max-allowed-sources"
-                        type="number"
-                        label="Limit the number of source the user can create"
-                        value={userForm.maxNumberCreatedSource || 0}
-                        disabled={!userForm.allowSourceCreation}
-                        onChange={handleFieldUpdate("maxNumberCreatedSource")}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        error={errors?.maxNumberCreatedSource !== undefined}
-                        helperText={errors?.maxNumberCreatedSource}
-                    />
-                    <TextField
-                        id="max-writable-triples"
-                        type="number"
-                        label="Max triples written with Mapping Modeler"
-                        value={userForm.maxWritableTriplesPerUser ?? ""}
-                        onChange={handleFieldUpdate("maxWritableTriplesPerUser")}
-                        InputLabelProps={{ shrink: true }}
-                        inputProps={{ min: 0 }}
-                        error={errors?.maxWritableTriplesPerUser !== undefined}
-                        helperText={errors?.maxWritableTriplesPerUser ?? "Empty: the profile decides. 0: forbidden"}
-                    />
-                    <TextField
-                        id="max-upload-triples"
-                        type="number"
-                        label="Max uploaded triples"
-                        value={userForm.maxUploadTriplesPerUser ?? ""}
-                        onChange={handleFieldUpdate("maxUploadTriplesPerUser")}
-                        InputLabelProps={{ shrink: true }}
-                        inputProps={{ min: 0 }}
-                        error={errors?.maxUploadTriplesPerUser !== undefined}
-                        helperText={errors?.maxUploadTriplesPerUser ?? "Empty: the profile decides. 0: forbidden"}
-                    />
-                    <TextField
-                        id="max-user-data-records"
-                        type="number"
-                        label="Max user data entries"
-                        value={userForm.maxUserDataRecordsPerUser ?? ""}
-                        onChange={handleFieldUpdate("maxUserDataRecordsPerUser")}
-                        InputLabelProps={{ shrink: true }}
-                        inputProps={{ min: 0 }}
-                        error={errors?.maxUserDataRecordsPerUser !== undefined}
-                        helperText={errors?.maxUserDataRecordsPerUser ?? "Empty: the profile decides. 0: forbidden"}
-                    />
                 </Stack>
             </DialogContent>
             <DialogActions>

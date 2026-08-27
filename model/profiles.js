@@ -8,6 +8,22 @@ import { userModel } from "./users.js";
 import { quotaModel } from "./quota.js";
 
 /**
+ * What a limit resolves to when no profile of a user sets it. An administrator is
+ * exempt from all five regardless of this (see `bin/user.js:resolveUserLimits` and
+ * `getMaxNtExportTriplesForUser` below). Mirrored in `mainapp/src/Profile.ts` as
+ * `defaultQuotaLimits`, which drives the Config Editor's quota helper texts: keep
+ * both in sync.
+ */
+const defaultQuotaLimits = {
+    allowSourceCreation: false,
+    maxNumberCreatedSource: 2,
+    maxNtExportTriples: 0,
+    maxWritableTriplesPerUser: 0,
+    maxUploadTriplesPerUser: 0,
+    maxUserDataRecordsPerUser: 0,
+};
+
+/**
  * @typedef {import("./UserTypes").UserAccount} UserAccount
  * @typedef {import("./ProfileTypes").Profile} Profile
  */
@@ -23,7 +39,7 @@ const ProfileObject = z
         allowedDatabases: z.string().array().optional(),
         isShared: z.boolean().default(true),
         quota: z.record(z.string(), z.record(z.string(), z.union([z.number(), z.object({ quota: z.number(), wholeProfileQuota: z.boolean() })]))).optional(),
-        maxNtExportTriples: z.number().int().positive().optional(),
+        maxNtExportTriples: z.number().int().nonnegative().optional(),
         allowSourceCreation: z.boolean().optional(),
         maxNumberCreatedSource: z.number().int().nonnegative().optional(),
         /* Nonnegative and not positive: 0 is a meaningful value here, it forbids. */
@@ -387,7 +403,8 @@ class ProfileModel {
 
     /**
      * Return the max number of triples a user may export as N-Triples, across all their profiles.
-     * Admin users (login "admin" or holding the "admin" profile) are never capped.
+     * Admin users (login "admin" or holding the "admin" profile) are never capped. Anyone else
+     * whose profiles leave it undefined is capped at 0, i.e. forbidden.
      * @param {UserAccount} user - the user whose profiles are inspected
      * @returns {Promise<number|undefined>} - maximum allowed triples, or undefined if unlimited
      */
@@ -405,7 +422,7 @@ class ProfileModel {
             }
         }
 
-        return maxNtExportTriples;
+        return maxNtExportTriples ?? defaultQuotaLimits.maxNtExportTriples;
     };
 
     /** The numeric caps a profile may carry, and that a user may also carry on their account. */
@@ -450,4 +467,4 @@ class ProfileModel {
 
 const profileModel = new ProfileModel(toolModel);
 
-export { ProfileModel, profileModel };
+export { ProfileModel, profileModel, defaultQuotaLimits };

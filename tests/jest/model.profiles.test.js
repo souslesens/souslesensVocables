@@ -490,9 +490,9 @@ describe("Test the Profilemodel module", () => {
         expect(result).toBe(5000);
     });
 
-    test("getMaxNtExportTriplesForUser is unlimited when no profile of the user sets a cap", async () => {
+    test("getMaxNtExportTriplesForUser forbids when no profile of the user sets a cap", async () => {
         const result = await profileModel.getMaxNtExportTriplesForUser({ id: "42", login: "someone", groups: ["all_forbidden"] });
-        expect(result).toBeUndefined();
+        expect(result).toBe(0);
     });
 
     test("getLimitsForUser returns the limits of a single-profile user", async () => {

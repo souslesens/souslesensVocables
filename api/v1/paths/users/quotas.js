@@ -2,7 +2,6 @@ import userManager from "../../../../bin/user.js";
 import { profileModel } from "../../../../model/profiles.js";
 import { sourceModel } from "../../../../model/sources.js";
 import { userDataModel } from "../../../../model/userData.js";
-import { userModel } from "../../../../model/users.js";
 import { tripleQuotaModel, MAPPING_KIND, UPLOAD_KIND } from "../../../../model/tripleQuota.js";
 
 /**
@@ -22,11 +21,6 @@ export default function () {
             const userInfo = await userManager.getUser(req.user);
             const login = userInfo.user.login;
 
-            /* Source creation skips the cap for an admin, in api/v1/paths/sources.js and
-             * api/v1/paths/admin/sources.js, so the screen must not show them a cap they
-             * will never hit. The other caps do apply to admins, and stay as they are. */
-            const isAdmin = await userModel.isAdmin(login);
-
             const ownedSources = await sourceModel.getOwnedSources(userInfo.user);
             const ownedUserData = await userDataModel.countOwnedBy(parseInt(userInfo.user.id));
 
@@ -37,8 +31,8 @@ export default function () {
 
             res.status(200).json({
                 sources: {
-                    ...quotaEntry(Object.keys(ownedSources).length, isAdmin ? null : userInfo.maxNumberCreatedSource),
-                    allowed: isAdmin || Boolean(userInfo.allowSourceCreation),
+                    ...quotaEntry(Object.keys(ownedSources).length, userInfo.maxNumberCreatedSource),
+                    allowed: Boolean(userInfo.allowSourceCreation),
                 },
                 mappingTriples: quotaEntry(mappingTriples, userInfo.maxWritableTriplesPerUser),
                 uploadTriples: quotaEntry(uploadTriples, userInfo.maxUploadTriplesPerUser),
@@ -56,8 +50,8 @@ export default function () {
     GET.apiDoc = {
         summary: "Where the current user stands against each of their quotas",
         description:
-            "Returns, for every limit that has a usage, what the caller currently holds and the cap resolved for them " +
-            "(their profiles first, then their account). `cap: null` means no limit, `cap: 0` forbids. " +
+            "Returns, for every limit that has a usage, what the caller currently holds and the cap resolved from their profiles. " +
+            "`cap: null` means no limit, `cap: 0` forbids. " +
             "An admin is never capped on sources, since source creation skips that cap for them. " +
             "The triple figures are measured against the triplestore at call time, so deletions made outside the " +
             "application are already taken into account, which makes this route slower than a plain read.",

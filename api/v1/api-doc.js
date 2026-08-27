@@ -108,11 +108,6 @@ const apiDoc = {
                 _type: { type: "string" },
                 source: { type: "string" },
                 token: { type: "string" },
-                allowSourceCreation: { type: "boolean" },
-                maxNumberCreatedSource: { type: "number" },
-                maxWritableTriplesPerUser: { type: "number" },
-                maxUploadTriplesPerUser: { type: "number" },
-                maxUserDataRecordsPerUser: { type: "number" },
             },
             required: ["login", "groups"],
             title: "User Model",
@@ -336,23 +331,24 @@ const apiDoc = {
                 },
                 allowSourceCreation: {
                     type: "boolean",
-                    description: "Lets the users of this profile create sources. Omitted, the right stored on the user account applies.",
+                    description: "Lets the users of this profile create sources. Omitted, source creation is forbidden by default.",
                 },
                 maxNumberCreatedSource: {
                     type: "number",
-                    description: "How many sources a user of this profile may own. Omitted, the limit stored on the user account applies.",
+                    description: "How many sources a user of this profile may own. Omitted, defaults to 2.",
                 },
                 maxWritableTriplesPerUser: {
                     type: "number",
-                    description: "How many triples a user of this profile may hold through the Mapping Modeler. 0 forbids writing any. Omitted, the limit stored on the user account applies.",
+                    description:
+                        "How many triples a user of this profile may hold through the Mapping Modeler. 0 forbids writing any. Omitted, forbidden by default (an administrator is exempt regardless).",
                 },
                 maxUploadTriplesPerUser: {
                     type: "number",
-                    description: "How many uploaded triples a user of this profile may hold. 0 forbids uploading. Omitted, the limit stored on the user account applies.",
+                    description: "How many uploaded triples a user of this profile may hold. 0 forbids uploading. Omitted, forbidden by default (an administrator is exempt regardless).",
                 },
                 maxUserDataRecordsPerUser: {
                     type: "number",
-                    description: "How many user data entries a user of this profile may own. 0 forbids saving any. Omitted, the limit stored on the user account applies.",
+                    description: "How many user data entries a user of this profile may own. 0 forbids saving any. Omitted, forbidden by default (an administrator is exempt regardless).",
                 },
             },
         },

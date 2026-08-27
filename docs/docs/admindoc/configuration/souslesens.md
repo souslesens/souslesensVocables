@@ -75,6 +75,19 @@ The `mainConfig.json` contain all the `souslesensVocables` configuration.
 -   `userData`: The configuration of the userData file management system
     -   `location`: the system used to store the file content (`file` or `database`)
     -   `maximumFileSize`: the maximum file content size allowed in the database (in bytes)
+-   `metrics`: The server metrics configuration
+    -   `virtuoso`: The Virtuoso load protection settings. These back the `restrictVirtuosoLoad`
+        security handler, which answers `429` to the heavy SPARQL/RDF endpoints once the estimated
+        load crosses a threshold.
+        -   `maxPending`: Number of in-flight SPARQL requests above which the estimated load is
+            considered to be 100%. The load ratio is `pending / maxPending × 100`, capped at 100.
+            Default `50`.
+        -   `maxLoad`: Global load threshold (0-100), in percent, above which protected endpoints
+            answer `429`. It applies to users whose profiles define no `maxVirtuosoLoad` (see
+            [rights-and-quotas](rights-and-quotas.md)). Default `80`.
+
+    **Note:** `maxPending` here is the scale the estimated load is measured against, not the
+    threshold that triggers the refusal; the refusal threshold is `maxLoad`.
 
 ### LLM provider configuration
 

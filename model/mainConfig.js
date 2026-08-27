@@ -3,6 +3,7 @@ import { Lock } from "async-await-mutex-lock";
 import { mainConfigPath } from "./config.js";
 import { toolModel } from "./tools.js";
 import { quotaModel } from "./quota.js";
+import { configureVirtuosoMetrics } from "../bin/metrics.js";
 
 const lock = new Lock();
 
@@ -31,6 +32,8 @@ class MainConfigModel {
             if (config.generalQuota !== undefined) {
                 quotaModel.clearConfigCache();
             }
+
+            configureVirtuosoMetrics(config.metrics?.virtuoso?.maxPending, config.metrics?.virtuoso?.maxLoad);
         } finally {
             lock.release("MainConfigLock");
         }

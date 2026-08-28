@@ -82,7 +82,7 @@ The table displays:
 
 - **Name**: Profile identifier
 - **Allowed Tools**: Tools accessible to users with this profile (first 3 shown, others in tooltip)
-- **Shared Users**: Indicates if users with this profile are shared across sources
+- **Users visibility**: When enabled, users sharing this profile can see each other in the users list. When disabled, sharing this profile does not expose users to one another.
 - **Allowed Sources**: Source schemas permitted for this profile
 - **Actions**: Edit or delete buttons
 
@@ -105,7 +105,7 @@ Click "Create Profile" or the edit icon to open the profile editor:
 
 - **Allowed Tools**: Select which tools are available to this profile
 - **Allowed Databases**: Choose which registered databases this profile can access
-- **Shared Users**: Enable to share users across all sources
+- **Users visibility**: When enabled, users sharing this profile see each other in the users list (e.g. to share user data and assign annotation templates). Admins always see every user.
 
 #### Advanced Settings
 

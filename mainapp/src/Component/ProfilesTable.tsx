@@ -17,6 +17,7 @@ import {
     IconButton,
     InputAdornment,
     InputLabel,
+    Menu,
     MenuItem,
     Modal,
     Paper,
@@ -36,7 +37,7 @@ import {
     styled,
 } from "@mui/material";
 
-import { ChevronRight, Close, Done, Edit, ExpandMore, Speed, Delete as DeleteIcon } from "@mui/icons-material";
+import { ChevronRight, Close, Done, Edit, ExpandMore, KeyboardArrowDown, Speed, Delete as DeleteIcon } from "@mui/icons-material";
 import { TreeView, TreeItem, TreeItemProps, TreeItemContentProps, useTreeItem } from "@mui/x-tree-view";
 
 import clsx from "clsx";
@@ -70,6 +71,7 @@ const ProfilesTable = () => {
     const [snackOpen, setSnackOpen] = useState(false);
     const [snackMessage, setSnackMessage] = useState("");
     const [snackError, setSnackError] = useState(false);
+    const [downloadAnchorEl, setDownloadAnchorEl] = useState<null | HTMLElement>(null);
 
     const me = SRD.withDefault("", model.me);
 
@@ -299,9 +301,22 @@ const ProfilesTable = () => {
                             </Table>
                         </TableContainer>
                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                            <CsvDownloader separator="&#9;" filename="profiles" extension=".tsv" datas={datas}>
-                                <Button variant="outlined">Download CSV</Button>
-                            </CsvDownloader>
+                            <Button variant="outlined" endIcon={<KeyboardArrowDown />} onClick={(event) => setDownloadAnchorEl(event.currentTarget)}>
+                                Download CSV
+                            </Button>
+                            <Menu anchorEl={downloadAnchorEl} open={Boolean(downloadAnchorEl)} onClose={() => setDownloadAnchorEl(null)}>
+                                <CsvDownloader separator="&#9;" filename="profiles" extension=".tsv" datas={datas}>
+                                    <MenuItem onClick={() => setDownloadAnchorEl(null)}>Profiles</MenuItem>
+                                </CsvDownloader>
+                                <MenuItem
+                                    onClick={() => {
+                                        setDownloadAnchorEl(null);
+                                        window.open("/api/v1/admin/profiles/access-control");
+                                    }}
+                                >
+                                    Access control
+                                </MenuItem>
+                            </Menu>
                             <Button
                                 sx={{
                                     // FIXME Need to override the jquery css

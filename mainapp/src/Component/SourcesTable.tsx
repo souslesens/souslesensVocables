@@ -214,16 +214,11 @@ const SourcesTable = () => {
                         taxonomyPredicates: joinWhenArray(taxonomyPredicates),
                     };
 
-                    const dataWithoutCarriageReturns = Object.fromEntries(
-                        Object.entries(processedData).map(([key, value]) => {
-                            if (typeof value === "string") {
-                                return [key, value.replace("\n", " ")];
-                            }
-                            return [key, value];
-                        }),
-                    );
+                    const sanitizeValue = (value: unknown) => (typeof value === "string" ? value.replace("\n", " ").replace(/\t/g, " ") : value);
 
-                    return { ...dataWithoutCarriageReturns };
+                    const sanitizedData = Object.fromEntries(Object.entries(processedData).map(([key, value]) => [key, sanitizeValue(value)]));
+
+                    return { ...sanitizedData };
                 });
                 const sortedSources: ServerSource[] = gotSources.slice().sort((a, b) => {
                     if (orderBy == "graphSize") {

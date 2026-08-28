@@ -242,7 +242,7 @@ const ProfilesTable = () => {
                                         </TableCell>
                                         <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
                                             <TableSortLabel active={orderBy === "isShared"} direction={order} onClick={() => handleRequestSort("isShared")}>
-                                                Shared Users
+                                                Users visibility
                                             </TableSortLabel>
                                         </TableCell>
                                         <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
@@ -879,7 +879,15 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                             </Select>
                         </FormControl>
                         <FormControl>
-                            <FormControlLabel control={<Checkbox checked={profileModel.profileForm.isShared} onChange={handleFieldUpdate("isShared")} />} label={"shared Users"} />
+                            <FormControlLabel
+                                control={<Checkbox checked={profileModel.profileForm.isShared} onChange={handleFieldUpdate("isShared")} />}
+                                label={
+                                    <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>
+                                        {"Users visibility"}
+                                        <HelpTooltip title="When enabled, two users sharing this profile can see each other in the users list (used to share user data and assign annotation templates). When disabled, sharing this profile does not expose users to one another. Admins always see every user." />
+                                    </Box>
+                                }
+                            />
                         </FormControl>
                         <TextField defaultValue={profileModel.profileForm.theme ?? config.theme.defaultTheme} fullWidth id="theme" label="Theme" onChange={handleFieldUpdate("theme")} select>
                             {getAvailableThemes().map((theme) => (

@@ -71,8 +71,11 @@ states what it can be linked to through a restriction rather than a direct tripl
 ## Truncation is not a smaller answer
 
 `truncation.truncated: true` means the reply was cut to fit a byte budget, and what was cut cannot
-be fetched afterwards. Raising `options.limit` does not help, since several of the underlying
-queries ignore it, which is precisely why the cut happens here.
+be fetched afterwards from this same answer. Raising `options.limit` does not help, since several of
+the underlying queries ignore it, which is precisely why the cut happens here. What it does carry is
+a `resultId` and a `nextOffset`: pass those to `sls_result_page`, which works for every tool here, not
+only `sls_sparql_select`, and can also `grep` the held rows for a term instead of paging through them
+by hand.
 
 For rows, `totalRows` says how many rows the tool handed back and `returnedRows` how many of them
 fitted. If a narrower query can still answer the question, run it. If it cannot, because that figure

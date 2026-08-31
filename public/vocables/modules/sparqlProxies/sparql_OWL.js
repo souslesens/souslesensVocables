@@ -288,7 +288,7 @@ var Sparql_OWL = (function () {
         query +=
             "?child1 " +
             Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel, options) +
-            " ?subject.  FILTER (!isBlank(?subject)) " +
+            " ?subject.  FILTER (!isBlank(?subject)) FILTER (!isBlank(?child1)) " +
             strFilter +
             "OPTIONAL {?subject rdfs:label ?subjectLabel." +
             Sparql_common.getLangFilter(sourceLabel, "conceptLabel") +
@@ -307,6 +307,9 @@ var Sparql_OWL = (function () {
                 " ?child" +
                 i +
                 "." +
+                "FILTER (!isBlank(?child" +
+                (i + 1) +
+                ")) " +
                 "OPTIONAL {?child" +
                 (i + 1) +
                 " rdfs:label  ?child" +
@@ -1005,9 +1008,9 @@ var Sparql_OWL = (function () {
 " OPTIONAL{?subject rdfs:label ?subjectLabel.}  " +
 " OPTIONAL{?object rdfs:label ?objectLabel.}  ";*/
             if (options.onlyObjectProperties) {
-                (" ?prop rdf:type owl:ObjectProperty.");
+                query += " ?prop rdf:type owl:ObjectProperty. ";
             } else if (options.onlyDataTypeProperties) {
-                (" filter (isLiteral(?object) )");
+                query += " filter (isLiteral(?object) ) ";
             } else if (!options.includeLiterals && !(options.filter && options.filter.indexOf("?object") > -1)) {
                 query += " filter (!isLiteral(?object) )";
             }

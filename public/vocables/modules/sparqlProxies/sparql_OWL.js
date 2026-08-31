@@ -288,7 +288,7 @@ var Sparql_OWL = (function () {
         query +=
             "?child1 " +
             Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel, options) +
-            " ?subject.  FILTER (!isBlank(?subject)) " +
+            " ?subject.  FILTER (!isBlank(?subject)) FILTER (!isBlank(?child1)) " +
             strFilter +
             "OPTIONAL {?subject rdfs:label ?subjectLabel." +
             Sparql_common.getLangFilter(sourceLabel, "conceptLabel") +
@@ -307,6 +307,9 @@ var Sparql_OWL = (function () {
                 " ?child" +
                 i +
                 "." +
+                "FILTER (!isBlank(?child" +
+                (i + 1) +
+                ")) " +
                 "OPTIONAL {?child" +
                 (i + 1) +
                 " rdfs:label  ?child" +
@@ -1005,9 +1008,9 @@ var Sparql_OWL = (function () {
 " OPTIONAL{?subject rdfs:label ?subjectLabel.}  " +
 " OPTIONAL{?object rdfs:label ?objectLabel.}  ";*/
             if (options.onlyObjectProperties) {
-                (" ?prop rdf:type owl:ObjectProperty.");
+                query += " ?prop rdf:type owl:ObjectProperty. ";
             } else if (options.onlyDataTypeProperties) {
-                (" filter (isLiteral(?object) )");
+                query += " filter (isLiteral(?object) ) ";
             } else if (!options.includeLiterals && !(options.filter && options.filter.indexOf("?object") > -1)) {
                 query += " filter (!isLiteral(?object) )";
             }
@@ -1109,7 +1112,6 @@ var Sparql_OWL = (function () {
      * @param {(string|string[])} [options.propIds] - Filter by property URI(s)
      * @param {(string|string[])} [options.subPropIds] - Filter by sub-property URI(s)
      * @param {boolean} [options.dataTypeProperties] - Query `owl:DatatypeProperty` instead of `owl:ObjectProperty`
-     * @param {boolean} [options.inheritedProperties] - Include inherited properties via `rdfs:subPropertyOf*`
      * @param {string} [options.searchType] - One of `property`/`domain`/`range` to search by `options.words`
      * @param {(string|string[])} [options.words] - Label word(s) used when `searchType` is set
      * @param {boolean} [options.addInverseRestrictions] - Also fetch and merge inverse-direction results
@@ -1119,7 +1121,6 @@ var Sparql_OWL = (function () {
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?domain`/`?prop`/`?range`/`?subProp`/`?inverseProp` (+labels)
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `domain` (optional), `domainLabel` (optional), `prop`, `propLabel` (optional), `range` (optional), `rangeLabel` (optional), `subProp` (optional), `subPropLabel` (optional), `inverseProp` (optional), `inversePropLabel` (optional).
      * @expose read
-     * @mcpTool sls_property_schema
      */
     self.getObjectPropertiesDomainAndRange = function (sourceLabel, domainIds, options, callback) {
         if (!options) {
@@ -1167,32 +1168,19 @@ var Sparql_OWL = (function () {
         if (options.selectGraph) {
             query += " GRAPH ?g ";
         }
-        if (options.inheritedProperties) {
-            query += "  { ?prop rdfs:subPropertyOf*/rdf:type owl:ObjectProperty ";
-        }
-        if (options.dataTypeProperties) {
-            query +=
-                "   {?prop rdf:type owl:DatatypeProperty. " +
-                optionalLabelStr +
-                "{?prop rdfs:label ?propLabel.  " +
-                Sparql_common.getLangFilter(sourceLabel, "propLabel") +
-                "}" +
-                "OPTIONAL{?prop owl:inverseOf ?inverseProp. " +
-                "OPTIONAL{?inverseProp rdfs:label ?inversePropLabel.  " +
-                Sparql_common.getLangFilter(sourceLabel, "inversePropLabel") +
-                "}}";
-        } else {
-            query +=
-                "   {?prop rdf:type owl:ObjectProperty. " +
-                optionalLabelStr +
-                "{?prop rdfs:label ?propLabel.  " +
-                Sparql_common.getLangFilter(sourceLabel, "propLabel") +
-                "}" +
-                "OPTIONAL{?prop owl:inverseOf ?inverseProp. " +
-                "OPTIONAL{?inverseProp rdfs:label ?inversePropLabel.  " +
-                Sparql_common.getLangFilter(sourceLabel, "inversePropLabel") +
-                "}}";
-        }
+        var propertyType = options.dataTypeProperties ? "owl:DatatypeProperty" : "owl:ObjectProperty";
+        query +=
+            "   {?prop rdf:type " +
+            propertyType +
+            ". " +
+            optionalLabelStr +
+            "{?prop rdfs:label ?propLabel.  " +
+            Sparql_common.getLangFilter(sourceLabel, "propLabel") +
+            "}" +
+            "OPTIONAL{?prop owl:inverseOf ?inverseProp. " +
+            "OPTIONAL{?inverseProp rdfs:label ?inversePropLabel.  " +
+            Sparql_common.getLangFilter(sourceLabel, "inversePropLabel") +
+            "}}";
 
         if (!options.searchType) {
             query +=
@@ -2137,6 +2125,7 @@ var Sparql_OWL = (function () {
      * @param {Function} callback - Error-first callback `(err, propsMap)` mapping property URI → `{prop, propLabel, subProps, domain, domainLabel, range, rangeLabel, inverseProp, inversePropLabel}`
      * @returns {err|Object} Throws an error or returns a map keyed by property URI with fields: `prop`, `propLabel`, `subProps`, `domain` (optional), `domainLabel` (optional), `range` (optional), `rangeLabel` (optional), `inverseProp` (optional), `inversePropLabel` (optional).
      * @expose read
+     * @mcpTool sls_property_schema
      */
     self.getInferredPropertiesDomainsAndRanges = function (sourceLabel, options, callback) {
         if (!options) {

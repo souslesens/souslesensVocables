@@ -411,15 +411,26 @@ var Lineage_createResource = (function () {
     /**
      * Starts the resource creation bot, which automates the creation of resources.
      * This function initiates the bot with the current source as a parameter.
+     *
+     * `prefill` carries answers the caller already has, `resourceType`, `resourceLabel`,
+     * `currentVocab` and `resourceId` for the superclass. The bot steps over the questions they
+     * answer and stops on the first one still open, so a caller knowing only the label still leaves
+     * the user choosing the superclass. Nothing is written: the user saves from the bot.
      * @function
      * @name startCreateRessourceBot
      * @memberof Lineage_createResource
+     * @param {Object} [prefill] - Bot parameters known in advance.
+     * @returns {void}
      */
-    self.startCreateRessourceBot = function () {
+    self.startCreateRessourceBot = function (prefill) {
         // reset precendent values to not add triples to another resource
         $("#editPredicate_objectValue").val("");
         $("#editPredicate_propertyValue").val("");
-        CreateResource_bot.start(null, { source: Lineage_sources.activeSource });
+        var botParams = { source: Lineage_sources.activeSource };
+        for (var prefilledKey in prefill || {}) {
+            botParams[prefilledKey] = prefill[prefilledKey];
+        }
+        CreateResource_bot.start(null, botParams);
     };
 
     /**

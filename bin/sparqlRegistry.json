@@ -617,12 +617,6 @@
                         "description": "Query `owl:DatatypeProperty` instead of `owl:ObjectProperty`"
                     },
                     {
-                        "name": "inheritedProperties",
-                        "type": "boolean",
-                        "required": false,
-                        "description": "Include inherited properties via `rdfs:subPropertyOf*`"
-                    },
-                    {
                         "name": "searchType",
                         "type": "string",
                         "required": false,
@@ -669,8 +663,7 @@
         "expose": true,
         "example": null,
         "summary": "Returns object (or datatype) properties with their domains, ranges, sub-properties and inverse properties: what links what to what in a source, which is how you answer \"can these two classes be related, and through which property\". Omit `domainIds` for the whole source's property schema. Annotation properties and plain RDF/OWL vocabulary legitimately have no declared domain or range, so an empty answer for one of those is not a defect.",
-        "access": "read",
-        "mcpTool": "sls_property_schema"
+        "access": "read"
     },
     {
         "name": "getObjectRestrictions",
@@ -1316,7 +1309,8 @@
         "expose": true,
         "example": null,
         "summary": "Returns all object properties of a source with their inferred domains, ranges, sub-properties and inverse properties (and their labels), assembled from a multi-`UNION` query and folded into a per-property map. Domains/ranges of inverse properties are also covered.",
-        "access": "read"
+        "access": "read",
+        "mcpTool": "sls_property_schema"
     },
     {
         "name": "getAllTriples",

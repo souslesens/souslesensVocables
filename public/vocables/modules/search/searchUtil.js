@@ -839,8 +839,11 @@ indexes.push(source.toLowerCase());
                             };
 
                             //var filter = "?id rdf:type ?type2. filter (?type= owl:NamedIndividual && ?type2!=?type)";
-                            //Filter on individuals = entities that are  type of a class
-                            var filter = "?id rdf:type ?type.?type rdf:type owl:Class";
+                            // Filter on individuals = entities that are type of a class.
+                            // ?id is locked to the source's own graph so individuals from imported
+                            // sources are never indexed here, while ?type rdf:type owl:Class is left
+                            // unscoped so a class defined in an import still validates the individual's type.
+                            var filter = "GRAPH <" + Config.sources[sourceLabel].graphUri + "> {?id rdf:type ?type} .?type rdf:type owl:Class";
                             //  filter+="?id <http://souslesens.org/KGcreator#mappingFile> 'dbo.V_jobcard'"
                             Sparql_OWL.getDictionary(
                                 sourceLabel,
@@ -848,7 +851,7 @@ indexes.push(source.toLowerCase());
                                     filter: filter,
                                     processorFectchSize: 100,
                                     skosPrefLabel: true,
-                                    withoutImports: true,
+                                    withoutImports: false,
                                     indexedPredicates: options.indexedPredicates,
                                 },
                                 processor,

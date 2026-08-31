@@ -30,7 +30,7 @@ var OntologyModels = (function () {
      *   nonObjectProperties: { [propUri]:  { id, label, domain, range } },
      *   constraints:         { [propUri]:  { domain, domainLabel, range, rangeLabel, label, superProp } },
      *   restrictions:        { [propUri]:  [ { domain, range, blankNodeId, ... } ] },
-     *   classesCount:        number
+     *   classesCount:        number (named owl:Class only, anonymous class expressions excluded)
      * }
      * ```
      * Classes are only loaded when `classesCount <= Config.ontologyModelMaxClasses`.
@@ -240,7 +240,10 @@ var OntologyModels = (function () {
 
                         // set model classes (if source not  declared in sources.json && classes.length<Config.ontologyModelMaxClasses)
                         function (callbackSeries) {
-                            var query = queryP + " select (count (distinct ?sub) as ?numberOfClasses)  FROM <" + graphUri + "> where{" + " ?sub rdf:type owl:Class.} ";
+                            // Anonymous nodes typed owl:Class (class expressions, orphan nodes left by imports) are not classes and must not be counted.
+                            // Same convention as Sparql_OWL.defaultTopClassFilter: recognised by the shape of the IRI, isBlank alone being unreliable.
+                            var namedClassFilter = " filter (!isBlank(?sub) && !STRSTARTS(STR(?sub),'nodeID://') && !STRSTARTS(STR(?sub),'_:')).";
+                            var query = queryP + " select (count (distinct ?sub) as ?numberOfClasses)  FROM <" + graphUri + "> where{" + " ?sub rdf:type owl:Class." + namedClassFilter + "} ";
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
@@ -261,7 +264,9 @@ var OntologyModels = (function () {
                                         " OPTIONAL {?superClass rdfs:label ?superClassLabel}}" +
                                         Sparql_common.getVariableLangLabel("sub", true, true) +
                                         //   " VALUES ?class {owl:Class rdf:class rdfs:Class} filter( !isBlank(?sub))} order by ?sub";
-                                        " VALUES ?class {owl:Class rdf:class rdfs:Class} .  filter (not exists{ ?superClass  rdf:type owl:Restriction}).filter( !isBlank(?sub)).} order by ?sub";
+                                        " VALUES ?class {owl:Class rdf:class rdfs:Class} .  filter (not exists{ ?superClass  rdf:type owl:Restriction})." +
+                                        namedClassFilter +
+                                        "} order by ?sub";
                                     Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                         if (err) {
                                             return callbackSeries(err);

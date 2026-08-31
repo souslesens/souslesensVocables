@@ -175,16 +175,25 @@ var SearchWidget = (function () {
                 return MainController.errorAlert(_err);
             }
 
-            if (callback) {
-                return callback(null, result);
-            }
+            var targetDiv = options.jstreeDiv || self.currentTargetDiv;
             if (Object.keys(result[0].matches).length == 0) {
-                return $("#" + (options.jstreeDiv || self.currentTargetDiv)).html("<b>No matches found</b>");
+                $("#" + targetDiv).html("<b>No matches found</b>");
+                if (callback) {
+                    return callback(null, result);
+                }
+                return;
             }
 
-            SearchWidget.searchResultToJstree(options.jstreeDiv || self.currentTargetDiv, result, options, function (err, _result) {
+            // the callback signals that the tree is drawn, so callers can chain on what the user now sees
+            SearchWidget.searchResultToJstree(targetDiv, result, options, function (err, _result) {
                 if (err) {
+                    if (callback) {
+                        return callback(err);
+                    }
                     return MainController.errorAlert(err);
+                }
+                if (callback) {
+                    return callback(null, result);
                 }
             });
         });

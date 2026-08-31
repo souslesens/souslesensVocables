@@ -28,13 +28,54 @@ var CreateResource_bot = (function () {
         self.myBotEngine.init(CreateResource_bot, workflow, null, function () {
             self.myBotEngine.startParams = startParams;
             self.params = { source: self.source || Lineage_sources.activeSource, resourceType: "", resourceLabel: "", currentVocab: "" };
+            // What the caller already knows is kept apart from what the user answers, so a step can
+            // be stepped over the first time it is reached and asked normally afterwards.
+            self.prefilledParams = {};
             if (_params)
                 for (var key in _params) {
                     self.params[key] = _params[key];
+                    self.prefilledParams[key] = _params[key];
                 }
             self.source = self.params.source || Lineage_sources.activeSource;
             self.myBotEngine.nextStep();
         });
+    };
+
+    /**
+     * A step whose answer came in with the start parameters: it is written into the conversation and
+     * stepped over instead of being asked. Consumed once, so the Previous button gets the question
+     * back rather than skipping forward again the moment the user reaches it.
+     *
+     * It is registered in the bot engine's own history exactly as `showList` and `promptValue`
+     * register a real answer, `history.step` and `history.VarFilling` alike. Skipping that
+     * bookkeeping used to leave the Previous button unable to see this step at all: `previousStep`
+     * walks back through `history.step` one entry at a time, and an unregistered step is invisible to
+     * it, so Previous from the step after it jumped over it and over every other unregistered step in
+     * between, landing two or three questions further back than one click should reach.
+     * @function
+     * @name usePrefilledStep
+     * @memberof CreateResource_bot
+     * @param {string} paramName - The workflow parameter the step fills.
+     * @param {string} [stepMessage] - What to show in the conversation, the value itself by default.
+     * @returns {boolean} True when the step was answered and the workflow already moved on.
+     */
+    self.usePrefilledStep = function (paramName, stepMessage) {
+        if (!self.prefilledParams || !self.prefilledParams[paramName]) {
+            return false;
+        }
+        var prefilledValue = self.prefilledParams[paramName];
+        delete self.prefilledParams[paramName];
+        var botEngine = self.myBotEngine;
+        if (!botEngine.history.step.includes(botEngine.history.currentIndex)) {
+            botEngine.history.step.push(botEngine.history.currentIndex);
+        }
+        botEngine.insertBotMessage(stepMessage || prefilledValue);
+        botEngine.history.VarFilling[botEngine.history.currentIndex] = {
+            VarFilled: paramName,
+            valueFilled: prefilledValue,
+        };
+        botEngine.nextStep(prefilledValue);
+        return true;
     };
 
     self.workflow_end = {
@@ -84,6 +125,9 @@ var CreateResource_bot = (function () {
 
     self.functions = {
         listResourceTypesFn: function (queryParams, varName) {
+            if (self.usePrefilledStep("resourceType")) {
+                return;
+            }
             var choices = [{ id: "owl:Class", label: "Class" }];
             if (Config.sources[self.source] && Config.sources[self.source].allowIndividuals) {
                 choices.push({ id: "owl:NamedIndividual", label: "Individual" });
@@ -96,6 +140,9 @@ var CreateResource_bot = (function () {
         },
 
         listVocabsFn: function () {
+            if (self.usePrefilledStep("currentVocab")) {
+                return;
+            }
             CommonBotFunctions.listVocabsFn(self.source, false, function (err, vocabs) {
                 if (err) {
                     return self.myBotEngine.abort(err);
@@ -106,10 +153,10 @@ var CreateResource_bot = (function () {
         },
 
         promptResourceLabelFn: function () {
+            if (self.usePrefilledStep("resourceLabel")) {
+                return;
+            }
             self.myBotEngine.promptValue("resource label ", "resourceLabel");
-            /*  self.params.resourceLabel = prompt("resource label ");
-            _botEngine.insertBotMessage(self.params.resourceLabel);
-            _botEngine.nextStep();*/
         },
 
         /**
@@ -122,6 +169,9 @@ var CreateResource_bot = (function () {
          * @returns {void}
          */
         listSuperClassesFn: function () {
+            if (self.usePrefilledStep("resourceId", Sparql_common.getLabelFromURI(self.params.resourceId))) {
+                return;
+            }
             if (self.params.currentVocab === "searchClass") {
                 var vocabs = [{ id: "allSources", label: "All Sources" }];
                 vocabs.push({ id: self.source, label: self.source });

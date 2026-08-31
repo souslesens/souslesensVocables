@@ -41,11 +41,20 @@ var GraphDecorationWidget = (function () {
         }
 
         $("#smallDialogDiv").dialog("close");
-        var newIds = [];
+        self.applyDecoration(nodes, $("#lineage_decorate_colorSelect").val(), $("#lineage_decorate_shapeSelect").val(), $("#lineage_decorate_sizeInput").val());
+    };
 
-        var color = $("#lineage_decorate_colorSelect").val();
-        var shape = $("#lineage_decorate_shapeSelect").val();
-        var size = $("#lineage_decorate_sizeInput").val();
+    /**
+     * Restyle nodes on the whiteboard. Split out of `decorateNodes` so a caller that already knows
+     * what to apply, rather than reading it from the dialog, does not restate the update.
+     * @param {Array} nodes - Node ids, or node objects carrying `data`.
+     * @param {string} [color] - CSS colour, left as it is when absent.
+     * @param {string} [shape] - vis.js shape, left as it is when absent.
+     * @param {number|string} [size] - Node size, left as it is when absent.
+     * @returns {number} How many nodes were restyled.
+     */
+    self.applyDecoration = function (nodes, color, shape, size) {
+        var restyledNodes = [];
         nodes.forEach(function (node) {
             var id;
             if (typeof node === "object") {
@@ -57,19 +66,20 @@ var GraphDecorationWidget = (function () {
             } else {
                 id = node;
             }
-            var obj = { id: id };
+            var restyledNode = { id: id };
             if (color) {
-                obj.color = color;
+                restyledNode.color = color;
             }
             if (shape) {
-                obj.shape = shape;
+                restyledNode.shape = shape;
             }
             if (size) {
-                obj.size = parseInt(size);
+                restyledNode.size = parseInt(size);
             }
-            newIds.push(obj);
+            restyledNodes.push(restyledNode);
         });
-        Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newIds);
+        Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(restyledNodes);
+        return restyledNodes.length;
     };
 
     self.getNodeDecorationAttrs = function (nodeId) {

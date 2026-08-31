@@ -2453,11 +2453,16 @@ var Lineage_whiteboard = (function () {
      * @param {Object} sparqlResults.domainLabel - The label for the domain.
      * @returns {void}
      */
-    self.drawProperties = function (sparqlResults) {
+    self.drawProperties = function (sparqlResults, source) {
         var visjsData = { nodes: [], edges: [] };
         var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
         self.currentExpandLevel += 1;
+        var physics = true;
         sparqlResults.forEach(function (item) {
+            // A row may carry its own source, as the ones lineage_draw_triples builds for the chat
+            // bot do; a row coming from drawObjectProperties has none and falls back to the source
+            // that function queried, or to the active source as a last resort.
+            var itemSource = item.source || source || Lineage_sources.activeSource;
             if (!item.range) {
                 item.range = { value: "?_" + item.prop.value };
             }
@@ -2475,10 +2480,10 @@ var Lineage_whiteboard = (function () {
                     shadow: self.nodeShadow,
                     shape: Lineage_whiteboard.defaultShape,
                     size: Lineage_whiteboard.defaultShapeSize,
-                    color: self.getSourceColor(source, item.range.value),
+                    color: self.getSourceColor(itemSource, item.range.value),
                     level: self.currentExpandLevel,
                     data: {
-                        source: source,
+                        source: itemSource,
                         id: item.range.value,
                         label: item.rangeLabel.value,
                         varName: "range",
@@ -2503,7 +2508,7 @@ var Lineage_whiteboard = (function () {
                         from: item.range.value,
                         to: item.domain.value,
                         label: "<i>" + item.propLabel.value + "</i>",
-                        data: { propertyId: item.prop.value, source: source },
+                        data: { propertyId: item.prop.value, source: itemSource },
                         font: { multi: true, size: 10 },
                         // font: {align: "middle", ital: {color:Lineage_whiteboard.objectPropertyColor, mod: "italic", size: 10}},
                         //   physics:false,
@@ -2582,7 +2587,7 @@ var Lineage_whiteboard = (function () {
                         UI.message("No data found", true);
                         return callback(null, 0);
                     }
-                    self.drawProperties(result);
+                    self.drawProperties(result, source);
                     return callback(null, result.length);
                 },
             );
@@ -2603,7 +2608,7 @@ var Lineage_whiteboard = (function () {
                     item.prop = { value: item.prop.value };
                     item.propLabel = { value: item.propLabel.value };
                 });
-                self.drawProperties(result);
+                self.drawProperties(result, source);
                 return callback(null, result.length);
             });
         }

@@ -9,7 +9,7 @@ import Axiom_UI from "./axiom_UI.js";
 var NodeInfosAxioms = (function () {
     var self = {};
 
-    self.init = function (source, resource, divId) {
+    self.init = function (source, resource, divId, callback) {
         self.currentSource = source;
         self.currentResource = resource;
         self.currentResource.level = 0;
@@ -30,6 +30,9 @@ var NodeInfosAxioms = (function () {
                     var graphDivId = "nodeInfosAxioms_graphDiv";
                     var options = {};
                     Axioms_graph.drawNodeAxioms2(self.currentResource.data.source, self.currentResource.data.id, triples, graphDivId, options);
+                    if (callback) {
+                        callback();
+                    }
                 });
             });
         });

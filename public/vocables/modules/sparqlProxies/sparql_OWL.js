@@ -1339,13 +1339,15 @@ var Sparql_OWL = (function () {
         query += Sparql_common.getVariableLangLabel("value", true);
 
         if (options.getMetadata) {
+            // each metadata property is optional on its own: a restriction carrying none of them
+            // must still be returned, and one carrying only some must keep the ones it has
             query +=
-                " ?node  <https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status>" +
-                " ?status.?node <http://purl.org/dc/terms/created> ?creationDate. " +
-                "?node  <http://purl.org/dc/terms/creator> ?creator." +
-                "?node  <http://purl.org/dc/terms/source> ?provenance." +
-                "?node <http://data.souslesens.org/property#domainSourceLabel> ?domainSourceLabel." +
-                "?node <http://data.souslesens.org/property#rangeSourceLabel> ?rangeSourceLabel.";
+                " optional {?node <https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status> ?status.}" +
+                " optional {?node <http://purl.org/dc/terms/created> ?creationDate.}" +
+                " optional {?node <http://purl.org/dc/terms/creator> ?creator.}" +
+                " optional {?node <http://purl.org/dc/terms/source> ?provenance.}" +
+                " optional {?node <http://data.souslesens.org/property#domainSourceLabel> ?domainSourceLabel.}" +
+                " optional {?node <http://data.souslesens.org/property#rangeSourceLabel> ?rangeSourceLabel.}";
         }
 
         var filter2 = options.filter;

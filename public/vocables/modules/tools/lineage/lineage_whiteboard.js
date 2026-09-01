@@ -5484,11 +5484,11 @@ attrs.color=self.getSourceColor(superClassValue)
     /**
      * Where the user is in Lineage right now: the tool state an agent cannot read from the server.
      * @function
-     * @name getAgentContext
+     * @name getWhiteboardContext
      * @memberof module:Lineage_whiteboard
      * @returns {Object} Active tab and source, loaded sources, board size, selection size.
      */
-    self.getAgentContext = function () {
+    self.getWhiteboardContext = function () {
         var openTabName = null;
         for (var tabName in self.lineageTabs) {
             if ($("#" + self.lineageTabs[tabName].tabId).css("display") === "block") {

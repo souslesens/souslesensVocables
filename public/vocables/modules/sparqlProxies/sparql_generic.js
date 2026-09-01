@@ -100,9 +100,9 @@ var Sparql_generic = (function () {
     /**
      * Returns the roots of a source's class or concept hierarchy by delegating to its controller
      * (`Sparql_OWL` or `Sparql_SKOS`), so it works on an OWL and on a SKOS source alike.
-     * Returns nothing when every class of the source chains into an upper ontology such as BFO or
-     * IOF, because the default top-class filter then matches no node: retry with
-     * `options.skipTopClassFilter` in that case.
+     * The roots are those of the source alone: what it imports is left out of the query, so a class
+     * whose only parent lives in an upper ontology such as BFO or IOF is reported as a root here.
+     * Ask for the source that holds them to get the roots of the imported ontologies themselves.
      * @function
      * @name getTopConcepts
      * @memberof module:Sparql_generic
@@ -115,6 +115,8 @@ var Sparql_generic = (function () {
      * @returns {err|Array} Throws an error or returns the delegated controller's top-concept bindings.
      * @expose read
      * @mcpTool sls_top_concepts
+     * @mcpFixed options.withoutImports=true
+     * @mcpFixed options.skipTopClassFilter=false
      */
     self.getTopConcepts = function (sourceLabel, options, callback) {
         $("#waitImg").css("display", "block");

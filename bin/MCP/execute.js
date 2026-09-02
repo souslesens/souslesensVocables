@@ -141,9 +141,8 @@ function flattenBindingRow(row) {
 
 /**
  * Reduce SPARQL bindings to plain `{variable: value}` rows, wherever they appear in the payload.
- * Recognises the three shapes SLS actually returns: a bare array of bindings, the full
- * `{head, results: {bindings}}` envelope, and `{hierarchies, rawResult}` from
- * getNodesAncestorsOrDescendants.
+ * Recognises the two shapes SLS actually returns: a bare array of bindings, and the full
+ * `{head, results: {bindings}}` envelope.
  * @param {*} payload
  * @returns {*} The payload with its bindings flattened, unchanged when it holds none
  */
@@ -171,9 +170,6 @@ export function flattenSparqlResult(payload) {
 
     if (payload.results && Array.isArray(payload.results.bindings)) {
         return { ...payload, results: { ...payload.results, bindings: flattenSparqlResult(payload.results.bindings) } };
-    }
-    if (Array.isArray(payload.rawResult)) {
-        return { ...payload, rawResult: flattenSparqlResult(payload.rawResult) };
     }
     return payload;
 }
@@ -298,21 +294,64 @@ function acceptsLimitOption(registryEntry) {
 }
 
 /**
- * @param {*} payload - Flattened tool payload, in any of the three shapes the SPARQL layer returns
- * @returns {number|null} Row count, or null when the payload carries no rows
+ * Maps every top-level key of a payload that carries rows to how many it carries.
+ *
+ * An array counts itself, and an object whose own values are arrays counts the sum of those
+ * (`{hierarchies: {id: [...]}}`). An object with no arrays inside falls back to its own key count, but
+ * only once there are two or more such fallback candidates to set side by side, as in
+ * `{classesMap: {...2834 entries}, labels: {}}`: a lone one is indistinguishable from a single
+ * document's own fields (`{someDocument: {key: "value"}}`) and is left out rather than guessed at.
+ * @param {*} payload
+ * @returns {Object<string, number>} One entry per row-bearing key, empty when the payload has none
+ */
+function rowCountsByKey(payload) {
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+        return {};
+    }
+    const strictCounts = {};
+    const fallbackCounts = {};
+    for (const [key, value] of Object.entries(payload)) {
+        if (Array.isArray(value)) {
+            strictCounts[key] = value.length;
+            continue;
+        }
+        if (value && typeof value === "object") {
+            const nestedArrays = Object.values(value).filter(Array.isArray);
+            if (nestedArrays.length > 0) {
+                strictCounts[key] = nestedArrays.reduce((total, array) => total + array.length, 0);
+            } else {
+                fallbackCounts[key] = Object.keys(value).length;
+            }
+        }
+    }
+    if (Object.keys(fallbackCounts).length < 2 && Object.keys(strictCounts).length === 0) {
+        return {};
+    }
+    return { ...strictCounts, ...fallbackCounts };
+}
+
+/**
+ * A single figure for comparing a count against a limit, valid only when the payload resolves to
+ * exactly one row-bearing shape. Two distinct ones at once (say a results array and a separate
+ * warnings array) are not summed together: nothing here knows whether they count the same kind of
+ * thing, so `rowCeilingNotice` falls back to reporting the breakdown from `rowCountsByKey` instead.
+ * @param {*} payload - Flattened tool payload, in any of the shapes the SPARQL layer returns
+ * @returns {number|null} Row count, or null when it is zero or ambiguous
  */
 function countPayloadRows(payload) {
     if (Array.isArray(payload)) {
         return payload.length;
     }
-    if (payload && payload.results && Array.isArray(payload.results.bindings)) {
-        return payload.results.bindings.length;
+    const counts = rowCountsByKey(payload);
+    const countedKeys = Object.keys(counts);
+    if (countedKeys.length === 1) {
+        return counts[countedKeys[0]];
     }
-    if (payload && Array.isArray(payload.rawResult)) {
-        return payload.rawResult.length;
-    }
-    if (payload && Array.isArray(payload.hits)) {
-        return payload.hits.length;
+    if (countedKeys.length === 0 && payload && typeof payload === "object") {
+        // Nothing countable one level in: the payload may itself be a flat map of rows (getLabelsMap's
+        // {uri: label, ...}), but a single key here is a document's own field, not a row, same as above.
+        const ownKeyCount = Object.keys(payload).length;
+        return ownKeyCount >= 2 ? ownKeyCount : null;
     }
     return null;
 }
@@ -326,7 +365,8 @@ const rowCountWorthDoubting = 1000;
 // hint: it sends the agent to an endpoint that cannot answer the question it was told to ask.
 const escalationForSparql =
     `Establish the real total with sls_sparql_select and SELECT (COUNT(*) AS ?total) on the same pattern before quoting a figure, ` +
-    `then either raise options.limit to cover it, narrow the question, or hand the same pattern to sls_sparql_select with collect true, which walks the whole set.`;
+    `then either raise options.limit to cover it, narrow the question, or hand the same pattern to sls_sparql_select with collect true, which walks the whole set against the endpoint. ` +
+    `That answer can still be too large for one response: if so, its own truncation notice names sls_result_page, which searches it without reading it all.`;
 const escalationForElastic =
     `Hits are returned best-scoring first, so what is missing is the weaker matches, not a random remainder. ` +
     `Raise size to see further down the ranking, or get exact per-index totals with sls_count_labels_by_source, which counts rather than lists.`;
@@ -351,13 +391,12 @@ const escalationForElastic =
  * @param {number|undefined} ceilingContext.appliedRowLimit - Ceiling this server asked for, when it asked for one
  * @param {object|null} [ceilingContext.sparqlExecution] - Facts reported by the route about the queries it ran
  * @param {string} ceilingContext.escalation - What the agent should do next about a cut
- * @returns {object|null} Notice for the response envelope, or null when the payload carries no rows
+ * @returns {object|null} Notice for the response envelope; `returnedRows` when the payload resolves to
+ *   one row-bearing shape, `rowCountsByKey` instead when it has none or several and the queries this
+ *   call ran are still known; null when neither the payload nor the queries have anything to report
  */
 export function rowCeilingNotice(payload, ceilingContext) {
     const returnedRows = countPayloadRows(payload);
-    if (returnedRows === null) {
-        return null;
-    }
     const { appliedRowLimit, sparqlExecution, escalation } = ceilingContext;
 
     // The route measured the queries themselves, which is the only account that covers a limit this
@@ -365,7 +404,7 @@ export function rowCeilingNotice(payload, ceilingContext) {
     // is a cut. A function that pages internally ends either on a ceiling, its last block full, or
     // on the end of the data, its last block short. The same test reads both.
     if (sparqlExecution && sparqlExecution.queryCount > 0) {
-        const { lastLimit, lastRows, totalRows, queryCount, endpointCeiling } = sparqlExecution;
+        const { lastLimit, lastRows, endpointCeiling } = sparqlExecution;
         let knownCeiling = null;
         if (lastLimit && endpointCeiling) {
             knownCeiling = Math.min(lastLimit, endpointCeiling);
@@ -383,14 +422,13 @@ export function rowCeilingNotice(payload, ceilingContext) {
             completeness = true;
         }
 
-        const notice = { returnedRows: returnedRows, knownCeiling: knownCeiling, atKnownCeiling: atKnownCeiling, complete: completeness };
-        // Rows the function read against rows it handed back: a function that groups or maps its
-        // bindings returns fewer, and without this the ceiling figures look unrelated to the answer.
-        if (totalRows !== returnedRows) {
-            notice.sparqlRows = totalRows;
-        }
-        if (queryCount > 1) {
-            notice.sparqlQueries = queryCount;
+        const notice = { knownCeiling: knownCeiling, atKnownCeiling: atKnownCeiling, complete: completeness };
+        if (returnedRows === null) {
+            // The payload has none or several row-bearing keys, so no single count can be vouched for:
+            // report what was actually found under each key instead of staying silent about the cut.
+            notice.rowCountsByKey = rowCountsByKey(payload);
+        } else {
+            notice.returnedRows = returnedRows;
         }
 
         if (atKnownCeiling) {
@@ -401,12 +439,18 @@ export function rowCeilingNotice(payload, ceilingContext) {
             notice.hint =
                 `Cut: the last query this call ran came back with ${lastRows} rows against ${whichCeiling}, so this is a prefix of the result, not the result. ` +
                 `Never present it to the user as the whole set. ${escalation}`;
-        } else if (completeness === "unknown" && returnedRows >= rowCountWorthDoubting) {
+        } else if (completeness === "unknown" && returnedRows !== null && returnedRows >= rowCountWorthDoubting) {
             notice.hint =
                 `Possibly cut: nothing here proves this answer is whole, because this endpoint's own row cap could not be established and endpoints truncate silently. ` +
                 `Do not call it the whole set until a count agrees with it. ${escalation}`;
         }
         return notice;
+    }
+
+    // Below this point every branch compares returnedRows against a limit, which needs one resolved
+    // count: a payload with none or several row-bearing keys has nothing to report here.
+    if (returnedRows === null) {
+        return null;
     }
 
     // A search engine counts what it did not return, so completeness needs no inference here. The
@@ -449,6 +493,52 @@ export function rowCeilingNotice(payload, ceilingContext) {
     return notice;
 }
 
+// Only the base URI cell of a level (`child1`, `child2`, …), never its `child1Label`/`child1Type`/
+// `child1IsBlankNode` siblings, which is why the digits must run to the end of the key.
+const childDepthKeyRegex = /^child(\d+)$/;
+
+/**
+ * How many `descendantsDepth` levels actually carried data, against how many were asked for.
+ *
+ * A row exposes `child1`..`childN` only for the levels the recursive `OPTIONAL` chain in
+ * `getNodeChildren` actually bound: an unbound optional variable is absent from the SPARQL JSON row
+ * entirely, not present with a null value. So the highest bound `childN` across every row is the
+ * true depth reached, and it is the only way to tell "the hierarchy genuinely ends here" apart from
+ * "the depth parameter did nothing" — both look identical otherwise (SLS-02).
+ * @param {*} rows - Flattened tool payload, expected to be an array of child rows
+ * @param {number} requestedDepth
+ * @returns {object|null} `{requestedDepth, depthReached, hint?}`, or null when the payload is not row-shaped
+ */
+function depthReachedNotice(rows, requestedDepth) {
+    if (!Array.isArray(rows) || !Number.isFinite(requestedDepth)) {
+        return null;
+    }
+    let depthReached = 0;
+    for (const row of rows) {
+        if (!row || typeof row !== "object") {
+            continue;
+        }
+        for (const [key, value] of Object.entries(row)) {
+            const depthMatch = key.match(childDepthKeyRegex);
+            if (depthMatch && value !== null && value !== undefined && Number(depthMatch[1]) > depthReached) {
+                depthReached = Number(depthMatch[1]);
+            }
+        }
+    }
+    const notice = { requestedDepth: requestedDepth, depthReached: depthReached };
+    if (rows.length === 0) {
+        // No row at all, not just a missing deeper key: child1 is bound by the query's base pattern
+        // whenever any row matches, so an empty result is a plain "no children", nothing to re-query.
+        notice.hint = `Requested depth ${requestedDepth}, but the query returned no rows: this node has no children at any depth, not an ambiguous partial result.`;
+    } else if (depthReached < requestedDepth) {
+        notice.hint =
+            `Requested depth ${requestedDepth}, but no row carries a bound child${depthReached + 1}. ` +
+            `This may mean the hierarchy genuinely ends at depth ${depthReached}, or that levels past it were never reached — ` +
+            `call sls_node_children again on the child${depthReached} URIs to tell the two apart before reporting the hierarchy as complete.`;
+    }
+    return notice;
+}
+
 /**
  * Run a promoted registry function: agent arguments already use the function's own parameter names,
  * so only the `@mcpFixed` values and the default limit are added.
@@ -474,7 +564,11 @@ async function executeSparqlTool(descriptor, toolArguments) {
     }
     const flattenedData = flattenSparqlResult(result.data);
     const ceilingContext = { appliedRowLimit: namedParams.options?.limit, sparqlExecution: result.sparqlExecution, escalation: escalationForSparql };
-    return { ...result, data: flattenedData, rowCeiling: rowCeilingNotice(flattenedData, ceilingContext) };
+    const response = { ...result, data: flattenedData, rowCeiling: rowCeilingNotice(flattenedData, ceilingContext) };
+    if (namedParams.descendantsDepth !== undefined) {
+        response.depthCeiling = depthReachedNotice(flattenedData, Number(namedParams.descendantsDepth));
+    }
+    return response;
 }
 
 // ---------------------------------------------------------------------------

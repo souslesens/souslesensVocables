@@ -394,7 +394,7 @@
         ],
         "returns": {
             "type": "err|Object",
-            "description": "Throws an error or returns `{hierarchies, rawResult}`; each `rawResult` binding contains `subject`, `class`, `type`, `classLabel` (optional), `superClass`, `superClassType`, `superClassSubClass`, `superClassLabel` (optional), `subjectTypes`."
+            "description": "Throws an error or returns `{hierarchies}`; each hierarchy entry is a binding with `subject`, `class`, `type`, `classLabel` (optional), `superClass`, `superClassType`, `superClassSubClass`, `superClassLabel` (optional), `subjectTypes`."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
@@ -1373,7 +1373,7 @@
     {
         "name": "generateOWL",
         "module": "Sparql_OWL",
-        "description": "Serialises a source to Turtle by paginating `DESCRIBE ?s ?p ?o` queries (`text/turtle` Accept header) in pages of 1000, separating `@prefix` lines from the body and concatenating everything into a single Turtle document.",
+        "description": "Serialises a source to Turtle by paginating `DESCRIBE ?s ?p ?o` queries (`text/turtle` Accept header) in pages of 1000, separating `@prefix` lines from the body and concatenating everything into a single Turtle document. Not exposed: its only caller, lineage_sources.js's exportOWL, is itself never invoked from any UI element, and this crashes outright through the MCP/RemoteCodeRunner path (`result.result` is undefined there for a non-JSON Accept header). Unused and non-functional outside a real browser.",
         "params": [
             {
                 "name": "sourceLabel",
@@ -1401,9 +1401,9 @@
             "description": "Throws an error or returns the source serialized as a Turtle string."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
+        "expose": false,
         "example": null,
-        "access": "read"
+        "summary": "Serialises a source to Turtle by paginating `DESCRIBE ?s ?p ?o` queries (`text/turtle` Accept header) in pages of 1000, separating `@prefix` lines from the body and concatenating everything into a single Turtle document."
     },
     {
         "name": "getDistinctClassLabels",

@@ -235,6 +235,11 @@ function toCallToolResult(descriptor, result) {
     if (result.rowCeiling) {
         envelope.rowCeiling = result.rowCeiling;
     }
+    // Same reasoning as rowCeiling: only present on tools that took a depth parameter
+    // (descendantsDepth), so it stays out of the envelope everywhere else.
+    if (result.depthCeiling) {
+        envelope.depthCeiling = result.depthCeiling;
+    }
 
     // Two different cuts land in the same envelope and only one of them is about the data. `truncation`
     // counts the rows the tool handed this server, so `totalRows` is the size of the payload and never

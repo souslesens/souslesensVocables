@@ -145,10 +145,11 @@ Three failures, three different repairs, and they are not interchangeable.
 
 **A sort refused.** `SR353: Sorted TOP clause specifies more then N rows to sort. Only 10000 are
 allowed.` Nothing here is too large. The ceiling counts the rows the endpoint is _asked_ to sort,
-which is your LIMIT plus your OFFSET, never the rows the query returns. A query that declares no
-LIMIT receives the platform one, so an `ORDER BY` alone is refused even when the answer is 170 rows.
-Add an explicit `LIMIT 10000` or less and the identical query runs, or drop the `ORDER BY` and sort
-the rows yourself once you have them.
+which is your LIMIT plus your OFFSET, never the rows the query returns, so a sorted query asking for
+20000 rows is refused even when its whole answer is 170. An `ORDER BY` carrying no LIMIT of its own is
+not refused: nothing is appended to it here, and it sorts up to the endpoint's own row ceiling. Lower
+your LIMIT to 10000 or less, or leave it out entirely, or drop the `ORDER BY` and sort the rows
+yourself once you have them.
 
 **A timeout, meaning nothing came back at all.** The pattern is the problem, not the size, so a
 smaller LIMIT changes nothing: the endpoint walks the pattern before it applies one. Bind it, with an

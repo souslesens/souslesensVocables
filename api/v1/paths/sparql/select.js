@@ -1,10 +1,9 @@
 import ConfigManager from "../../../../bin/configManager.js";
 import httpProxy from "../../../../bin/httpProxy.js";
 import UserRequestFiltering from "../../../../bin/userRequestFiltering.js";
-// The row ceiling lives with the MCP configuration rather than here: this route and the catalog
-// functions answer the same agents, and two ceilings drifting apart would make a raw SELECT and a
-// catalog call return at different scales for no reason a caller could see. The module reads
-// environment variables and nothing else, so importing it costs no MCP machinery.
+// Imported for the request timeout the tool description quotes, so the figure an agent is told
+// matches the one the MCP server actually enforces. The module reads environment variables and
+// nothing else, so importing it costs no MCP machinery.
 import { mcpConfig } from "../../../../bin/MCP/config.js";
 import { describeExecutionError } from "../../../../bin/sparqlQueriesRunner.js";
 // Shared with /sparqlQueries/run so a catalog call and a raw SELECT judge their own completeness
@@ -103,23 +102,23 @@ function withDatasetClause(query, datasetClause) {
     return null;
 }
 
-// A SELECT with no LIMIT on a multi-million-triple graph is a full scan. Agents write those, so the
-// route caps what they did not cap themselves, at the ceiling the MCP layer is willing to hold.
-// Nothing pages below that: the caller gets the set in one answer, and the MCP result store keeps
-// whatever did not fit the response budget. Virtuoso's own `ResultSetMaxRows` usually bites first,
-// but it is configuration this code does not own and an external endpoint may have none at all, so
-// the ceiling stays explicit here rather than being left to the server on the other end.
+// The caller's own LIMIT, read to judge completeness and never to enforce anything: a query that
+// comes back with exactly as many rows as it asked for is a prefix, whatever the endpoint's ceiling.
 //
-// The cap is decided on the tail alone, meaning what follows the last closing brace, because that is
+// A query declaring none is forwarded as it stands. This route used to append
+// `MCP_MAX_COLLECTED_ROWS` to it, and that cap cost more than it bought. It bounds no cost, since the
+// endpoint scans the pattern before applying any LIMIT, and it bounds no payload on an endpoint
+// declaring its own `ResultSetMaxRows`, which is lower. What it did bound was `ORDER BY`: Virtuoso
+// compiles a sorted LIMIT/OFFSET into a sorted TOP whose buffer it refuses past 10000 rows (SR353),
+// counting the window asked for and never the rows returned, so an appended `LIMIT 500000` made every
+// sorted query fail, one whose whole answer was 3008 rows included. Measured against this platform's
+// instance: the identical query with no LIMIT at all sorts and returns up to `ResultSetMaxRows`.
+//
+// The limit is read from the tail alone, meaning what follows the last closing brace, because that is
 // where SPARQL puts the outer query's solution modifiers. Two things depend on it. A LIMIT belonging
-// to a sub-SELECT sits before that brace and must not be mistaken for the outer one, or the outer
-// query goes out unbounded. And `LIMIT n OFFSET n`, the ordinary way to page through a result set,
-// must be recognised: an end-anchored test misses it because OFFSET trails it, appends a second
-// LIMIT, and every paged request dies of a syntax error while `OFFSET n LIMIT n` survives. That
-// asymmetry is invisible to the caller and makes pagination fail at random.
-//
-// OFFSET without LIMIT still gets one appended, which is legal: SPARQL accepts the two clauses in
-// either order.
+// to a sub-SELECT sits before that brace and is not the outer one. And `LIMIT n OFFSET n`, the
+// ordinary way to page through a result set, must be recognised: an end-anchored test misses it
+// because OFFSET trails it, and the answer would then be judged against a ceiling nobody applied.
 const tailLimitRegex = /\bLIMIT\s+(\d+)/i;
 
 // Above this many rows, an answer is large enough that mistaking a prefix for the whole set changes
@@ -137,11 +136,12 @@ const collectBatchSize = 10000;
 /**
  * Say what this answer does and does not prove about its own completeness.
  *
- * Two ceilings can cut a result, and only one of them is ours. Virtuoso stops at `ResultSetMaxRows`
- * and announces nothing: measured on this platform's instance it serves 20 000 rows and no more, so
- * a query capped there while our LIMIT says 50 000 comes back looking like a complete answer of
- * 20 000 rows. Comparing the count against our own ceiling alone therefore proves nothing in exactly
- * the case that occurs in practice.
+ * Two ceilings can cut a result and neither belongs to this route, which appends nothing to a
+ * caller's query. The caller's own LIMIT is one of them: a query returning exactly the rows it asked
+ * for is a prefix. Virtuoso's `ResultSetMaxRows` is the other, and it announces nothing: measured on
+ * this platform's instance it serves 20 000 rows and no more, so a query capped there comes back
+ * looking exactly like a complete answer of 20 000 rows. Counting the rows therefore proves nothing
+ * on its own, in exactly the case that occurs in practice.
  *
  * That is why the endpoint's ceiling is discovered rather than assumed, either from the probe or
  * from a `sparql_server.maxRows` declaration. With it, `complete` is a real answer: false on the
@@ -151,7 +151,8 @@ const collectBatchSize = 10000;
  * the difference to change a conclusion.
  *
  * @param {object} sparqlResults - SPARQL 1.1 JSON results, forwarded otherwise untouched.
- * @param {number} effectiveRowCeiling - Lowest ceiling this code knows to be in force.
+ * @param {number|null} effectiveRowCeiling - Lowest ceiling known to be in force, null when neither
+ *   the caller nor the endpoint declared one.
  * @param {boolean} isEndpointCeilingKnown - Whether the source declared the endpoint's own cap.
  */
 function withRowCeilingNotice(sparqlResults, effectiveRowCeiling, isEndpointCeilingKnown) {
@@ -161,7 +162,7 @@ function withRowCeilingNotice(sparqlResults, effectiveRowCeiling, isEndpointCeil
     }
 
     const returnedRows = bindings.length;
-    const isAtKnownCeiling = returnedRows >= effectiveRowCeiling;
+    const isAtKnownCeiling = effectiveRowCeiling !== null && returnedRows >= effectiveRowCeiling;
     // Only a source that declares its endpoint's cap can be answered with a plain yes: below a
     // ceiling nobody declared, an unannounced cut and a complete answer are the same observation.
     let completeness = "unknown";
@@ -182,7 +183,7 @@ function withRowCeilingNotice(sparqlResults, effectiveRowCeiling, isEndpointCeil
             `Note this is paging a result that is merely large, which is cheap. Paging a query that is merely slow is not: there, split on an indexed value instead.`;
     } else if (!isEndpointCeilingKnown && returnedRows >= rowCountWorthDoubting) {
         notice.hint =
-            `Possibly cut: ${returnedRows} rows is below the ceiling this route applies (${effectiveRowCeiling}), but this endpoint's own limit could not be established and endpoints truncate silently. ` +
+            `Possibly cut: this endpoint's own limit could not be established and endpoints truncate silently, so ${returnedRows} rows may be a prefix. ` +
             `Do not treat this as the whole set until a SELECT (COUNT(*) AS ?total) on the same pattern agrees with ${returnedRows}. ` +
             `Declaring sparql_server.maxRows on this source would settle it once and remove this warning.`;
     }
@@ -268,13 +269,7 @@ export default function () {
                 const lastClosingBraceIndex = trimmedQuery.lastIndexOf("}");
                 const solutionModifiers = lastClosingBraceIndex === -1 ? trimmedQuery : trimmedQuery.slice(lastClosingBraceIndex + 1);
                 const callerLimitMatch = solutionModifiers.match(tailLimitRegex);
-                let limitedQuery = trimmedQuery;
-                let appliedRowCeiling = mcpConfig.maxCollectedRows;
-                if (callerLimitMatch) {
-                    appliedRowCeiling = Number(callerLimitMatch[1]);
-                } else {
-                    limitedQuery = `${trimmedQuery} LIMIT ${appliedRowCeiling}`;
-                }
+                const callerRowLimit = callerLimitMatch ? Number(callerLimitMatch[1]) : null;
 
                 const endpointAuth = endpointAuthForUrl(endpointUrl);
 
@@ -284,9 +279,11 @@ export default function () {
                 discoverEndpointLimits(endpointUrl, endpointAuth, function (endpointLimits) {
                     const endpointRowCeiling = declaredEndpointMaxRows ?? endpointLimits.rowCeiling;
                     const isEndpointCeilingKnown = endpointRowCeiling !== null;
-                    const effectiveRowCeiling = isEndpointCeilingKnown ? Math.min(appliedRowCeiling, endpointRowCeiling) : appliedRowCeiling;
+                    const candidateCeilings = [callerRowLimit, endpointRowCeiling];
+                    const knownCeilings = candidateCeilings.filter((ceiling) => ceiling !== null);
+                    const effectiveRowCeiling = knownCeilings.length > 0 ? Math.min(...knownCeilings) : null;
 
-                    const params = { query: limitedQuery, format: "json" };
+                    const params = { query: trimmedQuery, format: "json" };
                     if (endpointAuth) {
                         params.auth = { ...endpointAuth };
                     }
@@ -343,8 +340,8 @@ export default function () {
             "`UserRequestFiltering.filterSparqlRequest`, which restricts it to graphs the caller may read. " +
             "A query declaring neither `FROM` nor `GRAPH` is scoped to the source's own graph, and to the graphs it imports unless `withImports` is false, " +
             "so `source` bounds what the query reads instead of only choosing the endpoint. " +
-            `A query with no trailing \`LIMIT\` receives the ceiling the MCP layer is willing to hold in one answer (\`MCP_MAX_COLLECTED_ROWS\`, ${mcpConfig.maxCollectedRows} by default), ` +
-            "which is also what makes an `ORDER BY` without a LIMIT of its own fail on Virtuoso's 10000-row sort ceiling. " +
+            "A query with no `LIMIT` of its own is forwarded as it stands, nothing appended: the endpoint's own row ceiling bounds the answer, and the `rowCeiling` block of the response says whether it was reached. " +
+            "So an `ORDER BY` runs here exactly as it does against the endpoint itself. " +
             "Prefer `sls_run_query_function` when a catalog function already answers the question: it is parameterised, tested, and cheaper to call.",
         operationId: "sparqlSelect",
         // `url` is deliberately absent from `body`: the MCP server builds the request only from the
@@ -367,9 +364,9 @@ export default function () {
                         "Every answer carries `elapsedMs`, what the endpoint spent on it, so measure rather than guess: strip one element at a time and re-run to find which one carries the cost. " +
                         "Two different problems, two different remedies, and confusing them wastes a lot of time. " +
                         "A result that is merely LARGE gets cut at the endpoint's row ceiling and the rest stays reachable: set collect true and the whole set is walked for you, or re-run with OFFSET block after block until one comes back short. " +
-                        `ORDER BY is the one clause that fails on its own: Virtuoso caps a sorted query at 10000 rows counted as your LIMIT plus your OFFSET, not as the rows it returns, and a query declaring no LIMIT receives the platform ceiling of ${mcpConfig.maxCollectedRows}, ` +
-                        "so an ORDER BY is refused with SR353 even when the answer is a hundred rows. Give it an explicit LIMIT of 10000 or less and the identical query runs, or drop it and sort the rows yourself. " +
-                        "Either way do not page with it: an ordered walk dies on its second block, while unsorted blocks come back in the endpoint's scan order, which is stable for an unchanging store. " +
+                        "ORDER BY: sort freely, but never put a large LIMIT on a sorted query. Virtuoso refuses a sorted result whose LIMIT plus OFFSET passes 10000 (SR353), counting the window you asked for and never the rows it returns, " +
+                        "so ORDER BY with LIMIT 20000 is refused while the same query with no LIMIT at all runs and sorts up to the endpoint's own ceiling. Lower the LIMIT to 10000 or less, or leave it out. " +
+                        "Never page a sorted query for that same reason: its second block asks for OFFSET 10000 and dies. Collect the blocks unsorted, which come back in the endpoint's scan order, stable for an unchanging store, and sort them yourself afterwards. " +
                         "A query that is merely SLOW is not helped by OFFSET, it is made worse, since the endpoint re-evaluates the pattern up to offset+limit for every block and page ten costs more than the whole query did. " +
                         "Split that one on an indexed value instead, one rdf:type, one graph or one value of a bound predicate at a time, so that each part is cheap because the filter applies inside the index. " +
                         "SIZE: the same COUNT is the only way to know a result's real size, because endpoints cap result sets silently. " +

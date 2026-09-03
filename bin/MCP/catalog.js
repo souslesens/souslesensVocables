@@ -287,6 +287,18 @@ const restToolDeclarationSchema = z
             .strict()
             .optional(),
         statusHints: z.record(z.string(), z.string().min(1)).optional(),
+        // Declares that one HTTP status from this route is not a failure at all: the resource is
+        // simply not materialized yet (a cache nothing has filled, a file nobody has built). Rather
+        // than a failed tool call, the agent gets an ordinary successful answer carrying `notice`, so
+        // it reads as "unknown, ask elsewhere" rather than as an outage to retry or, worse, as an
+        // empty object it could mistake for "this source has zero classes".
+        normalAbsence: z
+            .object({
+                status: z.number(),
+                notice: z.string().min(1),
+            })
+            .strict()
+            .optional(),
     })
     .strict();
 
@@ -388,6 +400,7 @@ function restToolDescriptor(toolDeclaration, routePath, httpMethod) {
         rowCeiling: toolDeclaration.rowCeiling || null,
         pagedCollection: toolDeclaration.pagedCollection || null,
         statusHints: toolDeclaration.statusHints || {},
+        normalAbsence: toolDeclaration.normalAbsence || null,
     };
 }
 

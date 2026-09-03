@@ -750,6 +750,14 @@ async function executeRestTool(descriptor, registryByKey, toolArguments) {
     const result = await slsRequest(descriptor.httpMethod, descriptor.route, requestOptions);
 
     if (!result.ok) {
+        // Some routes fail with a status that names a normal, expected state rather than a fault
+        // (SLS-06): nothing configured yet, nobody has built the resource. Surfacing that as a failed
+        // tool call sends an agent looking for a bug that is not there; answering with a bare empty
+        // object risks the opposite mistake, read as proof the source genuinely has none. Neither is
+        // right, so this becomes an ordinary successful answer carrying only the notice.
+        if (descriptor.normalAbsence && result.status === descriptor.normalAbsence.status) {
+            return { ...result, ok: true, status: 200, errorMessage: null, data: { available: false, notice: descriptor.normalAbsence.notice } };
+        }
         const hint = descriptor.statusHints[result.status];
         return hint ? { ...result, errorMessage: hint } : result;
     }
@@ -882,12 +890,17 @@ async function executeCollectedTool(descriptor, registryByKey, toolArguments) {
             // as if it were whole is the outcome this whole mechanism exists to avoid.
             return blockResult;
         }
-        blockCount += 1;
         collectedElapsedMs += blockResult.data?.elapsedMs ?? 0;
         const blockBindings = blockResult.data?.results?.bindings;
+        // A walk always ends on an empty block, because a short one does not prove the end: an
+        // endpoint whose row ceiling sits below the batch size returns short blocks forever, and
+        // stopping on one would truncate the walk while calling it complete. That terminating call
+        // is a cost, counted in `elapsedMs`, and not a block of rows, so it is deliberately left out
+        // of `collectedBlocks`: a reader told a third block exists looks for the rows in it.
         if (!Array.isArray(blockBindings) || blockBindings.length === 0) {
             break;
         }
+        blockCount += 1;
         responseVars = blockResult.data.head?.vars ?? responseVars;
         for (const binding of blockBindings) {
             collectedBindings.push(binding);

@@ -2746,9 +2746,8 @@
             "description": "Throws an error or returns a map of graph URI to `1`."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
-        "example": null,
-        "access": "read"
+        "expose": false,
+        "example": null
     },
     {
         "name": "getNodesAllTriples",

@@ -260,8 +260,7 @@ const apiDoc = {
             title: "Source Update Model",
         },
         DataSource: {
-            type: "object",
-            "x-nullable": true,
+            type: ["object", "null"],
             properties: {
                 type: { type: "string" },
                 connection: { type: "string" },

@@ -87,13 +87,17 @@ export default function () {
                     access: "read",
                     description:
                         "Lists the SPARQL functions callable through sls_run_query_function, with their module and a one-sentence summary. " +
-                        "Pass name to get that function's full documentation and parameter contract, which you need before calling it. " +
+                        "Skips a function already reachable through its own dedicated tool: call that tool instead. " +
+                        "Pass name to get a function's full documentation and parameter contract, which you need before calling it. " +
                         "Use it whenever the dedicated tools do not cover what you need: it reaches far more of the ontology API than they do.",
                     params: {
                         name: { type: "string", description: "Exact function name: returns its full documentation and parameter contract instead of the summary." },
                         nameContains: { type: "string", description: "Case-insensitive filter on the function name." },
                     },
                     query: { access: "read", compact: "true", name: "{name}", nameContains: "{nameContains}" },
+                    // MCP-only: hides functions the registry already promotes to their own tool. The
+                    // REST route below is untouched, so every other caller still gets the full registry.
+                    excludePromotedFunctions: true,
                 },
             ],
         },

@@ -252,6 +252,11 @@ const restToolDeclarationSchema = z
         body: z.record(z.string(), z.any()).optional(),
         parseJsonPayload: z.boolean().optional(),
         emptyListWhenNull: z.boolean().optional(),
+        // Drops entries the SPARQL registry already promotes to their own tool (`entry.mcpTool` set):
+        // an agent that can already reach a function through a dedicated tool has no reason to see it
+        // a second time in this discovery listing. The REST route itself is untouched — every other
+        // caller of GET /sparqlQueries/catalog still gets the complete registry.
+        excludePromotedFunctions: z.boolean().optional(),
         resultShape: z.enum(resultShapeNames).optional(),
         maxResponseBytes: z.number().positive().optional(),
         navigableDocument: z.boolean().optional(),
@@ -393,6 +398,7 @@ function restToolDescriptor(toolDeclaration, routePath, httpMethod) {
         paramDefaults: paramDefaults,
         parseJsonPayload: Boolean(toolDeclaration.parseJsonPayload),
         emptyListWhenNull: Boolean(toolDeclaration.emptyListWhenNull),
+        excludePromotedFunctions: Boolean(toolDeclaration.excludePromotedFunctions),
         resultShape: toolDeclaration.resultShape || null,
         maxResponseBytes: toolDeclaration.maxResponseBytes || null,
         navigableDocument: Boolean(toolDeclaration.navigableDocument),
@@ -515,6 +521,7 @@ function resultPageToolDescriptor() {
         paramDefaults: { offset: 0 },
         parseJsonPayload: false,
         emptyListWhenNull: false,
+        excludePromotedFunctions: false,
         resultShape: null,
         maxResponseBytes: null,
         navigableDocument: false,

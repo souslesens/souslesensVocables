@@ -139,7 +139,6 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.returnQueryStr] - Return the SPARQL query string instead of executing it
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?topConcept`/`?topConceptLabel`(/`?subjectGraph`)
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `topConcept`, `topConceptLabel` (optional), `subjectGraph` (optional).
-     * @expose read
      */
     self.getTopConcepts = function (sourceLabel, options, callback) {
         if (!options) {
@@ -252,7 +251,6 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?subject`/`?child1…`(labels), label-enriched
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `subjectLabel` (optional), `child1`, `child1Label` (optional), `child1Type` (optional), `child1Graph` (optional), depth-indexed `childN` (optional), `childNLabel` (optional), `collection` (optional), `acollection` (optional), `collectionLabel` (optional), `acollectionLabel` (optional).
-     * @expose read
      */
 
     // To simplify delete collection ...
@@ -394,7 +392,6 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?prop`/`?value`(/labels/graph)
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `prop`, `value`, `propLabel` (optional), `valueLabel` (optional), `g` (optional).
-     * @expose read
      */
     self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
         if (!options) {
@@ -480,8 +477,6 @@ var Sparql_OWL = (function () {
      * @param {(string|string[])} [options.filterCollections] - Exclude ancestors that are members of these collections
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `subjectLabel` (optional), `subjectTypes`, `subjectSuperClasses` (optional), `broader1`, `broader1Label` (optional), `broaderGraphs1`, and depth-indexed `broaderN` (optional), `broaderNLabel` (optional), `broaderGraphsN`.
-     *
-     * @expose read
      */
     self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
         if (Config.sources[sourceLabel].imports && Config.sources[sourceLabel].imports.length > 0) {
@@ -2877,7 +2872,6 @@ var Sparql_OWL = (function () {
      * @param {string} id - URI of the resource whose label is fetched
      * @param {Function} callback - Error-first callback receiving the matching SPARQL bindings
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `type`, and `subjectLabel`.
-     * @expose read
      */
     self.getNodeLabel = function (sourceLabel, id, callback) {
         var fromStr = Sparql_common.getFromStr(sourceLabel);

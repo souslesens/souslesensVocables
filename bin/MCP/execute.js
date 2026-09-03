@@ -273,7 +273,36 @@ function shapeElasticIndexCounts(elasticResponse) {
     return { ...describeElasticTotal(elasticResponse && elasticResponse.hits), sources: countedSources };
 }
 
-const resultShapers = { elasticHits: shapeElasticHits, elasticIndexCounts: shapeElasticIndexCounts, sourceCards: shapeSourceCards };
+/**
+ * Reduce a raw `readdir` of a mapping directory to the names sls_mapping_get accepts.
+ *
+ * Declared by a route through `x-mcp.resultShape: "mappingFileNames"`. `dataController.getFilesList`
+ * returns every entry of the directory as it stands on disk, and those directories hold editor
+ * backups (`lifex_dalia_db.json-19-12`) beside the mappings. Listing them hands an agent names that
+ * sls_mapping_get answers 404 on, since it reads `{dataSource}.json`: the two tools must agree on
+ * one vocabulary, which is the mapping name without its extension.
+ * @param {*} fileNames - directory entries as returned by readdir
+ * @returns {string[]}
+ */
+function shapeMappingFileNames(fileNames) {
+    const jsonExtension = ".json";
+    const entries = Array.isArray(fileNames) ? fileNames : [];
+
+    const mappingNames = [];
+    for (const fileName of entries) {
+        if (typeof fileName !== "string" || !fileName.endsWith(jsonExtension)) {
+            continue;
+        }
+        const mappingName = fileName.slice(0, -jsonExtension.length);
+        if (mappingName.length > 0) {
+            mappingNames.push(mappingName);
+        }
+    }
+    mappingNames.sort((firstName, secondName) => firstName.localeCompare(secondName));
+    return mappingNames;
+}
+
+const resultShapers = { elasticHits: shapeElasticHits, elasticIndexCounts: shapeElasticIndexCounts, mappingFileNames: shapeMappingFileNames, sourceCards: shapeSourceCards };
 
 // Exported so catalog.js can reject an `x-mcp` asking for a shape nobody implements, at boot rather
 // than on the first call.
@@ -773,6 +802,12 @@ async function executeRestTool(descriptor, registryByKey, toolArguments) {
     }
     if (descriptor.emptyListWhenNull && shapedData === null) {
         shapedData = [];
+    }
+    if (descriptor.excludePromotedFunctions && Array.isArray(shapedData)) {
+        // The registry itself, and every other caller of GET /sparqlQueries/catalog, still lists
+        // these entries in full: only this discovery listing hides a function once a dedicated tool
+        // already reaches it, so an agent scanning it never finds two names for the same capability.
+        shapedData = shapedData.filter((entry) => !registryByKey.get(`${entry.module}.${entry.name}`)?.mcpTool);
     }
     if (descriptor.resultShape) {
         const shaper = resultShapers[descriptor.resultShape];

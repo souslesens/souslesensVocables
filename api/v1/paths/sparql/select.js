@@ -30,6 +30,36 @@ const namedGraphPatternRegex = /\bGRAPH\b/i;
 // dataset clause lands in front of it. SPARQL puts `FROM` between the projection and `WHERE`.
 const trailingWhereKeywordRegex = /\bWHERE\s*$/i;
 
+// The handful of prefixes almost every query against this platform ends up needing (STORE-02):
+// Virtuoso refuses a query that uses an undeclared prefix, and hand-writing `owl:`/`rdfs:` every
+// time is the kind of friction the FROM clause below is already spared. Declared unconditionally,
+// minus whatever the caller already declared: a duplicate PREFIX to the same IRI is legal SPARQL,
+// but only omitting the ones already present keeps a caller's own redefinition (a different IRI
+// under the same short name) in force instead of silently shadowed.
+const commonPrefixes = [
+    { name: "rdf", uri: "http://www.w3.org/1999/02/22-rdf-syntax-ns#" },
+    { name: "rdfs", uri: "http://www.w3.org/2000/01/rdf-schema#" },
+    { name: "owl", uri: "http://www.w3.org/2002/07/owl#" },
+    { name: "skos", uri: "http://www.w3.org/2004/02/skos/core#" },
+    { name: "xsd", uri: "http://www.w3.org/2001/XMLSchema#" },
+    { name: "dcterms", uri: "http://purl.org/dc/terms/" },
+];
+
+const prefixDeclarationRegex = /\bPREFIX\s+([a-zA-Z][\w-]*)\s*:/gi;
+
+/**
+ * Short names already declared by the caller's own query, so `commonPrefixes` never overrides one.
+ * @param {string} strippedQuery - Query text with comments removed
+ * @returns {Set<string>}
+ */
+function collectDeclaredPrefixNames(strippedQuery) {
+    const declaredNames = new Set();
+    for (const match of strippedQuery.matchAll(prefixDeclarationRegex)) {
+        declaredNames.add(match[1].toLowerCase());
+    }
+    return declaredNames;
+}
+
 /**
  * Build the `FROM` clauses for a source, one level of imports deep, the way the rest of SLS does.
  *
@@ -232,7 +262,13 @@ export default function () {
             }
 
             const strippedQuery = UserRequestFiltering.stripSparqlComments(query);
-            let scopedQuery = query;
+
+            const declaredPrefixNames = collectDeclaredPrefixNames(strippedQuery);
+            const missingPrefixes = commonPrefixes.filter((prefix) => !declaredPrefixNames.has(prefix.name));
+            const missingPrefixDeclarations = missingPrefixes.map((prefix) => `PREFIX ${prefix.name}: <${prefix.uri}>`);
+            const queryWithCommonPrefixes = missingPrefixDeclarations.length > 0 ? missingPrefixDeclarations.join(" ") + " " + query : query;
+
+            let scopedQuery = queryWithCommonPrefixes;
             if (!datasetClauseRegex.test(strippedQuery) && !namedGraphPatternRegex.test(strippedQuery)) {
                 const withImports = req.body.withImports !== false;
                 const datasetClause = datasetClauseForSource(source, userSources, withImports);
@@ -243,7 +279,7 @@ export default function () {
                             `Name the graphs yourself with FROM, or query a source that declares one.`,
                     });
                 }
-                scopedQuery = withDatasetClause(query, datasetClause);
+                scopedQuery = withDatasetClause(queryWithCommonPrefixes, datasetClause);
                 if (!scopedQuery) {
                     return res.status(400).json({
                         message:
@@ -379,7 +415,8 @@ export default function () {
                             type: "string",
                             required: true,
                             description:
-                                "SPARQL SELECT text, PREFIX declarations included. Add LIMIT yourself when you want fewer rows than the platform ceiling. " +
+                                "SPARQL SELECT text. rdf, rdfs, owl, skos, xsd and dcterms are declared for you when the query does not declare them itself — " +
+                                "add any other prefix yourself. Add LIMIT yourself when you want fewer rows than the platform ceiling. " +
                                 "Leave the FROM out unless you mean to query graphs other than the source's own: it is written for you from `source`.",
                         },
                         withImports: {
@@ -427,7 +464,9 @@ export default function () {
                         source: { type: "string", description: "Source name, as declared in sources.json.", example: "CFIHOS" },
                         query: {
                             type: "string",
-                            description: "SPARQL SELECT text. Its dataset is filled in from `source` when it declares none, so a query that names no graph never reads the whole store.",
+                            description:
+                                "SPARQL SELECT text. Its dataset is filled in from `source` when it declares none, so a query that names no graph never reads the whole store. " +
+                                "rdf, rdfs, owl, skos, xsd and dcterms are declared for you when the query does not declare them itself.",
                             example: "SELECT ?class ?label WHERE { ?class a owl:Class . OPTIONAL { ?class rdfs:label ?label } } LIMIT 50",
                         },
                         withImports: {

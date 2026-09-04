@@ -185,8 +185,18 @@ function shapeElasticHits(elasticResponse) {
     const rawHits = hitsEnvelope && Array.isArray(hitsEnvelope.hits) ? hitsEnvelope.hits : [];
 
     const flatHits = [];
+    // Same key-seen-once technique as common.js's unduplicateArray and searchWidget.js's
+    // existingNodes: a reindex hands out a fresh random Elasticsearch _id per document (API-05),
+    // so the same ontology node can be indexed twice and come back as two identical hits.
+    const seenIds = {};
     for (const hit of rawHits) {
         const hitSource = hit._source || {};
+        if (hitSource.id && seenIds[hitSource.id]) {
+            continue;
+        }
+        if (hitSource.id) {
+            seenIds[hitSource.id] = 1;
+        }
         flatHits.push({ score: hit._score, index: hit._index, id: hitSource.id, label: hitSource.label, type: hitSource.type, parents: hitSource.parents });
     }
 

@@ -76,7 +76,15 @@ export default function () {
                         size: { type: "number", description: "Maximum number of hits, counted across all indices together, not per index.", default: 10 },
                         fuzziness: { type: "string", description: 'Edit distance tolerated: "AUTO", "0" for exact matching, "1" or "2".', default: "AUTO" },
                     },
-                    body: { url: "_search", indexes: "{indexes}", query: { size: "{size}", query: { match: { label: { query: "{text}", fuzziness: "{fuzziness}" } } } } },
+                    // operator "and" for the same reason as sls_count_labels_by_source below:
+                    // Elasticsearch defaults a match query to OR, so "centrifugal pump" without it
+                    // ranks and counts every label holding either word, not both — totalMatches then
+                    // reads as a real count while it is really the OR figure.
+                    body: {
+                        url: "_search",
+                        indexes: "{indexes}",
+                        query: { size: "{size}", query: { match: { label: { query: "{text}", fuzziness: "{fuzziness}", operator: "and" } } } },
+                    },
                     resultShape: "elasticHits",
                     // `size` hits back means the ranking was cut there, and the hits below the cut are
                     // the ones a caller searching a specific source most often wanted.

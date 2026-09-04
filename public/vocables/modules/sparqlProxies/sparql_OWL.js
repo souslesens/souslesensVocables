@@ -666,6 +666,7 @@ var Sparql_OWL = (function () {
             ' ?superClass ?superClassType ?superClassSubClass ?superClassLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes) ' +
             fromStr;
         var filterStr;
+        var afterSubSelectPattern = "";
         if (!options.descendants) {
             filterStr = Sparql_common.setFilter("subject", classIds, null, { values: 1 });
             query +=
@@ -681,13 +682,13 @@ var Sparql_OWL = (function () {
                 "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType ";
         } else {
             filterStr = Sparql_common.setFilter("superClass", classIds, null, { values: 1 });
+            // keeps leaves in the result. Placed after the sub-select: a group opening on an OPTIONAL
+            // is a left join over the empty pattern, which collapses back to a plain join.
+            afterSubSelectPattern = " OPTIONAL { ?superClassSubClass rdfs:subClassOf ?class }";
             query +=
                 "  WHERE {" +
-                // OPTIONAL so a leaf (no subclass of its own) is still reported, not dropped from the result.
-                "   OPTIONAL { ?superClassSubClass  rdfs:subClassOf ?class }" +
-                "  \n" +
                 " { SELECT * where {" +
-                // Always "*" here: the recursion below needs ?class to match the root reflexively to anchor itself.
+                // "*" : the root must match reflexively to anchor the recursion
                 "  ?class rdf:type ?type. ?class rdfs:subClassOf*" +
                 " ?superClass.\n" +
                 "    ?superClass rdf:type ?superClassType filter (?superClassType !=owl:Restriction)\n" +
@@ -705,7 +706,7 @@ var Sparql_OWL = (function () {
 
         //   query+="filter(!isBlank(?superClassSubClass))"
 
-        query += "}}} LIMIT 10000";
+        query += "}}" + afterSubSelectPattern + "} LIMIT 10000";
 
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         self.no_params = true;
@@ -783,7 +784,8 @@ var Sparql_OWL = (function () {
                     classIds.forEach(function (baseClassId) {
                         var childrenMap = {};
                         result.results.bindings.forEach(function (item) {
-                            if (item.superClass.value == baseClassId) {
+                            // no ?superClassSubClass means a leaf row: it names no child
+                            if (item.superClass.value == baseClassId && item.superClassSubClass) {
                                 childrenMap[item.superClassSubClass.value] = item;
                             }
                         });

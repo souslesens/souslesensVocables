@@ -200,7 +200,17 @@ function shapeElasticHits(elasticResponse) {
         flatHits.push({ score: hit._score, index: hit._index, id: hitSource.id, label: hitSource.label, type: hitSource.type, parents: hitSource.parents });
     }
 
-    return { ...describeElasticTotal(hitsEnvelope), hits: flatHits };
+    // Both figures, because they answer different questions: `indexedHits` and `totalMatches` count
+    // indexed documents and are what says whether the ranking was cut at `size`, while the
+    // deduplicated list is what an agent may count as concepts.
+    const shapedHits = { ...describeElasticTotal(hitsEnvelope), indexedHits: rawHits.length, hits: flatHits };
+    if (flatHits.length < rawHits.length) {
+        shapedHits.duplicatesRemoved = rawHits.length - flatHits.length;
+        shapedHits.duplicatesNotice =
+            `${shapedHits.duplicatesRemoved} of the ${rawHits.length} hits were the same node indexed twice and were dropped, leaving ${flatHits.length} distinct nodes. ` +
+            `Count concepts from those ${flatHits.length}, never from totalMatches or indexedHits, which count documents.`;
+    }
+    return shapedHits;
 }
 
 /**
@@ -492,19 +502,26 @@ export function rowCeilingNotice(payload, ceilingContext) {
         return null;
     }
 
+    // Deduplication happens after the index applied `size`, so the rows that decide whether the
+    // ranking was cut are the ones it returned, not the ones left after dropping repeats. Judging the
+    // ceiling on the deduplicated count reads a cut result as merely short.
+    const rowsAgainstCeiling = typeof payload?.indexedHits === "number" ? payload.indexedHits : returnedRows;
+
     // A search engine counts what it did not return, so completeness needs no inference here. The
     // count is a floor rather than a figure past 10000 matches, and `describeElasticTotal` says so.
     if (payload && typeof payload.totalMatches === "number" && !payload.totalMatchesIsLowerBound) {
-        const isComplete = returnedRows >= payload.totalMatches;
+        const isComplete = rowsAgainstCeiling >= payload.totalMatches;
         const notice = { returnedRows: returnedRows, knownCeiling: appliedRowLimit ?? null, atKnownCeiling: !isComplete, complete: isComplete };
         if (!isComplete) {
-            notice.hint = `Cut: ${returnedRows} of ${payload.totalMatches} matches came back. ${escalation}`;
+            notice.hint = `Cut: ${rowsAgainstCeiling} of ${payload.totalMatches} matches came back. ${escalation}`;
+        } else if (payload.duplicatesRemoved) {
+            notice.hint = `Whole: all ${payload.totalMatches} matches came back, ${payload.duplicatesRemoved} of them duplicates, so the ${returnedRows} nodes listed are the complete answer.`;
         }
         return notice;
     }
 
     // No account from the route: all that is left is the limit this server asked for, and the count.
-    if (appliedRowLimit && returnedRows === appliedRowLimit) {
+    if (appliedRowLimit && rowsAgainstCeiling === appliedRowLimit) {
         return {
             returnedRows: returnedRows,
             knownCeiling: appliedRowLimit,

@@ -472,14 +472,13 @@ var Sparql_generic = (function () {
      * @param {string} [sparqlServerUrl] - Endpoint URL to query; defaults to the main server
      * @param {Function} callback - Error-first callback `(err, graphs)`; `graphs` is a map of graph URI → 1
      * @returns {err|Object} Throws an error or returns a map of graph URI to `1`.
-     * @expose read
      */
     self.getEndPointAllGraphsMap = function (sparqlServerUrl, callback) {
         if (!sparqlServerUrl) {
             sparqlServerUrl = Config.sparql_server.url + "?format=json&query=";
         }
         var query = "select distinct ?g WHERE {GRAPH ?g{?s ?p ?o}} limit 10000";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(sparqlServerUrl, query, null, {}, function (err, result) {
             if (err) {
                 return callback(err);
             }

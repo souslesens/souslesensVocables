@@ -74,18 +74,18 @@ describe("rowCeilingNotice, with the execution facts the route reports", () => {
         });
 
         expect(finished.complete).toBe(true);
-        expect(finished.sparqlQueries).toBe(3);
         expect(stoppedOnCeiling.complete).toBe(false);
     });
 
-    test("rows read and rows handed back are both reported when a function reshapes its bindings", () => {
+    test("a function that reshapes its bindings is judged on returnedRows alone", () => {
         const notice = rowCeilingNotice(bindings(50), {
             sparqlExecution: { queryCount: 1, lastLimit: 10000, lastRows: 8000, totalRows: 8000, endpointCeiling: 20000 },
             escalation: escalation,
         });
 
         expect(notice.returnedRows).toBe(50);
-        expect(notice.sparqlRows).toBe(8000);
+        expect(notice.sparqlQueries).toBeUndefined();
+        expect(notice.sparqlRows).toBeUndefined();
     });
 });
 

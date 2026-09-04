@@ -14,7 +14,7 @@ export default function () {
         dataController.readFile(req.query.dir, req.query.fileName, function (err, result) {
             if (err) {
                 if (err == "file does not exist") {
-                    return res.status(500).json(err);
+                    return res.status(404).json(err);
                 }
                 res.status(err.status || 500).json(err);
                 next(err);
@@ -47,7 +47,13 @@ export default function () {
                     query: { dir: "graphs/", fileName: "{source}_KGmodelGraph.json" },
                     parseJsonPayload: true,
                     navigableDocument: true,
-                    statusHints: { 500: "No KGquery model saved for this source. Build the model in the KGquery tool first, or explore the source with sls_source_taxonomy." },
+                    normalAbsence: {
+                        status: 404,
+                        notice:
+                            "No KGquery model has been built for this source yet: nothing has been misconfigured, this model only exists once a user builds it in the KGquery tool. " +
+                            "This says nothing about the source's real classes or relations: it is unknown, not zero. " +
+                            "Explore the source with sls_source_taxonomy or sls_ontology_model instead.",
+                    },
                 },
                 {
                     name: "sls_mapping_get",
@@ -60,7 +66,7 @@ export default function () {
                     query: { dir: "mappings/{source}", fileName: "{dataSource}.json" },
                     parseJsonPayload: true,
                     navigableDocument: true,
-                    statusHints: { 500: "No mapping file with that name for this source. List the available ones with sls_mappings_list." },
+                    statusHints: { 404: "No mapping file with that name for this source. List the available ones with sls_mappings_list." },
                 },
             ],
         },
@@ -77,7 +83,8 @@ export default function () {
                     example: '{"id":"assets_mapping","label":"Assets","columns":[]}',
                 },
             },
-            500: { description: "File not found or read error." },
+            404: { description: "File not found." },
+            500: { description: "Read error." },
         },
         tags: ["Data"],
     };

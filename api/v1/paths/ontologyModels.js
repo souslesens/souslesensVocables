@@ -17,7 +17,7 @@ export default function () {
         if (model) {
             return processResponse(res, null, model);
         }
-        return processResponse(res, "no data", null);
+        return res.status(404).json({ error: `No ontology model cached for source "${req.query.source}".` });
     }
 
     GET.apiDoc = {
@@ -38,8 +38,12 @@ export default function () {
                     params: { source: { type: "string", required: true, description: "SLS source name." } },
                     query: { source: "{source}" },
                     navigableDocument: true,
-                    statusHints: {
-                        500: "No ontology model is cached for this source. It is only filled when a user opens the source in the SousLeSens web UI. Use sls_kgquery_model or sls_source_taxonomy instead.",
+                    normalAbsence: {
+                        status: 404,
+                        notice:
+                            "No ontology model is cached yet for this source: nothing has been misconfigured, the cache is only filled when a user opens the source in the SousLeSens web UI. " +
+                            "This says nothing about whether the source has classes or properties: it is unknown, not zero, and must never be reported as an empty ontology. " +
+                            "Use sls_kgquery_model or sls_source_taxonomy to get real class and property data for this source.",
                     },
                 },
             ],
@@ -91,7 +95,7 @@ export default function () {
                     },
                 },
             },
-            500: { description: "No cached model for this source." },
+            404: { description: "No cached model for this source." },
         },
         tags: ["Ontology"],
     };

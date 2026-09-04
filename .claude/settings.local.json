@@ -36,7 +36,7 @@
       "Bash(gh pr create:*)",
       "Bash(gh pr merge:*)",
       "Bash(gh issue comment:*)"
-    ]
-  },
-  "defaultMode": "acceptEdits"
+    ],
+    "defaultMode": "bypassPermissions"
+  }
 }

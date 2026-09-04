@@ -139,7 +139,6 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.returnQueryStr] - Return the SPARQL query string instead of executing it
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?topConcept`/`?topConceptLabel`(/`?subjectGraph`)
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `topConcept`, `topConceptLabel` (optional), `subjectGraph` (optional).
-     * @expose read
      */
     self.getTopConcepts = function (sourceLabel, options, callback) {
         if (!options) {
@@ -252,7 +251,6 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?subject`/`?child1…`(labels), label-enriched
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `subjectLabel` (optional), `child1`, `child1Label` (optional), `child1Type` (optional), `child1Graph` (optional), depth-indexed `childN` (optional), `childNLabel` (optional), `collection` (optional), `acollection` (optional), `collectionLabel` (optional), `acollectionLabel` (optional).
-     * @expose read
      */
 
     // To simplify delete collection ...
@@ -394,7 +392,6 @@ var Sparql_OWL = (function () {
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?prop`/`?value`(/labels/graph)
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `prop`, `value`, `propLabel` (optional), `valueLabel` (optional), `g` (optional).
-     * @expose read
      */
     self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
         if (!options) {
@@ -480,8 +477,6 @@ var Sparql_OWL = (function () {
      * @param {(string|string[])} [options.filterCollections] - Exclude ancestors that are members of these collections
      * @param {number} [options.limit] - Result limit (defaults to `Config.queryLimit`)
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `subjectLabel` (optional), `subjectTypes`, `subjectSuperClasses` (optional), `broader1`, `broader1Label` (optional), `broaderGraphs1`, and depth-indexed `broaderN` (optional), `broaderNLabel` (optional), `broaderGraphsN`.
-     *
-     * @expose read
      */
     self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
         if (Config.sources[sourceLabel].imports && Config.sources[sourceLabel].imports.length > 0) {
@@ -640,8 +635,8 @@ var Sparql_OWL = (function () {
      * @param {boolean} [options.excludeItself] - Use `+` instead of `*` (exclude the class itself)
      * @param {string} [options.filter] - Extra SPARQL filter appended to the query
      * @param {boolean} [options.withoutImports] - Exclude imported graphs from the `FROM` clause
-     * @param {Function} callback - Error-first callback `(err, {hierarchies, rawResult})` where `hierarchies` maps each class URI to its ordered hierarchy
-     * @returns {err|Object} Throws an error or returns `{hierarchies, rawResult}`; each `rawResult` binding contains `subject`, `class`, `type`, `classLabel` (optional), `superClass`, `superClassType`, `superClassSubClass`, `superClassLabel` (optional), `subjectTypes`.
+     * @param {Function} callback - Error-first callback `(err, {hierarchies})` where `hierarchies` maps each class URI to its ordered hierarchy
+     * @returns {err|Object} Throws an error or returns `{hierarchies}`; each hierarchy entry is a binding with `subject`, `class`, `type`, `classLabel` (optional), `superClass`, `superClassType`, `superClassSubClass`, `superClassLabel` (optional), `subjectTypes`.
      * @expose read
      * @mcpTool sls_node_descendants
      * @mcpFixed options.descendants = true
@@ -671,6 +666,7 @@ var Sparql_OWL = (function () {
             ' ?superClass ?superClassType ?superClassSubClass ?superClassLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes) ' +
             fromStr;
         var filterStr;
+        var afterSubSelectPattern = "";
         if (!options.descendants) {
             filterStr = Sparql_common.setFilter("subject", classIds, null, { values: 1 });
             query +=
@@ -686,17 +682,18 @@ var Sparql_OWL = (function () {
                 "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType ";
         } else {
             filterStr = Sparql_common.setFilter("superClass", classIds, null, { values: 1 });
+            // keeps leaves in the result. Placed after the sub-select: a group opening on an OPTIONAL
+            // is a left join over the empty pattern, which collapses back to a plain join.
+            afterSubSelectPattern = " OPTIONAL { ?superClassSubClass rdfs:subClassOf ?class }";
             query +=
                 "  WHERE {" +
-                "   ?superClassSubClass  rdfs:subClassOf ?class" +
-                "  \n" +
                 " { SELECT * where {" +
-                "  ?class rdf:type ?type. ?class rdfs:subClassOf" +
-                modifier +
+                // "*" : the root must match reflexively to anchor the recursion
+                "  ?class rdf:type ?type. ?class rdfs:subClassOf*" +
                 " ?superClass.\n" +
                 "    ?superClass rdf:type ?superClassType filter (?superClassType !=owl:Restriction)\n" +
                 "   OPTIONAL {?class rdfs:label ?classLabel }" +
-                "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType ";
+                "   OPTIONAL {?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType }";
         }
 
         if (options.filter) {
@@ -709,7 +706,7 @@ var Sparql_OWL = (function () {
 
         //   query+="filter(!isBlank(?superClassSubClass))"
 
-        query += "}}} LIMIT 10000";
+        query += "}}" + afterSubSelectPattern + "} LIMIT 10000";
 
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         self.no_params = true;
@@ -787,7 +784,8 @@ var Sparql_OWL = (function () {
                     classIds.forEach(function (baseClassId) {
                         var childrenMap = {};
                         result.results.bindings.forEach(function (item) {
-                            if (item.superClass.value == baseClassId) {
+                            // no ?superClassSubClass means a leaf row: it names no child
+                            if (item.superClass.value == baseClassId && item.superClassSubClass) {
                                 childrenMap[item.superClassSubClass.value] = item;
                             }
                         });
@@ -808,7 +806,7 @@ var Sparql_OWL = (function () {
                     });
                 }
 
-                return callback(null, { hierarchies: hierarchies, rawResult: result.results.bindings });
+                return callback(null, { hierarchies: hierarchies });
             },
         );
     };
@@ -2319,6 +2317,10 @@ var Sparql_OWL = (function () {
      * Serialises a source to Turtle by paginating `DESCRIBE ?s ?p ?o` queries (`text/turtle`
      * Accept header) in pages of 1000, separating `@prefix` lines from the body and concatenating
      * everything into a single Turtle document.
+     *
+     * Not exposed: its only caller, lineage_sources.js's exportOWL, is itself never invoked from any
+     * UI element, and this crashes outright through the MCP/RemoteCodeRunner path (`result.result` is
+     * undefined there for a non-JSON Accept header). Unused and non-functional outside a real browser.
      * @function
      * @name generateOWL
      * @memberof module:Sparql_OWL
@@ -2327,7 +2329,6 @@ var Sparql_OWL = (function () {
      * @param {string} [options.filter] - Reserved filter (currently unused in the query body)
      * @param {Function} callback - Error-first callback `(err, turtle)` with the full Turtle string
      * @returns {err|string} Throws an error or returns the source serialized as a Turtle string.
-     * @expose read
      */
     self.generateOWL = function (sourceLabel, options, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;
@@ -2873,7 +2874,6 @@ var Sparql_OWL = (function () {
      * @param {string} id - URI of the resource whose label is fetched
      * @param {Function} callback - Error-first callback receiving the matching SPARQL bindings
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `type`, and `subjectLabel`.
-     * @expose read
      */
     self.getNodeLabel = function (sourceLabel, id, callback) {
         var fromStr = Sparql_common.getFromStr(sourceLabel);

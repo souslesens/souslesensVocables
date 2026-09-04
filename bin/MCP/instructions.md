@@ -121,6 +121,20 @@ Establish the real number with `sls_sparql_select` and `SELECT (COUNT(*) AS ?tot
 pattern before quoting one to the user. This is not hypothetical: 10000 notifications were once
 announced as the complete list, out of 100741.
 
+### `depthCeiling` says whether `descendantsDepth` actually reached, not just whether rows came back
+
+`sls_node_children` reports a `depthCeiling` block alongside `rowCeiling` whenever you passed a
+`descendantsDepth`. A hierarchy that runs out one level below your request looks identical to a
+depth parameter that did nothing: both return the same rows, with no `child2` key anywhere. This
+block is the only way to tell them apart, so read it before concluding a branch is empty.
+
+- `depthReached >= requestedDepth`: the depth you asked for was actually walked. No `hint` — nothing
+  more to check.
+- `depthReached < requestedDepth` and a `hint` is present: the walk stopped early. The hint names the
+  exact node URIs to re-query (`sls_node_children` again on the `childN` URIs at `depthReached`)
+  before you report the hierarchy as ending there. Do not treat the shorter result as proof the
+  hierarchy is shallow.
+
 ## A refused query is a query to repair, not a result to report
 
 The triple store's error names what to change. Change it and run it again, in the same turn. Handing
@@ -131,10 +145,11 @@ Three failures, three different repairs, and they are not interchangeable.
 
 **A sort refused.** `SR353: Sorted TOP clause specifies more then N rows to sort. Only 10000 are
 allowed.` Nothing here is too large. The ceiling counts the rows the endpoint is _asked_ to sort,
-which is your LIMIT plus your OFFSET, never the rows the query returns. A query that declares no
-LIMIT receives the platform one, so an `ORDER BY` alone is refused even when the answer is 170 rows.
-Add an explicit `LIMIT 10000` or less and the identical query runs, or drop the `ORDER BY` and sort
-the rows yourself once you have them.
+which is your LIMIT plus your OFFSET, never the rows the query returns, so a sorted query asking for
+20000 rows is refused even when its whole answer is 170. An `ORDER BY` carrying no LIMIT of its own is
+not refused: nothing is appended to it here, and it sorts up to the endpoint's own row ceiling. Lower
+your LIMIT to 10000 or less, or leave it out entirely, or drop the `ORDER BY` and sort the rows
+yourself once you have them.
 
 **A timeout, meaning nothing came back at all.** The pattern is the problem, not the size, so a
 smaller LIMIT changes nothing: the endpoint walks the pattern before it applies one. Bind it, with an

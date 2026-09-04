@@ -27,12 +27,15 @@ export default function () {
                 {
                     name: "sls_mappings_list",
                     access: "read",
-                    description: "Names of the mapping documents saved for a source, one per data source. Feed a name to sls_mapping_get without its .json extension.",
+                    description: "Names of the mapping documents saved for a source, one per data source. Feed a name straight to sls_mapping_get.",
                     params: { source: { type: "string", required: true, description: "SLS source name the mappings target." } },
                     query: { dir: "mappings/{source}" },
                     // getFilesList answers null when the directory does not exist, which simply
                     // means the source has no mapping yet.
                     emptyListWhenNull: true,
+                    // The directory also holds editor backups (`*.json-19-12`), which sls_mapping_get
+                    // cannot read: the shape keeps the real mappings and drops their extension.
+                    resultShape: "mappingFileNames",
                 },
             ],
         },

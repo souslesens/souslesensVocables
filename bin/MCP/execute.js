@@ -141,9 +141,8 @@ function flattenBindingRow(row) {
 
 /**
  * Reduce SPARQL bindings to plain `{variable: value}` rows, wherever they appear in the payload.
- * Recognises the three shapes SLS actually returns: a bare array of bindings, the full
- * `{head, results: {bindings}}` envelope, and `{hierarchies, rawResult}` from
- * getNodesAncestorsOrDescendants.
+ * Recognises the two shapes SLS actually returns: a bare array of bindings, and the full
+ * `{head, results: {bindings}}` envelope.
  * @param {*} payload
  * @returns {*} The payload with its bindings flattened, unchanged when it holds none
  */
@@ -172,9 +171,6 @@ export function flattenSparqlResult(payload) {
     if (payload.results && Array.isArray(payload.results.bindings)) {
         return { ...payload, results: { ...payload.results, bindings: flattenSparqlResult(payload.results.bindings) } };
     }
-    if (Array.isArray(payload.rawResult)) {
-        return { ...payload, rawResult: flattenSparqlResult(payload.rawResult) };
-    }
     return payload;
 }
 
@@ -189,12 +185,32 @@ function shapeElasticHits(elasticResponse) {
     const rawHits = hitsEnvelope && Array.isArray(hitsEnvelope.hits) ? hitsEnvelope.hits : [];
 
     const flatHits = [];
+    // Same key-seen-once technique as common.js's unduplicateArray and searchWidget.js's
+    // existingNodes: a reindex hands out a fresh random Elasticsearch _id per document (API-05),
+    // so the same ontology node can be indexed twice and come back as two identical hits.
+    const seenIds = {};
     for (const hit of rawHits) {
         const hitSource = hit._source || {};
+        if (hitSource.id && seenIds[hitSource.id]) {
+            continue;
+        }
+        if (hitSource.id) {
+            seenIds[hitSource.id] = 1;
+        }
         flatHits.push({ score: hit._score, index: hit._index, id: hitSource.id, label: hitSource.label, type: hitSource.type, parents: hitSource.parents });
     }
 
-    return { ...describeElasticTotal(hitsEnvelope), hits: flatHits };
+    // Both figures, because they answer different questions: `indexedHits` and `totalMatches` count
+    // indexed documents and are what says whether the ranking was cut at `size`, while the
+    // deduplicated list is what an agent may count as concepts.
+    const shapedHits = { ...describeElasticTotal(hitsEnvelope), indexedHits: rawHits.length, hits: flatHits };
+    if (flatHits.length < rawHits.length) {
+        shapedHits.duplicatesRemoved = rawHits.length - flatHits.length;
+        shapedHits.duplicatesNotice =
+            `${shapedHits.duplicatesRemoved} of the ${rawHits.length} hits were the same node indexed twice and were dropped, leaving ${flatHits.length} distinct nodes. ` +
+            `Count concepts from those ${flatHits.length}, never from totalMatches or indexedHits, which count documents.`;
+    }
+    return shapedHits;
 }
 
 /**
@@ -277,7 +293,36 @@ function shapeElasticIndexCounts(elasticResponse) {
     return { ...describeElasticTotal(elasticResponse && elasticResponse.hits), sources: countedSources };
 }
 
-const resultShapers = { elasticHits: shapeElasticHits, elasticIndexCounts: shapeElasticIndexCounts, sourceCards: shapeSourceCards };
+/**
+ * Reduce a raw `readdir` of a mapping directory to the names sls_mapping_get accepts.
+ *
+ * Declared by a route through `x-mcp.resultShape: "mappingFileNames"`. `dataController.getFilesList`
+ * returns every entry of the directory as it stands on disk, and those directories hold editor
+ * backups (`lifex_dalia_db.json-19-12`) beside the mappings. Listing them hands an agent names that
+ * sls_mapping_get answers 404 on, since it reads `{dataSource}.json`: the two tools must agree on
+ * one vocabulary, which is the mapping name without its extension.
+ * @param {*} fileNames - directory entries as returned by readdir
+ * @returns {string[]}
+ */
+function shapeMappingFileNames(fileNames) {
+    const jsonExtension = ".json";
+    const entries = Array.isArray(fileNames) ? fileNames : [];
+
+    const mappingNames = [];
+    for (const fileName of entries) {
+        if (typeof fileName !== "string" || !fileName.endsWith(jsonExtension)) {
+            continue;
+        }
+        const mappingName = fileName.slice(0, -jsonExtension.length);
+        if (mappingName.length > 0) {
+            mappingNames.push(mappingName);
+        }
+    }
+    mappingNames.sort((firstName, secondName) => firstName.localeCompare(secondName));
+    return mappingNames;
+}
+
+const resultShapers = { elasticHits: shapeElasticHits, elasticIndexCounts: shapeElasticIndexCounts, mappingFileNames: shapeMappingFileNames, sourceCards: shapeSourceCards };
 
 // Exported so catalog.js can reject an `x-mcp` asking for a shape nobody implements, at boot rather
 // than on the first call.
@@ -298,21 +343,64 @@ function acceptsLimitOption(registryEntry) {
 }
 
 /**
- * @param {*} payload - Flattened tool payload, in any of the three shapes the SPARQL layer returns
- * @returns {number|null} Row count, or null when the payload carries no rows
+ * Maps every top-level key of a payload that carries rows to how many it carries.
+ *
+ * An array counts itself, and an object whose own values are arrays counts the sum of those
+ * (`{hierarchies: {id: [...]}}`). An object with no arrays inside falls back to its own key count, but
+ * only once there are two or more such fallback candidates to set side by side, as in
+ * `{classesMap: {...2834 entries}, labels: {}}`: a lone one is indistinguishable from a single
+ * document's own fields (`{someDocument: {key: "value"}}`) and is left out rather than guessed at.
+ * @param {*} payload
+ * @returns {Object<string, number>} One entry per row-bearing key, empty when the payload has none
+ */
+function rowCountsByKey(payload) {
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+        return {};
+    }
+    const strictCounts = {};
+    const fallbackCounts = {};
+    for (const [key, value] of Object.entries(payload)) {
+        if (Array.isArray(value)) {
+            strictCounts[key] = value.length;
+            continue;
+        }
+        if (value && typeof value === "object") {
+            const nestedArrays = Object.values(value).filter(Array.isArray);
+            if (nestedArrays.length > 0) {
+                strictCounts[key] = nestedArrays.reduce((total, array) => total + array.length, 0);
+            } else {
+                fallbackCounts[key] = Object.keys(value).length;
+            }
+        }
+    }
+    if (Object.keys(fallbackCounts).length < 2 && Object.keys(strictCounts).length === 0) {
+        return {};
+    }
+    return { ...strictCounts, ...fallbackCounts };
+}
+
+/**
+ * A single figure for comparing a count against a limit, valid only when the payload resolves to
+ * exactly one row-bearing shape. Two distinct ones at once (say a results array and a separate
+ * warnings array) are not summed together: nothing here knows whether they count the same kind of
+ * thing, so `rowCeilingNotice` falls back to reporting the breakdown from `rowCountsByKey` instead.
+ * @param {*} payload - Flattened tool payload, in any of the shapes the SPARQL layer returns
+ * @returns {number|null} Row count, or null when it is zero or ambiguous
  */
 function countPayloadRows(payload) {
     if (Array.isArray(payload)) {
         return payload.length;
     }
-    if (payload && payload.results && Array.isArray(payload.results.bindings)) {
-        return payload.results.bindings.length;
+    const counts = rowCountsByKey(payload);
+    const countedKeys = Object.keys(counts);
+    if (countedKeys.length === 1) {
+        return counts[countedKeys[0]];
     }
-    if (payload && Array.isArray(payload.rawResult)) {
-        return payload.rawResult.length;
-    }
-    if (payload && Array.isArray(payload.hits)) {
-        return payload.hits.length;
+    if (countedKeys.length === 0 && payload && typeof payload === "object") {
+        // Nothing countable one level in: the payload may itself be a flat map of rows (getLabelsMap's
+        // {uri: label, ...}), but a single key here is a document's own field, not a row, same as above.
+        const ownKeyCount = Object.keys(payload).length;
+        return ownKeyCount >= 2 ? ownKeyCount : null;
     }
     return null;
 }
@@ -326,7 +414,8 @@ const rowCountWorthDoubting = 1000;
 // hint: it sends the agent to an endpoint that cannot answer the question it was told to ask.
 const escalationForSparql =
     `Establish the real total with sls_sparql_select and SELECT (COUNT(*) AS ?total) on the same pattern before quoting a figure, ` +
-    `then either raise options.limit to cover it, narrow the question, or hand the same pattern to sls_sparql_select with collect true, which walks the whole set.`;
+    `then either raise options.limit to cover it, narrow the question, or hand the same pattern to sls_sparql_select with collect true, which walks the whole set against the endpoint. ` +
+    `That answer can still be too large for one response: if so, its own truncation notice names sls_result_page, which searches it without reading it all.`;
 const escalationForElastic =
     `Hits are returned best-scoring first, so what is missing is the weaker matches, not a random remainder. ` +
     `Raise size to see further down the ranking, or get exact per-index totals with sls_count_labels_by_source, which counts rather than lists.`;
@@ -351,13 +440,12 @@ const escalationForElastic =
  * @param {number|undefined} ceilingContext.appliedRowLimit - Ceiling this server asked for, when it asked for one
  * @param {object|null} [ceilingContext.sparqlExecution] - Facts reported by the route about the queries it ran
  * @param {string} ceilingContext.escalation - What the agent should do next about a cut
- * @returns {object|null} Notice for the response envelope, or null when the payload carries no rows
+ * @returns {object|null} Notice for the response envelope; `returnedRows` when the payload resolves to
+ *   one row-bearing shape, `rowCountsByKey` instead when it has none or several and the queries this
+ *   call ran are still known; null when neither the payload nor the queries have anything to report
  */
 export function rowCeilingNotice(payload, ceilingContext) {
     const returnedRows = countPayloadRows(payload);
-    if (returnedRows === null) {
-        return null;
-    }
     const { appliedRowLimit, sparqlExecution, escalation } = ceilingContext;
 
     // The route measured the queries themselves, which is the only account that covers a limit this
@@ -365,7 +453,7 @@ export function rowCeilingNotice(payload, ceilingContext) {
     // is a cut. A function that pages internally ends either on a ceiling, its last block full, or
     // on the end of the data, its last block short. The same test reads both.
     if (sparqlExecution && sparqlExecution.queryCount > 0) {
-        const { lastLimit, lastRows, totalRows, queryCount, endpointCeiling } = sparqlExecution;
+        const { lastLimit, lastRows, endpointCeiling } = sparqlExecution;
         let knownCeiling = null;
         if (lastLimit && endpointCeiling) {
             knownCeiling = Math.min(lastLimit, endpointCeiling);
@@ -383,14 +471,13 @@ export function rowCeilingNotice(payload, ceilingContext) {
             completeness = true;
         }
 
-        const notice = { returnedRows: returnedRows, knownCeiling: knownCeiling, atKnownCeiling: atKnownCeiling, complete: completeness };
-        // Rows the function read against rows it handed back: a function that groups or maps its
-        // bindings returns fewer, and without this the ceiling figures look unrelated to the answer.
-        if (totalRows !== returnedRows) {
-            notice.sparqlRows = totalRows;
-        }
-        if (queryCount > 1) {
-            notice.sparqlQueries = queryCount;
+        const notice = { knownCeiling: knownCeiling, atKnownCeiling: atKnownCeiling, complete: completeness };
+        if (returnedRows === null) {
+            // The payload has none or several row-bearing keys, so no single count can be vouched for:
+            // report what was actually found under each key instead of staying silent about the cut.
+            notice.rowCountsByKey = rowCountsByKey(payload);
+        } else {
+            notice.returnedRows = returnedRows;
         }
 
         if (atKnownCeiling) {
@@ -401,7 +488,7 @@ export function rowCeilingNotice(payload, ceilingContext) {
             notice.hint =
                 `Cut: the last query this call ran came back with ${lastRows} rows against ${whichCeiling}, so this is a prefix of the result, not the result. ` +
                 `Never present it to the user as the whole set. ${escalation}`;
-        } else if (completeness === "unknown" && returnedRows >= rowCountWorthDoubting) {
+        } else if (completeness === "unknown" && returnedRows !== null && returnedRows >= rowCountWorthDoubting) {
             notice.hint =
                 `Possibly cut: nothing here proves this answer is whole, because this endpoint's own row cap could not be established and endpoints truncate silently. ` +
                 `Do not call it the whole set until a count agrees with it. ${escalation}`;
@@ -409,19 +496,32 @@ export function rowCeilingNotice(payload, ceilingContext) {
         return notice;
     }
 
+    // Below this point every branch compares returnedRows against a limit, which needs one resolved
+    // count: a payload with none or several row-bearing keys has nothing to report here.
+    if (returnedRows === null) {
+        return null;
+    }
+
+    // Deduplication happens after the index applied `size`, so the rows that decide whether the
+    // ranking was cut are the ones it returned, not the ones left after dropping repeats. Judging the
+    // ceiling on the deduplicated count reads a cut result as merely short.
+    const rowsAgainstCeiling = typeof payload?.indexedHits === "number" ? payload.indexedHits : returnedRows;
+
     // A search engine counts what it did not return, so completeness needs no inference here. The
     // count is a floor rather than a figure past 10000 matches, and `describeElasticTotal` says so.
     if (payload && typeof payload.totalMatches === "number" && !payload.totalMatchesIsLowerBound) {
-        const isComplete = returnedRows >= payload.totalMatches;
+        const isComplete = rowsAgainstCeiling >= payload.totalMatches;
         const notice = { returnedRows: returnedRows, knownCeiling: appliedRowLimit ?? null, atKnownCeiling: !isComplete, complete: isComplete };
         if (!isComplete) {
-            notice.hint = `Cut: ${returnedRows} of ${payload.totalMatches} matches came back. ${escalation}`;
+            notice.hint = `Cut: ${rowsAgainstCeiling} of ${payload.totalMatches} matches came back. ${escalation}`;
+        } else if (payload.duplicatesRemoved) {
+            notice.hint = `Whole: all ${payload.totalMatches} matches came back, ${payload.duplicatesRemoved} of them duplicates, so the ${returnedRows} nodes listed are the complete answer.`;
         }
         return notice;
     }
 
     // No account from the route: all that is left is the limit this server asked for, and the count.
-    if (appliedRowLimit && returnedRows === appliedRowLimit) {
+    if (appliedRowLimit && rowsAgainstCeiling === appliedRowLimit) {
         return {
             returnedRows: returnedRows,
             knownCeiling: appliedRowLimit,
@@ -445,6 +545,52 @@ export function rowCeilingNotice(payload, ceilingContext) {
     const notice = { returnedRows: returnedRows, knownCeiling: appliedRowLimit ?? null, atKnownCeiling: false, complete: "unknown" };
     if (returnedRows >= rowCountWorthDoubting) {
         notice.hint = `Possibly cut: this call reported no ceiling of its own, and ${returnedRows} rows is large enough that a silent truncation would change a conclusion. ${escalation}`;
+    }
+    return notice;
+}
+
+// Only the base URI cell of a level (`child1`, `child2`, …), never its `child1Label`/`child1Type`/
+// `child1IsBlankNode` siblings, which is why the digits must run to the end of the key.
+const childDepthKeyRegex = /^child(\d+)$/;
+
+/**
+ * How many `descendantsDepth` levels actually carried data, against how many were asked for.
+ *
+ * A row exposes `child1`..`childN` only for the levels the recursive `OPTIONAL` chain in
+ * `getNodeChildren` actually bound: an unbound optional variable is absent from the SPARQL JSON row
+ * entirely, not present with a null value. So the highest bound `childN` across every row is the
+ * true depth reached, and it is the only way to tell "the hierarchy genuinely ends here" apart from
+ * "the depth parameter did nothing" — both look identical otherwise (SLS-02).
+ * @param {*} rows - Flattened tool payload, expected to be an array of child rows
+ * @param {number} requestedDepth
+ * @returns {object|null} `{requestedDepth, depthReached, hint?}`, or null when the payload is not row-shaped
+ */
+function depthReachedNotice(rows, requestedDepth) {
+    if (!Array.isArray(rows) || !Number.isFinite(requestedDepth)) {
+        return null;
+    }
+    let depthReached = 0;
+    for (const row of rows) {
+        if (!row || typeof row !== "object") {
+            continue;
+        }
+        for (const [key, value] of Object.entries(row)) {
+            const depthMatch = key.match(childDepthKeyRegex);
+            if (depthMatch && value !== null && value !== undefined && Number(depthMatch[1]) > depthReached) {
+                depthReached = Number(depthMatch[1]);
+            }
+        }
+    }
+    const notice = { requestedDepth: requestedDepth, depthReached: depthReached };
+    if (rows.length === 0) {
+        // No row at all, not just a missing deeper key: child1 is bound by the query's base pattern
+        // whenever any row matches, so an empty result is a plain "no children", nothing to re-query.
+        notice.hint = `Requested depth ${requestedDepth}, but the query returned no rows: this node has no children at any depth, not an ambiguous partial result.`;
+    } else if (depthReached < requestedDepth) {
+        notice.hint =
+            `Requested depth ${requestedDepth}, but no row carries a bound child${depthReached + 1}. ` +
+            `This may mean the hierarchy genuinely ends at depth ${depthReached}, or that levels past it were never reached — ` +
+            `call sls_node_children again on the child${depthReached} URIs to tell the two apart before reporting the hierarchy as complete.`;
     }
     return notice;
 }
@@ -474,7 +620,11 @@ async function executeSparqlTool(descriptor, toolArguments) {
     }
     const flattenedData = flattenSparqlResult(result.data);
     const ceilingContext = { appliedRowLimit: namedParams.options?.limit, sparqlExecution: result.sparqlExecution, escalation: escalationForSparql };
-    return { ...result, data: flattenedData, rowCeiling: rowCeilingNotice(flattenedData, ceilingContext) };
+    const response = { ...result, data: flattenedData, rowCeiling: rowCeilingNotice(flattenedData, ceilingContext) };
+    if (namedParams.descendantsDepth !== undefined) {
+        response.depthCeiling = depthReachedNotice(flattenedData, Number(namedParams.descendantsDepth));
+    }
+    return response;
 }
 
 // ---------------------------------------------------------------------------
@@ -656,6 +806,14 @@ async function executeRestTool(descriptor, registryByKey, toolArguments) {
     const result = await slsRequest(descriptor.httpMethod, descriptor.route, requestOptions);
 
     if (!result.ok) {
+        // Some routes fail with a status that names a normal, expected state rather than a fault
+        // (SLS-06): nothing configured yet, nobody has built the resource. Surfacing that as a failed
+        // tool call sends an agent looking for a bug that is not there; answering with a bare empty
+        // object risks the opposite mistake, read as proof the source genuinely has none. Neither is
+        // right, so this becomes an ordinary successful answer carrying only the notice.
+        if (descriptor.normalAbsence && result.status === descriptor.normalAbsence.status) {
+            return { ...result, ok: true, status: 200, errorMessage: null, data: { available: false, notice: descriptor.normalAbsence.notice } };
+        }
         const hint = descriptor.statusHints[result.status];
         return hint ? { ...result, errorMessage: hint } : result;
     }
@@ -671,6 +829,12 @@ async function executeRestTool(descriptor, registryByKey, toolArguments) {
     }
     if (descriptor.emptyListWhenNull && shapedData === null) {
         shapedData = [];
+    }
+    if (descriptor.excludePromotedFunctions && Array.isArray(shapedData)) {
+        // The registry itself, and every other caller of GET /sparqlQueries/catalog, still lists
+        // these entries in full: only this discovery listing hides a function once a dedicated tool
+        // already reaches it, so an agent scanning it never finds two names for the same capability.
+        shapedData = shapedData.filter((entry) => !registryByKey.get(`${entry.module}.${entry.name}`)?.mcpTool);
     }
     if (descriptor.resultShape) {
         const shaper = resultShapers[descriptor.resultShape];
@@ -788,12 +952,17 @@ async function executeCollectedTool(descriptor, registryByKey, toolArguments) {
             // as if it were whole is the outcome this whole mechanism exists to avoid.
             return blockResult;
         }
-        blockCount += 1;
         collectedElapsedMs += blockResult.data?.elapsedMs ?? 0;
         const blockBindings = blockResult.data?.results?.bindings;
+        // A walk always ends on an empty block, because a short one does not prove the end: an
+        // endpoint whose row ceiling sits below the batch size returns short blocks forever, and
+        // stopping on one would truncate the walk while calling it complete. That terminating call
+        // is a cost, counted in `elapsedMs`, and not a block of rows, so it is deliberately left out
+        // of `collectedBlocks`: a reader told a third block exists looks for the rows in it.
         if (!Array.isArray(blockBindings) || blockBindings.length === 0) {
             break;
         }
+        blockCount += 1;
         responseVars = blockResult.data.head?.vars ?? responseVars;
         for (const binding of blockBindings) {
             collectedBindings.push(binding);

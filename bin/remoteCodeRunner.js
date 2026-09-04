@@ -102,7 +102,7 @@ function addSparqlAuth(sparqlUrl, params) {
  * @param {function} error
  */
 function handleSparqlPost(data, success, error) {
-    const body = JSON.parse(data.body);
+    const body = typeof data.body === "string" ? JSON.parse(data.body) : data.body || {};
     const sparqlUrl = data.url;
     const headers = body.headers || {};
     const params = body.params || {};
@@ -145,7 +145,7 @@ function handleSparqlPost(data, success, error) {
  */
 function handleGetRequest(data, success, error) {
     const getUrl = data.url;
-    const getOptions = data.options ? JSON.parse(data.options) : {};
+    const getOptions = typeof data.options === "string" ? JSON.parse(data.options) : data.options || {};
 
     httpProxy.get(getUrl, getOptions, function (err, result) {
         if (err) {

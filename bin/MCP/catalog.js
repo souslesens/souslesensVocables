@@ -252,6 +252,11 @@ const restToolDeclarationSchema = z
         body: z.record(z.string(), z.any()).optional(),
         parseJsonPayload: z.boolean().optional(),
         emptyListWhenNull: z.boolean().optional(),
+        // Drops entries the SPARQL registry already promotes to their own tool (`entry.mcpTool` set):
+        // an agent that can already reach a function through a dedicated tool has no reason to see it
+        // a second time in this discovery listing. The REST route itself is untouched — every other
+        // caller of GET /sparqlQueries/catalog still gets the complete registry.
+        excludePromotedFunctions: z.boolean().optional(),
         resultShape: z.enum(resultShapeNames).optional(),
         maxResponseBytes: z.number().positive().optional(),
         navigableDocument: z.boolean().optional(),
@@ -287,6 +292,18 @@ const restToolDeclarationSchema = z
             .strict()
             .optional(),
         statusHints: z.record(z.string(), z.string().min(1)).optional(),
+        // Declares that one HTTP status from this route is not a failure at all: the resource is
+        // simply not materialized yet (a cache nothing has filled, a file nobody has built). Rather
+        // than a failed tool call, the agent gets an ordinary successful answer carrying `notice`, so
+        // it reads as "unknown, ask elsewhere" rather than as an outage to retry or, worse, as an
+        // empty object it could mistake for "this source has zero classes".
+        normalAbsence: z
+            .object({
+                status: z.number(),
+                notice: z.string().min(1),
+            })
+            .strict()
+            .optional(),
     })
     .strict();
 
@@ -381,6 +398,7 @@ function restToolDescriptor(toolDeclaration, routePath, httpMethod) {
         paramDefaults: paramDefaults,
         parseJsonPayload: Boolean(toolDeclaration.parseJsonPayload),
         emptyListWhenNull: Boolean(toolDeclaration.emptyListWhenNull),
+        excludePromotedFunctions: Boolean(toolDeclaration.excludePromotedFunctions),
         resultShape: toolDeclaration.resultShape || null,
         maxResponseBytes: toolDeclaration.maxResponseBytes || null,
         navigableDocument: Boolean(toolDeclaration.navigableDocument),
@@ -388,6 +406,7 @@ function restToolDescriptor(toolDeclaration, routePath, httpMethod) {
         rowCeiling: toolDeclaration.rowCeiling || null,
         pagedCollection: toolDeclaration.pagedCollection || null,
         statusHints: toolDeclaration.statusHints || {},
+        normalAbsence: toolDeclaration.normalAbsence || null,
     };
 }
 
@@ -502,6 +521,7 @@ function resultPageToolDescriptor() {
         paramDefaults: { offset: 0 },
         parseJsonPayload: false,
         emptyListWhenNull: false,
+        excludePromotedFunctions: false,
         resultShape: null,
         maxResponseBytes: null,
         navigableDocument: false,

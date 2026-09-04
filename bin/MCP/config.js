@@ -60,10 +60,11 @@ export const mcpConfig = {
     // this server cannot know and which is shared between every call of a conversation. A route
     // whose document is legitimately larger raises it for itself through `x-mcp.maxResponseBytes`.
     maxResponseBytes: readPositiveNumber("MCP_MAX_RESPONSE_BYTES", 250000),
-    // Row ceiling for anything an agent runs against the triple store: the `limit` option injected
-    // into catalog functions, and the LIMIT that /api/v1/sparql/select appends to a raw SELECT that
-    // declares none. One number for both, so a raw query and a catalog call answer at the same
-    // scale. Well under `maxResponseBytes`, which truncates whatever exceeds it anyway.
+    // Row ceiling for the catalog functions an agent runs against the triple store, injected as their
+    // `limit` option when the call names none, and the page size `sls_result_page` reads with. Nothing
+    // is appended to a raw SELECT: /api/v1/sparql/select forwards the query as it stands and leaves
+    // the endpoint's own ceiling to bound it, since a LIMIT of ours bounded no cost and broke every
+    // sorted query. Well under `maxResponseBytes`, which truncates whatever exceeds it anyway.
     defaultSparqlLimit: readPositiveNumber("MCP_DEFAULT_SPARQL_LIMIT", 1000),
     // Ceilings for the rows held back from oversized answers, see resultStore.js. In memory and
     // lost on restart by design: persistence would buy little and cost a file lifecycle. The age

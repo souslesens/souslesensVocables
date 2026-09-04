@@ -100,10 +100,9 @@
             "description": "Throws an error or returns SPARQL results with variables: `topConcept`, `topConceptLabel` (optional), `subjectGraph` (optional)."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
+        "expose": false,
         "example": null,
-        "summary": "Returns the top-level classes of an OWL source: `owl:Class` instances with no named parent class in the queried graphs. Blank nodes are excluded; labels are fetched optionally and language-filtered.",
-        "access": "read"
+        "summary": "Returns the top-level classes of an OWL source: `owl:Class` instances with no named parent class in the queried graphs. Blank nodes are excluded; labels are fetched optionally and language-filtered."
     },
     {
         "name": "getNodeChildren",
@@ -196,9 +195,8 @@
             "description": "Throws an error or returns SPARQL results with variables: `subject`, `subjectLabel` (optional), `child1`, `child1Label` (optional), `child1Type` (optional), `child1Graph` (optional), depth-indexed `childN` (optional), `childNLabel` (optional), `collection` (optional), `acollection` (optional), `collectionLabel` (optional), `acollectionLabel` (optional)."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
-        "example": null,
-        "access": "read"
+        "expose": false,
+        "example": null
     },
     {
         "name": "getNodeInfos",
@@ -261,9 +259,8 @@
             "description": "Throws an error or returns SPARQL results with variables: `prop`, `value`, `propLabel` (optional), `valueLabel` (optional), `g` (optional)."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
-        "example": null,
-        "access": "read"
+        "expose": false,
+        "example": null
     },
     {
         "name": "getNodeParents",
@@ -338,9 +335,8 @@
             "description": "Throws an error or returns SPARQL results with variables: `subject`, `subjectLabel` (optional), `subjectTypes`, `subjectSuperClasses` (optional), `broader1`, `broader1Label` (optional), `broaderGraphs1`, and depth-indexed `broaderN` (optional), `broaderNLabel` (optional), `broaderGraphsN`."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
-        "example": null,
-        "access": "read"
+        "expose": false,
+        "example": null
     },
     {
         "name": "getNodesAncestorsOrDescendants",
@@ -394,7 +390,7 @@
         ],
         "returns": {
             "type": "err|Object",
-            "description": "Throws an error or returns `{hierarchies, rawResult}`; each `rawResult` binding contains `subject`, `class`, `type`, `classLabel` (optional), `superClass`, `superClassType`, `superClassSubClass`, `superClassLabel` (optional), `subjectTypes`."
+            "description": "Throws an error or returns `{hierarchies}`; each hierarchy entry is a binding with `subject`, `class`, `type`, `classLabel` (optional), `superClass`, `superClassType`, `superClassSubClass`, `superClassLabel` (optional), `subjectTypes`."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
@@ -1373,7 +1369,7 @@
     {
         "name": "generateOWL",
         "module": "Sparql_OWL",
-        "description": "Serialises a source to Turtle by paginating `DESCRIBE ?s ?p ?o` queries (`text/turtle` Accept header) in pages of 1000, separating `@prefix` lines from the body and concatenating everything into a single Turtle document.",
+        "description": "Serialises a source to Turtle by paginating `DESCRIBE ?s ?p ?o` queries (`text/turtle` Accept header) in pages of 1000, separating `@prefix` lines from the body and concatenating everything into a single Turtle document. Not exposed: its only caller, lineage_sources.js's exportOWL, is itself never invoked from any UI element, and this crashes outright through the MCP/RemoteCodeRunner path (`result.result` is undefined there for a non-JSON Accept header). Unused and non-functional outside a real browser.",
         "params": [
             {
                 "name": "sourceLabel",
@@ -1401,9 +1397,9 @@
             "description": "Throws an error or returns the source serialized as a Turtle string."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
+        "expose": false,
         "example": null,
-        "access": "read"
+        "summary": "Serialises a source to Turtle by paginating `DESCRIBE ?s ?p ?o` queries (`text/turtle` Accept header) in pages of 1000, separating `@prefix` lines from the body and concatenating everything into a single Turtle document."
     },
     {
         "name": "getDistinctClassLabels",
@@ -1698,9 +1694,8 @@
             "description": "Throws an error or returns SPARQL results with variables: `subject`, `type`, and `subjectLabel`."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
-        "example": null,
-        "access": "read"
+        "expose": false,
+        "example": null
     },
     {
         "name": "getNodesSuperClassesAndDefinition",
@@ -2746,9 +2741,8 @@
             "description": "Throws an error or returns a map of graph URI to `1`."
         },
         "responseSchema": "#/definitions/SparqlQueryResponse",
-        "expose": true,
-        "example": null,
-        "access": "read"
+        "expose": false,
+        "example": null
     },
     {
         "name": "getNodesAllTriples",

@@ -1928,7 +1928,7 @@ var Lineage_whiteboard = (function () {
      * @name addChildrenToGraph
      * @memberof module:Lineage
      * @param {string} [source] - The source to fetch the child nodes from. If not provided, the active source is used.
-     * @param {Array<string>} nodeIds - An array of node IDs to add as parent nodes for retrieving children.
+     * @param {Array<string>} nodeIds - An array of node IDs to add as parent nodes for retrieving children. When not provided, only the whiteboard nodes belonging to that source are expanded, so the nodes drawn from the imported sources are left untouched.
      * @param {Object} [options] - Optional configuration options for adding child nodes.
      * @param {number} [options.depth=1] - The depth of the child nodes to retrieve.
      * @param {boolean} [options.dontClusterNodes=false] - If true, disables clustering of child nodes.
@@ -1959,9 +1959,16 @@ var Lineage_whiteboard = (function () {
             parentIds = [];
             var nodes = self.lineageVisjsGraph.data.nodes.get();
             nodes.forEach(function (node) {
-                if ((source == Lineage_sources.activeSource || (node.data && node.data.source == source)) && node.data && node.data.id != source) {
-                    parentIds.push(node.data.id);
+                // only the nodes of the expanded source : the whiteboard also holds nodes drawn from the
+                // imported sources, and expanding them all ignores the source the user has selected
+                if (!node.data || node.data.source != source) {
+                    return;
                 }
+                // the source box node carries a source but no class id, it has no children to fetch
+                if (!node.data.id || node.data.id == source) {
+                    return;
+                }
+                parentIds.push(node.data.id);
             });
         }
         // Every early exit below answers the callback, empty-handed rather than not at all: a caller

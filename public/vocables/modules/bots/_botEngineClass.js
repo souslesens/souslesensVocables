@@ -15,6 +15,7 @@ class BotEngineClass {
             step: [],
         };
         this.currentList = [];
+        this.multiSelectedValues = [];
         this.divId = null;
     }
 
@@ -223,6 +224,10 @@ class BotEngineClass {
         $("#" + this.divId)
             .find("#botFilterProposalDiv")
             .hide();
+        $("#" + this.divId)
+            .find("#botListValidateBtn")
+            .remove();
+        this.multiSelectedValues = [];
         this.history.workflowObjects.push(JSON.parse(JSON.stringify(this.currentObj)));
         this.history.currentIndex += 1;
         this.history.returnValues.push(returnValue);
@@ -442,7 +447,30 @@ class BotEngineClass {
             .html(message);
     }
 
-    showList(values, varToFill, returnValue, sort, callback) {
+    /**
+     * @function
+     * @name showList
+     * @memberof BotEngineClass
+     * Displays the bot proposal select filled with the given values.
+     * In single selection mode a click on an option immediately validates the step.
+     * In multi selection mode a click toggles the option without losing the other ones, the filter bar
+     * stays visible whatever the list length, and a Validate button submits the whole selection as an array.
+     * @param {Array<Object|string>} values - Items to display, plain strings or {id, label} objects.
+     * @param {string} varToFill - Name of the bot parameter filled with the selection.
+     * @param {*} [returnValue] - Value passed to nextStep instead of the selection, used by _OR alternatives.
+     * @param {boolean} [sort] - Sorts the values on their label before display.
+     * @param {Function} [callback] - Called with the selection instead of moving to the next step.
+     * @param {Object} [options] - Display options.
+     * @param {boolean} [options.multiSelect] - Enables multi selection with a Validate button.
+     * @param {boolean} [options.allowEmptySelection] - Lets Validate submit an empty selection.
+     * @param {Array<string>} [options.selectedValues] - Values already selected, displayed as such when the step is played again.
+     * @returns {void}
+     */
+    showList(values, varToFill, returnValue, sort, callback, options) {
+        if (!options) {
+            options = {};
+        }
+        const multiSelect = options.multiSelect === true;
         values = common.StringArrayToIdLabelObjectArray(values);
         if (sort) {
             values.sort(function (a, b) {
@@ -459,14 +487,21 @@ class BotEngineClass {
             this.history.step.push(this.history.currentIndex);
         }
 
+        var selectElement = $("#" + this.divId).find("#bot_resourcesProposalSelect");
         $("#" + this.divId)
-            .find("#bot_resourcesProposalSelect")
-            .css("display", "block");
+            .find("#botListValidateBtn")
+            .remove();
+        this.multiSelectedValues = [];
+        if (multiSelect && options.selectedValues) {
+            this.multiSelectedValues = options.selectedValues.slice();
+        }
+        selectElement.css("display", "block");
+        selectElement.prop("multiple", multiSelect);
         $("#" + this.divId)
             .find("#botSearchScopeSelect")
             .hide();
         this.currentList = values;
-        if (values.length > 20) {
+        if (multiSelect || values.length > 20) {
             $("#" + this.divId)
                 .find("#botFilterProposalDiv")
                 .show();
@@ -475,46 +510,126 @@ class BotEngineClass {
                 .val("")
                 .trigger("focus");
         }
-        common.fillSelectOptions($("#" + this.divId).find("#bot_resourcesProposalSelect"), values, false, "label", "id");
-        $("#" + this.divId)
-            .find("#bot_resourcesProposalSelect")
-            .unbind("click");
-        UI.adjustSelectListSize($("#" + this.divId).find("#bot_resourcesProposalSelect"), 10);
+        this.fillProposalSelect(values);
+        selectElement.unbind("click");
+        selectElement.off(".botMultiSelect");
+        UI.adjustSelectListSize(selectElement, 10);
         $("#botPanel").scrollTop($("#botPanel")[0].scrollHeight);
-        $("#" + this.divId)
-            .find("#bot_resourcesProposalSelect")
-            .bind("click", (evt) => {
-                // 'this' ici est l'instance de la classe, evt.currentTarget est le select DOM
-                var text = $(evt.currentTarget).find("option:selected").text();
-                if (text == "") {
+
+        if (multiSelect) {
+            // preventDefault keeps the browser from dropping the other selected options on a plain click,
+            // so the list behaves like a set of checkboxes and the focus stays in the filter input
+            selectElement.on("mousedown.botMultiSelect", (evt) => {
+                var clickedOption = $(evt.target);
+                if (!clickedOption.is("option")) {
                     return;
                 }
-                this.insertBotMessage(text);
-
-                var selectedValue = $(evt.currentTarget).val();
-                if (Array.isArray(selectedValue)) {
-                    selectedValue = selectedValue[0];
+                evt.preventDefault();
+                var clickedValue = clickedOption.val();
+                var wasSelected = clickedOption.prop("selected");
+                clickedOption.prop("selected", !wasSelected);
+                if (wasSelected) {
+                    this.multiSelectedValues = this.multiSelectedValues.filter((selectedValue) => selectedValue !== clickedValue);
+                } else {
+                    this.multiSelectedValues.push(clickedValue);
                 }
-                if (evt.ctrlKey) {
-                    return;
-                }
-
-                if (varToFill) {
-                    this.history.VarFilling[this.history.currentIndex] = {
-                        VarFilled: varToFill,
-                        valueFilled: selectedValue,
-                    };
-                    if (Array.isArray(this.currentBot.params[varToFill])) {
-                        this.currentBot.params[varToFill].push(selectedValue);
-                    } else {
-                        this.currentBot.params[varToFill] = selectedValue;
-                    }
-                }
-                if (callback) {
-                    return callback(selectedValue);
-                }
-                this.nextStep(returnValue || selectedValue);
             });
+            // the toggle above is the only supported way to change the selection : any native change
+            // (click under the last option, keyboard navigation) collapses it and must be reverted
+            selectElement.on("change.botMultiSelect", () => {
+                selectElement.val(this.multiSelectedValues);
+            });
+
+            selectElement.after(`<button id="botListValidateBtn" class="w3-button classesPanelButton size-of-button-small" style="margin-top:6px;width:100%">Validate</button>`);
+            $("#" + this.divId)
+                .find("#botListValidateBtn")
+                .on("click", () => {
+                    // without allowEmptySelection an empty validation is a misclick; with it, selecting
+                    // nothing is a legitimate answer and must not leave the user stuck on a dead button
+                    if (this.multiSelectedValues.length === 0 && !options.allowEmptySelection) {
+                        return;
+                    }
+                    var selectedValues = this.multiSelectedValues;
+                    var selectedLabels = [];
+                    selectedValues.forEach((selectedValue) => {
+                        var listItem = this.currentList.find((item) => item.id === selectedValue);
+                        if (listItem) {
+                            selectedLabels.push(listItem.label);
+                        } else {
+                            selectedLabels.push(selectedValue);
+                        }
+                    });
+                    this.insertBotMessage(selectedLabels.join(", "));
+
+                    if (varToFill) {
+                        this.history.VarFilling[this.history.currentIndex] = {
+                            VarFilled: varToFill,
+                            valueFilled: selectedValues,
+                        };
+                        this.currentBot.params[varToFill] = selectedValues;
+                    }
+                    this.multiSelectedValues = [];
+                    $("#" + this.divId)
+                        .find("#botListValidateBtn")
+                        .remove();
+
+                    if (callback) {
+                        return callback(selectedValues);
+                    }
+                    this.nextStep(returnValue || selectedValues);
+                });
+            return;
+        }
+
+        selectElement.bind("click", (evt) => {
+            // 'this' ici est l'instance de la classe, evt.currentTarget est le select DOM
+            var text = $(evt.currentTarget).find("option:selected").text();
+            if (text == "") {
+                return;
+            }
+            this.insertBotMessage(text);
+
+            var selectedValue = $(evt.currentTarget).val();
+            if (Array.isArray(selectedValue)) {
+                selectedValue = selectedValue[0];
+            }
+            if (evt.ctrlKey) {
+                return;
+            }
+
+            if (varToFill) {
+                this.history.VarFilling[this.history.currentIndex] = {
+                    VarFilled: varToFill,
+                    valueFilled: selectedValue,
+                };
+                if (Array.isArray(this.currentBot.params[varToFill])) {
+                    this.currentBot.params[varToFill].push(selectedValue);
+                } else {
+                    this.currentBot.params[varToFill] = selectedValue;
+                }
+            }
+            if (callback) {
+                return callback(selectedValue);
+            }
+            this.nextStep(returnValue || selectedValue);
+        });
+    }
+
+    /**
+     * @function
+     * @name fillProposalSelect
+     * @memberof BotEngineClass
+     * Fills the bot proposal select with the given values and restores the multi selection made on the
+     * previous content, so that filtering the list never drops what the user already selected.
+     * @param {Array<Object>} values - Items to display ({id, label}).
+     * @returns {void}
+     */
+    fillProposalSelect(values) {
+        var selectElement = $("#" + this.divId).find("#bot_resourcesProposalSelect");
+        common.fillSelectOptions(selectElement, values, false, "label", "id");
+        if (this.multiSelectedValues && this.multiSelectedValues.length > 0) {
+            selectElement.val(this.multiSelectedValues);
+        }
     }
 
     showTree(jstreeData, varToFill, treeOptions, returnValue, callback) {
@@ -666,7 +781,7 @@ class BotEngineClass {
         if (!str && this.lastFilterListStr.length < str.length) {
             return;
         } else {
-            common.fillSelectOptions($("#" + this.divId).find("#bot_resourcesProposalSelect"), this.currentList, false, "label", "id");
+            this.fillProposalSelect(this.currentList);
         }
         if (str.length < 2 && this.lastFilterListStr.length < str.length) {
             return;
@@ -679,7 +794,7 @@ class BotEngineClass {
                 selection.push(item);
             }
         });
-        common.fillSelectOptions($("#" + this.divId).find("#bot_resourcesProposalSelect"), selection, false, "label", "id");
+        this.fillProposalSelect(selection);
         UI.adjustSelectListSize($("#" + this.divId).find("#bot_resourcesProposalSelect"), 10);
         $("#" + this.divId)
             .find("#botPanel")

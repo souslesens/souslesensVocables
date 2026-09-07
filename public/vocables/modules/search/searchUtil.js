@@ -839,10 +839,8 @@ indexes.push(source.toLowerCase());
                             };
 
                             //var filter = "?id rdf:type ?type2. filter (?type= owl:NamedIndividual && ?type2!=?type)";
-                            // Filter on individuals = entities that are type of a class.
-                            // ?id is locked to the source's own graph so individuals from imported
-                            // sources are never indexed here, while ?type rdf:type owl:Class is left
-                            // unscoped so a class defined in an import still validates the individual's type.
+                            // Individuals of the source's own graph only, but typed by a class that may
+                            // come from an import, hence the GRAPH on ?id alone.
                             var filter = "GRAPH <" + Config.sources[sourceLabel].graphUri + "> {?id rdf:type ?type} .?type rdf:type owl:Class";
                             //  filter+="?id <http://souslesens.org/KGcreator#mappingFile> 'dbo.V_jobcard'"
                             Sparql_OWL.getDictionary(

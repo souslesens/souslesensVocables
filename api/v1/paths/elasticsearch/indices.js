@@ -10,10 +10,7 @@ export default function () {
         try {
             const indices = await indexModel.getIndices();
 
-            // The list exists to be fed back to the search routes, and an index the caller has no
-            // source for is not skipped there: it makes validateElasticSearchIndices reject the
-            // *whole* multi-index query. This is the same intersection the search UI already does
-            // client-side in SearchUtil.initSourcesIndexesList.
+            // An index without a readable source makes validateElasticSearchIndices reject the whole query.
             ConfigManager.getUserSources(req, res, function (accessError, userSources) {
                 if (accessError) {
                     return;

@@ -35,8 +35,8 @@ export default function () {
                         "Cached ontology model of a source: classes, properties, constraints and restrictions in one payload. " +
                         "This cache lives in the SLS server process and is filled only when a user opens the source in the web UI, so it is often empty. " +
                         "Prefer sls_kgquery_model or sls_source_taxonomy.",
-                    params: { source: { type: "string", required: true, description: "SLS source name." } },
-                    query: { source: "{source}" },
+                    params: { sourceLabel: { type: "string", required: true, description: "SLS source name." } },
+                    query: { source: "{sourceLabel}" },
                     navigableDocument: true,
                     normalAbsence: {
                         status: 404,

@@ -43,8 +43,8 @@ export default function () {
                         "KGquery model of a source: the class and relation graph built in the KGquery tool and saved as JSON. " +
                         "Nodes carry their datatype properties, edges their object properties and cardinalities. " +
                         "The most compact description of how a source is actually queried.",
-                    params: { source: { type: "string", required: true, description: "SLS source name." } },
-                    query: { dir: "graphs/", fileName: "{source}_KGmodelGraph.json" },
+                    params: { sourceLabel: { type: "string", required: true, description: "SLS source name." } },
+                    query: { dir: "graphs/", fileName: "{sourceLabel}_KGmodelGraph.json" },
                     parseJsonPayload: true,
                     navigableDocument: true,
                     normalAbsence: {
@@ -60,10 +60,10 @@ export default function () {
                     access: "read",
                     description: "Mapping document of one data source towards a SLS source: per-table column mappings, URI patterns, joins and generated predicates.",
                     params: {
-                        source: { type: "string", required: true, description: "SLS source name the mapping targets." },
+                        sourceLabel: { type: "string", required: true, description: "SLS source name the mapping targets." },
                         dataSource: { type: "string", required: true, description: "Data source name without the .json extension. List them with sls_mappings_list." },
                     },
-                    query: { dir: "mappings/{source}", fileName: "{dataSource}.json" },
+                    query: { dir: "mappings/{sourceLabel}", fileName: "{dataSource}.json" },
                     parseJsonPayload: true,
                     navigableDocument: true,
                     statusHints: { 404: "No mapping file with that name for this source. List the available ones with sls_mappings_list." },

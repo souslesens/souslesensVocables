@@ -173,7 +173,7 @@ var CreateResource_bot = (function () {
                 return;
             }
             if (self.params.currentVocab === "searchClass") {
-                var vocabs = [{ id: "allSources", label: "All Sources" }];
+                var vocabs = [{ id: "allSources", label: "" }];
                 vocabs.push({ id: self.source, label: self.source });
                 var imports = Config.sources[self.source].imports;
                 if (imports) {

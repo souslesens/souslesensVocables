@@ -1,11 +1,15 @@
 import async from "async";
 import request from "request";
 import fs from 'fs'
+import ConfigManager from "./configManager.js";
+import path from 'path'
+
+import httpProxy from "./httpProxy.js";
 
 
 var Ask = {
 
-    whoAmI: function (source, term) {
+    whoAmI: function (source, term, callback) {
         var termUrisMap = {}
         async.series([
 
@@ -21,11 +25,11 @@ var Ask = {
                         hits.forEach(function (hit) {
 
                             termUrisMap[hit._source.id] = {
-                                id:hit._source.id,
-                                label:hit._source.label,
-                                ancestors:hit._source.parents,
-                                predicates:[],
-                                relations:[],
+                                id: hit._source.id,
+                                label: hit._source.label,
+                                ancestors: hit._source.parents,
+                                predicates: [],
+                                relations: [],
                             }
                         })
                         return callbackSeries()
@@ -64,45 +68,44 @@ var Ask = {
                     if (err) {
                         return callbackSeries(err)
                     }
-                    sparqlResult.results.bindings.forEach(function(item){
+                    sparqlResult.results.bindings.forEach(function (item) {
                         termUrisMap[item.sub.value].predicates.push(
-                            {predicate:item.prop.value,
-                            predicateLabel:item.propLabel?item.propLabel.value:item.prop.value,
-                                object:item.value.value,
-                                objectLabel:item.valueLabel?item.valueLabel.value:item.value.value
+                            {
+                                predicate: item.prop.value,
+                                predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
+                                object: item.value.value,
+                                objectLabel: item.valueLabel ? item.valueLabel.value : item.value.value
                             }
-
                         )
 
                     })
 
-
-
-
+                    return callbackSeries()
                 })
 
 
             }
             // get restrictions
-            , function(callbackSeries){
-            var termUris=Object.keys(termUrisMap)
-                var query=  Ask.getRestrictionsSparql(source, termUris)
+            , function (callbackSeries) {
+                var termUris = Object.keys(termUrisMap)
+                var query = Ask.getRestrictionsSparql(source, termUris)
                 Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
 
                     if (err) {
                         return callbackSeries(err)
                     }
-                    sparqlResult.results.bindings.forEach(function(item){
+                    sparqlResult.results.bindings.forEach(function (item) {
                         termUrisMap[item.class1.value].relations.push(
-                            {predicate:item.prop.value,
-                                predicateLabel:item.propLabel?item.propLabel.value:item.prop.value,
-                                object:item.class2.value,
-                                objectLabel:item.class2Label?item.class2Label.value:item.class2.value
+                            {
+                                predicate: item.prop.value,
+                                predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
+                                object: item.superClass2.value,
+                                objectLabel: item.superClass2Label ? item.superClass2Label.value : item.superClass2.value
                             }
-
                         )
 
                     })
+                    return callbackSeries()
 
                 })
 
@@ -110,12 +113,8 @@ var Ask = {
             },
 
 
+        ], function (err) {
 
-
-
-
-            ], function (err) {
-            var termUrisMap = {}
             return callback(err, termUrisMap)
         })
     },
@@ -135,13 +134,13 @@ var Ask = {
             var nodesMap = {}
             result.nodes.forEach(function (node) {
                 graph.nodes.push(node.data)
-                nodesMap[node.id] = node
+                nodesMap[node.id] = node.data
 
             })
             result.edges.forEach(function (edge) {
                 var newEdge = edge.data
-                newEdge.from = nodesMap[edge.from]
-                newEdge.to = nodesMap[edge.to]
+                newEdge.from = edge.from
+                newEdge.to = edge.to
                 graph.edges.push(newEdge)
 
             })
@@ -293,6 +292,7 @@ var Ask = {
     getLinkedClasses: function (source, term1, term2, callback) {
         var term1Uris = []
         var term2Uris = []
+        var resultMap = {}
         var indexName = source.toLowerCase()
         var query = ""
         async.series([
@@ -334,23 +334,57 @@ var Ask = {
 
                     var query = Ask.getRestrictionsSparql(source, term1Uris, term2Uris)
 
-                    Ask.executeSparqlQuery(source, query, function (err, result) {
+                    Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
                         if (err) {
                             return callbackSeries(err)
                         }
+
+                        sparqlResult.results.bindings.forEach(function (item) {
+                            if (!resultMap[item.class1.value]) {
+                                resultMap[item.class1.value] = []
+                            }
+                            resultMap[item.class1.value].push(
+                                {
+                                    predicate: item.prop.value,
+                                    predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
+                                    object: item.class2.value,
+                                    objectLabel: item.class2Label ? item.class2Label.value : item.class2.value
+                                }
+                            )
+
+                        })
+
+
                         // on essaie la relation  inverse
                         if (true || result.length == 0 || term2 == null) {
                             query = query.replace("filter (?class2 in", "xx")
                             query = query.replace("filter (?class1 in", "filter (?class2 in")
                             query = query.replace("xx", "filter(?class1 in")
 
-                            Ask.executeSparqlQuery(source, query, function (err, result) {
+                            Ask.executeSparqlQuery(source, query, function (err, result2) {
+
+                                sparqlResult.results.bindings.forEach(function (item) {
+                                    if (!resultMap[item.class2.value]) {
+                                        resultMap[item.class2.value] = []
+                                    }
+                                    resultMap[item.class2.value].push(
+                                        {
+                                            predicate: item.prop.value,
+                                            predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
+                                            object: item.class1.value,
+                                            objectLabel: item.class1Label ? item.class1Label.value : item.class1.value
+                                        }
+                                    )
+
+                                })
+
+                                return callbackSeries()
 
                             })
                         }
+                        return callbackSeries()
 
                     })
-                    var x = query
 
 
                 }
@@ -359,7 +393,7 @@ var Ask = {
             ],
 
             function (err) {
-                return callback(err)
+                return callback(null, resultMap)
             })
 
 
@@ -387,7 +421,7 @@ var Ask = {
                 if (index > 0) {
                     filter += ","
                 }
-                filter += "<" + item.id + ">"
+                filter += "<" + (item.id || item) + ">"
 
 
             })
@@ -401,7 +435,7 @@ var Ask = {
                 if (index > 0) {
                     filter += ","
                 }
-                filter += "<" + item.id + ">"
+                filter += "<" + (item.id || item) + ">"
 
 
             })
@@ -415,8 +449,8 @@ var Ask = {
 
 
     getTopConceptsGraphData: function (source, callback) {
-        var path = "../data/graphs/" + source + "_whiteBoard.json"
-        var str = "" + fs.readFileSync(path)
+        var myPath = path.resolve("data/graphs/" + source + "_whiteBoard.json")
+        var str = "" + fs.readFileSync(myPath)
         var json = JSON.parse(str)
         return callback(null, json)
 
@@ -433,7 +467,34 @@ var Ask = {
      */
     executeSparqlQuery: function (source, query, callback) {
 
-        return callback()
+
+        try {
+
+            var params = {
+                "query": query,
+                "useProxy": true,
+            }
+            var serverUrl = ConfigManager.config.sparql_server.url + "?format=json&query="
+            var headers = {
+                "Accept": "application/sparql-results+json",
+                "Content-Type": "application/x-www-form-urlencoded"
+            }
+            params.auth = {
+                user: ConfigManager.config.sparql_server.user,
+                pass: ConfigManager.config.sparql_server.password,
+                sendImmediately: false,
+            };
+
+
+            httpProxy.post(serverUrl, headers, params, function (err, result) {
+                callback(null, result);
+            });
+
+
+        } catch (err) {
+            callback(err)
+        }
+
     },
     /**
      * give the best format (concise) for llm
@@ -588,12 +649,13 @@ var Ask = {
 }
 
 export default Ask
-Ask.whoAmI("ISO-14224-IOF", " failure mode", function (err, result) {
-
-})
-
 
 if (false) {
+    Ask.whoAmI("ISO-14224-IOF", " failure mode", function (err, result) {
+
+    })
+
+
     Ask.getKnowledgeModelGraph("ISO-14224-IOF", function (err, result) {
     })
 

@@ -5,67 +5,120 @@ import fs from 'fs'
 
 var Ask = {
 
-whoAmI:function (source, term) {
-    var termUrisMap = {}
-    async.series([
+    whoAmI: function (source, term) {
+        var termUrisMap = {}
+        async.series([
 
 
-        // search terms and topClasses
-        function (callbackSeries) {
-            var indexName = source.toLowerCase()
-            Ask.executeElasticQuery("/_search", term, indexName, function (err, result) {
-                if (err) {
-                    return callbackSeries(err)
-                } else {
-                    var hits = result.body.hits.hits
-                    hits.forEach(function (hit) {
+            // search terms and topClasses
+            function (callbackSeries) {
+                var indexName = source.toLowerCase()
+                Ask.executeElasticQuery("/_search", term, indexName, function (err, result) {
+                    if (err) {
+                        return callbackSeries(err)
+                    } else {
+                        var hits = result.body.hits.hits
+                        hits.forEach(function (hit) {
 
-                        termUrisMap[hit._source.id] = (hit._source)
-                    })
-                    return callbackSeries()
-                }
-            });
+                            termUrisMap[hit._source.id] = {
+                                id:hit._source.id,
+                                label:hit._source.label,
+                                ancestors:hit._source.parents,
+                                predicates:[],
+                                relations:[],
+                            }
+                        })
+                        return callbackSeries()
+                    }
+                });
 
-        },
+            },
 
 //get Properties
-        function (callbackSeries) {
-            var filter = "filter (?sub in ("
-            Object.keys(termUrisMap).forEach(function (item, index) {
-                if (index > 0) {
-                    filter += ","
-                }
-                filter += "<" + item+ ">"
+            function (callbackSeries) {
+                var filter = "filter (?sub in ("
+                Object.keys(termUrisMap).forEach(function (item, index) {
+                    if (index > 0) {
+                        filter += ","
+                    }
+                    filter += "<" + item + ">"
 
 
-            })
-            filter += ") )"
-            var fromStr = " FROM  NAMED  <http://datalenergies.total.com/resource/tsf/iso-14224-iof/all/>  FROM  NAMED  <http://purl.obolibrary.org/obo/bfo.owl>  FROM  NAMED  <https://spec.industrialontologies.org/ontology/202502/core/Core/> "
-            var query = "  PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
-                "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                " PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                " select distinct * " +
-                fromStr +
-                " where {graph ?g {" +
-                "?sub ?prop ?value." +
-                "    Optional {?value rdfs:label ?valueLabel} " +
-                filter +
-                " Optional {?prop rdfs:label ?propLabel} }  FILTER (!exists{?value rdf:type owl:Restriction} ) } " +
+                })
+                filter += ") )"
+                var fromStr = " FROM  NAMED  <http://datalenergies.total.com/resource/tsf/iso-14224-iof/all/>  FROM  NAMED  <http://purl.obolibrary.org/obo/bfo.owl>  FROM  NAMED  <https://spec.industrialontologies.org/ontology/202502/core/Core/> "
+                var query = "  PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
+                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                    " PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                    " select distinct * " +
+                    fromStr +
+                    " where {graph ?g {" +
+                    "?sub ?prop ?value." +
+                    "    Optional {?value rdfs:label ?valueLabel} " +
+                    filter +
+                    " Optional {?prop rdfs:label ?propLabel} }  FILTER (!exists{?value rdf:type owl:Restriction} ) } " +
 
-                "LIMIT 10000"
-            Ask.executeSparqlQuery(source, query, function (err, result) {
+                    "LIMIT 10000"
+                Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
 
-                if (err) {
-                    return callbackSeries(err)
-                }
-            })
+                    if (err) {
+                        return callbackSeries(err)
+                    }
+                    sparqlResult.results.bindings.forEach(function(item){
+                        termUrisMap[item.sub.value].predicates.push(
+                            {predicate:item.prop.value,
+                            predicateLabel:item.propLabel?item.propLabel.value:item.prop.value,
+                                object:item.value.value,
+                                objectLabel:item.valueLabel?item.valueLabel.value:item.value.value
+                            }
+
+                        )
+
+                    })
 
 
-        }], function (err) {
-        var termUrisMap = {}
-        return callback(err,termUrisMap)
-    })
-},
+
+
+                })
+
+
+            }
+            // get restrictions
+            , function(callbackSeries){
+            var termUris=Object.keys(termUrisMap)
+                var query=  Ask.getRestrictionsSparql(source, termUris)
+                Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
+
+                    if (err) {
+                        return callbackSeries(err)
+                    }
+                    sparqlResult.results.bindings.forEach(function(item){
+                        termUrisMap[item.class1.value].relations.push(
+                            {predicate:item.prop.value,
+                                predicateLabel:item.propLabel?item.propLabel.value:item.prop.value,
+                                object:item.class2.value,
+                                objectLabel:item.class2Label?item.class2Label.value:item.class2.value
+                            }
+
+                        )
+
+                    })
+
+                })
+
+
+            },
+
+
+
+
+
+
+            ], function (err) {
+            var termUrisMap = {}
+            return callback(err, termUrisMap)
+        })
+    },
     /**
      *  get a simplified ontology model with nodes topConcepts and their semantic relations
      * @param source
@@ -119,7 +172,7 @@ whoAmI:function (source, term) {
         var topConceptsGraphData = {}
         var topConcepts1 = []
         var topConcepts2 = []
-        var shortestPath=[]
+        var shortestPath = []
 
         async.series([
 
@@ -197,7 +250,7 @@ whoAmI:function (source, term) {
                     var x = topConcepts1;
                     var y = topConcepts2;
 
-return callbackSeries()
+                    return callbackSeries()
                 },
 
 
@@ -210,8 +263,8 @@ return callbackSeries()
                         if (err) {
                             return callbackSeries(err)
                         }
-                        shortestPath=result
-                        return callbackSeries( )
+                        shortestPath = result
+                        return callbackSeries()
 
 
                     })
@@ -222,7 +275,7 @@ return callbackSeries()
 
             function (err) {
 
-                return callback(null,shortestPath )
+                return callback(null, shortestPath)
             }
         )
 
@@ -278,50 +331,13 @@ return callbackSeries()
                 },
                 //build query
                 function (callbackSeries) {
-                    query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix owl: <http://www.w3.org/2002/07/owl#> "
-                    query += "Select * from <http://datalenergies.total.com/resource/tsf/iso-14224-iof/all/> where {" +
-                        "  ?class1 rdfs:subClassOf{0,5} ?superClass1.\n" +
-                        "  ?superClass1 rdf:type owl:Class.\n" +
-                        "  ?superClass1 rdfs:subClassOf  ?restr. ?restr rdf:type owl:Restriction.\n" +
-                        "  ?restr owl:onProperty ?prop. ?restr owl:someValuesFrom|owl:allValuesFrom|owl:hasValue ?superClass2.\n" +
-                        "   { ?class1 rdfs:label ?class1Label}\n" +
-                        "   optional { ?prop rdfs:label ?propLabel}\n" +
-                        "     { ?superClass2 rdfs:label ?superClass2Label}"
 
-                    var filter = ""
-                    if (term1Uris) {
-                        filter += "filter (?class1 in ("
-                        term1Uris.forEach(function (item, index) {
-                            if (index > 0) {
-                                filter += ","
-                            }
-                            filter += "<" + item.id + ">"
+                    var query = Ask.getRestrictionsSparql(source, term1Uris, term2Uris)
 
-
-                        })
-                        filter +=") )"
-                    }
-                    if (term2Uris) {
-
-                        query +="  ?superClass2 ^rdfs:subClassOf{0,5} ?class2."
-                        filter += "filter (?class2 in ("
-                        term2Uris.forEach(function (item, index) {
-                            if (index > 0) {
-                                filter += ","
-                            }
-                            filter += "<" + item.id + ">"
-
-
-                        })
-                        filter +=") )"
-                    }
-
-                    query += filter + "} limit 10000"
-
-
-                    Ask.executeSparqlQuery(source,query, function(err, result) {
-                        if (err)
+                    Ask.executeSparqlQuery(source, query, function (err, result) {
+                        if (err) {
                             return callbackSeries(err)
+                        }
                         // on essaie la relation  inverse
                         if (true || result.length == 0 || term2 == null) {
                             query = query.replace("filter (?class2 in", "xx")
@@ -334,8 +350,7 @@ return callbackSeries()
                         }
 
                     })
-                    var x=query
-
+                    var x = query
 
 
                 }
@@ -354,7 +369,49 @@ return callbackSeries()
     /*******************************************************Helpers*********************************************************/
 
 
+    getRestrictionsSparql: function (source, term1Uris, term2Uris, callback) {
+        var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix owl: <http://www.w3.org/2002/07/owl#> "
+        query += "Select * from <http://datalenergies.total.com/resource/tsf/iso-14224-iof/all/> where {" +
+            "  ?class1 rdfs:subClassOf{0,5} ?superClass1.\n" +
+            "  ?superClass1 rdf:type owl:Class.\n" +
+            "  ?superClass1 rdfs:subClassOf  ?restr. ?restr rdf:type owl:Restriction.\n" +
+            "  ?restr owl:onProperty ?prop. ?restr owl:someValuesFrom|owl:allValuesFrom|owl:hasValue ?superClass2.\n" +
+            "   { ?class1 rdfs:label ?class1Label}\n" +
+            "   optional { ?prop rdfs:label ?propLabel}\n" +
+            "     { ?superClass2 rdfs:label ?superClass2Label}"
 
+        var filter = ""
+        if (term1Uris) {
+            filter += "filter (?class1 in ("
+            term1Uris.forEach(function (item, index) {
+                if (index > 0) {
+                    filter += ","
+                }
+                filter += "<" + item.id + ">"
+
+
+            })
+            filter += ") )"
+        }
+        if (term2Uris) {
+
+            query += "  ?superClass2 ^rdfs:subClassOf{0,5} ?class2."
+            filter += "filter (?class2 in ("
+            term2Uris.forEach(function (item, index) {
+                if (index > 0) {
+                    filter += ","
+                }
+                filter += "<" + item.id + ">"
+
+
+            })
+            filter += ") )"
+        }
+
+        query += filter + "} limit 10000"
+
+        return query;
+    },
 
 
     getTopConceptsGraphData: function (source, callback) {
@@ -376,7 +433,7 @@ return callbackSeries()
      */
     executeSparqlQuery: function (source, query, callback) {
 
-return callback()
+        return callback()
     },
     /**
      * give the best format (concise) for llm
@@ -385,6 +442,7 @@ return callback()
      * @return {*}
      */
     formatSparqlResults: function (sparqlResult) {
+
 
         return sparqlResult
     },
@@ -447,7 +505,8 @@ return callback()
             });
             return graph;
         }
-        function getEdgesFromToMap  (visjsData) {
+
+        function getEdgesFromToMap(visjsData) {
             var nodesMap = {};
             var edgesFromToMap = {};
             visjsData.nodes.forEach(function (node) {
@@ -503,7 +562,7 @@ return callback()
         var paths = findAllPathsUndirected(graph, start, end);
         var edgesFromToMap = getEdgesFromToMap(visjsdata)
 
-        var resultArray=[]
+        var resultArray = []
         paths.forEach(function (path) {
             var lineStr = "";
             for (var i = 1; i < path.length; i++) {
@@ -512,11 +571,10 @@ return callback()
                     var edge = edgesFrom[path[i]];
 
 
-
                     resultArray.push([
-                        {id: edge.fromNode.id,label: edge.fromNode.label},
+                        {id: edge.fromNode.id, label: edge.fromNode.label},
                         {id: edge.data.propertyId, label: edge.data.propertyLabel},
-                        {id: edge.toNode.id,label: edge.toNode.label},
+                        {id: edge.toNode.id, label: edge.toNode.label},
 
 
                     ]);
@@ -527,21 +585,16 @@ return callback()
     },
 
 
-
-
-
 }
 
 export default Ask
-Ask.whoAmI("ISO-14224-IOF", " failure mode",function (err, result) {
+Ask.whoAmI("ISO-14224-IOF", " failure mode", function (err, result) {
 
 })
 
 
-
-
-if(false) {
-    Ask.getKnowledgeModelGraph("ISO-14224-IOF",function (err, result) {
+if (false) {
+    Ask.getKnowledgeModelGraph("ISO-14224-IOF", function (err, result) {
     })
 
     Ask.getTwoTermsShortestPath("ISO-14224-IOF", " failure mode", "centrifugal pump", function (err, result) {

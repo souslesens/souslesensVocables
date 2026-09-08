@@ -1,0 +1,1702 @@
+# Impact du chantier MCP sur le code SLS pre existant: diff filtre
+#
+# Plage: d62b8c405~1 jusqu au working tree (11/08/2026 au 04/09/2026), genere avec git diff -w.
+#
+# Ce patch ne contient QUE les hunks portant un changement de comportement du code SLS
+# historique. Sont retires: les fichiers propres au MCP (bin/MCP/*, api/v1/paths/sparql/select.js,
+# bin/endpointLimits.js, bin/remoteCodeRunner.js, tests MCP), les blocs "x-mcp" des apiDoc, les
+# hunks purement JSDoc (@expose read/write, @mcpTool, @mcpFixed, reecritures de texte de doc) et
+# les travaux hors MCP de la meme fenetre (quotas par profil, protection de charge Virtuoso,
+# refactor KGbuilder, chaine LLM).
+#
+# Les compteurs des en-tetes @@ sont ceux du diff complet: ce fichier est fait pour etre lu,
+# pas pour etre applique avec git apply.
+#
+# Commentaire de lecture: tasks/impact-mcp-sur-sls-existant.md
+
+diff --git a/api/v1/controllers/sparqlQueries.js b/api/v1/controllers/sparqlQueries.js
+index ed5283f40..a18c2134a 100644
+--- a/api/v1/controllers/sparqlQueries.js
++++ b/api/v1/controllers/sparqlQueries.js
+@@ -5,6 +5,7 @@ import userManager from "../../../bin/user.js";
+ import ConfigManager from "../../../bin/configManager.js";
+ import RemoteCodeRunner from "../../../bin/remoteCodeRunner.js";
+ import { profileModel } from "../../../model/profiles.js";
++import { describeExecutionError } from "../../../bin/sparqlQueriesRunner.js";
+ 
+ const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
+ const requireJson = createRequire(import.meta.url);
+@@ -67,7 +68,7 @@ export async function runRegisteredSparqlQuery(req, res, returnQueryStr) {
+ 
+         RemoteCodeRunner.runVocablesFn({ moduleName, functionName: name, args: positionalArgs }, userContext, function (error, result) {
+             if (error) {
+-                return res.status(500).json({ message: error.message || String(error) });
++                return res.status(500).json({ message: describeExecutionError(error) });
+             }
+             res.status(200).json(result);
+         });
+diff --git a/api/v1/paths/data/file.js b/api/v1/paths/data/file.js
+index 2d40e436a..e9344d5fa 100644
+--- a/api/v1/paths/data/file.js
++++ b/api/v1/paths/data/file.js
+@@ -14,7 +14,7 @@ export default function () {
+         dataController.readFile(req.query.dir, req.query.fileName, function (err, result) {
+             if (err) {
+                 if (err == "file does not exist") {
+-                    return res.status(500).json(err);
++                    return res.status(404).json(err);
+                 }
+                 res.status(err.status || 500).json(err);
+                 next(err);
+@@ -42,7 +83,8 @@ export default function () {
+                     example: '{"id":"assets_mapping","label":"Assets","columns":[]}',
+                 },
+             },
+-            500: { description: "File not found or read error." },
++            404: { description: "File not found." },
++            500: { description: "Read error." },
+         },
+         tags: ["Data"],
+     };
+diff --git a/api/v1/paths/elasticsearch/indices.js b/api/v1/paths/elasticsearch/indices.js
+index 496a41cc1..954f85269 100644
+--- a/api/v1/paths/elasticsearch/indices.js
++++ b/api/v1/paths/elasticsearch/indices.js
+@@ -1,15 +1,27 @@
+ import { indexModel } from "../../../../model/index.js";
++import ConfigManager from "../../../../bin/configManager.js";
+ 
+ export default function () {
+     let operations = {
+         GET,
+     };
+ 
+-    async function GET(_req, res, _next) {
+-        const indices = await indexModel.getIndices();
++    async function GET(req, res, _next) {
+         try {
+-            await indexModel.getIndices();
+-            res.status(200).send(indices);
++            const indices = await indexModel.getIndices();
++
++            // An index without a readable source makes validateElasticSearchIndices reject the whole query.
++            ConfigManager.getUserSources(req, res, function (accessError, userSources) {
++                if (accessError) {
++                    return;
++                }
++                const accessibleIndexNames = {};
++                for (const sourceName in userSources) {
++                    accessibleIndexNames[sourceName.toLowerCase()] = true;
++                }
++                const accessibleIndices = indices.filter((indexName) => accessibleIndexNames[indexName]);
++                res.status(200).send(accessibleIndices);
++            });
+         } catch (error) {
+             res.status(500).send({ error: error });
+             console.error(error);
+diff --git a/api/v1/paths/ontologyModels.js b/api/v1/paths/ontologyModels.js
+index fb9bb6151..0a1bd9e52 100644
+--- a/api/v1/paths/ontologyModels.js
++++ b/api/v1/paths/ontologyModels.js
+@@ -17,7 +17,7 @@ export default function () {
+         if (model) {
+             return processResponse(res, null, model);
+         }
+-        return processResponse(res, "no data", null);
++        return res.status(404).json({ error: `No ontology model cached for source "${req.query.source}".` });
+     }
+ 
+     GET.apiDoc = {
+@@ -73,7 +95,7 @@ export default function () {
+                     },
+                 },
+             },
+-            500: { description: "No cached model for this source." },
++            404: { description: "No cached model for this source." },
+         },
+         tags: ["Ontology"],
+     };
+diff --git a/bin/sparqlQueriesRunner.js b/bin/sparqlQueriesRunner.js
+index 97fe8e561..57125eec4 100644
+--- a/bin/sparqlQueriesRunner.js
++++ b/bin/sparqlQueriesRunner.js
+@@ -4,8 +4,46 @@ import path from "node:path";
+ import userManager from "./user.js";
+ import ConfigManager from "./configManager.js";
+ import RemoteCodeRunner from "./remoteCodeRunner.js";
++import { discoverEndpointLimits, endpointAuthForUrl } from "./endpointLimits.js";
+ import { profileModel } from "../model/profiles.js";
+ 
++// What the executed queries turn out to have asked for, reported beside the answer rather than
++// inside it. The body of this route is whatever the catalog function returned, which is an array for
++// some functions, a plain object keyed by URI for others and SPARQL JSON for the rest, so there is no
++// one place in it to add a key. A header carries the same facts whatever the shape and no existing
++// client has to change.
++//
++// Facts only, never a verdict: the row count, the LIMIT that was in force and the endpoint's own cap.
++// Whoever reads them decides what to say about completeness, and the MCP server says it in terms of
++// the tools an agent can actually call next.
++const sparqlExecutionHeader = "x-sls-sparql-execution";
++
++/**
++ * Answer with the result and, when the call reached the triple store, the header describing what
++ * bounded it. A call that never queried, or whose ceiling could not be established, simply gets no
++ * header rather than a header full of nulls.
++ */
++function respondWithExecutionFacts(res, result, sparqlExecution, declaredEndpointMaxRows) {
++    if (!sparqlExecution || sparqlExecution.queryCount === 0) {
++        return res.status(200).json(result);
++    }
++
++    const endpointAuth = endpointAuthForUrl(sparqlExecution.endpointUrl);
++    discoverEndpointLimits(sparqlExecution.endpointUrl, endpointAuth, function (endpointLimits) {
++        const facts = {
++            queryCount: sparqlExecution.queryCount,
++            lastLimit: sparqlExecution.lastLimit,
++            lastRows: sparqlExecution.lastRows,
++            totalRows: sparqlExecution.totalRows,
++            // A declaration in sources.json wins over the probe, as it does on /sparql/select: it lets
++            // an operator state a cap the probe cannot see, such as one applied by a gateway.
++            endpointCeiling: declaredEndpointMaxRows ?? endpointLimits.rowCeiling,
++        };
++        res.set(sparqlExecutionHeader, JSON.stringify(facts));
++        res.status(200).json(result);
++    });
++}
++
+ const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+ const requireJson = createRequire(import.meta.url);
+ 
+@@ -14,6 +52,32 @@ function loadRegistry() {
+     return requireJson(registryPath);
+ }
+ 
++/**
++ * The SPARQL layer reports a failure in three shapes: an `Error`, the raw triplestore body as a
++ * string (`httpProxy` forwards it as-is when Virtuoso answers with an error instead of bindings),
++ * and the server-side ajax shim's `{ responseText }`. Only the first carries `message`, so reading
++ * `message` alone turned every triplestore syntax error into `[object Object]` and dropped the one
++ * sentence that says what to correct, which is the sentence an agent needs to fix its own query.
++ * @param {Error|string|object} executionError
++ * @returns {string} Text safe to hand back to the caller.
++ */
++function describeExecutionError(executionError) {
++    if (typeof executionError === "string") {
++        return executionError;
++    }
++    if (executionError && typeof executionError.responseText === "string" && executionError.responseText.length > 0) {
++        return executionError.responseText;
++    }
++    if (executionError && typeof executionError.message === "string" && executionError.message.length > 0) {
++        return executionError.message;
++    }
++    try {
++        return JSON.stringify(executionError);
++    } catch (_circularStructureError) {
++        return String(executionError);
++    }
++}
++
+ async function runRegisteredSparqlQuery(req, res, returnQueryStr) {
+     try {
+         const { name, module: moduleName, params = {} } = req.body || {};
+@@ -58,6 +122,7 @@ async function runRegisteredSparqlQuery(req, res, returnQueryStr) {
+         const sourceParamNameRegex = /source/i;
+         const allowedSourceNames = Object.keys(userSources);
+         const sourceParams = entry.params.filter((param) => sourceParamNameRegex.test(param.name));
++        let declaredEndpointMaxRows = null;
+         for (const sourceParam of sourceParams) {
+             const requestedSource = params[sourceParam.name];
+             if (typeof requestedSource !== "string" || requestedSource.length === 0) {
+@@ -66,15 +131,18 @@ async function runRegisteredSparqlQuery(req, res, returnQueryStr) {
+             if (!allowedSourceNames.includes(requestedSource)) {
+                 return res.status(403).json({ message: `Access denied: you are not allowed to access source '${requestedSource}'` });
+             }
++            if (declaredEndpointMaxRows === null) {
++                declaredEndpointMaxRows = Number(userSources[requestedSource]?.sparql_server?.maxRows) || null;
++            }
+         }
+ 
+         const userContext = { user, userSources, tools: userTools };
+ 
+-        RemoteCodeRunner.runVocablesFn({ moduleName, functionName: name, args: positionalArgs }, userContext, function (error, result) {
++        RemoteCodeRunner.runVocablesFn({ moduleName, functionName: name, args: positionalArgs }, userContext, function (error, result, sparqlExecution) {
+             if (error) {
+-                return res.status(500).json({ message: error.message || String(error) });
++                return res.status(500).json({ message: describeExecutionError(error) });
+             }
+-            res.status(200).json(result);
++            respondWithExecutionFacts(res, result, sparqlExecution, declaredEndpointMaxRows);
+         });
+     } catch (error) {
+         console.error(error);
+@@ -82,4 +150,4 @@ async function runRegisteredSparqlQuery(req, res, returnQueryStr) {
+     }
+ }
+ 
+-export { runRegisteredSparqlQuery };
++export { runRegisteredSparqlQuery, describeExecutionError };
+diff --git a/bin/userRequestFiltering.js b/bin/userRequestFiltering.js
+index 30e2ff3b7..7ab005af2 100644
+--- a/bin/userRequestFiltering.js
++++ b/bin/userRequestFiltering.js
+@@ -16,6 +16,18 @@ const parser = new SparqlParser({ skipValidation: true });
+ import NodeSqlParser from "node-sql-parser";
+ const sqlParser = new NodeSqlParser.Parser();
+ 
++// A SPARQL comment runs from # to the end of the line. Comments are stripped before any keyword
++// matching, otherwise a commented-out operation is enough to disguise the real one.
++const sparqlCommentLineRegex = /^#[^\n]*/gm;
++// The whole SPARQL prologue, not PREFIX alone: BASE is equally legal before SELECT, and refusing a
++// query for carrying one reads to the caller as "writes are forbidden", which sends it looking for a
++// permission problem instead of removing one line.
++const leadingPrologueDeclarationsRegex = /^(?:\s*(?:PREFIX\s+\S+\s*<[^>]*>|BASE\s*<[^>]*>)\s*)+/i;
++const selectOperationRegex = /^SELECT\b/i;
++// SPARQL 1.1 Update chains operations with `;`. Used both to check each operation of an update
++// independently, and to refuse a read that smuggles an update behind the leading SELECT.
++const chainedUpdateOperationRegex = /;\s*(?=DELETE|INSERT|CLEAR|LOAD|CREATE|DROP|COPY|MOVE|ADD)/i;
++
+ // Splits a SPARQL update query at the first WHERE keyword found at brace depth 0.
+ // Returns [updateClause, whereClause] where whereClause is null when no top-level WHERE exists.
+ // Handles string literals so that { } inside "..." or '...' do not affect brace depth counting.
+@@ -367,7 +379,32 @@ var UserRequestFiltering = {
+     },
+ 
+     stripSparqlComments: function (query) {
+-        return query.replace(/^#[^\n]*/gm, "").trim();
++        return query.replace(sparqlCommentLineRegex, "").trim();
++    },
++
++    /**
++     * True when SELECT is the main operation of the query, comments and PREFIX declarations aside.
++     *
++     * Leading PREFIX lines are removed first so that a sub-SELECT nested inside an update does not
++     * pass for a read, as in `INSERT { ... } WHERE { { SELECT ... } }`. Calling this on an already
++     * stripped query is harmless: stripping comments twice changes nothing.
++     *
++     * An update chained behind the SELECT with `;` is refused too. That check cannot be left to
++     * `checkSelectQuery`, whose parser would reject the chain: `filterSparqlRequest` returns early
++     * for admins and never reaches it, so this is the only place that sees such a query. A `;`
++     * inside a literal followed by one of those keywords costs a false refusal, which is the safe
++     * direction to fail in.
++     *
++     * @param {string} query - SPARQL text, raw or comment-stripped.
++     * @returns {boolean}
++     */
++    isSelectQuery: function (query) {
++        var strippedQuery = UserRequestFiltering.stripSparqlComments(query);
++        var queryCore = strippedQuery.replace(leadingPrologueDeclarationsRegex, "").trim();
++        if (!selectOperationRegex.test(queryCore)) {
++            return false;
++        }
++        return !chainedUpdateOperationRegex.test(queryCore);
+     },
+ 
+     filterSparqlRequest: function (query, userSourcesMap, userInfo, callback) {
+@@ -380,11 +417,9 @@ var UserRequestFiltering = {
+         var strippedQuery = UserRequestFiltering.stripSparqlComments(query);
+         var userGraphUrisMap = UserRequestFiltering.getUserGraphUrisMap(userSourcesMap);
+ 
+-        // Route to checkSelectQuery only when SELECT/ASK/CONSTRUCT/DESCRIBE is the main operation.
+-        // Strip leading PREFIX declarations first so a sub-SELECT inside an INSERT/DELETE WHERE clause
+-        // does not trigger the SELECT branch (e.g. INSERT { ... } WHERE { { SELECT ... } }).
+-        var queryCore = strippedQuery.replace(/^(\s*PREFIX\s+\S+\s*<[^>]*>\s*\n?)+/i, "").trim();
+-        if (/^SELECT\b/i.test(queryCore)) {
++        // Route to checkSelectQuery only when SELECT is the main operation. The same discriminator
++        // is what /api/v1/sparql/select uses to refuse writes outright.
++        if (UserRequestFiltering.isSelectQuery(strippedQuery)) {
+             UserRequestFiltering.checkSelectQuery(strippedQuery, userGraphUrisMap, function (err) {
+                 if (err) {
+                     return callback(err);
+@@ -397,7 +432,7 @@ var UserRequestFiltering = {
+             // e.g. DELETE DATA { GRAPH <g1> { ... } } ; INSERT DATA { GRAPH <g2> { ... } }
+             // Without the split, only the first operation would be ACL-checked.
+             // The lookahead (?=DELETE|INSERT|...) avoids splitting on ; inside literals or subexpressions.
+-            var updateOperations = strippedQuery.split(/;\s*(?=DELETE|INSERT|CLEAR|LOAD|CREATE|DROP|COPY|MOVE|ADD)/i);
++            var updateOperations = strippedQuery.split(chainedUpdateOperationRegex);
+             var errors = [];
+ 
+             async.eachSeries(
+@@ -427,15 +462,19 @@ var UserRequestFiltering = {
+     },
+     validateElasticSearchIndices: function (userInfo, indices, userSourcesMap, acl, callback) {
+         var indicesMap = {};
+-        for (var source in userSourcesMap) {
+-            indicesMap[source.toLowerCase()] = { source: source, acl: source.accessControl == "readwrite" ? "w" : "r" };
++        for (var sourceName in userSourcesMap) {
++            // `userSourcesMap` is keyed by source name and the access control lives on the value.
++            // Reading `accessControl` off the key graded every index read-only, so every `acl == "w"`
++            // validation failed. getUserGraphUrisMap above has the correct shape.
++            var source = userSourcesMap[sourceName];
++            indicesMap[sourceName.toLowerCase()] = { source: sourceName, acl: source.accessControl == "readwrite" ? "w" : "r" };
+         }
+ 
+         var error = null;
+         if (!indices) {
+             var indices = [];
+-            for (var source in userSourcesMap) {
+-                indices.push(source.toLowerCase());
++            for (var accessibleSourceName in userSourcesMap) {
++                indices.push(accessibleSourceName.toLowerCase());
+             }
+             return callback(error, indices);
+         }
+diff --git a/public/vocables/modules/bots/_commonBotFunctions.js b/public/vocables/modules/bots/_commonBotFunctions.js
+index 2949174e3..044fb8bc3 100644
+--- a/public/vocables/modules/bots/_commonBotFunctions.js
++++ b/public/vocables/modules/bots/_commonBotFunctions.js
+@@ -283,7 +283,7 @@ var CommonBotFunctions = (function () {
+             " WHERE { " +
+             "  <" +
+             classId +
+-            "> rdfs:subClassOf* ?child . " +
++            "> rdfs:subClassOf{0,5} ?child . " +
+             "  ?child rdfs:subClassOf ?parent . " +
+             "  ?parent rdf:type ?type . FILTER(?type != owl:Restriction) " +
+             "  FILTER(!isBlank(?child)) " +
+diff --git a/public/vocables/modules/bots/createResource_bot.js b/public/vocables/modules/bots/createResource_bot.js
+index e7cbd5e8f..7e9212a79 100644
+--- a/public/vocables/modules/bots/createResource_bot.js
++++ b/public/vocables/modules/bots/createResource_bot.js
+@@ -28,15 +28,56 @@ var CreateResource_bot = (function () {
+         self.myBotEngine.init(CreateResource_bot, workflow, null, function () {
+             self.myBotEngine.startParams = startParams;
+             self.params = { source: self.source || Lineage_sources.activeSource, resourceType: "", resourceLabel: "", currentVocab: "" };
++            // What the caller already knows is kept apart from what the user answers, so a step can
++            // be stepped over the first time it is reached and asked normally afterwards.
++            self.prefilledParams = {};
+             if (_params)
+                 for (var key in _params) {
+                     self.params[key] = _params[key];
++                    self.prefilledParams[key] = _params[key];
+                 }
+             self.source = self.params.source || Lineage_sources.activeSource;
+             self.myBotEngine.nextStep();
+         });
+     };
+ 
++    /**
++     * A step whose answer came in with the start parameters: it is written into the conversation and
++     * stepped over instead of being asked. Consumed once, so the Previous button gets the question
++     * back rather than skipping forward again the moment the user reaches it.
++     *
++     * It is registered in the bot engine's own history exactly as `showList` and `promptValue`
++     * register a real answer, `history.step` and `history.VarFilling` alike. Skipping that
++     * bookkeeping used to leave the Previous button unable to see this step at all: `previousStep`
++     * walks back through `history.step` one entry at a time, and an unregistered step is invisible to
++     * it, so Previous from the step after it jumped over it and over every other unregistered step in
++     * between, landing two or three questions further back than one click should reach.
++     * @function
++     * @name usePrefilledStep
++     * @memberof CreateResource_bot
++     * @param {string} paramName - The workflow parameter the step fills.
++     * @param {string} [stepMessage] - What to show in the conversation, the value itself by default.
++     * @returns {boolean} True when the step was answered and the workflow already moved on.
++     */
++    self.usePrefilledStep = function (paramName, stepMessage) {
++        if (!self.prefilledParams || !self.prefilledParams[paramName]) {
++            return false;
++        }
++        var prefilledValue = self.prefilledParams[paramName];
++        delete self.prefilledParams[paramName];
++        var botEngine = self.myBotEngine;
++        if (!botEngine.history.step.includes(botEngine.history.currentIndex)) {
++            botEngine.history.step.push(botEngine.history.currentIndex);
++        }
++        botEngine.insertBotMessage(stepMessage || prefilledValue);
++        botEngine.history.VarFilling[botEngine.history.currentIndex] = {
++            VarFilled: paramName,
++            valueFilled: prefilledValue,
++        };
++        botEngine.nextStep(prefilledValue);
++        return true;
++    };
++
+     self.workflow_end = {
+         _OR: {
+             "New Resource": { newResourceFn: {} },
+@@ -84,6 +125,9 @@ var CreateResource_bot = (function () {
+ 
+     self.functions = {
+         listResourceTypesFn: function (queryParams, varName) {
++            if (self.usePrefilledStep("resourceType")) {
++                return;
++            }
+             var choices = [{ id: "owl:Class", label: "Class" }];
+             if (Config.sources[self.source] && Config.sources[self.source].allowIndividuals) {
+                 choices.push({ id: "owl:NamedIndividual", label: "Individual" });
+@@ -96,6 +140,9 @@ var CreateResource_bot = (function () {
+         },
+ 
+         listVocabsFn: function () {
++            if (self.usePrefilledStep("currentVocab")) {
++                return;
++            }
+             CommonBotFunctions.listVocabsFn(self.source, false, function (err, vocabs) {
+                 if (err) {
+                     return self.myBotEngine.abort(err);
+@@ -106,10 +153,10 @@ var CreateResource_bot = (function () {
+         },
+ 
+         promptResourceLabelFn: function () {
++            if (self.usePrefilledStep("resourceLabel")) {
++                return;
++            }
+             self.myBotEngine.promptValue("resource label ", "resourceLabel");
+-            /*  self.params.resourceLabel = prompt("resource label ");
+-            _botEngine.insertBotMessage(self.params.resourceLabel);
+-            _botEngine.nextStep();*/
+         },
+ 
+         /**
+@@ -122,6 +169,9 @@ var CreateResource_bot = (function () {
+          * @returns {void}
+          */
+         listSuperClassesFn: function () {
++            if (self.usePrefilledStep("resourceId", Sparql_common.getLabelFromURI(self.params.resourceId))) {
++                return;
++            }
+             if (self.params.currentVocab === "searchClass") {
+                 var vocabs = [{ id: "allSources", label: "All Sources" }];
+                 vocabs.push({ id: self.source, label: self.source });
+diff --git a/public/vocables/modules/graph/VisjsGraphClass.js b/public/vocables/modules/graph/VisjsGraphClass.js
+index 161f122e5..92d05922d 100644
+--- a/public/vocables/modules/graph/VisjsGraphClass.js
++++ b/public/vocables/modules/graph/VisjsGraphClass.js
+@@ -378,8 +378,40 @@ const VisjsGraphClass = function (graphDiv, data, options) {
+      * new layout parameters
+      * @returns {void}
+      */
++    /**
++     * Gives a level to the nodes that have none, so a hierarchical layout can be applied. Vis.js
++     * refuses one otherwise: "nodes require either no predefined levels or levels have to be defined
++     * for all nodes". A whiteboard routinely holds both kinds at once, a taxonomy drawing levelling
++     * its nodes where a relations or properties drawing does not, so the levels have to be evened out
++     * before every switch to a hierarchical layout. An unknown level is -1 here as everywhere else.
++     * @function
++     * @name normalizeNodeLevels
++     * @memberof module:VisjsGraphClass
++     * @param {Array} [pendingNodes] - Nodes not added to the graph yet, levelled in place.
++     * @returns {void}
++     */
++    self.normalizeNodeLevels = function (pendingNodes) {
++        var unknownLevel = -1;
++        var newlyLevelledNodes = [];
++        self.data.nodes.get().forEach(function (node) {
++            if (node.level === undefined || node.level === null) {
++                newlyLevelledNodes.push({ id: node.id, level: unknownLevel });
++            }
++        });
++        self.data.nodes.update(newlyLevelledNodes);
++
++        if (pendingNodes) {
++            pendingNodes.forEach(function (pendingNode) {
++                if (pendingNode.level === undefined || pendingNode.level === null) {
++                    pendingNode.level = unknownLevel;
++                }
++            });
++        }
++    };
++
+     self.setLayout = function (/** @type {string} */ layout) {
+         if (layout == "hierarchical vertical") {
++            self.normalizeNodeLevels();
+             self.currentContext.options.layoutHierarchical = {
+                 direction: "UD",
+                 sortMethod: "hubsize",
+@@ -395,6 +427,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
+ 
+             self.redraw();
+         } else if (layout == "hierarchical horizontal") {
++            self.normalizeNodeLevels();
+             self.currentContext.options.layoutHierarchical = {
+                 direction: "LR",
+                 sortMethod: "hubsize",
+diff --git a/public/vocables/modules/search/searchUtil.js b/public/vocables/modules/search/searchUtil.js
+index 4b2879e41..2c80b18d8 100644
+--- a/public/vocables/modules/search/searchUtil.js
++++ b/public/vocables/modules/search/searchUtil.js
+@@ -839,8 +839,11 @@ indexes.push(source.toLowerCase());
+                             };
+ 
+                             //var filter = "?id rdf:type ?type2. filter (?type= owl:NamedIndividual && ?type2!=?type)";
+-                            //Filter on individuals = entities that are  type of a class
+-                            var filter = "?id rdf:type ?type.?type rdf:type owl:Class";
++                            // Filter on individuals = entities that are type of a class.
++                            // ?id is locked to the source's own graph so individuals from imported
++                            // sources are never indexed here, while ?type rdf:type owl:Class is left
++                            // unscoped so a class defined in an import still validates the individual's type.
++                            var filter = "GRAPH <" + Config.sources[sourceLabel].graphUri + "> {?id rdf:type ?type} .?type rdf:type owl:Class";
+                             //  filter+="?id <http://souslesens.org/KGcreator#mappingFile> 'dbo.V_jobcard'"
+                             Sparql_OWL.getDictionary(
+                                 sourceLabel,
+@@ -848,7 +851,7 @@ indexes.push(source.toLowerCase());
+                                     filter: filter,
+                                     processorFectchSize: 100,
+                                     skosPrefLabel: true,
+-                                    withoutImports: true,
++                                    withoutImports: false,
+                                     indexedPredicates: options.indexedPredicates,
+                                 },
+                                 processor,
+diff --git a/public/vocables/modules/shared/export.js b/public/vocables/modules/shared/export.js
+index d40ad9c8e..d96f8cb8b 100644
+--- a/public/vocables/modules/shared/export.js
++++ b/public/vocables/modules/shared/export.js
+@@ -494,9 +494,34 @@ fixedColumns: true*/
+         link.click();
+         document.body.removeChild(link);
+     };*/
+-    self.exportDataToCSV = function (dataset) {
+-        let csvContent = dataset.map((row) => row.map((cell) => `"${cell}"`).join(";")).join("\n");
+-        self.downloadStringAsFile(csvContent, "export_data.csv", "text/csv;charset=utf-8;");
++    self.csvQuoteRegex = /"/g;
++    self.csvFieldSeparator = ";";
++    self.defaultCsvFileName = "export_data.csv";
++
++    /**
++     * Write rows of cells to a CSV file the browser downloads.
++     *
++     * Quoting every field protects the separators and the line breaks inside it, but a quote that
++     * belongs to the data has to be doubled as well, which this used to skip. The cost was not
++     * theoretical: a definition reading `valve dite "papillon"` came back out as `valve dite
++     * papillon`, quietly, in a file that opened without complaint. And when a separator happened to
++     * fall between two of those quotes, the parser split the field and every column after it moved
++     * along by one. Both are silent, which is what makes them worth the doubling.
++     *
++     * @param {Array<Array<*>>} dataset - Rows of cells. A null or undefined cell writes as empty.
++     * @param {string} [fileName] - Defaults to export_data.csv.
++     */
++    self.exportDataToCSV = function (dataset, fileName) {
++        const csvLines = [];
++        for (const row of dataset) {
++            const quotedCells = [];
++            for (const cell of row) {
++                const cellText = cell === null || cell === undefined ? "" : String(cell);
++                quotedCells.push('"' + cellText.replace(self.csvQuoteRegex, '""') + '"');
++            }
++            csvLines.push(quotedCells.join(self.csvFieldSeparator));
++        }
++        self.downloadStringAsFile(csvLines.join("\n"), fileName || self.defaultCsvFileName, "text/csv;charset=utf-8;");
+     };
+ 
+     self.showExportPopUp = function (visjsGraph) {
+diff --git a/public/vocables/modules/shared/ontologyModels.js b/public/vocables/modules/shared/ontologyModels.js
+index 806d0761a..ce34a943d 100644
+--- a/public/vocables/modules/shared/ontologyModels.js
++++ b/public/vocables/modules/shared/ontologyModels.js
+@@ -240,7 +240,10 @@ var OntologyModels = (function () {
+ 
+                         // set model classes (if source not  declared in sources.json && classes.length<Config.ontologyModelMaxClasses)
+                         function (callbackSeries) {
+-                            var query = queryP + " select (count (distinct ?sub) as ?numberOfClasses)  FROM <" + graphUri + "> where{" + " ?sub rdf:type owl:Class.} ";
++                            // Anonymous nodes typed owl:Class (class expressions, orphan nodes left by imports) are not classes and must not be counted.
++                            // Same convention as Sparql_OWL.defaultTopClassFilter: recognised by the shape of the IRI, isBlank alone being unreliable.
++                            var namedClassFilter = " filter (!isBlank(?sub) && !STRSTARTS(STR(?sub),'nodeID://') && !STRSTARTS(STR(?sub),'_:')).";
++                            var query = queryP + " select (count (distinct ?sub) as ?numberOfClasses)  FROM <" + graphUri + "> where{" + " ?sub rdf:type owl:Class." + namedClassFilter + "} ";
+                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
+                                 if (err) {
+                                     return callbackSeries(err);
+@@ -261,7 +264,9 @@ var OntologyModels = (function () {
+                                         " OPTIONAL {?superClass rdfs:label ?superClassLabel}}" +
+                                         Sparql_common.getVariableLangLabel("sub", true, true) +
+                                         //   " VALUES ?class {owl:Class rdf:class rdfs:Class} filter( !isBlank(?sub))} order by ?sub";
+-                                        " VALUES ?class {owl:Class rdf:class rdfs:Class} .  filter (not exists{ ?superClass  rdf:type owl:Restriction}).filter( !isBlank(?sub)).} order by ?sub";
++                                        " VALUES ?class {owl:Class rdf:class rdfs:Class} .  filter (not exists{ ?superClass  rdf:type owl:Restriction})." +
++                                        namedClassFilter +
++                                        "} order by ?sub";
+                                     Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
+                                         if (err) {
+                                             return callbackSeries(err);
+diff --git a/public/vocables/modules/shared/subGraph.js b/public/vocables/modules/shared/subGraph.js
+index d916a2775..f761e1ee1 100644
+--- a/public/vocables/modules/shared/subGraph.js
++++ b/public/vocables/modules/shared/subGraph.js
+@@ -57,7 +57,7 @@ var SubGraph = (function () {
+                                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>SELECT distinct * " +
+                                 strFrom +
+                                 "WHERE {" +
+-                                "  ?s rdfs:subClassOf+ ?o. ?o rdf:type ?type " +
++                                "  ?s rdfs:subClassOf{1,5} ?o. ?o rdf:type ?type " +
+                                 (filter || "") +
+                                 (filterPropStr || "") +
+                                 (optionalStr || "") +
+diff --git a/public/vocables/modules/sparqlProxies/sparql_OWL.js b/public/vocables/modules/sparqlProxies/sparql_OWL.js
+index abada2aea..95103dfef 100644
+--- a/public/vocables/modules/sparqlProxies/sparql_OWL.js
++++ b/public/vocables/modules/sparqlProxies/sparql_OWL.js
+@@ -288,7 +286,7 @@ var Sparql_OWL = (function () {
+         query +=
+             "?child1 " +
+             Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel, options) +
+-            " ?subject.  FILTER (!isBlank(?subject)) " +
++            " ?subject.  FILTER (!isBlank(?subject)) FILTER (!isBlank(?child1)) " +
+             strFilter +
+             "OPTIONAL {?subject rdfs:label ?subjectLabel." +
+             Sparql_common.getLangFilter(sourceLabel, "conceptLabel") +
+@@ -307,6 +305,9 @@ var Sparql_OWL = (function () {
+                 " ?child" +
+                 i +
+                 "." +
++                "FILTER (!isBlank(?child" +
++                (i + 1) +
++                ")) " +
+                 "OPTIONAL {?child" +
+                 (i + 1) +
+                 " rdfs:label  ?child" +
+@@ -660,6 +666,7 @@ var Sparql_OWL = (function () {
+             ' ?superClass ?superClassType ?superClassSubClass ?superClassLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes) ' +
+             fromStr;
+         var filterStr;
++        var afterSubSelectPattern = "";
+         if (!options.descendants) {
+             filterStr = Sparql_common.setFilter("subject", classIds, null, { values: 1 });
+             query +=
+@@ -675,17 +682,18 @@ var Sparql_OWL = (function () {
+                 "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType ";
+         } else {
+             filterStr = Sparql_common.setFilter("superClass", classIds, null, { values: 1 });
++            // keeps leaves in the result. Placed after the sub-select: a group opening on an OPTIONAL
++            // is a left join over the empty pattern, which collapses back to a plain join.
++            afterSubSelectPattern = " OPTIONAL { ?superClassSubClass rdfs:subClassOf ?class }";
+             query +=
+                 "  WHERE {" +
+-                "   ?superClassSubClass  rdfs:subClassOf ?class" +
+-                "  \n" +
+                 " { SELECT * where {" +
+-                "  ?class rdf:type ?type. ?class rdfs:subClassOf" +
+-                modifier +
++                // "*" : the root must match reflexively to anchor the recursion
++                "  ?class rdf:type ?type. ?class rdfs:subClassOf*" +
+                 " ?superClass.\n" +
+                 "    ?superClass rdf:type ?superClassType filter (?superClassType !=owl:Restriction)\n" +
+                 "   OPTIONAL {?class rdfs:label ?classLabel }" +
+-                "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType ";
++                "   OPTIONAL {?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType }";
+         }
+ 
+         if (options.filter) {
+@@ -698,7 +706,7 @@ var Sparql_OWL = (function () {
+ 
+         //   query+="filter(!isBlank(?superClassSubClass))"
+ 
+-        query += "}}} LIMIT 10000";
++        query += "}}" + afterSubSelectPattern + "} LIMIT 10000";
+ 
+         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+         self.no_params = true;
+@@ -776,7 +784,8 @@ var Sparql_OWL = (function () {
+                     classIds.forEach(function (baseClassId) {
+                         var childrenMap = {};
+                         result.results.bindings.forEach(function (item) {
+-                            if (item.superClass.value == baseClassId) {
++                            // no ?superClassSubClass means a leaf row: it names no child
++                            if (item.superClass.value == baseClassId && item.superClassSubClass) {
+                                 childrenMap[item.superClassSubClass.value] = item;
+                             }
+                         });
+@@ -797,7 +806,7 @@ var Sparql_OWL = (function () {
+                     });
+                 }
+ 
+-                return callback(null, { hierarchies: hierarchies, rawResult: result.results.bindings });
++                return callback(null, { hierarchies: hierarchies });
+             },
+         );
+     };
+@@ -994,9 +1006,9 @@ var Sparql_OWL = (function () {
+ " OPTIONAL{?subject rdfs:label ?subjectLabel.}  " +
+ " OPTIONAL{?object rdfs:label ?objectLabel.}  ";*/
+             if (options.onlyObjectProperties) {
+-                (" ?prop rdf:type owl:ObjectProperty.");
++                query += " ?prop rdf:type owl:ObjectProperty. ";
+             } else if (options.onlyDataTypeProperties) {
+-                (" filter (isLiteral(?object) )");
++                query += " filter (isLiteral(?object) ) ";
+             } else if (!options.includeLiterals && !(options.filter && options.filter.indexOf("?object") > -1)) {
+                 query += " filter (!isLiteral(?object) )";
+             }
+@@ -1150,23 +1166,11 @@ var Sparql_OWL = (function () {
+         if (options.selectGraph) {
+             query += " GRAPH ?g ";
+         }
+-        if (options.inheritedProperties) {
+-            query += "  { ?prop rdfs:subPropertyOf*/rdf:type owl:ObjectProperty ";
+-        }
+-        if (options.dataTypeProperties) {
+-            query +=
+-                "   {?prop rdf:type owl:DatatypeProperty. " +
+-                optionalLabelStr +
+-                "{?prop rdfs:label ?propLabel.  " +
+-                Sparql_common.getLangFilter(sourceLabel, "propLabel") +
+-                "}" +
+-                "OPTIONAL{?prop owl:inverseOf ?inverseProp. " +
+-                "OPTIONAL{?inverseProp rdfs:label ?inversePropLabel.  " +
+-                Sparql_common.getLangFilter(sourceLabel, "inversePropLabel") +
+-                "}}";
+-        } else {
++        var propertyType = options.dataTypeProperties ? "owl:DatatypeProperty" : "owl:ObjectProperty";
+         query +=
+-                "   {?prop rdf:type owl:ObjectProperty. " +
++            "   {?prop rdf:type " +
++            propertyType +
++            ". " +
+             optionalLabelStr +
+             "{?prop rdfs:label ?propLabel.  " +
+             Sparql_common.getLangFilter(sourceLabel, "propLabel") +
+@@ -1175,7 +1179,6 @@ var Sparql_OWL = (function () {
+             "OPTIONAL{?inverseProp rdfs:label ?inversePropLabel.  " +
+             Sparql_common.getLangFilter(sourceLabel, "inversePropLabel") +
+             "}}";
+-        }
+ 
+         if (!options.searchType) {
+             query +=
+@@ -1328,13 +1337,15 @@ var Sparql_OWL = (function () {
+         query += Sparql_common.getVariableLangLabel("value", true);
+ 
+         if (options.getMetadata) {
++            // each metadata property is optional on its own: a restriction carrying none of them
++            // must still be returned, and one carrying only some must keep the ones it has
+             query +=
+-                " ?node  <https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status>" +
+-                " ?status.?node <http://purl.org/dc/terms/created> ?creationDate. " +
+-                "?node  <http://purl.org/dc/terms/creator> ?creator." +
+-                "?node  <http://purl.org/dc/terms/source> ?provenance." +
+-                "?node <http://data.souslesens.org/property#domainSourceLabel> ?domainSourceLabel." +
+-                "?node <http://data.souslesens.org/property#rangeSourceLabel> ?rangeSourceLabel.";
++                " optional {?node <https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status> ?status.}" +
++                " optional {?node <http://purl.org/dc/terms/created> ?creationDate.}" +
++                " optional {?node <http://purl.org/dc/terms/creator> ?creator.}" +
++                " optional {?node <http://purl.org/dc/terms/source> ?provenance.}" +
++                " optional {?node <http://data.souslesens.org/property#domainSourceLabel> ?domainSourceLabel.}" +
++                " optional {?node <http://data.souslesens.org/property#rangeSourceLabel> ?rangeSourceLabel.}";
+         }
+ 
+         var filter2 = options.filter;
+diff --git a/public/vocables/modules/sparqlProxies/sparql_generic.js b/public/vocables/modules/sparqlProxies/sparql_generic.js
+index df613747e..4bedfd401 100644
+--- a/public/vocables/modules/sparqlProxies/sparql_generic.js
++++ b/public/vocables/modules/sparqlProxies/sparql_generic.js
+@@ -445,14 +472,13 @@ var Sparql_generic = (function () {
+      * @param {string} [sparqlServerUrl] - Endpoint URL to query; defaults to the main server
+      * @param {Function} callback - Error-first callback `(err, graphs)`; `graphs` is a map of graph URI → 1
+      * @returns {err|Object} Throws an error or returns a map of graph URI to `1`.
+-     * @expose
+      */
+     self.getEndPointAllGraphsMap = function (sparqlServerUrl, callback) {
+         if (!sparqlServerUrl) {
+             sparqlServerUrl = Config.sparql_server.url + "?format=json&query=";
+         }
+         var query = "select distinct ?g WHERE {GRAPH ?g{?s ?p ?o}} limit 10000";
+-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
++        Sparql_proxy.querySPARQL_GET_proxy(sparqlServerUrl, query, null, {}, function (err, result) {
+             if (err) {
+                 return callback(err);
+             }
+diff --git a/public/vocables/modules/tools/axioms/nodeInfosAxioms.js b/public/vocables/modules/tools/axioms/nodeInfosAxioms.js
+index 355f471a2..4e35b7470 100644
+--- a/public/vocables/modules/tools/axioms/nodeInfosAxioms.js
++++ b/public/vocables/modules/tools/axioms/nodeInfosAxioms.js
+@@ -9,7 +9,7 @@ import Axiom_UI from "./axiom_UI.js";
+ var NodeInfosAxioms = (function () {
+     var self = {};
+ 
+-    self.init = function (source, resource, divId) {
++    self.init = function (source, resource, divId, callback) {
+         self.currentSource = source;
+         self.currentResource = resource;
+         self.currentResource.level = 0;
+@@ -30,6 +30,9 @@ var NodeInfosAxioms = (function () {
+                     var graphDivId = "nodeInfosAxioms_graphDiv";
+                     var options = {};
+                     Axioms_graph.drawNodeAxioms2(self.currentResource.data.source, self.currentResource.data.id, triples, graphDivId, options);
++                    if (callback) {
++                        callback();
++                    }
+                 });
+             });
+         });
+diff --git a/public/vocables/modules/tools/containers/containers_graph.js b/public/vocables/modules/tools/containers/containers_graph.js
+index d761b5f8c..c71028ac5 100644
+--- a/public/vocables/modules/tools/containers/containers_graph.js
++++ b/public/vocables/modules/tools/containers/containers_graph.js
+@@ -372,4 +372,4 @@ var Containers_graph = (function () {
+ })();
+ 
+ export default Containers_graph;
+-window.Container_graph = Containers_graph;
++window.Containers_graph = Containers_graph;
+diff --git a/public/vocables/modules/tools/lineage/css/lineageSkin.css b/public/vocables/modules/tools/lineage/css/lineageSkin.css
+index deb116b1d..353a02452 100644
+--- a/public/vocables/modules/tools/lineage/css/lineageSkin.css
++++ b/public/vocables/modules/tools/lineage/css/lineageSkin.css
+@@ -399,3 +399,23 @@
+ #lineage_drawnSources::-webkit-scrollbar-track {
+     background-color: @background-color;
+ }
++
++/* Grip for dragging the chat bot dock taller or shorter. jQuery UI's own handle is seven
++   transparent pixels straddling the edge, which is not something a user finds by accident:
++   this makes it a visible bar, and clear of the fold button just below it. */
++#lineage_chatbotDock > .ui-resizable-n {
++    height: 9px;
++    top: -9px;
++    background: @background-color;
++    border-top: 1px solid @button1-color;
++    cursor: n-resize;
++}
++#lineage_chatbotDock > .ui-resizable-n::after {
++    content: "";
++    display: block;
++    width: 34px;
++    height: 3px;
++    margin: 3px auto 0;
++    border-radius: 2px;
++    background: @button1-color;
++}
+diff --git a/public/vocables/modules/tools/lineage/html/lateralPanel.html b/public/vocables/modules/tools/lineage/html/lateralPanel.html
+index 8785553bf..9bcfe9c73 100644
+--- a/public/vocables/modules/tools/lineage/html/lateralPanel.html
++++ b/public/vocables/modules/tools/lineage/html/lateralPanel.html
+@@ -39,3 +39,9 @@
+ <div id="propertiesTab" class="w3-container lineage-tab slsv-bg-pale" style="display: none"></div>
+ 
+ <div id="containersTab" class="w3-container lineage-tab slsv-bg-pale" style="display: none"></div>
++
++<!-- Docked at the bottom of the panel, outside the tabs on purpose: the chat bot answers about the
++     graph, not about the tab in front of it, so it stays reachable from Classes or Containers just
++     as from the Whiteboard. Empty unless the sls-chatbot plugin is installed: see
++     Lineage_whiteboard.mountChatbotPlugin. -->
++<div id="lineage_chatbotDock" style="flex: 0 0 auto; display: flex; flex-direction: column"></div>
+diff --git a/public/vocables/modules/tools/lineage/lineage_createResource.js b/public/vocables/modules/tools/lineage/lineage_createResource.js
+index f1eebf050..3a3438d65 100644
+--- a/public/vocables/modules/tools/lineage/lineage_createResource.js
++++ b/public/vocables/modules/tools/lineage/lineage_createResource.js
+@@ -411,15 +411,26 @@ var Lineage_createResource = (function () {
+     /**
+      * Starts the resource creation bot, which automates the creation of resources.
+      * This function initiates the bot with the current source as a parameter.
++     *
++     * `prefill` carries answers the caller already has, `resourceType`, `resourceLabel`,
++     * `currentVocab` and `resourceId` for the superclass. The bot steps over the questions they
++     * answer and stops on the first one still open, so a caller knowing only the label still leaves
++     * the user choosing the superclass. Nothing is written: the user saves from the bot.
+      * @function
+      * @name startCreateRessourceBot
+      * @memberof Lineage_createResource
++     * @param {Object} [prefill] - Bot parameters known in advance.
++     * @returns {void}
+      */
+-    self.startCreateRessourceBot = function () {
++    self.startCreateRessourceBot = function (prefill) {
+         // reset precendent values to not add triples to another resource
+         $("#editPredicate_objectValue").val("");
+         $("#editPredicate_propertyValue").val("");
+-        CreateResource_bot.start(null, { source: Lineage_sources.activeSource });
++        var botParams = { source: Lineage_sources.activeSource };
++        for (var prefilledKey in prefill || {}) {
++            botParams[prefilledKey] = prefill[prefilledKey];
++        }
++        CreateResource_bot.start(null, botParams);
+     };
+ 
+     /**
+diff --git a/public/vocables/modules/tools/lineage/lineage_properties.js b/public/vocables/modules/tools/lineage/lineage_properties.js
+index 60dc058a1..7eba0d06b 100644
+--- a/public/vocables/modules/tools/lineage/lineage_properties.js
++++ b/public/vocables/modules/tools/lineage/lineage_properties.js
+@@ -621,13 +621,16 @@ var Lineage_properties = (function () {
+      *
+      * @param property : a specific property uri or null (all)
+      */
+-    self.drawRangeAndDomainsGraph = function (source, targetnodes, options, property) {
++    self.drawRangeAndDomainsGraph = function (source, targetnodes, options, property, callback) {
+         if (targetnodes && targetnodes.length > 0) {
+             options = options || {};
+             options.filterNodes = targetnodes;
+         }
+         self.getPropertiesRangeAndDomain(source, property, options, function (err, result) {
+             if (err) {
++                if (callback) {
++                    return callback(err);
++                }
+                 return MainController.errorAlert(err);
+             }
+ 
+@@ -957,6 +960,9 @@ var Lineage_properties = (function () {
+ 
+ */
+             self.graphInited = true;
++            if (callback) {
++                return callback(null, visjsData.nodes.length);
++            }
+         });
+     };
+ 
+diff --git a/public/vocables/modules/tools/lineage/lineage_whiteboard.js b/public/vocables/modules/tools/lineage/lineage_whiteboard.js
+index ba4f173ed..3f0b98218 100644
+--- a/public/vocables/modules/tools/lineage/lineage_whiteboard.js
++++ b/public/vocables/modules/tools/lineage/lineage_whiteboard.js
+@@ -57,6 +57,11 @@ var Lineage_whiteboard = (function () {
+     self.MoreOptionsShow = {};
+     var graphContext = {};
+ 
++    // Optional plugin embedded in the lateral panel. Named here rather than imported: plugins are
++    // discovered at boot from the plugins directory, so an instance without it must simply leave
++    // its two containers empty. See mountChatbotPlugin.
++    self.chatbotPluginName = "sls-chatbot";
++
+     self.propertyColors = {};
+     self.defaultShape = "dot";
+     self.defaultShapeSize = 5;
+@@ -231,6 +236,7 @@ var Lineage_whiteboard = (function () {
+         if (Lineage_legendOverlay && typeof Lineage_legendOverlay.destroy === "function") {
+             Lineage_legendOverlay.destroy();
+         }
++        self.unloadChatbotPlugin();
+ 
+         $("#graphDiv").empty();
+         $("#lateralPanelDiv").resizable("destroy");
+@@ -280,6 +286,7 @@ var Lineage_whiteboard = (function () {
+             }
+             $("#lateralPanelDiv").load("./modules/tools/lineage/html/lateralPanel.html", function () {
+                 Lineage_whiteboard.initWhiteboardTab();
++                Lineage_whiteboard.mountChatbotPlugin();
+                 //  Lineage_whiteboard.initClassesTab();
+ 
+                 if (self._pendingDataLoaded) {
+@@ -1268,11 +1275,14 @@ var Lineage_whiteboard = (function () {
+      * @param {any} _descendantsAlso - Flag to include descendants in the search for similar nodes.
+      * @returns {void} Updates the graph with similar nodes and edges, or displays an alert in case of an error.
+      */
+-    self.drawSimilarsNodes = function (_similarType, _node, _sources, _descendantsAlso) {
++    self.drawSimilarsNodes = function (_similarType, _node, _sources, _descendantsAlso, callback) {
++        if (!callback) {
++            callback = function () {};
++        }
+         var toSource = $("#sourcesTreeDiv").jstree().get_selected()[0];
+         var fromSource = Lineage_sources.activeSource;
+         if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
+-            return;
++            return callback("no node on the whiteboard to compare");
+         }
+         var nodes = self.lineageVisjsGraph.data.nodes.get();
+ 
+@@ -1288,7 +1298,8 @@ var Lineage_whiteboard = (function () {
+ 
+         SearchUtil.getSimilarLabelsInSources(fromSource, [toSource], labels, ids, "exactMatch", null, function (err, result) {
+             if (err) {
+-                return MainController.errorAlert(err);
++                MainController.errorAlert(err);
++                return callback(err);
+             }
+ 
+             var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
+@@ -1357,8 +1368,9 @@ var Lineage_whiteboard = (function () {
+                 $("#accordion").accordion("option", { active: 2 });
+                 Lineage_sources.registerSource(toSource);
+             }
+-        });
+             UI.message("", true);
++            return callback(null, visjsData.edges.length);
++        });
+     };
+ 
+     /**
+@@ -1517,7 +1529,7 @@ var Lineage_whiteboard = (function () {
+     self.graphNodeNeighborhood = function (nodeData, propFilter, callback) {
+         var fromSource = Lineage_sources.activeSource;
+         if (propFilter == "ranges") {
+-            return graphNodeNeighborhoodRanges(nodeData);
++            return self.graphNodeNeighborhoodRanges(nodeData);
+         }
+         var ids;
+         if (!nodeData) {
+@@ -1951,8 +1964,15 @@ var Lineage_whiteboard = (function () {
+                 }
+             });
+         }
++        // Every early exit below answers the callback, empty-handed rather than not at all: a caller
++        // driving this from an agent loop waits on it, and a path that only writes a UI message
++        // leaves that loop hanging on nodes that simply have no children.
+         if (parentIds.length == 0) {
+-            return UI.message("no parent node selected");
++            UI.message("no parent node selected");
++            if (callback) {
++                return callback(null, { nodes: [], edges: [] });
++            }
++            return;
+         }
+ 
+         UI.message("");
+@@ -1973,13 +1993,21 @@ var Lineage_whiteboard = (function () {
+ 
+         Sparql_generic.getNodeChildren(source, null, parentIds, depth, options, function (err, result) {
+             if (err) {
+-                return UI.message(err);
++                UI.message(err);
++                if (callback) {
++                    return callback(err);
++                }
++                return;
+             }
+             var parentsMap = [];
+ 
+             if (result.length == 0) {
+                 $("#waitImg").css("display", "none");
+-                return UI.message("No data found", true);
++                UI.message("No data found", true);
++                if (callback) {
++                    return callback(null, { nodes: [], edges: [] });
++                }
++                return;
+             }
+             if (result.length > self.showLimit) {
+                 alert("Too may nodes (" + result.length + ") only " + self.showLimit + "can be shown ");
+@@ -2425,11 +2453,16 @@ var Lineage_whiteboard = (function () {
+      * @param {Object} sparqlResults.domainLabel - The label for the domain.
+      * @returns {void}
+      */
+-    self.drawProperties = function (sparqlResults) {
++    self.drawProperties = function (sparqlResults, source) {
+         var visjsData = { nodes: [], edges: [] };
+         var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
+         self.currentExpandLevel += 1;
++        var physics = true;
+         sparqlResults.forEach(function (item) {
++            // A row may carry its own source, as the ones lineage_draw_triples builds for the chat
++            // bot do; a row coming from drawObjectProperties has none and falls back to the source
++            // that function queried, or to the active source as a last resort.
++            var itemSource = item.source || source || Lineage_sources.activeSource;
+             if (!item.range) {
+                 item.range = { value: "?_" + item.prop.value };
+             }
+@@ -2447,10 +2480,10 @@ var Lineage_whiteboard = (function () {
+                     shadow: self.nodeShadow,
+                     shape: Lineage_whiteboard.defaultShape,
+                     size: Lineage_whiteboard.defaultShapeSize,
+-                    color: self.getSourceColor(source, item.range.value),
++                    color: self.getSourceColor(itemSource, item.range.value),
+                     level: self.currentExpandLevel,
+                     data: {
+-                        source: source,
++                        source: itemSource,
+                         id: item.range.value,
+                         label: item.rangeLabel.value,
+                         varName: "range",
+@@ -2475,7 +2508,7 @@ var Lineage_whiteboard = (function () {
+                         from: item.range.value,
+                         to: item.domain.value,
+                         label: "<i>" + item.propLabel.value + "</i>",
+-                        data: { propertyId: item.prop.value, source: source },
++                        data: { propertyId: item.prop.value, source: itemSource },
+                         font: { multi: true, size: 10 },
+                         // font: {align: "middle", ital: {color:Lineage_whiteboard.objectPropertyColor, mod: "italic", size: 10}},
+                         //   physics:false,
+@@ -2514,7 +2547,10 @@ var Lineage_whiteboard = (function () {
+      * @param {boolean} [_descendantsAlso] - A flag to include descendants as well.
+      * @returns {void}
+      */
+-    self.drawObjectProperties = function (source, classIds, _descendantsAlso) {
++    self.drawObjectProperties = function (source, classIds, _descendantsAlso, callback) {
++        if (!callback) {
++            callback = function () {};
++        }
+         if (!classIds) {
+             if (!source) {
+                 source = Lineage_sources.activeSource;
+@@ -2528,7 +2564,7 @@ var Lineage_whiteboard = (function () {
+             classIds = null;
+         }
+         var physics = true;
+-        var graphSpatialisation = $("#Lineage_whiteboard_excludeRelationsFromGraphSpatializationCBX").prop("checked");
++        var excludeRelationsFromPhysic = $("#Lineage_whiteboard_excludeRelationsFromGraphSpatializationCBX").prop("checked");
+         if (excludeRelationsFromPhysic) {
+             physics = false;
+         }
+@@ -2543,14 +2579,16 @@ var Lineage_whiteboard = (function () {
+                 },
+                 function (err, result) {
+                     if (err) {
+-                        return UI.message(err);
++                        UI.message(err);
++                        return callback(err);
+                     }
+                     if (result.length == 0) {
+                         $("#waitImg").css("display", "none");
+-
+-                        return UI.message("No data found", true);
++                        UI.message("No data found", true);
++                        return callback(null, 0);
+                     }
+-                    self.drawProperties(result);
++                    self.drawProperties(result, source);
++                    return callback(null, result.length);
+                 },
+             );
+         }
+@@ -2570,7 +2608,8 @@ var Lineage_whiteboard = (function () {
+                     item.prop = { value: item.prop.value };
+                     item.propLabel = { value: item.propLabel.value };
+                 });
+-                drawProperties(result);
++                self.drawProperties(result, source);
++                return callback(null, result.length);
+             });
+         }
+     };
+@@ -3518,7 +3557,13 @@ restrictionSource = Config.predicatesSource;
+ 
+         var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
+         if (existingNodes[nodes[0].data.id]) {
+-            return self.zoomGraphOnNode(nodes[0].data.id);
++            self.zoomGraphOnNode(nodes[0].data.id);
++            // The callback used to be skipped here, which left any caller waiting on it hanging
++            // whenever the first node happened to be drawn already.
++            if (callback) {
++                return callback();
++            }
++            return;
+         }
+ 
+         UI.message("");
+@@ -3788,12 +3833,15 @@ self.zoomGraphOnNode(node.data[0].id, false);
+      * @param {Object} [source] - The source of the lineage data. If not provided, the active source is used.
+      * @returns {void}
+      */
+-    self.drawInferredClassesModel = function (source) {
++    self.drawInferredClassesModel = function (source, callback) {
+         if (!source) {
+             source = Lineage_sources.activeSource;
+         }
+         KGquery_graph.getImplicitModelVisjsData(source, function (err, visjsData) {
+             if (err) {
++                if (callback) {
++                    return callback(err);
++                }
+                 return MainController.errorAlert(err);
+             }
+             if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
+@@ -3804,6 +3852,9 @@ self.zoomGraphOnNode(node.data[0].id, false);
+             }
+ 
+             $("#waitImg").css("display", "none");
++            if (callback) {
++                return callback(null, visjsData.nodes.length);
++            }
+         });
+     };
+ 
+@@ -4265,18 +4316,11 @@ self.zoomGraphOnNode(node.data[0].id, false);
+         removeFromGraph: function () {
+             var nodesSelected = self.lineageVisjsGraph.network.getSelectedNodes();
+             if (nodesSelected.length > 1) {
+-                for (var i = 0; i < nodesSelected.length; i++) {
+-                    var edgeIds = self.lineageVisjsGraph.network.getConnectedEdges(nodesSelected[i].id);
+-                    self.lineageVisjsGraph.data.edges.remove(edgeIds);
+-                    self.lineageVisjsGraph.removeNodes("id", nodesSelected[i], true);
+-                }
+-                Lineage_decoration.decorateByUpperOntologyByClass();
+-                return;
++                // `getSelectedNodes` answers with ids, not node objects: reading `.id` off them used
++                // to leave every connected edge behind.
++                return self.removeNodesFromWhiteboard(nodesSelected);
+             }
+-            var edgeIds = self.lineageVisjsGraph.network.getConnectedEdges(Lineage_whiteboard.currentGraphNode.id);
+-            self.lineageVisjsGraph.data.edges.remove(edgeIds);
+-            self.lineageVisjsGraph.removeNodes("id", Lineage_whiteboard.currentGraphNode.id, true);
+-            Lineage_decoration.decorateByUpperOntologyByClass();
++            self.removeNodesFromWhiteboard([Lineage_whiteboard.currentGraphNode.id]);
+         },
+ 
+         /**
+@@ -4829,15 +4873,10 @@ attrs.color=self.getSourceColor(superClassValue)
+          */
+ 
+         saveWhiteboard: function () {
+-            if (Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().length > 0) {
+-                var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+-                var positions = Lineage_whiteboard.lineageVisjsGraph.network.getPositions();
+-                var data = {
+-                    nodes: nodes,
+-                    edges: Lineage_whiteboard.lineageVisjsGraph.data.edges.get(),
+-                    context: Lineage_whiteboard.lineageVisjsGraph.currentContext,
+-                    positions: positions,
+-                };
++            var data = Lineage_whiteboard.serializeWhiteboard();
++            if (!data) {
++                return alert("No Whiteboard to save");
++            }
+             var data_path = "savedWhiteboards";
+             //UserDataWidget.currentTreeNode = null;
+             UserDataWidget.showSaveDialog(data_path, data, null, { title: "Save Whiteboard" }, function (err, result) {
+@@ -4848,9 +4887,6 @@ attrs.color=self.getSourceColor(superClassValue)
+             });
+ 
+             //Lineage_whiteboard.lineageVisjsGraph.saveGraph(visjsFileName);
+-            } else {
+-                alert("No Whiteboard to save");
+-            }
+         },
+         /**
+          * @function
+@@ -4902,20 +4938,12 @@ attrs.color=self.getSourceColor(superClassValue)
+          *
+          */
+         exportWhiteboard: function () {
+-            if (Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().length > 0) {
+-                var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+-                var positions = Lineage_whiteboard.lineageVisjsGraph.network.getPositions();
+-                var data = {
+-                    nodes: nodes,
+-                    edges: Lineage_whiteboard.lineageVisjsGraph.data.edges.get(),
+-                    context: Lineage_whiteboard.lineageVisjsGraph.currentContext,
+-                    positions: positions,
+-                };
++            var data = Lineage_whiteboard.serializeWhiteboard();
++            if (!data) {
++                return alert("No Whiteboard to save");
++            }
+             var fileName = MainController.currentSource + "_whiteBoard.json";
+             Export.downloadJSON(data, fileName);
+-            } else {
+-                alert("No Whiteboard to save");
+-            }
+         },
+         /**
+          * Display a whiteboard graph from a JSON file.
+@@ -5163,6 +5191,80 @@ attrs.color=self.getSourceColor(superClassValue)
+         }
+     };
+ 
++    /**
++     * @function
++     * @name mountChatbotPlugin
++     * @memberof module:Lineage_whiteboard
++     * Draws the chat bot plugin at the bottom of the lateral panel, on the instances that have it
++     * installed.
++     *
++     * A capability check rather than an import: plugins are discovered at boot from the plugins
++     * directory, so the dock stays empty wherever the plugin is absent. It sits below the tabs
++     * rather than in one of them, so the same conversation is at hand from Classes or Containers
++     * as from the Whiteboard. Mounted reduced, so it drops its frame and sends what the agent does
++     * to UI.message, and on the host whiteboard, so that nodes it is asked to show land on this
++     * graph.
++     * @returns {void}
++     */
++    self.mountChatbotPlugin = function () {
++        var chatbotTool = Config.userTools ? Config.userTools[self.chatbotPluginName] : null;
++        var chatbotController = chatbotTool ? chatbotTool.controller : null;
++        if (!chatbotController || typeof chatbotController.mount !== "function") {
++            return;
++        }
++        // After the mount, never before: mount() fills the dock asynchronously and replaces its
++        // content, which would throw away the handle resizable appends inside it.
++        chatbotController.mount("#lineage_chatbotDock", { reduced: true, hostWhiteboard: true }, self.makeChatbotDockResizable);
++    };
++
++    /**
++     * @function
++     * @name makeChatbotDockResizable
++     * @memberof module:Lineage_whiteboard
++     * Lets the chat bot dock be dragged taller or shorter by its top edge, the way the lateral
++     * panel itself is dragged wider or narrower.
++     *
++     * Until it is dragged the dock has no height of its own: it is as tall as the conversation
++     * needs, capped by the plugin. Dragging replaces that by an explicit height, so the cap is
++     * lifted at the same time: left in place it would fight every drag past it.
++     * @returns {void}
++     */
++    self.makeChatbotDockResizable = function () {
++        $("#lineage_chatbotDock").resizable({
++            handles: "n",
++            // Enough to keep the ask box and its fold handle; below that, use the fold.
++            minHeight: 70,
++            start: function () {
++                this.style.setProperty("--chatbot-max-height", "100%");
++                $(this).resizable("option", "maxHeight", Math.max(140, $("#lateralPanelDiv").height() - 160));
++            },
++            resize: function (event, ui) {
++                // The north handle normally moves the element up as it grows it. Here the dock is
++                // the last item of a flex column, so growing it already pushes it up on its own:
++                // letting jQuery UI also offset `top` would lift it off the bottom of the panel.
++                ui.position.top = ui.originalPosition.top;
++            },
++        });
++    };
++
++    /**
++     * @function
++     * @name unloadChatbotPlugin
++     * @memberof module:Lineage_whiteboard
++     * Stops the embedded chat bot when Lineage goes away.
++     *
++     * MainController only unloads the controller of the current tool, which here is Lineage, so
++     * without this an agent still running keeps its loop alive and writes into a removed panel.
++     * @returns {void}
++     */
++    self.unloadChatbotPlugin = function () {
++        var chatbotTool = Config.userTools ? Config.userTools[self.chatbotPluginName] : null;
++        var chatbotController = chatbotTool ? chatbotTool.controller : null;
++        if (chatbotController && typeof chatbotController.unload === "function") {
++            chatbotController.unload();
++        }
++    };
++
+     /**
+      * @function
+      * @name hideShowMoreOptions
+@@ -5235,35 +5337,17 @@ attrs.color=self.getSourceColor(superClassValue)
+     self.addVisDataToGraph = function (visjsData) {
+         if (Lineage_whiteboard.lineageVisjsGraph.options.layoutHierarchical) {
+             // add level to Nodes if missing when layoutHierarchical
+-
+-            var oldNodesMap = {};
+-            var newEdgesFromMap = {};
+-            var newEdgesToMap = {};
+-            var maxLevel = -1;
+-            Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().forEach(function (node) {
+-                if (!node.level) {
+-                    node.level = -1;
+-                }
+-                maxLevel = Math.max(maxLevel, node.level);
+-                oldNodesMap[node.id] = node;
+-            });
+-            visjsData.edges.forEach(function (edge) {
+-                newEdgesFromMap[edge.from] = edge;
+-                newEdgesToMap[edge.to] = edge;
+-            });
+-
+-            visjsData.nodes.forEach(function (node) {
+-                if (!node.level) {
+-                    //   if( newEdgesFromMap[node.id] && newEdgesFromMap[node.id]  )
+-                    node.level = -1; // maxLevel + 1
+-                }
+-            });
++            Lineage_whiteboard.lineageVisjsGraph.normalizeNodeLevels(visjsData.nodes);
+         }
+ 
+         Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+         Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+ 
+         if (visjsData.nodes.length > 0) {
++            // The upper ontology legend used to be applied to the first drawing only, so a board
++            // grown by successive additions ended up half decorated. Decorating what was just added
++            // keeps the colors meaning the same thing everywhere on the board.
++            Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
+             Lineage_whiteboard.lineageVisjsGraph.network.focus(visjsData.nodes[0].id, {
+                 scale: 1,
+                 animation: true,
+@@ -5272,6 +5356,164 @@ attrs.color=self.getSourceColor(superClassValue)
+         }
+     };
+ 
++    /**
++     * The whiteboard as a plain object: what a save, an export and an undo snapshot all need.
++     * Positions come from the network and exist nowhere but this browser.
++     * @function
++     * @name serializeWhiteboard
++     * @memberof module:Lineage_whiteboard
++     * @returns {Object|null} `{nodes, edges, context, positions}`, or null when the board is empty.
++     */
++    self.serializeWhiteboard = function () {
++        var graph = self.lineageVisjsGraph;
++        if (!graph || !graph.data || !graph.data.nodes || graph.data.nodes.get().length === 0) {
++            return null;
++        }
++        return {
++            nodes: graph.data.nodes.get(),
++            edges: graph.data.edges.get(),
++            context: graph.currentContext,
++            positions: graph.network ? graph.network.getPositions() : {},
++        };
++    };
++
++    self.whiteboardSnapshot = null;
++
++    /**
++     * The five Lineage tabs, in the order of the lateral panel buttons: the div each one shows, the
++     * function that fills it, and the button that stays highlighted while it is open.
++     * `lateralPanel.html` calls `UI.openTab` directly and hands it the clicked button, so this table
++     * exists for callers that have no button to hand.
++     */
++    self.lineageTabs = {
++        whiteboard: { tabId: "whiteboardTab", initFunctionName: "initWhiteboardTab", buttonSelector: "#lineage-tab-buttons .whiteBoardIcon" },
++        classes: { tabId: "classesTab", initFunctionName: "initClassesTab", buttonSelector: "#lineage-tab-buttons .classesIcon" },
++        properties: { tabId: "propertiesTab", initFunctionName: "initPropertiesTab", buttonSelector: "#lineage-tab-buttons .propertiesIcon" },
++        query: { tabId: "queryTab", initFunctionName: "initQueryTab", buttonSelector: "#lineage-tab-buttons .queryIcon" },
++        containers: { tabId: "containersTab", initFunctionName: "initContainersTab", buttonSelector: "#lineage-tab-buttons .containersIcon" },
++    };
++
++    /**
++     * Whether anything is drawn. The graph object does not exist before the first drawing, so
++     * `lineageVisjsGraph.isGraphNotEmpty()` cannot be asked directly without this guard.
++     * @function
++     * @name isWhiteboardDrawn
++     * @memberof module:Lineage_whiteboard
++     * @returns {boolean}
++     */
++    self.isWhiteboardDrawn = function () {
++        if (!self.lineageVisjsGraph || !self.lineageVisjsGraph.data || !self.lineageVisjsGraph.data.nodes) {
++            return false;
++        }
++        return self.lineageVisjsGraph.isGraphNotEmpty();
++    };
++
++    /**
++     * Take nodes off the whiteboard, with the edges that reached them, and redraw the legend.
++     * Removing a node without its connected edges leaves the edges in the dataset, where they no
++     * longer show but are still counted and still saved.
++     * @function
++     * @name removeNodesFromWhiteboard
++     * @memberof module:Lineage_whiteboard
++     * @param {string[]} nodeIds - URIs of the nodes to remove.
++     * @returns {void}
++     */
++    self.removeNodesFromWhiteboard = function (nodeIds) {
++        nodeIds.forEach(function (nodeId) {
++            var connectedEdgeIds = self.lineageVisjsGraph.network.getConnectedEdges(nodeId);
++            self.lineageVisjsGraph.data.edges.remove(connectedEdgeIds);
++            self.lineageVisjsGraph.removeNodes("id", nodeId, true);
++        });
++        Lineage_decoration.decorateByUpperOntologyByClass();
++    };
++
++    /**
++     * Show one of the five Lineage tabs and fill it, naming the tab rather than its div and its init
++     * function. For callers that are not the lateral panel buttons, which call `UI.openTab` directly.
++     *
++     * `UI.openTab` highlights the button it is handed and unhighlights the others, so a caller with
++     * no button to hand would leave the panel with no tab looking open. The button is looked up from
++     * `lineageTabs` in that case.
++     * @function
++     * @name openLineageTab
++     * @memberof module:Lineage_whiteboard
++     * @param {string} tabName - One of the keys of `lineageTabs`.
++     * @param {Object} [buttonClicked] - The button element, when a click is what opened the tab.
++     * @returns {boolean} False when no such tab exists.
++     */
++    self.openLineageTab = function (tabName, buttonClicked) {
++        var openedTab = self.lineageTabs[tabName];
++        if (!openedTab) {
++            return false;
++        }
++        UI.openTab("lineage-tab", openedTab.tabId, self[openedTab.initFunctionName], buttonClicked || $(openedTab.buttonSelector));
++        return true;
++    };
++
++    /**
++     * Keep the board as it is now, so the next mutation can be undone.
++     * Only one snapshot is held: an agent adds in small steps and what a user asks to take back is
++     * the last one.
++     * @function
++     * @name saveWhiteboardSnapshot
++     * @memberof module:Lineage_whiteboard
++     * @returns {void}
++     */
++    self.saveWhiteboardSnapshot = function () {
++        self.whiteboardSnapshot = self.serializeWhiteboard();
++    };
++
++    /**
++     * Put back the board held by the last snapshot, dropping everything drawn since.
++     * @function
++     * @name restoreWhiteboardSnapshot
++     * @memberof module:Lineage_whiteboard
++     * @returns {boolean} False when no snapshot was taken, so the caller can say so.
++     */
++    self.restoreWhiteboardSnapshot = function () {
++        if (!self.whiteboardSnapshot) {
++            return false;
++        }
++        var restoredBoard = self.whiteboardSnapshot;
++        self.whiteboardSnapshot = null;
++        self.clearWhiteboard();
++        self.loadGraphFromJSON(restoredBoard);
++        return true;
++    };
++
++    /**
++     * Where the user is in Lineage right now: the tool state an agent cannot read from the server.
++     * @function
++     * @name getWhiteboardContext
++     * @memberof module:Lineage_whiteboard
++     * @returns {Object} Active tab and source, loaded sources, board size, selection size.
++     */
++    self.getWhiteboardContext = function () {
++        var openTabName = null;
++        for (var tabName in self.lineageTabs) {
++            if ($("#" + self.lineageTabs[tabName].tabId).css("display") === "block") {
++                openTabName = tabName;
++            }
++        }
++        var drawnNodes = self.isWhiteboardDrawn() ? self.lineageVisjsGraph.data.nodes.get() : [];
++        var drawnEdges = self.isWhiteboardDrawn() ? self.lineageVisjsGraph.data.edges.get() : [];
++        var loadedSources = Lineage_sources.loadedSources ? Object.keys(Lineage_sources.loadedSources) : [];
++        // Two selections live side by side: vis.js holds the one the mouse makes, Lineage_selection
++        // only the one a Ctrl+Alt click or a shift multi-select wrote. Reading the second alone
++        // reported nothing selected while nodes were haloed on the canvas.
++        var visSelectedNodes = self.isWhiteboardDrawn() && self.lineageVisjsGraph.network ? self.lineageVisjsGraph.network.getSelectedNodes() : [];
++        var trackedSelectedNodes = Lineage_selection.selectedNodes || [];
++        return {
++            activeSource: Lineage_sources.activeSource || null,
++            loadedSources: loadedSources,
++            activeTab: openTabName,
++            nodeCount: drawnNodes.length,
++            edgeCount: drawnEdges.length,
++            selectedNodeCount: visSelectedNodes.length > 0 ? visSelectedNodes.length : trackedSelectedNodes.length,
++            hasUndoSnapshot: self.whiteboardSnapshot !== null,
++        };
++    };
++
+     self.drawDataTypeProperties = function (source, classIds, options, callback) {
+         if (!options) {
+             options = {};
+diff --git a/public/vocables/modules/tools/mappingModeler/mappingModeler.js b/public/vocables/modules/tools/mappingModeler/mappingModeler.js
+index f81a2c126..851fd479c 100644
+--- a/public/vocables/modules/tools/mappingModeler/mappingModeler.js
++++ b/public/vocables/modules/tools/mappingModeler/mappingModeler.js
+@@ -92,6 +92,11 @@ var MappingModeler = (function () {
+      * @throws {Error} If any step in the initialization sequence fails.
+      */
+     self.onLoaded = function () {
++        // A read only source can also arrive from the url or from a tool switch, not only from a click in the source selector.
++        if (SourceSelectorWidget.refuseReadOnlySourceForMappingModeler(MainController.currentSource, "MappingModeler")) {
++            return SourceSelectorWidget.showSourceDialog(true);
++        }
++
+         var tableStatsMap = {};
+         async.series(
+             [
+diff --git a/public/vocables/modules/uiWidgets/graphDecorationWidget.js b/public/vocables/modules/uiWidgets/graphDecorationWidget.js
+index 5607a6f1c..387e803f3 100644
+--- a/public/vocables/modules/uiWidgets/graphDecorationWidget.js
++++ b/public/vocables/modules/uiWidgets/graphDecorationWidget.js
+@@ -41,11 +41,20 @@ var GraphDecorationWidget = (function () {
+         }
+ 
+         $("#smallDialogDiv").dialog("close");
+-        var newIds = [];
++        self.applyDecoration(nodes, $("#lineage_decorate_colorSelect").val(), $("#lineage_decorate_shapeSelect").val(), $("#lineage_decorate_sizeInput").val());
++    };
+ 
+-        var color = $("#lineage_decorate_colorSelect").val();
+-        var shape = $("#lineage_decorate_shapeSelect").val();
+-        var size = $("#lineage_decorate_sizeInput").val();
++    /**
++     * Restyle nodes on the whiteboard. Split out of `decorateNodes` so a caller that already knows
++     * what to apply, rather than reading it from the dialog, does not restate the update.
++     * @param {Array} nodes - Node ids, or node objects carrying `data`.
++     * @param {string} [color] - CSS colour, left as it is when absent.
++     * @param {string} [shape] - vis.js shape, left as it is when absent.
++     * @param {number|string} [size] - Node size, left as it is when absent.
++     * @returns {number} How many nodes were restyled.
++     */
++    self.applyDecoration = function (nodes, color, shape, size) {
++        var restyledNodes = [];
+         nodes.forEach(function (node) {
+             var id;
+             if (typeof node === "object") {
+@@ -57,19 +66,20 @@ var GraphDecorationWidget = (function () {
+             } else {
+                 id = node;
+             }
+-            var obj = { id: id };
++            var restyledNode = { id: id };
+             if (color) {
+-                obj.color = color;
++                restyledNode.color = color;
+             }
+             if (shape) {
+-                obj.shape = shape;
++                restyledNode.shape = shape;
+             }
+             if (size) {
+-                obj.size = parseInt(size);
++                restyledNode.size = parseInt(size);
+             }
+-            newIds.push(obj);
++            restyledNodes.push(restyledNode);
+         });
+-        Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newIds);
++        Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(restyledNodes);
++        return restyledNodes.length;
+     };
+ 
+     self.getNodeDecorationAttrs = function (nodeId) {
+diff --git a/public/vocables/modules/uiWidgets/searchWidget.js b/public/vocables/modules/uiWidgets/searchWidget.js
+index 356f34797..18e4fd2be 100644
+--- a/public/vocables/modules/uiWidgets/searchWidget.js
++++ b/public/vocables/modules/uiWidgets/searchWidget.js
+@@ -175,17 +175,26 @@ var SearchWidget = (function () {
+                 return MainController.errorAlert(_err);
+             }
+ 
++            var targetDiv = options.jstreeDiv || self.currentTargetDiv;
++            if (Object.keys(result[0].matches).length == 0) {
++                $("#" + targetDiv).html("<b>No matches found</b>");
+                 if (callback) {
+                     return callback(null, result);
+                 }
+-            if (Object.keys(result[0].matches).length == 0) {
+-                return $("#" + (options.jstreeDiv || self.currentTargetDiv)).html("<b>No matches found</b>");
++                return;
+             }
+ 
+-            SearchWidget.searchResultToJstree(options.jstreeDiv || self.currentTargetDiv, result, options, function (err, _result) {
++            // the callback signals that the tree is drawn, so callers can chain on what the user now sees
++            SearchWidget.searchResultToJstree(targetDiv, result, options, function (err, _result) {
+                 if (err) {
++                    if (callback) {
++                        return callback(err);
++                    }
+                     return MainController.errorAlert(err);
+                 }
++                if (callback) {
++                    return callback(null, result);
++                }
+             });
+         });
+     };
+diff --git a/public/vocables/modules/uiWidgets/sourceSelectorWidget.js b/public/vocables/modules/uiWidgets/sourceSelectorWidget.js
+index e86e5113e..6f612a392 100644
+--- a/public/vocables/modules/uiWidgets/sourceSelectorWidget.js
++++ b/public/vocables/modules/uiWidgets/sourceSelectorWidget.js
+@@ -323,6 +323,25 @@ var SourceSelectorWidget = (function () {
+         return sources;
+     };
+ 
++    /**
++     * Mapping Modeler only writes triples, so a source declared read only in sources.json,
++     * or one the current user may only read, has nothing it can do there.
++     * Alerts and returns true when the source must be refused, so the caller stops.
++     * @param {string} source - the source the user picked
++     * @param {string} tool - the tool the source would be opened with
++     * @returns {boolean} true when the source was refused
++     */
++    self.refuseReadOnlySourceForMappingModeler = function (source, tool) {
++        if (tool != "MappingModeler" || !source) {
++            return false;
++        }
++        if (Lineage_sources.isSourceEditableForUser(source)) {
++            return false;
++        }
++        alert("Source " + source + " is read only: Mapping Modeler cannot write into it. Choose an editable source.");
++        return true;
++    };
++
+     self.onSourceSelect = function (event, obj) {
+         if (obj.event.type == "contextmenu") {
+             return;
+@@ -331,6 +350,9 @@ var SourceSelectorWidget = (function () {
+             $("#sourceSelector_jstreeDiv").jstree(true).open_node(obj.node.id);
+             return;
+         }
++        if (self.refuseReadOnlySourceForMappingModeler(obj.node.data.id, MainController.currentTool)) {
++            return;
++        }
+         $("#" + self.currentTreeDiv).dialog("close");
+         self.initSource(obj.node.data.id);
+         if (self.sourceSelectedCallback) {
+

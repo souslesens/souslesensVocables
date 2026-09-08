@@ -116,12 +116,13 @@ async function runRegisteredSparqlQuery(req, res, returnQueryStr) {
         const user = await ConfigManager.getUser(req, res);
         const userTools = await profileModel.getUserTools(userInfo.user);
 
-        // Deny up-front if the caller requests any source they are not allowed to access.
-        // Every source-identifying param is named with "source" (e.g. sourceLabel,
-        // fromSourceLabel, toSourceLabel); presence in userSources means at least read access.
-        const sourceParamNameRegex = /source/i;
+        // Deny up-front if the caller requests any source they are not allowed to access; presence
+        // in userSources means at least read access. A source is carried by `sourceLabel`, and by
+        // `fromSourceLabel` on the two copy functions. Matching on the word "source" instead also
+        // caught `sourceIds` and `resourcesIds`, which hold node URIs, and denied a legitimate call.
+        const sourceParamNames = ["sourceLabel", "fromSourceLabel"];
         const allowedSourceNames = Object.keys(userSources);
-        const sourceParams = entry.params.filter((param) => sourceParamNameRegex.test(param.name));
+        const sourceParams = entry.params.filter((param) => sourceParamNames.includes(param.name));
         let declaredEndpointMaxRows = null;
         for (const sourceParam of sourceParams) {
             const requestedSource = params[sourceParam.name];

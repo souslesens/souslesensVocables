@@ -1478,6 +1478,8 @@ var Sparql_generic = (function () {
                     }
 
                     for (var key in allClassesMap) {
+                        if(key=="http://datalenergies.total.com/resource/tsf/iso-14224-iof/all/equi-type-PU-CE")
+                            var x=3
                         recurse(key, allClassesMap[key].parents);
                     }
 
@@ -1506,7 +1508,6 @@ var Sparql_generic = (function () {
                         obj._chainBuilt = true;
                         return obj.parents;
                     }
-
                     for (var key in allClassesMap) {
                         buildParentChain(key);
                         delete allClassesMap[key]._directParents;
@@ -1519,8 +1520,8 @@ var Sparql_generic = (function () {
                         parentArray.push(sourceLabel);
                         allClassesMap[key].parents = parentArray.reverse();
                     }
-
                     callbackSeries();
+                  
                 },
 
                 // add orphan parents to all data

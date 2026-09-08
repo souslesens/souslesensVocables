@@ -9,14 +9,14 @@ import httpProxy from "./httpProxy.js";
 
 var Ask = {
 
-    whoAmI: function (source, term, callback) {
+    getTermInfos: function (sourceLabel, term, callback) {
         var termUrisMap = {}
         async.series([
 
 
             // search terms and topClasses
             function (callbackSeries) {
-                var indexName = source.toLowerCase()
+                var indexName = sourceLabel.toLowerCase()
                 Ask.executeElasticQuery("/_search", term, indexName, function (err, result) {
                     if (err) {
                         return callbackSeries(err)
@@ -63,7 +63,7 @@ var Ask = {
                     " Optional {?prop rdfs:label ?propLabel} }  FILTER (!exists{?value rdf:type owl:Restriction} ) } " +
 
                     "LIMIT 10000"
-                Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
+                Ask.executeSparqlQuery(sourceLabel, query, function (err, sparqlResult) {
 
                     if (err) {
                         return callbackSeries(err)
@@ -88,8 +88,8 @@ var Ask = {
             // get restrictions
             , function (callbackSeries) {
                 var termUris = Object.keys(termUrisMap)
-                var query = Ask.getRestrictionsSparql(source, termUris)
-                Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
+                var query = Ask.getRestrictionsSparql(sourceLabel, termUris)
+                Ask.executeSparqlQuery(sourceLabel, query, function (err, sparqlResult) {
 
                     if (err) {
                         return callbackSeries(err)
@@ -120,12 +120,12 @@ var Ask = {
     },
     /**
      *  get a simplified ontology model with nodes topConcepts and their semantic relations
-     * @param source
+     * @param sourceLabel
      * @param callback :
      */
-    getKnowledgeModelGraph: function (source, callback) {
+    getKnowledgeModelGraph: function (sourceLabel, callback) {
 
-        Ask.getTopConceptsGraphData(source, function (err, result) {
+        Ask.getTopConceptsGraphData(sourceLabel, function (err, result) {
             if (err) {
                 return callback(err)
             }
@@ -153,17 +153,17 @@ var Ask = {
 
      /**
      * build a path between  classes that are linked together including inherited from the class hierrachy
-     * @param source
+     * @param sourceLabel
      * @param term1
      * @param term2
      * @param callback
      */
 
 
-    getTwoTermsShortestPath: function (source, term1, term2, callback) {
+    getTwoTermsShortestPath: function (sourceLabel, term1, term2, callback) {
 
 
-        var indexName = source.toLowerCase(source)
+        var indexName = sourceLabel.toLowerCase(sourceLabel)
 
         var term1Uris = [];
 
@@ -207,7 +207,7 @@ var Ask = {
                 },
                 // load the data model visjs
                 function (callbackSeries) {
-                    Ask.getTopConceptsGraphData(source, function (err, result) {
+                    Ask.getTopConceptsGraphData(sourceLabel, function (err, result) {
                         if (err) {
                             return callbackSeries(err)
                         }
@@ -283,17 +283,17 @@ var Ask = {
     ,
     /**
      * get the classes that are linked to term 1 in subClasses of term 2 if not null including relations of supeClasses of class1
-     * @param source
+     * @param sourceLabel
      * @param term1
      * @param term2
      * @param callback
      */
 
-    getLinkedClasses: function (source, term1, term2, callback) {
+    getLinkedClasses: function (sourceLabel, term1, term2, callback) {
         var term1Uris = []
         var term2Uris = []
         var resultMap = {}
-        var indexName = source.toLowerCase()
+        var indexName = sourceLabel.toLowerCase()
         var query = ""
         async.series([
                 // search terms and topClasses
@@ -332,9 +332,9 @@ var Ask = {
                 //build query
                 function (callbackSeries) {
 
-                    var query = Ask.getRestrictionsSparql(source, term1Uris, term2Uris)
+                    var query = Ask.getRestrictionsSparql(sourceLabel, term1Uris, term2Uris)
 
-                    Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
+                    Ask.executeSparqlQuery(sourceLabel, query, function (err, sparqlResult) {
                         if (err) {
                             return callbackSeries(err)
                         }
@@ -361,7 +361,7 @@ var Ask = {
                             query = query.replace("filter (?class1 in", "filter (?class2 in")
                             query = query.replace("xx", "filter(?class1 in")
 
-                            Ask.executeSparqlQuery(source, query, function (err, result2) {
+                            Ask.executeSparqlQuery(sourceLabel, query, function (err, result2) {
 
                                 sparqlResult.results.bindings.forEach(function (item) {
                                     if (!resultMap[item.class2.value]) {
@@ -403,7 +403,7 @@ var Ask = {
     /*******************************************************Helpers*********************************************************/
 
 
-    getRestrictionsSparql: function (source, term1Uris, term2Uris, callback) {
+    getRestrictionsSparql: function (sourceLabel, term1Uris, term2Uris, callback) {
         var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix owl: <http://www.w3.org/2002/07/owl#> "
         query += "Select * from <http://datalenergies.total.com/resource/tsf/iso-14224-iof/all/> where {" +
             "  ?class1 rdfs:subClassOf{0,5} ?superClass1.\n" +
@@ -448,8 +448,8 @@ var Ask = {
     },
 
 
-    getTopConceptsGraphData: function (source, callback) {
-        var myPath = path.resolve("data/graphs/" + source + "_whiteBoard.json")
+    getTopConceptsGraphData: function (sourceLabel, callback) {
+        var myPath = path.resolve("data/graphs/" + sourceLabel + "_whiteBoard.json")
         var str = "" + fs.readFileSync(myPath)
         var json = JSON.parse(str)
         return callback(null, json)
@@ -461,11 +461,11 @@ var Ask = {
      * To be implemented
      *
      *
-     * @param source
+     * @param sourceLabel
      * @param query
      * @param callback
      */
-    executeSparqlQuery: function (source, query, callback) {
+    executeSparqlQuery: function (sourceLabel, query, callback) {
 
 
         try {
@@ -651,7 +651,7 @@ var Ask = {
 export default Ask
 
 if (false) {
-    Ask.whoAmI("ISO-14224-IOF", " failure mode", function (err, result) {
+    Ask.getTermInfos("ISO-14224-IOF", " failure mode", function (err, result) {
 
     })
 

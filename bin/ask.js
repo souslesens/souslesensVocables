@@ -281,7 +281,9 @@ var Ask = {
             ],
 
             function (err) {
-
+                if (err) {
+                    return callback(err)
+                }
                 return callback(null, shortestPath)
             }
         )
@@ -373,6 +375,9 @@ var Ask = {
                             query = query.replace("xx", "filter(?class1 in")
 
                             Ask.executeSparqlQuery(sourceLabel, query, function (err, result2) {
+                                if (err) {
+                                    return callbackSeries(err)
+                                }
 
                                 sparqlResult.results.bindings.forEach(function (item) {
                                     if (!resultMap[item.class2.value]) {
@@ -404,6 +409,9 @@ var Ask = {
             ],
 
             function (err) {
+                if (err) {
+                    return callback(err)
+                }
                 return callback(null, resultMap)
             })
 
@@ -460,9 +468,16 @@ var Ask = {
 
 
     getTopConceptsGraphData: function (sourceLabel, callback) {
-        var myPath = path.resolve("data/graphs/" + sourceLabel + "_whiteBoard.json")
-        var str = "" + fs.readFileSync(myPath)
-        var json = JSON.parse(str)
+        // A source with no saved whiteboard, or a misspelled source name, would otherwise throw
+        // synchronously out of the callback chain instead of reaching the caller as an error.
+        var json = null
+        try {
+            var myPath = path.resolve("data/graphs/" + sourceLabel + "_whiteBoard.json")
+            var str = "" + fs.readFileSync(myPath)
+            json = JSON.parse(str)
+        } catch (readError) {
+            return callback("no knowledge model graph for source " + sourceLabel + ": " + readError.message)
+        }
         return callback(null, json)
 
 
@@ -498,6 +513,9 @@ var Ask = {
 
 
             httpProxy.post(serverUrl, headers, params, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
                 callback(null, result);
             });
 
@@ -546,7 +564,16 @@ var Ask = {
         //  console.log("DEBUG:bin/elasticRestProxy:forwardRequest" + JSON.stringify(options));
         request(options, function (error, response, body) {
             //  console.log("DEBUG:bin/elasticRestProxy:forwardRequest\n  error=" + error + "\n  reponse=" + response + "\n  body " + body);
-            return callback(error, response, body);
+            if (error) {
+                return callback(error);
+            }
+            // An unknown index answers 404 with an error payload and no hits: without this the caller
+            // reads hits.hits on undefined and the failure surfaces as an empty result.
+            if (response.statusCode < 200 || response.statusCode > 299) {
+                var elasticMessage = body && body.error ? JSON.stringify(body.error) : response.statusMessage;
+                return callback("ElasticSearch " + response.statusCode + " on index " + indexName + ": " + elasticMessage);
+            }
+            return callback(null, response, body);
         });
 
 

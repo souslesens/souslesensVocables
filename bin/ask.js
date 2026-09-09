@@ -40,6 +40,11 @@ var Ask = {
 
 //get Properties
             function (callbackSeries) {
+                // Same trap as in getLinkedClasses: an empty IN list binds nothing and the query
+                // ends up scanning the whole graph.
+                if (Object.keys(termUrisMap).length == 0) {
+                    return callbackSeries()
+                }
                 var filter = "filter (?sub in ("
                 Object.keys(termUrisMap).forEach(function (item, index) {
                     if (index > 0) {
@@ -88,6 +93,9 @@ var Ask = {
             // get restrictions
             , function (callbackSeries) {
                 var termUris = Object.keys(termUrisMap)
+                if (termUris.length == 0) {
+                    return callbackSeries()
+                }
                 var query = Ask.getRestrictionsSparql(sourceLabel, termUris)
                 Ask.executeSparqlQuery(sourceLabel, query, function (err, sparqlResult) {
 
@@ -313,9 +321,6 @@ var Ask = {
                 },
                 function (callbackSeries) {
 
-                    if (!term2) {
-                        return callbackSeries()
-                    }
                     Ask.executeElasticQuery("/_search", term2, indexName, function (err, result) {
                         if (err) {
                             return callbackSeries(err)
@@ -331,6 +336,12 @@ var Ask = {
                 },
                 //build query
                 function (callbackSeries) {
+
+                    // Without URIs on both sides the restriction query has no filter left to bind it,
+                    // and the subClassOf traversal then walks the whole graph until the request times out.
+                    if (term1Uris.length == 0 || term2Uris.length == 0) {
+                        return callbackSeries()
+                    }
 
                     var query = Ask.getRestrictionsSparql(sourceLabel, term1Uris, term2Uris)
 
@@ -415,7 +426,7 @@ var Ask = {
             "     { ?superClass2 rdfs:label ?superClass2Label}"
 
         var filter = ""
-        if (term1Uris) {
+        if (term1Uris && term1Uris.length > 0) {
             filter += "filter (?class1 in ("
             term1Uris.forEach(function (item, index) {
                 if (index > 0) {
@@ -427,7 +438,7 @@ var Ask = {
             })
             filter += ") )"
         }
-        if (term2Uris) {
+        if (term2Uris && term2Uris.length > 0) {
 
             query += "  ?superClass2 ^rdfs:subClassOf{0,5} ?class2."
             filter += "filter (?class2 in ("

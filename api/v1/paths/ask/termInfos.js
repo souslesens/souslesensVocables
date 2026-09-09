@@ -105,6 +105,10 @@ export default function () {
                     },
                 },
             },
+            400: {
+                description: "A required query parameter is missing.",
+                schema: { type: "object", properties: { message: { type: "string" } } },
+            },
             500: {
                 description: "ElasticSearch or the SPARQL endpoint returned an error.",
                 schema: { type: "object", properties: { message: { type: "string" } } },

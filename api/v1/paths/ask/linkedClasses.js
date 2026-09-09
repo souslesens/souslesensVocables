@@ -15,9 +15,10 @@ export default function () {
     GET.apiDoc = {
         summary: "What can this term be attached to",
         description:
-            "The classes a term can be linked to and the properties linking them, narrowed to a second term when given. " +
-            "Use it before writing a query or a mapping, to know which relations are allowed between two families of terms. " +
-            "Collects OWL restrictions on the matching classes and their super classes up to five levels, in both directions.",
+            "The relations between two families of terms: the classes they can be linked to and the properties linking them. " +
+            "Use it before writing a query or a mapping, to know which relations the ontology allows between them. " +
+            "Collects OWL restrictions on the matching classes and their super classes up to five levels, in both directions. " +
+            "Both terms are required: without a second one the traversal is unbounded and does not return.",
         operationId: "askLinkedClasses",
         "x-mcp": {
             tools: [
@@ -25,13 +26,13 @@ export default function () {
                     name: "sls_linked_classes",
                     access: "read",
                     description:
-                        "Given a term, lists the classes it can be linked to and the properties linking them; given two terms, only the relations between those two families. " +
-                        "Call it before writing a query or a mapping: it says which relations the ontology actually allows, instead of you guessing a predicate. " +
+                        "Lists the relations the ontology allows between two terms: the classes they link and the properties linking them. " +
+                        "Call it before writing a query or a mapping, instead of guessing a predicate. " +
                         "It climbs the class hierarchy for you, up to five levels, and reads the restrictions in both directions, so it finds relations a direct triple lookup misses.",
                     params: {
                         sourceLabel: { type: "string", required: true, description: "Source to look in. Its lowercase form is the label index name." },
                         term1: { type: "string", required: true, description: "Term the relations start from, in plain words. For instance failure mode." },
-                        term2: { type: "string", description: "Term restricting the other end of the relation. Omit it to get every class the first term can reach." },
+                        term2: { type: "string", required: true, description: "Term at the other end of the relation, in plain words. For instance centrifugal pump." },
                     },
                     query: { sourceLabel: "{sourceLabel}", term1: "{term1}", term2: "{term2}" },
                 },
@@ -40,7 +41,7 @@ export default function () {
         parameters: [
             { name: "sourceLabel", in: "query", type: "string", required: true, description: "Source name. Its lowercase form names the ElasticSearch index. Example: `ISO-14224-IOF`." },
             { name: "term1", in: "query", type: "string", required: true, description: "Term whose classes the relations start from. Example: `failure mode`." },
-            { name: "term2", in: "query", type: "string", required: false, description: "Term restricting the classes reached at the other end of the relation. Omit it to get every linked class. Example: `centrifugal pump`." },
+            { name: "term2", in: "query", type: "string", required: true, description: "Term whose classes the relations end at. Example: `centrifugal pump`." },
         ],
         responses: {
             200: {
@@ -71,6 +72,10 @@ export default function () {
                         ],
                     },
                 },
+            },
+            400: {
+                description: "A required query parameter is missing.",
+                schema: { type: "object", properties: { message: { type: "string" } } },
             },
             500: {
                 description: "ElasticSearch or the SPARQL endpoint returned an error.",

@@ -38,7 +38,13 @@ export default function () {
             ],
         },
         parameters: [
-            { name: "sourceLabel", in: "query", type: "string", required: true, description: "Source name. Its lowercase form names the ElasticSearch index, and a whiteboard must be saved for it. Example: `ISO-14224-IOF`." },
+            {
+                name: "sourceLabel",
+                in: "query",
+                type: "string",
+                required: true,
+                description: "Source name. Its lowercase form names the ElasticSearch index, and a whiteboard must be saved for it. Example: `ISO-14224-IOF`.",
+            },
             { name: "term1", in: "query", type: "string", required: true, description: "Term the path starts from. Example: `failure mode`." },
             { name: "term2", in: "query", type: "string", required: true, description: "Term the path ends at. Example: `centrifugal pump`." },
         ],
@@ -66,6 +72,10 @@ export default function () {
                         ],
                     ],
                 },
+            },
+            400: {
+                description: "A required query parameter is missing.",
+                schema: { type: "object", properties: { message: { type: "string" } } },
             },
             500: {
                 description: "ElasticSearch returned an error, or no whiteboard is saved for that source.",

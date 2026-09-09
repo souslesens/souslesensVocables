@@ -79,6 +79,10 @@ export default function () {
                     },
                 },
             },
+            400: {
+                description: "A required query parameter is missing.",
+                schema: { type: "object", properties: { message: { type: "string" } } },
+            },
             500: {
                 description: "No whiteboard saved for that source, or the file could not be parsed.",
                 schema: { type: "object", properties: { message: { type: "string" } } },

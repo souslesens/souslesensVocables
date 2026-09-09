@@ -1483,8 +1483,7 @@ var Sparql_generic = (function () {
                         recurse(key, allClassesMap[key].parents);
                     }
 
-                    // pick single most-specific parent (deepest = most ancestors)
-                    // read all depths before modifying any parents array
+                    // two chains of parents (node with two subclasses) take the longest one
                     var chosenParents = {};
                     for (var key in allClassesMap) {
                         chosenParents[key] = allClassesMap[key]._directParents.reduce(function (best, candidateId) {

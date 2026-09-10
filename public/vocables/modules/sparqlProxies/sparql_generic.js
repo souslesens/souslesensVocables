@@ -1483,34 +1483,40 @@ var Sparql_generic = (function () {
                         recurse(key, allClassesMap[key].parents);
                     }
 
-                    // two chains of parents (node with two subclasses) take the longest one
-                    var chosenParents = {};
+                    var multipleParentsClassUri = "http://souslesens.org/anomaly/multipleParentsClass";
+                    var cyclicParentsClassUri = "http://souslesens.org/anomaly/cyclicParentsClass";
+                    var anomalyParents = {};
+
+                    // hierarchies with errors,  indexed under a parent
                     for (var key in allClassesMap) {
-                        chosenParents[key] = allClassesMap[key]._directParents.reduce(function (best, candidateId) {
-                            if (!best) return candidateId;
-                            var bestDepth = allClassesMap[best] ? allClassesMap[best].parents.length : 0;
-                            var candidateDepth = allClassesMap[candidateId] ? allClassesMap[candidateId].parents.length : 0;
-                            return candidateDepth > bestDepth ? candidateId : best;
-                        }, null);
+                        var directParentCount = 0;
+                        var isInCycle = false;
+                        allClassesMap[key]._directParents.forEach(function (directParent) {
+                            if (directParent === key) {
+                                return;
+                            }
+                            directParentCount++;
+                            if (allClassesMap[directParent] && allClassesMap[directParent].parents.indexOf(key) > -1) {
+                                isInCycle = true;
+                            }
+                        });
+                        if (isInCycle) {
+                            anomalyParents[key] = cyclicParentsClassUri;
+                        } else if (directParentCount > 1) {
+                            anomalyParents[key] = multipleParentsClassUri;
+                        }
                     }
 
-                    // build full ancestor chain following chosen parents only (memoized)
-                    // processedParents guards against cycles (e.g. OWL reflexive subClassOf triples materialized by reasoner)
-                    var processedParents = {};
-                    function buildParentChain(nodeId) {
-                        var obj = allClassesMap[nodeId];
-                        if (!obj || obj._chainBuilt) return obj ? obj.parents : [];
-                        if (processedParents[nodeId]) return [];
-                        processedParents[nodeId] = 1;
-                        var chosenParent = chosenParents[nodeId] !== nodeId ? chosenParents[nodeId] : null;
-                        obj.parents = chosenParent ? [chosenParent].concat(buildParentChain(chosenParent)) : [];
-                        obj._chainBuilt = true;
-                        return obj.parents;
-                    }
+                    // applied apart because the verdicts above read the ancestors of other classes
                     for (var key in allClassesMap) {
-                        buildParentChain(key);
+                        var selfIndex = allClassesMap[key].parents.indexOf(key);
+                        if (selfIndex > -1) {
+                            allClassesMap[key].parents.splice(selfIndex, 1);
+                        }
+                        if (anomalyParents[key]) {
+                            allClassesMap[key].parents = [anomalyParents[key]];
+                        }
                         delete allClassesMap[key]._directParents;
-                        delete allClassesMap[key]._chainBuilt;
                     }
 
                     // format parents: add source and sort top-down [source, ..., parent_direct]

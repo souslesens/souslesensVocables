@@ -328,7 +328,6 @@ var Ask = {
     getLinkedClasses: function (source, term1, term2, callback) {
         var term1Uris = [];
         var term2Uris = [];
-        // term2Uris holds the word matched on labels, term2ClassUris the uris the inverse pass filters on
         var term2ClassUris = [];
         var resultMap = {};
         var indexName = source.toLowerCase();
@@ -383,13 +382,19 @@ var Ask = {
                 },
                 //build query
                 function (callbackSeries) {
+                    // without uris the walk covers the whole graph
+                    if (term1Uris.length == 0) {
+                        return callbackSeries();
+                    }
+
                     Ask.getRestrictionsSparql(source, term1Uris, term2Uris, function (err, query) {
                         Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
                             if (err) {
                                 return callbackSeries(err);
                             }
 
-                            sparqlResult.results.bindings.forEach(function (item) {
+                            var directBindings = sparqlResult && sparqlResult.results ? sparqlResult.results.bindings : [];
+                            directBindings.forEach(function (item) {
                                 if (!resultMap[item.class1.value]) {
                                     resultMap[item.class1.value] = [];
                                 }
@@ -404,6 +409,11 @@ var Ask = {
 
                             // on essaie la relation  inverse
                             if (term2 != null && (true || result.length == 0)) {
+                                // same on the other side
+                                if (term2ClassUris.length == 0) {
+                                    return callbackSeries();
+                                }
+
                                 Ask.getRestrictionsSparql(source, term2ClassUris, [term1], function (err, queryInverse) {
                                     Ask.executeSparqlQuery(source, queryInverse, function (err, inverseSparqlResult) {
                                         if (err) {

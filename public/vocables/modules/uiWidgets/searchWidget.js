@@ -378,7 +378,7 @@ var SearchWidget = (function () {
         if (!options) {
             options = {};
         }
-        options.onlyClasses = true;
+        options.boostClasses = true;
         if (sourceLabel) {
             options.searchedSources = [sourceLabel];
         }

@@ -203,7 +203,6 @@ var ConfigManager = {
             res.status(err.status || 500).json(err);
             next(err);
         }
-
     },
 };
 ConfigManager.getGeneralConfig();

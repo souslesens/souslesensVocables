@@ -1540,7 +1540,6 @@ var Sparql_generic = (function () {
                         allClassesMap[key].parents = parentArray.reverse();
                     }
                     callbackSeries();
-                  
                 },
 
                 // add orphan parents to all data

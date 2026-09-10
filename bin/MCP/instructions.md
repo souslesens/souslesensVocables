@@ -14,9 +14,11 @@ it with the source name and the URI. When a lookup finds nothing, say so plainly
 
 ## Ask the high level question first
 
-Four tools take plain words and answer a whole question, running the chain of searches and queries
+Five tools take plain words and answer a whole question, running the chain of searches and queries
 you would otherwise write by hand. Try them before assembling that chain yourself.
 
+- `sls_ontology_summary`: which ontologies you have and what each one is about. First call when the
+  source to use is not decided yet.
 - `sls_knowledge_model_graph`: what a source is about. First call on a source you do not know.
 - `sls_term_infos`: what a term means, with its predicates and relations.
 - `sls_two_terms_paths`: how two terms are connected.

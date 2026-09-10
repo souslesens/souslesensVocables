@@ -1,66 +1,37 @@
-# Central Agent Rules
-
-Shared cross-agent rules live in:
-
-`C:\Users\kounnoughi\OneDrive - Jems\Documents\Obsidian Vault\AI\second-brain\Agent Rules\GLOBAL_AGENT_RULES.md`
-
-Read that file for global behavior across Claude Code, Codex, and future agents. If Karim asks to change a global agent rule, update the central file first, then update relevant adapters according to:
-
-`C:\Users\kounnoughi\OneDrive - Jems\Documents\Obsidian Vault\AI\second-brain\Agent Rules\RULE_CHANGE_PROTOCOL.md`
-
-Local/project-specific rules in this file still apply after these shared rules.
-
----
-
 # SousLeSens Vocables - Claude Code Guidelines
 
 
 ## Workspace Trust
 
-Repo + worktrees = trusted local env.
+Repo + worktrees = trusted local env. No confirmation for editing files or applying multiple changes in workspace.
 
-Claude no ask confirmation for:
-- Editing files
-- Running git commands
-- Applying multiple changes
-in workspace.
+Git: see `# Claude Permissions`, local ops only.
 
 
 # Claude Permissions
 
-Claude allowed:
+Allowed:
 - Read, create, update, delete files in repo + worktrees
 - Local git: add, commit, branch, diff
 - Modify code freely, no per-change confirmation
 
-Claude NOT allowed:
+NOT allowed:
 - Push commits to remote
 - Create/modify GitHub PRs
 - Modify GitHub issues/comments
 - Any GitHub write action
 
-Claude MUST:
-- Ask explicit permission before GitHub write op
-- Ask before push, even if told "finish task"
+MUST ask explicit permission before any GitHub write op, and before push even if told "finish task".
 
 # Avoid useless comments
 
-Write self‑explanatory code: expressive precise names + clear structure over comments.
-Use descriptive identifiers (variables, functions, classes) conveying intent + domain meaning.
-Comments only for:
+Self-explanatory code: precise names + clear structure over comments. Identifiers convey intent + domain meaning.
 
-Complex logic not obvious from code,
-Business decisions / domain rationale,
-Temporary patches/workarounds (include why + removal conditions),
-Separating long multi‑step processes (section headers / brief overviews).
+Comment only for: complex logic not obvious from code, business/domain rationale, temporary patches (why + removal conditions), section headers in long multi-step processes.
 
+No redundant comments (e.g. "increment i", restating code). A useful comment is a few words on one line, not a sentence: `// stop on a loop`, `// climb single parents, stop chain at the first anomaly`. Write one whenever it earns its place, never to pad.
 
-No redundant/obvious comments (e.g. "increment i", restating code).
-Minimal comments via self‑documenting code: naming, structure, small focused functions
-
-## Overview
-
-Docs to help Claude Code work with SousLeSens Vocables codebase.
+Create a function only for a clear, precise, independent need, never to split code for its own sake. See `### Keep the number of new functions low`.
 
 ## Project Description
 
@@ -71,30 +42,14 @@ Docs to help Claude Code work with SousLeSens Vocables codebase.
 ### Key Documentation Files
 
 - **[claude.md](./claude.md)** (this file) - Main overview + quick reference
-
 - **[refactoring-guidelines.md](./refactoring-guidelines.md)** - Code style + refactoring rules
-- **[architecture.md](./architecture.md)** - System architecture deep dive
 - **[module-patterns.md](./module-patterns.md)** - Common module patterns + examples
 - **[sparql-guidelines.md](./sparql-guidelines.md)** - SPARQL execution + query building
 - **[coding-standards.md](./coding-standards.md)** - Detailed coding standards
 
 ### Technology Stack
 
-**Frontend:**
-- JavaScript ES6+ module system (`import`/`export`)
-- jQuery for DOM + AJAX
-- Vis.js for graph viz
-- JSTree for hierarchical trees
-- Async.js for callback async flow
-
-**Backend:**
-- Node.js + Express.js
-- SPARQL for semantic queries
-- Triple store integration (Virtuoso, GraphDB, etc.)
-
-**Build Tools:**
-- Webpack for bundling
-- ESLint for code quality
+Authoritative: `package.json`. The constraints it does not show are in `### Do ✅` / `### Don't ❌`: async.js and not async/await, dual export on every client module.
 
 ## Core Architecture Patterns
 
@@ -106,15 +61,15 @@ Docs to help Claude Code work with SousLeSens Vocables codebase.
 var ModuleName = (function () {
     var self = {};
 
-    // Private variables (closure scope)
-    var privateVar = null;
+    // module state and constants live on self, never floating in the closure
+    self.currentSource = null;
+    self.blankNodeColumnTypes = ["RowIndex", "VirtualColumn"];
 
-    // Public methods and properties
-    self.publicMethod = function() {
-        // Implementation
+    self.publicMethod = function (source) {
+        // a variable whose scope is this function body stays a local var
+        var matchingNodes = [];
+        return matchingNodes;
     };
-
-    self.publicProperty = null;
 
     return self;
 })();
@@ -126,9 +81,7 @@ export default ModuleName;
 window.ModuleName = ModuleName;
 ```
 
-**Why both exports?**
-- `export default` for ES6 module imports
-- `window.ModuleName` for inline HTML handlers like `onclick="ModuleName.method()"`
+Both exports needed: `export default` for ES6 imports, `window.ModuleName` for inline HTML handlers like `onclick="ModuleName.method()"`.
 
 ### 2. Async Flow Control with async.js
 
@@ -250,97 +203,19 @@ result.results.bindings.forEach(function(binding) {
 
 ### Other SPARQL Methods
 
-```javascript
-
-// Delete triples
-Sparql_generic.deleteTriples(source, subjectUri, predicateUri, objectUri, callback);
-
-// Insert triples
-Sparql_generic.insertTriples(source, triples, options, callback);
-
-// Get node children
-Sparql_generic.getNodeChildren(source, nodeId, options, callback);
-```
+Authoritative: `sparqlProxies/sparql_generic.js` (CRUD), `sparql_OWL.js`, `sparql_SKOS.js`. Grep the method name, signatures drift.
 
 ## Key Module Reference
 
-### Core Modules (`public/vocables/modules/`)
+Layout under `public/vocables/modules/`: one directory per tool in `tools/`, SPARQL layer in `sparqlProxies/`, reusable UI in `uiWidgets/`, cross-tool utils in `shared/`. `ls` for the rest.
 
-#### `tools/KGquery/` - Knowledge Graph Query Builder
-- **KGquery.js** - Main orchestrator, query execution
-- **KGquery_graph.js** - Graph viz with Vis.js, cardinality mgmt
-- **KGquery_paths.js** - Shortest path between nodes
-- **KGquery_filter.js** - Query filtering + optional predicates
-- **KGquery_predicates.js** - SPARQL query building
-- **KGquery_proxy.js** - API for programmatic access
-
-#### `tools/lineage/` - Ontology Lineage and Visualization
-- **lineage_whiteboard.js** - Main viz controller (5000+ lines)
-- **lineage_sources.js** - Source mgmt
-- **lineage_selection.js** - Node selection
-- **lineage_relations.js** - Relationship mgmt
-- **lineage_graphTraversal.js** - Graph traversal algos
-
-#### `sparqlProxies/` - SPARQL Execution Layer
-- **sparql_proxy.js** - Main proxy for executing SPARQL (**USE THIS**)
-- **sparql_common.js** - Common SPARQL utilities
-- **sparql_generic.js** - Generic SPARQL ops (CRUD)
-- **sparql_OWL.js** - OWL queries
-- **sparql_SKOS.js** - SKOS queries
-
-#### `uiWidgets/` - Reusable UI Components
-- **JstreeWidget.js** - Hierarchical tree wrapper (jsTree)
-- **NodeInfosWidget.js** - Node info display + tabs
-- **PopupMenuWidget.js** - Context menus + smart positioning
-- **SimpleListSelectorWidget.js** - Basic list selection
-- **DateWidget.js** - Date range filtering
-
-#### `shared/` - Shared Utilities
-- **common.js** - Common utility functions
-- **mainController.js** - App controller
-- **ontologyModels.js** - Ontology data mgmt
+The only non-obvious entry point: `sparqlProxies/sparql_proxy.js` executes SPARQL, **USE THIS**, not a hand-rolled fetch.
 
 ## Important Data Structures
 
 ### Graph Data (visjsData)
 
-**Used throughout for graph viz:**
-
-```javascript
-{
-    nodes: [
-        {
-            id: "http://example.org/Class1",
-            label: "Class1",
-            shape: "box",  // dot, box, triangle, ellipse, diamond, etc.
-            color: "#ddd",
-            data: {
-                id: "http://example.org/Class1",
-                source: "myOntology",
-                type: "owl:Class",
-                nonObjectProperties: [...]  // Datatype properties
-            }
-        }
-    ],
-    edges: [
-        {
-            id: "edgeId",
-            from: "http://example.org/Class1",
-            to: "http://example.org/Class2",
-            label: "hasRelation (n)",  // With cardinality suffix
-            data: {
-                propertyId: "http://example.org/hasRelation",
-                propertyLabel: "hasRelation",  // Original label
-                originalLabel: "hasRelation",  // Preserved original
-                maxCardinality: 5,  // Calculated cardinality
-                source: "myOntology"
-            },
-            arrows: { to: { enabled: true, type: "solid" } },
-            color: "#aaa"
-        }
-    ]
-}
-```
+Vis.js `{ nodes, edges }` with a `data` object carrying the SousLeSens payload on both. Authoritative: `KGquery_graph.js` and `lineage_whiteboard.js`. Inspect a live one with `KGquery_graph.visjsData` rather than trusting a copy here.
 
 ### Configuration Access
 
@@ -356,107 +231,25 @@ Config.defaultGraphTheme                      // UI theme
 
 ## Common Patterns You'll See
 
-### 1. Loading HTML Templates
+Template loading, jsTree wiring, jQuery idioms: authoritative in `module-patterns.md` and in the modules themselves. Copy the neighbouring module, not a snippet from here.
 
-```javascript
-$("#divId").load("modules/path/to/template.html", function() {
-    // Setup after template loads
-    UI.openDialog("divId", { title: "Dialog Title" });
-
-    // Bind events
-    $("#buttonId").on("click", function() {
-        // Handle click
-    });
-});
-```
-
-### 2. JSTree Integration
-
-```javascript
-var jstreeData = [
-    { id: "node1", text: "Label", parent: "#", data: {...} },
-    { id: "node2", text: "Child", parent: "node1", data: {...} }
-];
-
-var options = {
-    withCheckboxes: true,
-    selectTreeNodeFn: function(event, obj) {
-        // Handle selection
-    },
-    validateFn: function(checkedNodes) {
-        // Handle validation
-    }
-};
-
-JstreeWidget.loadJsTree("divId", jstreeData, options, function() {
-    // Tree loaded
-});
-```
-
-### 3. jQuery Patterns
-
-```javascript
-// Chaining
-$("#elementId").html(html).css("display", "block").trigger("focus");
-
-// Get/set values
-var value = $("#selectId").val();
-$("#inputId").val(newValue);
-
-// Event binding
-$("#buttonId").on("click", handler);
-$("#inputId").bind("keydown", null, function() {
-    if (event.keyCode == 13) {  // Enter key
-        // Handle
-    }
-});
-```
-
-### 4. Error Handling
-
-```javascript
-// Standard pattern
-Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source}, function(err, result) {
-    if (err) {
-        // Option 1: Show to user
-        return MainController.errorAlert(err);
-
-        // Option 2: Propagate up
-        return callback(err);
-
-        // Option 3: Silent message
-        return UI.message(err);
-    }
-
-    // Process result
-    callback(null, result);
-});
-```
+Error handling has three outlets, pick one per call site: `MainController.errorAlert(err)` to show it, `return callback(err)` to propagate, `UI.message(err)` for a silent notice. Shape in `### 3. Error-First Callbacks`.
 
 ## DRY Principle - MANDATORY
 
-### Before Implementing ANY Feature
-
-**Claude Code MUST follow this workflow:**
-
-1. **Reuse Existing Functions**
-   - Use existing utils from `common.js`, `UI.js`, etc.
-   - Use existing SPARQL methods from `sparql_proxy.js`, `sparql_generic.js`
-   - Use existing UI widgets from `uiWidgets/`
-
-2. **Only Create New Functions When Necessary**
-   - No existing function fits requirement
-   - Function reused in multiple places
+Reuse before creating: utils in `common.js` and `UI.js`, SPARQL in `sparql_proxy.js` and `sparql_generic.js`, widgets in `uiWidgets/`. Create a function only when nothing fits or it is reused in several places. See `### Keep the number of new functions low`.
 
 ---
 
 ## Reading Guidelines
 
-Read `.claude/` docs (architecture.md, module-patterns.md, refactoring-guidelines.md, etc.) only when task requires. No proactive reads at session start.
+Read `.claude/` docs (module-patterns.md, refactoring-guidelines.md, etc.) only when the task requires. No proactive reads at session start.
 
 ## Efficient File Reading
 
-File > 200 lines: Grep first for target line, then Read with `offset` + `limit`. Never Read full large file for "context".
+Gather the context the change needs before touching anything: what already exists so DRY is not broken, and what the change impacts. Stop there. Reading whole directories blind is noise, not context.
+
+File > 200 lines: Grep first for the target line, then Read with `offset` + `limit`.
 
 Files already read in session: no re-read unless modified.
 
@@ -464,20 +257,18 @@ Files already read in session: no re-read unless modified.
 
 ### Do ✅
 
-
 - **Reuse existing functions** - DRY rigorously
-- **Always read files before modifying** - Get context
+- **Read what the change needs before modifying** - see `## Efficient File Reading`
 - **Preserve backward compatibility** - Many parts depend on existing APIs
 - **Follow existing patterns** - No new paradigms
 - **Use async.js for async flow** - No Promises / async/await
 - **Handle all errors** - Error-first callbacks consistently
 - **Test thoroughly** - Cover null/undefined, empty arrays, edge cases
 - **Update documentation** - Keep files current on changes
-- **Update function-index.md** - When creating new public functions
 
 ### Don't ❌
 
-- **Don't duplicate existing functionality** 
+- **Don't duplicate existing functionality**
 - **Don't break existing APIs** - Function signatures = contracts
 - **Don't modify global state carelessly** - Use module-level state
 - **Don't use modern async/await** - Codebase uses callbacks
@@ -490,13 +281,10 @@ Files already read in session: no re-read unless modified.
 
 ### Client code: everything lives on the IIFE `self` (MANDATORY)
 
-In `public/vocables/**`, a module is an IIFE returning `self`. Nothing may float in the closure
-next to `self`: no free `var`, no free `function`. Every constant, every state flag and every
-function must be a member of `self`, so the whole module surface is inspectable from the console
-and callable from HTML handlers.
+In `public/vocables/**` a module is an IIFE returning `self`. Nothing floats in the closure next to `self`: no free `var`, no free `function`. Every constant, state flag and function is a member of `self`, so the whole module surface is inspectable from the console and callable from HTML handlers.
 
 ```javascript
-// WRONG — free constants and free function in the closure
+// WRONG: free constants and free function in the closure
 var BLANK_NODE_COLUMN_TYPES = ["RowIndex", "VirtualColumn"];
 var isSynchronizing = false;
 function isBlankNodeColumn(columnNodeData) { ... }
@@ -507,13 +295,11 @@ self.isSynchronizingBlankNodeGroup = false;
 self.isBlankNodeColumn = function (columnNodeData) { ... };
 ```
 
-Local variables inside a function body stay local, that is not what this rule is about.
+Variables local to a function body stay local, this rule is not about them.
 
 ### No UPPER_CASE identifiers (MANDATORY)
 
-This project has no screaming constants. Constants use camelCase like everything else, whatever
-their scope, including regex constants and lookup tables. This rule overrides the generic
-"extract magic values to UPPER_CASE constants" convention.
+No screaming constants. Constants use camelCase whatever their scope, regex constants and lookup tables included. Overrides the generic "extract magic values to UPPER_CASE constants" convention.
 
 ```javascript
 // WRONG
@@ -527,14 +313,11 @@ var paramTagRegex = /^@param/;
 
 ### Keep the number of new functions low
 
-Before adding a function, check that it is not a two-line wrapper over another one you just wrote,
-and that an existing module does not already do it. Merge helpers that are always called together,
-and prefer a loop inside the caller over a private helper used once.
+Before adding a function, check it is not a two-line wrapper over one you just wrote, and that no existing module already does it. Merge helpers always called together. Prefer a loop inside the caller over a private helper used once.
 
 ### No chained array/string methods
 
-Never chain `.split()`, `.map()`, `.filter()`, `.find()`, `.reduce()` one after another.
-Each step must be its own named variable so a human can read the intermediate state.
+Never chain `.split()`, `.map()`, `.filter()`, `.find()`, `.reduce()`. Each step gets its own named variable so the intermediate state is readable.
 
 ```javascript
 // WRONG
@@ -546,19 +329,18 @@ const trimmedLines = rawLines.map((line) => line.trim());
 const nonEmptyLines = trimmedLines.filter((line) => line.length > 0);
 ```
 
-Chaining `.join()` after a single `.map()` is acceptable only when the result is extracted to a named variable first.
+`.join()` after a single `.map()` is acceptable only when the result is extracted to a named variable first.
 
 ### Extract regex into named constants
 
-Never put a regex literal directly inside `.match()`, `.replace()`, `.test()`, or `.split()`.
-Declare it as a named `const` above the usage, with a `Regex` suffix in camelCase. Never use UPPER_CASE for regex constants.
+Never put a regex literal inside `.match()`, `.replace()`, `.test()` or `.split()`. Declare it as a named `const` above the usage, camelCase with a `Regex` suffix. Never UPPER_CASE.
 
 ```javascript
-// WRONG — inline regex
+// WRONG: inline regex
 const match = line.match(/^@param\s+\{([^}]+)\}\s+(\[?[\w.]+\]?)/);
 const cleaned = name.replace(/^\[|\]$/g, "");
 
-// WRONG — UPPER_CASE not allowed for regex
+// WRONG: UPPER_CASE not allowed for regex
 const PARAM_TAG_RE = /^@param\s+\{([^}]+)\}\s+(\[?[\w.]+\]?)/;
 
 // RIGHT
@@ -570,8 +352,7 @@ const cleaned = name.replace(optionalBracketsRegex, "");
 
 ### No abbreviated names in callbacks
 
-Never use single-letter or cryptic names in `.map()`, `.filter()`, `.find()`, `.forEach()` callbacks.
-Always use the full semantic name for what the element represents.
+Never single-letter or cryptic names in `.map()`, `.filter()`, `.find()`, `.forEach()` callbacks. Use the full semantic name of what the element represents.
 
 ```javascript
 // WRONG
@@ -595,45 +376,97 @@ const [, type, rawName, desc] = paramMatch;
 const [, type, rawName, description] = paramMatch;
 ```
 
+### Never throw in a data or query flow (MANDATORY)
+
+Errors travel through the error-first callback, as a plain string message. Nothing catches a `throw`
+in these flows, so it kills the async chain it sits in and reaches no user.
+
+```javascript
+// WRONG
+throw new Error("onlyClasses cannot be combined with classFilter");
+
+// RIGHT
+return callback("onlyClasses cannot be combined with classFilter");
+```
+
+Validation therefore belongs in the nearest function that has a callback, not in the helper that
+built the value. A synchronous helper returns its result and nothing else.
+
+Callers surface it with `MainController.errorAlert(err)`, `UI.message(err)`, or by propagating with
+`return callback(err)`. See `### 4. Error Handling`.
+
+The `throw` calls already in `public/vocables/**` are React mount guards at bootstrap and vendored
+files. Neither is a precedent for new code.
+
+### A loop must be readable without simulating it (MANDATORY)
+
+If understanding a block requires tracing an example through it, rewrite it before showing it. Three checks:
+
+Name identifiers after the domain thing they hold, never after their mechanical role.
+
+```javascript
+// WRONG
+var currentId = key;
+var parentId = singleParents[currentId];
+
+// RIGHT
+var currentClass = key;
+var parentClass = singleParents[currentClass];
+```
+
+Drop bookkeeping state when the data already being built answers the same question.
+
+```javascript
+// WRONG
+var walkedParents = {};
+walkedParents[key] = 1;
+if (walkedParents[parentClass]) { break; }
+
+// RIGHT
+if (parentClass === key || ancestorChain.indexOf(parentClass) > -1) { break; }
+```
+
+No state seeded before a loop just to make the first iteration behave.
+
+### Data transformation pipelines (MANDATORY)
+
+Any multi-step transformation over a map or list: index building, taxonomy computation, graph flattening, aggregation.
+
+**One block, one job.** A loop does one thing. Write as few blocks as possible: merge loops walking the same collection for related purposes, split a loop doing two unrelated jobs. At most one short comment per block, saying why, never what.
+
+**Never read and write the same field in one pass.** When a decision depends on other entries, compute every decision first, apply after. Two loops, first read-only, second write-only. A single loop makes the result depend on iteration order, silently.
+
+**One field, one meaning.** A field must not hold an unordered set at one step and an ordered chain at the next. Use two fields, or drop the intermediate one.
+
+**Separate an in-progress marker from a memo.** In-progress = "on the current call stack", cleared on the way back up. Memo = "computed, reuse it", lives for the whole pass. Delete temporary fields in a loop of their own, after the build, never inside it.
+
+**Filter invalid input before a selection, not after.** A selection is exclusive, it discards the alternatives. Neutralizing a bad winner afterwards cannot recover them.
+
+**Surface an anomaly instead of arbitrating it.** When the data is ambiguous, route the entry to an explicit marker so it shows up in the output. Never pick a winner on a heuristic the data does not support.
+
+**No tie-break on upstream order.** Equal candidates are separated on a stable value. Relying on the row order a SPARQL endpoint or API returned makes the output change between two runs over unchanged data.
+
+**Initialize accumulators explicitly.** `var accumulator;` in a loop body does not reset between iterations: the declaration is hoisted and the assignment never happens. Write `var accumulator = null;`.
+
+**Do not add reporting the output already carries.** If the written data records the anomaly, a parallel array plus a log line is duplication.
+
 ## Debugging Tips
 
-### Check the Browser Console
-
-Errors appear in browser console with stack traces
-
-### Enable SPARQL Query Logging
-
-```javascript
-Sparql_proxy.debugSparql = true;  // Logs all queries
-```
-
-### Inspect visjsData
-
-```javascript
-console.log(KGquery_graph.visjsData);  // See current graph data
-```
-
-### Check Config
-
-```javascript
-console.log(Config.sources);  // See available sources
-console.log(Config.currentSource);  // Current active source
-```
+Errors land in the browser console with stack traces. `Sparql_proxy.debugSparql = true` logs every query. `KGquery_graph.visjsData`, `Config.sources` and `Config.currentSource` are inspectable from the console.
 
 ## Domain Concepts (SousLeSens)
 
 ### Source
 
-Central concept. **source** = one ontology / KG in triple store.
-Defined in `config/sources.json`. Each source has:
+Central concept. **source** = one ontology / KG in triple store, defined in `config/sources.json`. Each source has:
 
-- `graphUri` — named graph URI in triple store (e.g. `http://rds.posccaesar.org/ontology/...`)
-- `schemaType` — `"OWL"` or `"SKOS"` — determines controller
-- `controller` — `"Sparql_OWL"` or `"Sparql_SKOS"` — JS module handling queries
-- `sparql_server.url` — SPARQL endpoint (`"_default"` = main Virtuoso instance)
-- `predicates` — custom predicates for hierarchy (broaderPredicate, prefLabel, etc.)
-- `imports` — list of other source names whose triples also load
-- `owner`, `published` — access control
+- `graphUri`: named graph URI in triple store (e.g. `http://rds.posccaesar.org/ontology/...`)
+- `schemaType`: `"OWL"` or `"SKOS"`, determines controller
+- `controller`: `"Sparql_OWL"` or `"Sparql_SKOS"`, JS module handling queries
+- `sparql_server.url`: SPARQL endpoint (`"_default"` = main Virtuoso instance)
+- `predicates`: custom predicates for hierarchy (broaderPredicate, prefLabel, etc.)
+- `imports`: other source names whose triples also load
+- `owner`, `published`: access control
 
 ```javascript
 Config.sources[sourceName]          // Access source config
@@ -643,32 +476,22 @@ Lineage_sources.activeSource        // Currently selected source name
 
 ### OWL vs SKOS
 
-Two distinct data models, different query strategies:
+Two data models, different query strategies.
 
-**OWL** (`schemaType: "OWL"`, controller: `Sparql_OWL`)
+**OWL** (`schemaType: "OWL"`, controller `Sparql_OWL`): classes (`owl:Class`), properties (`owl:ObjectProperty`, `owl:DatatypeProperty`), hierarchy via `rdfs:subClassOf`, instances via `rdf:type`. Formal ontologies (ISO standards, engineering).
 
-- Classes (`owl:Class`), properties (`owl:ObjectProperty`, `owl:DatatypeProperty`)
-- Hierarchy via `rdfs:subClassOf`
-- Instances via `rdf:type`
-- For formal ontologies (ISO standards, engineering ontologies)
+**SKOS** (`schemaType: "SKOS"`, controller `Sparql_SKOS`): concepts (`skos:Concept`), concept schemes, hierarchy via `skos:broader` / `skos:narrower`, labels via `skos:prefLabel`, `skos:altLabel`. Thesauri, taxonomies, controlled vocabularies (GEMET, etc.).
 
-**SKOS** (`schemaType: "SKOS"`, controller: `Sparql_SKOS`)
-
-- Concepts (`skos:Concept`), concept schemes
-- Hierarchy via `skos:broader` / `skos:narrower`
-- Labels via `skos:prefLabel`, `skos:altLabel`
-- For thesauri, taxonomies, controlled vocabularies (GEMET, etc.)
-
-`schemaType` determines generated SPARQL — never assume OWL structure on SKOS source.
+`schemaType` determines generated SPARQL. Never assume OWL structure on a SKOS source.
 
 ### Profile
 
-Controls user access. Defined in `config/profiles.json`. Each profile has:
+Controls user access, defined in `config/profiles.json`. Each profile has:
 
-- `allowedTools` — visible tools (lineage, KGquery, MappingModeler, etc.)
-- `allowedSourceSchemas` — accessible schema types (`OWL`, `SKOS`, `INDIVIDUALS`)
-- `sourcesAccessControl` — per-source read/readwrite permissions
-- `defaultSourceAccessControl` — fallback permission
+- `allowedTools`: visible tools (lineage, KGquery, MappingModeler, etc.)
+- `allowedSourceSchemas`: accessible schema types (`OWL`, `SKOS`, `INDIVIDUALS`)
+- `sourcesAccessControl`: per-source read/readwrite permissions
+- `defaultSourceAccessControl`: fallback permission
 
 ```javascript
 // Current user profile available via:
@@ -677,12 +500,12 @@ Config.userProfile
 
 ### Tools
 
-- **Lineage** — visualizes ontology/KG as interactive graph on whiteboard. Main tool.
-- **KGquery** — builds SPARQL queries visually from graph model, executes, shows results in table/graph
-- **MappingModeler** — creates semantic mappings from SQL/CSV data sources to OWL/SKOS models
+- **Lineage**: ontology/KG as interactive graph on whiteboard. Main tool.
+- **KGquery**: builds SPARQL queries visually from the graph model, executes, shows results in table/graph.
+- **MappingModeler**: semantic mappings from SQL/CSV data sources to OWL/SKOS models.
 
 ### graphUri vs source name
 
-- **source name** = human key in `sources.json` (e.g. `"ISO_15926-part-14_PCA"`) — used in JS code
-- **graphUri** = actual URI of named graph in Virtuoso — used in SPARQL `FROM` clauses
-- `Sparql_common.getFromStr(source)` converts source name → `FROM <graphUri>` clause
+- **source name** = human key in `sources.json` (e.g. `"ISO_15926-part-14_PCA"`), used in JS code
+- **graphUri** = actual URI of the named graph in Virtuoso, used in SPARQL `FROM` clauses
+- `Sparql_common.getFromStr(source)` converts source name to a `FROM <graphUri>` clause

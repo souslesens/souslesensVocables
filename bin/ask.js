@@ -393,6 +393,8 @@ var Ask = {
         function (source, term1, term2, callback) {
             var term1Uris = []
             var term2Uris = []
+            // term2Uris holds the word matched on labels, term2ClassUris the uris the inverse pass filters on
+            var term2ClassUris = []
             var resultMap = {}
             var indexName = source.toLowerCase()
             var sourceInfos = null
@@ -438,19 +440,18 @@ var Ask = {
                         }
 
                         term2Uris = [term2]
-                        return callbackSeries()
 
-                        /* Ask.executeElasticQuery("/_search", term2, indexName, function (err, result) {
-                             if (err) {
-                                 return callbackSeries(err)
-                             } else {
-                                 var hits = result.body.hits.hits
-                                 hits.forEach(function (hit) {
-                                     term2Uris.push(hit._source)
-                                 })
-                                 return callbackSeries()
-                             }
-                         });*/
+                        Ask.executeElasticQuery("/_search", term2, indexName, function (err, result) {
+                            if (err) {
+                                return callbackSeries(err)
+                            } else {
+                                var hits = result.body.hits.hits
+                                hits.forEach(function (hit) {
+                                    term2ClassUris.push(hit._source)
+                                })
+                                return callbackSeries()
+                            }
+                        });
 
                     },
                     //build query
@@ -485,16 +486,15 @@ var Ask = {
                                 // on essaie la relation  inverse
                                 if (term2 != null && (true || result.length == 0)) {
 
-                                    Ask.getRestrictionsSparql(source, term2Uris, term1Uris, function (err, queryInverse) {
+                                    Ask.getRestrictionsSparql(source, term2ClassUris, [term1], function (err, queryInverse) {
 
+                                        Ask.executeSparqlQuery(source, queryInverse, function (err, inverseSparqlResult) {
+                                            if (err) {
+                                                return callbackSeries(err)
+                                            }
 
-                                        /*  query = query.replace("filter (?class2 in", "xx")
-                                          query = query.replace("filter (?class1 in", "filter (?class2 in")
-                                          query = query.replace("xx", "filter(?class1 in")*/
-
-                                        Ask.executeSparqlQuery(source, queryInverse, function (err, result2) {
-
-                                            sparqlResult.results.bindings.forEach(function (item) {
+                                            var inverseBindings = inverseSparqlResult && inverseSparqlResult.results ? inverseSparqlResult.results.bindings : []
+                                            inverseBindings.forEach(function (item) {
                                                 if (!resultMap[item.class1.value]) {
                                                     resultMap[item.class1.value] = []
                                                 }
@@ -518,8 +518,9 @@ var Ask = {
 
                                     })
 
+                                } else {
+                                    return callbackSeries()
                                 }
-                                return callbackSeries()
 
                             })
                         })

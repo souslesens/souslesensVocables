@@ -2,7 +2,7 @@
 
 This guide provides step-by-step instructions to configure a SousLeSens instance from scratch. It covers the essential setup process: creating users, defining profiles, configuring data sources, and setting up access permissions.
 
-For detailed information about any ConfigEditor feature, refer to the complete [ConfigEditor documentation](configeditor.md).
+For detailed information about any ConfigEditor feature, refer to the complete [ConfigEditor documentation](../administration/configeditor.md).
 
 ```{contents} Table of Contents
 :depth: 3
@@ -36,7 +36,7 @@ The first step is to create user accounts that will access the SousLeSens instan
 
 > **Tip**: Create at least one administrator user and regular users for day-to-day operations.
 
-For detailed instructions, see [ConfigEditor - Creating a User](configeditor.md#creating-a-user).
+For detailed instructions, see [ConfigEditor - Creating a User](../administration/configeditor.md#creating-a-user).
 
 ## Step 2: Create Profiles
 
@@ -64,7 +64,7 @@ Profiles define roles and permissions that control what users can see and do in 
     - Select the appropriate profile(s)
     - Save changes
 
-For detailed instructions, see [ConfigEditor - Profiles](configeditor.md#profiles).
+For detailed instructions, see [ConfigEditor - Profiles](../administration/configeditor.md#profiles).
 
 ## Step 3: Configure a Source
 
@@ -86,7 +86,7 @@ Sources are the knowledge graphs (RDF data) that SousLeSens will manage and visu
 
     > **Option**: Click **"Submit and Upload Graph"** to save the configuration and upload an RDF graph in one step
 
-For detailed instructions, see [ConfigEditor - Creating a Source](configeditor.md#creating-a-source).
+For detailed instructions, see [ConfigEditor - Creating a Source](../administration/configeditor.md#creating-a-source).
 
 ### 3.2 Upload a Graph
 

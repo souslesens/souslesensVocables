@@ -1,4 +1,4 @@
-# ConfigEditor
+# ConfigEditor tool
 
 The ConfigEditor is the central administration interface of SousLeSens. It allows administrators to manage all aspects of the instance configuration, including global settings, users, profiles, data sources, databases, plugins, and system logs.
 

@@ -4,12 +4,15 @@ import fs from 'fs'
 import ConfigManager from "./configManager.js";
 import path from 'path'
 
+
 import httpProxy from "./httpProxy.js";
+import {sourceModel} from "../model/sources.js";
 
 
 var Ask = {
 
     whoAmI: function (source, term, callback) {
+        var sourceInfos = {}
         var termUrisMap = {}
         async.series([
 
@@ -37,7 +40,17 @@ var Ask = {
                 });
 
             },
+            function (callbackSeries) {
+                Ask.getSourceInfos(source, function (err, result) {
 
+                    if (err) {
+                        return callbackSeries(err)
+                    }
+                    sourceInfos = result
+                    callbackSeries()
+                })
+
+            },
 //get Properties
             function (callbackSeries) {
                 var filter = "filter (?sub in ("
@@ -50,19 +63,32 @@ var Ask = {
 
                 })
                 filter += ") )"
-                var fromStr = " FROM  NAMED  <http://datalenergies.total.com/resource/tsf/iso-14224-iof/all/>  FROM  NAMED  <http://purl.obolibrary.org/obo/bfo.owl>  FROM  NAMED  <https://spec.industrialontologies.org/ontology/202502/core/Core/> "
+                var fromStr = " FROM   <" + sourceInfos.graphUri + "> "
+                // var imports=sourceInfos.imports
+
+                /*
+                                sourceInfos.importGraphUris.forEach(function(item){
+                                    var fromStr = " FROM  NAMED  <"+item+"> "
+                                })
+
+                                */
+
+
+                //    var fromStr = " FROM  NAMED  <http://datalenergies.total.com/resource/tsf/iso-14224-iof/all/>  FROM  NAMED  <http://purl.obolibrary.org/obo/bfo.owl>  FROM  NAMED  <https://spec.industrialontologies.org/ontology/202502/core/Core/> "
                 var query = "  PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
                     "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                     " PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                     " select distinct * " +
                     fromStr +
-                    " where {graph ?g {" +
+                    // " where {graph ?g {" +
+                    " where { {" +
                     "?sub ?prop ?value." +
                     "    Optional {?value rdfs:label ?valueLabel} " +
                     filter +
-                    " Optional {?prop rdfs:label ?propLabel} }  FILTER (!exists{?value rdf:type owl:Restriction} ) } " +
+                    " Optional {?prop rdfs:label ?propLabel}   FILTER (!exists{?value rdf:type owl:Restriction} ) } " +
 
-                    "LIMIT 10000"
+                    "}LIMIT 10000"
+
                 Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
 
                     if (err) {
@@ -87,28 +113,30 @@ var Ask = {
             }
             // get restrictions
             , function (callbackSeries) {
-                var termUris = Object.keys(termUrisMap)
-                var query = Ask.getRestrictionsSparql(source, termUris)
-                Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
 
-                    if (err) {
-                        return callbackSeries(err)
-                    }
-                    sparqlResult.results.bindings.forEach(function (item) {
-                        termUrisMap[item.class1.value].relations.push(
-                            {
-                                predicate: item.prop.value,
-                                predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
-                                object: item.superClass2.value,
-                                objectLabel: item.superClass2Label ? item.superClass2Label.value : item.superClass2.value
-                            }
-                        )
+                var termUris = Object.keys(termUrisMap)
+                Ask.getRestrictionsSparql(source, termUris, null, function (err, query) {
+
+                    Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
+
+                        if (err) {
+                            return callbackSeries(err)
+                        }
+                        sparqlResult.results.bindings.forEach(function (item) {
+                            termUrisMap[item.class1.value].relations.push(
+                                {
+                                    predicate: item.prop.value,
+                                    predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
+                                    object: item.superClass2.value,
+                                    objectLabel: item.superClass2Label ? item.superClass2Label.value : item.superClass2.value
+                                }
+                            )
+
+                        })
+                        return callbackSeries()
 
                     })
-                    return callbackSeries()
-
                 })
-
 
             },
 
@@ -294,8 +322,24 @@ var Ask = {
         var term2Uris = []
         var resultMap = {}
         var indexName = source.toLowerCase()
+        var sourceInfos = null
         var query = ""
+
+
         async.series([
+
+                function (callbackSeries) {
+
+                    Ask.getSourceInfos(source, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err)
+                        } else {
+                            sourceInfos = result
+                        }
+                    })
+                },
+
+
                 // search terms and topClasses
                 function (callbackSeries) {
                     Ask.executeElasticQuery("/_search", term1, indexName, function (err, result) {
@@ -332,58 +376,61 @@ var Ask = {
                 //build query
                 function (callbackSeries) {
 
-                    var query = Ask.getRestrictionsSparql(source, term1Uris, term2Uris)
+                    Ask.getRestrictionsSparql(source, term1Uris, term2Uris, function (err, query) {
 
-                    Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
-                        if (err) {
-                            return callbackSeries(err)
-                        }
+                        Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
 
-                        sparqlResult.results.bindings.forEach(function (item) {
-                            if (!resultMap[item.class1.value]) {
-                                resultMap[item.class1.value] = []
+                            if (err) {
+                                return callbackSeries(err)
                             }
-                            resultMap[item.class1.value].push(
-                                {
-                                    predicate: item.prop.value,
-                                    predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
-                                    object: item.class2.value,
-                                    objectLabel: item.class2Label ? item.class2Label.value : item.class2.value
+
+                            sparqlResult.results.bindings.forEach(function (item) {
+                                if (!resultMap[item.class1.value]) {
+                                    resultMap[item.class1.value] = []
                                 }
-                            )
-
-                        })
-
-
-                        // on essaie la relation  inverse
-                        if (true || result.length == 0 || term2 == null) {
-                            query = query.replace("filter (?class2 in", "xx")
-                            query = query.replace("filter (?class1 in", "filter (?class2 in")
-                            query = query.replace("xx", "filter(?class1 in")
-
-                            Ask.executeSparqlQuery(source, query, function (err, result2) {
-
-                                sparqlResult.results.bindings.forEach(function (item) {
-                                    if (!resultMap[item.class2.value]) {
-                                        resultMap[item.class2.value] = []
+                                resultMap[item.class1.value].push(
+                                    {
+                                        predicate: item.prop.value,
+                                        predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
+                                        object: item.class2.value,
+                                        objectLabel: item.class2Label ? item.class2Label.value : item.class2.value
                                     }
-                                    resultMap[item.class2.value].push(
-                                        {
-                                            predicate: item.prop.value,
-                                            predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
-                                            object: item.class1.value,
-                                            objectLabel: item.class1Label ? item.class1Label.value : item.class1.value
+                                )
+
+                            })
+
+
+                            // on essaie la relation  inverse
+                            if (true || result.length == 0 || term2 == null) {
+                                query = query.replace("filter (?class2 in", "xx")
+                                query = query.replace("filter (?class1 in", "filter (?class2 in")
+                                query = query.replace("xx", "filter(?class1 in")
+
+                                Ask.executeSparqlQuery(source, query, function (err, result2) {
+
+                                    sparqlResult.results.bindings.forEach(function (item) {
+                                        if (!resultMap[item.class2.value]) {
+                                            resultMap[item.class2.value] = []
                                         }
-                                    )
+                                        resultMap[item.class2.value].push(
+                                            {
+                                                predicate: item.prop.value,
+                                                predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
+                                                object: item.class1.value,
+                                                objectLabel: item.class1Label ? item.class1Label.value : item.class1.value
+                                            }
+                                        )
+
+                                    })
+
+                                    return callbackSeries()
 
                                 })
 
-                                return callbackSeries()
+                            }
+                            return callbackSeries()
 
-                            })
-                        }
-                        return callbackSeries()
-
+                        })
                     })
 
 
@@ -403,48 +450,105 @@ var Ask = {
     /*******************************************************Helpers*********************************************************/
 
 
+    getSourceInfos: function (source, callback) {
+        async function getSourceInfos2(source) {
+            var user = {login: "admin"}
+            const sourceInfos = await sourceModel.getOneUserSource(user, source);
+            /**   if(sourceInfos.imports){
+             sourceInfos.importGraphUris=[]
+             sourceInfos.imports.forEach(function(importSource){
+
+             Ask.getSourceInfos(importSource, function(err, importSourceInfos){
+
+             sourceInfos.importGraphUris.push(importSourceInfos.graphUri)
+             })
+
+
+
+             })
+
+             }*/
+
+            return sourceInfos;
+        }
+
+        try {
+
+            getSourceInfos2(source).then(sourceInfos => {
+
+                /*  if(sourceInfos.imports) {
+                      sourceInfos.importGraphUris = []
+                      sourceInfos.imports.forEach(function (importSource) {
+
+                          getSourceInfos2(importSource).then(importSourceInfos => {
+
+                              sourceInfos.importGraphUris.push(importSourceInfos.graphUri)
+                          })
+
+
+                      })
+                  }*/
+
+                callback(null, sourceInfos)
+            });
+
+
+        } catch (e) {
+            callback(e)
+        }
+
+    },
+
     getRestrictionsSparql: function (source, term1Uris, term2Uris, callback) {
-        var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix owl: <http://www.w3.org/2002/07/owl#> "
-        query += "Select * from <http://datalenergies.total.com/resource/tsf/iso-14224-iof/all/> where {" +
-            "  ?class1 rdfs:subClassOf{0,5} ?superClass1.\n" +
-            "  ?superClass1 rdf:type owl:Class.\n" +
-            "  ?superClass1 rdfs:subClassOf  ?restr. ?restr rdf:type owl:Restriction.\n" +
-            "  ?restr owl:onProperty ?prop. ?restr owl:someValuesFrom|owl:allValuesFrom|owl:hasValue ?superClass2.\n" +
-            "   { ?class1 rdfs:label ?class1Label}\n" +
-            "   optional { ?prop rdfs:label ?propLabel}\n" +
-            "     { ?superClass2 rdfs:label ?superClass2Label}"
 
-        var filter = ""
-        if (term1Uris) {
-            filter += "filter (?class1 in ("
-            term1Uris.forEach(function (item, index) {
-                if (index > 0) {
-                    filter += ","
-                }
-                filter += "<" + (item.id || item) + ">"
+        Ask.getSourceInfos(source, function (err, sourceInfos) {
 
+            if (err) {
+                return callback(err)
+            }
+            var graphUri = sourceInfos.graphUri
+            var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix owl: <http://www.w3.org/2002/07/owl#> "
+            query += "Select * from <" + graphUri + "> where {" +
+                "  ?class1 rdfs:subClassOf{0,5} ?superClass1.\n" +
+                "  ?superClass1 rdf:type owl:Class.\n" +
+                "  ?superClass1 rdfs:subClassOf  ?restr. ?restr rdf:type owl:Restriction.\n" +
+                "  ?restr owl:onProperty ?prop. ?restr owl:someValuesFrom|owl:allValuesFrom|owl:hasValue ?superClass2.\n" +
+                "   { ?class1 rdfs:label ?class1Label}\n" +
+                "   optional { ?prop rdfs:label ?propLabel}\n" +
+                "     { ?superClass2 rdfs:label ?superClass2Label}"
 
-            })
-            filter += ") )"
-        }
-        if (term2Uris) {
-
-            query += "  ?superClass2 ^rdfs:subClassOf{0,5} ?class2."
-            filter += "filter (?class2 in ("
-            term2Uris.forEach(function (item, index) {
-                if (index > 0) {
-                    filter += ","
-                }
-                filter += "<" + (item.id || item) + ">"
+            var filter = ""
+            if (term1Uris) {
+                filter += "filter (?class1 in ("
+                term1Uris.forEach(function (item, index) {
+                    if (index > 0) {
+                        filter += ","
+                    }
+                    filter += "<" + (item.id || item) + ">"
 
 
-            })
-            filter += ") )"
-        }
+                })
+                filter += ") )"
+            }
+            if (term2Uris) {
 
-        query += filter + "} limit 10000"
+                query += "  ?superClass2 ^rdfs:subClassOf{0,5} ?class2."
+                filter += "filter (?class2 in ("
+                term2Uris.forEach(function (item, index) {
+                    if (index > 0) {
+                        filter += ","
+                    }
+                    filter += "<" + (item.id || item) + ">"
 
-        return query;
+
+                })
+                filter += ") )"
+            }
+
+            query += filter + "} limit 10000"
+
+            return callback(null, query);
+        })
     },
 
 
@@ -466,13 +570,15 @@ var Ask = {
      * @param callback
      */
     executeSparqlQuery: function (source, query, callback) {
-
-
+        if (!query) {
+            return callback(null, oldResult)
+        }
+        var oldResult = null
         try {
 
             var params = {
                 "query": query,
-                "useProxy": true,
+                //  "useProxy": true,
             }
             var serverUrl = ConfigManager.config.sparql_server.url + "?format=json&query="
             var headers = {
@@ -487,12 +593,18 @@ var Ask = {
 
 
             httpProxy.post(serverUrl, headers, params, function (err, result) {
-                callback(null, result);
+                if (!oldResult) {
+                    oldResult = result
+                }
+
+                return callback(null, result);
             });
 
 
         } catch (err) {
-            callback(err)
+
+            return callback(err)
+
         }
 
     },
@@ -532,9 +644,7 @@ var Ask = {
         };
 
         process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
-        //  console.log("DEBUG:bin/elasticRestProxy:forwardRequest" + JSON.stringify(options));
         request(options, function (error, response, body) {
-            //  console.log("DEBUG:bin/elasticRestProxy:forwardRequest\n  error=" + error + "\n  reponse=" + response + "\n  body " + body);
             return callback(error, response, body);
         });
 
@@ -649,6 +759,14 @@ var Ask = {
 }
 
 export default Ask
+
+
+/**export async function getSourceInfos(source){
+ var user={login : "admin"}
+ const sourceInfo = await sourceModel.getOneUserSource(user, source);
+ return sourceInfo[source];
+ }**/
+
 
 if (false) {
     Ask.whoAmI("ISO-14224-IOF", " failure mode", function (err, result) {

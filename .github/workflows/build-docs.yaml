@@ -28,7 +28,7 @@ jobs:
             - name: Install npm dependencies
               run: npm ci
             - name: Generate jsdoc
-              run: npm run tools:jsdoc2md > docs/docs/devdoc/codedoc/jsdoc.md
+              run: npm run tools:jsdoc2md > docs/docs/developpement/codedoc/jsdoc.md
             - name: Setup uv
               uses: astral-sh/setup-uv@v4
             - name: Build docs with Sphinx

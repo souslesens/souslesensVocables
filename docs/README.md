@@ -11,7 +11,7 @@ Install `uv` following the [doc](https://docs.astral.sh/uv/getting-started/insta
 Before building the documentation, generate the jsdoc (from the project root):
 
 ```shell
-npm run tools:jsdoc2md > docs/docs/devdoc/codedoc/jsdoc.md
+npm run tools:jsdoc2md > docs/docs/developpement/codedoc/jsdoc.md
 ```
 
 ## autobuild

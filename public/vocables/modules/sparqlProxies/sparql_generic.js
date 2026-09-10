@@ -1481,39 +1481,56 @@ var Sparql_generic = (function () {
                         recurse(key, allClassesMap[key].parents);
                     }
 
-                    // pick single most-specific parent (deepest = most ancestors)
-                    // read all depths before modifying any parents array
-                    var chosenParents = {};
+                    var multipleParentsClassUri = "http://souslesens.org/anomaly/multipleParentsClass";
+                    var cyclicParentsClassUri = "http://souslesens.org/anomaly/cyclicParentsClass";
+                    var anomalyParents = {};
+                    var singleParents = {};
+
+                    // flag ambiguous hierarchies, else keep the single parent
                     for (var key in allClassesMap) {
-                        chosenParents[key] = allClassesMap[key]._directParents.reduce(function (best, candidateId) {
-                            if (!best) return candidateId;
-                            var bestDepth = allClassesMap[best] ? allClassesMap[best].parents.length : 0;
-                            var candidateDepth = allClassesMap[candidateId] ? allClassesMap[candidateId].parents.length : 0;
-                            return candidateDepth > bestDepth ? candidateId : best;
-                        }, null);
+                        var parentsExcludingSelf = [];
+                        var isInCycle = false;
+                        allClassesMap[key]._directParents.forEach(function (directParent) {
+                            // a self reference (X subClassOf X) is always dropped
+                            if (directParent === key) {
+                                return;
+                            }
+                            parentsExcludingSelf.push(directParent);
+                            if (allClassesMap[directParent] && allClassesMap[directParent].parents.indexOf(key) > -1) {
+                                isInCycle = true;
+                            }
+                        });
+
+                        if (isInCycle) {
+                            anomalyParents[key] = cyclicParentsClassUri;
+                        } else if (parentsExcludingSelf.length > 1) {
+                            anomalyParents[key] = multipleParentsClassUri;
+                        } else if (parentsExcludingSelf.length === 1) {
+                            singleParents[key] = parentsExcludingSelf[0];
+                        }
                     }
 
-                    // build full ancestor chain following chosen parents only (memoized)
-                    // processedParents guards against cycles (e.g. OWL reflexive subClassOf triples materialized by reasoner)
-                    var processedParents = {};
-                    function buildParentChain(nodeId) {
-                        if (self.processedParents[nodeId]) return [];
-
-                        self.processedParents[nodeId] = 1;
-                        var obj = allClassesMap[nodeId];
-                        if (!obj || obj._chainBuilt) return obj ? obj.parents : [];
-                        if (processedParents[nodeId]) return [];
-                        processedParents[nodeId] = 1;
-                        var chosenParent = chosenParents[nodeId] !== nodeId ? chosenParents[nodeId] : null;
-                        obj.parents = chosenParent ? [chosenParent].concat(buildParentChain(chosenParent)) : [];
-                        obj._chainBuilt = true;
-                        return obj.parents;
-                    }
-                    self.processedParents = {};
+                    // climb single parents, stop chain at the first anomaly
                     for (var key in allClassesMap) {
-                        buildParentChain(key);
+                        var ancestorChain = [];
+                        var currentClass = key;
+
+                        while (currentClass) {
+                            if (anomalyParents[currentClass]) {
+                                ancestorChain.push(anomalyParents[currentClass]);
+                                break;
+                            }
+                            var parentClass = singleParents[currentClass];
+                            // stop on a loop
+                            if (!parentClass || parentClass === key || ancestorChain.indexOf(parentClass) > -1) {
+                                break;
+                            }
+                            ancestorChain.push(parentClass);
+                            currentClass = parentClass;
+                        }
+
+                        allClassesMap[key].parents = ancestorChain;
                         delete allClassesMap[key]._directParents;
-                        delete allClassesMap[key]._chainBuilt;
                     }
 
                     // format parents: add source and sort top-down [source, ..., parent_direct]
@@ -1522,7 +1539,6 @@ var Sparql_generic = (function () {
                         parentArray.push(sourceLabel);
                         allClassesMap[key].parents = parentArray.reverse();
                     }
-
                     callbackSeries();
                 },
 

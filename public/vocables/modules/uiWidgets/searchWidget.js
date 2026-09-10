@@ -227,41 +227,45 @@ var SearchWidget = (function () {
                     return self.sortMatchesLangFirst(preferredLang, a, b);
                 });
 
+                // one path per concept in the index, so the node id is source + uri and never the whole path
+                var sourceNodeId = "#" + source;
+                if (!existingNodes[sourceNodeId]) {
+                    jstreeData.push({
+                        id: sourceNodeId,
+                        text: "<span class='searched_conceptSource'>" + source + "</span>",
+                        parent: "#",
+                        type: "Class",
+                        data: {
+                            id: source,
+                            label: source,
+                            source: source,
+                        },
+                    });
+                    existingNodes[sourceNodeId] = jstreeData.length;
+                }
+
                 items.forEach(function (match) {
                     if (leafCount >= maxDisplayedLeaves) {
                         return;
                     }
-                    if (match.parents) {
-                        var parentId = "";
-                        var parents = match.parents; //.split("|")
-                        var nodeId = "";
-                        if (!parents.forEach) {
-                            return;
-                        }
-                        parents.forEach(function (aClass, indexParent) {
-                            if (aClass == "") {
+
+                    var parentNodeId = sourceNodeId;
+                    if (match.parents && match.parents.forEach) {
+                        match.parents.forEach(function (aClass, indexParent) {
+                            // parents[0] is the source label, already drawn as the root node
+                            if (aClass == "" || indexParent == 0) {
                                 return;
                             }
-
                             var label = parentIdsLabelsMap[aClass];
                             if (typeof label == "object") {
                                 label = Sparql_common.getLabelFromURI(aClass);
                             }
-                            if (indexParent > 0) {
-                                parentId += parents[indexParent - 1];
-                            } else {
-                                parentId = "#";
-                                label = "<span class='searched_conceptSource'>" + source + "</span>";
-                            }
-
-                            nodeId = parentId + aClass;
-
-                            if (!existingNodes[nodeId]) {
-                                existingNodes[nodeId] = 1;
+                            var ancestorNodeId = source + "|" + aClass;
+                            if (!existingNodes[ancestorNodeId]) {
                                 jstreeData.push({
-                                    id: nodeId,
+                                    id: ancestorNodeId,
                                     text: label,
-                                    parent: parentId,
+                                    parent: parentNodeId,
                                     type: "Class",
                                     data: {
                                         id: aClass,
@@ -269,34 +273,36 @@ var SearchWidget = (function () {
                                         source: source,
                                     },
                                 });
+                                existingNodes[ancestorNodeId] = jstreeData.length;
                             }
+                            parentNodeId = ancestorNodeId;
                         });
-                    } else {
-                        nodeId = source;
                     }
-                    var leafId = nodeId + match.id;
-                    if (match.id.indexOf("Branch") > -1) {
-                        console.log("here");
-                    }
+
                     var type = "Class";
                     if (match.type.indexOf("Class") == -1) {
                         type = "Individual";
                     }
-                    if (!existingNodes[leafId]) {
-                        existingNodes[leafId] = 1;
-                        leafCount++;
-                        jstreeData.push({
-                            id: leafId,
-                            text: "<span class='searched_concept'>" + match.label + "</span>",
-                            parent: nodeId,
-                            type: type,
-                            data: {
-                                id: match.id,
-                                label: match.label,
-                                source: source,
-                            },
-                        });
+                    var matchNodeId = source + "|" + match.id;
+                    var matchText = "<span class='searched_concept'>" + match.label + "</span>";
+                    if (existingNodes[matchNodeId]) {
+                        // already drawn as an ancestor of another match: being a search result wins the label
+                        jstreeData[existingNodes[matchNodeId] - 1].text = matchText;
+                        return;
                     }
+                    leafCount++;
+                    jstreeData.push({
+                        id: matchNodeId,
+                        text: matchText,
+                        parent: parentNodeId,
+                        type: type,
+                        data: {
+                            id: match.id,
+                            label: match.label,
+                            source: source,
+                        },
+                    });
+                    existingNodes[matchNodeId] = jstreeData.length;
                 });
             }
         });
@@ -372,7 +378,7 @@ var SearchWidget = (function () {
         if (!options) {
             options = {};
         }
-        options.onlyClasses = true;
+        options.boostClasses = true;
         if (sourceLabel) {
             options.searchedSources = [sourceLabel];
         }

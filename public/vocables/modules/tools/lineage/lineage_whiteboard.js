@@ -2466,9 +2466,7 @@ var Lineage_whiteboard = (function () {
         self.currentExpandLevel += 1;
         var physics = true;
         sparqlResults.forEach(function (item) {
-            // A row may carry its own source, as the ones lineage_draw_triples builds for the chat
-            // bot do; a row coming from drawObjectProperties has none and falls back to the source
-            // that function queried, or to the active source as a last resort.
+            // rows from lineage_draw_triples carry their own source, those from drawObjectProperties do not
             var itemSource = item.source || source || Lineage_sources.activeSource;
             if (!item.range) {
                 item.range = { value: "?_" + item.prop.value };

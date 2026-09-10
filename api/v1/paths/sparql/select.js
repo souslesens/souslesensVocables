@@ -390,8 +390,8 @@ export default function () {
                     description:
                         "Runs a raw SPARQL SELECT against one source and returns the SPARQL JSON results. " +
                         "Only SELECT is accepted: INSERT, DELETE, LOAD, CLEAR, CREATE, DROP, COPY, MOVE and ADD are refused with 403. " +
-                        "Leave the dataset out and it is filled in from `source`, its imported graphs included unless you set withImports false: an unscoped query would otherwise read every graph the endpoint holds, which is how a source-scoped question quietly returns rows from other sources. " +
-                        "Write your own FROM or GRAPH blocks only to query something other than the source you named, and then `source` selects the endpoint alone. " +
+                        "Leave the dataset out and it is filled in from `sourceLabel`, its imported graphs included unless you set withImports false: an unscoped query would otherwise read every graph the endpoint holds, which is how a source-scoped question quietly returns rows from other sources. " +
+                        "Write your own FROM or GRAPH blocks only to query something other than the source you named, and then `sourceLabel` selects the endpoint alone. " +
                         "Avoid a `;` followed by one of those keywords anywhere in the text, quoted strings included: it reads as a chained update and is refused. " +
                         "Get the source name from sls_list_sources and its graphUri from that same answer. " +
                         `TIME: your client gives up around ${mcpConfig.requestTimeoutMs} ms and you get nothing back, not even a partial answer, so a heavy query costs you a full minute and teaches you nothing. ` +
@@ -410,14 +410,14 @@ export default function () {
                         "Rows beyond the response budget are not lost: the `truncation` block names a resultId that sls_result_page reads and greps. " +
                         "Use this only when no function of sls_list_query_functions covers the question.",
                     params: {
-                        source: { type: "string", required: true, description: "Source name as listed by sls_list_sources, for instance CFIHOS." },
+                        sourceLabel: { type: "string", required: true, description: "Source name as listed by sls_list_sources, for instance CFIHOS." },
                         query: {
                             type: "string",
                             required: true,
                             description:
                                 "SPARQL SELECT text. rdf, rdfs, owl, skos, xsd and dcterms are declared for you when the query does not declare them itself — " +
                                 "add any other prefix yourself. Add LIMIT yourself when you want fewer rows than the platform ceiling. " +
-                                "Leave the FROM out unless you mean to query graphs other than the source's own: it is written for you from `source`.",
+                                "Leave the FROM out unless you mean to query graphs other than the source's own: it is written for you from `sourceLabel`.",
                         },
                         withImports: {
                             type: "boolean",
@@ -441,7 +441,7 @@ export default function () {
                     // `collect` is absent from the body on purpose: the walk belongs to the MCP
                     // server, which reads the flag and calls this route once per block. The route
                     // itself never loops and has no idea it is being paged.
-                    body: { source: "{source}", query: "{query}", withImports: "{withImports}" },
+                    body: { source: "{sourceLabel}", query: "{query}", withImports: "{withImports}" },
                     pagedCollection: { enabledByParam: "collect", queryParam: "query", batchSize: collectBatchSize },
                     // No `statusHints` on purpose. The MCP server *replaces* the error message with
                     // the hint rather than adding to it, which is right for the routes that use it,

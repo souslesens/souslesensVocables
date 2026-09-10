@@ -203,52 +203,6 @@ var ConfigManager = {
             res.status(err.status || 500).json(err);
             next(err);
         }
-        if (false) {
-            const sourcesJSON = path.resolve(configPath + "/sources.json");
-            const profilesJSON = path.resolve(configPath + "/profiles.json");
-
-            const read = util.promisify(fs.readFile);
-
-            try {
-                const userInfo = await userManager.getUser(req.user || null);
-
-                var sourcesFile = sourcesJSON;
-                if (req.query.sourcesFile) {
-                    sourcesFile = path.resolve(configPath + "/" + req.query.sourcesFile);
-                    if (!sourcesFile.startsWith(path.resolve(configPath))) {
-                        return res.status(403).json({ done: false, message: "forbidden path" });
-                    }
-                }
-                //  const sources = await read(sourcesJSON);
-                const sources = await read(sourcesFile);
-                const parsedSources = JSON.parse(sources);
-                // return all sources if user is admin
-                let filteredSources;
-                if (!userInfo.user.groups.includes("admin")) {
-                    //   if (!userInfo.user.groups.indexOf("admin")>-1) {
-                    // return filtered sources if user is not admin
-                    const profiles = await read(profilesJSON);
-                    const parsedProfiles = JSON.parse(profiles);
-                    const allowedSources = getAllowedSources(userInfo.user, parsedProfiles, parsedSources, config.formalOntologySourceLabel);
-                    filteredSources = filterSources(allowedSources, parsedSources);
-                } else {
-                    // admin, return all sources with readwrite right
-                    filteredSources = Object.fromEntries(
-                        Object.entries(parsedSources).map(([id, s]) => {
-                            s["accessControl"] = "readwrite";
-                            return [id, s];
-                        }),
-                    );
-                }
-                // sort
-                const sortedSources = sortObjectByKey(filteredSources);
-                // return
-                next(null, sortedSources);
-                //  resourceFetched(res, sortedSources);
-            } catch (err) {
-                next(err);
-            }
-        }
     },
 };
 ConfigManager.getGeneralConfig();

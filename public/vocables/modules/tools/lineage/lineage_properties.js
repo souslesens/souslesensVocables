@@ -89,12 +89,13 @@ var Lineage_properties = (function () {
             },
         };
 
-        if (self.currentTreeNode.data.type === "http://www.w3.org/2002/07/owl#ObjectProperty") {
+        var graphableNodeTypes = ["http://www.w3.org/2002/07/owl#ObjectProperty", "http://www.w3.org/2002/07/owl#DatatypeProperty"];
+        if (graphableNodeTypes.indexOf(self.currentTreeNode.data.type) > -1) {
             items["graphNode"] = {
                 label: "graph node",
                 action: function (_e) {
                     try {
-                        const properties = "http://www.w3.org/2002/07/owl#ObjectProperty";
+                        const propertyType = self.currentTreeNode.data.type;
                         const visjsData = { nodes: [], edges: [] };
                         var existingNodes = {};
 
@@ -127,7 +128,7 @@ var Lineage_properties = (function () {
                                     id,
                                     label,
                                     source: source,
-                                    type: properties,
+                                    type: propertyType,
                                 },
                             });
                             existingNodes[id] = 1;

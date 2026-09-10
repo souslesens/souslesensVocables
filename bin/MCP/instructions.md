@@ -12,6 +12,20 @@ Never invent a URI, a label, a definition or a hierarchical link. Anything you a
 ontology must come from a tool result in this conversation. Quote a definition verbatim, and follow
 it with the source name and the URI. When a lookup finds nothing, say so plainly.
 
+## Ask the high level question first
+
+Five tools take plain words and answer a whole question, running the chain of searches and queries
+you would otherwise write by hand. Try them before assembling that chain yourself.
+
+- `sls_ontology_summary`: which ontologies you have and what each one is about. First call when the
+  source to use is not decided yet.
+- `sls_knowledge_model_graph`: what a source is about. First call on a source you do not know.
+- `sls_term_infos`: what a term means, with its predicates and relations.
+- `sls_two_terms_paths`: how two terms are connected.
+- `sls_linked_classes`: what a term can be attached to, and through which property.
+
+Drop down to the per-node tools or `sls_sparql_select` for what they do not carry.
+
 ## Start from a URI
 
 Almost every tool takes a node URI, not a word. `sls_search_labels` turns a phrase into ranked

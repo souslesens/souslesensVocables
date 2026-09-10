@@ -773,6 +773,7 @@ const apiDoc = {
     },
     tags: [
         { name: "Annotate", description: "Manage annotation" },
+        { name: "Ask", description: "High level questions answered in one call, each route composing several label index and SPARQL lookups a client would otherwise chain by hand" },
         { name: "Authentication", description: "Manage user connection" },
         { name: "Axiom", description: "Manage axiom" },
         { name: "Config", description: "Manage main configuration file" },

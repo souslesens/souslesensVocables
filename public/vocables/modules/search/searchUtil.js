@@ -9,6 +9,8 @@ var SearchUtil = (function () {
     var self = {};
     self.existingIndexes = null;
     self.indexSourcesMap = {};
+    // must stay well above the preferred language boost of 3, otherwise language ordering wins over type
+    self.classTypeBoost = 20;
 
     self.initSourcesIndexesList = function (options, callback) {
         if (!options) {
@@ -535,6 +537,13 @@ indexes.push(source.toLowerCase());
                 },
             };
         }
+        // boost and not filter: a source holding only individuals would return nothing
+        if (options.boostClasses) {
+            if (!queryObj.bool.should) {
+                queryObj.bool.should = [];
+            }
+            queryObj.bool.should.push({ term: { "type.keyword": { value: "Class", boost: self.classTypeBoost } } });
+        }
         if (options.classFilter) {
             queryObj.bool.filter = {
                 multi_match: {
@@ -552,11 +561,14 @@ indexes.push(source.toLowerCase());
             var preferredLang = Config && Config.default_lang ? Config.default_lang : "en";
             queryObj.bool.should.push({ term: { lang: { value: preferredLang, boost: 3 } } });
         }
-        console.log(JSON.stringify(queryObj));
         return queryObj;
     };
 
     self.getElasticSearchMatches = function (words, indexes, mode, from, size, options, callback) {
+        // onlyClasses already restricts the result set, combining it makes the other option a no-op or drops it
+        if (options.onlyClasses && (options.boostClasses || options.classFilter)) {
+            return callback("onlyClasses cannot be combined with boostClasses or classFilter");
+        }
         $("#waitImg").css("display", "block");
         //   UI.message("Searching exact matches ")
         if (!Array.isArray(words)) {
@@ -839,10 +851,8 @@ indexes.push(source.toLowerCase());
                             };
 
                             //var filter = "?id rdf:type ?type2. filter (?type= owl:NamedIndividual && ?type2!=?type)";
-                            // Filter on individuals = entities that are type of a class.
-                            // ?id is locked to the source's own graph so individuals from imported
-                            // sources are never indexed here, while ?type rdf:type owl:Class is left
-                            // unscoped so a class defined in an import still validates the individual's type.
+                            // Individuals of the source's own graph only, but typed by a class that may
+                            // come from an import, hence the GRAPH on ?id alone.
                             var filter = "GRAPH <" + Config.sources[sourceLabel].graphUri + "> {?id rdf:type ?type} .?type rdf:type owl:Class";
                             //  filter+="?id <http://souslesens.org/KGcreator#mappingFile> 'dbo.V_jobcard'"
                             Sparql_OWL.getDictionary(

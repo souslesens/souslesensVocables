@@ -93,7 +93,7 @@ export default function () {
         tags: ["Sources"],
     };
     ///// POST api/v1/sources
-    async function POST(req, res, next) {
+    async function POST(req, res) {
         try {
             const userInfo = await userManager.getUser(req.user);
             const userLogin = userInfo.user.login;
@@ -126,8 +126,7 @@ export default function () {
             const sources = await sourceModel.getAllSources();
             res.status(200).json(successfullyCreated(sources));
         } catch (err) {
-            res.status(err.status || 500).json(err);
-            next(err);
+            res.status(err.status || 500).json({ message: err.message || "An error occurred" });
         }
     }
     POST.apiDoc = {

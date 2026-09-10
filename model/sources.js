@@ -251,7 +251,9 @@ class SourceModel {
             const sources = await this._read();
             newSource.id = newSource.name;
             if (Object.keys(sources).includes(newSource.id)) {
-                throw Error("Source already exists, try updating it.");
+                const error = new Error("Source already exists");
+                error.status = 409;
+                throw error;
             }
             sources[newSource.id] = newSource;
             await this._write(sources);

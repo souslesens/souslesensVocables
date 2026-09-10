@@ -4,19 +4,22 @@ import fs from 'fs'
 import ConfigManager from "./configManager.js";
 import path from 'path'
 
+
 import httpProxy from "./httpProxy.js";
+import {sourceModel} from "../model/sources.js";
 
 
 var Ask = {
 
-    getTermInfos: function (sourceLabel, term, callback) {
+    getTermClassesInfos: function (source, term, callback) {
+        var sourceInfos = {}
         var termUrisMap = {}
         async.series([
 
 
             // search terms and topClasses
             function (callbackSeries) {
-                var indexName = sourceLabel.toLowerCase()
+                var indexName = source.toLowerCase()
                 Ask.executeElasticQuery("/_search", term, indexName, function (err, result) {
                     if (err) {
                         return callbackSeries(err)
@@ -37,14 +40,19 @@ var Ask = {
                 });
 
             },
+            function (callbackSeries) {
+                Ask.getSourceInfos(source, function (err, result) {
 
+                    if (err) {
+                        return callbackSeries(err)
+                    }
+                    sourceInfos = result
+                    callbackSeries()
+                })
+
+            },
 //get Properties
             function (callbackSeries) {
-                // Same trap as in getLinkedClasses: an empty IN list binds nothing and the query
-                // ends up scanning the whole graph.
-                if (Object.keys(termUrisMap).length == 0) {
-                    return callbackSeries()
-                }
                 var filter = "filter (?sub in ("
                 Object.keys(termUrisMap).forEach(function (item, index) {
                     if (index > 0) {
@@ -55,20 +63,11 @@ var Ask = {
 
                 })
                 filter += ") )"
-                var fromStr = " FROM  NAMED  <http://datalenergies.total.com/resource/tsf/iso-14224-iof/all/>  FROM  NAMED  <http://purl.obolibrary.org/obo/bfo.owl>  FROM  NAMED  <https://spec.industrialontologies.org/ontology/202502/core/Core/> "
-                var query = "  PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
-                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                    " PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                    " select distinct * " +
-                    fromStr +
-                    " where {graph ?g {" +
-                    "?sub ?prop ?value." +
-                    "    Optional {?value rdfs:label ?valueLabel} " +
-                    filter +
-                    " Optional {?prop rdfs:label ?propLabel} }  FILTER (!exists{?value rdf:type owl:Restriction} ) } " +
 
-                    "LIMIT 10000"
-                Ask.executeSparqlQuery(sourceLabel, query, function (err, sparqlResult) {
+                var query = Ask.getPropertiesSparql(sourceInfos.graphUri, filter)
+
+
+                Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
 
                     if (err) {
                         return callbackSeries(err)
@@ -92,31 +91,30 @@ var Ask = {
             }
             // get restrictions
             , function (callbackSeries) {
-                var termUris = Object.keys(termUrisMap)
-                if (termUris.length == 0) {
-                    return callbackSeries()
-                }
-                var query = Ask.getRestrictionsSparql(sourceLabel, termUris)
-                Ask.executeSparqlQuery(sourceLabel, query, function (err, sparqlResult) {
 
-                    if (err) {
-                        return callbackSeries(err)
-                    }
-                    sparqlResult.results.bindings.forEach(function (item) {
-                        termUrisMap[item.class1.value].relations.push(
-                            {
-                                predicate: item.prop.value,
-                                predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
-                                object: item.superClass2.value,
-                                objectLabel: item.superClass2Label ? item.superClass2Label.value : item.superClass2.value
-                            }
-                        )
+                var termUris = Object.keys(termUrisMap)
+                Ask.getRestrictionsSparql(source, termUris, null, function (err, query) {
+
+                    Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
+
+                        if (err) {
+                            return callbackSeries(err)
+                        }
+                        sparqlResult.results.bindings.forEach(function (item) {
+                            termUrisMap[item.class1.value].relations.push(
+                                {
+                                    predicate: item.prop.value,
+                                    predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
+                                    object: item.superClass2.value,
+                                    objectLabel: item.superClass2Label ? item.superClass2Label.value : item.superClass2.value
+                                }
+                            )
+
+                        })
+                        return callbackSeries()
 
                     })
-                    return callbackSeries()
-
                 })
-
 
             },
 
@@ -128,50 +126,109 @@ var Ask = {
     },
     /**
      *  get a simplified ontology model with nodes topConcepts and their semantic relations
-     * @param sourceLabel
+     * @param source
      * @param callback :
      */
-    getKnowledgeModelGraph: function (sourceLabel, callback) {
+    getKnowledgeModelGraph: function (source, callback) {
+        var graph = {nodes: [], edges: []}
+        var nodesMap = {}
+        var sourceInfos = null;
+        async.series([
 
-        Ask.getTopConceptsGraphData(sourceLabel, function (err, result) {
-            if (err) {
-                return callback(err)
+            function (callbackSeries) {
+                Ask.getTopConceptsGraphData(source, function (err, result) {
+                    if (err) {
+                        return callbackSeries(err)
+                    }
+
+
+                    result.nodes.forEach(function (node) {
+                        graph.nodes.push(node.data)
+                        nodesMap[node.id] = node.data
+
+                    })
+                    result.edges.forEach(function (edge) {
+                        var newEdge = edge.data
+                        newEdge.from = edge.from
+                        newEdge.to = edge.to
+                        graph.edges.push(newEdge)
+
+                    })
+
+                    callbackSeries()
+                })
+            },
+            function (callbackSeries) {
+                Ask.getSourceInfos(source, function (err, result) {
+                    if (err) {
+                        return callbackSeries(err)
+                    } else {
+                        sourceInfos = result
+                        return callbackSeries()
+                    }
+                })
+            },
+
+
+            //add node Descriptions
+            function (callbackSeries) {
+
+                var filter = "filter (?sub in ("
+                Object.keys(nodesMap).forEach(function (item, index) {
+                    if (index > 0) {
+                        filter += ","
+                    }
+                    filter += "<" + item + ">"
+
+
+                })
+                filter += ") )"
+                filter += "FILTER(?prop in (<http://purl.org/dc/terms/description>,<http://purl.org/dc/terms/description>,<http://www.w3.org/2004/02/skos/core#definition>,rdfs:isDefinedBy))"
+
+                var query = Ask.getPropertiesSparql(sourceInfos.graphUri, filter)
+
+
+                Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
+
+                    if (err) {
+                        return callbackSeries(err)
+                    }
+
+                    var definitionsMap = {}
+                    sparqlResult.results.bindings.forEach(function (item) {
+
+                        definitionsMap[item.sub.value] = item.value.value
+
+                    })
+                    graph.nodes.forEach(function (node) {
+                        node.description = definitionsMap[node.id]
+                    })
+                    callbackSeries()
+                })
             }
 
-            var graph = {nodes: [], edges: []}
-            var nodesMap = {}
-            result.nodes.forEach(function (node) {
-                graph.nodes.push(node.data)
-                nodesMap[node.id] = node.data
 
-            })
-            result.edges.forEach(function (edge) {
-                var newEdge = edge.data
-                newEdge.from = edge.from
-                newEdge.to = edge.to
-                graph.edges.push(newEdge)
-
-            })
-
-            return callback(null, graph)
-
+        ], function (err) {
+            return callback(err, graph)
         })
+
+
     },
     /**
 
      /**
      * build a path between  classes that are linked together including inherited from the class hierrachy
-     * @param sourceLabel
+     * @param source
      * @param term1
      * @param term2
      * @param callback
      */
 
 
-    getTwoTermsShortestPath: function (sourceLabel, term1, term2, callback) {
+    getTwoTermsShortestPath: function (source, term1, term2, callback) {
 
 
-        var indexName = sourceLabel.toLowerCase(sourceLabel)
+        var indexName = source.toLowerCase(source)
 
         var term1Uris = [];
 
@@ -180,6 +237,7 @@ var Ask = {
         var topConcepts1 = []
         var topConcepts2 = []
         var shortestPath = []
+        var termsShortestPaths = []
 
         async.series([
 
@@ -215,7 +273,7 @@ var Ask = {
                 },
                 // load the data model visjs
                 function (callbackSeries) {
-                    Ask.getTopConceptsGraphData(sourceLabel, function (err, result) {
+                    Ask.getTopConceptsGraphData(source, function (err, result) {
                         if (err) {
                             return callbackSeries(err)
                         }
@@ -263,28 +321,59 @@ var Ask = {
 
                 // get shortest path between  terms and build a complete path between nodes
                 function (callbackSeries) {
+
+
                     var start = topConcepts1[0]
                     var end = topConcepts2[0]
 
-                    Ask.getShortestPath(topConceptsGraphData, start, end, function (err, result) {
-                        if (err) {
-                            return callbackSeries(err)
-                        }
-                        shortestPath = result
-                        return callbackSeries()
 
+                    topConcepts1.forEach(function (start) {
+                        topConcepts2.forEach(function (end) {
+
+                                Ask.getShortestPath(topConceptsGraphData, start, end, function (err, result) {
+                                        if (err) {
+                                            return callbackSeries(err)
+                                        }
+                                        shortestPath = []
+                                        if (term1Uris[start]) {
+                                            shortestPath.push({id: term1Uris[start].id, label: term1Uris[start].label})
+                                            shortestPath.push({id: "subClassOf", label: "subClassOf"})
+                                            shortestPath.push(shortestPath[0])
+                                        }
+                                        shortestPath = shortestPath.concat(result)
+
+                                        if (term1Uris[end]) {
+                                            shortestPath.push(shortestPath[shortestPath.length - 1])
+                                            shortestPath.push({id: term1Uris[end].id, label: term1Uris[end].label})
+                                            shortestPath.push({id: "superClassOf", label: "superClassOf"})
+
+                                        }
+
+                                        /*   var parents= term1Uris[start].parents
+                                             parents.forEach(function(parent){*
+
+
+                                             })*/
+
+
+                                        termsShortestPaths.push(shortestPath)
+
+
+                                    }
+                                )
+                            }
+                        )
 
                     })
-                }
+                    callbackSeries()
+                },
 
 
             ],
 
             function (err) {
-                if (err) {
-                    return callback(err)
-                }
-                return callback(null, shortestPath)
+
+                return callback(null, termsShortestPaths)
             }
         )
 
@@ -293,191 +382,271 @@ var Ask = {
     ,
     /**
      * get the classes that are linked to term 1 in subClasses of term 2 if not null including relations of supeClasses of class1
-     * @param sourceLabel
+     * @param source
      * @param term1
      * @param term2
      * @param callback
      */
 
-    getLinkedClasses: function (sourceLabel, term1, term2, callback) {
-        var term1Uris = []
-        var term2Uris = []
-        var resultMap = {}
-        var indexName = sourceLabel.toLowerCase()
-        var query = ""
-        async.series([
-                // search terms and topClasses
-                function (callbackSeries) {
-                    Ask.executeElasticQuery("/_search", term1, indexName, function (err, result) {
-                        if (err) {
-                            return callbackSeries(err)
-                        } else {
-                            var hits = result.body.hits.hits
-                            hits.forEach(function (hit) {
-                                term1Uris.push(hit._source)
-                            })
-                            return callbackSeries()
-                        }
-                    });
+    getLinkedClasses:
 
-                },
-                function (callbackSeries) {
+        function (source, term1, term2, callback) {
+            var term1Uris = []
+            var term2Uris = []
+            var resultMap = {}
+            var indexName = source.toLowerCase()
+            var sourceInfos = null
+            var query = ""
 
-                    Ask.executeElasticQuery("/_search", term2, indexName, function (err, result) {
-                        if (err) {
-                            return callbackSeries(err)
-                        } else {
-                            var hits = result.body.hits.hits
-                            hits.forEach(function (hit) {
-                                term2Uris.push(hit._source)
-                            })
-                            return callbackSeries()
-                        }
-                    });
 
-                },
-                //build query
-                function (callbackSeries) {
+            async.series([
 
-                    // Without URIs on both sides the restriction query has no filter left to bind it,
-                    // and the subClassOf traversal then walks the whole graph until the request times out.
-                    if (term1Uris.length == 0 || term2Uris.length == 0) {
-                        return callbackSeries()
-                    }
+                    function (callbackSeries) {
 
-                    var query = Ask.getRestrictionsSparql(sourceLabel, term1Uris, term2Uris)
-
-                    Ask.executeSparqlQuery(sourceLabel, query, function (err, sparqlResult) {
-                        if (err) {
-                            return callbackSeries(err)
-                        }
-
-                        sparqlResult.results.bindings.forEach(function (item) {
-                            if (!resultMap[item.class1.value]) {
-                                resultMap[item.class1.value] = []
+                        Ask.getSourceInfos(source, function (err, result) {
+                            if (err) {
+                                return callbackSeries(err)
+                            } else {
+                                sourceInfos = result
+                                return callbackSeries()
                             }
-                            resultMap[item.class1.value].push(
-                                {
-                                    predicate: item.prop.value,
-                                    predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
-                                    object: item.class2.value,
-                                    objectLabel: item.class2Label ? item.class2Label.value : item.class2.value
-                                }
-                            )
-
                         })
+                    },
 
 
-                        // on essaie la relation  inverse
-                        if (true || result.length == 0 || term2 == null) {
-                            query = query.replace("filter (?class2 in", "xx")
-                            query = query.replace("filter (?class1 in", "filter (?class2 in")
-                            query = query.replace("xx", "filter(?class1 in")
+                    // search terms and topClasses
+                    function (callbackSeries) {
 
-                            Ask.executeSparqlQuery(sourceLabel, query, function (err, result2) {
+
+                        Ask.executeElasticQuery("/_search", term1, indexName, function (err, result) {
+                            if (err) {
+                                return callbackSeries(err)
+                            } else {
+                                var hits = result.body.hits.hits
+                                hits.forEach(function (hit) {
+                                    term1Uris.push(hit._source)
+                                })
+                                return callbackSeries()
+                            }
+                        });
+
+                    },
+                    function (callbackSeries) {
+
+                        if (!term2) {
+                            return callbackSeries()
+                        }
+
+                        term2Uris = [term2]
+                        return callbackSeries()
+
+                        /* Ask.executeElasticQuery("/_search", term2, indexName, function (err, result) {
+                             if (err) {
+                                 return callbackSeries(err)
+                             } else {
+                                 var hits = result.body.hits.hits
+                                 hits.forEach(function (hit) {
+                                     term2Uris.push(hit._source)
+                                 })
+                                 return callbackSeries()
+                             }
+                         });*/
+
+                    },
+                    //build query
+                    function (callbackSeries) {
+
+                        Ask.getRestrictionsSparql(source, term1Uris, term2Uris, function (err, query) {
+
+                            Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
+
                                 if (err) {
                                     return callbackSeries(err)
                                 }
 
                                 sparqlResult.results.bindings.forEach(function (item) {
-                                    if (!resultMap[item.class2.value]) {
-                                        resultMap[item.class2.value] = []
+                                    if (!resultMap[item.class1.value]) {
+                                        resultMap[item.class1.value] = []
                                     }
-                                    resultMap[item.class2.value].push(
+                                    resultMap[item.class1.value].push(
                                         {
+
+                                            subjectLabel: item.class1Label ? item.class1Label.value : item.class1.value,
                                             predicate: item.prop.value,
                                             predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
-                                            object: item.class1.value,
-                                            objectLabel: item.class1Label ? item.class1Label.value : item.class1.value
+                                            object: item.class2 ? item.class2.value : item.superClass2.value,
+                                            objectLabel: item.class2Label ? item.class2Label.value : (item.superClass2Label ? item.superClass2Label.value : item.superClass2.value)
                                         }
                                     )
 
                                 })
 
+
+                                // on essaie la relation  inverse
+                                if (term2 != null && (true || result.length == 0)) {
+
+                                    Ask.getRestrictionsSparql(source, term2Uris, term1Uris, function (err, queryInverse) {
+
+
+                                        /*  query = query.replace("filter (?class2 in", "xx")
+                                          query = query.replace("filter (?class1 in", "filter (?class2 in")
+                                          query = query.replace("xx", "filter(?class1 in")*/
+
+                                        Ask.executeSparqlQuery(source, queryInverse, function (err, result2) {
+
+                                            sparqlResult.results.bindings.forEach(function (item) {
+                                                if (!resultMap[item.class1.value]) {
+                                                    resultMap[item.class1.value] = []
+                                                }
+                                                resultMap[item.class1.value].push(
+                                                    {
+
+                                                        subjectLabel: item.class1Label ? item.class1Label.value : item.class1.value,
+                                                        predicate: item.prop.value,
+                                                        inverseRelation: true,
+                                                        predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
+                                                        object: item.class2 ? item.class2.value : item.superClass2.value,
+                                                        objectLabel: item.class2Label ? item.class2Label.value : (item.superClass2Label ? item.superClass2Label.value : item.superClass2.value)
+                                                    }
+                                                )
+
+                                            })
+
+
+                                            return callbackSeries()
+                                        })
+
+                                    })
+
+                                }
                                 return callbackSeries()
 
                             })
-                        }
-                        return callbackSeries()
-
-                    })
+                        })
 
 
-                }
+                    }
 
 
-            ],
+                ],
 
-            function (err) {
-                if (err) {
-                    return callback(err)
-                }
-                return callback(null, resultMap)
-            })
+                function (err) {
+                    return callback(null, resultMap)
+                })
 
 
-    },
+        }
+
+    ,
 
 
     /*******************************************************Helpers*********************************************************/
 
 
-    getRestrictionsSparql: function (sourceLabel, term1Uris, term2Uris, callback) {
-        var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix owl: <http://www.w3.org/2002/07/owl#> "
-        query += "Select * from <http://datalenergies.total.com/resource/tsf/iso-14224-iof/all/> where {" +
-            "  ?class1 rdfs:subClassOf{0,5} ?superClass1.\n" +
-            "  ?superClass1 rdf:type owl:Class.\n" +
-            "  ?superClass1 rdfs:subClassOf  ?restr. ?restr rdf:type owl:Restriction.\n" +
-            "  ?restr owl:onProperty ?prop. ?restr owl:someValuesFrom|owl:allValuesFrom|owl:hasValue ?superClass2.\n" +
-            "   { ?class1 rdfs:label ?class1Label}\n" +
-            "   optional { ?prop rdfs:label ?propLabel}\n" +
-            "     { ?superClass2 rdfs:label ?superClass2Label}"
+    getSourceInfos: function (source, callback) {
+        async function getSourceInfos2(source) {
+            var user = {login: "admin"}
+            const sourceInfos = await sourceModel.getOneUserSource(user, source);
 
-        var filter = ""
-        if (term1Uris && term1Uris.length > 0) {
-            filter += "filter (?class1 in ("
-            term1Uris.forEach(function (item, index) {
-                if (index > 0) {
-                    filter += ","
-                }
-                filter += "<" + (item.id || item) + ">"
-
-
-            })
-            filter += ") )"
-        }
-        if (term2Uris && term2Uris.length > 0) {
-
-            query += "  ?superClass2 ^rdfs:subClassOf{0,5} ?class2."
-            filter += "filter (?class2 in ("
-            term2Uris.forEach(function (item, index) {
-                if (index > 0) {
-                    filter += ","
-                }
-                filter += "<" + (item.id || item) + ">"
-
-
-            })
-            filter += ") )"
+            return sourceInfos;
         }
 
-        query += filter + "} limit 10000"
-
-        return query;
-    },
-
-
-    getTopConceptsGraphData: function (sourceLabel, callback) {
-        // A source with no saved whiteboard, or a misspelled source name, would otherwise throw
-        // synchronously out of the callback chain instead of reaching the caller as an error.
-        var json = null
         try {
-            var myPath = path.resolve("data/graphs/" + sourceLabel + "_whiteBoard.json")
-            var str = "" + fs.readFileSync(myPath)
-            json = JSON.parse(str)
-        } catch (readError) {
-            return callback("no knowledge model graph for source " + sourceLabel + ": " + readError.message)
+
+            getSourceInfos2(source).then(sourceInfos => {
+                callback(null, sourceInfos)
+            });
+
+
+        } catch (e) {
+            callback(e)
         }
+
+    }
+    ,
+
+
+    getPropertiesSparql: function (graphUri, filter) {
+        var fromStr = " FROM   <" + graphUri + "> "
+        var query = "  PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+            " PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+            " select distinct * " +
+            fromStr +
+            // " where {graph ?g {" +
+            " where { {" +
+            "?sub ?prop ?value." +
+            "    Optional {?value rdfs:label ?valueLabel} " +
+            filter + "FILTER (?prop !=rdfs:subClassOf)" +
+            " Optional {?prop rdfs:label ?propLabel}   FILTER (!exists{?value rdf:type owl:Restriction} ) } " +
+
+            "}LIMIT 10000"
+        return query
+    }
+    ,
+
+    getRestrictionsSparql: function (source, term1Uris, term2Uris, callback) {
+
+        Ask.getSourceInfos(source, function (err, sourceInfos) {
+
+            if (err) {
+                return callback(err)
+            }
+            var graphUri = sourceInfos.graphUri
+            var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix owl: <http://www.w3.org/2002/07/owl#> "
+            query += "Select * from <" + graphUri + "> where {" +
+                "  ?class1 rdfs:subClassOf{0,5} ?superClass1.\n" +
+                "  ?superClass1 rdf:type owl:Class.\n" +
+                "  ?superClass1 rdfs:subClassOf  ?restr. ?restr rdf:type owl:Restriction.\n" +
+                "  ?restr owl:onProperty ?prop. ?restr owl:someValuesFrom|owl:allValuesFrom|owl:hasValue ?superClass2.\n" +
+                "   { ?class1 rdfs:label ?class1Label}\n" +
+                "   optional { ?prop rdfs:label ?propLabel}\n" +
+                "     { ?superClass2 rdfs:label ?superClass2Label}"
+
+            var filter = ""
+            if (term1Uris) {
+                filter += "filter (?class1 in ("
+                term1Uris.forEach(function (item, index) {
+                    if (index > 0) {
+                        filter += ","
+                    }
+                    filter += "<" + (item.id || item) + ">"
+
+
+                })
+                filter += ") )"
+            }
+            if (term2Uris && term2Uris.length > 0) {
+
+
+                query += "  ?superClass2 ^rdfs:subClassOf{0,5} ?class2."
+
+
+                filter += "   ?class2 rdfs:label ?class2Label filter (regex(?class2Label,\"" + term2Uris[0] + "\",\"i\"))"
+                /*   filter += "filter (?class2 in ("
+                   term2Uris.forEach(function (item, index) {
+                       if (index > 0) {
+                           filter += ","
+                       }
+                       filter += "<" + (item.id || item) + ">"
+
+
+                   })
+                   filter += ") )"*/
+            }
+
+            query += filter + "} limit 10000"
+
+            return callback(null, query);
+        })
+    }
+    ,
+
+
+    getTopConceptsGraphData: function (source, callback) {
+        var myPath = path.resolve("data/graphs/" + source + "_whiteBoard.json")
+        var str = "" + fs.readFileSync(myPath)
+        var json = JSON.parse(str)
         return callback(null, json)
 
 
@@ -487,18 +656,20 @@ var Ask = {
      * To be implemented
      *
      *
-     * @param sourceLabel
+     * @param source
      * @param query
      * @param callback
      */
-    executeSparqlQuery: function (sourceLabel, query, callback) {
-
-
+    executeSparqlQuery: function (source, query, callback) {
+        if (!query) {
+            return callback(null, oldResult)
+        }
+        var oldResult = null
         try {
 
             var params = {
                 "query": query,
-                "useProxy": true,
+                //  "useProxy": true,
             }
             var serverUrl = ConfigManager.config.sparql_server.url + "?format=json&query="
             var headers = {
@@ -513,18 +684,22 @@ var Ask = {
 
 
             httpProxy.post(serverUrl, headers, params, function (err, result) {
-                if (err) {
-                    return callback(err);
+                if (!oldResult) {
+                    oldResult = result
                 }
-                callback(null, result);
+
+                return callback(null, result);
             });
 
 
         } catch (err) {
-            callback(err)
+
+            return callback(err)
+
         }
 
-    },
+    }
+    ,
     /**
      * give the best format (concise) for llm
      *
@@ -535,7 +710,8 @@ var Ask = {
 
 
         return sparqlResult
-    },
+    }
+    ,
 
     executeElasticQuery: function (urlPath, term, indexName, callback) {
 
@@ -561,19 +737,8 @@ var Ask = {
         };
 
         process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
-        //  console.log("DEBUG:bin/elasticRestProxy:forwardRequest" + JSON.stringify(options));
         request(options, function (error, response, body) {
-            //  console.log("DEBUG:bin/elasticRestProxy:forwardRequest\n  error=" + error + "\n  reponse=" + response + "\n  body " + body);
-            if (error) {
-                return callback(error);
-            }
-            // An unknown index answers 404 with an error payload and no hits: without this the caller
-            // reads hits.hits on undefined and the failure surfaces as an empty result.
-            if (response.statusCode < 200 || response.statusCode > 299) {
-                var elasticMessage = body && body.error ? JSON.stringify(body.error) : response.statusMessage;
-                return callback("ElasticSearch " + response.statusCode + " on index " + indexName + ": " + elasticMessage);
-            }
-            return callback(null, response, body);
+            return callback(error, response, body);
         });
 
 
@@ -681,15 +846,24 @@ var Ask = {
             }
         })
         return callback(null, resultArray)
-    },
+    }
+    ,
 
 
 }
 
 export default Ask
 
+
+/**export async function getSourceInfos(source){
+ var user={login : "admin"}
+ const sourceInfo = await sourceModel.getOneUserSource(user, source);
+ return sourceInfo[source];
+ }**/
+
+
 if (false) {
-    Ask.getTermInfos("ISO-14224-IOF", " failure mode", function (err, result) {
+    Ask.whoAmI("ISO-14224-IOF", " failure mode", function (err, result) {
 
     })
 

@@ -41,7 +41,7 @@ export default function () {
         parameters: [
             { name: "sourceLabel", in: "query", type: "string", required: true, description: "Source name. Its lowercase form names the ElasticSearch index. Example: `ISO-14224-IOF`." },
             { name: "term1", in: "query", type: "string", required: true, description: "Term whose classes the relations start from. Example: `failure mode`." },
-            { name: "term2", in: "query", type: "string", required: true, description: "Term whose classes the relations end at. Example: `centrifugal pump`." },
+            { name: "term2", in: "query", type: "string", required: false, description: "Term whose classes the relations end at. Example: `centrifugal pump`." },
         ],
         responses: {
             200: {

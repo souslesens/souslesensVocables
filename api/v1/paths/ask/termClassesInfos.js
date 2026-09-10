@@ -4,7 +4,7 @@ export default function () {
     function GET(req, res, _next) {
         const { sourceLabel, term } = req.query;
 
-        Ask.getTermInfos(sourceLabel, term, function (err, termUrisMap) {
+        Ask.getTermClassesInfos(sourceLabel, term, function (err, termUrisMap) {
             if (err) {
                 return res.status(500).json({ message: "" + err });
             }

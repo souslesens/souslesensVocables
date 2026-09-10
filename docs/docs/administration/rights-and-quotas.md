@@ -244,7 +244,7 @@ How the threshold is resolved for a given user:
   several profiles set it, the most permissive (the highest threshold) wins, mirroring how
   the other limits are resolved.
 - When no profile of the user sets one, the **global** `config.metrics.virtuoso.maxLoad`
-  threshold applies (see [souslesens.md](souslesens.md)).
+  threshold applies (see [configuration-files](configuration-files.md)).
 
 A field left empty means "this profile does not set a threshold", so the global value
 applies. The estimated load behind the check is derived from the in-flight SPARQL requests

@@ -898,8 +898,8 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                 control={<Checkbox checked={profileModel.profileForm.isShared} onChange={handleFieldUpdate("isShared")} />}
                                 label={
                                     <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>
-                                        {"Users visibility"}
-                                        <HelpTooltip title="When enabled, two users sharing this profile can see each other in the users list (used to share user data and assign annotation templates). When disabled, sharing this profile does not expose users to one another. Admins always see every user." />
+                                        {"Shared users data"}
+                                        <HelpTooltip title="Enabling this lets users of this profile share their users data with other users of the same profile. If this box is unchecked, users cannot see each other." />
                                     </Box>
                                 }
                             />

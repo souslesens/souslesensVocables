@@ -183,3 +183,6 @@ WORKTREE.md
 .codex/
 .playwright-mcp/
 AGENTS.md
+
+#mcp 
+.mcp.json

@@ -1110,6 +1110,7 @@ var Sparql_OWL = (function () {
      * @param {(string|string[])} [options.propIds] - Filter by property URI(s)
      * @param {(string|string[])} [options.subPropIds] - Filter by sub-property URI(s)
      * @param {boolean} [options.dataTypeProperties] - Query `owl:DatatypeProperty` instead of `owl:ObjectProperty`
+     * @param {boolean} [options.inheritedProperties] - Include inherited properties via `rdfs:subPropertyOf*`
      * @param {string} [options.searchType] - One of `property`/`domain`/`range` to search by `options.words`
      * @param {(string|string[])} [options.words] - Label word(s) used when `searchType` is set
      * @param {boolean} [options.addInverseRestrictions] - Also fetch and merge inverse-direction results
@@ -1166,19 +1167,32 @@ var Sparql_OWL = (function () {
         if (options.selectGraph) {
             query += " GRAPH ?g ";
         }
-        var propertyType = options.dataTypeProperties ? "owl:DatatypeProperty" : "owl:ObjectProperty";
-        query +=
-            "   {?prop rdf:type " +
-            propertyType +
-            ". " +
-            optionalLabelStr +
-            "{?prop rdfs:label ?propLabel.  " +
-            Sparql_common.getLangFilter(sourceLabel, "propLabel") +
-            "}" +
-            "OPTIONAL{?prop owl:inverseOf ?inverseProp. " +
-            "OPTIONAL{?inverseProp rdfs:label ?inversePropLabel.  " +
-            Sparql_common.getLangFilter(sourceLabel, "inversePropLabel") +
-            "}}";
+        if (options.inheritedProperties) {
+            query += "  { ?prop rdfs:subPropertyOf*/rdf:type owl:ObjectProperty ";
+        }
+        if (options.dataTypeProperties) {
+            query +=
+                "   {?prop rdf:type owl:DatatypeProperty. " +
+                optionalLabelStr +
+                "{?prop rdfs:label ?propLabel.  " +
+                Sparql_common.getLangFilter(sourceLabel, "propLabel") +
+                "}" +
+                "OPTIONAL{?prop owl:inverseOf ?inverseProp. " +
+                "OPTIONAL{?inverseProp rdfs:label ?inversePropLabel.  " +
+                Sparql_common.getLangFilter(sourceLabel, "inversePropLabel") +
+                "}}";
+        } else {
+            query +=
+                "   {?prop rdf:type owl:ObjectProperty. " +
+                optionalLabelStr +
+                "{?prop rdfs:label ?propLabel.  " +
+                Sparql_common.getLangFilter(sourceLabel, "propLabel") +
+                "}" +
+                "OPTIONAL{?prop owl:inverseOf ?inverseProp. " +
+                "OPTIONAL{?inverseProp rdfs:label ?inversePropLabel.  " +
+                Sparql_common.getLangFilter(sourceLabel, "inversePropLabel") +
+                "}}";
+        }
 
         if (!options.searchType) {
             query +=

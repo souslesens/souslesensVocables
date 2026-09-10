@@ -256,7 +256,7 @@ async function main() {
     const failedParallelCalls = parallelResults.filter((parallelResult) => parallelResult.isError);
     record("concurrent tool calls all answer", failedParallelCalls.length === 0, `${parallelResults.length} parallel calls, ${failedParallelCalls.length} failed`);
 
-    const kgModelResult = await client.callTool({ name: "sls_kgquery_model", arguments: { source: sourceForQueries } });
+    const kgModelResult = await client.callTool({ name: "sls_kgquery_model", arguments: { sourceLabel: sourceForQueries } });
     const kgModelEnvelope = readEnvelope(kgModelResult);
     const kgModelIsParsed = Boolean(kgModelEnvelope && kgModelEnvelope.data && typeof kgModelEnvelope.data === "object");
     record("sls_kgquery_model", !kgModelResult.isError && kgModelIsParsed, kgModelResult.isError ? "no KGquery model saved for this source" : "parsed as an object");
@@ -267,13 +267,13 @@ async function main() {
 
     if (kgModelIsParsed) {
         const documentKeys = Object.keys(kgModelEnvelope.data);
-        const selectedResult = await client.callTool({ name: "sls_kgquery_model", arguments: { source: sourceForQueries, _select: documentKeys[0] } });
+        const selectedResult = await client.callTool({ name: "sls_kgquery_model", arguments: { sourceLabel: sourceForQueries, _select: documentKeys[0] } });
         const selectedEnvelope = readEnvelope(selectedResult);
         const wholeSize = JSON.stringify(kgModelEnvelope.data).length;
         const selectedSize = selectedEnvelope ? JSON.stringify(selectedEnvelope.data).length : wholeSize;
         record("_select returns one part of the document", !selectedResult.isError && selectedSize < wholeSize, `${documentKeys[0]}: ${selectedSize} of ${wholeSize} chars`);
 
-        const grepResult = await client.callTool({ name: "sls_kgquery_model", arguments: { source: sourceForQueries, _grep: documentKeys[0].toUpperCase() } });
+        const grepResult = await client.callTool({ name: "sls_kgquery_model", arguments: { sourceLabel: sourceForQueries, _grep: documentKeys[0].toUpperCase() } });
         const grepEnvelope = readEnvelope(grepResult);
         const grepMatchedByKey = Boolean(grepEnvelope && grepEnvelope.data && grepEnvelope.data.matchedEntries > 0);
         record(
@@ -282,7 +282,7 @@ async function main() {
             grepEnvelope && grepEnvelope.data ? `${grepEnvelope.data.matchedEntries} of ${grepEnvelope.data.totalEntries}` : "",
         );
 
-        const badSelectResult = await client.callTool({ name: "sls_kgquery_model", arguments: { source: sourceForQueries, _select: "__no_such_key__" } });
+        const badSelectResult = await client.callTool({ name: "sls_kgquery_model", arguments: { sourceLabel: sourceForQueries, _select: "__no_such_key__" } });
         const badSelectEnvelope = readEnvelope(badSelectResult);
         const namesTheKeys = Boolean(badSelectEnvelope && badSelectEnvelope.error && badSelectEnvelope.error.includes(documentKeys[0]));
         record("_select on an unknown key lists the real ones", badSelectResult.isError === true && namesTheKeys, "");

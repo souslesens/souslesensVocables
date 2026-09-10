@@ -1478,44 +1478,58 @@ var Sparql_generic = (function () {
                     }
 
                     for (var key in allClassesMap) {
-                        if(key=="http://datalenergies.total.com/resource/tsf/iso-14224-iof/all/equi-type-PU-CE")
-                            var x=3
                         recurse(key, allClassesMap[key].parents);
                     }
 
                     var multipleParentsClassUri = "http://souslesens.org/anomaly/multipleParentsClass";
                     var cyclicParentsClassUri = "http://souslesens.org/anomaly/cyclicParentsClass";
                     var anomalyParents = {};
+                    var singleParents = {};
 
-                    // hierarchies with errors,  indexed under a parent
+                    // flag ambiguous hierarchies, else keep the single parent
                     for (var key in allClassesMap) {
-                        var directParentCount = 0;
+                        var parentsExcludingSelf = [];
                         var isInCycle = false;
                         allClassesMap[key]._directParents.forEach(function (directParent) {
+                            // a self reference (X subClassOf X) is always dropped
                             if (directParent === key) {
                                 return;
                             }
-                            directParentCount++;
+                            parentsExcludingSelf.push(directParent);
                             if (allClassesMap[directParent] && allClassesMap[directParent].parents.indexOf(key) > -1) {
                                 isInCycle = true;
                             }
                         });
+
                         if (isInCycle) {
                             anomalyParents[key] = cyclicParentsClassUri;
-                        } else if (directParentCount > 1) {
+                        } else if (parentsExcludingSelf.length > 1) {
                             anomalyParents[key] = multipleParentsClassUri;
+                        } else if (parentsExcludingSelf.length === 1) {
+                            singleParents[key] = parentsExcludingSelf[0];
                         }
                     }
 
-                    // applied apart because the verdicts above read the ancestors of other classes
+                    // climb single parents, stop chain at the first anomaly
                     for (var key in allClassesMap) {
-                        var selfIndex = allClassesMap[key].parents.indexOf(key);
-                        if (selfIndex > -1) {
-                            allClassesMap[key].parents.splice(selfIndex, 1);
+                        var ancestorChain = [];
+                        var currentClass = key;
+
+                        while (currentClass) {
+                            if (anomalyParents[currentClass]) {
+                                ancestorChain.push(anomalyParents[currentClass]);
+                                break;
+                            }
+                            var parentClass = singleParents[currentClass];
+                            // stop on a loop
+                            if (!parentClass || parentClass === key || ancestorChain.indexOf(parentClass) > -1) {
+                                break;
+                            }
+                            ancestorChain.push(parentClass);
+                            currentClass = parentClass;
                         }
-                        if (anomalyParents[key]) {
-                            allClassesMap[key].parents = [anomalyParents[key]];
-                        }
+
+                        allClassesMap[key].parents = ancestorChain;
                         delete allClassesMap[key]._directParents;
                     }
 

@@ -41,8 +41,21 @@ export default function () {
         },
         parameters: [
             { name: "sourceLabel", in: "query", type: "string", required: true, description: "Source name. Example: `ISO-14224-IOF`." },
-            { name: "uri1", in: "query", type: "string", required: true, description: "URI of the class the relations start from, its subclasses included. Example: `http://standards.iso.org/iso/14224/FailureMode`." },
-            { name: "uri2", in: "query", type: "string", required: false, description: "URI of the class the relations end at, its subclasses included. Without it, every relation of `uri1` is returned. Example: `http://standards.iso.org/iso/14224/CentrifugalPump`." },
+            {
+                name: "uri1",
+                in: "query",
+                type: "string",
+                required: true,
+                description: "URI of the class the relations start from, its subclasses included. Example: `http://standards.iso.org/iso/14224/FailureMode`.",
+            },
+            {
+                name: "uri2",
+                in: "query",
+                type: "string",
+                required: false,
+                description:
+                    "URI of the class the relations end at, its subclasses included. Without it, every relation of `uri1` is returned. Example: `http://standards.iso.org/iso/14224/CentrifugalPump`.",
+            },
         ],
         responses: {
             200: {

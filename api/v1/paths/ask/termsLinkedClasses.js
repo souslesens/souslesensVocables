@@ -33,8 +33,16 @@ export default function () {
                         "It reads downwards only: a restriction declared on a super class of a matched class does not come back, so name that broader class in the term when you want it.",
                     params: {
                         sourceLabel: { type: "string", required: true, description: "Source to look in. Its lowercase form is the label index name." },
-                        term1: { type: "string", required: true, description: "Words naming the classes the relations start from, matched against their labels, not a URI. For instance failure mode." },
-                        term2: { type: "string", required: true, description: "Words naming the classes at the other end of the relations, matched against their labels, not a URI. For instance centrifugal pump." },
+                        term1: {
+                            type: "string",
+                            required: true,
+                            description: "Words naming the classes the relations start from, matched against their labels, not a URI. For instance failure mode.",
+                        },
+                        term2: {
+                            type: "string",
+                            required: true,
+                            description: "Words naming the classes at the other end of the relations, matched against their labels, not a URI. For instance centrifugal pump.",
+                        },
                     },
                     query: { sourceLabel: "{sourceLabel}", term1: "{term1}", term2: "{term2}" },
                 },

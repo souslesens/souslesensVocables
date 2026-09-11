@@ -2,9 +2,9 @@ import Ask from "../../../../bin/ask.js";
 
 export default function () {
     function GET(req, res, _next) {
-        const { sourceLabel, uri1, uri2 } = req.query;
+        const { sourceLabel, term1, term2 } = req.query;
 
-        Ask.getLinkedClasses(sourceLabel, uri1, uri2, function (err, linkedClassesMap) {
+        Ask.getTermsLinkedClasses(sourceLabel, term1, term2, function (err, linkedClassesMap) {
             if (err) {
                 return res.status(500).json({ message: "" + err });
             }
@@ -15,11 +15,11 @@ export default function () {
     GET.apiDoc = {
         summary: "What can this term be attached to",
         description:
-            "The relations between  classes they are linked to and the properties linking them. " +
+            "The relations between two families of terms: the classes they can be linked to and the properties linking them. " +
             "Use it before writing a query or a mapping, to know which relations the ontology allows between them. " +
             "Collects OWL restrictions on the matching classes and their super classes up to five levels, in both directions. " +
             "Both terms are required: without a second one the traversal is unbounded and does not return.",
-        operationId: "askLinkedClasses",
+        operationId: "askTermsLinkedClasses",
         "x-mcp": {
             tools: [
                 {
@@ -31,17 +31,17 @@ export default function () {
                         "It climbs the class hierarchy for you, up to five levels, and reads the restrictions in both directions, so it finds relations a direct triple lookup misses.",
                     params: {
                         sourceLabel: { type: "string", required: true, description: "Source to look in. Its lowercase form is the label index name." },
-                        uri1: { type: "string", required: true, description: "class uri the relations start from. Example: ``." },
-                        uri2: { type: "string", required: false, description: "class uri the relations ends from. Example: ``." },
+                        term1: { type: "string", required: true, description: "Term the relations start from, in plain words. For instance failure mode." },
+                        term2: { type: "string", required: true, description: "Term at the other end of the relation, in plain words. For instance centrifugal pump." },
                     },
-                    query: { sourceLabel: "{sourceLabel}", uri1: "{uri1}", term2: "{term2}" },
+                    query: { sourceLabel: "{sourceLabel}", term1: "{term1}", term2: "{term2}" },
                 },
             ],
         },
         parameters: [
             { name: "sourceLabel", in: "query", type: "string", required: true, description: "Source name. Its lowercase form names the ElasticSearch index. Example: `ISO-14224-IOF`." },
-            { name: "uri1", in: "query", type: "string", required: true, description: "class uri the relations start from. Example: ``." },
-            { name: "uri2", in: "query", type: "string", required: false, description: "class uri the relations end at. Example: ``." },
+            { name: "term1", in: "query", type: "string", required: true, description: "Term whose classes the relations start from. Example: `failure mode`." },
+            { name: "term2", in: "query", type: "string", required: false, description: "Term whose classes the relations end at. Example: `centrifugal pump`." },
         ],
         responses: {
             200: {

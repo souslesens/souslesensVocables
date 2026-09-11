@@ -680,21 +680,46 @@ var uris2=uri2?[uri2]:null
             }
             var graphUri = sourceInfos.graphUri
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix owl: <http://www.w3.org/2002/07/owl#> "
-            query+= "Select distinct * from <" + graphUri + "> where {" +
+          /*  query+= "Select distinct * from <" + graphUri + "> where {" +
                 " \n" +
-                "  ?class1 rdfs:subClassOf+  ?restr. ?restr rdf:type owl:Restriction.\n" +
-                "  #  ?class1 rdfs:subClassOf ?superClass1. ?superClass1 rdf:type owl:Class.\n" +
+                "  ?class1 rdfs:subClassOf  ?restr. ?restr rdf:type owl:Restriction.\n" +
+                "  #  ?class1 rdfs:subClassOf* ?superClass1. ?superClass1 rdf:type owl:Class.\n" +
                 "  ?restr owl:onProperty ?prop. ?restr owl:someValuesFrom|owl:allValuesFrom|owl:hasValue ?class2.\n" +
                 "\n" +
                 "   ?class1 rdfs:label ?class1Label." +
                 "  \n" +
                 " ?class1 rdfs:subClassOf* ?superClass1."+
-                "  ?class2 rdfs:label ?class2Label."
+                "  ?class2 rdfs:label ?class2Label."*/
+query+="SELECT DISTINCT\n" +
+    "    ?class1\n" +
+    "    ?class1Label\n" +
+    "    ?superClass1\n" +
+    "    ?prop\n" +
+    "    ?class2\n" +
+    "    ?class2Label\n" +
+    "from <" + graphUri + ">" +
+    "WHERE {\n" +
+    "\n" +
+    " ?class1 rdfs:subClassOf* ?superClass1 .\n" +
+
+    "    # Class1 elle-même + toutes ses superclasses\n" +
+    "   \n" +
+    "    # Restrictions définies directement sur une de ces classes\n" +
+    "    ?superClass1 rdfs:subClassOf ?restr .\n" +
+    "\n" +
+    "    ?restr a owl:Restriction ;\n" +
+    "           owl:onProperty ?prop .\n" +
+    "\n" +
+    "    ?restr (owl:someValuesFrom|owl:allValuesFrom|owl:hasValue) ?class2 .\n" +
+    "\n" +
+    "    OPTIONAL { ?class1 rdfs:label ?class1Label . }\n" +
+    "    OPTIONAL { ?class2 rdfs:label ?class2Label . }\n"
+
 
 
             var filter = ""
 
-                filter += " filter (?superClass1 in ("
+                filter += " filter (?class1 in ("
                 term1Uris.forEach(function (item, index) {
                     if (index > 0) {
                         filter += ","

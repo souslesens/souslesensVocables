@@ -176,6 +176,69 @@ var Ask = {
         );
     },
     /**
+     * the ontologies a user may read that describe themselves, as {source, graphUri, imports, description}.
+     * A source whose graph carries no description is left out rather than returned empty.
+     * @param userSources : map sourceName -> source config, as returned by sourceModel.getUserSources
+     * @param callback : (err, summaries)
+     */
+    getOntologySummary: function (userSources, callback) {
+        var sourceNamesByGraphUri = {};
+        Object.keys(userSources).forEach(function (sourceName) {
+            var source = userSources[sourceName];
+            var endpointUrl = source.sparql_server ? source.sparql_server.url : "_default";
+            if (!source.graphUri || (endpointUrl && endpointUrl != "_default")) {
+                return;
+            }
+            if (!sourceNamesByGraphUri[source.graphUri]) {
+                sourceNamesByGraphUri[source.graphUri] = [];
+            }
+            sourceNamesByGraphUri[source.graphUri].push(sourceName);
+        });
+
+        var graphUris = Object.keys(sourceNamesByGraphUri);
+        if (graphUris.length == 0) {
+            return callback(null, []);
+        }
+
+        Ask.executeSparqlQuery(null, Ask.getOntologyDescriptionsSparql(graphUris), function (err, sparqlResult) {
+            if (err) {
+                return callback(err);
+            }
+
+            var descriptionsByGraphUri = {};
+            sparqlResult.results.bindings.forEach(function (item) {
+                var graphUri = item.graph.value;
+                if (!descriptionsByGraphUri[graphUri]) {
+                    descriptionsByGraphUri[graphUri] = [];
+                }
+                descriptionsByGraphUri[graphUri].push({ ontology: item.ontology.value, predicate: item.predicate.value, value: item.value.value });
+            });
+
+            var trailingSlashRegex = /\/$/;
+            var summaries = [];
+            Object.keys(descriptionsByGraphUri).forEach(function (graphUri) {
+                var graphDescriptions = descriptionsByGraphUri[graphUri];
+
+                // A graph often holds several self describing nodes, one per vocabulary it imports :
+                // the node named like the graph is the one describing the source itself.
+                var ownDescriptions = graphDescriptions.filter(function (graphDescription) {
+                    return graphDescription.ontology.replace(trailingSlashRegex, "") == graphUri.replace(trailingSlashRegex, "");
+                });
+                var description = Ask.getBestAnnotation(ownDescriptions.length > 0 ? ownDescriptions : graphDescriptions, Ask.ontologyDescriptionPredicates);
+                sourceNamesByGraphUri[graphUri].forEach(function (sourceName) {
+                    summaries.push({
+                        source: sourceName,
+                        graphUri: graphUri,
+                        imports: userSources[sourceName].imports || [],
+                        description: description,
+                    });
+                });
+            });
+
+            return callback(null, summaries);
+        });
+    },
+    /**
 
      /**
      * build a path between  classes that are linked together including inherited from the class hierrachy
@@ -505,6 +568,68 @@ var Ask = {
     },
 
     /*******************************************************Helpers*********************************************************/
+
+    // Read in this order : the first predicate an ontology carries wins.
+    ontologyDescriptionPredicates: [
+        "http://purl.org/dc/terms/description",
+        "http://purl.org/dc/elements/1.1/description",
+        "http://purl.org/dc/terms/abstract",
+        "http://www.w3.org/2000/01/rdf-schema#comment",
+        "http://www.w3.org/2004/02/skos/core#definition",
+    ],
+
+    /**
+     * the descriptions the given graphs carry on the node describing themselves
+     * @param graphUris
+     * @return {string} sparql query returning ?graph ?ontology ?predicate ?value
+     */
+    getOntologyDescriptionsSparql: function (graphUris) {
+        var graphValues = "";
+        graphUris.forEach(function (graphUri) {
+            graphValues += "<" + graphUri + "> ";
+        });
+        var predicateValues = "";
+        Ask.ontologyDescriptionPredicates.forEach(function (predicate) {
+            predicateValues += "<" + predicate + "> ";
+        });
+
+        return (
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
+            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> " +
+            " select distinct ?graph ?ontology ?predicate ?value where {" +
+            " VALUES ?graph {" +
+            graphValues +
+            "}" +
+            " graph ?graph {" +
+            "  ?ontology rdf:type ?ontologyType." +
+            "  VALUES ?ontologyType {owl:Ontology skos:ConceptScheme}" +
+            "  ?ontology ?predicate ?value." +
+            "  VALUES ?predicate {" +
+            predicateValues +
+            "}" +
+            "  FILTER (isLiteral(?value))" +
+            " } } LIMIT 10000"
+        );
+    },
+
+    /**
+     * the value of the first predicate of the priority list the annotations carry
+     * @param annotations : [{predicate, value}]
+     * @param predicatesByPriority
+     * @return {string|null}
+     */
+    getBestAnnotation: function (annotations, predicatesByPriority) {
+        for (var priorityIndex = 0; priorityIndex < predicatesByPriority.length; priorityIndex++) {
+            var predicate = predicatesByPriority[priorityIndex];
+            for (var annotationIndex = 0; annotationIndex < annotations.length; annotationIndex++) {
+                if (annotations[annotationIndex].predicate == predicate) {
+                    return annotations[annotationIndex].value;
+                }
+            }
+        }
+        return null;
+    },
 
     getSourceInfos: function (source, callback) {
         async function getSourceInfos2(source) {

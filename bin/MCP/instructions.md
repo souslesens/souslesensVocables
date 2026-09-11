@@ -22,7 +22,7 @@ you would otherwise write by hand. Try them before assembling that chain yoursel
 - `sls_knowledge_model_graph`: what a source is about. First call on a source you do not know.
 - `sls_term_infos`: what a term means, with its predicates and relations.
 - `sls_two_terms_paths`: how two terms are connected.
-- `sls_linked_classes`: what a term can be attached to, and through which property.
+- `sls_terms_linked_classes`: what a term can be attached to, and through which property.
 
 Drop down to the per-node tools or `sls_sparql_select` for what they do not carry.
 

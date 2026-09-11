@@ -13,12 +13,12 @@ export default function () {
     }
 
     GET.apiDoc = {
-        summary: "What can this term be attached to",
+        summary: "What can this class be attached to",
         description:
-            "The relations between  classes they are linked to and the properties linking them. " +
-            "Use it before writing a query or a mapping, to know which relations the ontology allows between them. " +
-            "Collects OWL restrictions on the matching classes and their super classes up to five levels, in both directions. " +
-            "Both terms are required: without a second one the traversal is unbounded and does not return.",
+            "The relations a class, given by its URI, can have: the properties carried by its OWL restrictions and the classes they point to. " +
+            "Covers the restrictions carried by the class itself and by its subclasses. A restriction declared on one of its super classes is not returned. " +
+            "With `uri2`, keeps only the relations reaching that class or its subclasses, and adds the ones going from `uri2` back to `uri1`, flagged `inverseRelation`. " +
+            "Use it before writing a query or a mapping, to know which relations the ontology allows for a class already identified.",
         operationId: "askLinkedClasses",
         "x-mcp": {
             tools: [
@@ -26,22 +26,23 @@ export default function () {
                     name: "sls_linked_classes",
                     access: "read",
                     description:
-                        "Lists the relations the ontology allows between two terms: the classes they link and the properties linking them. " +
-                        "Call it before writing a query or a mapping, instead of guessing a predicate. " +
-                        "It climbs the class hierarchy for you, up to five levels, and reads the restrictions in both directions, so it finds relations a direct triple lookup misses.",
+                        "Lists the relations the ontology allows for one class given by its URI: the properties of its OWL restrictions and the classes they point to. " +
+                        "Give a second class URI to keep only the relations between the two, read in both directions. Takes URIs only: from plain words, use sls_terms_linked_classes. " +
+                        "Call it before writing a query or a mapping, instead of guessing a predicate. Restrictions declared on the subclasses of the given class are included, so it finds relations a lookup on that single class misses. " +
+                        "It reads downwards only: a restriction declared on a super class does not come back, so pass that super class URI when you want it.",
                     params: {
-                        sourceLabel: { type: "string", required: true, description: "Source to look in. Its lowercase form is the label index name." },
-                        uri1: { type: "string", required: true, description: "class uri the relations start from. Example: ``." },
-                        uri2: { type: "string", required: false, description: "class uri the relations ends from. Example: ``." },
+                        sourceLabel: { type: "string", required: true, description: "Source to look in." },
+                        uri1: { type: "string", required: true, description: "URI of the class the relations start from. Its subclasses are covered too." },
+                        uri2: { type: "string", required: false, description: "URI of the class at the other end. Leave it out to list every relation of uri1." },
                     },
-                    query: { sourceLabel: "{sourceLabel}", uri1: "{uri1}", term2: "{term2}" },
+                    query: { sourceLabel: "{sourceLabel}", uri1: "{uri1}", uri2: "{uri2}" },
                 },
             ],
         },
         parameters: [
-            { name: "sourceLabel", in: "query", type: "string", required: true, description: "Source name. Its lowercase form names the ElasticSearch index. Example: `ISO-14224-IOF`." },
-            { name: "uri1", in: "query", type: "string", required: true, description: "class uri the relations start from. Example: ``." },
-            { name: "uri2", in: "query", type: "string", required: false, description: "class uri the relations end at. Example: ``." },
+            { name: "sourceLabel", in: "query", type: "string", required: true, description: "Source name. Example: `ISO-14224-IOF`." },
+            { name: "uri1", in: "query", type: "string", required: true, description: "URI of the class the relations start from, its subclasses included. Example: `http://standards.iso.org/iso/14224/FailureMode`." },
+            { name: "uri2", in: "query", type: "string", required: false, description: "URI of the class the relations end at, its subclasses included. Without it, every relation of `uri1` is returned. Example: `http://standards.iso.org/iso/14224/CentrifugalPump`." },
         ],
         responses: {
             200: {

@@ -6,6 +6,7 @@ import path from 'path'
 
 
 import httpProxy from "./httpProxy.js";
+import util from "./util.js";
 import {sourceModel} from "../model/sources.js";
 
 
@@ -53,6 +54,11 @@ var Ask = {
             },
 //get Properties
             function (callbackSeries) {
+                // no match : an empty IN list is invalid sparql
+                if (Object.keys(termUrisMap).length == 0) {
+                    return callbackSeries()
+                }
+
                 var filter = "filter (?sub in ("
                 Object.keys(termUrisMap).forEach(function (item, index) {
                     if (index > 0) {
@@ -76,7 +82,7 @@ var Ask = {
                         termUrisMap[item.sub.value].predicates.push(
                             {
                                 predicate: item.prop.value,
-                                predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
+                                predicateLabel: item.propLabel ? item.propLabel.value : util.getLabelFromURI(item.prop.value),
                                 object: item.value.value,
                                 objectLabel: item.valueLabel ? item.valueLabel.value : item.value.value
                             }
@@ -93,7 +99,15 @@ var Ask = {
             , function (callbackSeries) {
 
                 var termUris = Object.keys(termUrisMap)
+                
+                if (termUris.length == 0) {
+                    return callbackSeries()
+                }
+
                 Ask.getRestrictionsSparql(source, termUris, null, function (err, query) {
+                    if (err) {
+                        return callbackSeries(err)
+                    }
 
                     Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
 
@@ -101,12 +115,17 @@ var Ask = {
                             return callbackSeries(err)
                         }
                         sparqlResult.results.bindings.forEach(function (item) {
-                            termUrisMap[item.class1.value].relations.push(
+                            // the query also returns the subclasses of the searched terms, which are not in the map
+                            var searchedTerm = termUrisMap[item.class1.value]
+                            if (!searchedTerm) {
+                                return
+                            }
+                            searchedTerm.relations.push(
                                 {
                                     predicate: item.prop.value,
-                                    predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
-                                    object: item.superClass2.value,
-                                    objectLabel: item.superClass2Label ? item.superClass2Label.value : item.superClass2.value
+                                    predicateLabel: item.propLabel ? item.propLabel.value : util.getLabelFromURI(item.prop.value),
+                                    object: item.class2.value,
+                                    objectLabel: item.class2Label ? item.class2Label.value : item.class2.value
                                 }
                             )
 
@@ -414,7 +433,7 @@ var uris2=uri2?[uri2]:null
 
                                             subjectLabel: item.class1Label ? item.class1Label.value : item.class1.value,
                                             predicate: item.prop.value,
-                                            predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
+                                            predicateLabel: item.propLabel ? item.propLabel.value : util.getLabelFromURI(item.prop.value),
                                             object: item.class2 ? item.class2.value : item.superClass2.value,
                                             objectLabel: item.class2Label ? item.class2Label.value : (item.superClass2Label ? item.superClass2Label.value : item.superClass2.value)
                                         }
@@ -448,7 +467,7 @@ var uris2=uri2?[uri2]:null
                                                         subjectLabel: item.class1Label ? item.class1Label.value : item.class1.value,
                                                         predicate: item.prop.value,
                                                         inverseRelation: true,
-                                                        predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
+                                                        predicateLabel: item.propLabel ? item.propLabel.value : util.getLabelFromURI(item.prop.value),
                                                         object: item.class2 ? item.class2.value : item.superClass2.value,
                                                         objectLabel: item.class2Label ? item.class2Label.value : (item.superClass2Label ? item.superClass2Label.value : item.superClass2.value)
                                                     }
@@ -504,7 +523,6 @@ var uris2=uri2?[uri2]:null
                     // search terms and topClasses
                     function (callbackSeries) {
 
-                        return callbackSeries()
                         Ask.executeElasticQuery("/_search", term1, indexName, function (err, result) {
                             if (err) {
                                 return callbackSeries(err)
@@ -524,34 +542,36 @@ var uris2=uri2?[uri2]:null
                             return callbackSeries()
                         }
 
-                        term2Uris = [term2]
-                        return callbackSeries()
-
-                        /* Ask.executeElasticQuery("/_search", term2, indexName, function (err, result) {
-                             if (err) {
-                                 return callbackSeries(err)
-                             } else {
-                                 var hits = result.body.hits.hits
-                                 hits.forEach(function (hit) {
-                                     term2Uris.push(hit._source)
-                                 })
-                                 return callbackSeries()
-                             }
-                         });*/
+                        Ask.executeElasticQuery("/_search", term2, indexName, function (err, result) {
+                            if (err) {
+                                return callbackSeries(err)
+                            } else {
+                                var hits = result.body.hits.hits
+                                hits.forEach(function (hit) {
+                                    term2Uris.push(hit._source)
+                                })
+                                return callbackSeries()
+                            }
+                        });
 
                     },
                     //build query
                     function (callbackSeries) {
 
-                        Ask.getRestrictionsSparql(source, term1Uris, term2Uris, function (err, query) {
-                            console.log(query)
+                        // without uris the walk covers the whole graph
+                        if (term1Uris.length == 0) {
+                            return callbackSeries()
+                        }
+
+                        Ask.getRestrictionsSparql(source, term1Uris, term2 ? [term2] : [], function (err, query) {
                             Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
 
                                 if (err) {
                                     return callbackSeries(err)
                                 }
 
-                                sparqlResult.results.bindings.forEach(function (item) {
+                                var directBindings = sparqlResult && sparqlResult.results ? sparqlResult.results.bindings : []
+                                directBindings.forEach(function (item) {
                                     if (!resultMap[item.class1.value]) {
                                         resultMap[item.class1.value] = []
                                     }
@@ -560,7 +580,7 @@ var uris2=uri2?[uri2]:null
 
                                             subjectLabel: item.class1Label ? item.class1Label.value : item.class1.value,
                                             predicate: item.prop.value,
-                                            predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
+                                            predicateLabel: item.propLabel ? item.propLabel.value : util.getLabelFromURI(item.prop.value),
                                             object: item.class2 ? item.class2.value : item.superClass2.value,
                                             objectLabel: item.class2Label ? item.class2Label.value : (item.superClass2Label ? item.superClass2Label.value : item.superClass2.value)
                                         }
@@ -572,16 +592,20 @@ var uris2=uri2?[uri2]:null
                                 // on essaie la relation  inverse
                                 if (term2 != null && (true || result.length == 0)) {
 
-                                    Ask.getRestrictionsSparql(source, term2Uris, term1Uris, function (err, queryInverse) {
+                                    // same on the other side
+                                    if (term2Uris.length == 0) {
+                                        return callbackSeries()
+                                    }
 
+                                    Ask.getRestrictionsSparql(source, term2Uris, [term1], function (err, queryInverse) {
 
-                                        /*  query = query.replace("filter (?class2 in", "xx")
-                                          query = query.replace("filter (?class1 in", "filter (?class2 in")
-                                          query = query.replace("xx", "filter(?class1 in")*/
+                                        Ask.executeSparqlQuery(source, queryInverse, function (err, inverseSparqlResult) {
+                                            if (err) {
+                                                return callbackSeries(err)
+                                            }
 
-                                        Ask.executeSparqlQuery(source, queryInverse, function (err, result2) {
-
-                                            sparqlResult.results.bindings.forEach(function (item) {
+                                            var inverseBindings = inverseSparqlResult && inverseSparqlResult.results ? inverseSparqlResult.results.bindings : []
+                                            inverseBindings.forEach(function (item) {
                                                 if (!resultMap[item.class1.value]) {
                                                     resultMap[item.class1.value] = []
                                                 }
@@ -591,7 +615,7 @@ var uris2=uri2?[uri2]:null
                                                         subjectLabel: item.class1Label ? item.class1Label.value : item.class1.value,
                                                         predicate: item.prop.value,
                                                         inverseRelation: true,
-                                                        predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
+                                                        predicateLabel: item.propLabel ? item.propLabel.value : util.getLabelFromURI(item.prop.value),
                                                         object: item.class2 ? item.class2.value : item.superClass2.value,
                                                         objectLabel: item.class2Label ? item.class2Label.value : (item.superClass2Label ? item.superClass2Label.value : item.superClass2.value)
                                                     }
@@ -605,8 +629,9 @@ var uris2=uri2?[uri2]:null
 
                                     })
 
+                                } else {
+                                    return callbackSeries()
                                 }
-                                return callbackSeries()
 
                             })
                         })
@@ -672,6 +697,10 @@ var uris2=uri2?[uri2]:null
     }
     ,
     getRestrictionsSparql: function (source, term1Uris, term2Uris, callback) {
+        // an empty IN list is invalid sparql, and dropping the filter makes the query walk the whole graph
+        if (!term1Uris || term1Uris.length == 0) {
+            return callback("getRestrictionsSparql needs at least one class uri in term1Uris")
+        }
 
         Ask.getSourceInfos(source, function (err, sourceInfos) {
 

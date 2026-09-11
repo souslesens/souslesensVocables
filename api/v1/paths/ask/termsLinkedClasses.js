@@ -15,24 +15,26 @@ export default function () {
     GET.apiDoc = {
         summary: "What can this term be attached to",
         description:
-            "The relations between two families of terms: the classes they can be linked to and the properties linking them. " +
-            "Use it before writing a query or a mapping, to know which relations the ontology allows between them. " +
-            "Collects OWL restrictions on the matching classes and their super classes up to five levels, in both directions. " +
+            "Same relations as `/ask/linkedClasses`, starting from plain words instead of class URIs. " +
+            "Each term is resolved to the classes whose label matches it, then the OWL restrictions between the two families of classes are collected in both directions, those carried by their subclasses included. " +
+            "A restriction declared on a super class of a matched class is not returned. " +
+            "Use it before writing a query or a mapping, to know which relations the ontology allows between two terms. " +
             "Both terms are required: without a second one the traversal is unbounded and does not return.",
         operationId: "askTermsLinkedClasses",
         "x-mcp": {
             tools: [
                 {
-                    name: "sls_linked_classes",
+                    name: "sls_terms_linked_classes",
                     access: "read",
                     description:
-                        "Lists the relations the ontology allows between two terms: the classes they link and the properties linking them. " +
-                        "Call it before writing a query or a mapping, instead of guessing a predicate. " +
-                        "It climbs the class hierarchy for you, up to five levels, and reads the restrictions in both directions, so it finds relations a direct triple lookup misses.",
+                        "Lists the relations the ontology allows between two terms given in plain words: the classes they link and the properties linking them. " +
+                        "Each term is matched against class labels, so every class it names is covered without a prior search. When you already hold class URIs, use sls_linked_classes instead. " +
+                        "Call it before writing a query or a mapping, instead of guessing a predicate. It reads the OWL restrictions in both directions, those carried by the subclasses of the matched classes included, so it finds relations a direct triple lookup misses. " +
+                        "It reads downwards only: a restriction declared on a super class of a matched class does not come back, so name that broader class in the term when you want it.",
                     params: {
                         sourceLabel: { type: "string", required: true, description: "Source to look in. Its lowercase form is the label index name." },
-                        term1: { type: "string", required: true, description: "Term the relations start from, in plain words. For instance failure mode." },
-                        term2: { type: "string", required: true, description: "Term at the other end of the relation, in plain words. For instance centrifugal pump." },
+                        term1: { type: "string", required: true, description: "Words naming the classes the relations start from, matched against their labels, not a URI. For instance failure mode." },
+                        term2: { type: "string", required: true, description: "Words naming the classes at the other end of the relations, matched against their labels, not a URI. For instance centrifugal pump." },
                     },
                     query: { sourceLabel: "{sourceLabel}", term1: "{term1}", term2: "{term2}" },
                 },
@@ -40,8 +42,8 @@ export default function () {
         },
         parameters: [
             { name: "sourceLabel", in: "query", type: "string", required: true, description: "Source name. Its lowercase form names the ElasticSearch index. Example: `ISO-14224-IOF`." },
-            { name: "term1", in: "query", type: "string", required: true, description: "Term whose classes the relations start from. Example: `failure mode`." },
-            { name: "term2", in: "query", type: "string", required: false, description: "Term whose classes the relations end at. Example: `centrifugal pump`." },
+            { name: "term1", in: "query", type: "string", required: true, description: "Words matched against class labels, naming the classes the relations start from. Example: `failure mode`." },
+            { name: "term2", in: "query", type: "string", required: false, description: "Words matched against class labels, naming the classes the relations end at. Example: `centrifugal pump`." },
         ],
         responses: {
             200: {

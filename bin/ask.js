@@ -388,9 +388,96 @@ var Ask = {
      * @param callback
      */
 
-    getLinkedClasses:
+    getLinkedClasses:function (source, uri1, uri2, callback) {
 
-        function (source, term1, term2, callback) {
+            var resultMap = {}
+            var indexName = source.toLowerCase()
+            var sourceInfos = null
+            var query = ""
+
+var uris2=uri2?[uri2]:null
+
+                        Ask.getRestrictionsSparql(source, [uri1],uris2 , function (err, query) {
+
+                            Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
+
+                                if (err) {
+                                    return callback(err)
+                                }
+
+                                sparqlResult.results.bindings.forEach(function (item) {
+                                    if (!resultMap[item.class1.value]) {
+                                        resultMap[item.class1.value] = []
+                                    }
+                                    resultMap[item.class1.value].push(
+                                        {
+
+                                            subjectLabel: item.class1Label ? item.class1Label.value : item.class1.value,
+                                            predicate: item.prop.value,
+                                            predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
+                                            object: item.class2 ? item.class2.value : item.superClass2.value,
+                                            objectLabel: item.class2Label ? item.class2Label.value : (item.superClass2Label ? item.superClass2Label.value : item.superClass2.value)
+                                        }
+                                    )
+
+                                })
+
+
+                                // on essaie la relation  inverse
+                                if (uri2 != null && (true || sparqlResult.length == 0)) {
+
+                                    Ask.getRestrictionsSparql(source, [uri2], [uri1], function (err, queryInverse) {
+
+
+                                        /*  query = query.replace("filter (?class2 in", "xx")
+                                          query = query.replace("filter (?class1 in", "filter (?class2 in")
+                                          query = query.replace("xx", "filter(?class1 in")*/
+
+                                        Ask.executeSparqlQuery(source, queryInverse, function (err, sparqlResult2) {
+                                            if (err) {
+                                                return callback(err)
+                                            }
+
+                                            sparqlResult2.results.bindings.forEach(function (item) {
+                                                if (!resultMap[item.class1.value]) {
+                                                    resultMap[item.class1.value] = []
+                                                }
+                                                resultMap[item.class1.value].push(
+                                                    {
+
+                                                        subjectLabel: item.class1Label ? item.class1Label.value : item.class1.value,
+                                                        predicate: item.prop.value,
+                                                        inverseRelation: true,
+                                                        predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
+                                                        object: item.class2 ? item.class2.value : item.superClass2.value,
+                                                        objectLabel: item.class2Label ? item.class2Label.value : (item.superClass2Label ? item.superClass2Label.value : item.superClass2.value)
+                                                    }
+                                                )
+
+                                            })
+
+
+                                            return callback(null,resultMap)
+                                        })
+
+                                    })
+
+                                }else{
+                                    return callback(null,resultMap)
+                                }
+
+
+                            })
+                        })
+
+
+                    }
+
+
+    ,
+
+
+    getTermsLinkedClasses:function (source, term1, term2, callback) {
             var term1Uris = []
             var term2Uris = []
             var resultMap = {}
@@ -417,7 +504,7 @@ var Ask = {
                     // search terms and topClasses
                     function (callbackSeries) {
 
-
+                        return callbackSeries()
                         Ask.executeElasticQuery("/_search", term1, indexName, function (err, result) {
                             if (err) {
                                 return callbackSeries(err)
@@ -457,7 +544,7 @@ var Ask = {
                     function (callbackSeries) {
 
                         Ask.getRestrictionsSparql(source, term1Uris, term2Uris, function (err, query) {
-
+                            console.log(query)
                             Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
 
                                 if (err) {
@@ -584,8 +671,75 @@ var Ask = {
         return query
     }
     ,
-
     getRestrictionsSparql: function (source, term1Uris, term2Uris, callback) {
+
+        Ask.getSourceInfos(source, function (err, sourceInfos) {
+
+            if (err) {
+                return callback(err)
+            }
+            var graphUri = sourceInfos.graphUri
+            var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix owl: <http://www.w3.org/2002/07/owl#> "
+            query+= "Select distinct * from <" + graphUri + "> where {" +
+                " \n" +
+                "  ?class1 rdfs:subClassOf+  ?restr. ?restr rdf:type owl:Restriction.\n" +
+                "  #  ?class1 rdfs:subClassOf ?superClass1. ?superClass1 rdf:type owl:Class.\n" +
+                "  ?restr owl:onProperty ?prop. ?restr owl:someValuesFrom|owl:allValuesFrom|owl:hasValue ?class2.\n" +
+                "\n" +
+                "   ?class1 rdfs:label ?class1Label." +
+                "  \n" +
+                " ?class1 rdfs:subClassOf* ?superClass1."+
+                "  ?class2 rdfs:label ?class2Label."
+
+
+            var filter = ""
+
+                filter += " filter (?superClass1 in ("
+                term1Uris.forEach(function (item, index) {
+                    if (index > 0) {
+                        filter += ","
+                    }
+                    filter += "<" + (item.id || item) + ">"
+
+
+                })
+                filter += ") )"
+
+            if (term2Uris && term2Uris.length > 0) {
+
+
+                filter += "?class2 rdfs:subClassOf* ?superClass2."
+
+
+
+                //cas uri
+                if(term2Uris[0] .startsWith("http")){
+                    filter += " filter (?superClass2 in ("
+                    term2Uris.forEach(function (item, index) {
+                        if (index > 0) {
+                            filter += ","
+                        }
+                        filter += "<" + (item.id || item) + ">"
+
+
+                    })
+                    filter += ") )"
+                }// case term
+                else{
+                    filter += "   ?class2 rdfs:label ?class2Label filter (regex(?class2Label,\"" + term2Uris[0] + "\",\"i\"))"
+                }
+
+
+
+            }
+
+            query += filter + "} limit 10000"
+
+            return callback(null, query);
+        })
+    }
+    ,
+    getRestrictionsSparqlOld: function (source, term1Uris, term2Uris, callback) {
 
         Ask.getSourceInfos(source, function (err, sourceInfos) {
 
@@ -602,6 +756,10 @@ var Ask = {
                 "   { ?class1 rdfs:label ?class1Label}\n" +
                 "   optional { ?prop rdfs:label ?propLabel}\n" +
                 "     { ?superClass2 rdfs:label ?superClass2Label}"
+
+
+
+
 
             var filter = ""
             if (term1Uris) {
@@ -622,17 +780,25 @@ var Ask = {
                 query += "  ?superClass2 ^rdfs:subClassOf{0,5} ?class2."
 
 
-                filter += "   ?class2 rdfs:label ?class2Label filter (regex(?class2Label,\"" + term2Uris[0] + "\",\"i\"))"
-                /*   filter += "filter (?class2 in ("
-                   term2Uris.forEach(function (item, index) {
-                       if (index > 0) {
-                           filter += ","
-                       }
-                       filter += "<" + (item.id || item) + ">"
+                //cas uri
+                if(term2Uris[0] .startsWith("http")){
+                    filter += "filter (?class2 in ("
+                    term2Uris.forEach(function (item, index) {
+                        if (index > 0) {
+                            filter += ","
+                        }
+                        filter += "<" + (item.id || item) + ">"
 
 
-                   })
-                   filter += ") )"*/
+                    })
+                    filter += ") )"
+                }// case term
+                else{
+                    filter += "   ?class2 rdfs:label ?class2Label filter (regex(?class2Label,\"" + term2Uris[0] + "\",\"i\"))"
+                }
+
+
+
             }
 
             query += filter + "} limit 10000"
@@ -641,6 +807,8 @@ var Ask = {
         })
     }
     ,
+
+
 
 
     getTopConceptsGraphData: function (source, callback) {

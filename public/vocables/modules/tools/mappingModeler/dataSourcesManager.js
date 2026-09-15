@@ -147,7 +147,7 @@ var DataSourceManager = (function () {
                         items.showSampleData = {
                             label: "show SampleData",
                             action: function (_e) {
-                                MappingModeler.showSampleData();
+                                MappingModeler.showSampleData(node);
                             },
                         };
                         items.deleteTableMappings = {

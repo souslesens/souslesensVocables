@@ -185,8 +185,8 @@ var Ask = {
         var sourceNamesByGraphUri = {};
         Object.keys(userSources).forEach(function (sourceName) {
             var source = userSources[sourceName];
-            var endpointUrl = source.sparql_server ? source.sparql_server.url : "_default";
-            if (!source.graphUri || (endpointUrl && endpointUrl != "_default")) {
+            var endpointUrl = (source.sparql_server && source.sparql_server.url) || "_default";
+            if (!source.graphUri || endpointUrl != "_default") {
                 return;
             }
             if (!sourceNamesByGraphUri[source.graphUri]) {
@@ -205,26 +205,31 @@ var Ask = {
                 return callback(err);
             }
 
-            var descriptionsByGraphUri = {};
-            sparqlResult.results.bindings.forEach(function (item) {
-                var graphUri = item.graph.value;
-                if (!descriptionsByGraphUri[graphUri]) {
-                    descriptionsByGraphUri[graphUri] = [];
+            var annotationsByGraphUri = {};
+            sparqlResult.results.bindings.forEach(function (binding) {
+                var graphUri = binding.graph.value;
+                if (!annotationsByGraphUri[graphUri]) {
+                    annotationsByGraphUri[graphUri] = [];
                 }
-                descriptionsByGraphUri[graphUri].push({ ontology: item.ontology.value, predicate: item.predicate.value, value: item.value.value });
+                annotationsByGraphUri[graphUri].push({
+                    ontology: binding.ontology.value,
+                    predicate: binding.predicate.value,
+                    value: binding.value.value,
+                    language: binding.value["xml:lang"] || "",
+                });
             });
 
-            var trailingSlashRegex = /\/$/;
             var summaries = [];
-            Object.keys(descriptionsByGraphUri).forEach(function (graphUri) {
-                var graphDescriptions = descriptionsByGraphUri[graphUri];
+            Object.keys(annotationsByGraphUri).forEach(function (graphUri) {
+                var graphAnnotations = annotationsByGraphUri[graphUri];
 
-                // A graph often holds several self describing nodes, one per vocabulary it imports :
-                // the node named like the graph is the one describing the source itself.
-                var ownDescriptions = graphDescriptions.filter(function (graphDescription) {
-                    return graphDescription.ontology.replace(trailingSlashRegex, "") == graphUri.replace(trailingSlashRegex, "");
+                // a graph describes several nodes, its imports included
+                var graphNodeAnnotations = graphAnnotations.filter(function (annotation) {
+                    return Ask.withoutTrailingSlash(annotation.ontology) == Ask.withoutTrailingSlash(graphUri);
                 });
-                var description = Ask.getBestAnnotation(ownDescriptions.length > 0 ? ownDescriptions : graphDescriptions, Ask.ontologyDescriptionPredicates);
+                var describingAnnotations = graphNodeAnnotations.length > 0 ? graphNodeAnnotations : graphAnnotations;
+                var description = Ask.getBestAnnotation(describingAnnotations, Ask.ontologyDescriptionPredicates);
+
                 sourceNamesByGraphUri[graphUri].forEach(function (sourceName) {
                     summaries.push({
                         source: sourceName,
@@ -239,8 +244,6 @@ var Ask = {
         });
     },
     /**
-
-     /**
      * build a path between  classes that are linked together including inherited from the class hierrachy
      * @param source
      * @param term1
@@ -579,19 +582,41 @@ var Ask = {
     ],
 
     /**
+     * a graph URI ends with a slash, the ontology node inside it often not
+     * @param uri
+     * @return {string}
+     */
+    withoutTrailingSlash: function (uri) {
+        var trailingSlashRegex = /\/$/;
+        return uri.replace(trailingSlashRegex, "");
+    },
+
+    /**
      * the descriptions the given graphs carry on the node describing themselves
      * @param graphUris
      * @return {string} sparql query returning ?graph ?ontology ?predicate ?value
      */
     getOntologyDescriptionsSparql: function (graphUris) {
-        var graphValues = "";
+        var graphTerms = graphUris.map(function (graphUri) {
+            return "<" + graphUri + ">";
+        });
+        var graphValues = graphTerms.join(" ");
+
+        // both spellings, the FILTER below keeps the one of the graph being read
+        var graphNodeTerms = [];
         graphUris.forEach(function (graphUri) {
-            graphValues += "<" + graphUri + "> ";
+            graphNodeTerms.push("<" + graphUri + ">");
+            var graphNodeUri = Ask.withoutTrailingSlash(graphUri);
+            if (graphNodeUri != graphUri) {
+                graphNodeTerms.push("<" + graphNodeUri + ">");
+            }
         });
-        var predicateValues = "";
-        Ask.ontologyDescriptionPredicates.forEach(function (predicate) {
-            predicateValues += "<" + predicate + "> ";
+        var graphNodeValues = graphNodeTerms.join(" ");
+
+        var predicateTerms = Ask.ontologyDescriptionPredicates.map(function (predicate) {
+            return "<" + predicate + ">";
         });
+        var predicateValues = predicateTerms.join(" ");
 
         return (
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
@@ -602,8 +627,16 @@ var Ask = {
             graphValues +
             "}" +
             " graph ?graph {" +
-            "  ?ontology rdf:type ?ontologyType." +
-            "  VALUES ?ontologyType {owl:Ontology skos:ConceptScheme}" +
+            "  {" +
+            "   ?ontology rdf:type ?ontologyType." +
+            "   VALUES ?ontologyType {owl:Ontology skos:ConceptScheme}" +
+            "  } UNION {" +
+            // a node named like its graph describes the source whether it declares a type or not
+            "   VALUES ?ontology {" +
+            graphNodeValues +
+            "}" +
+            '   FILTER (REPLACE(STR(?ontology), "/$", "") = REPLACE(STR(?graph), "/$", ""))' +
+            "  }" +
             "  ?ontology ?predicate ?value." +
             "  VALUES ?predicate {" +
             predicateValues +
@@ -614,19 +647,38 @@ var Ask = {
     },
 
     /**
-     * the value of the first predicate of the priority list the annotations carry
-     * @param annotations : [{predicate, value}]
+     * the value of the first predicate of the priority list the annotations carry, in english when a
+     * translation exists, else the lowest language tag rather than the endpoint row order
+     * @param annotations : [{predicate, value, language}]
      * @param predicatesByPriority
      * @return {string|null}
      */
     getBestAnnotation: function (annotations, predicatesByPriority) {
+        var englishLanguageRegex = /^en(-|$)/i;
         for (var priorityIndex = 0; priorityIndex < predicatesByPriority.length; priorityIndex++) {
             var predicate = predicatesByPriority[priorityIndex];
-            for (var annotationIndex = 0; annotationIndex < annotations.length; annotationIndex++) {
-                if (annotations[annotationIndex].predicate == predicate) {
-                    return annotations[annotationIndex].value;
-                }
+            var candidates = annotations.filter(function (annotation) {
+                return annotation.predicate == predicate;
+            });
+            if (candidates.length == 0) {
+                continue;
             }
+            var englishCandidate = candidates.find(function (annotation) {
+                return englishLanguageRegex.test(annotation.language || "");
+            });
+            if (englishCandidate) {
+                return englishCandidate.value;
+            }
+            candidates.sort(function (leftAnnotation, rightAnnotation) {
+                if (leftAnnotation.language != rightAnnotation.language) {
+                    return leftAnnotation.language < rightAnnotation.language ? -1 : 1;
+                }
+                if (leftAnnotation.value == rightAnnotation.value) {
+                    return 0;
+                }
+                return leftAnnotation.value < rightAnnotation.value ? -1 : 1;
+            });
+            return candidates[0].value;
         }
         return null;
     },

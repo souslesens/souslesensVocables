@@ -67,10 +67,9 @@ export default function () {
                         text: { type: "string", required: true, description: "Phrase to search for." },
                         indexes: {
                             type: "string[]",
-                            required: true,
                             description:
-                                "Index names to search, from sls_list_indexes. One call over ten indices costs the same as one call over one, so pass every plausible index " +
-                                "when you are looking for the best match. To cover a specific source, pass that index alone: in a wide search its hits are ranked against " +
+                                "Omitted, the search runs over every full-text index you can read, all sources at once, which costs the same as one index. " +
+                                "Otherwise, the index names to search: each is its source name in lowercase, and not every source has one. To cover a specific source, pass its index alone: in a wide search its hits are ranked against " +
                                 "everything else and can fall below the cut with no trace.",
                         },
                         size: { type: "number", description: "Maximum number of hits, counted across all indices together, not per index.", default: 10 },
@@ -89,7 +88,8 @@ export default function () {
                     // `size` hits back means the ranking was cut there, and the hits below the cut are
                     // the ones a caller searching a specific source most often wanted.
                     rowCeiling: { param: "size", escalation: "elastic" },
-                    statusHints: { 500: "Elasticsearch is unreachable or the index does not exist. Check the index name with sls_list_indexes." },
+                    paramDefaultsFromRoute: { indexes: "/elasticsearch/indices" },
+                    statusHints: { 500: "Elasticsearch is unreachable or the index does not exist: that source has no full-text index. Leave indexes out to search only the indices that exist." },
                 },
                 {
                     name: "sls_count_labels_by_source",
@@ -102,7 +102,12 @@ export default function () {
                         "which ranks partial matches instead of dropping them.",
                     params: {
                         text: { type: "string", required: true, description: "Phrase to count matches for." },
-                        indexes: { type: "string[]", required: true, description: "Index names to cover, from sls_list_indexes. Pass all of them: the cost does not grow with the count." },
+                        indexes: {
+                            type: "string[]",
+                            description:
+                                "Omitted, the count covers every full-text index you can read, all sources at once, which costs the same as one index. " +
+                                "Otherwise, the index names to cover: each is its source name in lowercase, and not every source has one.",
+                        },
                         fuzziness: { type: "string", description: 'Edit distance tolerated: "AUTO", "0" for exact matching, "1" or "2".', default: "AUTO" },
                     },
                     // size 0 asks Elasticsearch for the aggregation without any document, and the
@@ -123,7 +128,8 @@ export default function () {
                         },
                     },
                     resultShape: "elasticIndexCounts",
-                    statusHints: { 500: "Elasticsearch is unreachable or one of the indices does not exist. Check the names with sls_list_indexes." },
+                    paramDefaultsFromRoute: { indexes: "/elasticsearch/indices" },
+                    statusHints: { 500: "Elasticsearch is unreachable or one of the indices does not exist: not every source has a full-text index. Leave indexes out to cover only the indices that exist." },
                 },
             ],
         },

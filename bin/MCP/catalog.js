@@ -291,6 +291,9 @@ const restToolDeclarationSchema = z
             })
             .strict()
             .optional(),
+        // Maps a parameter the agent may leave out to the GET route whose answer then stands in for it,
+        // so a value the agent could only pick by calling that route first is picked here instead.
+        paramDefaultsFromRoute: z.record(z.string(), z.string().startsWith("/")).optional(),
         statusHints: z.record(z.string(), z.string().min(1)).optional(),
         // Declares that one HTTP status from this route is not a failure at all: the resource is
         // simply not materialized yet (a cache nothing has filled, a file nobody has built). Rather
@@ -381,6 +384,11 @@ function restToolDescriptor(toolDeclaration, routePath, httpMethod) {
             paramDefaults[paramName] = paramDeclaration.default;
         }
     }
+    for (const paramName of Object.keys(toolDeclaration.paramDefaultsFromRoute || {})) {
+        if (!properties[paramName] || requiredNames.includes(paramName)) {
+            throw new Error(`[mcp] ${declarationOrigin} tool "${toolDeclaration.name}" defaults "${paramName}" from a route, which needs an optional parameter of that name.`);
+        }
+    }
     if (toolDeclaration.navigableDocument) {
         Object.assign(properties, documentNavigationProperties);
     }
@@ -396,6 +404,7 @@ function restToolDescriptor(toolDeclaration, routePath, httpMethod) {
         query: toolDeclaration.query || null,
         body: toolDeclaration.body || null,
         paramDefaults: paramDefaults,
+        paramDefaultsFromRoute: toolDeclaration.paramDefaultsFromRoute || {},
         parseJsonPayload: Boolean(toolDeclaration.parseJsonPayload),
         emptyListWhenNull: Boolean(toolDeclaration.emptyListWhenNull),
         excludePromotedFunctions: Boolean(toolDeclaration.excludePromotedFunctions),

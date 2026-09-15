@@ -763,6 +763,22 @@ function resolveGuardedFunction(guard, registryByKey, toolArguments) {
  */
 async function executeRestTool(descriptor, registryByKey, toolArguments) {
     const effectiveArguments = { ...descriptor.paramDefaults, ...toolArguments };
+    for (const [paramName, defaultRoute] of Object.entries(descriptor.paramDefaultsFromRoute)) {
+        const suppliedValue = effectiveArguments[paramName];
+        const isOmitted = suppliedValue === undefined || suppliedValue === null || (Array.isArray(suppliedValue) && suppliedValue.length === 0);
+        if (!isOmitted) {
+            continue;
+        }
+        const defaultResult = await slsRequest("GET", defaultRoute);
+        if (!defaultResult.ok) {
+            return defaultResult;
+        }
+        // an empty index list reaches Elasticsearch as no index at all, which it reads as every index of the cluster
+        if (Array.isArray(defaultResult.data) && defaultResult.data.length === 0) {
+            return { ok: false, status: 404, data: null, errorMessage: `Nothing to use for "${paramName}": ${defaultRoute} answered an empty list.`, url: defaultResult.url };
+        }
+        effectiveArguments[paramName] = defaultResult.data;
+    }
     // A ceiling this server knows it asked for. The generic runner sets it from the injected
     // `options.limit`; a route declaring `rowCeiling` sets it from the parameter it named. Routes that
     // merely list what exists cap nothing and leave it undefined, so they get no notice: telling an

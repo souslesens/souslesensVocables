@@ -169,63 +169,54 @@ async function main() {
     });
     record("escape hatch refuses a write function", blockedWriteResult.isError === true, "");
 
-    const indexesResult = await client.callTool({ name: "sls_list_indexes", arguments: {} });
-    const indexesEnvelope = readEnvelope(indexesResult);
-    const availableIndexes = indexesEnvelope && Array.isArray(indexesEnvelope.data) ? indexesEnvelope.data : [];
-    record("sls_list_indexes", !indexesResult.isError, indexesResult.isError ? "Elasticsearch unreachable on this instance" : `${availableIndexes.length} indices`);
-
-    // Index names are lowercase and do not always match the source name, so look one up rather
-    // than taking the first of the list: the head of the list is full of throwaway test indices.
-    const indexForSource = availableIndexes.find((indexName) => indexName === sourceForQueries.toLowerCase());
-    if (indexForSource) {
-        const searchResult = await client.callTool({ name: "sls_search_labels", arguments: { text: "entity", indexes: [indexForSource] } });
-        const searchEnvelope = readEnvelope(searchResult);
-        const searchHits = searchEnvelope && searchEnvelope.data && Array.isArray(searchEnvelope.data.hits) ? searchEnvelope.data.hits : [];
-        const firstHit = searchHits[0];
-        record("sls_search_labels", !searchResult.isError && searchHits.length > 0, `${indexForSource}: ${searchHits.length} hits, top = ${firstHit ? firstHit.label : "none"}`);
+    const indexForSource = sourceForQueries.toLowerCase();
+    const searchResult = await client.callTool({ name: "sls_search_labels", arguments: { text: "entity", indexes: [indexForSource] } });
+    const searchEnvelope = readEnvelope(searchResult);
+    const searchHits = searchEnvelope && searchEnvelope.data && Array.isArray(searchEnvelope.data.hits) ? searchEnvelope.data.hits : [];
+    const firstHit = searchHits[0];
+    if (searchResult.isError) {
+        record("sls_search_labels on one index skipped", true, `no full-text index "${indexForSource}" or Elasticsearch unreachable`);
     } else {
-        record("sls_search_labels skipped", true, `no index named "${sourceForQueries.toLowerCase()}"`);
+        record("sls_search_labels on one index", searchHits.length > 0, `${indexForSource}: ${searchHits.length} hits, top = ${firstHit ? firstHit.label : "none"}`);
     }
 
-    // sls_list_indexes exists to be poured straight into sls_search_labels. One index the caller
+    // Without indexes the server fills them from GET /elasticsearch/indices. One index the caller
     // has no source for makes validateElasticSearchIndices reject the whole multi-index search, so
-    // "the list is searchable as a whole" is the only assertion that proves the filtering works.
-    if (availableIndexes.length > 0) {
-        const wideSearchResult = await client.callTool({ name: "sls_search_labels", arguments: { text: "pump", indexes: availableIndexes, size: 5 } });
-        const wideSearchEnvelope = readEnvelope(wideSearchResult);
-        const wideSearchHits = wideSearchEnvelope && wideSearchEnvelope.data && Array.isArray(wideSearchEnvelope.data.hits) ? wideSearchEnvelope.data.hits : [];
-        const searchedIndexes = new Set();
-        for (const hit of wideSearchHits) {
-            searchedIndexes.add(hit.index);
-        }
-        record(
-            "every index listed can be searched in one call",
-            !wideSearchResult.isError,
-            wideSearchResult.isError ? readEnvelope(wideSearchResult) : `${availableIndexes.length} indices at once, hits from ${searchedIndexes.size} of them`,
-        );
-
-        // The ranking was cut at `size` and what fell below it is the weaker matches, which is exactly
-        // the part a caller searching one specific source came for. A search says so too, or it lies
-        // by omission the same way a truncated SPARQL answer does.
-        const wideSearchCeiling = wideSearchEnvelope && wideSearchEnvelope.rowCeiling;
-        record(
-            "sls_search_labels reports a rowCeiling",
-            wideSearchHits.length === 0 || (Boolean(wideSearchCeiling) && completenessValues.includes(wideSearchCeiling.complete)),
-            wideSearchCeiling ? JSON.stringify(wideSearchCeiling).slice(0, 160) : "no rowCeiling on the answer",
-        );
-
-        // The reason sls_count_labels_by_source exists: a ranked search returns one global top-K,
-        // so the sources that rank lower vanish without a trace. The count must see strictly more
-        // sources than the search did, or the two tools are answering the same question.
-        const countedResult = await client.callTool({ name: "sls_count_labels_by_source", arguments: { text: "pump", indexes: availableIndexes } });
-        const countedEnvelope = readEnvelope(countedResult);
-        const countedSources = countedEnvelope && countedEnvelope.data && Array.isArray(countedEnvelope.data.sources) ? countedEnvelope.data.sources : [];
-        record(
-            "counting by source sees the sources a ranked search hides",
-            !countedResult.isError && countedSources.length > searchedIndexes.size,
-            countedResult.isError ? readEnvelope(countedResult) : `${countedSources.length} sources counted against ${searchedIndexes.size} reached by the ranked search`,
-        );
+    // "the default is searchable as a whole" is the only assertion that proves the filtering works.
+    const wideSearchResult = await client.callTool({ name: "sls_search_labels", arguments: { text: "pump", size: 5 } });
+    const wideSearchEnvelope = readEnvelope(wideSearchResult);
+    const wideSearchHits = wideSearchEnvelope && wideSearchEnvelope.data && Array.isArray(wideSearchEnvelope.data.hits) ? wideSearchEnvelope.data.hits : [];
+    const searchedIndexes = new Set();
+    for (const hit of wideSearchHits) {
+        searchedIndexes.add(hit.index);
     }
+    record(
+        "sls_search_labels without indexes searches every readable index in one call",
+        !wideSearchResult.isError,
+        wideSearchResult.isError ? readEnvelope(wideSearchResult) : `hits from ${searchedIndexes.size} indices`,
+    );
+
+    // The ranking was cut at `size` and what fell below it is the weaker matches, which is exactly
+    // the part a caller searching one specific source came for. A search says so too, or it lies
+    // by omission the same way a truncated SPARQL answer does.
+    const wideSearchCeiling = wideSearchEnvelope && wideSearchEnvelope.rowCeiling;
+    record(
+        "sls_search_labels reports a rowCeiling",
+        wideSearchHits.length === 0 || (Boolean(wideSearchCeiling) && completenessValues.includes(wideSearchCeiling.complete)),
+        wideSearchCeiling ? JSON.stringify(wideSearchCeiling).slice(0, 160) : "no rowCeiling on the answer",
+    );
+
+    // The reason sls_count_labels_by_source exists: a ranked search returns one global top-K,
+    // so the sources that rank lower vanish without a trace. The count must see strictly more
+    // sources than the search did, or the two tools are answering the same question.
+    const countedResult = await client.callTool({ name: "sls_count_labels_by_source", arguments: { text: "pump" } });
+    const countedEnvelope = readEnvelope(countedResult);
+    const countedSources = countedEnvelope && countedEnvelope.data && Array.isArray(countedEnvelope.data.sources) ? countedEnvelope.data.sources : [];
+    record(
+        "counting by source sees the sources a ranked search hides",
+        !countedResult.isError && countedSources.length > searchedIndexes.size,
+        countedResult.isError ? readEnvelope(countedResult) : `${countedSources.length} sources counted against ${searchedIndexes.size} reached by the ranked search`,
+    );
 
     const forbiddenSourceResult = await client.callTool({ name: "sls_top_concepts", arguments: { sourceLabel: "__no_such_source__" } });
     record("unknown source is refused by SLS", forbiddenSourceResult.isError === true, "");

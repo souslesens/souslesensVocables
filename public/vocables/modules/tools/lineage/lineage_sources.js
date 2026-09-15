@@ -681,13 +681,10 @@ var Lineage_sources = (function () {
             '<span  class="popupMenuItem" onclick="Lineage_sources.menuActions.sourceMetaData();"> MetaData </span>';
 
         if (source !== "_defaultSource") {
-            var isSourceEditable = self.isSourceEditableForUser(source);
-            // admins rebuild derived data of read-only sources too, the triples stay untouched
+            // admins manage read-only sources too, as model/sources.js grants them
             var isAdmin = authentication.currentUser.groupes.indexOf("admin") > -1;
-            if (isSourceEditable) {
+            if (isAdmin || self.isSourceEditableForUser(source)) {
                 html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.editSource();">Edit</span>';
-            }
-            if (isSourceEditable || isAdmin) {
                 html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.refreshIndexes();">Refresh indexes</span>';
                 html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.clearOntologyModelCache();">Refresh ontology model</span>';
             }

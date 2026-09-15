@@ -32,8 +32,7 @@ var CreateSLSVsource_bot = (function () {
 
     self.workflowUpload = {
         _OR: {
-            "Upload graph from file": { uploadFromFileFn: self.loadingWorkflow },
-            "Upload graph from URL": { uploadFromUrlFn: self.loadingWorkflow },
+            "Upload graph": { uploadFromFileFn: self.loadingWorkflow },
             "Add description": { addMetadata: self.workflowUploadwithoutDescription },
             Finish: self.loadingWorkflow,
         },
@@ -41,8 +40,7 @@ var CreateSLSVsource_bot = (function () {
 
     self.workflowUploadwithoutDescription = {
         _OR: {
-            "Upload graph from file": { uploadFromFileFn: self.loadingWorkflow },
-            "Upload graph from URL": { uploadFromUrlFn: self.loadingWorkflow },
+            "Upload graph": { uploadFromFileFn: self.loadingWorkflow },
             Finish: self.loadingWorkflow,
         },
     };
@@ -69,12 +67,7 @@ var CreateSLSVsource_bot = (function () {
         promptSourceNameFn: {
             _OR: {
                 "Create source from upload": {
-                    saveUploadSource: {
-                        _OR: {
-                            "Upload graph from file": { uploadFromFileFn: self.workflow2withoutUpload },
-                            "Upload graph from URL": { uploadFromUrlFn: self.workflow2withoutUpload },
-                        },
-                    },
+                    saveUploadSource: { uploadFromFileFn: self.workflow2withoutUpload },
                 },
                 "Define new source": { promptGraphUriFn: { validateGraphUriFn: self.workflow2 } },
             },
@@ -87,7 +80,7 @@ var CreateSLSVsource_bot = (function () {
         listImportsFn: "Add import ",
         saveFn: "Create source",
         uploadFromUrlFn: "Enter graph URL",
-        uploadFromFileFn: "Choose graph file",
+        uploadFromFileFn: "Upload graph",
         validateGraphUriFn: "validate GraphUri",
     };
     self.functions = {

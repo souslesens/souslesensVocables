@@ -662,6 +662,9 @@ var OntologyModels = (function () {
                 if (source) {
                     Config.ontologiesVocabularyModels[source] = null;
                     OntologyModels.registerSourcesModel(source, { noCache: true }, function (err, result) {
+                        if (err) {
+                            return callback(err);
+                        }
                         callback(null, "DONE");
                     });
                 } else {

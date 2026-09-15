@@ -516,6 +516,8 @@ var Lineage_sources = (function () {
                     {
                         indexProperties: 1,
                         indexNamedIndividuals: 1,
+                        // the model was just built by registerSource and is in use by the tool being opened
+                        skipOntologyModelRefresh: true,
                     },
                     function (err, _result) {
                         if (err) {

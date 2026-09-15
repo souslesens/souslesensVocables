@@ -11,7 +11,7 @@ export default function () {
     };
 
     ///// GET api/v1/sources
-    async function GET(req, res, next) {
+    async function GET(req, res, _next) {
         try {
             const userInfo = await userManager.getUser(req.user);
             let localSourceModel = sourceModel;
@@ -19,8 +19,7 @@ export default function () {
             const userSources = await localSourceModel.getUserSources(userInfo.user);
             res.status(200).json(successfullyFetched(userSources));
         } catch (err) {
-            res.status(err.status || 500).json(err);
-            next(err);
+            res.status(err.status || 500).json({ message: err.message || "An error occurred" });
         }
     }
     GET.apiDoc = {
@@ -36,7 +35,7 @@ export default function () {
     };
 
     ///// POST api/v1/sources
-    async function POST(req, res, next) {
+    async function POST(req, res, _next) {
         try {
             const userInfo = await userManager.getUser(req.user);
             const userLogin = userInfo.user.login;
@@ -56,26 +55,22 @@ export default function () {
 
             newSource = fixBooleanInObject(newSource);
 
-            await Promise.all(
-                Object.entries(newSource).map(async ([_key, value]) => {
-                    // if user is not admin, set owner=me and published=false
-                    if (!isAdmin) {
-                        value.owner = userLogin;
-                        value.published = false;
-                    }
-                    await sourceModel.addSource(value);
-                }),
-            );
+            // restrictAdmin also lets in the users allowed to create sources, addUserSource applies their rules
+            for (const sourceDescriptor of Object.values(newSource)) {
+                await sourceModel.addUserSource(userInfo.user, sourceDescriptor);
+            }
             const sources = await sourceModel.getAllSources();
             res.status(200).json(successfullyCreated(sources));
         } catch (err) {
-            res.status(err.status || 500).json(err);
-            next(err);
+            res.status(err.status || 500).json({ message: err.message || "An error occurred" });
         }
     }
     POST.apiDoc = {
         summary: "Create one or more sources (admin endpoint)",
-        description: "Admin variant of `POST /sources` without quota enforcement. Body is a map `sourceName → Source descriptor`. " + "Returns the full sources catalog after insertion.",
+        description:
+            "Admin variant of `POST /sources` without quota enforcement. Body is a map `sourceName → Source descriptor`. " +
+            "`restrictAdmin` also admits users allowed to create sources: for them the rules of `POST /sources` apply (private group, owner, unpublished, free `graphUri`). " +
+            "Returns the full sources catalog after insertion.",
         security: [{ restrictAdmin: [] }],
         operationId: "adminCreateSources",
         parameters: [

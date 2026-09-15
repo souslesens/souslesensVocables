@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { Chip, IconButton, Link, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TextField } from "@mui/material";
-import { Delete, Edit } from "@mui/icons-material";
+import { Delete, Edit, Public } from "@mui/icons-material";
 
 import { DeleteDialog } from "./DeleteDialog";
 import { getSourcesForUser, ServerSource } from "../Source";
 import { cleanUpText, fetchMe } from "../Utils";
 import { Severity } from "../user-settings";
 import { EditSourceDialog } from "./EditSourceDialog";
+import { PublishSourceDialog } from "./PublishSourceDialog";
 
-type DialogType = "delete" | "edit";
+type DialogType = "delete" | "edit" | "publish";
 type Order = "asc" | "desc";
 type User = {
     login: string;
@@ -16,7 +17,7 @@ type User = {
     maxNumberCreatedSource: number;
 };
 
-const initialDialog = { delete: false, edit: false };
+const initialDialog = { delete: false, edit: false, publish: false };
 const initialUser = { login: "", allowSourceCreation: false, maxNumberCreatedSource: 0 };
 
 interface UserSourcesProps {
@@ -27,7 +28,7 @@ type OrderByType = "name" | "graphUri" | "group";
 
 const UserSources = ({ handleSnackbar }: UserSourcesProps) => {
     const [filtering, setFiltering] = useState("");
-    const [isOpen, setIsOpen] = useState<{ edit: boolean; delete: boolean }>(initialDialog);
+    const [isOpen, setIsOpen] = useState<Record<DialogType, boolean>>(initialDialog);
     const [order, setOrder] = useState<Order>("asc");
     const [orderBy, setOrderBy] = useState<OrderByType>("name");
     const [selectedSource, setSelectedSource] = useState("");
@@ -76,6 +77,17 @@ const UserSources = ({ handleSnackbar }: UserSourcesProps) => {
         handleSnackbar(`The source '${selectedSource}' has been updated`);
     };
 
+    const onPublishSuccess = (ownedSources: ServerSource[]) => {
+        setSources(ownedSources);
+        handleSnackbar(`The source '${selectedSource}' has been published`);
+        const publishedSource = ownedSources.find((ownedSource) => ownedSource.name === selectedSource);
+        const loadedSource = window.Config.sources[selectedSource];
+        // Config.sources also carries the accessControl computed at login, keep it
+        if (publishedSource && loadedSource) {
+            window.Config.sources[selectedSource] = { ...loadedSource, group: publishedSource.group, published: publishedSource.published };
+        }
+    };
+
     const onOpenDialog = (dialogType: DialogType, sourceName?: string) => {
         setSelectedSource(sourceName ?? "");
         setIsOpen({ ...isOpen, [dialogType]: true });
@@ -115,6 +127,9 @@ const UserSources = ({ handleSnackbar }: UserSourcesProps) => {
                                     Group
                                 </TableSortLabel>
                             </TableCell>
+                            <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                Published
+                            </TableCell>
                             <TableCell></TableCell>
                         </TableRow>
                     </TableHead>
@@ -130,10 +145,21 @@ const UserSources = ({ handleSnackbar }: UserSourcesProps) => {
                                             <Link href={source.graphUri}>{source.graphUri}</Link>
                                         </TableCell>
                                         <TableCell align="center">{source.group ? <Chip label={source.group} size="small" /> : ""}</TableCell>
+                                        <TableCell align="center">{source.published ? <Chip color="success" label="public" size="small" /> : ""}</TableCell>
                                         <TableCell>
                                             <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                                                 <IconButton aria-label="edit" color="primary" onClick={() => onOpenDialog("edit", source.name)} size="small">
                                                     <Edit />
+                                                </IconButton>
+                                                <IconButton
+                                                    aria-label="publish"
+                                                    color="primary"
+                                                    disabled={source.published}
+                                                    onClick={() => onOpenDialog("publish", source.name)}
+                                                    size="small"
+                                                    title="Publish"
+                                                >
+                                                    <Public />
                                                 </IconButton>
                                                 <IconButton aria-label="delete" color="error" onClick={() => onOpenDialog("delete", source.name)} size="small">
                                                     <Delete />
@@ -153,6 +179,7 @@ const UserSources = ({ handleSnackbar }: UserSourcesProps) => {
                 isOpen={isOpen["delete"]}
                 title={`Delete ${selectedSource}`}
             />
+            <PublishSourceDialog isOpen={isOpen["publish"]} onClose={() => handleCloseDialog("publish")} onPublishSuccess={onPublishSuccess} sourceName={selectedSource} />
             <EditSourceDialog onClose={() => handleCloseDialog("edit")} onEditSuccess={onEditSuccess} open={isOpen["edit"]} sources={sources} sourceName={selectedSource} />
         </Stack>
     );

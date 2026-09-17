@@ -108,7 +108,7 @@ var Containers_query = (function () {
 
             var filterAncestorsTypeStr = "";
             if (options.filterAncestorsType) {
-                filterAncestorsTypeStr = "  ?ancestor ^rdfs:member <" + options.filterAncestorsType + ">\n";
+                filterAncestorsTypeStr = "  ?ancestor ^rdfs:member <" + options.filterAncestorsType + ">.\n";
             }
 
             var query =
@@ -120,6 +120,7 @@ var Containers_query = (function () {
                 " ?ancestorParent rdfs:member ?ancestor.\n" +
                 "  optional { ?ancestorParent rdfs:label ?ancestorParentLabel.}\n" +
                 "   optional { ?ancestor rdfs:label ?ancestorLabel.}\n" +
+                filterAncestorsTypeStr +
                 " ?ancestor rdfs:member* ?child. \n" +
                 "{select * where{\n" +
                 "   ?childParent rdfs:member ?child. \n" +

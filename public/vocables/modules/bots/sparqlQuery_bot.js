@@ -751,10 +751,9 @@ var SparqlQuery_bot = (function () {
                         filter = "FILTER (?object=<" + self.params.constraintClass + "> )";
                     }
                 }
-                if (self.params.constraintObject == "ObjectProperty") {
-                    if (constraintType == " subClassOfRestriction") {
-                        filter = "FILTER (?predicate=<" + self.params.constraintObjectProperty + ">)";
-                    }
+                // ?predicate is bound to owl:onProperty in the Restriction query, whatever the restriction side
+                if (self.params.constraintObject == "ObjectProperty" && self.params.constraintObjectProperty != "any") {
+                    filter = "FILTER (?predicate=<" + self.params.constraintObjectProperty + ">)";
                 }
                 self.getResourcesList("Restriction", null, filter, { withoutImports: 0 }, function (err, result) {
                     if (err) {
@@ -774,7 +773,8 @@ var SparqlQuery_bot = (function () {
                 } else if (self.params.constraintClass && self.params.constraintClass != "any") {
                     filter += "FILTER (?subject=<" + self.params.constraintClass + "> )"; //|| ?object=<" + self.params.constraintClass + ">)"
                 } else if (self.params.constraintObjectProperty && self.params.constraintObjectProperty != "any") {
-                    filter += "FILTER (?predicate=<" + self.params.constraintObjectProperty + ">)";
+                    // the property is the subject of its rdfs:domain / rdfs:range triple, ?predicate is already the constraint type
+                    filter += "FILTER (?subject=<" + self.params.constraintObjectProperty + ">)";
                 }
 
                 var map = {

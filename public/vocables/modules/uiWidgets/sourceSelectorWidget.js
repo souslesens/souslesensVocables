@@ -190,8 +190,14 @@ var SourceSelectorWidget = (function () {
         return treeData;
     };
 
-    self.addRecentSources = function (treeData) {
-        self.recentSources = JSON.parse(localStorage.getItem("recentSources"));
+    self.addRecentSources = function (treeData, sourcesSelection) {
+        var storedRecentSources = JSON.parse(localStorage.getItem("recentSources"));
+        if (storedRecentSources && sourcesSelection) {
+            storedRecentSources = storedRecentSources.filter(function (recentSource) {
+                return sourcesSelection.indexOf(recentSource) > -1;
+            });
+        }
+        self.recentSources = storedRecentSources;
         if (self.recentSources && self.recentSources.length > 0) {
             treeData.unshift({ id: "Recent", text: "Recent", type: "Folder", parent: "#" });
             for (let i = self.recentSources.length - 1; i >= 0; i--) {
@@ -216,8 +222,9 @@ var SourceSelectorWidget = (function () {
             jstreeOptions = {};
         }
 
-        var treeData = self.getSourcesJstreeData();
-        treeData = self.addRecentSources(treeData);
+        // jstreeOptions.sourcesSelection restricts the tree to a caller defined white list of sources
+        var treeData = self.getSourcesJstreeData(null, jstreeOptions.sourcesSelection);
+        treeData = self.addRecentSources(treeData, jstreeOptions.sourcesSelection);
 
         if (!jstreeOptions.contextMenu) {
             jstreeOptions.contextMenu = SourceSelectorWidget.getJstreeConceptsContextMenu();

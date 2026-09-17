@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Chip, IconButton, Link, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TextField } from "@mui/material";
-import { Delete, Edit, Share } from "@mui/icons-material";
+import { Delete, Edit, Reply } from "@mui/icons-material";
 
 import { DeleteDialog } from "./DeleteDialog";
 import { getSourcesForUser, ServerSource } from "../Source";
@@ -159,7 +159,8 @@ const UserSources = ({ handleSnackbar }: UserSourcesProps) => {
                                                     size="small"
                                                     title="Publish"
                                                 >
-                                                    <Share />
+                                                    {/* the share arrow of the social apps: Reply points left */}
+                                                    <Reply sx={{ transform: "scaleX(-1)" }} />
                                                 </IconButton>
                                                 <IconButton aria-label="delete" color="error" onClick={() => onOpenDialog("delete", source.name)} size="small">
                                                     <Delete />

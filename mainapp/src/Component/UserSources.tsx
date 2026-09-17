@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Chip, IconButton, Link, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TextField } from "@mui/material";
-import { Delete, Edit, Public } from "@mui/icons-material";
+import { Delete, Edit, Share } from "@mui/icons-material";
 
 import { DeleteDialog } from "./DeleteDialog";
 import { getSourcesForUser, ServerSource } from "../Source";
@@ -159,7 +159,7 @@ const UserSources = ({ handleSnackbar }: UserSourcesProps) => {
                                                     size="small"
                                                     title="Publish"
                                                 >
-                                                    <Public />
+                                                    <Share />
                                                 </IconButton>
                                                 <IconButton aria-label="delete" color="error" onClick={() => onOpenDialog("delete", source.name)} size="small">
                                                     <Delete />

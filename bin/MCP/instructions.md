@@ -53,7 +53,7 @@ the wrong source is the most common way to get nothing back.
 A label match is not a classification. `sls_search_labels` returns everything whose label contains
 the word, so searching "pump" also returns properties, requirements and dimensional specifications
 that merely mention pumps. "What kinds of X are there" is answered by resolving X to a URI and
-walking `sls_node_descendants` from it, then listing what the hierarchy returned and nothing else. If
+walking `sls_node_children` from it, then listing what the hierarchy returned and nothing else. If
 that hierarchy comes back short, say so; do not top it up with search hits that share the word, and
 never hand a search result set to the user as a list of subtypes.
 

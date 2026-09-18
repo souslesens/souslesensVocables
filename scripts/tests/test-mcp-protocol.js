@@ -100,7 +100,10 @@ async function main() {
     // own triples are where a language-tagged label reliably shows up.
     const firstConcept = topConceptRows[0] ? topConceptRows[0].topConcept : null;
     if (firstConcept) {
-        const nodeInfosResult = await client.callTool({ name: "sls_node_infos", arguments: { sourceLabel: sourceForQueries, conceptId: firstConcept, options: { getValuesLabels: true } } });
+        const nodeInfosResult = await client.callTool({
+            name: "sls_run_query_function",
+            arguments: { name: "getNodeInfos", module: "Sparql_generic", params: { sourceLabel: sourceForQueries, conceptId: firstConcept, options: { getValuesLabels: true } } },
+        });
         const nodeInfosEnvelope = readEnvelope(nodeInfosResult);
         const nodeInfoRows = nodeInfosEnvelope && Array.isArray(nodeInfosEnvelope.data) ? nodeInfosEnvelope.data : [];
         const siblingKeys = new Set();
@@ -233,9 +236,9 @@ async function main() {
     record("every tool traces back to a code declaration", undeclaredTools.length === 0, undeclaredTools.join(", ") || `${declaredSources.size} declarations`);
 
     // @mcpFixed must remove the key from the schema, not merely override it at call time.
-    const descendantsTool = listed.tools.find((tool) => tool.name === "sls_node_descendants");
-    const descendantsOptions = descendantsTool && descendantsTool.inputSchema.properties.options.properties;
-    record("@mcpFixed keys are absent from the input schema", Boolean(descendantsOptions) && !("descendants" in descendantsOptions) && !("excludeItself" in descendantsOptions), "");
+    const topConceptsTool = listed.tools.find((tool) => tool.name === "sls_top_concepts");
+    const topConceptsOptions = topConceptsTool && topConceptsTool.inputSchema.properties.options.properties;
+    record("@mcpFixed keys are absent from the input schema", Boolean(topConceptsOptions) && !("withoutImports" in topConceptsOptions) && !("skipTopClassFilter" in topConceptsOptions), "");
 
     // Concurrent tool calls must all answer: the caller context is per request, so nothing may leak
     // between them and nothing may serialise them here.

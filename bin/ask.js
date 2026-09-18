@@ -9,31 +9,71 @@ import { sourceModel } from "../model/sources.js";
 
 var Ask = {
     getTermClassesInfos: function (source, term, callback) {
+        var indexName = source.toLowerCase();
+        Ask.executeElasticQuery("/_search", term, indexName, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            var termUrisMap = {};
+            var hits = result.body.hits.hits;
+            hits.forEach(function (hit) {
+                termUrisMap[hit._source.id] = {
+                    id: hit._source.id,
+                    label: hit._source.label,
+                    ancestors: hit._source.parents,
+                    predicates: [],
+                    relations: [],
+                };
+            });
+            Ask.fillClassesInfos(source, termUrisMap, callback);
+        });
+    },
+    getUriClassesInfos: function (source, uri, callback) {
+        // characters that cannot sit inside a SPARQL IRIREF, so the uri cannot break out of <...>
+        var iriForbiddenCharactersRegex = /[\s<>"{}|\\^`]/;
+        if (iriForbiddenCharactersRegex.test(uri)) {
+            return callback("uri is not a valid IRI: " + uri);
+        }
+        var uriInfos = { id: uri, label: null, ancestors: [], predicates: [], relations: [] };
+        Ask.getSourceInfos(source, function (err, sourceInfos) {
+            if (err) {
+                return callback(err);
+            }
+            var query =
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+                "select distinct ?label ?ancestor from <" +
+                sourceInfos.graphUri +
+                "> where { optional { <" +
+                uri +
+                "> rdfs:label ?label } optional { <" +
+                uri +
+                "> rdfs:subClassOf+ ?ancestor filter (!isBlank(?ancestor)) } } limit 10000";
+            Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
+                if (err) {
+                    return callback(err);
+                }
+                var labels = [];
+                sparqlResult.results.bindings.forEach(function (binding) {
+                    if (binding.label && labels.indexOf(binding.label.value) < 0) {
+                        labels.push(binding.label.value);
+                    }
+                    if (binding.ancestor && uriInfos.ancestors.indexOf(binding.ancestor.value) < 0) {
+                        uriInfos.ancestors.push(binding.ancestor.value);
+                    }
+                });
+                // one label per language, sorted so the pick does not follow the endpoint row order
+                labels.sort();
+                uriInfos.label = labels.length > 0 ? labels[0] : null;
+                var uriInfosMap = {};
+                uriInfosMap[uri] = uriInfos;
+                Ask.fillClassesInfos(source, uriInfosMap, callback);
+            });
+        });
+    },
+    fillClassesInfos: function (source, termUrisMap, callback) {
         var sourceInfos = {};
-        var termUrisMap = {};
         async.series(
             [
-                // search terms and topClasses
-                function (callbackSeries) {
-                    var indexName = source.toLowerCase();
-                    Ask.executeElasticQuery("/_search", term, indexName, function (err, result) {
-                        if (err) {
-                            return callbackSeries(err);
-                        } else {
-                            var hits = result.body.hits.hits;
-                            hits.forEach(function (hit) {
-                                termUrisMap[hit._source.id] = {
-                                    id: hit._source.id,
-                                    label: hit._source.label,
-                                    ancestors: hit._source.parents,
-                                    predicates: [],
-                                    relations: [],
-                                };
-                            });
-                            return callbackSeries();
-                        }
-                    });
-                },
                 function (callbackSeries) {
                     Ask.getSourceInfos(source, function (err, result) {
                         if (err) {

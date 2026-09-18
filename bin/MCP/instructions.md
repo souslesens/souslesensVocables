@@ -14,14 +14,16 @@ it with the source name and the URI. When a lookup finds nothing, say so plainly
 
 ## Ask the high level question first
 
-Five tools take plain words and answer a whole question, running the chain of searches and queries
-you would otherwise write by hand. Try them before assembling that chain yourself.
+Six tools answer a whole question, running the chain of searches and queries you would otherwise
+write by hand. Try them before assembling that chain yourself.
 
 - `sls_ontology_summary`: which ontologies you have and what each one is about. First call when the
   source to use is not decided yet. It lists only the sources that carry a description; the others
   are in `sls_list_sources`.
 - `sls_knowledge_model_graph`: what a source is about. First call on a source you do not know.
 - `sls_term_infos`: what a term means, with its predicates and relations.
+- `sls_uri_infos`: the same description for one class already resolved to a URI. Reading a node is
+  this call, not a per-predicate chain.
 - `sls_two_terms_paths`: how two terms are connected.
 - `sls_terms_linked_classes`: what a term can be attached to, and through which property.
 

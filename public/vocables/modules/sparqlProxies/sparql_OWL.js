@@ -664,8 +664,12 @@ var Sparql_OWL = (function () {
             fromStr;
         var filterStr;
         var afterSubSelectPattern = "";
+        var subSelectClosing = "}}";
         if (!options.descendants) {
             filterStr = Sparql_common.setFilter("subject", classIds, null, { values: 1 });
+            // a limit here forbids Virtuoso to merge the sub-select with the ^rdfs:subClassOf pattern above:
+            // merged, its optimizer reads every rdfs:subClassOf of the store and checks the class last
+            subSelectClosing = "} LIMIT 10000}";
             query +=
                 "  WHERE {" +
                 "  ?superClass ^rdfs:subClassOf ?superClassSubClass\n" +
@@ -703,7 +707,7 @@ var Sparql_OWL = (function () {
 
         //   query+="filter(!isBlank(?superClassSubClass))"
 
-        query += "}}" + afterSubSelectPattern + "} LIMIT 10000";
+        query += subSelectClosing + afterSubSelectPattern + "} LIMIT 10000";
 
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         self.no_params = true;

@@ -286,7 +286,9 @@ var Lineage_whiteboard = (function () {
             }
             $("#lateralPanelDiv").load("./modules/tools/lineage/html/lateralPanel.html", function () {
                 Lineage_whiteboard.initWhiteboardTab();
-                Lineage_whiteboard.mountChatbotPlugin();
+
+                // !!!!! disable temporary chatbot
+              //  Lineage_whiteboard.mountChatbotPlugin();
                 //  Lineage_whiteboard.initClassesTab();
 
                 if (self._pendingDataLoaded) {

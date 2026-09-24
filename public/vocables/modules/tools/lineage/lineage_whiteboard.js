@@ -288,7 +288,7 @@ var Lineage_whiteboard = (function () {
                 Lineage_whiteboard.initWhiteboardTab();
 
                 // !!!!! disable temporary chatbot
-              //  Lineage_whiteboard.mountChatbotPlugin();
+                //  Lineage_whiteboard.mountChatbotPlugin();
                 //  Lineage_whiteboard.initClassesTab();
 
                 if (self._pendingDataLoaded) {

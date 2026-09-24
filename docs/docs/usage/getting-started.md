@@ -22,6 +22,18 @@ The initial setup workflow consists of four main steps:
 3. **Configure Sources** - Add data sources and upload RDF graphs
 4. **Set Access Permissions** - Grant profiles access to sources
 
+The following diagram shows the main entities involved in this workflow:
+
+```mermaid
+flowchart TB
+    Login --> User
+    User --> Profile
+    User --> UserData
+    Profile --> Tool
+    Profile --> Sources
+    Profile --> Databases
+```
+
 ## Step 1: Create Users
 
 The first step is to create user accounts that will access the SousLeSens instance.

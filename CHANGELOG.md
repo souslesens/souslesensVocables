@@ -2,6 +2,73 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.15.0](https://github.com/souslesens/souslesensVocables/compare/3.14.1...3.15.0) (2026-09-25)
+
+
+### Features
+
+* add virtuoso_sparql_load and virtuoso_sparql_pending_queries metrics ([dcefe05](https://github.com/souslesens/souslesensVocables/commit/dcefe058542f1e5a9df2411334c1d870053ba44c))
+* **ai:** run one LLM turn with tool calling, for a browser-side agent loop ([300e1a8](https://github.com/souslesens/souslesensVocables/commit/300e1a8fbe22aaf6defe9938f6327b2922aa6563))
+* **config:** add virtuoso load protection settings to ConfigEditor ([f4b08f8](https://github.com/souslesens/souslesensVocables/commit/f4b08f863e44a6ad602985293d671445e178d94f))
+* **configEditor:** rename profile sharing option and clarify help ([18aacc9](https://github.com/souslesens/souslesensVocables/commit/18aacc95076a7fe7d3e2dedc68dd253dc8a44003))
+* **lineage:** datatype property graph node ([fd31ca6](https://github.com/souslesens/souslesensVocables/commit/fd31ca63a50f306500e7c291b2979e7d4b361ca2))
+* **lineage:** dock the sls-chatbot plugin in the lateral panel ([e8c8edc](https://github.com/souslesens/souslesensVocables/commit/e8c8edcb31867ef142c003c7cc8682c660894c75))
+* **mcp:** answer "which sources contain this term" with one aggregation ([d684563](https://github.com/souslesens/souslesensVocables/commit/d684563e4798a7be1b0ebc0eed2a4e735be337b9))
+* **mcp:** erreur gestion on ask ([0f441c6](https://github.com/souslesens/souslesensVocables/commit/0f441c6b92382b22ad86409afc97ae45ac75e9a4))
+* **mcp:** exposse ask ([be257ac](https://github.com/souslesens/souslesensVocables/commit/be257ac264f6b12085c35678afdbd1e90e35c4a2))
+* **mcp:** let the SLS page speak MCP from the browser ([b7d9ed3](https://github.com/souslesens/souslesensVocables/commit/b7d9ed3bd937ad886ce7fc8a6cf7e658b6e2dbf1))
+* **mcp:** make truncation actionable instead of a dead end ([5810fc2](https://github.com/souslesens/souslesensVocables/commit/5810fc243ef416d92a6fbc436a03d1714ef742e7))
+* **mcp:** promote four query functions to first-class tools ([719956a](https://github.com/souslesens/souslesensVocables/commit/719956a1a48db1d296c9af26682c3aaeba450d41))
+* **mcp:** read oversized documents from the inside with _select and _grep ([7d8d593](https://github.com/souslesens/souslesensVocables/commit/7d8d59372e2de57300b11c9b4c4f3564a79388b8))
+* **mcp:** read-only MCP server whose catalog is derived from the code ([d62b8c4](https://github.com/souslesens/souslesensVocables/commit/d62b8c405c2cc7c0450bb130033ab29b8a77dad8))
+* **mcp:** report row ceiling and truncation notices for SPARQL and Elastic tools ([9fda151](https://github.com/souslesens/souslesensVocables/commit/9fda151d8449e7e85e1143a977517541d05a4d7f))
+* **mcp:** required params ask ([efa67e0](https://github.com/souslesens/souslesensVocables/commit/efa67e088c0d3d68f9b3d3932a6c64e76f12ded2))
+* **mcp:** server instructions, source cards, and metadata kept through flattening ([fdaa9e0](https://github.com/souslesens/souslesensVocables/commit/fdaa9e043079817a058593cd520682777c94db2f))
+* **mcp:** SPARQL select tool, result store and paged reads ([b68fe37](https://github.com/souslesens/souslesensVocables/commit/b68fe37b8c784419bfac53ed4fd5bd4ec2d826b1))
+* **mcp:** validate x-mcp declarations and cap concurrency towards SLS ([565eee0](https://github.com/souslesens/souslesensVocables/commit/565eee05fd47ae2e224c54b8e9d3fdb5513ed028))
+* **metrics:** add restrictVirtuosoLoad middleware to monitor Virtuoso server load ([a211857](https://github.com/souslesens/souslesensVocables/commit/a2118572819b33aa960c89675d3218110160921a))
+* **profiles:** add access control CSV export ([cd96969](https://github.com/souslesens/souslesensVocables/commit/cd96969f986f384299d171b627f6578ab7117366))
+* **profiles:** add per-profile Virtuoso load threshold for restrictVirtuosoLoad ([9a7a67e](https://github.com/souslesens/souslesensVocables/commit/9a7a67e8064fc7bd134e06fe0b7e8f78b6db29ef))
+* **profiles:** rename shared users toggle to users visibility ([db916bd](https://github.com/souslesens/souslesensVocables/commit/db916bddd823d66d84f705bc92630d331dc62e1e))
+* **quotas:** cap the triples and the user data entries a user may hold ([4de25cb](https://github.com/souslesens/souslesensVocables/commit/4de25cb7b56e0968b2e088d082324f4d1f49dada))
+* **userQuotas:** reword the sources row and reorder the quota table ([a1863d3](https://github.com/souslesens/souslesensVocables/commit/a1863d3336ad909537b8c788d946e76a28210fdd))
+
+
+### Bug Fixes
+
+* **ai:** make llm.<provider>.maxTokens the only authority on one turn's output ([a44b2d0](https://github.com/souslesens/souslesensVocables/commit/a44b2d0d25fcfb5d17e721d4211de725d19076c0))
+* **ai:** put the completion route behind admin, like the other LLM routes ([ef35742](https://github.com/souslesens/souslesensVocables/commit/ef357428abf2c8d38aabdf8d7eeeb82c095018ba))
+* **ask:** expose and correct claude's modifications ([1923d98](https://github.com/souslesens/souslesensVocables/commit/1923d98fd493b033aed4c349a2dbcc35c753e86e))
+* **configEditor:** allow null dataSource in source schema validation ([8380389](https://github.com/souslesens/souslesensVocables/commit/8380389958f5f88df675291fe2bd5729dff4dfab))
+* **deps:** pin zod to 3.25.30 so react-zorm typings stop exploding ([e17cbc5](https://github.com/souslesens/souslesensVocables/commit/e17cbc54a87b9f9dcbc3458a66cf9a99eb5588ae))
+* **lineage:** preserve per-row source and signal axioms draw completion ([0cf2427](https://github.com/souslesens/souslesensVocables/commit/0cf242761ada542c54af4771cd8dc2eadc4aab01))
+* **mainapp:** bundle a single copy of zod ([0827ae8](https://github.com/souslesens/souslesensVocables/commit/0827ae8205dfca3f8baeaf49f8bf5044c5c5c2d4))
+* **mainapp:** say when no database is reachable instead of an empty selector ([5b1e91e](https://github.com/souslesens/souslesensVocables/commit/5b1e91e0339337cfea69e9c06df74770780b05cc))
+* **mappingModeler:** refuse read only sources with an alert ([22174a7](https://github.com/souslesens/souslesensVocables/commit/22174a754c080c7f8550581f60c178bc51660305))
+* **mcp:** count every word of a phrase, not any of them ([4abc5af](https://github.com/souslesens/souslesensVocables/commit/4abc5af2a91c09ba48928d06b944fa4d9c3623d3))
+* **mcp:** dedupe OWL/generic query functions, hide promoted ones from discovery ([188983c](https://github.com/souslesens/souslesensVocables/commit/188983ce8415cb4f8f08e68b3b82cc33c65259db))
+* **mcp:** elastic mcp dedup ([1976f69](https://github.com/souslesens/souslesensVocables/commit/1976f69b8e7cf956df9066b75c311f0925745995))
+* **mcp:** elastic mcp params and dedup + basic prefixes on select ([0333017](https://github.com/souslesens/souslesensVocables/commit/03330174f5112387a1710f618e74c0a3c70fc53c))
+* **mcp:** keep fixing the anomalies found in the MCP audit ([d8c061d](https://github.com/souslesens/souslesensVocables/commit/d8c061db4dff6c7eeccd8976d656fe4ac2aff7bc))
+* **mcp:** mcp some reverts + use only sourceLabel on MCP + elegates comment ([9dd97dd](https://github.com/souslesens/souslesensVocables/commit/9dd97dd36f9e6ded0cdbb7080cf2fdd1528c6566))
+* **mcp:** only list the Elasticsearch indices the caller can actually search ([ed20df3](https://github.com/souslesens/souslesensVocables/commit/ed20df33a8d05026b1cef06a8070f0a536f1f54e))
+* **mcp:** refuse to start when the backend declares no x-mcp tool at all ([ed875d5](https://github.com/souslesens/souslesensVocables/commit/ed875d5e374690c0aece74a0f11ca5bfba74fba9))
+* **mcp:** say when a match total is a floor, not a figure ([09f5595](https://github.com/souslesens/souslesensVocables/commit/09f559547872c46e9879b915e8e4e6bf92e30c2d))
+* **mcp:** sparql_owl descendants ([9b0ba47](https://github.com/souslesens/souslesensVocables/commit/9b0ba471d704424b99169952daf79905db888c86))
+* **OntoCreator:** return clear error when source already exists ([83583ef](https://github.com/souslesens/souslesensVocables/commit/83583ef5fb51e44351151bdadfec241c435316d0))
+* **Pierre:** mcp fix getNodesAncestors descendants parameters and row celling , depthCeilling parameters for agents ([95465a3](https://github.com/souslesens/souslesensVocables/commit/95465a3bdc506cec6eff2efc6d49738b5305035d))
+* **quotas:** report the source quota as unlimited for admins ([9590171](https://github.com/souslesens/souslesensVocables/commit/95901710c93687adaa35f85b2472313d396eae73))
+* **quotas:** resolve limits from profiles only, exempt admins, deny by default ([b379617](https://github.com/souslesens/souslesensVocables/commit/b379617d60eb08e703de55466d1ab1012c47b873))
+* **search:** scope named individuals to source graph while resolving imported types ([def83d4](https://github.com/souslesens/souslesensVocables/commit/def83d4427460341b019cb675197910e23fb13cb))
+* **security:** protect read-only sources and guard the unprotected write routes ([b727614](https://github.com/souslesens/souslesensVocables/commit/b727614fb7a248eeb4ce6f6a49bd47c6b4adbe0e))
+* **security:** read accessControl off the source, not off its name ([e07d30d](https://github.com/souslesens/souslesensVocables/commit/e07d30d207a7e337dfb253b7b0d5c4bab2a3af4a))
+* **sources:** sanitize tabs from CSV export ([274162d](https://github.com/souslesens/souslesensVocables/commit/274162d6272a93e0d4b1943e1c930c4c94057557))
+* **sparql_owl:** metadataoptions for restrictions and  top class fix parameters ([789a979](https://github.com/souslesens/souslesensVocables/commit/789a9790b4090640771ca2aeb3535fb2da34edd2))
+* **sparql:** exclude blank taxonomy children and fix dropped query clauses ([f16dd86](https://github.com/souslesens/souslesensVocables/commit/f16dd86658b4398c47d7e15cdc7b7275befa94fa))
+* **sparql:** indexes multiple parent auto reference and cyclic errors ([67e97e5](https://github.com/souslesens/souslesensVocables/commit/67e97e59171d742575449d50b462c445e4950479))
+* **sparql:** indexes multiple parent auto reference and cyclic errors ([8f9fd5a](https://github.com/souslesens/souslesensVocables/commit/8f9fd5a2b8b93e72a5de955057417de4aa66efaf))
+* **sparql:** indexes multiple parent auto reference and cyclic errors ([4f3628e](https://github.com/souslesens/souslesensVocables/commit/4f3628ef71d208d8f30729419327fbd40fc0a371))
+
 ### [3.14.1](https://github.com/souslesens/souslesensVocables/compare/3.14.0...3.14.1) (2026-08-17)
 
 

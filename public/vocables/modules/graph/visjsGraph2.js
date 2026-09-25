@@ -684,8 +684,7 @@ var visjsGraph = (function () {
         visjsGraph.data.nodes.update(newNodes);
     };
     self.toSVG = function () {
-        SVGexport.toSVG(self.network);
-        self.redraw();
+        SVGexport.toSVG(self);
     };
 
     self.toGraphMl = function () {

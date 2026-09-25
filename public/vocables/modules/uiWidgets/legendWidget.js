@@ -6,7 +6,6 @@ var LegendWidget = (function () {
     var self = {};
     self.currentLegendDJstreedata = {};
     self.legendDivsStack = {};
-    self.legendNodeStates = {};
 
     self.clearLegend = function () {
         self.legendDivsStack = {};
@@ -82,22 +81,69 @@ var LegendWidget = (function () {
         }
     };
 
-    self.getNodeState = function (nodeId) {
-        if (!self.legendNodeStates[nodeId]) {
-            self.legendNodeStates[nodeId] = { isHidden: false, hideOthersActive: false, isGrouped: false };
+    /**
+     * Computes the current state of a legend entry from the graph itself, so that every legend context menu
+     * reflects the actions triggered from the other ones.
+     * @function
+     * @name getLegendNodeState
+     * @memberof LegendWidget
+     * @param {Object} legendNode - The jstree legend node.
+     * @returns {{isHidden: boolean, hideOthersActive: boolean, isGrouped: boolean}} The derived state of the legend entry.
+     */
+    self.getLegendNodeState = function (legendNode) {
+        var state = { isHidden: false, hideOthersActive: false, isGrouped: false };
+        if (!legendNode || !legendNode.original) {
+            return state;
         }
-        return self.legendNodeStates[nodeId];
+        var allNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+        var legendNodesCount = 0;
+        var hiddenLegendNodesCount = 0;
+        var otherNodesCount = 0;
+        var hiddenOtherNodesCount = 0;
+        allNodes.forEach(function (node) {
+            if (legendNode.id == node.id) {
+                state.isGrouped = true;
+            }
+            if (legendNode.original.color == node.color || legendNode.id == node.id) {
+                legendNodesCount += 1;
+                if (node.hidden) {
+                    hiddenLegendNodesCount += 1;
+                }
+            } else {
+                otherNodesCount += 1;
+                if (node.hidden) {
+                    hiddenOtherNodesCount += 1;
+                }
+            }
+        });
+        state.isHidden = legendNodesCount > 0 && hiddenLegendNodesCount == legendNodesCount;
+        // "show others" only makes sense while this legend entry is the visible one
+        state.hideOthersActive = !state.isHidden && otherNodesCount > 0 && hiddenOtherNodesCount == otherNodesCount;
+        return state;
     };
 
     self.getLegendJstreeContextMenu = function () {
         var items = {};
         var currentNode = self.currentLegendNode;
-        var state = self.getNodeState(currentNode.id);
+        var state = self.getLegendNodeState(currentNode);
+
+        var hideShowNodesLabel = "Hide nodes";
+        if (state.isHidden) {
+            hideShowNodesLabel = "Show nodes";
+        }
+        var hideShowOthersLabel = "Hide others";
+        if (state.hideOthersActive) {
+            hideShowOthersLabel = "Show others";
+        }
+        var groupUngroupLabel = "Group nodes";
+        if (state.isGrouped) {
+            groupUngroupLabel = "Ungroup nodes";
+        }
 
         items.hideShowNodes = {
-            label: state.isHidden ? "Show nodes" : "Hide nodes",
+            label: hideShowNodesLabel,
             action: function (_e) {
-                var nodeState = self.getNodeState(currentNode.id);
+                var nodeState = self.getLegendNodeState(currentNode);
                 var allNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
                 var newNodes = [];
                 if (nodeState.isHidden) {
@@ -107,7 +153,6 @@ var LegendWidget = (function () {
                         }
                     });
                     $("#Lineage_source_" + Lineage_sources.activeSource).removeClass("lineage_hiddenSource");
-                    nodeState.isHidden = false;
                 } else {
                     allNodes.forEach(function (node) {
                         if (currentNode.original.color == node.color || currentNode.id == node.id) {
@@ -115,22 +160,21 @@ var LegendWidget = (function () {
                         }
                     });
                     $("#Lineage_source_" + Lineage_sources.activeSource).addClass("lineage_hiddenSource");
-                    nodeState.isHidden = true;
                 }
                 Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
             },
         };
         items.hideShowOthers = {
-            label: state.hideOthersActive ? "Show others" : "Hide others",
+            label: hideShowOthersLabel,
             action: function (_e) {
-                var nodeState = self.getNodeState(currentNode.id);
+                var nodeState = self.getLegendNodeState(currentNode);
                 var allNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
                 var newNodes = [];
                 if (nodeState.hideOthersActive) {
                     allNodes.forEach(function (node) {
                         newNodes.push({ id: node.id, hidden: false });
                     });
-                    nodeState.hideOthersActive = false;
+                    $("#Lineage_source_" + Lineage_sources.activeSource).removeClass("lineage_hiddenSource");
                 } else {
                     allNodes.forEach(function (node) {
                         if (currentNode.original.color == node.color || currentNode.id == node.id) {
@@ -139,21 +183,19 @@ var LegendWidget = (function () {
                             newNodes.push({ id: node.id, hidden: true });
                         }
                     });
-                    nodeState.hideOthersActive = true;
                 }
                 Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
             },
         };
         items.groupUngroup = {
-            label: state.isGrouped ? "Ungroup nodes" : "Group nodes",
+            label: groupUngroupLabel,
             action: function (_e) {
                 var node = self.currentLegendNode;
-                var nodeState = self.getNodeState(node.id);
+                var nodeState = self.getLegendNodeState(node);
                 if (nodeState.isGrouped) {
                     if (node && node.id) {
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(node.id);
                     }
-                    nodeState.isGrouped = false;
                 } else {
                     self.getEdgeBetweenLegendAndNodes(node, function (err, result) {
                         if (err) {
@@ -202,7 +244,6 @@ var LegendWidget = (function () {
                             }
                             Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
                             Lineage_whiteboard.lineageVisjsGraph.data.edges.update(visjsData.edges);
-                            nodeState.isGrouped = true;
                         }
                     });
                 }

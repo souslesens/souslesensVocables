@@ -681,9 +681,9 @@ var Lineage_sources = (function () {
             '<span  class="popupMenuItem" onclick="Lineage_sources.menuActions.sourceMetaData();"> MetaData </span>';
 
         if (source !== "_defaultSource") {
-            // admins manage read-only sources too, as model/sources.js grants them
+            // admins and owners manage read-only sources too, as model/sources.js grants them
             var isAdmin = authentication.currentUser.groupes.indexOf("admin") > -1;
-            if (isAdmin || self.isSourceEditableForUser(source)) {
+            if (isAdmin || self.isSourceOwnedByUser(source) || self.isSourceEditableForUser(source)) {
                 html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.editSource();">Edit</span>';
                 html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.refreshIndexes();">Refresh indexes</span>';
                 html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.clearOntologyModelCache();">Refresh ontology model</span>';

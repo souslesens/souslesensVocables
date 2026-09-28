@@ -92,7 +92,9 @@ var CreateSLSVsource_bot = (function () {
         },
         promptSourceNameFn: function () {
             self.myBotEngine.promptValue("source label", "sourceLabel", "", null, function (value) {
-                if (!value) {
+                var sourceNameError = Lineage_createSLSVsource.validateSourceName(value);
+                if (sourceNameError) {
+                    alert(sourceNameError);
                     return self.myBotEngine.previousStep();
                 }
                 self.params.sourceLabel = value;
@@ -103,13 +105,9 @@ var CreateSLSVsource_bot = (function () {
             self.myBotEngine.promptValue("graph Uri", "graphUri", "http://", { expandDialog: true });
         },
         validateGraphUriFn: function () {
-            // check that graphUri is a valid URL using URL constructor.
-            // this is the same method used by zod
-            // https://zod.dev/api?id=urls
-            try {
-                new URL(self.params.graphUri);
-            } catch {
-                alert("graphUri is not a correct URL");
+            var graphUriError = Lineage_createSLSVsource.validateGraphUri(self.params.graphUri);
+            if (graphUriError) {
+                alert(graphUriError);
                 return self.myBotEngine.previousStep();
             }
             self.myBotEngine.nextStep();
@@ -257,8 +255,9 @@ var CreateSLSVsource_bot = (function () {
                     alert("graphUri not found in the source file, please enter it manually");
                     // Enter it manually and continue worflow
                     return self.myBotEngine.promptValue("enter manually graphUri", "graphUri", self.params.graphUri, null, function (value) {
-                        if (!value) {
-                            alert("enter a value ");
+                        var graphUriError = Lineage_createSLSVsource.validateGraphUri(value);
+                        if (graphUriError) {
+                            alert(graphUriError);
                             return self.myBotEngine.previousStep();
                         }
                         self.params.graphUri = value;

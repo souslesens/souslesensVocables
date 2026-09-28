@@ -84,6 +84,61 @@ var Lineage_createSLSVsource = (function () {
         });
     };
 
+    // mirrors mainapp/src/Source.ts, the ConfigEditor form refuses a name this regex rejects
+    self.sourceNameRegex = /^[A-Za-z0-9][A-Za-z0-9_-]{1,254}$/;
+
+    /**
+     * Applies to a source name the rules the ConfigEditor form applies: the name becomes the
+     * ElasticSearch index name once lowercased, so it must be a legal index name and stay unique
+     * after that lowercasing.
+     * @function
+     * @name validateSourceName
+     * @memberof Lineage_createSLSVsource
+     * @param {string} sourceName - the name a user entered
+     * @returns {string|null} the message to show, null when the name is acceptable
+     */
+    self.validateSourceName = function (sourceName) {
+        if (!sourceName) {
+            return "enter source name";
+        }
+        if (!self.sourceNameRegex.test(sourceName)) {
+            return "Name must contain 2 to 255 alphanum, - or _ chars, and start with an alphanum char";
+        }
+        var indexName = sourceName.toLowerCase();
+        if (indexName === "admin") {
+            return "Name can't be admin";
+        }
+        var existingIndexNames = Object.keys(Config.sources).map(function (existingSourceName) {
+            return existingSourceName.toLowerCase();
+        });
+        if (existingIndexNames.indexOf(indexName) > -1) {
+            return "This name is already used by another source once lowercased";
+        }
+        return null;
+    };
+
+    /**
+     * Applies to a graphUri the rule the ConfigEditor form applies, whose zod url() validator is
+     * the URL constructor.
+     * https://zod.dev/api?id=urls
+     * @function
+     * @name validateGraphUri
+     * @memberof Lineage_createSLSVsource
+     * @param {string} graphUri - the URI a user entered
+     * @returns {string|null} the message to show, null when the URI is acceptable
+     */
+    self.validateGraphUri = function (graphUri) {
+        if (!graphUri) {
+            return "enter source graphUri";
+        }
+        try {
+            new URL(graphUri);
+        } catch {
+            return "graphUri is not a correct URL";
+        }
+        return null;
+    };
+
     /**
      * Creates a new source with the specified parameters.
      * Validates input values and writes the source metadata.
@@ -94,15 +149,17 @@ var Lineage_createSLSVsource = (function () {
      * @param {string} graphUri - The URI of the source graph.
      * @param {Array<string>} imports - An array of URIs to be imported into the source.
      * @param {Function} callback - A callback function executed after the source creation.
-     * @returns {void|string} Returns an error message if validation fails, otherwise void.
+     * @returns {void}
      */
     self.createSource = function (sourceName, graphUri, imports, callback) {
         var user = Authentification.currentUser.login;
-        if (!sourceName) {
-            return "enter source name";
+        var sourceNameError = self.validateSourceName(sourceName);
+        if (sourceNameError) {
+            return callback(sourceNameError);
         }
-        if (!graphUri) {
-            return "enter source graphUri";
+        var graphUriError = self.validateGraphUri(graphUri);
+        if (graphUriError) {
+            return callback(graphUriError);
         }
         var userPrivateProfile = "PRIVATE/" + user;
         var sourceConfig = {};

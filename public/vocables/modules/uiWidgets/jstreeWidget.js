@@ -768,12 +768,13 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         $("#" + divId)
             .jstree(true)
             .deselect_all();
+        // jstree loads data in a worker: a refresh started before the previous one ends restores an empty state, so each refresh reopens the tree
+        $("#" + divId).off("refresh.jstree");
         if (options.openAll) {
             $("#" + divId).on("refresh.jstree", function () {
                 $("#" + divId)
                     .jstree(true)
                     .open_all();
-                $("#" + divId).off("refresh.jstree");
             });
         }
         $("#" + divId)

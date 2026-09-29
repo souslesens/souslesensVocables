@@ -1425,7 +1425,7 @@ var MappingModeler = (function () {
             }
         });
 
-        JstreeWidget.updateJstree("suggestionsSelectJstreeDiv", newData);
+        JstreeWidget.updateJstree("suggestionsSelectJstreeDiv", newData, { openAll: true });
     };
 
     /**

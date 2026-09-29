@@ -661,8 +661,16 @@ var KGquery_graph = (function () {
         self.visjsData = null;
 
         options.callback = function () {
+            var savedNodes = self.KGqueryGraph.data.nodes.get();
+            // a dragged node moves in the network only, its DataSet x/y stay those of the first draw
+            savedNodes.forEach(function (node) {
+                if (positions[node.id]) {
+                    node.x = positions[node.id].x;
+                    node.y = positions[node.id].y;
+                }
+            });
             self.visjsData = {};
-            self.visjsData.nodes = self.KGqueryGraph.data.nodes.get();
+            self.visjsData.nodes = savedNodes;
             self.visjsData.edges = self.KGqueryGraph.data.edges.get();
             self.visjsDataSource = KGquery.currentSource;
             if (callback) {

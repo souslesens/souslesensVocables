@@ -2,6 +2,7 @@ import common from "../../shared/common.js";
 import Authentification from "../../shared/authentification.js";
 import CreateSLSVsource_bot from "../../bots/createSLSVsource_bot.js";
 import UI from "../../shared/UI.js";
+import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 
 /**
  * @module Lineage_createSLSVsource
@@ -226,9 +227,7 @@ var Lineage_createSLSVsource = (function () {
                 headers: {},
             },
             controller: "Sparql_OWL",
-            // Empty means "use the default top-class query computed by Sparql_OWL.getTopConcepts
-            // from the source taxonomyPredicates".
-            topClassFilter: "",
+            topClassFilter: Sparql_OWL.defaultTopClassFilter,
             schemaType: "OWL",
             dataSource: {
                 type: "",

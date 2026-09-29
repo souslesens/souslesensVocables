@@ -2084,30 +2084,33 @@ var OntologyModels = (function () {
             async.eachSeries(
                 chunks,
                 function (classChunk, callbackEach) {
-                    var valuesStr = classChunk
-                        .map(function (uri) {
-                            return "<" + uri + ">";
-                        })
-                        .join(" ");
-                    var query2 =
+                    // UNION rather than VALUES, far faster on Virtuoso
+                    var classBranches = classChunk.map(function (classUri) {
+                        var classIri = "<" + classUri + ">";
+                        var branchLines = [
+                            "  { ?s rdf:type " + classIri + ".",
+                            "    ?s ?prop ?v.",
+                            "    bind (" + classIri + " as ?class)",
+                            "    bind (datatype(?v) as ?datatype)",
+                            "    filter (?prop not in (<http://souslesens.org/KGcreator#mappingFile>,<http://purl.org/dc/terms/created>))",
+                            "  }",
+                        ];
+                        return branchLines.join("\n");
+                    });
+                    var classBranchesUnion = classBranches.join("\n  UNION\n");
+                    var classChunkQuery =
                         "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
                         "SELECT distinct ?class ?prop ?datatype FROM <" +
                         sourceGraphUri +
                         "> WHERE {\n" +
-                        "  VALUES ?class { " +
-                        valuesStr +
-                        " }\n" +
-                        "  ?s rdf:type ?class.\n" +
-                        "  ?s ?prop ?v.\n" +
-                        "  bind (datatype(?v) as ?datatype)\n" +
-                        "  filter (?prop not in (<http://souslesens.org/KGcreator#mappingFile>,<http://purl.org/dc/terms/created>))\n" +
+                        classBranchesUnion +
                         "\n" +
                         filterStr +
                         "}";
 
-                    Sparql_proxy.querySPARQL_GET_proxy(url, query2, null, {}, function (err, result) {
+                    Sparql_proxy.querySPARQL_GET_proxy(url, classChunkQuery, null, {}, function (err, result) {
                         if (err) {
                             return callbackEach(err);
                         }

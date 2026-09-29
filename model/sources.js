@@ -8,7 +8,6 @@ import { profileModel } from "./profiles.js";
  * @typedef {import("./SourceTypes").Source} Source
  * @typedef {import("./SourceTypes").SourceWithAccessControl} SourceWithAccessControl
  * @typedef {import("./profiles").ProfileModel} ProfileModel
- * @typedef {import("./ProfileTypes").Profile} Profile
  */
 
 const lock = new Lock();
@@ -76,35 +75,24 @@ class SourceModel {
     };
 
     /**
-     * @param {UserAccount} user -  a user account
-     * @returns {Promise<[string, Profile][]>} the profiles the user belongs to, by group or by login
-     */
-    _getUserProfilesList = async (user) => {
-        const profiles = await this.profileModel.getAllProfiles();
-        const profilesList = Object.entries(profiles);
-        return profilesList.filter(([profileName, _profile]) => user.groups.includes(profileName) || profileName == user.login);
-    };
-
-    /**
-     * @param {Record<string, string>} sourcesAccessControl - a profile access control, keyed by tree path
-     * @param {string} treePath - a `<schemaType>/<group>[/<sourceName>]` path
-     * @returns {string} the access control of the closest parent path, "" when none matches
-     */
-    _getClosestAccessControl = (sourcesAccessControl, treePath) => {
-        const accessEntries = Object.entries(sourcesAccessControl);
-        const parentEntries = accessEntries.filter(([accessPath, _accessControl]) => treePath === accessPath || treePath.startsWith(`${accessPath}/`));
-        const closestParent = parentEntries.reduce((closest, current) => (closest[0].length >= current[0].length ? closest : current), ["", ""]);
-        return closestParent[1];
-    };
-
-    /**
      * @param {Record<string, Source>} sources -  a collection of sources
      * @param {UserAccount} user -  a user account
      * @returns {Promise<Record<string, SourceWithAccessControl>>} a collection of sources
      */
     _getAllowedSources = async (sources, user) => {
+        const profiles = await this.profileModel.getAllProfiles();
+        // convert objects to lists
+        const profilesList = Object.entries(profiles);
         const sourcesList = Object.entries(sources);
-        const userProfilesList = await this._getUserProfilesList(user);
+        // get profiles of user
+        const userProfilesList = profilesList.filter(([profileName, profile]) => {
+            if (user.groups.includes(profileName)) {
+                return [profileName, profile];
+            }
+            if (profileName == user.login) {
+                return [profileName, profile];
+            }
+        });
         // get [[<sourceName>, <accessControl>]] list
         const allAccessControl = userProfilesList.flatMap(([_k, profile]) => {
             const sourcesAccessControl = profile.sourcesAccessControl;
@@ -116,8 +104,18 @@ class SourceModel {
                     }
                 })
                 .map(([sourceName, source]) => {
-                    const treeStr = [source.schemaType, source.group, sourceName].join("/");
-                    return [sourceName, this._getClosestAccessControl(sourcesAccessControl, treeStr)];
+                    const schemaType = source.schemaType;
+                    const group = source.group;
+                    const treeStr = [schemaType, group, sourceName].join("/");
+                    // find the closest parent accessControl
+                    const closestParent = Object.entries(sourcesAccessControl)
+                        .filter(([k, v]) => {
+                            if (treeStr === k || treeStr.startsWith(`${k}/`)) {
+                                return [k, v];
+                            }
+                        })
+                        .reduce((acc, current) => (acc[0].length >= current[0].length ? acc : current), ["", ""]);
+                    return [sourceName, closestParent[1]];
                 });
         });
 
@@ -275,7 +273,7 @@ class SourceModel {
 
     /**
      * addSource for a user. A non admin creates a private unpublished source it owns, on a graph
-     * no other source declares: making it visible goes through publishSource.
+     * no other source declares.
      * @param {UserAccount} user - a user account
      * @param {Source} newSource - a source
      */
@@ -335,69 +333,6 @@ class SourceModel {
         }
         this._checkSourceOwner(user, storedSource);
         return this.deleteSource(sourceNameId);
-    };
-
-    /**
-     * Groups the owner of a source may publish it into: the groups of the existing sources and
-     * the groups named in the profiles, kept when a profile grants readwrite on
-     * `<schemaType of the source>/<group>`. Private groups are never proposed.
-     * @param {UserAccount} user - a user account
-     * @param {string} sourceName - a source owned by the user
-     * @returns {Promise<string[]>} the publishable groups, sorted by name
-     */
-    getPublishableGroups = async (user, sourceName) => {
-        const sources = await this._read();
-        const source = sources[sourceName];
-        if (!source) {
-            const error = new Error(`Source ${sourceName} does not exist`);
-            error.status = 404;
-            throw error;
-        }
-        this._checkSourceOwner(user, source);
-        const isAdmin = this.isAdmin(user);
-
-        const allSources = Object.values(sources);
-        const userProfilesList = isAdmin ? [] : await this._getUserProfilesList(user);
-        const userProfiles = userProfilesList.map(([_profileName, profile]) => profile);
-        const schemaProfiles = userProfiles.filter((profile) => profile.allowedSourceSchemas.includes(source.schemaType));
-        const schemaPrefix = `${source.schemaType}/`;
-
-        const candidateGroups = new Set(allSources.map((existingSource) => existingSource.group));
-        const sourceGroupPaths = allSources.map((existingSource) => `${existingSource.group}/${existingSource.name}`);
-        for (const profile of schemaProfiles) {
-            for (const [accessPath, accessControl] of Object.entries(profile.sourcesAccessControl)) {
-                const groupPath = accessPath.slice(schemaPrefix.length);
-                // a path ending with a source name grants that source only, it names no group
-                if (accessControl === "readwrite" && accessPath.startsWith(schemaPrefix) && !sourceGroupPaths.includes(groupPath)) {
-                    candidateGroups.add(groupPath);
-                }
-            }
-        }
-
-        const publishableGroups = [...candidateGroups].filter((group) => {
-            if (!group || group.startsWith("PRIVATE")) {
-                return false;
-            }
-            return isAdmin || schemaProfiles.some((profile) => this._getClosestAccessControl(profile.sourcesAccessControl, schemaPrefix + group) === "readwrite");
-        });
-        return publishableGroups.sort();
-    };
-
-    /**
-     * Makes a source public by moving it into a group other profiles can read.
-     * @param {UserAccount} user - a user account
-     * @param {string} sourceName - a source owned by the user
-     * @param {string} group - one of the groups returned by getPublishableGroups
-     */
-    publishSource = async (user, sourceName, group) => {
-        const publishableGroups = await this.getPublishableGroups(user, sourceName);
-        if (!publishableGroups.includes(group)) {
-            const error = new Error(`No readwrite right to publish ${sourceName} into group ${group}`);
-            error.status = 403;
-            throw error;
-        }
-        const sources = await this._read();
-        await this.updateSource({ ...sources[sourceName], group: group, published: true });
     };
 
     /**

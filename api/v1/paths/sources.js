@@ -128,7 +128,7 @@ export default function () {
         description:
             "Creates one or more source entries in `sources.json`. Body is an object whose values are full `Source` descriptors. " +
             "Non-admin callers must have `allowSourceCreation = true` (set on their profile) and stay below `maxNumberCreatedSource`. " +
-            "For non-admins, server overrides `owner = caller.login`, `published = false` and `group = PRIVATE/<caller.login>` (publishing goes through `PUT /sources/{id}/publish`), " +
+            "For non-admins, server overrides `owner = caller.login`, `published = false` and `group = PRIVATE/<caller.login>`, " +
             "and refuses a `graphUri` another source already declares (409). " +
             "Returns the refreshed full sources catalog.",
         security: [{ restrictLoggedUser: [] }],

@@ -76,7 +76,7 @@ export default function () {
         description:
             "Replaces the descriptor of source `id`. The `name` field of the body must equal the path `id`. " +
             "Only the owner of the source or an admin may update it. For a non admin, `id`, `owner`, `published`, `group` and `editable` keep their stored value, " +
-            "and `graphUri` cannot be set to a graph another source declares (409). Publishing goes through `PUT /sources/{id}/publish`. " +
+            "and `graphUri` cannot be set to a graph another source declares (409). " +
             "Returns the refreshed list of sources owned by the caller.",
         security: [{ restrictLoggedUser: [] }],
         operationId: "updateUserSource",

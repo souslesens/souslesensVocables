@@ -138,6 +138,47 @@ Most JavaScript modules follow a **dual export pattern** (`export default` + `wi
 
 <!-- AUTO-DESC:END -->
 
+(ontology-model)=
+
+## Ontology model in depth
+
+The ontology model is a per-source digest of the schema declared in a graph: its classes, object properties, datatype and annotation properties, domains and ranges. The tools read it instead of querying the triplestore for every list or check. It is computed in the browser by `OntologyModels.registerSourcesModel` (`ontologyModels.js`), kept in browser memory, and shared between users through an in-memory cache of the server process (`api/v1/paths/ontologyModels.js`).
+
+### Model structure
+
+`Config.ontologiesVocabularyModels[source]` holds one model per source:
+
+| Field                 | Content                                                                                                                                                                                                    |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `graphUri`            | Named graph the model is computed from.                                                                                                                                                                    |
+| `classes`             | `{ [classUri]: { id, label, superClass, superClassLabel } }`: named `owl:Class` and `rdfs:Class` resources, each with a single parent.                                                                    |
+| `classesCount`        | Number of named `owl:Class` resources in the graph, set even when `classes` is left empty.                                                                                                                |
+| `properties`          | `{ [propUri]: { id, label, inverseProp, superProp } }`: resources declared `owl:ObjectProperty` or `rdf:Property`.                                                                                       |
+| `nonObjectProperties` | `{ [propUri]: { id, label, domain, range } }`: resources declared `owl:DatatypeProperty`, `owl:AnnotationProperty` or `rdf:Property`.                                                                    |
+| `propertyTypes`       | `{ [propUri]: { [typeUri]: true } }`: every declared type of each property among the four above. `rdf:Property` puts a property in both `properties` and `nonObjectProperties`, so this map is what tells an object property from a datatype one. |
+| `constraints`         | `{ [propUri]: { domain, domainLabel, range, rangeLabel, label, superProp } }`: declared domains and ranges, completed by the inverse and inherited ones. An inherited value adds `domainParentProperty` or `rangeParentProperty`. |
+| `restrictions`        | `{ [propUri]: [ { domain, range, blankNodeId, ... } ] }`: OWL restrictions, filled only when restrictions are created or deleted in Lineage, never read from the graph.                                                                      |
+
+### How a model is computed
+
+`registerSourcesModel` first looks for the model in the page, then in the server cache, and only computes it when both miss:
+
+```mermaid
+flowchart LR
+    page{"In page memory?"} -- "no" --> cache{"In server cache?"}
+    page -- "yes" --> ready["Model ready"]
+    cache -- "yes" --> ready
+    cache -- "no" --> compute["SPARQL queries,<br>then POST to<br>the server cache"]
+    compute --> ready
+```
+
+When both miss, or when the model is refreshed, the graph of the source is read in five steps. Its imports are not read: they get models of their own.
+
+1. **Properties.** The object properties are read with their label, their inverse and their parent property. The datatype and annotation properties are read with their domain and range.
+2. **Property types.** Each property keeps its declared types, so that the tools can tell an object property from a datatype one.
+3. **Classes.** Each class is read with its label and one parent class. Above 20,000 classes, set by `Config.ontologyModelMaxClasses`, only the number of classes is kept, to keep the model light.
+4. **Domains and ranges.** The declared domains and ranges are read. A property that declares none takes those of its inverse property, swapped, or those of its parent property. A declared value is never replaced.
+5. **Cache.** The model is stored in the server cache, so that the other users do not compute it again.
 
 ```{toctree}
 :maxdepth: 5

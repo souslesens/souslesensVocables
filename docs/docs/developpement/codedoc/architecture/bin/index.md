@@ -14,7 +14,7 @@ The **bin** directory contains the **Node.js backend modules** of SousLeSensVoca
 - HTTP/WebSocket server entry point and routing
 - SPARQL query execution and graph store management
 - Knowledge graph construction from tabular data (CSV, databases)
-- Ontology model extraction from RDF/OWL graphs
+
 - User authentication (local, Auth0, Keycloak)
 - Data format conversion (CSV, RDF, SKOS, XSD, SQL)
 - Elasticsearch indexing and proxying
@@ -49,7 +49,7 @@ Backend modules are organized as Express.js route handlers and standalone utilit
 9. **SPARQLutil..js** — SPARQL utility for generating and executing INSERT DATA statements against graphs with deduplication and pagination for large triple sets.
 10. **graphStore..js** — Manages graph import/export via curl commands against SPARQL graph CRUD endpoints, supporting authentication and large buffer sizes for file operations.
 11. **graphTraversal..js** — Implements graph traversal algorithms (BFS) and SPARQL queries to build graph vicinity arrays for ontology exploration and relationship discovery.
-12. **OntologyModel..js** — Ontology model builder that executes SPARQL queries to extract classes, properties, restrictions, and constraints from RDF/OWL graphs.
+12. **OntologyModel..js**: legacy server-side ontology model builder. No code of the repository imports it: the ontology model the application uses is computed in the browser by `OntologyModels.registerSourcesModel` and cached by `api/v1/paths/ontologyModels.js`, see {ref}`the ontology model <ontology-model>`.
 13. **parliamentProxy.js** — HTTP proxy client for Parliament SPARQL engine supporting query execution and FROM clause transformation for graph specification.
 
 ### RDF & data export
@@ -103,7 +103,6 @@ Backend modules are organized as Express.js route handlers and standalone utilit
 - **Multi-strategy authentication** supporting local accounts, Auth0, and Keycloak with role/profile-based access control.
 - **SPARQL security filtering** that validates user queries against read/write ACLs on graph URIs.
 - **Knowledge graph construction pipeline** from CSV/database sources through mapping definitions to RDF triple insertion.
-- **Ontology model extraction** via SPARQL queries to build in-memory models of classes, properties, restrictions, and constraints.
 - **Graph import/export** in multiple formats (N-Triples, Turtle) with pagination for large datasets.
 - **Elasticsearch integration** for full-text search, fuzzy matching, and concept indexing.
 - **Database connectivity** across MySQL, PostgreSQL, and SQL Server with query execution and schema introspection.
@@ -117,7 +116,7 @@ Backend modules are organized as Express.js route handlers and standalone utilit
 - The server is started via `www`, which initializes Express.js routes and Socket.io connections.
 - Backend modules are imported by Express route handlers in `routes/` or called directly by other `bin/` modules.
 - Configuration is loaded at startup by `configManager..js` and made available globally via `Config`.
-- SPARQL operations go through `SPARQLutil..js`, `graphStore..js`, or `OntologyModel..js` depending on the use case.
+- SPARQL operations go through `SPARQLutil..js` or `graphStore..js` depending on the use case.
 - KG construction is orchestrated by the `KGbuilder/` subdirectory modules, which read mapping definitions and generate triples from tabular data.
 
 

@@ -388,6 +388,10 @@
 
 #lineage_drawnSources {
     scrollbar-color: @button1-color @background-color;
+    /* a long press opens the source list, not a text selection */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 #lineage_drawnSources::-webkit-scrollbar {
     height: 4px;
@@ -398,6 +402,16 @@
 }
 #lineage_drawnSources::-webkit-scrollbar-track {
     background-color: @background-color;
+}
+/* a phone in either orientation, not a tablet: the header keeps only the tool and source selectors */
+@media (hover: none) and (pointer: coarse) and (max-width: 500px), (hover: none) and (pointer: coarse) and (max-height: 500px) {
+    #MenuBarHeader > button,
+    #SouslesensVocables_Github,
+    #currentToolTitle,
+    /* the spacer stays, UI.distributeSourceChips measures the room left from its edge */
+    #MenuBarFooter > :not(#toolSelectionSection):not(#topControlPanelSection):not(#index_topControlSpacer) {
+        display: none !important;
+    }
 }
 
 /* Grip for dragging the chat bot dock taller or shorter. jQuery UI's own handle is seven

@@ -4,6 +4,7 @@ import NodeInfosWidget from "../uiWidgets/nodeInfosWidget.js";
 import PredicatesSelectorWidget from "../uiWidgets/predicatesSelectorWidget.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import DateWidget from "../uiWidgets/dateWidget.js";
+import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 
 var Predicates_bot = (function () {
     var self = {};
@@ -423,10 +424,26 @@ var Predicates_bot = (function () {
 
         if (self.params.editItem) {
             var oldObject = self.params.editItem.object;
-            var oldObjectArg = self.params.editItem.objectType === "literal" ? { isString: true, value: oldObject } : oldObject;
+            var oldObjectArg = oldObject;
+            if (self.params.editItem.objectType === "literal") {
+                oldObjectArg = { isString: true, value: oldObject };
+            }
+            var editedSuperClass = self.params.editItem.property.indexOf("subClassOf") > -1;
+            // one parent is the rule, several the exception: on a subClassOf the user decides,
+            // the previous superclass is never dropped silently
+            if (editedSuperClass) {
+                var deletePreviousSuperClass = confirm('Do you want to delete the previous superclass "' + Sparql_common.getLabelFromURI(oldObject) + '" ?');
+                if (!deletePreviousSuperClass) {
+                    return doSave();
+                }
+            }
             Sparql_generic.deleteTriples(self.params.source, NodeInfosWidget.currentNodeId, self.params.editItem.property, oldObjectArg, function (err) {
                 if (err) {
                     return MainController.errorAlert(err);
+                }
+                // addPredicate draws the new edge, the deleted one would stay on the whiteboard
+                if (editedSuperClass && Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                    Lineage_whiteboard.deleteEdge(NodeInfosWidget.currentNodeId, oldObject, self.params.editItem.property);
                 }
                 doSave();
             });

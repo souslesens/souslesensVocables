@@ -186,6 +186,9 @@ var UI = (function () {
     self.sourceListObserver = null;
 
     self.sourcePopupHideDelay = 150;
+    self.sourcePopupLongPressDelay = 500;
+    self.sourcePopupLongPressTimer = null;
+    self.isSourcePopupOpenedByLongPress = false;
     self.sourcePopupEventsNamespace = ".sourcesPanel";
     //self.sourcePopupFirstLoad = true;
     self.sourcePopupSelectors = {
@@ -434,13 +437,40 @@ var UI = (function () {
 
     self.bindSourcePanelHandlers = function () {
         var $panel = $(self.sourcePopupSelectors.panel);
-        $panel.on("mouseenter" + self.sourcePopupEventsNamespace, self.showSourcePopup);
+        // a finger enters the panel on every tap, so for a finger only a long press opens the list
+        $panel.on("pointerenter" + self.sourcePopupEventsNamespace, function (event) {
+            if (event.originalEvent.pointerType != "touch") {
+                self.showSourcePopup();
+            }
+        });
+        $panel.on("pointerdown" + self.sourcePopupEventsNamespace, function (event) {
+            if (event.originalEvent.pointerType != "touch") {
+                return;
+            }
+            self.isSourcePopupOpenedByLongPress = false;
+            clearTimeout(self.sourcePopupLongPressTimer);
+            self.sourcePopupLongPressTimer = setTimeout(function () {
+                self.isSourcePopupOpenedByLongPress = true;
+                self.showSourcePopup();
+            }, self.sourcePopupLongPressDelay);
+        });
+        $panel.on("pointerup" + self.sourcePopupEventsNamespace + " pointercancel" + self.sourcePopupEventsNamespace, function () {
+            clearTimeout(self.sourcePopupLongPressTimer);
+        });
+        $panel.on("touchend" + self.sourcePopupEventsNamespace, function (event) {
+            // lifting the finger would also click the button it pressed
+            if (self.isSourcePopupOpenedByLongPress) {
+                event.preventDefault();
+            }
+        });
+        // not pointerleave: a finger leaves on every lift, closing the list its long press opened
         $panel.on("mouseleave" + self.sourcePopupEventsNamespace, self.scheduleSourcePopupHide);
         $(document).on("mousemove" + self.sourcePopupEventsNamespace, self.onSourcePanelMouseMove);
         $(document).on("mousedown" + self.sourcePopupEventsNamespace, self.onSourcePanelMouseDown);
     };
 
     self.unbindSourcePanelHandlers = function () {
+        clearTimeout(self.sourcePopupLongPressTimer);
         $(self.sourcePopupSelectors.panel).off(self.sourcePopupEventsNamespace);
         $(document).off(self.sourcePopupEventsNamespace);
     };

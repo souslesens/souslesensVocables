@@ -209,24 +209,10 @@ var TripleFactory = (function () {
                             indexProperties: 1,
                             indexNamedIndividuals: 1,
                         },
-                        () => {
-                            $.ajax({
-                                type: "DELETE",
-                                url: `${Config.apiUrl}/ontologyModels?source=${MappingModeler.currentSLSsource}`,
-
-                                dataType: "json",
-                                success: function (result, _textStatus, _jqXHR) {
-                                    delete Config.ontologiesVocabularyModels[MappingModeler.currentSLSsource];
-
-                                    //    UI.message("ALL DONE");
-                                },
-                                error: function (err) {
-                                    if (callback) {
-                                        return callback(err);
-                                    }
-                                    UI.message(err.responseText);
-                                },
-                            });
+                        (err) => {
+                            if (err && callback) {
+                                return callback(err);
+                            }
                         },
                     );
                 }

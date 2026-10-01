@@ -9,7 +9,10 @@ import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 var OntologyModels = (function () {
     var self = {};
 
+    // sources whose model is complete
     self.loadedSources = {};
+    // sources whose model is being loaded, each with the callbacks of the calls made meanwhile
+    self.loadingSources = {};
 
     /**
      * @function registerSourcesModel
@@ -57,6 +60,11 @@ var OntologyModels = (function () {
         async.eachSeries(
             sources,
             function (source, callbackEach) {
+                // a second load would empty the model the first one is filling
+                if (self.loadingSources[source] && !options.noCache) {
+                    self.loadingSources[source].push(callbackEach);
+                    return;
+                }
                 var graphUri;
                 if (!Config.ontologiesVocabularyModels[source]) {
                     if (!Config.sources[source]) {
@@ -75,6 +83,21 @@ var OntologyModels = (function () {
                 }
 
                 graphUri = Config.ontologiesVocabularyModels[source].graphUri;
+
+                var callbacksAtLoadEnd = [];
+                self.loadingSources[source] = callbacksAtLoadEnd;
+                function endLoad(err) {
+                    if (!err) {
+                        self.loadedSources[source] = 1;
+                    }
+                    if (self.loadingSources[source] === callbacksAtLoadEnd) {
+                        delete self.loadingSources[source];
+                    }
+                    callbackEach(err);
+                    callbacksAtLoadEnd.forEach(function (callbackAtLoadEnd) {
+                        callbackAtLoadEnd(err);
+                    });
+                }
 
                 Config.ontologiesVocabularyModels[source].constraints = {}; //range and domain
                 Config.ontologiesVocabularyModels[source].restrictions = {};
@@ -127,8 +150,8 @@ var OntologyModels = (function () {
                             }
 
                             self.readModelOnServerCache(source, function (err, result) {
-                                self.loadedSources[source] = 1;
-                                if (result) {
+                                // classesCount is the last key written by writeModelOnServerCache: without it the model is still being written
+                                if (result && result.classesCount !== undefined) {
                                     Config.ontologiesVocabularyModels[source] = result;
                                     if (!Config.ontologiesVocabularyModels[source].constraints) {
                                         Config.ontologiesVocabularyModels[source].constraints = {};
@@ -149,11 +172,11 @@ var OntologyModels = (function () {
                                     // Backfill explicit property types for models cached before this map existed.
                                     if (!Config.ontologiesVocabularyModels[source].propertyTypes) {
                                         return loadPropertyTypes(function () {
-                                            return callbackEach();
+                                            return endLoad();
                                         });
                                     }
 
-                                    return callbackEach();
+                                    return endLoad();
                                 } else {
                                     callbackSeries();
                                 }
@@ -497,7 +520,7 @@ var OntologyModels = (function () {
                         },
                     ],
                     function (err) {
-                        callbackEach(err);
+                        endLoad(err);
                     },
                 );
             },
@@ -605,6 +628,7 @@ var OntologyModels = (function () {
         for (var source in Config.ontologiesVocabularyModels) {
             if (basicsSources.indexOf(source) < 0) {
                 delete Config.ontologiesVocabularyModels[source];
+                delete self.loadedSources[source];
             }
         }
     };
@@ -662,6 +686,9 @@ var OntologyModels = (function () {
                 if (source) {
                     Config.ontologiesVocabularyModels[source] = null;
                     OntologyModels.registerSourcesModel(source, { noCache: true }, function (err, result) {
+                        if (err) {
+                            return callback(err);
+                        }
                         callback(null, "DONE");
                     });
                 } else {
@@ -2081,30 +2108,33 @@ var OntologyModels = (function () {
             async.eachSeries(
                 chunks,
                 function (classChunk, callbackEach) {
-                    var valuesStr = classChunk
-                        .map(function (uri) {
-                            return "<" + uri + ">";
-                        })
-                        .join(" ");
-                    var query2 =
+                    // UNION rather than VALUES, far faster on Virtuoso
+                    var classBranches = classChunk.map(function (classUri) {
+                        var classIri = "<" + classUri + ">";
+                        var branchLines = [
+                            "  { ?s rdf:type " + classIri + ".",
+                            "    ?s ?prop ?v.",
+                            "    bind (" + classIri + " as ?class)",
+                            "    bind (datatype(?v) as ?datatype)",
+                            "    filter (?prop not in (<http://souslesens.org/KGcreator#mappingFile>,<http://purl.org/dc/terms/created>))",
+                            "  }",
+                        ];
+                        return branchLines.join("\n");
+                    });
+                    var classBranchesUnion = classBranches.join("\n  UNION\n");
+                    var classChunkQuery =
                         "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
                         "SELECT distinct ?class ?prop ?datatype FROM <" +
                         sourceGraphUri +
                         "> WHERE {\n" +
-                        "  VALUES ?class { " +
-                        valuesStr +
-                        " }\n" +
-                        "  ?s rdf:type ?class.\n" +
-                        "  ?s ?prop ?v.\n" +
-                        "  bind (datatype(?v) as ?datatype)\n" +
-                        "  filter (?prop not in (<http://souslesens.org/KGcreator#mappingFile>,<http://purl.org/dc/terms/created>))\n" +
+                        classBranchesUnion +
                         "\n" +
                         filterStr +
                         "}";
 
-                    Sparql_proxy.querySPARQL_GET_proxy(url, query2, null, {}, function (err, result) {
+                    Sparql_proxy.querySPARQL_GET_proxy(url, classChunkQuery, null, {}, function (err, result) {
                         if (err) {
                             return callbackEach(err);
                         }

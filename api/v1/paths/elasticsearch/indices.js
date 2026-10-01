@@ -38,20 +38,6 @@ export default function () {
             "source — orphans of deleted sources, whiteboard indices, sources outside the caller's profile — are left " +
             "out: passing one to the search routes fails the whole query.",
         operationId: "getElasticsearchIndices",
-        "x-mcp": {
-            tools: [
-                {
-                    name: "sls_list_indexes",
-                    access: "read",
-                    description:
-                        "Index names you may search with sls_search_labels, one per source that has a full-text index. " +
-                        "They are lowercase and do not always match the SLS source name, so read this list rather than guessing. " +
-                        "sls_search_labels takes several of them in one call, so this is also how you search the whole platform at once.",
-                    params: {},
-                },
-            ],
-        },
-
         responses: {
             200: {
                 description: "Index names from the Elasticsearch cluster.",

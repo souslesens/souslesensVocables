@@ -516,6 +516,8 @@ var Lineage_sources = (function () {
                     {
                         indexProperties: 1,
                         indexNamedIndividuals: 1,
+                        // the model was just built by registerSource and is in use by the tool being opened
+                        skipOntologyModelRefresh: true,
                     },
                     function (err, _result) {
                         if (err) {
@@ -679,10 +681,12 @@ var Lineage_sources = (function () {
             '<span  class="popupMenuItem" onclick="Lineage_sources.menuActions.sourceMetaData();"> MetaData </span>';
 
         if (source !== "_defaultSource") {
-            if (self.isSourceEditableForUser(source)) {
+            // admins and owners manage read-only sources too, as model/sources.js grants them
+            var isAdmin = authentication.currentUser.groupes.indexOf("admin") > -1;
+            if (isAdmin || self.isSourceOwnedByUser(source) || self.isSourceEditableForUser(source)) {
                 html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.editSource();">Edit</span>';
                 html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.refreshIndexes();">Refresh indexes</span>';
-                html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.clearOntologyModelCache();">Clear ontology model cache</span>';
+                html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.clearOntologyModelCache();">Refresh ontology model</span>';
             }
             html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.downloadGraph();">Download</span>';
         }
@@ -1110,7 +1114,15 @@ var Lineage_sources = (function () {
         },
 
         clearOntologyModelCache: function () {
-            Admin.clearOntologyModelCache(Lineage_sources.activeSource);
+            var source = Lineage_sources.activeSource;
+            $("#waitImg").css("display", "block");
+            OntologyModels.clearOntologyModelCache(source, function (err) {
+                $("#waitImg").css("display", "none");
+                if (err) {
+                    return MainController.errorAlert(err.responseText || err);
+                }
+                UI.message("Ontology model refreshed: " + source, true);
+            });
         },
     };
 

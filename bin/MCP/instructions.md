@@ -14,13 +14,16 @@ it with the source name and the URI. When a lookup finds nothing, say so plainly
 
 ## Ask the high level question first
 
-Five tools take plain words and answer a whole question, running the chain of searches and queries
-you would otherwise write by hand. Try them before assembling that chain yourself.
+Six tools answer a whole question, running the chain of searches and queries you would otherwise
+write by hand. Try them before assembling that chain yourself.
 
 - `sls_ontology_summary`: which ontologies you have and what each one is about. First call when the
-  source to use is not decided yet.
+  source to use is not decided yet. It lists only the sources that carry a description; the others
+  are in `sls_list_sources`.
 - `sls_knowledge_model_graph`: what a source is about. First call on a source you do not know.
 - `sls_term_infos`: what a term means, with its predicates and relations.
+- `sls_uri_infos`: the same description for one class already resolved to a URI. Reading a node is
+  this call, not a per-predicate chain.
 - `sls_two_terms_paths`: how two terms are connected.
 - `sls_terms_linked_classes`: what a term can be attached to, and through which property.
 
@@ -29,8 +32,7 @@ Drop down to the per-node tools or `sls_sparql_select` for what they do not carr
 ## Start from a URI
 
 Almost every tool takes a node URI, not a word. `sls_search_labels` turns a phrase into ranked
-candidates and is the normal first call on any domain term; `sls_list_indexes` gives it the index
-names, which are lowercase and do not always match the source name.
+candidates and is the normal first call on any domain term.
 
 Two different questions, two different tools. "Does this exist, and where is the best match" is a
 ranked search: `sls_search_labels` over every index at once, since one call over ten indices costs
@@ -53,7 +55,7 @@ the wrong source is the most common way to get nothing back.
 A label match is not a classification. `sls_search_labels` returns everything whose label contains
 the word, so searching "pump" also returns properties, requirements and dimensional specifications
 that merely mention pumps. "What kinds of X are there" is answered by resolving X to a URI and
-walking `sls_node_descendants` from it, then listing what the hierarchy returned and nothing else. If
+walking `sls_node_children` from it, then listing what the hierarchy returned and nothing else. If
 that hierarchy comes back short, say so; do not top it up with search hits that share the word, and
 never hand a search result set to the user as a list of subtypes.
 
@@ -68,8 +70,8 @@ source name, exist nowhere.
 `sls_kgquery_model` is the shortest way to the real ones. It names each class with its actual URI,
 its datatype properties and the object properties that join it to the others, which is exactly what a
 query needs. Call it on the source you are about to query, before the first SELECT.
-`sls_ontology_model` covers classes and restrictions when a user has opened the source in the web UI.
-When neither answers, `sls_source_taxonomy` and `sls_search_labels` still hand you a URI you did not
+`sls_knowledge_model_graph` gives the classes and the properties linking them when the source has no
+KGquery model. When neither answers, `sls_source_taxonomy` and `sls_search_labels` still hand you a URI you did not
 invent.
 
 A query against a guessed URI returns zero rows and says nothing about why, so it reads exactly like
@@ -142,7 +144,7 @@ announced as the complete list, out of 100741.
 depth parameter that did nothing: both return the same rows, with no `child2` key anywhere. This
 block is the only way to tell them apart, so read it before concluding a branch is empty.
 
-- `depthReached >= requestedDepth`: the depth you asked for was actually walked. No `hint` — nothing
+- `depthReached >= requestedDepth`: the depth you asked for was actually walked. No `hint`, nothing
   more to check.
 - `depthReached < requestedDepth` and a `hint` is present: the walk stopped early. The hint names the
   exact node URIs to re-query (`sls_node_children` again on the `childN` URIs at `depthReached`)

@@ -963,6 +963,7 @@ var Lineage_whiteboard = (function () {
                 keepNodePositionOnDrag: true,
                 onclickFn: Lineage_whiteboard.graphActions.onNodeClick,
                 onRightClickFn: Lineage_whiteboard.graphActions.showGraphPopupMenu,
+                onLongPressFn: Lineage_whiteboard.graphActions.showGraphPopupMenu,
                 onHoverNodeFn: Lineage_selection.selectNodesOnHover,
                 visjsOptions: {
                     physics: {

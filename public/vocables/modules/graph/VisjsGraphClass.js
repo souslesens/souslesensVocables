@@ -194,6 +194,25 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 }
             } //rigth click
         });
+        self.network.on("hold", function (params) {
+            // a mouse has its right click, a finger gets the long press instead
+            if (!_options.onLongPressFn || params.event.pointerType != "touch") {
+                return;
+            }
+            var pressedNodeOrEdge = null;
+            var nodeId = self.network.getNodeAt(params.pointer.DOM);
+            if (nodeId) {
+                pressedNodeOrEdge = self.data.nodes.get(nodeId);
+            } else {
+                var edgeId = self.network.getEdgeAt(params.pointer.DOM);
+                if (edgeId) {
+                    pressedNodeOrEdge = self.data.edges.get(edgeId);
+                }
+            }
+            if (pressedNodeOrEdge) {
+                _options.onLongPressFn(pressedNodeOrEdge, params.pointer.DOM, params.event.srcEvent);
+            }
+        });
 
         self.network.on("doubleClick", function (/** @type {any} */ params) {
             self.processClicks(params, _options, true);

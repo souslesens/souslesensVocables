@@ -9,7 +9,10 @@ import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 var OntologyModels = (function () {
     var self = {};
 
+    // sources whose model is complete
     self.loadedSources = {};
+    // sources whose model is being loaded, each with the callbacks of the calls made meanwhile
+    self.loadingSources = {};
 
     /**
      * @function registerSourcesModel
@@ -57,6 +60,11 @@ var OntologyModels = (function () {
         async.eachSeries(
             sources,
             function (source, callbackEach) {
+                // a second load would empty the model the first one is filling
+                if (self.loadingSources[source] && !options.noCache) {
+                    self.loadingSources[source].push(callbackEach);
+                    return;
+                }
                 var graphUri;
                 if (!Config.ontologiesVocabularyModels[source]) {
                     if (!Config.sources[source]) {
@@ -75,6 +83,21 @@ var OntologyModels = (function () {
                 }
 
                 graphUri = Config.ontologiesVocabularyModels[source].graphUri;
+
+                var callbacksAtLoadEnd = [];
+                self.loadingSources[source] = callbacksAtLoadEnd;
+                function endLoad(err) {
+                    if (!err) {
+                        self.loadedSources[source] = 1;
+                    }
+                    if (self.loadingSources[source] === callbacksAtLoadEnd) {
+                        delete self.loadingSources[source];
+                    }
+                    callbackEach(err);
+                    callbacksAtLoadEnd.forEach(function (callbackAtLoadEnd) {
+                        callbackAtLoadEnd(err);
+                    });
+                }
 
                 Config.ontologiesVocabularyModels[source].constraints = {}; //range and domain
                 Config.ontologiesVocabularyModels[source].restrictions = {};
@@ -127,8 +150,8 @@ var OntologyModels = (function () {
                             }
 
                             self.readModelOnServerCache(source, function (err, result) {
-                                self.loadedSources[source] = 1;
-                                if (result) {
+                                // classesCount is the last key written by writeModelOnServerCache: without it the model is still being written
+                                if (result && result.classesCount !== undefined) {
                                     Config.ontologiesVocabularyModels[source] = result;
                                     if (!Config.ontologiesVocabularyModels[source].constraints) {
                                         Config.ontologiesVocabularyModels[source].constraints = {};
@@ -149,11 +172,11 @@ var OntologyModels = (function () {
                                     // Backfill explicit property types for models cached before this map existed.
                                     if (!Config.ontologiesVocabularyModels[source].propertyTypes) {
                                         return loadPropertyTypes(function () {
-                                            return callbackEach();
+                                            return endLoad();
                                         });
                                     }
 
-                                    return callbackEach();
+                                    return endLoad();
                                 } else {
                                     callbackSeries();
                                 }
@@ -497,7 +520,7 @@ var OntologyModels = (function () {
                         },
                     ],
                     function (err) {
-                        callbackEach(err);
+                        endLoad(err);
                     },
                 );
             },
@@ -605,6 +628,7 @@ var OntologyModels = (function () {
         for (var source in Config.ontologiesVocabularyModels) {
             if (basicsSources.indexOf(source) < 0) {
                 delete Config.ontologiesVocabularyModels[source];
+                delete self.loadedSources[source];
             }
         }
     };

@@ -1027,14 +1027,20 @@ var MappingModeler = (function () {
     };
 
     self.clearSourceClasses = function (source, callback) {
-        OntologyModels.clearOntologyModelCache(MappingModeler.currentSLSsource);
-        var newClasses = [];
-        self.allClasses.forEach(function (item) {
-            if (item.source != source) {
-                newClasses.push(item);
+        // the class lists are rebuilt from the model once it is reloaded from the triple store
+        OntologyModels.clearOntologyModelCache(source, function (err) {
+            if (err) {
+                return MainController.errorAlert(err);
             }
+            self.initResourcesMap(source, function (err) {
+                if (err) {
+                    return MainController.errorAlert(err);
+                }
+                if (callback) {
+                    callback();
+                }
+            });
         });
-        self.allClasses = newClasses;
     };
 
     /**

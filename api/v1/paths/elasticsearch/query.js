@@ -129,7 +129,9 @@ export default function () {
                     },
                     resultShape: "elasticIndexCounts",
                     paramDefaultsFromRoute: { indexes: "/elasticsearch/indices" },
-                    statusHints: { 500: "Elasticsearch is unreachable or one of the indices does not exist: not every source has a full-text index. Leave indexes out to cover only the indices that exist." },
+                    statusHints: {
+                        500: "Elasticsearch is unreachable or one of the indices does not exist: not every source has a full-text index. Leave indexes out to cover only the indices that exist.",
+                    },
                 },
             ],
         },

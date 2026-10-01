@@ -1,5 +1,6 @@
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
+import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Lineage_whiteboard from "./lineage_whiteboard.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import common from "../../shared/common.js";
@@ -666,6 +667,70 @@ var Lineage_createRelation = (function () {
                             return callbackSeries(err);
                         }
                         callbackSeries();
+                    });
+                },
+
+                // offer to delete the previous superclass: one parent is the rule, several the exception
+                function (callbackSeries) {
+                    if (relationType != "Predicate" || propId != "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
+                        return callbackSeries();
+                    }
+                    // named superclasses of the source graph only: in OWL every restriction is a
+                    // subClassOf towards a blank node, and an inherited parent cannot be deleted here
+                    var fromStr = Sparql_common.getFromStr(inSource, false, true);
+                    var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ";
+                    query += " SELECT DISTINCT ?superClass " + fromStr;
+                    query += " WHERE { <" + self.sourceNode.id + "> rdfs:subClassOf ?superClass.";
+                    query += " FILTER (!isBlank(?superClass) && ?superClass != <" + self.targetNode.id + ">) }";
+                    var url = Config.sources[inSource].sparql_server.url + "?format=json&query=";
+
+                    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: inSource }, function (err, result) {
+                        if (err) {
+                            // the new relation is created: report and leave the previous superclasses alone
+                            MainController.errorAlert(err);
+                            return callbackSeries();
+                        }
+                        var previousSuperClasses = [];
+                        if (result && result.results && result.results.bindings) {
+                            result.results.bindings.forEach(function (binding) {
+                                previousSuperClasses.push(binding.superClass.value);
+                            });
+                        }
+                        if (previousSuperClasses.length == 0) {
+                            return callbackSeries();
+                        }
+                        var previousLabels = previousSuperClasses.map(function (superClassUri) {
+                            return Sparql_common.getLabelFromURI(superClassUri);
+                        });
+                        var previousLabelsStr = previousLabels.join(", ");
+                        var message = 'Do you want to delete the previous superclass "' + previousLabelsStr + '" ?';
+                        if (previousSuperClasses.length > 1) {
+                            message = 'Do you want to delete the previous superclasses "' + previousLabelsStr + '" ?';
+                        }
+                        if (!confirm(message)) {
+                            return callbackSeries();
+                        }
+
+                        async.eachSeries(
+                            previousSuperClasses,
+                            function (superClassUri, callbackEach) {
+                                Sparql_generic.deleteTriples(inSource, self.sourceNode.id, propId, superClassUri, function (err, _result) {
+                                    if (err) {
+                                        return callbackEach(err);
+                                    }
+                                    if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                                        Lineage_whiteboard.deleteEdge(self.sourceNode.id, superClassUri, propId);
+                                    }
+                                    callbackEach();
+                                });
+                            },
+                            function (err) {
+                                if (err) {
+                                    MainController.errorAlert(err);
+                                }
+                                callbackSeries();
+                            },
+                        );
                     });
                 },
 

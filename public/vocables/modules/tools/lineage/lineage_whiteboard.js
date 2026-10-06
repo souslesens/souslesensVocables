@@ -1931,7 +1931,7 @@ var Lineage_whiteboard = (function () {
      * @name addChildrenToGraph
      * @memberof module:Lineage
      * @param {string} [source] - The source to fetch the child nodes from. If not provided, the active source is used.
-     * @param {Array<string>} nodeIds - An array of node IDs to add as parent nodes for retrieving children. When not provided, only the whiteboard nodes belonging to that source are expanded, so the nodes drawn from the imported sources are left untouched.
+     * @param {Array<string>} nodeIds - An array of node IDs to add as parent nodes for retrieving children. When not provided, every whiteboard node is a parent, whatever its source, and only the children declared in that source are drawn.
      * @param {Object} [options] - Optional configuration options for adding child nodes.
      * @param {number} [options.depth=1] - The depth of the child nodes to retrieve.
      * @param {boolean} [options.dontClusterNodes=false] - If true, disables clustering of child nodes.
@@ -1962,13 +1962,8 @@ var Lineage_whiteboard = (function () {
             parentIds = [];
             var nodes = self.lineageVisjsGraph.data.nodes.get();
             nodes.forEach(function (node) {
-                // only the nodes of the expanded source : the whiteboard also holds nodes drawn from the
-                // imported sources, and expanding them all ignores the source the user has selected
-                if (!node.data || node.data.source != source) {
-                    return;
-                }
                 // the source box node carries a source but no class id, it has no children to fetch
-                if (!node.data.id || node.data.id == source) {
+                if (!node.data || !node.data.id || node.data.id == node.data.source) {
                     return;
                 }
                 parentIds.push(node.data.id);
@@ -1998,7 +1993,12 @@ var Lineage_whiteboard = (function () {
         }
         options.skipRestrictions = 1;
         options.selectGraph = 1;
-        options.includeSources = [MainController.currentSource];
+        if (nodeIds) {
+            options.includeSources = [MainController.currentSource];
+        } else {
+            // parents come from every whiteboard source, children only from the expanded one
+            options.withoutImports = true;
+        }
         // options.filter = ' FILTER (regex(str(?child1),"http"))';
 
         Sparql_generic.getNodeChildren(source, null, parentIds, depth, options, function (err, result) {
@@ -5053,6 +5053,42 @@ attrs.color=self.getSourceColor(superClassValue)
                     html += '<span class="popupMenuItem" onclick="Lineage_whiteboard.drawModel(null, null, { drawDataTypeProperties:true,notDrawDomain:true })">Data type properties</span>';
                     PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
                 });
+                $("#lineageWhiteboard_childrenBtn").bind("click", function (e) {
+                    Lineage_whiteboard.addChildrenToGraph();
+                });
+                $("#lineageWhiteboard_childrenBtn").bind("contextmenu", function (e) {
+                    e.preventDefault();
+                    var taxonomyPredicates = [];
+                    if (Config.sources[Lineage_sources.activeSource].taxonomyPredicates) {
+                        taxonomyPredicates = Config.sources[Lineage_sources.activeSource].taxonomyPredicates;
+                    }
+                    taxonomyPredicates = taxonomyPredicates.filter(function (predicate) {
+                        return (
+                            predicate != "http://www.w3.org/2000/01/rdf-schema#subClassOf" &&
+                            predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" &&
+                            predicate != "rdfs:subClassOf" &&
+                            predicate != "rdf:type"
+                        );
+                    });
+
+                    var html = '<span class="popupMenuItem" onclick="Lineage_whiteboard.addChildrenToGraph(null, null, { specificPredicates: \'all\' })">All</span>';
+                    html +=
+                        '<span class="popupMenuItem" onclick="Lineage_whiteboard.addChildrenToGraph(null,null,{specificPredicates: [\'http://www.w3.org/2000/01/rdf-schema#subClassOf\']})">Classes</span>';
+                    html +=
+                        '<span class="popupMenuItem" onclick="Lineage_whiteboard.addChildrenToGraph(null, null, { specificPredicates: [\'http://www.w3.org/1999/02/22-rdf-syntax-ns#type\'] })">Individuals</span>';
+
+                    taxonomyPredicates.forEach(function (predicate) {
+                        html +=
+                            '<span class="popupMenuItem" onclick="Lineage_whiteboard.addChildrenToGraph(null, null, { specificPredicates: \'' +
+                            predicate +
+                            "' })\">" +
+                            Sparql_common.getLabelFromURI(predicate) +
+                            "</span>";
+                    });
+                    html += "</span>";
+                    PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
+                });
+
                 $("#lateralPanelDiv").resizable({
                     maxWidth: $(window).width() - 100,
                     minWidth: 150,

@@ -9,7 +9,7 @@ var CreateSLSVsource_bot = (function () {
 
     self.start = function () {
         self.myBotEngine.init(CreateSLSVsource_bot, self.workflow, null, function () {
-            self.params = { sourceLabel: "", graphUri: "", imports: [] };
+            self.params = { sourceLabel: "", graphUri: "", imports: [], temporarySourceName: "", temporaryGraphUri: "" };
 
             self.myBotEngine.nextStep();
         });
@@ -183,7 +183,8 @@ var CreateSLSVsource_bot = (function () {
         },
         uploadFromFileFn: function () {
             const apiUrl = Config.slsPyApi.enabled ? Config.slsPyApi.url.replace(/\/$/, "").concat("/") : "/";
-            window.UploadGraphModal.open(apiUrl, self.params.sourceLabel, () => {
+            var uploadedSourceName = self.params.temporarySourceName || self.params.sourceLabel;
+            window.UploadGraphModal.open(apiUrl, uploadedSourceName, () => {
                 /*self.myBotEngine.currentObj = self.workflowUpload;
                 self.myBotEngine.nextStep(self.workflowUpload);*/
                 self.myBotEngine.nextStep();
@@ -216,15 +217,18 @@ var CreateSLSVsource_bot = (function () {
             async.series(
                 [
                     function (callbackSeries) {
+                        // the label stays free for the final source, created once the ontology graphUri is known
                         var randomID = common.getRandomHexaId(8);
+                        // prefix read by sourceModel.countSourcesAgainstQuota on the server
                         var url = "http://temporary.graphUri." + self.params.sourceLabel + randomID + "/";
                         self.params.graphUri = url;
+                        self.params.temporaryGraphUri = url;
+                        self.params.temporarySourceName = self.params.sourceLabel + "_upload_" + randomID;
                         self.params.imports = [];
-                        Lineage_createSLSVsource.createSource(self.params.sourceLabel, url, self.params.imports, function (err, result) {
+                        Lineage_createSLSVsource.createSource(self.params.temporarySourceName, url, self.params.imports, function (err) {
                             if (err) {
-                                callbackSeries(err);
+                                return callbackSeries(err);
                             }
-                            self.params.newConfig = result;
                             callbackSeries();
                         });
                     },
@@ -269,44 +273,48 @@ var CreateSLSVsource_bot = (function () {
             });
         },
         fillParamsFromUpload: function () {
-            if (self.params.newConfig) {
-                var sourceConfig = self.params.newConfig[self.params.sourceLabel];
-                if (!sourceConfig) {
-                    alert("source not registered");
-                    return self.myBotEngine.reset();
-                }
-            }
-
+            // graphMove needs a source of the user declaring each end, hence the final source before the move
             var graphUri = self.params.graphUri.endsWith("/") ? self.params.graphUri : self.params.graphUri + "/";
-            var temporaryGraphUri = sourceConfig.graphUri;
-            sourceConfig.graphUri = graphUri;
-            sourceConfig.baseUri = graphUri;
-            sourceConfig.imports = self.params.imports;
-            $.ajax({
-                type: "PUT",
-                url: `${Config.apiUrl}/sources/${self.params.sourceLabel}`,
-                data: JSON.stringify(sourceConfig),
-                contentType: "application/json",
-                dataType: "json",
-                success: function (_data, _textStatus, _jqXHR) {
-                    $.ajax({
-                        type: "POST",
-                        url: `${Config.apiUrl}/rdf/graphMove`,
-                        data: JSON.stringify({ sourceGraphUri: temporaryGraphUri, targetGraphUri: graphUri }),
-                        contentType: "application/json",
-                        dataType: "json",
-                        success: function () {
-                            return self.myBotEngine.nextStep();
-                        },
-                        error: function (err) {
-                            return MainController.errorAlert(err);
-                        },
-                    });
+            async.series(
+                [
+                    function (callbackSeries) {
+                        Lineage_createSLSVsource.createSource(self.params.sourceLabel, graphUri, self.params.imports, function (err) {
+                            if (err) {
+                                return callbackSeries(err);
+                            }
+                            callbackSeries();
+                        });
+                    },
+                    function (callbackSeries) {
+                        $.ajax({
+                            type: "POST",
+                            url: `${Config.apiUrl}/rdf/graphMove`,
+                            data: JSON.stringify({ sourceGraphUri: self.params.temporaryGraphUri, targetGraphUri: graphUri }),
+                            contentType: "application/json",
+                            dataType: "json",
+                            success: function () {
+                                callbackSeries();
+                            },
+                            error: function (moveError) {
+                                // the triples are still in the temporary graph, an empty final source would only mislead
+                                self.deleteSource(self.params.sourceLabel, function () {
+                                    callbackSeries(moveError);
+                                });
+                            },
+                        });
+                    },
+                    function (callbackSeries) {
+                        self.deleteSource(self.params.temporarySourceName, callbackSeries);
+                    },
+                ],
+                function (err) {
+                    if (err) {
+                        MainController.errorAlert(err);
+                        return self.myBotEngine.reset();
+                    }
+                    return self.myBotEngine.nextStep();
                 },
-                error: function (err) {
-                    return MainController.errorAlert(err);
-                },
-            });
+            );
         },
         loadLineageFn: function () {
             var url = window.location.href;
@@ -428,6 +436,20 @@ var CreateSLSVsource_bot = (function () {
                 },
             });
         },
+    };
+
+    self.deleteSource = function (sourceName, callback) {
+        $.ajax({
+            type: "DELETE",
+            url: `${Config.apiUrl}/sources/${sourceName}`,
+            dataType: "json",
+            success: function () {
+                callback();
+            },
+            error: function (err) {
+                callback(err);
+            },
+        });
     };
 
     self.uploadGraphFromUrl = function (callback) {

@@ -247,14 +247,18 @@ class UserModel {
      */
     updateUserAccount = async (user) => {
         const data = this._checkUser(user);
-        data.password = this._hashPassword(data.password);
 
         const conn = getKnexConnection(this._mainConfig.database);
-        const results = await conn.select("login").from("users").where("login", data.login).first();
+        const results = await conn.select("login", "token", "password").from("users").where("login", data.login).first();
         if (results === undefined) {
             cleanupConnection(conn);
             throw Error("UserAccount does not exist, try adding it.");
         }
+
+        // the admin UI reads accounts from public_users_list, which has no token column
+        data.token = data.token || results.token;
+        // the admin UI omits a password left blank, while authentication.js sends "" on purpose to clear it
+        data.password = data.password === undefined ? results.password : this._hashPassword(data.password);
 
         await conn.update(this._convertToDatabase(data)).into("users").where("login", data.login);
         cleanupConnection(conn);
@@ -275,7 +279,8 @@ class UserModel {
         // remove user login from userData.shared_user
         const allUserData = await conn.select("*").from("user_data");
         Object.values(allUserData).map((userData) => {
-            if (userData.shared_users.includes(login)) {
+            // tripleQuota share rows are inserted without shared_users
+            if (userData.shared_users && userData.shared_users.includes(login)) {
                 userData.shared_users = userData.shared_users.filter((u) => u !== login);
                 userDataModel.update(userData);
             }

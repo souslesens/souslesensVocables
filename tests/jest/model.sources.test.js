@@ -231,4 +231,14 @@ describe("SourceModel", () => {
             expect(src.owner).toStrictEqual(user.login);
         });
     });
+
+    test("one OntoCreator upload source is left out of the source quota, not two", async () => {
+        const regularSource = { graphUri: "http://example.org/regular/" };
+        const firstUploadSource = { graphUri: "http://temporary.graphUri.firstabc12345/" };
+        const secondUploadSource = { graphUri: "http://temporary.graphUri.secondabc12345/" };
+
+        expect(sourceModel.countSourcesAgainstQuota({ regular: regularSource })).toBe(1);
+        expect(sourceModel.countSourcesAgainstQuota({ regular: regularSource, first: firstUploadSource })).toBe(1);
+        expect(sourceModel.countSourcesAgainstQuota({ regular: regularSource, first: firstUploadSource, second: secondUploadSource })).toBe(2);
+    });
 });

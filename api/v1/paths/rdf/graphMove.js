@@ -1,5 +1,6 @@
 import { rdfDataModel } from "../../../../model/rdfData.js";
 import { sourceModel } from "../../../../model/sources.js";
+import { tripleQuotaModel } from "../../../../model/tripleQuota.js";
 import userManager from "../../../../bin/user.js";
 
 export default function () {
@@ -42,6 +43,7 @@ export default function () {
             }
 
             await rdfDataModel.moveGraph(sourceGraphUri, targetGraphUri);
+            await tripleQuotaModel.moveGraphShares(sourceGraphUri, targetGraphUri).catch((quotaError) => console.error("Could not move the quota shares of the moved graph", quotaError));
             if (rewriteResourceUris) {
                 await rdfDataModel.rewriteGraphResourceUris(targetGraphUri, sourceGraphUri, targetGraphUri);
             }
@@ -69,7 +71,8 @@ export default function () {
             "Moves all triples from `sourceGraphUri` to `targetGraphUri`, batch by batch (implemented by `rdfDataModel.moveGraph`), " +
             "so large graphs don't time out in a single SPARQL Update statement. When `rewriteResourceUris` is true, " +
             "IRI subjects, predicates, and objects starting from the old graph URI/base URI are rewritten to the target URI. " +
-            "When `sourceName` is provided, that source descriptor's `graphUri` is updated after a successful move.",
+            "When `sourceName` is provided, that source descriptor's `graphUri` is updated after a successful move. " +
+            "The triple quota shares recorded on `sourceGraphUri` follow the triples to `targetGraphUri`.",
         operationId: "rdfMoveGraph",
         parameters: [
             {

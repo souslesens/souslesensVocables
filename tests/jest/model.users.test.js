@@ -187,6 +187,55 @@ describe("UserModelJson", () => {
         async () => await userModel.updateUserAccount(user);
     });
 
+    test("update an user without token keeps the stored token", async () => {
+        const user = {
+            login: "skos_user",
+            password: "",
+            groups: ["owl_only"],
+            source: "keycloak",
+        };
+
+        // the mocked database is rebuilt on each connection, so the written row is read from the conversion
+        const convertToDatabaseSpy = jest.spyOn(userModel, "_convertToDatabase");
+        await userModel.updateUserAccount(user);
+        const writtenUser = convertToDatabaseSpy.mock.results[0].value;
+        convertToDatabaseSpy.mockRestore();
+
+        expect(writtenUser.profiles).toStrictEqual(["owl_only"]);
+        expect(writtenUser.token).toStrictEqual("skos-token");
+    });
+
+    test("update an user without password keeps the stored password", async () => {
+        const user = {
+            login: "admin",
+            groups: ["admin"],
+            source: "database",
+        };
+
+        const convertToDatabaseSpy = jest.spyOn(userModel, "_convertToDatabase");
+        await userModel.updateUserAccount(user);
+        const writtenUser = convertToDatabaseSpy.mock.results[0].value;
+        convertToDatabaseSpy.mockRestore();
+
+        expect(writtenUser.password).toStrictEqual("$2b$10$LhdaXF3tHrvA8b8fKMvNmeOSyogCBgN/L9XLN/vqjz6tgN5rSxMyy");
+    });
+
+    test("update an user with an empty password clears it", async () => {
+        const user = {
+            login: "admin",
+            password: "",
+            groups: ["admin"],
+            source: "keycloak",
+        };
+
+        const convertToDatabaseSpy = jest.spyOn(userModel, "_convertToDatabase");
+        await userModel.updateUserAccount(user);
+        const writtenUser = convertToDatabaseSpy.mock.results[0].value;
+        convertToDatabaseSpy.mockRestore();
+
+        expect(writtenUser.password).toStrictEqual("");
+    });
+
     test("update an unknown user", async () => {
         const user = {
             login: "unknown",

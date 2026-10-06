@@ -21,13 +21,14 @@ const user = {
                 throw Error("Admin user not found in database. Ensure ensureAdminUserExists() was called at startup.");
             }
             const adminLimits = await user.resolveUserLimits(adminUser);
+            const adminToken = adminUser.token || (await userModel.generateUserToken(adminUser.login));
             result = {
                 logged: true,
                 user: {
                     id: adminUser.id,
                     login: adminUser.login,
                     groups: adminUser.groups,
-                    token: adminUser.token,
+                    token: adminToken,
                 },
                 authSource: "disabled",
                 ...adminLimits,
@@ -39,9 +40,11 @@ const user = {
                 throw Error("could not find logged user " + reqUser);
             }
             const userLimits = await user.resolveUserLimits(findUser);
+            // accounts created before tokens existed, or emptied by an update before updateUserAccount kept them
+            const userToken = findUser.token || (await userModel.generateUserToken(findUser.login));
             result = {
                 logged: true,
-                user: { id: findUser.id, login: findUser.login, groups: findUser.groups, token: findUser.token },
+                user: { id: findUser.id, login: findUser.login, groups: findUser.groups, token: userToken },
                 authSource: config.auth,
                 ...userLimits,
                 auth: auth,

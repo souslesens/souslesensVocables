@@ -126,6 +126,37 @@ describe("TripleQuotaModel", () => {
         expect(await quotaModel.usageFor("alice", UPLOAD_KIND)).toBe(300);
     });
 
+    test("moving a graph hands its shares over to the target graph", async () => {
+        await quotaModel.addShare("alice", { kind: UPLOAD_KIND, graphUri: "urn:temporary" }, 300);
+        await quotaModel.addShare("alice", { kind: MAPPING_KIND, graphUri: "urn:temporary", table: "equipments" }, 100);
+        await quotaModel.moveGraphShares("urn:temporary", "urn:final");
+
+        const temporaryRows = await quotaModel._selectShares(connection, { data_group: "urn:temporary" });
+        const finalRows = await quotaModel._selectShares(connection, { data_group: "urn:final" });
+        const finalShares = finalRows.map((row) => quotaModel._readContent(row));
+        expect(temporaryRows).toHaveLength(0);
+        expect(finalShares).toEqual(
+            expect.arrayContaining([
+                { kind: UPLOAD_KIND, table: "", share: 300 },
+                { kind: MAPPING_KIND, table: "equipments", share: 100 },
+            ]),
+        );
+    });
+
+    test("a contributor present on both sides of a move keeps one summed share", async () => {
+        await quotaModel.addShare("alice", { kind: UPLOAD_KIND, graphUri: "urn:temporary" }, 300);
+        await quotaModel.addShare("alice", { kind: UPLOAD_KIND, graphUri: "urn:final" }, 200);
+        await quotaModel.addShare("bob", { kind: UPLOAD_KIND, graphUri: "urn:final" }, 50);
+        await quotaModel.moveGraphShares("urn:temporary", "urn:final");
+
+        const finalRows = await quotaModel._selectShares(connection, { data_group: "urn:final" });
+        const aliceRows = finalRows.filter((row) => row.data_label === "alice");
+        const bobRows = finalRows.filter((row) => row.data_label === "bob");
+        expect(aliceRows).toHaveLength(1);
+        expect(quotaModel._readContent(aliceRows[0]).share).toBe(500);
+        expect(quotaModel._readContent(bobRows[0]).share).toBe(50);
+    });
+
     test("the upload bucket is what the graph holds minus what KGbuilder wrote", async () => {
         await quotaModel.addShare("alice", { kind: UPLOAD_KIND, graphUri: "urn:g" }, 400);
         measures.total = 1400;

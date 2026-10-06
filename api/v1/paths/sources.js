@@ -104,7 +104,7 @@ export default function () {
             }
 
             const userOwnedSources = await sourceModel.getOwnedSources(userInfo.user);
-            if (!isAdmin && Object.keys(userOwnedSources).length >= userInfo.maxNumberCreatedSource) {
+            if (!isAdmin && sourceModel.countSourcesAgainstQuota(userOwnedSources) >= userInfo.maxNumberCreatedSource) {
                 res.status(401).json({ message: "Cannot create another source, the maximal limit was reached. Delete one in UserSettings > Sources, using the trash icon, to create a new one." });
                 return;
             }
@@ -127,7 +127,8 @@ export default function () {
         summary: "Create one or more sources for the current user",
         description:
             "Creates one or more source entries in `sources.json`. Body is an object whose values are full `Source` descriptors. " +
-            "Non-admin callers must have `allowSourceCreation = true` (set on their profile) and stay below `maxNumberCreatedSource`. " +
+            "Non-admin callers must have `allowSourceCreation = true` (set on their profile) and stay below `maxNumberCreatedSource`, " +
+            "one OntoCreator upload source (graphUri starting with `http://temporary.graphUri.`) being left out of that count. " +
             "For non-admins, server overrides `owner = caller.login`, `published = false` and `group = PRIVATE/<caller.login>`, " +
             "and refuses a `graphUri` another source already declares (409). " +
             "Returns the refreshed full sources catalog.",

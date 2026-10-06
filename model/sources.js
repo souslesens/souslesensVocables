@@ -11,6 +11,8 @@ import { profileModel } from "./profiles.js";
  */
 
 const lock = new Lock();
+// same prefix as CreateSLSVsource_bot.saveUploadSource
+const temporaryUploadGraphUriPrefix = "http://temporary.graphUri.";
 
 class SourceModel {
     /**
@@ -240,6 +242,20 @@ class SourceModel {
             }),
         );
         return ownedSources;
+    };
+
+    /**
+     * The OntoCreator upload source only lives until its graph moves to the final source,
+     * so one of them is left out of `maxNumberCreatedSource`. One only: a user keeping
+     * several would otherwise create sources without limit.
+     *
+     * @param {Record<string, Source>} ownedSources - the sources of one user
+     * @returns {number} how many of them count against the source quota
+     */
+    countSourcesAgainstQuota = (ownedSources) => {
+        const ownedSourcesList = Object.values(ownedSources);
+        const temporaryUploadSources = ownedSourcesList.filter((source) => (source.graphUri || "").startsWith(temporaryUploadGraphUriPrefix));
+        return ownedSourcesList.length - Math.min(temporaryUploadSources.length, 1);
     };
 
     /**

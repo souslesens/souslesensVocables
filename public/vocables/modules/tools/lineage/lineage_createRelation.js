@@ -628,7 +628,11 @@ var Lineage_createRelation = (function () {
                         return callbackSeries();
                     }
 
-                    var oldRelations = Lineage_whiteboard.lineageVisjsGraph.getNodeEdges(self.sourceNode.id, self.targetNode.id);
+                    // self-loop: drop incoming edges, keep restrictions only
+                    var targetNodeEdges = Lineage_whiteboard.lineageVisjsGraph.getNodeEdges(self.sourceNode.id, self.targetNode.id);
+                    var oldRelations = targetNodeEdges.filter(function (edge) {
+                        return edge.from == self.sourceNode.id && edge.data && edge.data.bNodeId;
+                    });
                     self.createRestrictionRelation(inSource, propId, self.sourceNode, self.targetNode, true, true, {}, function (err, blankNodeId) {
                         if (err) {
                             return callbackSeries(err);

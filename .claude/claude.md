@@ -33,6 +33,29 @@ No redundant comments (e.g. "increment i", restating code). A useful comment is 
 
 Create a function only for a clear, precise, independent need, never to split code for its own sake. See `### Keep the number of new functions low`.
 
+## Cover the line test (MANDATORY)
+
+Before keeping a comment, cover the line under it and ask what is lost. A reader who knows the project recovers the rest from the identifiers and the control flow, so delete it.
+
+```javascript
+// WRONG: the guard says it
+// one query, one endpoint : the others are out of reach
+if (endpointUrl != "_default") { return; }
+
+// WRONG: the name says it
+// several sources may share the same graph, so they are grouped
+var sourceNamesByGraphUri = {};
+
+// RIGHT: a trait of the data, visible in no identifier
+// a graph describes several nodes, its imports included
+var graphNodeAnnotations = graphAnnotations.filter(...);
+
+// RIGHT: a coupling with code elsewhere
+// both spellings, the FILTER below keeps the one of the graph being read
+```
+
+A comment earns its place by carrying something from outside the line: a trait of the data, a limit of the endpoint, a coupling with code the reader cannot see from here. Never a translation of the code under it.
+
 ## Project Description
 
 **SousLeSens Vocables** = semantic web platform for knowledge graph viz, ontology mgmt, SPARQL query building. Web UI for exploring + manipulating RDF/OWL ontologies in triple stores.
@@ -428,6 +451,22 @@ if (parentClass === key || ancestorChain.indexOf(parentClass) > -1) { break; }
 
 No state seeded before a loop just to make the first iteration behave.
 
+### Write a rule once (MANDATORY)
+
+A normalisation, a threshold, a format rule lives in one named place, even when one of its uses sits inside a generated SPARQL string. The same regex copied into three functions is three places to forget.
+
+```javascript
+// WRONG: the same rule in two functions plus a REPLACE in the query text
+var trailingSlashRegex = /\/$/;
+
+// RIGHT
+Ask.withoutTrailingSlash(uri);
+```
+
+### No condition that cannot be false (MANDATORY)
+
+Every branch of a guard must be reachable. `endpointUrl && endpointUrl != "_default"` on a value that is never empty reads as two tests where there is one, and hides which one matters.
+
 ### Data transformation pipelines (MANDATORY)
 
 Any multi-step transformation over a map or list: index building, taxonomy computation, graph flattening, aggregation.
@@ -449,6 +488,19 @@ Any multi-step transformation over a map or list: index building, taxonomy compu
 **Initialize accumulators explicitly.** `var accumulator;` in a loop body does not reset between iterations: the declaration is hoisted and the assignment never happens. Write `var accumulator = null;`.
 
 **Do not add reporting the output already carries.** If the written data records the anomaly, a parallel array plus a log line is duplication.
+
+## Review the code before handing it over (MANDATORY)
+
+After a substantial piece of work, more than about 50 changed lines or more than one file, spawn a reviewer subagent on the diff before presenting anything. Ask it four questions:
+
+- is the code pertinent to what was asked, or does it answer more than the request
+- does it read without being simulated
+- does it repeat something the repo already has
+- does it follow the conventions of this file
+
+Never spawn it for a small change: a few lines, a rename, a comment pass, a typo. The review must cost less than the change it reviews.
+
+Apply what it finds, then say in the report what the review caught. A review whose findings are all dismissed was the wrong call, so say that too.
 
 ## Debugging Tips
 

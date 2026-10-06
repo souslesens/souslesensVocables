@@ -638,9 +638,6 @@ var Sparql_OWL = (function () {
      * @param {Function} callback - Error-first callback `(err, {hierarchies})` where `hierarchies` maps each class URI to its ordered hierarchy
      * @returns {err|Object} Throws an error or returns `{hierarchies}`; each hierarchy entry is a binding with `subject`, `class`, `type`, `classLabel` (optional), `superClass`, `superClassType`, `superClassSubClass`, `superClassLabel` (optional), `subjectTypes`.
      * @expose read
-     * @mcpTool sls_node_descendants
-     * @mcpFixed options.descendants = true
-     * @mcpFixed options.excludeItself = true
      */
     self.getNodesAncestorsOrDescendants = function (sourceLabel, classIds, options, callback) {
         if (!options) {
@@ -667,8 +664,12 @@ var Sparql_OWL = (function () {
             fromStr;
         var filterStr;
         var afterSubSelectPattern = "";
+        var subSelectClosing = "}}";
         if (!options.descendants) {
             filterStr = Sparql_common.setFilter("subject", classIds, null, { values: 1 });
+            // a limit here forbids Virtuoso to merge the sub-select with the ^rdfs:subClassOf pattern above:
+            // merged, its optimizer reads every rdfs:subClassOf of the store and checks the class last
+            subSelectClosing = "} LIMIT 10000}";
             query +=
                 "  WHERE {" +
                 "  ?superClass ^rdfs:subClassOf ?superClassSubClass\n" +
@@ -706,7 +707,7 @@ var Sparql_OWL = (function () {
 
         //   query+="filter(!isBlank(?superClassSubClass))"
 
-        query += "}}" + afterSubSelectPattern + "} LIMIT 10000";
+        query += subSelectClosing + afterSubSelectPattern + "} LIMIT 10000";
 
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         self.no_params = true;
@@ -1276,7 +1277,6 @@ var Sparql_OWL = (function () {
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?subject`/`?prop`/`?value`/`?node`/`?constraintType` (+labels)
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `subject`, `subjectLabel` (optional), `node`, `prop`, `propLabel` (optional), `constraintType`, `value`, `valueLabel` (optional), `cardinalityType` (optional), `cardinalityValue` (optional), `g` (optional), `status` (optional), `creationDate` (optional), `creator` (optional), `provenance` (optional), `domainSourceLabel` (optional), `rangeSourceLabel` (optional).
      * @expose read
-     * @mcpTool sls_node_properties
      */
     self.getObjectRestrictions = function (sourceLabel, subClassIds, options, callback) {
         if (!options) {
@@ -2931,7 +2931,6 @@ var Sparql_OWL = (function () {
      * @param {Function} callback - Error-first callback `(err, bindings)` with `?node`/`?node_label`/`?definition`/`?superClass1Label`…`?superClass4Label`
      * @returns {err|Array} Throws an error or returns SPARQL results with variables: `node`, `node_label`, `definition` (optional), `superClass1Label` (optional), `superClass2Label` (optional), `superClass3Label` (optional), `superClass4Label` (optional), `description` (optional), `propLabel` (optional), `targetClass_label` (optional).
      * @expose read
-     * @mcpTool sls_node_definition
      */
     self.getNodesSuperClassesAndDefinition = function (sourceLabel, nodeIds, options, callback) {
         if (!options) {

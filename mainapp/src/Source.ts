@@ -87,9 +87,12 @@ export async function saveSource(source: ServerSource, edition: boolean) {
                 headers: { "Content-Type": "application/json" },
             });
         } else {
+            // Sparql_SKOS reads topClassFilter with a SKOS default of its own
+            const isOwlSourceWithoutTopClassFilter = source.controller === "Sparql_OWL" && source.topClassFilter.trim() === "";
+            const sourceToCreate = isOwlSourceWithoutTopClassFilter ? { ...source, topClassFilter: window.Sparql_OWL.defaultTopClassFilter } : source;
             response = await fetch(endpoint, {
                 method: "post",
-                body: JSON.stringify({ [source.name]: source }, null, "\t"),
+                body: JSON.stringify({ [source.name]: sourceToCreate }, null, "\t"),
                 headers: { "Content-Type": "application/json" },
             });
         }
@@ -187,8 +190,7 @@ export const ServerSourceSchema = z.object({
     graphUri: z.string().url().optional().or(z.literal("")),
     sparql_server: SparqlServerSchema,
     controller: z.string().default("Sparql_OWL"),
-    /* Empty means "use the default top-class query computed by Sparql_OWL.getTopConcepts
-     * from the source taxonomyPredicates". */
+    /* Left empty on a Sparql_OWL source, saveSource writes Sparql_OWL.defaultTopClassFilter at creation. */
     topClassFilter: z.string().default(""),
     schemaType: z.string().default("OWL"),
     dataSource: dataSourceSchema.nullable(),

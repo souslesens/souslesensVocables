@@ -8,7 +8,7 @@ import { createRoot } from "react-dom/client";
 declare global {
     interface Window {
         SearchUtil: {
-            generateElasticIndex: (sourceName: string, options: Record<string, number>, callback: () => void) => void;
+            generateElasticIndex: (sourceName: string, options: Record<string, number>, callback: (error?: unknown) => void) => void;
         };
         UI: {
             message: (text: string, status: boolean) => void;
@@ -94,15 +94,11 @@ export function UploadGraphModal({ apiUrl, onClose, open, sourceName, indexAfter
 
         if (indexAfterSuccess) {
             try {
-                window.SearchUtil.generateElasticIndex(sourceName, { indexProperties: 1, indexNamedIndividuals: 1 }, () => {
-                    fetch(`/api/v1/ontologyModels?source=${sourceName}`, { method: "DELETE" })
-                        .then((_success) => {
-                            delete window.Config.ontologiesVocabularyModels[sourceName];
-                            window.UI.message(`${sourceName} was updated successfully`, true);
-                        })
-                        .catch((error) => {
-                            alert(error);
-                        });
+                // generateElasticIndex also rebuilds the ontology model cache, client and server side
+                window.SearchUtil.generateElasticIndex(sourceName, { indexProperties: 1, indexNamedIndividuals: 1 }, (error?: unknown) => {
+                    if (!error) {
+                        window.UI.message(`${sourceName} was updated successfully`, true);
+                    }
                 });
             } catch (error) {
                 console.error(error);

@@ -19,6 +19,7 @@ export default function () {
             const graphUri = userSources[sourceName].graphUri;
             await rdfDataModel.addMetadata(graphUri, req.body.addedData);
             await rdfDataModel.removeMetadata(graphUri, req.body.removedData);
+            await rdfDataModel.ensureOntologyType(graphUri);
 
             res.status(200).send();
         } catch (error) {
@@ -54,7 +55,8 @@ export default function () {
         description:
             "Applies a delta on the metadata-level triples of the named graph attached to `source`: " +
             "`addedData` is inserted, `removedData` is deleted (both via `rdfDataModel.addMetadata`/`removeMetadata`). " +
-            "Used by the UI to edit `dc:title`, `dc:creator`, `owl:imports`, version annotations, etc.",
+            "Used by the UI to edit `dc:title`, `dc:creator`, `owl:imports`, version annotations, etc. " +
+            "Side effect: the graph node is declared `rdf:type owl:Ontology` if it is not already, so the node describing the source stays findable by type.",
         operationId: "rdfPostGraphMetadata",
         parameters: [
             { name: "source", in: "query", type: "string", required: true, description: "Source name. Example: `IOF_core`." },

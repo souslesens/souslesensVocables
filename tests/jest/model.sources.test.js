@@ -1,4 +1,5 @@
 import fs from "fs";
+import os from "os";
 import path from "path";
 import { fileURLToPath } from "url";
 import { jest } from "@jest/globals";
@@ -143,6 +144,82 @@ describe("SourceModel", () => {
         expect(await sourceModel.canWrite(admin, { name: "SOURCE_2" })).toBe(true);
         expect(await sourceModel.canWrite(admin, { graphUri: "http://data.exemple.org/source_2" })).toBe(true);
         expect(await sourceModel.canWrite(admin, { graphUri: "http://data.exemple.org/unknown" })).toBe(true);
+    });
+
+    describe("owner rights: update, deletion", () => {
+        const sourceOwner = { login: "jdoe", groups: ["owners"] };
+        let ownerSourcesPath;
+        let ownerSourceModel;
+
+        beforeEach(async () => {
+            const privateSource = { ...sourcesFromFiles["SOURCE_3"], name: "SOURCE_4", id: "SOURCE_4", group: "PRIVATE/jdoe", owner: "jdoe", published: false };
+            const ownerSources = { ...sourcesFromFiles, SOURCE_4: privateSource };
+            const temporaryDirectory = await fs.promises.mkdtemp(path.join(os.tmpdir(), "sources-"));
+            ownerSourcesPath = path.join(temporaryDirectory, "sources.json");
+            await fs.promises.writeFile(ownerSourcesPath, JSON.stringify(ownerSources));
+            ownerSourceModel = new SourceModel(PROFILE_MODEL, ownerSourcesPath);
+        });
+
+        test("a non owner can neither update nor delete a source", async () => {
+            const hijackedSource = { ...sourcesFromFiles["SOURCE_3"], owner: "jdoe" };
+            await expect(ownerSourceModel.updateUserSource(sourceOwner, hijackedSource)).rejects.toMatchObject({ status: 403 });
+            await expect(ownerSourceModel.deleteUserSource(sourceOwner, "SOURCE_3")).rejects.toMatchObject({ status: 403 });
+            const writtenSources = JSON.parse(await fs.promises.readFile(ownerSourcesPath, "utf8"));
+            expect(writtenSources["SOURCE_3"]).toStrictEqual(sourcesFromFiles["SOURCE_3"]);
+        });
+
+        test("an owner update keeps the stored access fields and applies the others", async () => {
+            const storedSource = { ...sourcesFromFiles["SOURCE_3"], name: "SOURCE_4", id: "SOURCE_4", group: "PRIVATE/jdoe", owner: "jdoe", published: false };
+            const updatedSource = {
+                ...storedSource,
+                owner: "someone",
+                published: true,
+                group: "FOLDER_2/SUBFOLDER_1",
+                editable: !storedSource.editable,
+                graphUri: "http://other.org/",
+                imports: ["SOURCE_1"],
+            };
+            expect(await ownerSourceModel.updateUserSource(sourceOwner, updatedSource)).toBe(true);
+            const writtenSources = JSON.parse(await fs.promises.readFile(ownerSourcesPath, "utf8"));
+            expect(writtenSources["SOURCE_4"]).toStrictEqual({ ...storedSource, graphUri: "http://other.org/", imports: ["SOURCE_1"] });
+        });
+
+        test("an owner cannot move its source onto a graph another source declares", async () => {
+            const storedSource = { ...sourcesFromFiles["SOURCE_3"], name: "SOURCE_4", id: "SOURCE_4", group: "PRIVATE/jdoe", owner: "jdoe", published: false };
+            const updatedSource = { ...storedSource, graphUri: sourcesFromFiles["SOURCE_1"].graphUri };
+            await expect(ownerSourceModel.updateUserSource(sourceOwner, updatedSource)).rejects.toMatchObject({ status: 409 });
+        });
+
+        test("a non admin cannot create a source on a graph another source declares, an admin can", async () => {
+            const newSource = { ...sourcesFromFiles["SOURCE_1"], name: "SOURCE_5", id: "SOURCE_5", owner: "jdoe" };
+            await expect(ownerSourceModel.addUserSource(sourceOwner, newSource)).rejects.toMatchObject({ status: 409 });
+            await ownerSourceModel.addUserSource(sourceOwner, { ...newSource, graphUri: "http://free.org/" });
+            await ownerSourceModel.addUserSource({ login: "admin" }, { ...newSource, name: "SOURCE_6", id: "SOURCE_6" });
+            const writtenSources = JSON.parse(await fs.promises.readFile(ownerSourcesPath, "utf8"));
+            expect(writtenSources["SOURCE_5"].graphUri).toStrictEqual("http://free.org/");
+            expect(writtenSources["SOURCE_6"].graphUri).toStrictEqual(sourcesFromFiles["SOURCE_1"].graphUri);
+        });
+
+        test("a non admin creates a private unpublished source it owns, an admin keeps its descriptor", async () => {
+            const newSource = { ...sourcesFromFiles["SOURCE_1"], name: "SOURCE_5", id: "SOURCE_5", graphUri: "http://free.org/", owner: "someone", published: true };
+            await ownerSourceModel.addUserSource(sourceOwner, newSource);
+            await ownerSourceModel.addUserSource({ login: "admin" }, { ...newSource, name: "SOURCE_6", id: "SOURCE_6", graphUri: "http://free-too.org/" });
+            const writtenSources = JSON.parse(await fs.promises.readFile(ownerSourcesPath, "utf8"));
+            expect(writtenSources["SOURCE_5"]).toMatchObject({ owner: "jdoe", published: false, group: "PRIVATE/jdoe" });
+            expect(writtenSources["SOURCE_6"]).toMatchObject({ owner: "someone", published: true, group: sourcesFromFiles["SOURCE_1"].group });
+        });
+
+        test("an update cannot overwrite another source through the id field", async () => {
+            const redirectedSource = { ...sourcesFromFiles["SOURCE_3"], name: "SOURCE_4", id: "SOURCE_3" };
+            await expect(ownerSourceModel.updateUserSource(sourceOwner, redirectedSource)).rejects.toMatchObject({ status: 403 });
+        });
+
+        test("an owner can delete its source, an admin any source", async () => {
+            expect(await ownerSourceModel.deleteUserSource(sourceOwner, "SOURCE_4")).toBe(true);
+            expect(await ownerSourceModel.deleteUserSource({ login: "admin" }, "SOURCE_3")).toBe(true);
+            const writtenSources = JSON.parse(await fs.promises.readFile(ownerSourcesPath, "utf8"));
+            expect(Object.keys(writtenSources)).toStrictEqual(["SOURCE_1", "SOURCE_2"]);
+        });
     });
 
     test("get owned user sources", async () => {

@@ -6,6 +6,7 @@ How to configure and manage a SousLeSens instance.
 :maxdepth: 2
 configuration-files.md
 configeditor.md
+admin.md
 rights-and-quotas.md
 sls-py-api.md
 jowl.md

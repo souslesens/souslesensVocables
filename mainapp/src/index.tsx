@@ -15,6 +15,9 @@ declare global {
             ontologiesVocabularyModels: Record<string, any>;
             // There are more config properties but we only use this one in mainapp
         };
+        Sparql_OWL: {
+            defaultTopClassFilter: string;
+        };
     }
 }
 window.ConfigEditor.createApp = function createApp() {

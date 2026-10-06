@@ -9,31 +9,71 @@ import { sourceModel } from "../model/sources.js";
 
 var Ask = {
     getTermClassesInfos: function (source, term, callback) {
+        var indexName = source.toLowerCase();
+        Ask.executeElasticQuery("/_search", term, indexName, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            var termUrisMap = {};
+            var hits = result.body.hits.hits;
+            hits.forEach(function (hit) {
+                termUrisMap[hit._source.id] = {
+                    id: hit._source.id,
+                    label: hit._source.label,
+                    ancestors: hit._source.parents,
+                    predicates: [],
+                    relations: [],
+                };
+            });
+            Ask.fillClassesInfos(source, termUrisMap, callback);
+        });
+    },
+    getUriClassesInfos: function (source, uri, callback) {
+        // characters that cannot sit inside a SPARQL IRIREF, so the uri cannot break out of <...>
+        var iriForbiddenCharactersRegex = /[\s<>"{}|\\^`]/;
+        if (iriForbiddenCharactersRegex.test(uri)) {
+            return callback("uri is not a valid IRI: " + uri);
+        }
+        var uriInfos = { id: uri, label: null, ancestors: [], predicates: [], relations: [] };
+        Ask.getSourceInfos(source, function (err, sourceInfos) {
+            if (err) {
+                return callback(err);
+            }
+            var query =
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+                "select distinct ?label ?ancestor from <" +
+                sourceInfos.graphUri +
+                "> where { optional { <" +
+                uri +
+                "> rdfs:label ?label } optional { <" +
+                uri +
+                "> rdfs:subClassOf+ ?ancestor filter (!isBlank(?ancestor)) } } limit 10000";
+            Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
+                if (err) {
+                    return callback(err);
+                }
+                var labels = [];
+                sparqlResult.results.bindings.forEach(function (binding) {
+                    if (binding.label && labels.indexOf(binding.label.value) < 0) {
+                        labels.push(binding.label.value);
+                    }
+                    if (binding.ancestor && uriInfos.ancestors.indexOf(binding.ancestor.value) < 0) {
+                        uriInfos.ancestors.push(binding.ancestor.value);
+                    }
+                });
+                // one label per language, sorted so the pick does not follow the endpoint row order
+                labels.sort();
+                uriInfos.label = labels.length > 0 ? labels[0] : null;
+                var uriInfosMap = {};
+                uriInfosMap[uri] = uriInfos;
+                Ask.fillClassesInfos(source, uriInfosMap, callback);
+            });
+        });
+    },
+    fillClassesInfos: function (source, termUrisMap, callback) {
         var sourceInfos = {};
-        var termUrisMap = {};
         async.series(
             [
-                // search terms and topClasses
-                function (callbackSeries) {
-                    var indexName = source.toLowerCase();
-                    Ask.executeElasticQuery("/_search", term, indexName, function (err, result) {
-                        if (err) {
-                            return callbackSeries(err);
-                        } else {
-                            var hits = result.body.hits.hits;
-                            hits.forEach(function (hit) {
-                                termUrisMap[hit._source.id] = {
-                                    id: hit._source.id,
-                                    label: hit._source.label,
-                                    ancestors: hit._source.parents,
-                                    predicates: [],
-                                    relations: [],
-                                };
-                            });
-                            return callbackSeries();
-                        }
-                    });
-                },
                 function (callbackSeries) {
                     Ask.getSourceInfos(source, function (err, result) {
                         if (err) {
@@ -176,8 +216,74 @@ var Ask = {
         );
     },
     /**
+     * the ontologies a user may read that describe themselves, as {source, graphUri, imports, description}.
+     * A source whose graph carries no description is left out rather than returned empty.
+     * @param userSources : map sourceName -> source config, as returned by sourceModel.getUserSources
+     * @param callback : (err, summaries)
+     */
+    getOntologySummary: function (userSources, callback) {
+        var sourceNamesByGraphUri = {};
+        Object.keys(userSources).forEach(function (sourceName) {
+            var source = userSources[sourceName];
+            var endpointUrl = (source.sparql_server && source.sparql_server.url) || "_default";
+            if (!source.graphUri || endpointUrl != "_default") {
+                return;
+            }
+            if (!sourceNamesByGraphUri[source.graphUri]) {
+                sourceNamesByGraphUri[source.graphUri] = [];
+            }
+            sourceNamesByGraphUri[source.graphUri].push(sourceName);
+        });
 
-     /**
+        var graphUris = Object.keys(sourceNamesByGraphUri);
+        if (graphUris.length == 0) {
+            return callback(null, []);
+        }
+
+        Ask.executeSparqlQuery(null, Ask.getOntologyDescriptionsSparql(graphUris), function (err, sparqlResult) {
+            if (err) {
+                return callback(err);
+            }
+
+            var annotationsByGraphUri = {};
+            sparqlResult.results.bindings.forEach(function (binding) {
+                var graphUri = binding.graph.value;
+                if (!annotationsByGraphUri[graphUri]) {
+                    annotationsByGraphUri[graphUri] = [];
+                }
+                annotationsByGraphUri[graphUri].push({
+                    ontology: binding.ontology.value,
+                    predicate: binding.predicate.value,
+                    value: binding.value.value,
+                    language: binding.value["xml:lang"] || "",
+                });
+            });
+
+            var summaries = [];
+            Object.keys(annotationsByGraphUri).forEach(function (graphUri) {
+                var graphAnnotations = annotationsByGraphUri[graphUri];
+
+                // a graph describes several nodes, its imports included
+                var graphNodeAnnotations = graphAnnotations.filter(function (annotation) {
+                    return Ask.withoutTrailingSlash(annotation.ontology) == Ask.withoutTrailingSlash(graphUri);
+                });
+                var describingAnnotations = graphNodeAnnotations.length > 0 ? graphNodeAnnotations : graphAnnotations;
+                var description = Ask.getBestAnnotation(describingAnnotations, Ask.ontologyDescriptionPredicates);
+
+                sourceNamesByGraphUri[graphUri].forEach(function (sourceName) {
+                    summaries.push({
+                        source: sourceName,
+                        graphUri: graphUri,
+                        imports: userSources[sourceName].imports || [],
+                        description: description,
+                    });
+                });
+            });
+
+            return callback(null, summaries);
+        });
+    },
+    /**
      * build a path between  classes that are linked together including inherited from the class hierrachy
      * @param source
      * @param term1
@@ -505,6 +611,117 @@ var Ask = {
     },
 
     /*******************************************************Helpers*********************************************************/
+
+    // Read in this order : the first predicate an ontology carries wins.
+    ontologyDescriptionPredicates: [
+        "http://purl.org/dc/terms/description",
+        "http://purl.org/dc/elements/1.1/description",
+        "http://purl.org/dc/terms/abstract",
+        "http://www.w3.org/2000/01/rdf-schema#comment",
+        "http://www.w3.org/2004/02/skos/core#definition",
+    ],
+
+    /**
+     * a graph URI ends with a slash, the ontology node inside it often not
+     * @param uri
+     * @return {string}
+     */
+    withoutTrailingSlash: function (uri) {
+        var trailingSlashRegex = /\/$/;
+        return uri.replace(trailingSlashRegex, "");
+    },
+
+    /**
+     * the descriptions the given graphs carry on the node describing themselves
+     * @param graphUris
+     * @return {string} sparql query returning ?graph ?ontology ?predicate ?value
+     */
+    getOntologyDescriptionsSparql: function (graphUris) {
+        var graphTerms = graphUris.map(function (graphUri) {
+            return "<" + graphUri + ">";
+        });
+        var graphValues = graphTerms.join(" ");
+
+        // both spellings, the FILTER below keeps the one of the graph being read
+        var graphNodeTerms = [];
+        graphUris.forEach(function (graphUri) {
+            graphNodeTerms.push("<" + graphUri + ">");
+            var graphNodeUri = Ask.withoutTrailingSlash(graphUri);
+            if (graphNodeUri != graphUri) {
+                graphNodeTerms.push("<" + graphNodeUri + ">");
+            }
+        });
+        var graphNodeValues = graphNodeTerms.join(" ");
+
+        var predicateTerms = Ask.ontologyDescriptionPredicates.map(function (predicate) {
+            return "<" + predicate + ">";
+        });
+        var predicateValues = predicateTerms.join(" ");
+
+        return (
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
+            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> " +
+            " select distinct ?graph ?ontology ?predicate ?value where {" +
+            " VALUES ?graph {" +
+            graphValues +
+            "}" +
+            " graph ?graph {" +
+            "  {" +
+            "   ?ontology rdf:type ?ontologyType." +
+            "   VALUES ?ontologyType {owl:Ontology skos:ConceptScheme}" +
+            "  } UNION {" +
+            // a node named like its graph describes the source whether it declares a type or not
+            "   VALUES ?ontology {" +
+            graphNodeValues +
+            "}" +
+            '   FILTER (REPLACE(STR(?ontology), "/$", "") = REPLACE(STR(?graph), "/$", ""))' +
+            "  }" +
+            "  ?ontology ?predicate ?value." +
+            "  VALUES ?predicate {" +
+            predicateValues +
+            "}" +
+            "  FILTER (isLiteral(?value))" +
+            " } } LIMIT 10000"
+        );
+    },
+
+    /**
+     * the value of the first predicate of the priority list the annotations carry, in english when a
+     * translation exists, else the lowest language tag rather than the endpoint row order
+     * @param annotations : [{predicate, value, language}]
+     * @param predicatesByPriority
+     * @return {string|null}
+     */
+    getBestAnnotation: function (annotations, predicatesByPriority) {
+        var englishLanguageRegex = /^en(-|$)/i;
+        for (var priorityIndex = 0; priorityIndex < predicatesByPriority.length; priorityIndex++) {
+            var predicate = predicatesByPriority[priorityIndex];
+            var candidates = annotations.filter(function (annotation) {
+                return annotation.predicate == predicate;
+            });
+            if (candidates.length == 0) {
+                continue;
+            }
+            var englishCandidate = candidates.find(function (annotation) {
+                return englishLanguageRegex.test(annotation.language || "");
+            });
+            if (englishCandidate) {
+                return englishCandidate.value;
+            }
+            candidates.sort(function (leftAnnotation, rightAnnotation) {
+                if (leftAnnotation.language != rightAnnotation.language) {
+                    return leftAnnotation.language < rightAnnotation.language ? -1 : 1;
+                }
+                if (leftAnnotation.value == rightAnnotation.value) {
+                    return 0;
+                }
+                return leftAnnotation.value < rightAnnotation.value ? -1 : 1;
+            });
+            return candidates[0].value;
+        }
+        return null;
+    },
 
     getSourceInfos: function (source, callback) {
         async function getSourceInfos2(source) {

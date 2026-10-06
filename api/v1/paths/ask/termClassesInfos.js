@@ -27,7 +27,7 @@ export default function () {
                     description:
                         "Understands a term in depth: every class whose label matches it, with its predicates and the relations its restrictions declare, keyed by class URI. " +
                         "Start here when the user names a domain word and you want the whole picture in one call, rather than searching the label index and then querying each hit. " +
-                        "It takes plain words, not a URI, so it is also the shortest way from a question to the URIs the other tools need.",
+                        "It takes plain words, not a URI, so it is also the shortest way from a question to the URIs the other tools need. Given a URI, use sls_uri_infos.",
                     params: {
                         sourceLabel: { type: "string", required: true, description: "Source to look in. Its lowercase form is the label index name." },
                         term: { type: "string", required: true, description: "Term in plain words. Several words are combined with AND. For instance failure mode." },

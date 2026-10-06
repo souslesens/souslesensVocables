@@ -1027,14 +1027,20 @@ var MappingModeler = (function () {
     };
 
     self.clearSourceClasses = function (source, callback) {
-        OntologyModels.clearOntologyModelCache(MappingModeler.currentSLSsource);
-        var newClasses = [];
-        self.allClasses.forEach(function (item) {
-            if (item.source != source) {
-                newClasses.push(item);
+        // the class lists are rebuilt from the model once it is reloaded from the triple store
+        OntologyModels.clearOntologyModelCache(source, function (err) {
+            if (err) {
+                return MainController.errorAlert(err);
             }
+            self.initResourcesMap(source, function (err) {
+                if (err) {
+                    return MainController.errorAlert(err);
+                }
+                if (callback) {
+                    callback();
+                }
+            });
         });
-        self.allClasses = newClasses;
     };
 
     /**
@@ -1425,7 +1431,7 @@ var MappingModeler = (function () {
             }
         });
 
-        JstreeWidget.updateJstree("suggestionsSelectJstreeDiv", newData);
+        JstreeWidget.updateJstree("suggestionsSelectJstreeDiv", newData, { openAll: true });
     };
 
     /**
@@ -1574,16 +1580,15 @@ var MappingModeler = (function () {
      * @name showSampleData
      * @memberof module:MappingModeler
      *
-     * @param {Object} node - The selected node from which to fetch data.
+     * @param {Object} [node] - The clicked node: a data sources tree node (table or csvSource) or a graph Column node. Defaults to the current table.
      * @param {Array|string} columns - The specific columns to display, can be an array or a single column name.
      * @param {Function} callback - A callback function to be executed after showing the data (optional).
      *
      * @description
-     * - Checks if columns are specified and prepares the table accordingly.
+     * - Resolves the data source and the table from the node itself, never from the last selection,
+     *   because a right click does not initialize the current table.
      * - Fetches and displays sample data from either a database or CSV source.
-     * - For a database source, it fetches the first 200 rows based on a predefined SQL query.
      * - Displays the data in a table with the specified columns.
-     * - Alerts the user if the CSV source is not yet implemented.
      *
      * @example
      * self.showSampleData(node, ['column1', 'column2'], function() {
@@ -1592,10 +1597,25 @@ var MappingModeler = (function () {
      */
 
     self.showSampleData = function (node, columns, callback) {
+        var dataSourceId = null;
+        var table = null;
         if (!node) {
-            node = self.currentTreeNode;
+            dataSourceId = DataSourceManager.currentConfig.currentDataSource?.id;
+            table = self.currentTable?.name;
+        } else if (node.data.type == "Column") {
+            dataSourceId = node.data.datasource;
+            table = node.data.dataTable;
+        } else if (node.data.type == "csvSource") {
+            dataSourceId = node.id;
+            table = node.id;
+        } else if (node.data.type == "table") {
+            dataSourceId = node.parent;
+            table = node.data.id;
         }
-        // alert("coming soon");
+        if (!dataSourceId || !table) {
+            return alert("no Table selected");
+        }
+
         if (!columns) {
             var hasColumn = false;
         } else {
@@ -1644,18 +1664,28 @@ var MappingModeler = (function () {
             return;
         }
 
-        if (DataSourceManager.currentConfig.currentDataSource.sampleData) {
-            showTable(DataSourceManager.currentConfig.currentDataSource.sampleData);
-        } else if (DataSourceManager.currentConfig.currentDataSource.type == "databaseSource") {
-            if (!node || !node.data) {
-                node = MappingModeler.currentTreeNode;
-                if (!node.data) {
-                    return alert("no Table  selected");
-                }
-            }
+        if (DataSourceManager.currentConfig.csvSources[dataSourceId]) {
+            var payload = {
+                fileName: table,
+                dir: "CSV/" + DataSourceManager.currentSlsvSource,
+                options: JSON.stringify({ lines: 100 }),
+            };
+            $.ajax({
+                type: "GET",
+                url: Config.apiUrl + "/data/csv",
+                data: payload,
+                dataType: "json",
+                success: function (result, _textStatus, _jqXHR) {
+                    showTable(result.data[0]);
+                },
+                error(err) {
+                    return MainController.errorAlert(err);
+                },
+            });
+        } else {
             const params = new URLSearchParams({
-                dbName: DataSourceManager.currentConfig.currentDataSource.id,
-                tableName: node.data.id,
+                dbName: dataSourceId,
+                tableName: table,
             });
 
             $.ajax({
@@ -1670,8 +1700,6 @@ var MappingModeler = (function () {
                     return MainController.errorAlert(err);
                 },
             });
-        } else if (DataSourceManager.currentConfig.currentDataSource.type == "csvSource") {
-            alert("Comming Soon...");
         }
     };
 

@@ -19,7 +19,7 @@ export default function () {
             "Each term is resolved to the classes whose label matches it, then the OWL restrictions between the two families of classes are collected in both directions, those carried by their subclasses included. " +
             "A restriction declared on a super class of a matched class is not returned. " +
             "Use it before writing a query or a mapping, to know which relations the ontology allows between two terms. " +
-            "Both terms are required: without a second one the traversal is unbounded and does not return.",
+            "Without `term2`, every relation of the classes matching `term1` is returned, and the pass reading them the other way round is skipped.",
         operationId: "askTermsLinkedClasses",
         "x-mcp": {
             tools: [
@@ -30,7 +30,8 @@ export default function () {
                         "Lists the relations the ontology allows between two terms given in plain words: the classes they link and the properties linking them. " +
                         "Each term is matched against class labels, so every class it names is covered without a prior search. When you already hold class URIs, use sls_linked_classes instead. " +
                         "Call it before writing a query or a mapping, instead of guessing a predicate. It reads the OWL restrictions in both directions, those carried by the subclasses of the matched classes included, so it finds relations a direct triple lookup misses. " +
-                        "It reads downwards only: a restriction declared on a super class of a matched class does not come back, so name that broader class in the term when you want it.",
+                        "It reads downwards only: a restriction declared on a super class of a matched class does not come back, so name that broader class in the term when you want it. " +
+                        "Leave term2 out to list every relation of the classes matching term1, in which case the reverse direction is not read.",
                     params: {
                         sourceLabel: { type: "string", required: true, description: "Source to look in. Its lowercase form is the label index name." },
                         term1: {
@@ -40,8 +41,10 @@ export default function () {
                         },
                         term2: {
                             type: "string",
-                            required: true,
-                            description: "Words naming the classes at the other end of the relations, matched against their labels, not a URI. For instance centrifugal pump.",
+                            required: false,
+                            description:
+                                "Words naming the classes at the other end of the relations, matched against their labels, not a URI. For instance centrifugal pump. " +
+                                "Leave it out to list every relation of the classes matching term1.",
                         },
                     },
                     query: { sourceLabel: "{sourceLabel}", term1: "{term1}", term2: "{term2}" },

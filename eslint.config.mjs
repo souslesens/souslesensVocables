@@ -115,6 +115,7 @@ export default [
                 KGquery: "readable",
                 Lineage_whiteboard: "readable",
                 Lineage_common: "readable",
+                Lineage_createSLSVsource: "readable",
                 Lineage_decoration: "readable",
                 Lineage_properties: "writable",
                 Lineage_relations: "readable",

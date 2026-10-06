@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.16.0](https://github.com/souslesens/souslesensVocables/compare/3.15.0...3.16.0) (2026-10-06)
+
+
+### Features
+
+* **ask:** describe a class from its URI with sls_uri_infos ([6d6df8a](https://github.com/souslesens/souslesensVocables/commit/6d6df8aedcf4e0e894eb97ab1f5194074ad88c72))
+* **createSLSVsource_bot:** merge upload from file and URL into one choice ([8d43aab](https://github.com/souslesens/souslesensVocables/commit/8d43aabd205ba9ffe0f2b5863107ad5871d7e861))
+* **docs:** architecture schema ([4f07d49](https://github.com/souslesens/souslesensVocables/commit/4f07d49420bfb755c412e8e3b66b3fde5bd8c5ae))
+* **lineage:** open the graph popup menu with a long press on touch screens ([5bc7b40](https://github.com/souslesens/souslesensVocables/commit/5bc7b40734c8a3005e2236ef000ee39cd8b0c896))
+* **mcp:** search every readable index when indexes is omitted ([191b69e](https://github.com/souslesens/souslesensVocables/commit/191b69e4c3ea0bab8c943d4f0df28d58a41d97d5))
+* **sources:** write the default topClassFilter at creation when left empty ([8de0ec6](https://github.com/souslesens/souslesensVocables/commit/8de0ec6300a15686ce7ba46f3c606d09fdaa2e6f))
+* **UI:** keep only the tool and source selectors in the phone header ([f646eba](https://github.com/souslesens/souslesensVocables/commit/f646ebaab3e23c95722ec082160291ec7516e906))
+* **userSettings:** publish an owned source into a group with readwrite rights ([a222bca](https://github.com/souslesens/souslesensVocables/commit/a222bca6a44891f4cbe2e90bfe25fd01254bc049))
+
+
+### Bug Fixes
+
+* **ask:** expose and correct claude's modifications ([e22ea3d](https://github.com/souslesens/souslesensVocables/commit/e22ea3d723d3b664c128317d7fbd8b318a92ba51))
+* **ask:** find untyped ontology nodes and pick descriptions deterministically ([ae1ca2c](https://github.com/souslesens/souslesensVocables/commit/ae1ca2c4aba011d76e668009bddfff3b202a47cd))
+* **createSLSVsource:** validate source name and graphUri like the ConfigEditor form ([d74ea76](https://github.com/souslesens/souslesensVocables/commit/d74ea76fad1aa2515cd0addc4a5da85f652fcbc3))
+* **KGquery_graph:** keep dragged node positions in the cached model after saving ([6c788d0](https://github.com/souslesens/souslesensVocables/commit/6c788d09bf7e81cb8c22d2b9c565e0a7b3b8e3fe))
+* **lineage_sources:** let the owner refresh indexes and ontology model of a read-only source ([2e2c445](https://github.com/souslesens/souslesensVocables/commit/2e2c445adae96aed514fd1baca199f4abf0c7196))
+* **lineage:** let admins refresh indexes and ontology model of read-only sources ([6eb9c60](https://github.com/souslesens/souslesensVocables/commit/6eb9c60f8f2011db671bf6b1128d7875ca27e4ea))
+* **lineage:** show the Edit source button to admins on read-only sources ([54b9b35](https://github.com/souslesens/souslesensVocables/commit/54b9b351762a5ec026a79144ea6d7fe229179160))
+* **mappingModeler:** keep every source in the Class tree while ontology models reload ([5b52fc5](https://github.com/souslesens/souslesensVocables/commit/5b52fc574d3789fd002902fb679a134f2557da50))
+* **mappingModeler:** keep the suggestions tree open while filtering classes ([9074404](https://github.com/souslesens/souslesensVocables/commit/907440431bfc8799a14f46bcf794717920335f6a))
+* **mappingModeler:** show sample data from the clicked node ([679b838](https://github.com/souslesens/souslesensVocables/commit/679b838189126d7f18b33731a4d7c5168074fbd9))
+* **metadata:** keep the graph node typed owl:Ontology after metadata edits ([add6e9b](https://github.com/souslesens/souslesensVocables/commit/add6e9beb6cbb2910581db9f304a73ad853fff8e))
+* **searchUtil:** refresh ontology model cache after a full reindex ([899b479](https://github.com/souslesens/souslesensVocables/commit/899b479167fd515d690c3d0a20efca3be51aa084))
+* **sparql_OWL:** limit the ancestors sub-select so Virtuoso keeps the class as entry point ([10b9f74](https://github.com/souslesens/souslesensVocables/commit/10b9f74164ea94797485afdbac49c45dd9c5d477))
+* **userSettings:** use the mirrored reply arrow for the publish action ([349a8ad](https://github.com/souslesens/souslesensVocables/commit/349a8ade369d5740d8a738046db62fb65511cce9))
+* **userSettings:** use the share icon for the publish action ([899734a](https://github.com/souslesens/souslesensVocables/commit/899734ac0a22484d4aa6fa430a9256a4b3ad921a))
+* **users:** keep tokens and passwords across account edits, fix OntoCreator upload rights ([abbb757](https://github.com/souslesens/souslesensVocables/commit/abbb75750acd6eee847aff82ccda860014d84592))
+
 ## [3.15.0](https://github.com/souslesens/souslesensVocables/compare/3.14.1...3.15.0) (2026-09-25)
 
 

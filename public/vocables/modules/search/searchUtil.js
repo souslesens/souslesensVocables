@@ -626,7 +626,7 @@ indexes.push(source.toLowerCase());
     };
 
     self.indexData = function (indexName, data, replaceIndex, callback) {
-        if (data.length == 0) {
+        if (data.length == 0 && !replaceIndex) {
             return callback();
         }
         var options = { replaceIndex: replaceIndex, owltype: "Class" };
@@ -672,13 +672,22 @@ indexes.push(source.toLowerCase());
                 var taxonomyClasses = [];
                 async.series(
                     [
+                        // recreated before any data: a source without classes would otherwise keep its stale or missing index
+                        function (callbackSeries) {
+                            if (options.ids) {
+                                return callbackSeries();
+                            }
+                            self.indexData(sourceLabel.toLowerCase(), [], true, function (err) {
+                                callbackSeries(err);
+                            });
+                        },
+
                         // index nodes hierarchy
                         function (callbackSeries) {
                             Sparql_generic.getSourceTaxonomy(sourceLabel, options, function (err, result) {
                                 if (err) {
                                     return callbackEachSource(err);
                                 }
-                                var index = 0;
                                 var classesArray = [];
                                 for (var key in result.classesMap) {
                                     classesArray.push(result.classesMap[key]);
@@ -692,14 +701,10 @@ indexes.push(source.toLowerCase());
                                             return callbackEach();
                                         }
 
-                                        var replaceIndex = false;
-                                        if (index++ == 0 && !options.ids) {
-                                            replaceIndex = true;
-                                        }
                                         data.forEach(function (item) {
                                             item.type = "Class";
                                         });
-                                        self.indexData(sourceLabel.toLowerCase(), data, replaceIndex, function (err, result) {
+                                        self.indexData(sourceLabel.toLowerCase(), data, false, function (err, result) {
                                             if (err) {
                                                 return callbackEach(err);
                                             }
@@ -731,7 +736,6 @@ indexes.push(source.toLowerCase());
                                 if (err) {
                                     return callbackEachSource(err);
                                 }
-                                var index = 0;
                                 var classesArray = [];
                                 for (var key in result.classesMap) {
                                     classesArray.push(result.classesMap[key]);
@@ -745,14 +749,10 @@ indexes.push(source.toLowerCase());
                                             return callbackEach();
                                         }
 
-                                        var replaceIndex = false;
-                                        if (index++ == 0) {
-                                            replaceIndex = true;
-                                        }
                                         data.forEach(function (item) {
                                             item.type = "Class";
                                         });
-                                        self.indexData(sourceLabel.toLowerCase(), data, replaceIndex, function (err, result) {
+                                        self.indexData(sourceLabel.toLowerCase(), data, false, function (err, result) {
                                             if (err) {
                                                 return callbackEach(err);
                                             }

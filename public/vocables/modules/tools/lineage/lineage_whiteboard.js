@@ -486,6 +486,7 @@ var Lineage_whiteboard = (function () {
     self.initUI = function (clearTree) {
         UI.message("");
         self.lineageVisjsGraph.clearGraph();
+        self.updateSelectedNodesOnlyCheckbox();
         if (Lineage_legendOverlay && typeof Lineage_legendOverlay.refresh === "function") {
             Lineage_legendOverlay.refresh();
         }
@@ -638,15 +639,22 @@ var Lineage_whiteboard = (function () {
                     options.data = topConcepts;
                     options.source = source;
                     Lineage_relations.currentQueryInfos = null;
+                    // drawRelations puts this status back once drawn, a stale one would switch All off
+                    Lineage_relations.whiteboardSourcesFromStatus = Lineage_sources.fromAllWhiteboardSources;
                     if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-                        options.data = Lineage_whiteboard.lineageVisjsGraph.data.nodes
-                            .get()
-                            .filter(function (node) {
-                                return node.data && node.data.source === source && node.data.type !== "Container";
-                            })
-                            .map(function (node) {
-                                return node.id;
-                            });
+                        var whiteboardNodes = self.getSelectedOrAllWhiteboardNodes();
+                        // every source, drawRestrictions narrows to the active one, or to all with All
+                        var classNodes = whiteboardNodes.filter(function (node) {
+                            return node.data && !self.isSourceBoxNode(node) && node.data.type !== "Container";
+                        });
+                        options.data = classNodes.map(function (node) {
+                            return node.id;
+                        });
+                    }
+                    // an empty id list sets no SPARQL filter and would draw every restriction of the source
+                    if (options.data.length == 0) {
+                        UI.message("No class node to draw relations from", true);
+                        return callbackSeries();
                     }
                     var direction = options.inverse ? "inverse" : "direct";
                     if (options.all) {
@@ -965,6 +973,7 @@ var Lineage_whiteboard = (function () {
                 onRightClickFn: Lineage_whiteboard.graphActions.showGraphPopupMenu,
                 onLongPressFn: Lineage_whiteboard.graphActions.showGraphPopupMenu,
                 onHoverNodeFn: Lineage_selection.selectNodesOnHover,
+                onSelectionChangeFn: Lineage_whiteboard.updateSelectedNodesOnlyCheckbox,
                 visjsOptions: {
                     physics: {
                         stabilization: {
@@ -1087,6 +1096,7 @@ var Lineage_whiteboard = (function () {
         Lineage_decoration.decorationDone = false;
         self.lineageVisjsGraph.draw(function () {
             UI.message("", true);
+            self.updateSelectedNodesOnlyCheckbox();
 
             //  Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
 
@@ -1135,6 +1145,58 @@ var Lineage_whiteboard = (function () {
             }
         });
         return sourceNodes;
+    };
+
+    /**
+     * Shows, hides and labels the "selected nodes only" checkbox of the Relations, Children and Parents buttons from the current selection.
+     * @function
+     * @name updateSelectedNodesOnlyCheckbox
+     * @memberof module:Lineage_whiteboard
+     * @returns {void}
+     */
+    self.updateSelectedNodesOnlyCheckbox = function () {
+        // vis.js keeps the selection of a cleared whiteboard
+        var selectedNodeIds = self.isWhiteboardDrawn() ? self.lineageVisjsGraph.network.getSelectedNodes() : [];
+        if (selectedNodeIds.length == 0) {
+            // the next selection is the scope again, even if the previous one was unchecked
+            $("#lineage_selectedNodesOnlyCheckbox").prop("checked", true);
+            $("#lineage_selectedNodesOnlyDiv").css("display", "none");
+            return;
+        }
+        var checkboxLabel = "Applied to all whiteboard";
+        if ($("#lineage_selectedNodesOnlyCheckbox").prop("checked")) {
+            checkboxLabel = "Applied to " + selectedNodeIds.length + (selectedNodeIds.length == 1 ? " selected node" : " selected nodes");
+        }
+        $("#lineage_selectedNodesOnlyLabel").text(checkboxLabel);
+        $("#lineage_selectedNodesOnlyDiv").css("display", "block");
+    };
+
+    /**
+     * Whiteboard nodes the Relations, Children and Parents buttons run on: the selection when the "selected nodes only" checkbox is checked, every node otherwise.
+     * @function
+     * @name getSelectedOrAllWhiteboardNodes
+     * @memberof module:Lineage_whiteboard
+     * @returns {Array<Object>} Vis.js nodes.
+     */
+    self.getSelectedOrAllWhiteboardNodes = function () {
+        var selectedNodeIds = self.lineageVisjsGraph.network.getSelectedNodes();
+        // the checkbox exists only in the Lineage whiteboard tab, other tools reach every node
+        if (selectedNodeIds.length == 0 || !$("#lineage_selectedNodesOnlyCheckbox").prop("checked")) {
+            return self.lineageVisjsGraph.data.nodes.get();
+        }
+        return self.lineageVisjsGraph.data.nodes.get(selectedNodeIds);
+    };
+
+    /**
+     * Whether a whiteboard node is the box standing for a source, which carries a source but no class id.
+     * @function
+     * @name isSourceBoxNode
+     * @memberof module:Lineage_whiteboard
+     * @param {Object} node - Vis.js node with a data object.
+     * @returns {boolean}
+     */
+    self.isSourceBoxNode = function (node) {
+        return node.data.id == node.data.source;
     };
 
     /**
@@ -1754,7 +1816,7 @@ var Lineage_whiteboard = (function () {
         var nodesBySource = {};
         if (!nodeIds || nodeIds.length === 0) {
             if (self.lineageVisjsGraph.isGraphNotEmpty()) {
-                self.lineageVisjsGraph.data.nodes.get().forEach(function (whiteboardNode) {
+                self.getSelectedOrAllWhiteboardNodes().forEach(function (whiteboardNode) {
                     var whiteboardNodeSource = source;
                     if (whiteboardNode.data && whiteboardNode.data.source) {
                         whiteboardNodeSource = whiteboardNode.data.source;
@@ -1960,10 +2022,9 @@ var Lineage_whiteboard = (function () {
             }
 
             parentIds = [];
-            var nodes = self.lineageVisjsGraph.data.nodes.get();
+            var nodes = self.getSelectedOrAllWhiteboardNodes();
             nodes.forEach(function (node) {
-                // the source box node carries a source but no class id, it has no children to fetch
-                if (!node.data || !node.data.id || node.data.id == node.data.source) {
+                if (!node.data || !node.data.id || self.isSourceBoxNode(node)) {
                     return;
                 }
                 parentIds.push(node.data.id);

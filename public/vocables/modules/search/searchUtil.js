@@ -3,6 +3,7 @@ import ElasticSearchProxy from "./elasticSearchProxy.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
+import OntologyModels from "../shared/ontologyModels.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var SearchUtil = (function () {
@@ -932,12 +933,27 @@ indexes.push(source.toLowerCase());
             function (err) {
                 if (err) {
                     MainController.errorAlert(err);
-                } else {
-                    UI.message("ALL DONE  total indexed : " + totalLinesAllsources);
+                    if (callback) {
+                        return callback(err);
+                    }
+                    return;
                 }
-                if (callback) {
-                    return callback(err);
+                UI.message("ALL DONE  total indexed : " + totalLinesAllsources);
+                // a full reindex follows a graph change: the cached model is stale too. Partial (ids) reindexes update the model themselves
+                if (options.ids || options.skipOntologyModelRefresh) {
+                    if (callback) {
+                        return callback();
+                    }
+                    return;
                 }
+                OntologyModels.clearOntologyModelCache(sourceLabel, function (err) {
+                    if (err) {
+                        MainController.errorAlert(err.responseText || err);
+                    }
+                    if (callback) {
+                        return callback(err);
+                    }
+                });
             },
         );
     };

@@ -353,7 +353,7 @@ git commit -m "WIP"
 
 ### Pull Requests
 
-See [contribute-to-development.md](../docs/docs/devdoc/contribute-to-development.md) in main docs.
+See [contribute-to-development.md](../docs/docs/developpement/contribute-to-development.md) in main docs.
 
 ---
 

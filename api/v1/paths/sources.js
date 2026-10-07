@@ -34,7 +34,7 @@ export default function () {
         description:
             "Returns the sources the caller is allowed to read, computed from their profile (`allowedSourceSchemas` + `sourcesAccessControl`). " +
             "When `ownedOnly=true`, the result is restricted to sources where the caller is the `owner`. " +
-            "Each source descriptor includes `graphUri`, `controller` (`Sparql_OWL` / `Sparql_SKOS`), `schemaType`, `imports`, etc. — " +
+            "Each source descriptor includes `graphUri`, `controller` (`Sparql_OWL` / `Sparql_SKOS`), `schemaType`, `imports`, etc., " +
             "see the `Source` definition.",
         security: [{ restrictLoggedUser: [] }],
         operationId: "getUserSources",
@@ -104,7 +104,7 @@ export default function () {
             }
 
             const userOwnedSources = await sourceModel.getOwnedSources(userInfo.user);
-            if (!isAdmin && Object.keys(userOwnedSources).length >= userInfo.maxNumberCreatedSource) {
+            if (!isAdmin && sourceModel.countSourcesAgainstQuota(userOwnedSources) >= userInfo.maxNumberCreatedSource) {
                 res.status(401).json({ message: "Cannot create another source, the maximal limit was reached. Delete one in UserSettings > Sources, using the trash icon, to create a new one." });
                 return;
             }
@@ -113,16 +113,10 @@ export default function () {
 
             newSource = fixBooleanInObject(newSource);
 
-            await Promise.all(
-                Object.entries(newSource).map(async ([_key, value]) => {
-                    // if user is not admin, set owner=me and published=false
-                    if (!isAdmin) {
-                        value.owner = userLogin;
-                        value.published = false;
-                    }
-                    await sourceModel.addSource(value);
-                }),
-            );
+            // one after the other, so two sources of the same body cannot both claim a free graph
+            for (const sourceDescriptor of Object.values(newSource)) {
+                await sourceModel.addUserSource(userInfo.user, sourceDescriptor);
+            }
             const sources = await sourceModel.getAllSources();
             res.status(200).json(successfullyCreated(sources));
         } catch (err) {
@@ -133,8 +127,11 @@ export default function () {
         summary: "Create one or more sources for the current user",
         description:
             "Creates one or more source entries in `sources.json`. Body is an object whose values are full `Source` descriptors. " +
-            "Non-admin callers must have `allowSourceCreation = true` (set on their profile) and stay below `maxNumberCreatedSource`. " +
-            "For non-admins, server overrides `owner = caller.login` and `published = false`. Returns the refreshed full sources catalog.",
+            "Non-admin callers must have `allowSourceCreation = true` (set on their profile) and stay below `maxNumberCreatedSource`, " +
+            "one OntoCreator upload source (graphUri starting with `http://temporary.graphUri.`) being left out of that count. " +
+            "For non-admins, server overrides `owner = caller.login`, `published = false` and `group = PRIVATE/<caller.login>`, " +
+            "and refuses a `graphUri` another source already declares (409). " +
+            "Returns the refreshed full sources catalog.",
         security: [{ restrictLoggedUser: [] }],
         operationId: "createUserSources",
         parameters: [
@@ -194,6 +191,7 @@ export default function () {
                 },
             },
             401: { description: "User not allowed to create sources, or quota reached." },
+            409: { description: "A source with this name already exists, or (non-admin) the `graphUri` is already declared by another source." },
             default: { description: "Server error.", schema: { additionalProperties: true } },
         },
         tags: ["Sources"],

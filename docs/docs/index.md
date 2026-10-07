@@ -11,32 +11,40 @@ A key feature of SLSV is graph visualization and interaction performed using exc
 
 Annotate tool allows annotate textual corpus with several registered lexical resources and identify missing terms.
 
-# User documentation
+# Installation
 
-Learn how to use SousLeSens.
-
-```{toctree}
-:maxdepth: 2
-userdoc/index.md
-```
-
-# Admin documentation
-
-How to install, configure and manage your own SousLeSens instance.
+How to install and deploy a SousLeSens instance.
 
 ```{toctree}
 :maxdepth: 2
-admindoc/index.md
+installation/index.md
 ```
 
-# Developper documentation
+# Administration
 
-How to install a development instance and to contribute to the code.
+How to configure and manage a SousLeSens instance.
+
+```{toctree}
+:maxdepth: 2
+administration/index.md
+```
+
+# Usage
+
+How to use the SousLeSens tools.
+
+```{toctree}
+:maxdepth: 2
+usage/index.md
+```
+
+# Development
+
+How to contribute to the code and set up a development instance.
 
 ```{toctree}
 :maxdepth: 15
-
-devdoc/index
+developpement/index
 ```
 
 # API

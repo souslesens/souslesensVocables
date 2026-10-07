@@ -13,7 +13,8 @@ author = "SousLeSens contributors"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["myst_parser", "sphinxnotes.isso"]
+extensions = ["myst_parser", "sphinxcontrib.mermaid", "sphinxnotes.isso"]
+myst_fence_as_directive = ["mermaid"]
 suppress_warnings = ["myst.xref_missing"]
 
 templates_path = ["_templates"]

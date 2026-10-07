@@ -218,8 +218,22 @@ class RdfDataModel {
                            }`;
             await this.execQuery(query);
         }
+        // _dropMetadata removed every triple of the graph node, its rdf:type included
+        await this.ensureOntologyType(graphUri);
 
         return await this.getRdfMetadata(graphUri);
+    };
+
+    /**
+     * declares the graph node as an owl:Ontology, so tools reading the graph find the node that
+     * describes the source. Writes nothing when the type is already there.
+     * @param {string} graphUri - the graph URI
+     */
+    ensureOntologyType = async (graphUri) => {
+        const typeTriple = `<${graphUri}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology>`;
+        const query = `INSERT { GRAPH <${graphUri}> { ${typeTriple} } }
+                       WHERE { FILTER NOT EXISTS { GRAPH <${graphUri}> { ${typeTriple} } } }`;
+        await this.execQuery(query);
     };
 
     removeMetadata = async (graphUri, metadata) => {

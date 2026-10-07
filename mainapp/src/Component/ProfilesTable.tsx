@@ -244,7 +244,7 @@ const ProfilesTable = () => {
                                         </TableCell>
                                         <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
                                             <TableSortLabel active={orderBy === "isShared"} direction={order} onClick={() => handleRequestSort("isShared")}>
-                                                Users visibility
+                                                Shared users data
                                             </TableSortLabel>
                                         </TableCell>
                                         <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>

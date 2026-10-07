@@ -396,12 +396,7 @@
         "expose": true,
         "example": null,
         "summary": "Returns the ancestor or descendant hierarchy of given class(es), one ordered branch list per class, `options.descendants` choosing the direction: how you specialise a class or enumerate its subtypes. Returns nothing when the children are attached through an OWL restriction rather than a direct `rdfs:subClassOf`, in which case walk the restriction blank nodes with {@link module:Sparql_OWL.getFilteredTriples}.",
-        "access": "read",
-        "mcpTool": "sls_node_descendants",
-        "mcpFixed": {
-            "options.descendants": true,
-            "options.excludeItself": true
-        }
+        "access": "read"
     },
     {
         "name": "getFilteredTriples2",
@@ -613,6 +608,12 @@
                         "description": "Query `owl:DatatypeProperty` instead of `owl:ObjectProperty`"
                     },
                     {
+                        "name": "inheritedProperties",
+                        "type": "boolean",
+                        "required": false,
+                        "description": "Include inherited properties via `rdfs:subPropertyOf*`"
+                    },
+                    {
                         "name": "searchType",
                         "type": "string",
                         "required": false,
@@ -767,8 +768,7 @@
         "expose": true,
         "example": null,
         "summary": "Returns the property triples a class carries as OWL restrictions: property, constraint type, target value and cardinality, with their labels. This is how a class declares its attributes, so it is the answer to \"what can I say about an instance of this class\". Returns nothing when the class carries no direct restriction, in which case try its parent.",
-        "access": "read",
-        "mcpTool": "sls_node_properties"
+        "access": "read"
     },
     {
         "name": "getNamedIndividuals",
@@ -1737,8 +1737,7 @@
         "expose": true,
         "example": null,
         "summary": "Returns, for each given node, its label, textual definition (`dcterms:description`| `rdfs:isDefinedBy`|`skos:definition`) and up to four levels of OWL super-classes with their labels. The cheapest way to confirm you picked the right sense of a term before grounding an answer on it. OWL sources only.",
-        "access": "read",
-        "mcpTool": "sls_node_definition"
+        "access": "read"
     },
     {
         "name": "getClassesWithoutTaxonomy",
@@ -2519,8 +2518,7 @@
         "responseSchema": "#/definitions/SparqlQueryResponse",
         "expose": true,
         "example": null,
-        "access": "read",
-        "mcpTool": "sls_node_infos"
+        "access": "read"
     },
     {
         "name": "getItems",

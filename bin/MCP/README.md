@@ -111,7 +111,13 @@ dropped. Parameter types use the same vocabulary as the JSDoc (`string`, `number
 `Object`, `any`, `string[]`, …) — the Swagger spelling `"object"` is refused, naming the route.
 
 Optional keys: `parseJsonPayload`, `emptyListWhenNull`, `resultShape`, `statusHints`, `maxResponseBytes`,
-`registryFunctionGuard`, `navigableDocument`, `rowCeiling`.
+`registryFunctionGuard`, `navigableDocument`, `rowCeiling`, `paramDefaultsFromRoute`.
+
+`paramDefaultsFromRoute: { param: "/route" }` lets the agent leave an optional parameter out: the
+server then calls that GET route with the caller's token and uses its answer as the value. An empty
+list is treated as omitted, and a route answering an empty list fails the call rather than sending
+it, since Elasticsearch reads no index as every index of the cluster. The two label search tools use
+it for `indexes`, filled from `GET /elasticsearch/indices`.
 
 `rowCeiling: { param, escalation }` names the tool's own parameter that caps how many rows come back,
 so an answer holding exactly that many is reported as a prefix instead of a total, and picks which
@@ -138,22 +144,23 @@ its author asked for. Instead the MCP server refuses to start and says where:
 [mcp] the x-mcp declaration of GET /data/files is unusable — tools.0: Unrecognized key(s) in object: 'statusHint'
 ```
 
-## The 23 tools
+## The tools
 
 Every one of them traces back to a declaration in product code, and `GET /catalog` says which.
 
-| Declared in                      | Tools                                                                                                                                                                                                                                            |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `sparql_generic.js` (`@mcpTool`) | `sls_top_concepts`, `sls_node_infos`, `sls_node_parents`, `sls_node_children`, `sls_source_taxonomy`, `sls_distinct_predicates`                                                                                                                  |
-| `sparql_OWL.js` (`@mcpTool`)     | `sls_node_definition`, `sls_node_descendants`, `sls_node_properties`, `sls_filtered_triples`, `sls_property_schema`, `sls_property_usage`                                                                                                        |
-| `api/v1/paths/**` (`x-mcp`)      | `sls_list_sources`, `sls_whoami`, `sls_ontology_model`, `sls_kgquery_model`, `sls_mappings_list`, `sls_mapping_get`, `sls_search_labels`, `sls_count_labels_by_source`, `sls_list_indexes`, `sls_list_query_functions`, `sls_run_query_function` |
+| Declared in                      | Tools                                                                                                                                                                                                                                                                                                                                                                                                              |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `sparql_generic.js` (`@mcpTool`) | `sls_top_concepts`, `sls_node_parents`, `sls_node_children`, `sls_source_taxonomy`, `sls_distinct_predicates`                                                                                                                                                                                                                                                                                                      |
+| `sparql_OWL.js` (`@mcpTool`)     | `sls_filtered_triples`, `sls_property_schema`, `sls_property_usage`                                                                                                                                                                                                                                                                                                                                                |
+| `api/v1/paths/**` (`x-mcp`)      | `sls_list_sources`, `sls_whoami`, `sls_ontology_model`, `sls_kgquery_model`, `sls_mappings_list`, `sls_mapping_get`, `sls_search_labels`, `sls_count_labels_by_source`, `sls_list_query_functions`, `sls_run_query_function`, `sls_sparql_select`, `sls_ontology_summary`, `sls_knowledge_model_graph`, `sls_term_infos`, `sls_uri_infos`, `sls_linked_classes`, `sls_terms_linked_classes`, `sls_two_terms_paths` |
 
 `sls_search_labels` is the natural-language entry point: the node tools all need a URI, and
 full-text label search is what produces one from a user's phrase. It takes any number of indices in
-one call — 146 indices answer in the same 380 ms as 10. `sls_list_indexes` feeds it that list and
-filters it to the caller's sources, because one index the caller has no source for makes
-`validateElasticSearchIndices` reject the _entire_ search, not just that index. On the reference
-instance that filtering takes the list from 474 names to 146.
+one call, and 146 indices answer in the same 380 ms as 10. An index is its source name in lowercase,
+but not every source has one, so without `indexes` the server fills the list from
+`GET /elasticsearch/indices`: the indices that exist, filtered to the caller's sources, because one
+index the caller has no source for makes `validateElasticSearchIndices` reject the _entire_ search,
+not just that index. On the reference instance that filtering takes the list from 474 names to 146.
 
 `sls_count_labels_by_source` exists because those two facts do not add up to source coverage. A
 multi-index `_search` ranks globally and returns one top-K, so a single index whose label is exactly

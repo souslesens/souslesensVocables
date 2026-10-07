@@ -146,7 +146,6 @@ var Sparql_generic = (function () {
      * @param {Function} callback - Error-first callback `(err, result)` with the node's triples
      * @returns {err|Array} Throws an error or returns the delegated controller's node triple bindings.
      * @expose read
-     * @mcpTool sls_node_infos
      */
     self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
         $("#waitImg").css("display", "block");

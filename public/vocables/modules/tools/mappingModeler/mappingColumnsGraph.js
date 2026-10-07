@@ -908,7 +908,7 @@ var MappingColumnsGraph = (function () {
          * @returns {void}
          */
         showSampledata: function () {
-            MappingModeler.showSampleData();
+            MappingModeler.showSampleData(self.currentGraphNode);
         },
 
         /**

@@ -11,6 +11,8 @@ import { profileModel } from "./profiles.js";
  */
 
 const lock = new Lock();
+// same prefix as CreateSLSVsource_bot.saveUploadSource
+const temporaryUploadGraphUriPrefix = "http://temporary.graphUri.";
 
 class SourceModel {
     /**
@@ -240,6 +242,113 @@ class SourceModel {
             }),
         );
         return ownedSources;
+    };
+
+    /**
+     * The OntoCreator upload source only lives until its graph moves to the final source,
+     * so one of them is left out of `maxNumberCreatedSource`. One only: a user keeping
+     * several would otherwise create sources without limit.
+     *
+     * @param {Record<string, Source>} ownedSources - the sources of one user
+     * @returns {number} how many of them count against the source quota
+     */
+    countSourcesAgainstQuota = (ownedSources) => {
+        const ownedSourcesList = Object.values(ownedSources);
+        const temporaryUploadSources = ownedSourcesList.filter((source) => (source.graphUri || "").startsWith(temporaryUploadGraphUriPrefix));
+        return ownedSourcesList.length - Math.min(temporaryUploadSources.length, 1);
+    };
+
+    /**
+     * @param {UserAccount} user - a user account
+     * @param {Source} source - an existing source
+     * @throws {Error} with status 403 when the user is neither the owner of the source nor an admin
+     */
+    _checkSourceOwner = (user, source) => {
+        if (!this.isAdmin(user) && source.owner !== user.login) {
+            const error = new Error(`Only the owner of ${source.name} or an admin can change it`);
+            error.status = 403;
+            throw error;
+        }
+    };
+
+    /**
+     * @param {Record<string, Source>} sources - a collection of sources
+     * @param {string} graphUri - a graph a non admin wants a source to declare
+     * @throws {Error} with status 409 when another source already declares the graph
+     */
+    _checkGraphUriNotDeclared = (sources, graphUri) => {
+        const sourcesList = Object.values(sources);
+        // canWrite resolves a graph to its first declaring source, a shared graphUri would lend the other source's rights
+        const declaringSource = sourcesList.find((source) => source.graphUri === graphUri);
+        if (declaringSource) {
+            const error = new Error(`Graph ${graphUri} is already declared by source ${declaringSource.name}`);
+            error.status = 409;
+            throw error;
+        }
+    };
+
+    /**
+     * addSource for a user. A non admin creates a private unpublished source it owns, on a graph
+     * no other source declares.
+     * @param {UserAccount} user - a user account
+     * @param {Source} newSource - a source
+     */
+    addUserSource = async (user, newSource) => {
+        if (this.isAdmin(user)) {
+            return this.addSource(newSource);
+        }
+        const sources = await this._read();
+        this._checkGraphUriNotDeclared(sources, newSource.graphUri);
+        await this.addSource({ ...newSource, owner: user.login, published: false, group: `PRIVATE/${user.login}` });
+    };
+
+    /**
+     * updateSource restricted to the owner of the source or an admin. A non admin cannot change
+     * the fields that decide who sees and who writes the source, nor take a graph another source declares.
+     * @param {UserAccount} user - a user account
+     * @param {Source} updatedSource - the new descriptor of the source
+     * @returns {Promise<boolean>} - true if the source exists
+     */
+    updateUserSource = async (user, updatedSource) => {
+        const sources = await this._read();
+        // same lookup order as updateSource, so the checked source is the one overwritten
+        const storedSource = updatedSource.id in sources ? sources[updatedSource.id] : sources[updatedSource.name];
+        if (!storedSource) {
+            return false;
+        }
+        this._checkSourceOwner(user, storedSource);
+        if (this.isAdmin(user)) {
+            return this.updateSource(updatedSource);
+        }
+        if (updatedSource.graphUri !== storedSource.graphUri) {
+            this._checkGraphUriNotDeclared(sources, updatedSource.graphUri);
+        }
+        const accessFields = {
+            id: storedSource.id,
+            owner: storedSource.owner,
+            published: storedSource.published,
+            group: storedSource.group,
+            editable: storedSource.editable,
+        };
+        return this.updateSource({ ...updatedSource, ...accessFields });
+    };
+
+    /**
+     * deleteSource restricted to the owner of the source or an admin.
+     * @param {UserAccount} user - a user account
+     * @param {string} sourceNameId - a source name or id
+     * @returns {Promise<boolean>} - true if the source exists
+     */
+    deleteUserSource = async (user, sourceNameId) => {
+        const sources = await this._read();
+        const sourcesList = Object.values(sources);
+        // same lookup order as deleteSource: name first, then id
+        const storedSource = sources[sourceNameId] ?? sourcesList.find((source) => source.id === sourceNameId);
+        if (!storedSource) {
+            return false;
+        }
+        this._checkSourceOwner(user, storedSource);
+        return this.deleteSource(sourceNameId);
     };
 
     /**

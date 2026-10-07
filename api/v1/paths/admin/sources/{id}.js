@@ -18,14 +18,16 @@ export default function () {
         res.status(400).json({ message: `Source with id ${req.params.id} not found` });
     }
 
-    async function DELETE(req, res, next) {
+    async function DELETE(req, res, _next) {
         if (!req.params.id) {
             res.status(500).json({ message: "I need a resource ID to perform this request" });
             return;
         }
         try {
             const sourceIdToDelete = req.params.id;
-            const sourceExists = await sourceModel.deleteSource(sourceIdToDelete);
+            // restrictAdmin also lets in the users allowed to create sources, deleteUserSource applies their rules
+            const userInfo = await userManager.getUser(req.user);
+            const sourceExists = await sourceModel.deleteUserSource(userInfo.user, sourceIdToDelete);
             if (!sourceExists) {
                 res.status(500).json({ message: `I couldn't delete resource ${sourceIdToDelete}. Maybe it has been deleted already?` });
                 return;
@@ -33,12 +35,11 @@ export default function () {
             const sources = await sourceModel.getAllSources();
             res.status(200).json({ message: `${sourceIdToDelete} successfully deleted`, resources: sources });
         } catch (err) {
-            res.status(err.status || 500).json(err);
-            next(err);
+            res.status(err.status || 500).json({ message: err.message || "An error occurred" });
         }
     }
 
-    async function PUT(req, res, next) {
+    async function PUT(req, res, _next) {
         const updatedSource = req.body;
         const sourceIdToUpdate = req.params.id;
         if (sourceIdToUpdate != updatedSource.name) {
@@ -46,7 +47,9 @@ export default function () {
             return;
         }
         try {
-            const sourceExists = await sourceModel.updateSource(updatedSource);
+            // restrictAdmin also lets in the users allowed to create sources, updateUserSource applies their rules
+            const userInfo = await userManager.getUser(req.user);
+            const sourceExists = await sourceModel.updateUserSource(userInfo.user, updatedSource);
             if (!sourceExists) {
                 res.status(400).json({ message: "Resource does not exist. If you want to create another resource, use POST instead." });
                 return;
@@ -54,8 +57,7 @@ export default function () {
             const sources = await sourceModel.getAllSources();
             res.status(200).json({ message: `${sourceIdToUpdate} successfully updated`, resources: sources });
         } catch (err) {
-            res.status(err.status || 500).json(err);
-            next(err);
+            res.status(err.status || 500).json({ message: err.message || "An error occurred" });
         }
     }
 
@@ -77,7 +79,9 @@ export default function () {
     };
     DELETE.apiDoc = {
         summary: "Delete a source (admin endpoint)",
-        description: "Admin-only deletion of source `id`. Returns the refreshed full sources catalog. " + "Does not drop the named graph in the triplestore.",
+        description:
+            "Admin-only deletion of source `id`. Returns the refreshed full sources catalog. " +
+            "`restrictAdmin` also admits users allowed to create sources: they may only delete a source they own (403). Does not drop the named graph in the triplestore.",
         security: [{ restrictAdmin: [] }],
         operationId: "adminDeleteSource",
         parameters: [{ in: "path", name: "id", type: "string", required: true, description: "Source name to delete." }],
@@ -97,7 +101,10 @@ export default function () {
     };
     PUT.apiDoc = {
         summary: "Update a source descriptor (admin endpoint)",
-        description: "Admin-only update of source `id`. Body must be a full `Source` descriptor whose `name` matches the path `id`. " + "Returns the full sources catalog after update.",
+        description:
+            "Admin-only update of source `id`. Body must be a full `Source` descriptor whose `name` matches the path `id`. " +
+            "`restrictAdmin` also admits users allowed to create sources: for them the rules of `PUT /sources/{id}` apply (owner only, access fields kept, free `graphUri`). " +
+            "Returns the full sources catalog after update.",
         security: [{ restrictAdmin: [] }],
         operationId: "adminUpdateSource",
         parameters: [

@@ -20,6 +20,8 @@ var KGquery_graph = (function () {
     self.visjsDataSource = null;
 
     self.labelsMap = {};
+    // measured on an 8 M triples ABox: 20 edges per query cut the round trips while each query stays under 10 s
+    self.cardinalityEdgesBatchSize = 20;
 
     self.visjsOptions = {
         onclickFn: function (node, point, nodeEvent) {
@@ -659,8 +661,16 @@ var KGquery_graph = (function () {
         self.visjsData = null;
 
         options.callback = function () {
+            var savedNodes = self.KGqueryGraph.data.nodes.get();
+            // a dragged node moves in the network only, its DataSet x/y stay those of the first draw
+            savedNodes.forEach(function (node) {
+                if (positions[node.id]) {
+                    node.x = positions[node.id].x;
+                    node.y = positions[node.id].y;
+                }
+            });
             self.visjsData = {};
-            self.visjsData.nodes = self.KGqueryGraph.data.nodes.get();
+            self.visjsData.nodes = savedNodes;
             self.visjsData.edges = self.KGqueryGraph.data.edges.get();
             self.visjsDataSource = KGquery.currentSource;
             if (callback) {
@@ -1007,73 +1017,64 @@ var KGquery_graph = (function () {
      * the source class via the edge's property.
      */
     self.addCardinalityToEdges = function (source, visjsData, callback) {
-        if (!visjsData || !visjsData.edges || visjsData.edges.length === 0) {
+        if (!visjsData || !visjsData.edges) {
+            return callback();
+        }
+        var edgesWithProperty = visjsData.edges.filter(function (edge) {
+            return edge.data && edge.data.propertyId;
+        });
+        if (edgesWithProperty.length === 0) {
             return callback();
         }
 
         KGquery_graph.message("calculating cardinalities for edges");
+        var fromStr = Sparql_common.getFromStr(source);
+        var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+        var edgesBatches = common.array.slice(edgesWithProperty, self.cardinalityEdgesBatchSize);
 
-        // Process edges sequentially to avoid overwhelming the SPARQL endpoint
+        // Process batches sequentially to avoid overwhelming the SPARQL endpoint
         async.eachSeries(
-            visjsData.edges,
-            function (edge, callbackEach) {
-                // Skip edges without propertyId
-                if (!edge.data || !edge.data.propertyId) {
-                    return callbackEach();
-                }
-
-                var startClass = edge.from;
-                var endClass = edge.to;
-                var propertyId = edge.data.propertyId;
-                var fromStr = Sparql_common.getFromStr(source);
-                // Build SPARQL query to get max cardinality
+            edgesBatches,
+            function (edgesBatch, callbackEach) {
+                var edgesValuesRows = edgesBatch.map(function (edge) {
+                    return "(<" + edge.from + "> <" + edge.data.propertyId + "> <" + edge.to + ">)";
+                });
+                var edgesValuesStr = edgesValuesRows.join(" ");
                 var query =
                     "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
-                    "SELECT (MAX(?count) AS ?maxCardinality) " +
+                    "SELECT ?startClass ?propertyId ?endClass (MAX(?count) AS ?maxCardinality) " +
                     fromStr +
                     "WHERE { " +
                     "{ " +
-                    "SELECT (COUNT(DISTINCT ?endingInstance) AS ?count) " +
+                    "SELECT ?startClass ?propertyId ?endClass ?startingInstance (COUNT(DISTINCT ?endingInstance) AS ?count) " +
                     "WHERE { " +
-                    "?startingInstance rdf:type <" +
-                    startClass +
-                    ">. " +
-                    "?startingInstance <" +
-                    propertyId +
-                    "> ?endingInstance. " +
-                    "?endingInstance rdf:type <" +
-                    endClass +
-                    ">. " +
+                    "VALUES (?startClass ?propertyId ?endClass) { " +
+                    edgesValuesStr +
+                    " } " +
+                    "?startingInstance rdf:type ?startClass. " +
+                    "?startingInstance ?propertyId ?endingInstance. " +
+                    "?endingInstance rdf:type ?endClass. " +
                     "} " +
-                    "GROUP BY ?startingInstance " +
-                    "ORDER BY DESC(?count) " +
+                    "GROUP BY ?startClass ?propertyId ?endClass ?startingInstance " +
                     "} " +
-                    "}";
+                    "} " +
+                    "GROUP BY ?startClass ?propertyId ?endClass";
 
-                var url = Config.sources[source].sparql_server.url + "?format=json&query=";
-                // Execute SPARQL query
                 Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, cardinalityResult) {
+                    var cardinalityBindings = [];
                     if (err) {
-                        console.log("Error calculating cardinality for edge " + edge.id + ":", err);
-                        // Set default cardinality on error
-                        edge.data.maxCardinality = 1;
-                        return callbackEach();
+                        console.log("Error calculating cardinality for edges " + edgesValuesStr + ":", err);
+                    } else {
+                        cardinalityBindings = cardinalityResult.results.bindings;
                     }
 
-                    // Extract and store cardinality in edge data
-                    var cardinality = 1;
-                    if (
-                        cardinalityResult &&
-                        cardinalityResult.results &&
-                        cardinalityResult.results.bindings &&
-                        cardinalityResult.results.bindings.length > 0 &&
-                        cardinalityResult.results.bindings[0].maxCardinality
-                    ) {
-                        cardinality = parseInt(cardinalityResult.results.bindings[0].maxCardinality.value);
-                    }
-
-                    edge.data.maxCardinality = cardinality;
+                    // an edge without instances, or in a failed batch, gets the default cardinality 1
+                    edgesBatch.forEach(function (edge) {
+                        var edgeBinding = cardinalityBindings.find(function (binding) {
+                            return binding.startClass.value === edge.from && binding.propertyId.value === edge.data.propertyId && binding.endClass.value === edge.to;
+                        });
+                        edge.data.maxCardinality = edgeBinding ? parseInt(edgeBinding.maxCardinality.value) : 1;
+                    });
                     callbackEach();
                 });
             },

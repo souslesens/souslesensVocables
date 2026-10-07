@@ -20,6 +20,10 @@
         <button class="w3-button slsv-button-1" onclick="Lineage_axioms.drawClassesWithAxioms()" title="Axioms">A</button>
 
         <button class="w3-button slsv-button-3" id="lineage_actionDiv_newAxiom" onclick="Lineage_whiteboard.graph.showBrowseDialog()">?</button>
+        <div id="lineage_actionScopeDiv" style="display: none">
+            <input type="checkbox" id="lineage_actionScopeCheckbox" checked onchange="Lineage_whiteboard.refreshActionScope()" />
+            <label for="lineage_actionScopeCheckbox" id="lineage_actionScopeLabel"></label>
+        </div>
     </div>
 
     <div id="whiteboard_Section" class="w3-panel w3-border w3-round-small lateralPanelSection-width">

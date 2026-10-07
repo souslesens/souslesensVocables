@@ -224,9 +224,10 @@ var MappingParser = {
             var fromColumn = fromNode.data.definedInColumn ? allColumnsMappings[fromNode.data.definedInColumn] : fromNode.data;
             var toColumn = toNode.data.definedInColumn ? allColumnsMappings[toNode.data.definedInColumn] : toNode.data;
 
-            //if edge is not from rdf, rdfs or owl and if from and to are rdf:typeClass the edge represents a restriction
+            //if edge is not from rdf, rdfs or owl and if from and to are rdf:typeClass the edge represents a restriction, unless isPredicate
             if (edge.data && edge.data.id && edge.data.id.indexOf("owl") < 0 && edge.data.id.indexOf("rdf") < 0) {
-                var isRestriction = fromColumn.rdfType == "owl:Class" && toColumn.rdfType == "owl:Class";
+                // set by hand in the mapping JSON, no UI writes it
+                var isRestriction = fromColumn.rdfType == "owl:Class" && toColumn.rdfType == "owl:Class" && !edge.data.isPredicate;
                 edge.isRestriction = isRestriction;
                 if (isRestriction) {
                     edge.restrictionType = edge.data.restrictionType || null;

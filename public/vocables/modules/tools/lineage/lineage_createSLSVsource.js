@@ -32,7 +32,8 @@ var Lineage_createSLSVsource = (function () {
                 return MainController.errorAlert(err);
             }
             if (refusalMessage) {
-                $("#botPanel").html("<div style='padding: 15px; max-width: 400px;'>" + refusalMessage + "</div>");
+                // #botDiv must survive: every bot without its own divId loads into it
+                $("#botDiv").html("<div style='padding: 15px; max-width: 400px;'>" + refusalMessage + "</div>");
                 return UI.openDialog("botPanel", { title: CreateSLSVsource_bot.title });
             }
             CreateSLSVsource_bot.start();
@@ -43,6 +44,7 @@ var Lineage_createSLSVsource = (function () {
      * Checks the source creation rights before the bot starts, so the user is not
      * refused by the API only after having filled every step of the workflow.
      * Both conditions are enforced again server side in POST /api/v1/sources.
+     * Read from the server on every call, so a profile edited by an admin during the session applies.
      * @function
      * @name checkSourceCreationRights
      * @memberof Lineage_createSLSVsource
@@ -56,24 +58,22 @@ var Lineage_createSLSVsource = (function () {
             return callback(null, null);
         }
 
-        if (!currentUser.allowSourceCreation) {
-            return callback(null, "Your profile does not allow creating sources.");
-        }
-
         $.ajax({
             type: "GET",
-            url: `${Config.apiUrl}/sources?ownedOnly=true`,
+            url: `${Config.apiUrl}/users/quotas`,
             dataType: "json",
-            success: function (data) {
-                var ownedSourcesCount = Object.keys(data.resources || {}).length;
-                var maxNumberCreatedSource = currentUser.maxNumberCreatedSource;
-                if (typeof maxNumberCreatedSource === "number" && ownedSourcesCount >= maxNumberCreatedSource) {
+            success: function (quotas) {
+                var sourcesQuota = quotas.sources;
+                if (!sourcesQuota.allowed) {
+                    return callback(null, "Your profile does not allow creating sources.");
+                }
+                if (typeof sourcesQuota.cap === "number" && sourcesQuota.used >= sourcesQuota.cap) {
                     return callback(
                         null,
                         "You already own " +
-                            ownedSourcesCount +
+                            sourcesQuota.used +
                             " sources, your profile allows " +
-                            maxNumberCreatedSource +
+                            sourcesQuota.cap +
                             ". Delete one in UserSettings &gt; Sources, using the trash icon, to create a new one.",
                     );
                 }
@@ -115,7 +115,23 @@ var Lineage_createSLSVsource = (function () {
         if (existingIndexNames.indexOf(indexName) > -1) {
             return "This name is already used by another source once lowercased";
         }
+        // the source selector tree uses the bare name as jstree id for a group segment and for a source
+        // the new source lands in the private group of the user, its segments count too
+        var groups = Object.values(Config.sources).map(function (source) {
+            return source.group || "";
+        });
+        groups.push(self.getUserPrivateGroup());
+        var isGroupName = groups.some(function (group) {
+            return group.split("/").indexOf(sourceName) > -1;
+        });
+        if (isGroupName) {
+            return "This name is already a group name";
+        }
         return null;
+    };
+
+    self.getUserPrivateGroup = function () {
+        return "PRIVATE/" + Authentification.currentUser.login;
     };
 
     /**
@@ -153,7 +169,6 @@ var Lineage_createSLSVsource = (function () {
      * @returns {void}
      */
     self.createSource = function (sourceName, graphUri, imports, callback) {
-        var user = Authentification.currentUser.login;
         var sourceNameError = self.validateSourceName(sourceName);
         if (sourceNameError) {
             return callback(sourceNameError);
@@ -162,7 +177,7 @@ var Lineage_createSLSVsource = (function () {
         if (graphUriError) {
             return callback(graphUriError);
         }
-        var userPrivateProfile = "PRIVATE/" + user;
+        var userPrivateProfile = self.getUserPrivateGroup();
         var sourceConfig = {};
 
         async.series(

@@ -95,7 +95,9 @@ var CreateSLSVsource_bot = (function () {
                 var sourceNameError = Lineage_createSLSVsource.validateSourceName(value);
                 if (sourceNameError) {
                     alert(sourceNameError);
-                    return self.myBotEngine.previousStep();
+                    // first step, previousStep cannot go back and promptValue kept the refused label
+                    self.params.sourceLabel = "";
+                    return self.functions.promptSourceNameFn();
                 }
                 self.params.sourceLabel = value;
                 self.myBotEngine.nextStep();

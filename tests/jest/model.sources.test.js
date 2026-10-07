@@ -222,6 +222,39 @@ describe("SourceModel", () => {
         });
     });
 
+    describe("a group segment cannot be named like a source", () => {
+        const admin = { login: "admin" };
+        let groupSourcesPath;
+        let groupSourceModel;
+
+        beforeEach(async () => {
+            const temporaryDirectory = await fs.promises.mkdtemp(path.join(os.tmpdir(), "sources-"));
+            groupSourcesPath = path.join(temporaryDirectory, "sources.json");
+            await fs.promises.writeFile(groupSourcesPath, JSON.stringify(sourcesFromFiles));
+            groupSourceModel = new SourceModel(PROFILE_MODEL, groupSourcesPath);
+        });
+
+        test("a new source cannot use a source name as group segment, its own name included", async () => {
+            const newSource = { ...sourcesFromFiles["SOURCE_1"], name: "SOURCE_5", id: "SOURCE_5", graphUri: "http://free.org/" };
+            await expect(groupSourceModel.addSource({ ...newSource, group: "FOLDER_1/SOURCE_2" })).rejects.toMatchObject({ status: 400 });
+            await expect(groupSourceModel.addSource({ ...newSource, group: "SOURCE_5/" })).rejects.toMatchObject({ status: 400 });
+            const writtenSources = JSON.parse(await fs.promises.readFile(groupSourcesPath, "utf8"));
+            expect(writtenSources["SOURCE_5"]).toBeUndefined();
+        });
+
+        test("a new source cannot take the name of a group segment", async () => {
+            const newSource = { ...sourcesFromFiles["SOURCE_1"], name: "SUBFOLDER_2", id: "SUBFOLDER_2", graphUri: "http://free.org/", group: "FOLDER_3" };
+            await expect(groupSourceModel.addSource(newSource)).rejects.toMatchObject({ status: 400 });
+        });
+
+        test("an update cannot move a source into a group named like a source, any other group is accepted", async () => {
+            await expect(groupSourceModel.updateUserSource(admin, { ...sourcesFromFiles["SOURCE_3"], group: "SOURCE_1" })).rejects.toMatchObject({ status: 400 });
+            expect(await groupSourceModel.updateUserSource(admin, { ...sourcesFromFiles["SOURCE_3"], group: "FOLDER_1/SUBFOLDER_2" })).toBe(true);
+            const writtenSources = JSON.parse(await fs.promises.readFile(groupSourcesPath, "utf8"));
+            expect(writtenSources["SOURCE_3"].group).toStrictEqual("FOLDER_1/SUBFOLDER_2");
+        });
+    });
+
     test("get owned user sources", async () => {
         tracker.on.select("profiles_list").response(dbProfiles);
         const user = { login: "admin", groups: [] };

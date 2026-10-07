@@ -188,3 +188,5 @@ AGENTS.md
 .mcp.json
 
 tasks/
+test-results/
+rdd/

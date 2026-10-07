@@ -927,22 +927,30 @@ var MappingModeler = (function () {
                     self.currentRelationModelRestrictionsMap = {};
                     jstreeData.forEach(function (item) {
                         if (item?.data?.fromColumn?.id == self.currentRelation.from.id && item?.data?.toColumn?.id == self.currentRelation.to.id) {
-                            var restrictionProperty = propertiesCopy.filter(function (prop) {
-                                return prop.id == item?.data?.property?.id;
+                            var restrictionProperty = propertiesCopy.find(function (prop) {
+                                return prop.id == item.data.property.id;
                             });
-                            if (restrictionProperty.length > 0) {
-                                restrictionProperty[0].highlight = "yellow";
-                                // property already restricted in the model : its constraint type and cardinality
-                                // will be reused as is when the user picks it, without asking anything.
-                                // a same property can carry several restrictions between the two classes, the
-                                // cardinality one is the most specific so it wins
-                                var alreadyMappedRestriction = self.currentRelationModelRestrictionsMap[item.data.property.id];
-                                if (!alreadyMappedRestriction || !alreadyMappedRestriction.cardinality) {
-                                    self.currentRelationModelRestrictionsMap[item.data.property.id] = {
-                                        restrictionType: item.data.restrictionType,
-                                        cardinality: item.data.cardinality,
-                                    };
-                                }
+                            // a property known only by its restrictions has no domain or range to be listed by
+                            if (!restrictionProperty) {
+                                restrictionProperty = {
+                                    id: item.data.property.id,
+                                    label: MappingModeler.currentSLSsource.substring(0, 3) + ":" + item.data.property.label,
+                                    source: MappingModeler.currentSLSsource,
+                                    resourceType: "ObjectProperty",
+                                };
+                                propertiesCopy.push(restrictionProperty);
+                            }
+                            restrictionProperty.highlight = "yellow";
+                            // property already restricted in the model : its constraint type and cardinality
+                            // will be reused as is when the user picks it, without asking anything.
+                            // a same property can carry several restrictions between the two classes, the
+                            // cardinality one is the most specific so it wins
+                            var alreadyMappedRestriction = self.currentRelationModelRestrictionsMap[item.data.property.id];
+                            if (!alreadyMappedRestriction || !alreadyMappedRestriction.cardinality) {
+                                self.currentRelationModelRestrictionsMap[item.data.property.id] = {
+                                    restrictionType: item.data.restrictionType,
+                                    cardinality: item.data.cardinality,
+                                };
                             }
                         }
                     });

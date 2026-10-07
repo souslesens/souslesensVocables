@@ -156,6 +156,24 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                     path: ["group"],
                 });
             }
+            // same rule as SourceModel._checkGroupSegmentsNotSourceNames, the source selector tree breaks otherwise
+            const getGroupSegments = (group: string) => group.split("/").filter((segment) => segment !== "");
+            const segmentNamedLikeSource = getGroupSegments(value.group).find((segment) => segment === value.name || sourcesNames.includes(segment));
+            if (segmentNamedLikeSource) {
+                context.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: `${segmentNamedLikeSource} is already a source name`,
+                    path: ["group"],
+                });
+            }
+            const sourceGroupedUnderName = sources.find((otherSource) => otherSource.name !== value.name && getGroupSegments(otherSource.group).includes(value.name));
+            if (sourceGroupedUnderName) {
+                context.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: `This name is already a group, in the group ${sourceGroupedUnderName.group} of source ${sourceGroupedUnderName.name}`,
+                    path: ["name"],
+                });
+            }
             if (value.published && value.group.trim() === "PRIVATE") {
                 context.addIssue({
                     code: z.ZodIssueCode.custom,

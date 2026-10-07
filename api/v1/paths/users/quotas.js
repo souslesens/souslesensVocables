@@ -31,7 +31,7 @@ export default function () {
 
             res.status(200).json({
                 sources: {
-                    ...quotaEntry(Object.keys(ownedSources).length, userInfo.maxNumberCreatedSource),
+                    ...quotaEntry(sourceModel.countSourcesAgainstQuota(ownedSources), userInfo.maxNumberCreatedSource),
                     allowed: Boolean(userInfo.allowSourceCreation),
                 },
                 mappingTriples: quotaEntry(mappingTriples, userInfo.maxWritableTriplesPerUser),
@@ -53,6 +53,7 @@ export default function () {
             "Returns, for every limit that has a usage, what the caller currently holds and the cap resolved from their profiles. " +
             "`cap: null` means no limit, `cap: 0` forbids. " +
             "An admin is never capped on sources, since source creation skips that cap for them. " +
+            "`sources.used` leaves out one OntoCreator upload source, as source creation does. " +
             "The triple figures are measured against the triplestore at call time, so deletions made outside the " +
             "application are already taken into account, which makes this route slower than a plain read.",
         operationId: "getUserQuotas",

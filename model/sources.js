@@ -2,6 +2,7 @@ import fs from "fs";
 import { Lock } from "async-await-mutex-lock";
 import { config, configSourcesPath } from "./config.js";
 import { profileModel } from "./profiles.js";
+import { getSourceGroupSegments } from "./sourceGroups.js";
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount
@@ -288,6 +289,30 @@ class SourceModel {
     };
 
     /**
+     * @param {Record<string, Source>} sources - the stored sources
+     * @param {Source} writtenSource - the source about to be stored
+     * @throws {Error} with status 400 when a group segment is also a source name
+     */
+    _checkGroupSegmentsNotSourceNames = (sources, writtenSource) => {
+        // the source selector tree uses the bare name as jstree id for a group segment and for a source
+        const sourceNames = Object.keys(sources).concat(writtenSource.name);
+        const writtenGroupSegments = getSourceGroupSegments(writtenSource.group);
+        const segmentNamedLikeSource = writtenGroupSegments.find((segment) => sourceNames.includes(segment));
+        if (segmentNamedLikeSource) {
+            const error = new Error(`Group ${writtenSource.group} cannot contain ${segmentNamedLikeSource}, a source already has this name`);
+            error.status = 400;
+            throw error;
+        }
+        const otherSourcesList = Object.values(sources).filter((source) => source.name !== writtenSource.name);
+        const sourceGroupedUnderName = otherSourcesList.find((source) => getSourceGroupSegments(source.group).includes(writtenSource.name));
+        if (sourceGroupedUnderName) {
+            const error = new Error(`Source name ${writtenSource.name} is already a group, in the group ${sourceGroupedUnderName.group} of source ${sourceGroupedUnderName.name}`);
+            error.status = 400;
+            throw error;
+        }
+    };
+
+    /**
      * addSource for a user. A non admin creates a private unpublished source it owns, on a graph
      * no other source declares.
      * @param {UserAccount} user - a user account
@@ -364,6 +389,7 @@ class SourceModel {
                 error.status = 409;
                 throw error;
             }
+            this._checkGroupSegmentsNotSourceNames(sources, newSource);
             sources[newSource.id] = newSource;
             await this._write(sources);
         } finally {
@@ -428,6 +454,7 @@ class SourceModel {
             } else {
                 return false;
             }
+            this._checkGroupSegmentsNotSourceNames(sources, source);
             await this._write(updatedSources);
             return true;
         } finally {

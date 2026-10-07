@@ -752,8 +752,8 @@ var Sparql_OWL = (function () {
                         hierarchies[id] = [];
 
                         result.results.bindings.forEach(function (item) {
-                            if (item.superClass.type == "bnode") {
-                                // if superClass is bnode  it causes problem !!
+                            // an anonymous superclass is an axiom, not a parent. Older Virtuoso types it "uri" with a "_:" value
+                            if (item.superClass.type == "bnode" || item.superClass.value.startsWith("_:")) {
                                 return;
                             }
 
@@ -819,6 +819,36 @@ var Sparql_OWL = (function () {
                 return callback(null, { hierarchies: hierarchies });
             },
         );
+    };
+
+    /**
+     * Every `rdfs:subClassOf` edge above the given classes, in the source and its imports.
+     * Unlike `getNodesAncestorsOrDescendants`, keeps every parent of a class with several parents.
+     *
+     * @function
+     * @name getSuperClassEdges
+     * @memberof module:Sparql_OWL
+     * @param {string} sourceLabel - OWL source name to query
+     * @param {string[]} classIds - Class URIs whose ancestors are read
+     * @param {Function} callback - Error-first callback `(err, bindings)`, each binding has `class` (one of classIds), `subClass` and `superClass`
+     */
+    self.getSuperClassEdges = function (sourceLabel, classIds, callback) {
+        var filterStr = Sparql_common.setFilter("class", classIds, null, { values: 1 });
+        var fromStr = Sparql_common.getFromStr(sourceLabel, false);
+        var query =
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+            "SELECT DISTINCT ?class ?subClass ?superClass " +
+            fromStr +
+            " WHERE { " +
+            filterStr +
+            " ?class rdfs:subClassOf* ?subClass. ?subClass rdfs:subClassOf ?superClass. FILTER(isIRI(?superClass)) } LIMIT 10000";
+        var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            callback(null, result.results.bindings);
+        });
     };
 
     /**

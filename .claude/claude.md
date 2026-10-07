@@ -56,6 +56,26 @@ var graphNodeAnnotations = graphAnnotations.filter(...);
 
 A comment earns its place by carrying something from outside the line: a trait of the data, a limit of the endpoint, a coupling with code the reader cannot see from here. Never a translation of the code under it.
 
+## Commit messages (MANDATORY)
+
+Same rule as code comments: one short sentence saying what changed, readable at first glance. No body, no recap of the investigation, no list of tests. The diff carries the detail, a PR or Karim's questions carry the why.
+
+GitHub copies the message of a single-commit branch into the PR title and description, so a long message becomes a long, truncated PR.
+
+```
+// WRONG
+fix(users): keep tokens and passwords across account edits, fix OntoCreator upload rights
+
+whoami now generates and stores a token for an account that has none, so
+services relying on the Authorization header work for every logged user.
+...
+
+// RIGHT
+fix(users): an account edit no longer wipes the token or the password
+```
+
+Several unrelated changes make several commits, each with its own sentence, rather than one message listing them.
+
 ## Project Description
 
 **SousLeSens Vocables** = semantic web platform for knowledge graph viz, ontology mgmt, SPARQL query building. Web UI for exploring + manipulating RDF/OWL ontologies in triple stores.

@@ -46,41 +46,21 @@ export default function () {
                         callbackSeries();
                     });
                 },
-                // is source private
+                // only fails on an index matching no source, ownership grants nothing more
                 function (callbackSeries) {
-                    isIndexPrivate(userInfo, req.body.indexName, function (err, isPrivate) {
-                        if (err) {
-                            return callbackSeries(err);
-                        }
-                        if (isPrivate) {
-                            elasticRestProxy.indexSource(req.body.indexName, req.body.data, req.body.options, function (err, _result) {
-                                callbackSeries(err);
-                            });
-                        } else {
-                            callbackSeries();
-                        }
+                    isIndexPrivate(userInfo, req.body.indexName, function (err, _isPrivate) {
+                        callbackSeries(err);
                     });
                 },
-                //normal source and ConfigManager
+                // the write verdict is computed but never blocks the indexation below
                 function (callbackSeries) {
                     if (!ConfigManager.config) {
                         return callbackSeries();
                     } else {
                         ConfigManager.getUserSources(req, res, function (err, userSources) {
                             UserRequestFiltering.validateElasticSearchIndices(null, [req.body.indexName], userSources, "w", function (_parsingError, _filteredQuery) {
-                                if (_parsingError) {
-                                    parsingError = _parsingError;
-                                    return callbackSeries();
-                                    // return processResponse(res, parsingError, null);
-                                }
-
-                                elasticRestProxy.indexSource(req.body.indexName, req.body.data, req.body.options, function (err, _result) {
-                                    if (err) {
-                                        return callbackSeries(err);
-                                    }
-                                    result = _result;
-                                    return callbackSeries();
-                                });
+                                parsingError = _parsingError;
+                                return callbackSeries();
                             });
                         });
                     }
@@ -159,7 +139,11 @@ export default function () {
                             type: "object",
                             properties: {
                                 owlType: { type: "string", description: "OWL schema type filter applied during indexing.", example: "owl:Class" },
-                                replaceIndex: { type: "boolean", description: "When `true`, deletes the existing index before bulk load.", example: false },
+                                replaceIndex: {
+                                    type: "boolean",
+                                    description: "When `true`, deletes the existing index before bulk load. With an empty `data`, only recreates the index, empty.",
+                                    example: false,
+                                },
                             },
                             example: { owlType: "owl:Class", replaceIndex: false },
                         },

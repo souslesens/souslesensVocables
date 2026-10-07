@@ -608,6 +608,10 @@ var elasticRestProxy = {
                 },
 
                 function (callbackSeries) {
+                    // _bulk rejects an empty body, an empty data only recreates the index
+                    if (data.length == 0) {
+                        return callbackSeries();
+                    }
                     var bulkStr = "";
 
                     data.forEach(function (item, _indexedLine) {

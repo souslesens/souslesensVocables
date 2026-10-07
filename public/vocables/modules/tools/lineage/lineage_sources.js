@@ -33,6 +33,8 @@ import IndexedPredicates_bot from "../../bots/indexedPredicates_bot.js";
 var Lineage_sources = (function () {
     var self = {};
     self.activeSource = null;
+    // the source Lineage was opened on, kept while other sources are added with "+" or made active
+    self.mainSource = null;
     self.loadedSources = {};
     self.sourceDivsMap = {};
 
@@ -99,6 +101,7 @@ var Lineage_sources = (function () {
 
     self.clearRegistrations = function () {
         _registrationGeneration++;
+        self.mainSource = null;
         self.loadedSources = {};
         self.sourceDivsMap = {};
     };

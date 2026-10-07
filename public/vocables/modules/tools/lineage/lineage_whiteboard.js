@@ -280,6 +280,7 @@ var Lineage_whiteboard = (function () {
         var nodeURI = Config.userTools["lineage"].urlParam_nodeURI || null;
         Config.userTools["lineage"].urlParam_nodeURI = null;
 
+        Lineage_sources.mainSource = MainController.currentSource;
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
                 return MainController.errorAlert(err);

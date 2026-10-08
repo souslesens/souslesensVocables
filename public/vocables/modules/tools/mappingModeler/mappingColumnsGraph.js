@@ -158,10 +158,10 @@ var MappingColumnsGraph = (function () {
             to: rangeId,
             label: propLabel,
             width: 3,
-            arrows: { to: { enabled: true, type: "arrow" } },
-            smooth: { type: "curvedCCW", forceDirection: "vertical", roundness: 0.5 },
+            arrows: {to: {enabled: true, type: "arrow"}},
+            smooth: {type: "curvedCCW", forceDirection: "vertical", roundness: 0.5},
             color: "#9b59b6",
-            data: { id: propUri, type: "DatatypeProperty" },
+            data: {id: propUri, type: "DatatypeProperty"},
         };
     };
 
@@ -199,7 +199,7 @@ var MappingColumnsGraph = (function () {
         }
         var existingNodes = self.visjsGraph.getExistingIdsMap();
 
-        var visjsData = { nodes: [], edges: [] };
+        var visjsData = {nodes: [], edges: []};
         var visjsNode = newResource;
 
         if (newResource.data.type == "Class") {
@@ -207,7 +207,7 @@ var MappingColumnsGraph = (function () {
             if (!tableWithSameClass && !existingNodes[visjsNode.id]) {
                 visjsData.nodes.push(visjsNode);
             } else {
-                self.visjsGraph.data.nodes.update({ id: newResource.id, hidden: false });
+                self.visjsGraph.data.nodes.update({id: newResource.id, hidden: false});
             }
             self.saveVisjsGraph();
         } else {
@@ -244,7 +244,7 @@ var MappingColumnsGraph = (function () {
                         label: label,
                         to: newResource.id,
                         width: 3,
-                        data: { type: type },
+                        data: {type: type},
                         arrows: arrows,
                         color: edgeColor,
                     });
@@ -286,7 +286,7 @@ var MappingColumnsGraph = (function () {
      */
     self.initOffsets = function () {
         if (!self.currentOffset) {
-            self.currentOffset = { x: -self.graphDivWidth / 2, y: 0 };
+            self.currentOffset = {x: -self.graphDivWidth / 2, y: 0};
         }
     };
 
@@ -438,7 +438,7 @@ var MappingColumnsGraph = (function () {
                 } else if (edge.color && typeof edge.color.color === "string") {
                     currentColor = edge.color.color.toLowerCase();
                 }
-                var edgeUpdate = { id: edge.id };
+                var edgeUpdate = {id: edge.id};
                 var shouldUpdateEdge = false;
                 if (currentColor !== "#00afef") {
                     edgeUpdate.color = "#00afef";
@@ -475,12 +475,12 @@ var MappingColumnsGraph = (function () {
         if (!self.visjsGraph) {
             return;
         }
-        Mapping_legendOverlay.init(containerId, self.visjsGraph, { title: "🔍 Legend" });
+        Mapping_legendOverlay.init(containerId, self.visjsGraph, {title: "🔍 Legend"});
     };
 
     self.getColumnClass = function (node) {
         if (!node.id) {
-            node = { id: node };
+            node = {id: node};
         }
         var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id);
 
@@ -494,12 +494,16 @@ var MappingColumnsGraph = (function () {
     };
 
     self.isClassColumn = function (node) {
-        if (!node) return false;
+        if (!node) {
+            return false;
+        }
         if (!node.id) {
-            node = { id: node };
+            node = {id: node};
         }
         var visjsNode = self.visjsGraph.data.nodes.get(node.id);
-        if (!visjsNode) return false;
+        if (!visjsNode) {
+            return false;
+        }
         var nodeData = visjsNode.data;
         if (nodeData.definedInColumn) {
             var mainNode = self.visjsGraph.data.nodes.get(nodeData.definedInColumn);
@@ -510,7 +514,7 @@ var MappingColumnsGraph = (function () {
 
     self.getClassColumns = function (node) {
         if (!node.id) {
-            node = { id: node };
+            node = {id: node};
         }
         var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id, true);
 
@@ -573,7 +577,7 @@ var MappingColumnsGraph = (function () {
             if (!MappingModeler.currentRelation) {
                 self.relationMessage(node.data.label, null);
                 MappingModeler.currentRelation = {
-                    from: { id: node.id, classId: self.getColumnClass(node), dataTable: node.data.dataTable },
+                    from: {id: node.id, classId: self.getColumnClass(node), dataTable: node.data.dataTable},
                     to: null,
                     type: node.data.type,
                 };
@@ -583,11 +587,11 @@ var MappingColumnsGraph = (function () {
                     self.relationMessage();
                     return alert("Relations between columns from different tables are not possible");
                 }
-                MappingModeler.currentRelation.to = { id: node.id, classId: self.getColumnClass(node) };
+                MappingModeler.currentRelation.to = {id: node.id, classId: self.getColumnClass(node)};
                 if (MappingModeler.currentRelation.type != "Class" && node.data.type == "Class") {
                     self.graphActions.drawColumnToClassEdge(MappingModeler.currentRelation);
                 } else if (MappingModeler.currentRelation.from.type != "Class" && node.data.type != "Class") {
-                    MappingModeler.onLegendNodeClick({ id: "ObjectProperty" });
+                    MappingModeler.onLegendNodeClick({id: "ObjectProperty"});
                 }
             }
         } else {
@@ -596,14 +600,15 @@ var MappingColumnsGraph = (function () {
 
                 if (tableSourceType == "table" && !DataSourceManager.currentConfig.currentDataSource) {
                     // return alert("choose a data source first");
-                    MappingColumnsGraph.activeSourceFromNode(node, function () {});
+                    MappingColumnsGraph.activeSourceFromNode(node, function () {
+                    });
                 }
 
                 var obj = {
                     event: "xx",
                     node: {
                         id: node.id,
-                        data: { type: tableSourceType, id: node.id, label: node.id },
+                        data: {type: tableSourceType, id: node.id, label: node.id},
                     },
                 };
                 DataSourceManager.onDataSourcesJstreeSelect(null, obj);
@@ -642,13 +647,20 @@ var MappingColumnsGraph = (function () {
                     obj.node.data.id = data.name;
                     obj.node.data.sqlType = data.driver;
                     DataSourceManager.onDataSourcesJstreeSelect(undefined, obj, function () {
-                        var obj2 = { node: { label: node.data.dataTable, data: { type: "table", id: node.data.dataTable, label: node.data.dataTable } } };
+                        var obj2 = {
+                            node: {
+                                label: node.data.dataTable,
+                                data: {type: "table", id: node.data.dataTable, label: node.data.dataTable}
+                            }
+                        };
                         DataSourceManager.onDataSourcesJstreeSelect(undefined, obj2, callback);
                     });
                 },
 
                 error: function (err) {
-                    if (callback) return callback(err);
+                    if (callback) {
+                        return callback(err);
+                    }
                     return MainController.errorAlert(err);
                 },
             });
@@ -670,7 +682,9 @@ var MappingColumnsGraph = (function () {
      */
 
     self.showImplicitGraphPopupMenu = function (node, point, event) {
-        if (!node || !node.data) return;
+        if (!node || !node.data) {
+            return;
+        }
 
         var html = "";
         if (node.data.type === "Class" || node.data.type === "superClass") {
@@ -743,8 +757,8 @@ var MappingColumnsGraph = (function () {
          * @returns {void}
          */
         outlineNode: function (nodeId) {
-            self.visjsGraph.decorateNodes(null, { borderWidth: 1 });
-            self.visjsGraph.decorateNodes(nodeId, { borderWidth: 5 });
+            self.visjsGraph.decorateNodes(null, {borderWidth: 1});
+            self.visjsGraph.decorateNodes(nodeId, {borderWidth: 5});
         },
 
         /**
@@ -845,7 +859,8 @@ var MappingColumnsGraph = (function () {
                     },
                 };
 
-                self.drawResource(newResource, { noSave: true }, function (err) {});
+                self.drawResource(newResource, {noSave: true}, function (err) {
+                });
             });
         },
 
@@ -873,7 +888,7 @@ var MappingColumnsGraph = (function () {
                             type: "arrow",
                         },
                     },
-                    data: { type: "rdf:type" },
+                    data: {type: "rdf:type"},
                 },
             ];
 
@@ -923,7 +938,7 @@ var MappingColumnsGraph = (function () {
             var divId = "columnMappingDetailsDiv";
             $("#smallDialogDiv").html("<div id='" + divId + "'></div>");
 
-            UI.openDialog("smallDialogDiv", { title: "Column Technical Mappings" });
+            UI.openDialog("smallDialogDiv", {title: "Column Technical Mappings"});
             UI.clampAndCenterDialog("smallDialogDiv");
             MappingsDetails.showColumnTechnicalMappingsDialog(divId, node || self.currentGraphNode, function () {
                 $("#smallDialogDiv").dialog("close");
@@ -1060,7 +1075,7 @@ var MappingColumnsGraph = (function () {
                             });
                         }
 
-                        MappingColumnsGraph.visjsGraph.network.setOptions({ physics: self.physicsHierarchical });
+                        MappingColumnsGraph.visjsGraph.network.setOptions({physics: self.physicsHierarchical});
                         self.adjustEdgeCurvatures();
                         UI.resetWindowSize();
 
@@ -1109,8 +1124,8 @@ var MappingColumnsGraph = (function () {
                     label: table,
                     y: -200,
                     x: index++ * 250 - 400,
-                    fixed: { x: true, y: true },
-                    data: { table: table },
+                    fixed: {x: true, y: true},
+                    data: {table: table},
                     allowSingleNodeCluster: true,
                 },
             };
@@ -1128,8 +1143,11 @@ var MappingColumnsGraph = (function () {
      * @param {function} [callback] - Optional callback function executed after saving the graph.
      * @returns {void}
      */
-    self.saveVisjsGraph = function (callback) {
-        var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
+    self.saveVisjsGraph = function (source, callback) {
+        if (!source) {
+            source = MappingModeler.currentSLSsource
+        }
+        var fileName = "mappings_" + source + "_ALL" + ".json";
         var graph = MappingColumnsGraph.visjsGraph;
         if (graph.data?.nodes?.length == 0) {
             nodes = [];
@@ -1186,7 +1204,7 @@ var MappingColumnsGraph = (function () {
             edges: edges,
             context: graph.currentContext,
             positions: positions,
-            options: { config: config },
+            options: {config: config},
         };
         if (!fileName) {
             fileName = prompt("Graph name");
@@ -1447,7 +1465,7 @@ var MappingColumnsGraph = (function () {
         var currentDataSource = DataSourceManager.currentConfig.currentDataSource;
         MappingColumnsGraph.visjsGraph.clearGraph();
         MappingColumnsGraph.visjsGraph = null;
-        var visjsData = { nodes: [], edges: [] };
+        var visjsData = {nodes: [], edges: []};
         MappingColumnsGraph.drawGraphCanvas(MappingColumnsGraph.graphDiv, visjsData, function () {
             DataSourceManager.currentConfig.currentDataSource = currentDataSource;
         });
@@ -1462,7 +1480,7 @@ var MappingColumnsGraph = (function () {
         MappingColumnsGraph.hideNodesFromOtherTables(table);
         self.visjsGraph.network.focus(table, {
             scale: 0.85,
-            offset: { x: 10, y: 200 },
+            offset: {x: 10, y: 200},
             locked: false,
             animation: true,
         });
@@ -1560,7 +1578,7 @@ var MappingColumnsGraph = (function () {
 
             data.edges.forEach(function (edge) {
                 edge.width = 3;
-                edge.font = { size: 16 };
+                edge.font = {size: 16};
                 if (edge.smooth === null) {
                     edge.smooth = {
                         type: "curvedCW",
@@ -1619,9 +1637,31 @@ var MappingColumnsGraph = (function () {
      * @memberof module:MappingColumnsGraph
      * @returns {void}
      */
-    self.exportMappings = function () {
+    self.exportMappings = function (source, callback) {
+        if (!source) {
+            source = MappingModeler.currentSLSsource
+        }
         self.saveVisjsGraph(function (err) {
-            var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
+
+            self.loadMappingsFromFile(source, function (err, data) {
+                if (err) {
+                    if (err.responseJSON == "file does not exist") {
+                        return;
+                    }
+                    return MainController.errorAlert(err);
+                }
+                if (data?.options?.config?.sparqlServerUrl) {
+                    data.options.config.sparqlServerUrl = "_default";
+                }
+                var fileName = "mappings_" + source + "_ALL" + ".json";
+                Export.downloadJSON(data, fileName);
+            })
+        })
+    }
+
+
+        self.loadMappingsFromFile = function (source, callback) {
+            var fileName = "mappings_" + source + "_ALL" + ".json";
             var payload = {
                 dir: "graphs/",
                 fileName: fileName,
@@ -1634,368 +1674,372 @@ var MappingColumnsGraph = (function () {
                 dataType: "json",
                 success: function (result, _textStatus, _jqXHR) {
                     var data = JSON.parse(result);
-                    if (data?.options?.config?.sparqlServerUrl) {
-                        data.options.config.sparqlServerUrl = "_default";
-                    }
-                    Export.downloadJSON(data, fileName);
-                },
-                error(err) {
+
                     if (callback) {
-                        return callback(err);
+                        return callback(null, data)
                     }
-                    if (err.responseJSON == "file does not exist") {
-                        return;
-                    }
+                },
+                error: function (err) {
+                    return callback(err)
+                }
+            })
+
+        }
+
+// -------------------------------
+// Mapping import helpers
+// -------------------------------
+
+        /**
+         * Returns the 1-based line number for a character index in a JSON text.
+         * Used to provide approximate locations in user-imported JSON files.
+         * @param {string} jsonText
+         * @param {number} idx
+         * @returns {number|null}
+         */
+        function getLineNumberFromIndex(jsonText, idx) {
+            if (!jsonText || typeof idx !== "number" || idx < 0) {
+                return null;
+            }
+            return jsonText.slice(0, idx).split("\n").length;
+        }
+
+        /**
+         * Tries to locate the line number of a datasource id under options.config.<sectionName>.
+         * Best-effort heuristic (may return null if formatting differs or JSON is minified).
+         * @param {string} jsonText
+         * @param {string} sectionName
+         * @param {string} key
+         * @returns {number|null}
+         */
+        function findConfigKeyLine(jsonText, sectionName, key) {
+            var sectionNeedle = `"${sectionName}": {`;
+            var sectionPos = jsonText.indexOf(sectionNeedle);
+            if (sectionPos < 0) {
+                return null;
+            }
+
+            var windowText = jsonText.slice(sectionPos, sectionPos + 20000);
+            var keyNeedle = `"${key}"`;
+            var keyPosLocal = windowText.indexOf(keyNeedle);
+            if (keyPosLocal < 0) {
+                return null;
+            }
+
+            return getLineNumberFromIndex(jsonText, sectionPos + keyPosLocal);
+        }
+
+        /**
+         * Tries to locate the line number where a node references a datasource id.
+         * Best-effort heuristic based on textual search near the node id.
+         * @param {string} jsonText
+         * @param {string} nodeId
+         * @param {string} datasourceId
+         * @returns {number|null}
+         */
+        function findNodeDatasourceLine(jsonText, nodeId, datasourceId) {
+            var idNeedle = `"id": "${nodeId}"`;
+            var idPos = jsonText.indexOf(idNeedle);
+            if (idPos < 0) {
+                return null;
+            }
+
+            var windowText = jsonText.slice(idPos, idPos + 4000);
+            var dsNeedle = `"datasource": "${datasourceId}"`;
+            var dsPosLocal = windowText.indexOf(dsNeedle);
+
+            var finalPos = dsPosLocal >= 0 ? idPos + dsPosLocal : idPos;
+            return getLineNumberFromIndex(jsonText, finalPos);
+        }
+
+        /** Shows a modal dialog explaining why the import is blocked. @returns {void} */
+        function showImportBlockingDialog(title, htmlBody) {
+            var html = "<div style='font-size:13px;line-height:1.45'>" + htmlBody + "</div>";
+            $("#mainDialogDiv").html(html);
+            UI.openDialog("mainDialogDiv", {title: title});
+            UI.clampAndCenterDialog("mainDialogDiv");
+        }
+
+        /** Posts the imported mapping graph JSON to the backend. @returns {void} */
+        function doImportPost(dataToSave) {
+            var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
+            var payload = {
+                dir: "graphs/",
+                fileName: fileName,
+                data: JSON.stringify(dataToSave, null, 2),
+            };
+            $.ajax({
+                type: "POST",
+                url: `${Config.apiUrl}/data/file`,
+                data: payload,
+                dataType: "json",
+                success: function (_result, _textStatus, _jqXHR) {
+                    MappingModeler.onLoaded();
+                },
+                error: function (err) {
                     return MainController.errorAlert(err);
                 },
             });
-        });
-    };
-
-    // -------------------------------
-    // Mapping import helpers
-    // -------------------------------
-
-    /**
-     * Returns the 1-based line number for a character index in a JSON text.
-     * Used to provide approximate locations in user-imported JSON files.
-     * @param {string} jsonText
-     * @param {number} idx
-     * @returns {number|null}
-     */
-    function getLineNumberFromIndex(jsonText, idx) {
-        if (!jsonText || typeof idx !== "number" || idx < 0) {
-            return null;
-        }
-        return jsonText.slice(0, idx).split("\n").length;
-    }
-
-    /**
-     * Tries to locate the line number of a datasource id under options.config.<sectionName>.
-     * Best-effort heuristic (may return null if formatting differs or JSON is minified).
-     * @param {string} jsonText
-     * @param {string} sectionName
-     * @param {string} key
-     * @returns {number|null}
-     */
-    function findConfigKeyLine(jsonText, sectionName, key) {
-        var sectionNeedle = `"${sectionName}": {`;
-        var sectionPos = jsonText.indexOf(sectionNeedle);
-        if (sectionPos < 0) return null;
-
-        var windowText = jsonText.slice(sectionPos, sectionPos + 20000);
-        var keyNeedle = `"${key}"`;
-        var keyPosLocal = windowText.indexOf(keyNeedle);
-        if (keyPosLocal < 0) return null;
-
-        return getLineNumberFromIndex(jsonText, sectionPos + keyPosLocal);
-    }
-
-    /**
-     * Tries to locate the line number where a node references a datasource id.
-     * Best-effort heuristic based on textual search near the node id.
-     * @param {string} jsonText
-     * @param {string} nodeId
-     * @param {string} datasourceId
-     * @returns {number|null}
-     */
-    function findNodeDatasourceLine(jsonText, nodeId, datasourceId) {
-        var idNeedle = `"id": "${nodeId}"`;
-        var idPos = jsonText.indexOf(idNeedle);
-        if (idPos < 0) return null;
-
-        var windowText = jsonText.slice(idPos, idPos + 4000);
-        var dsNeedle = `"datasource": "${datasourceId}"`;
-        var dsPosLocal = windowText.indexOf(dsNeedle);
-
-        var finalPos = dsPosLocal >= 0 ? idPos + dsPosLocal : idPos;
-        return getLineNumberFromIndex(jsonText, finalPos);
-    }
-
-    /** Shows a modal dialog explaining why the import is blocked. @returns {void} */
-    function showImportBlockingDialog(title, htmlBody) {
-        var html = "<div style='font-size:13px;line-height:1.45'>" + htmlBody + "</div>";
-        $("#mainDialogDiv").html(html);
-        UI.openDialog("mainDialogDiv", { title: title });
-        UI.clampAndCenterDialog("mainDialogDiv");
-    }
-
-    /** Posts the imported mapping graph JSON to the backend. @returns {void} */
-    function doImportPost(dataToSave) {
-        var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
-        var payload = {
-            dir: "graphs/",
-            fileName: fileName,
-            data: JSON.stringify(dataToSave, null, 2),
-        };
-        $.ajax({
-            type: "POST",
-            url: `${Config.apiUrl}/data/file`,
-            data: payload,
-            dataType: "json",
-            success: function (_result, _textStatus, _jqXHR) {
-                MappingModeler.onLoaded();
-            },
-            error: function (err) {
-                return MainController.errorAlert(err);
-            },
-        });
-    }
-
-    /**
-     * Parses and validates the imported mapping JSON text.
-     * Removes lastUpdate and ensures graphUri matches current source.
-     * @returns {{data:Object, error:string}}
-     */
-    function parseAndSanitizeImport(importedJsonText) {
-        var data = null;
-
-        try {
-            data = JSON.parse(importedJsonText);
-        } catch (e) {
-            return { data: null, error: "Invalid JSON: " + (e && e.message ? e.message : e) };
         }
 
-        // Basic validation
-        if (!data || !data.nodes) {
-            return { data: null, error: "Invalid mapping file: missing nodes." };
+        /**
+         * Parses and validates the imported mapping JSON text.
+         * Removes lastUpdate and ensures graphUri matches current source.
+         * @returns {{data:Object, error:string}}
+         */
+        function parseAndSanitizeImport(importedJsonText) {
+            var data = null;
+
+            try {
+                data = JSON.parse(importedJsonText);
+            } catch (e) {
+                return {data: null, error: "Invalid JSON: " + (e && e.message ? e.message : e)};
+            }
+
+            // Basic validation
+            if (!data || !data.nodes) {
+                return {data: null, error: "Invalid mapping file: missing nodes."};
+            }
+
+            // Remove lastUpdate if present
+            if (data.options && data.options.config && data.options.config.lastUpdate) {
+                delete data.options.config.lastUpdate;
+            }
+
+            // Check graphUri match (same behavior as before)
+            var currentGraphUri = Config.sources[MainController.currentSource].graphUri;
+            if (data.options && data.options.config && data.options.config.graphUri != currentGraphUri) {
+                return {
+                    data: null,
+                    error: "graphUri in file is not the same as the current graphUri, update graphURI in JSON file",
+                };
+            }
+
+            return {data: data, error: null};
         }
 
-        // Remove lastUpdate if present
-        if (data.options && data.options.config && data.options.config.lastUpdate) {
-            delete data.options.config.lastUpdate;
+        /**
+         * Builds an index of datasource usages in nodes.
+         * @param {Object} data Parsed mapping JSON object.
+         * @param {string} importedJsonText Raw JSON text (used to locate approximate line numbers).
+         * @returns {Object<string, Array>} Map datasourceId -> usage occurrences.
+         */
+        function indexDatasourceUsages(data, importedJsonText) {
+            var datasourceUsagesById = {}; // { dsId: [ {nodeIndex,nodeId,nodeType,dataTable,line} ] }
+
+            (data.nodes || []).forEach(function (node, nodeIndex) {
+                // datasourceId peut être stocké sous datasource ou dataSource selon les versions
+                var datasourceId = node && node.data ? node.data.datasource || node.data.dataSource : null;
+                if (!datasourceId) {
+                    return;
+                }
+
+                if (!datasourceUsagesById[datasourceId]) {
+                    datasourceUsagesById[datasourceId] = [];
+                }
+
+                datasourceUsagesById[datasourceId].push({
+                    nodeIndex: nodeIndex,
+                    nodeId: node.id,
+                    nodeType: node.data.type,
+                    dataTable: node.data.dataTable,
+                    line: findNodeDatasourceLine(importedJsonText, node.id, datasourceId),
+                });
+            });
+            return datasourceUsagesById;
         }
 
-        // Check graphUri match (same behavior as before)
-        var currentGraphUri = Config.sources[MainController.currentSource].graphUri;
-        if (data.options && data.options.config && data.options.config.graphUri != currentGraphUri) {
+        /**
+         * Checks that datasource ids used in nodes are declared in options.config (databaseSources/csvSources).
+         * @returns {{unknownIds:string[], dbSourcesFromFile:Object, csvSourcesFromFile:Object, requiredDbIds:string[]}}
+         */
+        function validateDatasourcesDeclared(data, datasourceUsagesById) {
+            var cfg = data && data.options && data.options.config ? data.options.config : {};
+
+            var dbSourcesFromFile = cfg.databaseSources || {};
+            var csvSourcesFromFile = cfg.csvSources || {};
+
+            var dbIdsFromConfig = Object.keys(dbSourcesFromFile);
+            var csvIdsFromConfig = Object.keys(csvSourcesFromFile);
+
+            var usedIds = Object.keys(datasourceUsagesById || {});
+            var unknownIds = usedIds.filter(function (id) {
+                return dbIdsFromConfig.indexOf(id) < 0 && csvIdsFromConfig.indexOf(id) < 0;
+            });
             return {
-                data: null,
-                error: "graphUri in file is not the same as the current graphUri, update graphURI in JSON file",
+                unknownIds: unknownIds,
+                dbSourcesFromFile: dbSourcesFromFile,
+                csvSourcesFromFile: csvSourcesFromFile,
+                requiredDbIds: dbIdsFromConfig.slice(),
             };
         }
 
-        return { data: data, error: null };
-    }
+        /**
+         * Renders up to 5 occurrences of datasource usage in nodes[].
+         * @param {Array<Object>} usages
+         * @returns {string} HTML fragment
+         */
+        function renderDatasourceOccurrences(usages) {
+            return (usages || [])
+                .slice(0, 5)
+                .map(function (usage) {
+                    return (
+                        " • <code>nodes[" +
+                        usage.nodeIndex +
+                        "].data.datasource</code> (line " +
+                        (usage.line || "?") +
+                        ") — type=" +
+                        usage.nodeType +
+                        (usage.dataTable ? " — table=" + usage.dataTable : "")
+                    );
+                })
+                .join("<br>");
+        }
 
-    /**
-     * Builds an index of datasource usages in nodes.
-     * @param {Object} data Parsed mapping JSON object.
-     * @param {string} importedJsonText Raw JSON text (used to locate approximate line numbers).
-     * @returns {Object<string, Array>} Map datasourceId -> usage occurrences.
-     */
-    function indexDatasourceUsages(data, importedJsonText) {
-        var datasourceUsagesById = {}; // { dsId: [ {nodeIndex,nodeId,nodeType,dataTable,line} ] }
+        /**
+         * Builds the HTML list for unknown datasources.
+         * @param {string[]} unknownIds
+         * @param {Object<string,Array>} datasourceUsagesById
+         * @returns {string} HTML <li>...</li> list
+         */
+        function renderUnknownDatasourcesHtml(unknownIds, datasourceUsagesById) {
+            return (unknownIds || [])
+                .map(function (id) {
+                    var usages = datasourceUsagesById && datasourceUsagesById[id] ? datasourceUsagesById[id] : [];
+                    var occurrences = renderDatasourceOccurrences(usages);
+                    var more = usages.length > 5 ? "<br> … (+" + (usages.length - 5) + " more occurrences)" : "";
+                    return "<li><b>" + id + "</b><br>" + occurrences + more + "</li>";
+                })
+                .join("");
+        }
 
-        (data.nodes || []).forEach(function (node, nodeIndex) {
-            // datasourceId peut être stocké sous datasource ou dataSource selon les versions
-            var datasourceId = node && node.data ? node.data.datasource || node.data.dataSource : null;
-            if (!datasourceId) return;
+        /**
+         * Builds the HTML list for missing databases on target server.
+         * @param {string[]} missing
+         * @param {Object} dbSourcesFromFile
+         * @param {Object<string,Array>} datasourceUsagesById
+         * @param {string} importedJsonText
+         * @returns {string} HTML <li>...</li> list
+         */
+        function renderMissingDatabasesHtml(missing, dbSourcesFromFile, datasourceUsagesById, importedJsonText) {
+            return (missing || [])
+                .map(function (id) {
+                    var name = dbSourcesFromFile && dbSourcesFromFile[id] && dbSourcesFromFile[id].name ? dbSourcesFromFile[id].name : "(unknown name)";
 
-            if (!datasourceUsagesById[datasourceId]) datasourceUsagesById[datasourceId] = [];
+                    var cfgLine = findConfigKeyLine(importedJsonText, "databaseSources", id);
 
-            datasourceUsagesById[datasourceId].push({
-                nodeIndex: nodeIndex,
-                nodeId: node.id,
-                nodeType: node.data.type,
-                dataTable: node.data.dataTable,
-                line: findNodeDatasourceLine(importedJsonText, node.id, datasourceId),
+                    var usages = datasourceUsagesById && datasourceUsagesById[id] ? datasourceUsagesById[id] : [];
+                    var occurrences = renderDatasourceOccurrences(usages);
+                    var more = usages.length > 5 ? "<br> … (+" + (usages.length - 5) + " more occurrences)" : "";
+
+                    return (
+                        "<li><b>" +
+                        id +
+                        "</b> — " +
+                        name +
+                        "<br>Declared in file: <code>options.config.databaseSources." +
+                        id +
+                        "</code> (line " +
+                        (cfgLine || "?") +
+                        ")" +
+                        "<br>" +
+                        occurrences +
+                        more +
+                        "</li>"
+                    );
+                })
+                .join("");
+        }
+
+        /**
+         * Computes which database ids declared in the file are missing on the target server.
+         * @param {string[]} requiredDbIds
+         * @param {Object|Array} resp API response from GET /databases
+         * @returns {{missing: string[]}}
+         */
+        function validateDatabasesAvailable(requiredDbIds, resp) {
+            var available = Array.isArray(resp) ? resp : resp && resp.resources ? resp.resources : [];
+            var availableIds = new Set(
+                available.map(function (db) {
+                    return db.id;
+                }),
+            );
+            var missing = (requiredDbIds || []).filter(function (id) {
+                return !availableIds.has(id);
             });
-        });
-        return datasourceUsagesById;
-    }
+            return {missing: missing};
+        }
 
-    /**
-     * Checks that datasource ids used in nodes are declared in options.config (databaseSources/csvSources).
-     * @returns {{unknownIds:string[], dbSourcesFromFile:Object, csvSourcesFromFile:Object, requiredDbIds:string[]}}
-     */
-    function validateDatasourcesDeclared(data, datasourceUsagesById) {
-        var cfg = data && data.options && data.options.config ? data.options.config : {};
+        /**
+         * @function
+         * @name importMappingsFromJSONFile
+         * @memberof module:MappingColumnsGraph
+         * @description
+         * Imports a mappings JSON file into the current mapping graph and saves it on the server.
+         *
+         * To prevent crashes when importing a graph created on another server, this import validates
+         * data source identifiers before writing the graph file:
+         * 1) JSON integrity: each `nodes[i].data.datasource` must be declared in
+         *    `options.config.databaseSources` or `options.config.csvSources`.
+         * 2) Target server availability: if `options.config.databaseSources` contains ids, the import
+         *    calls `GET /databases` and checks that each id exists and/or is authorized.
 
-        var dbSourcesFromFile = cfg.databaseSources || {};
-        var csvSourcesFromFile = cfg.csvSources || {};
+         * If validation fails, an "Import blocked" dialog is shown with actionable guidance (and tries to display approximate JSON line numbers when possible).
+         * @returns {void}
+         */
+        self.importMappingsFromJSONFile = function () {
+            ImportFileWidget.showImportDialog(function (err, importedJsonText) {
+                if (err) {
+                    return MainController.errorAlert(err);
+                }
 
-        var dbIdsFromConfig = Object.keys(dbSourcesFromFile);
-        var csvIdsFromConfig = Object.keys(csvSourcesFromFile);
+                var parsed = parseAndSanitizeImport(importedJsonText);
+                if (parsed.error) {
+                    return alert(parsed.error);
+                }
+                var data = parsed.data;
 
-        var usedIds = Object.keys(datasourceUsagesById || {});
-        var unknownIds = usedIds.filter(function (id) {
-            return dbIdsFromConfig.indexOf(id) < 0 && csvIdsFromConfig.indexOf(id) < 0;
-        });
-        return {
-            unknownIds: unknownIds,
-            dbSourcesFromFile: dbSourcesFromFile,
-            csvSourcesFromFile: csvSourcesFromFile,
-            requiredDbIds: dbIdsFromConfig.slice(),
-        };
-    }
+                var datasourceUsagesById = indexDatasourceUsages(data, importedJsonText);
 
-    /**
-     * Renders up to 5 occurrences of datasource usage in nodes[].
-     * @param {Array<Object>} usages
-     * @returns {string} HTML fragment
-     */
-    function renderDatasourceOccurrences(usages) {
-        return (usages || [])
-            .slice(0, 5)
-            .map(function (usage) {
-                return (
-                    " • <code>nodes[" +
-                    usage.nodeIndex +
-                    "].data.datasource</code> (line " +
-                    (usage.line || "?") +
-                    ") — type=" +
-                    usage.nodeType +
-                    (usage.dataTable ? " — table=" + usage.dataTable : "")
-                );
-            })
-            .join("<br>");
-    }
+                var declared = validateDatasourcesDeclared(data, datasourceUsagesById);
+                var unknownIds = declared.unknownIds;
+                var dbSourcesFromFile = declared.dbSourcesFromFile;
+                var csvSourcesFromFile = declared.csvSourcesFromFile;
+                var requiredDbIds = declared.requiredDbIds;
 
-    /**
-     * Builds the HTML list for unknown datasources.
-     * @param {string[]} unknownIds
-     * @param {Object<string,Array>} datasourceUsagesById
-     * @returns {string} HTML <li>...</li> list
-     */
-    function renderUnknownDatasourcesHtml(unknownIds, datasourceUsagesById) {
-        return (unknownIds || [])
-            .map(function (id) {
-                var usages = datasourceUsagesById && datasourceUsagesById[id] ? datasourceUsagesById[id] : [];
-                var occurrences = renderDatasourceOccurrences(usages);
-                var more = usages.length > 5 ? "<br> … (+" + (usages.length - 5) + " more occurrences)" : "";
-                return "<li><b>" + id + "</b><br>" + occurrences + more + "</li>";
-            })
-            .join("");
-    }
+                // Block import and show actionable guidance if datasource validation fails.
+                if (unknownIds.length > 0) {
+                    var unknownHtml = renderUnknownDatasourcesHtml(unknownIds, datasourceUsagesById);
 
-    /**
-     * Builds the HTML list for missing databases on target server.
-     * @param {string[]} missing
-     * @param {Object} dbSourcesFromFile
-     * @param {Object<string,Array>} datasourceUsagesById
-     * @param {string} importedJsonText
-     * @returns {string} HTML <li>...</li> list
-     */
-    function renderMissingDatabasesHtml(missing, dbSourcesFromFile, datasourceUsagesById, importedJsonText) {
-        return (missing || [])
-            .map(function (id) {
-                var name = dbSourcesFromFile && dbSourcesFromFile[id] && dbSourcesFromFile[id].name ? dbSourcesFromFile[id].name : "(unknown name)";
-
-                var cfgLine = findConfigKeyLine(importedJsonText, "databaseSources", id);
-
-                var usages = datasourceUsagesById && datasourceUsagesById[id] ? datasourceUsagesById[id] : [];
-                var occurrences = renderDatasourceOccurrences(usages);
-                var more = usages.length > 5 ? "<br> … (+" + (usages.length - 5) + " more occurrences)" : "";
-
-                return (
-                    "<li><b>" +
-                    id +
-                    "</b> — " +
-                    name +
-                    "<br>Declared in file: <code>options.config.databaseSources." +
-                    id +
-                    "</code> (line " +
-                    (cfgLine || "?") +
-                    ")" +
-                    "<br>" +
-                    occurrences +
-                    more +
-                    "</li>"
-                );
-            })
-            .join("");
-    }
-
-    /**
-     * Computes which database ids declared in the file are missing on the target server.
-     * @param {string[]} requiredDbIds
-     * @param {Object|Array} resp API response from GET /databases
-     * @returns {{missing: string[]}}
-     */
-    function validateDatabasesAvailable(requiredDbIds, resp) {
-        var available = Array.isArray(resp) ? resp : resp && resp.resources ? resp.resources : [];
-        var availableIds = new Set(
-            available.map(function (db) {
-                return db.id;
-            }),
-        );
-        var missing = (requiredDbIds || []).filter(function (id) {
-            return !availableIds.has(id);
-        });
-        return { missing: missing };
-    }
-
-    /**
-                * @function
-                * @name importMappingsFromJSONFile
-                * @memberof module:MappingColumnsGraph
-                * @description
-                * Imports a mappings JSON file into the current mapping graph and saves it on the server.
-                *
-                * To prevent crashes when importing a graph created on another server, this import validates
-                * data source identifiers before writing the graph file:
-                * 1) JSON integrity: each `nodes[i].data.datasource` must be declared in
-                *    `options.config.databaseSources` or `options.config.csvSources`.
-                * 2) Target server availability: if `options.config.databaseSources` contains ids, the import
-                *    calls `GET /databases` and checks that each id exists and/or is authorized.
-                
-                * If validation fails, an "Import blocked" dialog is shown with actionable guidance (and tries to display approximate JSON line numbers when possible).
-                * @returns {void}
-                */
-    self.importMappingsFromJSONFile = function () {
-        ImportFileWidget.showImportDialog(function (err, importedJsonText) {
-            if (err) {
-                return MainController.errorAlert(err);
-            }
-
-            var parsed = parseAndSanitizeImport(importedJsonText);
-            if (parsed.error) {
-                return alert(parsed.error);
-            }
-            var data = parsed.data;
-
-            var datasourceUsagesById = indexDatasourceUsages(data, importedJsonText);
-
-            var declared = validateDatasourcesDeclared(data, datasourceUsagesById);
-            var unknownIds = declared.unknownIds;
-            var dbSourcesFromFile = declared.dbSourcesFromFile;
-            var csvSourcesFromFile = declared.csvSourcesFromFile;
-            var requiredDbIds = declared.requiredDbIds;
-
-            // Block import and show actionable guidance if datasource validation fails.
-            if (unknownIds.length > 0) {
-                var unknownHtml = renderUnknownDatasourcesHtml(unknownIds, datasourceUsagesById);
-
-                showImportBlockingDialog(
-                    "Import blocked",
-                    "<p>These data sources are used in <code>nodes[].data.datasource</code> but are declared neither in <code>options.config.databaseSources</code> nor in <code>options.config.csvSources</code>.</p>" +
+                    showImportBlockingDialog(
+                        "Import blocked",
+                        "<p>These data sources are used in <code>nodes[].data.datasource</code> but are declared neither in <code>options.config.databaseSources</code> nor in <code>options.config.csvSources</code>.</p>" +
                         "<ul>" +
                         unknownHtml +
                         "</ul>" +
                         "<p><b>Fix:</b> add these ids to the config, or replace the value in the nodes listed below.</p>",
-                );
-                return; // STOP
-            }
+                    );
+                    return; // STOP
+                }
 
-            if (requiredDbIds.length === 0) {
-                return doImportPost(data);
-            }
+                if (requiredDbIds.length === 0) {
+                    return doImportPost(data);
+                }
 
-            $.ajax({
-                type: "GET",
-                url: `${Config.apiUrl}/databases`,
-                dataType: "json",
-                success: function (resp) {
-                    var check = validateDatabasesAvailable(requiredDbIds, resp);
-                    var missing = check.missing;
+                $.ajax({
+                    type: "GET",
+                    url: `${Config.apiUrl}/databases`,
+                    dataType: "json",
+                    success: function (resp) {
+                        var check = validateDatabasesAvailable(requiredDbIds, resp);
+                        var missing = check.missing;
 
-                    if (missing.length > 0) {
-                        var missingHtml = renderMissingDatabasesHtml(missing, dbSourcesFromFile, datasourceUsagesById, importedJsonText);
+                        if (missing.length > 0) {
+                            var missingHtml = renderMissingDatabasesHtml(missing, dbSourcesFromFile, datasourceUsagesById, importedJsonText);
 
-                        showImportBlockingDialog(
-                            "Import blocked",
-                            "<p>These databases are referenced by the mapping but are not available on this server (missing or not authorized).</p>" +
+                            showImportBlockingDialog(
+                                "Import blocked",
+                                "<p>These databases are referenced by the mapping but are not available on this server (missing or not authorized).</p>" +
                                 "<ul>" +
                                 missingHtml +
                                 "</ul>" +
@@ -2003,467 +2047,532 @@ var MappingColumnsGraph = (function () {
                                 "1) Create/add these databases on the target server (ConfigEditor ▸ Databases).<br>" +
                                 "2) Grant access to your account (ConfigEditor ▸ profiles/allowedDatabases).<br>" +
                                 "3) Or edit the imported JSON to point to an existing id.</p>",
-                        );
-                        return;
-                    }
-                    return doImportPost(data);
-                },
+                            );
+                            return;
+                        }
+                        return doImportPost(data);
+                    },
 
-                error: function (e) {
-                    var status = e && typeof e.status !== "undefined" ? e.status : 0;
+                    error: function (e) {
+                        var status = e && typeof e.status !== "undefined" ? e.status : 0;
 
-                    var details =
-                        (e && e.responseJSON && (e.responseJSON.message || e.responseJSON.error)) ||
-                        (e && e.responseText) ||
-                        (e && e.statusText) ||
-                        "Unable to reach the /databases API (offline or server unavailable).";
+                        var details =
+                            (e && e.responseJSON && (e.responseJSON.message || e.responseJSON.error)) ||
+                            (e && e.responseText) ||
+                            (e && e.statusText) ||
+                            "Unable to reach the /databases API (offline or server unavailable).";
 
-                    return MainController.errorAlert("Database validation failed (status=" + status + ") : " + details);
-                },
+                        return MainController.errorAlert("Database validation failed (status=" + status + ") : " + details);
+                    },
+                });
             });
-        });
-    };
+        };
 
-    self.hideNodesFromOtherTables = function (table) {
-        var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
-        var edges = MappingColumnsGraph.visjsGraph.data.edges.get();
+        self.hideNodesFromOtherTables = function (table) {
+            var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
+            var edges = MappingColumnsGraph.visjsGraph.data.edges.get();
 
-        self.normalizeRdfTypeEdgesColor(MappingColumnsGraph.visjsGraph);
+            self.normalizeRdfTypeEdgesColor(MappingColumnsGraph.visjsGraph);
 
-        var newNodes = [];
-        var newNodesMap = {};
-        var tableNodes = {};
+            var newNodes = [];
+            var newNodesMap = {};
+            var tableNodes = {};
 
-        nodes.forEach(function (node) {
-            var hidden = true;
-            if (node.data && node.data.dataTable) {
-                if (node.data.dataTable == table) {
-                    tableNodes[node.id] = node;
-                    hidden = false;
+            nodes.forEach(function (node) {
+                var hidden = true;
+                if (node.data && node.data.dataTable) {
+                    if (node.data.dataTable == table) {
+                        tableNodes[node.id] = node;
+                        hidden = false;
+                    }
                 }
+                newNodesMap[node.id] = {id: node.id, hidden: hidden};
+            });
+            //show classes linked to column
+            var edgesFromClassMap = {};
+            edges.forEach(function (edge) {
+                if (!edge.data || !tableNodes[edge.from]) {
+                    return;
+                }
+                var isTypeLink = edge.data.type == "rdf:type" || edge.data.type == "owl:Class";
+                var isSubClassOfLink = edge.data.type == "rdfs:subClassOf";
+                if (isTypeLink || isSubClassOfLink) {
+                    newNodesMap[edge.to].hidden = false;
+                    newNodesMap[edge.from].hidden = false;
+                }
+            });
+            for (var nodeId in newNodesMap) {
+                newNodes.push(newNodesMap[nodeId]);
             }
-            newNodesMap[node.id] = { id: node.id, hidden: hidden };
-        });
-        //show classes linked to column
-        var edgesFromClassMap = {};
-        edges.forEach(function (edge) {
-            if (!edge.data || !tableNodes[edge.from]) {
+            MappingColumnsGraph.visjsGraph.data.nodes.update(newNodes);
+        };
+
+        self.relationMessage = function (fromLabel, toLabel) {
+            if (MappingModeler.currentResourceType != "ObjectProperty") {
                 return;
             }
-            var isTypeLink = edge.data.type == "rdf:type" || edge.data.type == "owl:Class";
-            var isSubClassOfLink = edge.data.type == "rdfs:subClassOf";
-            if (isTypeLink || isSubClassOfLink) {
-                newNodesMap[edge.to].hidden = false;
-                newNodesMap[edge.from].hidden = false;
-            }
-        });
-        for (var nodeId in newNodesMap) {
-            newNodes.push(newNodesMap[nodeId]);
-        }
-        MappingColumnsGraph.visjsGraph.data.nodes.update(newNodes);
-    };
+            $("#mappingModeler_relationInfos").html("from: <b>" + (fromLabel ?? "None") + "</b> to: <b>" + (toLabel ?? "None") + "</b>");
+        };
 
-    self.relationMessage = function (fromLabel, toLabel) {
-        if (MappingModeler.currentResourceType != "ObjectProperty") {
-            return;
-        }
-        $("#mappingModeler_relationInfos").html("from: <b>" + (fromLabel ?? "None") + "</b> to: <b>" + (toLabel ?? "None") + "</b>");
-    };
+        self.drawClassesGraph = function () {
+            var columns = self.getNodesOfType(MappingModeler.columnsMappingsObjects);
+            var edgesFromMap = self.getEdgesMap("from");
+            var classNodesMap = self.getNodesMap("Class");
+            var linkedClasses = {};
+            var classVisjsData = {nodes: [], edges: []};
+            var uniqueNodes = {};
 
-    self.drawClassesGraph = function () {
-        var columns = self.getNodesOfType(MappingModeler.columnsMappingsObjects);
-        var edgesFromMap = self.getEdgesMap("from");
-        var classNodesMap = self.getNodesMap("Class");
-        var linkedClasses = {};
-        var classVisjsData = { nodes: [], edges: [] };
-        var uniqueNodes = {};
+            async.series(
+                [
+                    //get transitive linked classes
+                    function (callbackSeries) {
+                        columns.forEach(function (column) {
+                            var columnClass = self.getColumnClass(column);
+                            if (edgesFromMap[column.id]) {
+                                var edgesFrom = edgesFromMap[column.id];
+                                edgesFrom.forEach(function (edge) {
+                                    if (edge.from == column.id) {
+                                        var edgeType = edge.data ? edge.data.id : null;
 
-        async.series(
-            [
-                //get transitive linked classes
-                function (callbackSeries) {
-                    columns.forEach(function (column) {
-                        var columnClass = self.getColumnClass(column);
-                        if (edgesFromMap[column.id]) {
-                            var edgesFrom = edgesFromMap[column.id];
-                            edgesFrom.forEach(function (edge) {
-                                if (edge.from == column.id) {
-                                    var edgeType = edge.data ? edge.data.id : null;
-
-                                    if (edgeType && edgeType != "owl:Class" && edgeType != "rdf:type") {
-                                        if (!linkedClasses[columnClass]) {
-                                            linkedClasses[columnClass] = [];
+                                        if (edgeType && edgeType != "owl:Class" && edgeType != "rdf:type") {
+                                            if (!linkedClasses[columnClass]) {
+                                                linkedClasses[columnClass] = [];
+                                            }
+                                            edge.targetClass = self.getColumnClass(edge.to);
+                                            linkedClasses[columnClass].push(edge);
+                                        } else {
                                         }
-                                        edge.targetClass = self.getColumnClass(edge.to);
-                                        linkedClasses[columnClass].push(edge);
-                                    } else {
                                     }
+                                });
+                            }
+                        });
+                        callbackSeries();
+                    },
+
+                    //build visjgraph
+                    function (callbackSeries) {
+                        for (var classId in linkedClasses) {
+                            if (!uniqueNodes[classId]) {
+                                uniqueNodes[classId] = 1;
+                                var startClass = classNodesMap[classId];
+
+                                if (startClass) {
+                                    startClass.hidden = false;
+                                    classVisjsData.nodes.push(startClass);
+                                }
+                            }
+                            var targetClass;
+                            var targetEdges = linkedClasses[classId];
+                            targetEdges.forEach(function (edge) {
+                                targetClass = classNodesMap[edge.targetClass];
+                                if (targetClass && !uniqueNodes[edge.targetClass]) {
+                                    uniqueNodes[edge.targetClass] = 1;
+                                    targetClass.hidden = false;
+                                    classVisjsData.nodes.push(targetClass);
+                                }
+
+                                if (targetClass) {
+                                    var edge2 = {
+                                        label: edge.label,
+                                        data: {
+                                            label: edge.label,
+                                            id: edge.data.id,
+                                        },
+                                        from: classId,
+                                        to: targetClass.id,
+                                        arrows: {
+                                            to: {
+                                                enabled: true,
+                                                type: "arrow",
+                                            },
+                                        },
+
+                                        //  NEW: propagate original edge style from Mapping Modeler
+                                        color: edge.color,
+                                        width: edge.width || 3,
+                                    };
+
+                                    classVisjsData.edges.push(edge2);
                                 }
                             });
                         }
-                    });
-                    callbackSeries();
-                },
+                        callbackSeries();
+                    },
+                    // --- get link from column to class and build vijsgraph
+                    function (callbackSeries) {
+                        var addedColEdgeIds = {};
 
-                //build visjgraph
-                function (callbackSeries) {
-                    for (var classId in linkedClasses) {
-                        if (!uniqueNodes[classId]) {
-                            uniqueNodes[classId] = 1;
-                            var startClass = classNodesMap[classId];
-
-                            if (startClass) {
-                                startClass.hidden = false;
-                                classVisjsData.nodes.push(startClass);
-                            }
-                        }
-                        var targetClass;
-                        var targetEdges = linkedClasses[classId];
-                        targetEdges.forEach(function (edge) {
-                            targetClass = classNodesMap[edge.targetClass];
-                            if (targetClass && !uniqueNodes[edge.targetClass]) {
-                                uniqueNodes[edge.targetClass] = 1;
-                                targetClass.hidden = false;
-                                classVisjsData.nodes.push(targetClass);
+                        columns.forEach(function (column) {
+                            if (!column) {
+                                return;
                             }
 
-                            if (targetClass) {
-                                var edge2 = {
-                                    label: edge.label,
-                                    data: {
-                                        label: edge.label,
-                                        id: edge.data.id,
-                                    },
-                                    from: classId,
-                                    to: targetClass.id,
-                                    arrows: {
-                                        to: {
-                                            enabled: true,
-                                            type: "arrow",
-                                        },
-                                    },
-
-                                    //  NEW: propagate original edge style from Mapping Modeler
-                                    color: edge.color,
-                                    width: edge.width || 3,
-                                };
-
-                                classVisjsData.edges.push(edge2);
-                            }
-                        });
-                    }
-                    callbackSeries();
-                },
-                // --- get link from column to class and build vijsgraph
-                function (callbackSeries) {
-                    var addedColEdgeIds = {};
-
-                    columns.forEach(function (column) {
-                        if (!column) return;
-
-                        var columnId = null;
-                        if (column.id) columnId = column.id;
-                        if (!columnId) return;
-
-                        var columnLabel = columnId;
-                        if (column.label) columnLabel = column.label;
-
-                        var dataTable = null;
-                        if (column.data && column.data.dataTable) dataTable = column.data.dataTable;
-
-                        var displayLabel = columnLabel;
-                        if (dataTable) displayLabel = dataTable + ":" + columnLabel;
-
-                        var datableKey = dataTable;
-                        var columnColor = common.getResourceColor("dataTable", datableKey, "paletteIntense");
-                        var classId = self.getColumnClass(column);
-                        if (!classId) return;
-                        if (!uniqueNodes[classId]) return;
-
-                        if (!uniqueNodes[columnId]) {
-                            classVisjsData.nodes.push({
-                                id: columnId,
-                                label: displayLabel,
-                                shape: "box",
-                                color: columnColor,
-                                data: column.data,
-                            });
-                            uniqueNodes[columnId] = 1;
-                        }
-                        var edgeColumnToClass = [];
-                        if (edgesFromMap && edgesFromMap[columnId]) edgeColumnToClass = edgesFromMap[columnId];
-
-                        var edgeType = null;
-                        edgeColumnToClass.forEach(function (edge) {
-                            if (edgeType) return;
-                            if (edge && edge.data && edge.data.type) edgeType = edge.data.type;
-                        });
-
-                        var edgeId = columnId + "->" + classId + "|" + edgeType;
-                        if (!addedColEdgeIds[edgeId]) {
-                            classVisjsData.edges.push({
-                                id: edgeId,
-                                from: columnId,
-                                to: classId,
-                                label: "",
-                                color: "#00afef",
-                                width: 3,
-                                arrows: { to: { enabled: true, type: "arrow" } },
-                                data: { type: edgeType },
-                            });
-                            addedColEdgeIds[edgeId] = 1;
-                        }
-                    });
-
-                    callbackSeries();
-                },
-
-                // build datatype property edge
-                function (callbackSeries) {
-                    var addedDpEdgeIds = {};
-                    var cols = columns;
-                    cols.forEach(function (column) {
-                        // columnId
-                        var columnId = null;
-                        if (column) {
+                            var columnId = null;
                             if (column.id) {
                                 columnId = column.id;
                             }
-                        }
-                        if (!columnId) {
-                            return;
-                        }
+                            if (!columnId) {
+                                return;
+                            }
 
-                        // columnLabel
-                        var columnLabel = columnId;
-                        if (column) {
+                            var columnLabel = columnId;
                             if (column.label) {
-                                columnLabel = String(column.label);
+                                columnLabel = column.label;
                             }
-                        }
 
-                        // dataTable
-                        var dataTable = null;
-                        if (column && column.data && column.data.dataTable) {
-                            dataTable = column.data.dataTable;
-                        }
+                            var dataTable = null;
+                            if (column.data && column.data.dataTable) {
+                                dataTable = column.data.dataTable;
+                            }
 
-                        if (!uniqueNodes[columnId]) {
-                            classVisjsData.nodes.push({
-                                id: columnId,
-                                label: String(columnLabel),
-                                shape: "box",
-                                color: "#eaf4ff",
-                                data: column.data,
-                            });
-                            uniqueNodes[columnId] = 1;
-                        }
+                            var displayLabel = columnLabel;
+                            if (dataTable) {
+                                displayLabel = dataTable + ":" + columnLabel;
+                            }
 
-                        // otherPredicates
-                        var dataTypeNodes = null;
-                        if (column && column.data && column.data.otherPredicates) {
-                            dataTypeNodes = column.data.otherPredicates;
-                        }
-                        if (!dataTypeNodes) {
-                            return;
-                        }
-                        dataTypeNodes.forEach(function (predItem) {
-                            if (!predItem) {
+                            var datableKey = dataTable;
+                            var columnColor = common.getResourceColor("dataTable", datableKey, "paletteIntense");
+                            var classId = self.getColumnClass(column);
+                            if (!classId) {
                                 return;
                             }
-                            var dpColumnId = predItem.object;
-
-                            var propUri = null;
-                            if (predItem.property) {
-                                propUri = Sparql_common.getLabelFromURI(predItem.property);
-                            }
-                            if (!propUri) {
+                            if (!uniqueNodes[classId]) {
                                 return;
                             }
 
-                            // create node if not existing
-                            if (!uniqueNodes[dpColumnId]) {
+                            if (!uniqueNodes[columnId]) {
                                 classVisjsData.nodes.push({
-                                    id: dpColumnId,
-                                    label: dpColumnId,
+                                    id: columnId,
+                                    label: displayLabel,
                                     shape: "box",
-                                    size: 10,
-                                    color: "#ddd",
-                                    data: {
-                                        id: dpColumnId,
-                                        type: "DatatypeProperty",
-                                        source: MappingModeler.currentSLSsource,
-                                        prop: propUri,
-                                        propLabel: propUri,
-                                        dataTable: dataTable,
-                                    },
+                                    color: columnColor,
+                                    data: column.data,
                                 });
-                                uniqueNodes[dpColumnId] = 1;
+                                uniqueNodes[columnId] = 1;
+                            }
+                            var edgeColumnToClass = [];
+                            if (edgesFromMap && edgesFromMap[columnId]) {
+                                edgeColumnToClass = edgesFromMap[columnId];
                             }
 
-                            // edge from datatype propertie to column
-                            var edgeId = columnId + "->" + dpColumnId + "|" + propUri;
-                            if (!addedDpEdgeIds[edgeId]) {
-                                var dpColor = Lineage_whiteboard && Lineage_whiteboard.datatypeColor ? Lineage_whiteboard.datatypeColor : "#9b59b6";
+                            var edgeType = null;
+                            edgeColumnToClass.forEach(function (edge) {
+                                if (edgeType) {
+                                    return;
+                                }
+                                if (edge && edge.data && edge.data.type) {
+                                    edgeType = edge.data.type;
+                                }
+                            });
+
+                            var edgeId = columnId + "->" + classId + "|" + edgeType;
+                            if (!addedColEdgeIds[edgeId]) {
                                 classVisjsData.edges.push({
                                     id: edgeId,
                                     from: columnId,
-                                    to: dpColumnId,
-                                    label: propUri,
-                                    arrows: { to: { enabled: true, type: "solid" } },
-                                    font: { color: Lineage_whiteboard.datatypeColor, size: 12 },
-                                    color: dpColor,
+                                    to: classId,
+                                    label: "",
+                                    color: "#00afef",
                                     width: 3,
-                                    dashes: true,
-                                    data: { id: propUri, type: "DatatypeProperty" },
+                                    arrows: {to: {enabled: true, type: "arrow"}},
+                                    data: {type: edgeType},
                                 });
-                                addedDpEdgeIds[edgeId] = 1;
+                                addedColEdgeIds[edgeId] = 1;
                             }
                         });
-                    });
 
-                    callbackSeries();
-                },
-
-                // draw graph
-                function (callbackSeries) {
-                    //  classVisjsData={nodes:[], edges:[]}
-                    var html = "";
-                    html += "<div id='implicitModelContainer' style='position:relative; width:1000px; height:800px;'>";
-                    html += "<div id='mappingModeler_implicitModelGraph' style='width:100%; height:100%;'></div>";
-                    html += "</div>";
-
-                    $("#mainDialogDiv").html(html);
-                    UI.openDialog("mainDialogDiv", { title: "Implicit Model" });
-                    UI.clampAndCenterDialog("mainDialogDiv");
-                    $("#mainDialogDiv")
-                        .off("dialogclose.mappingLegend")
-                        .on("dialogclose.mappingLegend", function () {
-                            LegendOverlayWidget.uninstallAutoHideOnDialogs("implicitModelContainer", {
-                                namespace: "implicitLegendAutoHide",
-                            });
-                            Implicit_legendOverlay.destroy();
-                            LegendOverlayWidget.setVisible(self.graphDiv, true);
-                        });
-
-                    // Hide Mapping Modeler legend when opening Implicit Model
-                    LegendOverlayWidget.setVisible(self.graphDiv, false);
-
-                    var implicitOptions = {
-                        visjsOptions: { autoResize: true, width: "100%", height: "100%" },
-                        onclickFn: function (node, event, options) {
-                            if (!node) return;
-                            self.currentGraphNode = node;
-
-                            if (!node.data) return;
-
-                            if (!MappingModeler.columnsMappingsObjects.includes(node.data.type)) return;
-
-                            var baseLabel = null;
-                            if (node.data && node.data.label) {
-                                baseLabel = node.data.label;
-                            }
-
-                            var parentTable = null;
-                            if (node.data && node.data.dataTable) {
-                                parentTable = node.data.dataTable;
-                            }
-
-                            var dialogNode = {
-                                id: node.id,
-                                label: baseLabel,
-                                data: node.data,
-                            };
-                            MappingColumnsGraph.activeSourceFromNode(dialogNode, function () {
-                                MappingsDetails.openColumnTechDialog(dialogNode, function () {});
-                            });
-                        },
-
-                        onRightClickFn: function (node, point, event) {
-                            self.showImplicitGraphPopupMenu(node, point, event);
-                        },
-                    };
-
-                    self.implicitModelVisjsGraph = new VisjsGraphClass("mappingModeler_implicitModelGraph", classVisjsData, implicitOptions);
-                    self.implicitModelVisjsGraph.draw(function () {
-                        Implicit_legendOverlay.init("implicitModelContainer", self.implicitModelVisjsGraph, { title: "🔍 Legend" });
-                        LegendOverlayWidget.installAutoHideOnDialogs("implicitModelContainer", {
-                            namespace: "implicitLegendAutoHide",
-                            ignoreDialogIds: ["mainDialogDiv"],
-                        });
                         callbackSeries();
-                    });
+                    },
+
+                    // build datatype property edge
+                    function (callbackSeries) {
+                        var addedDpEdgeIds = {};
+                        var cols = columns;
+                        cols.forEach(function (column) {
+                            // columnId
+                            var columnId = null;
+                            if (column) {
+                                if (column.id) {
+                                    columnId = column.id;
+                                }
+                            }
+                            if (!columnId) {
+                                return;
+                            }
+
+                            // columnLabel
+                            var columnLabel = columnId;
+                            if (column) {
+                                if (column.label) {
+                                    columnLabel = String(column.label);
+                                }
+                            }
+
+                            // dataTable
+                            var dataTable = null;
+                            if (column && column.data && column.data.dataTable) {
+                                dataTable = column.data.dataTable;
+                            }
+
+                            if (!uniqueNodes[columnId]) {
+                                classVisjsData.nodes.push({
+                                    id: columnId,
+                                    label: String(columnLabel),
+                                    shape: "box",
+                                    color: "#eaf4ff",
+                                    data: column.data,
+                                });
+                                uniqueNodes[columnId] = 1;
+                            }
+
+                            // otherPredicates
+                            var dataTypeNodes = null;
+                            if (column && column.data && column.data.otherPredicates) {
+                                dataTypeNodes = column.data.otherPredicates;
+                            }
+                            if (!dataTypeNodes) {
+                                return;
+                            }
+                            dataTypeNodes.forEach(function (predItem) {
+                                if (!predItem) {
+                                    return;
+                                }
+                                var dpColumnId = predItem.object;
+
+                                var propUri = null;
+                                if (predItem.property) {
+                                    propUri = Sparql_common.getLabelFromURI(predItem.property);
+                                }
+                                if (!propUri) {
+                                    return;
+                                }
+
+                                // create node if not existing
+                                if (!uniqueNodes[dpColumnId]) {
+                                    classVisjsData.nodes.push({
+                                        id: dpColumnId,
+                                        label: dpColumnId,
+                                        shape: "box",
+                                        size: 10,
+                                        color: "#ddd",
+                                        data: {
+                                            id: dpColumnId,
+                                            type: "DatatypeProperty",
+                                            source: MappingModeler.currentSLSsource,
+                                            prop: propUri,
+                                            propLabel: propUri,
+                                            dataTable: dataTable,
+                                        },
+                                    });
+                                    uniqueNodes[dpColumnId] = 1;
+                                }
+
+                                // edge from datatype propertie to column
+                                var edgeId = columnId + "->" + dpColumnId + "|" + propUri;
+                                if (!addedDpEdgeIds[edgeId]) {
+                                    var dpColor = Lineage_whiteboard && Lineage_whiteboard.datatypeColor ? Lineage_whiteboard.datatypeColor : "#9b59b6";
+                                    classVisjsData.edges.push({
+                                        id: edgeId,
+                                        from: columnId,
+                                        to: dpColumnId,
+                                        label: propUri,
+                                        arrows: {to: {enabled: true, type: "solid"}},
+                                        font: {color: Lineage_whiteboard.datatypeColor, size: 12},
+                                        color: dpColor,
+                                        width: 3,
+                                        dashes: true,
+                                        data: {id: propUri, type: "DatatypeProperty"},
+                                    });
+                                    addedDpEdgeIds[edgeId] = 1;
+                                }
+                            });
+                        });
+
+                        callbackSeries();
+                    },
+
+                    // draw graph
+                    function (callbackSeries) {
+                        //  classVisjsData={nodes:[], edges:[]}
+                        var html = "";
+                        html += "<div id='implicitModelContainer' style='position:relative; width:1000px; height:800px;'>";
+                        html += "<div id='mappingModeler_implicitModelGraph' style='width:100%; height:100%;'></div>";
+                        html += "</div>";
+
+                        $("#mainDialogDiv").html(html);
+                        UI.openDialog("mainDialogDiv", {title: "Implicit Model"});
+                        UI.clampAndCenterDialog("mainDialogDiv");
+                        $("#mainDialogDiv")
+                            .off("dialogclose.mappingLegend")
+                            .on("dialogclose.mappingLegend", function () {
+                                LegendOverlayWidget.uninstallAutoHideOnDialogs("implicitModelContainer", {
+                                    namespace: "implicitLegendAutoHide",
+                                });
+                                Implicit_legendOverlay.destroy();
+                                LegendOverlayWidget.setVisible(self.graphDiv, true);
+                            });
+
+                        // Hide Mapping Modeler legend when opening Implicit Model
+                        LegendOverlayWidget.setVisible(self.graphDiv, false);
+
+                        var implicitOptions = {
+                            visjsOptions: {autoResize: true, width: "100%", height: "100%"},
+                            onclickFn: function (node, event, options) {
+                                if (!node) {
+                                    return;
+                                }
+                                self.currentGraphNode = node;
+
+                                if (!node.data) {
+                                    return;
+                                }
+
+                                if (!MappingModeler.columnsMappingsObjects.includes(node.data.type)) {
+                                    return;
+                                }
+
+                                var baseLabel = null;
+                                if (node.data && node.data.label) {
+                                    baseLabel = node.data.label;
+                                }
+
+                                var parentTable = null;
+                                if (node.data && node.data.dataTable) {
+                                    parentTable = node.data.dataTable;
+                                }
+
+                                var dialogNode = {
+                                    id: node.id,
+                                    label: baseLabel,
+                                    data: node.data,
+                                };
+                                MappingColumnsGraph.activeSourceFromNode(dialogNode, function () {
+                                    MappingsDetails.openColumnTechDialog(dialogNode, function () {
+                                    });
+                                });
+                            },
+
+                            onRightClickFn: function (node, point, event) {
+                                self.showImplicitGraphPopupMenu(node, point, event);
+                            },
+                        };
+
+                        self.implicitModelVisjsGraph = new VisjsGraphClass("mappingModeler_implicitModelGraph", classVisjsData, implicitOptions);
+                        self.implicitModelVisjsGraph.draw(function () {
+                            Implicit_legendOverlay.init("implicitModelContainer", self.implicitModelVisjsGraph, {title: "🔍 Legend"});
+                            LegendOverlayWidget.installAutoHideOnDialogs("implicitModelContainer", {
+                                namespace: "implicitLegendAutoHide",
+                                ignoreDialogIds: ["mainDialogDiv"],
+                            });
+                            callbackSeries();
+                        });
+                    },
+                ],
+                function (err) {
                 },
-            ],
-            function (err) {},
-        );
-    };
+            );
+        };
 
-    /**
-     * @function
-     * @name getNodesOfType
-     * @memberof module:MappingColumnsGraph
-     * Returns nodes (or their ids) whose `data.type` matches one or more requested types.
-     * @param {string|string[]} types - Type name or list of types to include.
-     * @param {boolean} [onlyIds=false] - If true, returns node ids instead of full node objects.
-     * @returns {Array<string|Object>} Array of nodes or ids filtered by type; empty array if none.
-     */
+        /**
+         * @function
+         * @name getNodesOfType
+         * @memberof module:MappingColumnsGraph
+         * Returns nodes (or their ids) whose `data.type` matches one or more requested types.
+         * @param {string|string[]} types - Type name or list of types to include.
+         * @param {boolean} [onlyIds=false] - If true, returns node ids instead of full node objects.
+         * @returns {Array<string|Object>} Array of nodes or ids filtered by type; empty array if none.
+         */
 
-    self.getNodesOfType = function (types, onlyIds) {
-        if (!types) {
-            return [];
-        }
-        if (!Array.isArray(types)) {
-            types = [types];
-        }
-        if (types.length == 0) {
-            return [];
-        }
+        self.getNodesOfType = function (types, onlyIds) {
+            if (!types) {
+                return [];
+            }
+            if (!Array.isArray(types)) {
+                types = [types];
+            }
+            if (types.length == 0) {
+                return [];
+            }
 
-        var nodes = self.visjsGraph.data.nodes.get();
-        var filteredNodes = [];
-        nodes.forEach(function (node) {
-            if (node?.data?.type && types.includes(node.data.type)) {
-                if (onlyIds) {
-                    filteredNodes.push(node.id);
-                } else {
-                    filteredNodes.push(node);
+            var nodes = self.visjsGraph.data.nodes.get();
+            var filteredNodes = [];
+            nodes.forEach(function (node) {
+                if (node?.data?.type && types.includes(node.data.type)) {
+                    if (onlyIds) {
+                        filteredNodes.push(node.id);
+                    } else {
+                        filteredNodes.push(node);
+                    }
                 }
-            }
-        });
-        return filteredNodes;
-    };
+            });
+            return filteredNodes;
+        };
 
-    self.getNodesMap = function (type) {
-        var nodes = self.visjsGraph.data.nodes.get();
-        var map = {};
-        nodes.forEach(function (node) {
-            if (!type || (node.data && node.data.type == type)) {
-                map[node.id] = node;
-            }
-        });
-        return map;
-    };
-    self.getEdgesMap = function (key) {
-        var edges = self.visjsGraph.data.edges.get();
-        var map = {};
-        var calculatedKey;
-        edges.forEach(function (edge) {
-            if (!key || key == "id") {
-                calculatedKey = edge.id;
-            } else {
-                calculatedKey = edge[key];
-            }
-            if (!map[calculatedKey]) {
-                map[calculatedKey] = [];
-            }
-            map[calculatedKey].push(edge);
-        });
-        return map;
-    };
+        self.getNodesMap = function (type) {
+            var nodes = self.visjsGraph.data.nodes.get();
+            var map = {};
+            nodes.forEach(function (node) {
+                if (!type || (node.data && node.data.type == type)) {
+                    map[node.id] = node;
+                }
+            });
+            return map;
+        };
+        self.getEdgesMap = function (key) {
+            var edges = self.visjsGraph.data.edges.get();
+            var map = {};
+            var calculatedKey;
+            edges.forEach(function (edge) {
+                if (!key || key == "id") {
+                    calculatedKey = edge.id;
+                } else {
+                    calculatedKey = edge[key];
+                }
+                if (!map[calculatedKey]) {
+                    map[calculatedKey] = [];
+                }
+                map[calculatedKey].push(edge);
+            });
+            return map;
+        };
 
-    return self;
-})();
+        /**
+         * gets json optionnaly firltered with nodes and relations  corresponding toClasses
+         *
+         */
+        self.getSourceMappingsModel = function (source, filter, callback) {
+            self.loadMappingsFromFile(source, function (err, json) {
 
-export default MappingColumnsGraph;
-window.MappingColumnsGraph = MappingColumnsGraph;
+                if (err) {
+                    return callback(err);
+                }
+                if (!filter) {
+                    return json;
+                }
+                if (filter == "ClassesAndRelations") {
+                    var filteredData = {nodes: [], edges: []}
+                }
+                var nodesMap = {}
+                json.nodes.forEach(function (node) {
+                    if (node.data && node.data.type == "Class") {
+                        filteredData.nodes.push(node)
+                        nodesMap[node.id] = node
+                    }
+                })
+                json.edges.forEach(function (edge) {
+                    if (nodesMap[edge.from] && nodesMap[edge.to]) {
+                        filteredData.edges.push(edge)
+                    }
+                })
+                return callback(null,filteredData);
+            })
+
+        }
+
+        return self;
+    }
+)
+    ();
+
+    export default MappingColumnsGraph;
+    window.MappingColumnsGraph = MappingColumnsGraph;

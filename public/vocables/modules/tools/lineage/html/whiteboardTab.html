@@ -10,7 +10,7 @@
         <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawTopConcepts()" title="Main classes" style="padding: 5px 8px">
             <img src="./icons/CommonIcons/show_main_classes.png" style="width: 33px; height: 33px" />
         </button>
-        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()" title="Children" style="padding: 5px 8px">
+        <button class="w3-button slsv-button-1" id="lineageWhiteboard_childrenBtn" title="Children" style="padding: 5px 8px">
             <img src="./icons/CommonIcons/show_children.png" style="width: 33px; height: 33px" />
         </button>
         <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()" title="Parents" style="padding: 5px 8px">
@@ -20,6 +20,10 @@
         <button class="w3-button slsv-button-1" onclick="Lineage_axioms.drawClassesWithAxioms()" title="Axioms">A</button>
 
         <button class="w3-button slsv-button-3" id="lineage_actionDiv_newAxiom" onclick="Lineage_whiteboard.graph.showBrowseDialog()">?</button>
+        <div id="lineage_selectedNodesOnlyDiv" style="display: none">
+            <input type="checkbox" id="lineage_selectedNodesOnlyCheckbox" checked onchange="Lineage_whiteboard.updateSelectedNodesOnlyCheckbox()" />
+            <label for="lineage_selectedNodesOnlyCheckbox" id="lineage_selectedNodesOnlyLabel"></label>
+        </div>
     </div>
 
     <div id="whiteboard_Section" class="w3-panel w3-border w3-round-small lateralPanelSection-width">

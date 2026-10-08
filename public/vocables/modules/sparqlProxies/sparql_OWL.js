@@ -74,10 +74,19 @@ var Sparql_OWL = (function () {
         var str = " ";
 
         if (options.specificPredicates) {
+            if (options.specificPredicates == "all") {
+                var taxonomyPredicates = sourceConfig.taxonomyPredicates || [];
+                var allPredicates = ["http://www.w3.org/2000/01/rdf-schema#subClassOf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"];
+                allPredicates = allPredicates.concat(taxonomyPredicates);
+                options.specificPredicates = allPredicates;
+            }
             if (!Array.isArray(options.specificPredicates)) {
                 options.specificPredicates = [options.specificPredicates];
             }
             options.specificPredicates.forEach(function (predicate, index) {
+                if (predicate.indexOf("http") == 0) {
+                    predicate = "<" + predicate + ">";
+                }
                 if (index > 0) {
                     str += "|";
                 }

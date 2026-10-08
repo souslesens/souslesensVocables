@@ -280,6 +280,7 @@ var Lineage_whiteboard = (function () {
         var nodeURI = Config.userTools["lineage"].urlParam_nodeURI || null;
         Config.userTools["lineage"].urlParam_nodeURI = null;
 
+        Lineage_sources.mainSource = MainController.currentSource;
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
                 return MainController.errorAlert(err);
@@ -486,6 +487,7 @@ var Lineage_whiteboard = (function () {
     self.initUI = function (clearTree) {
         UI.message("");
         self.lineageVisjsGraph.clearGraph();
+        self.updateSelectedNodesOnlyCheckbox();
         if (Lineage_legendOverlay && typeof Lineage_legendOverlay.refresh === "function") {
             Lineage_legendOverlay.refresh();
         }
@@ -638,15 +640,22 @@ var Lineage_whiteboard = (function () {
                     options.data = topConcepts;
                     options.source = source;
                     Lineage_relations.currentQueryInfos = null;
+                    // drawRelations puts this status back once drawn, a stale one would switch All off
+                    Lineage_relations.whiteboardSourcesFromStatus = Lineage_sources.fromAllWhiteboardSources;
                     if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-                        options.data = Lineage_whiteboard.lineageVisjsGraph.data.nodes
-                            .get()
-                            .filter(function (node) {
-                                return node.data && node.data.source === source && node.data.type !== "Container";
-                            })
-                            .map(function (node) {
-                                return node.id;
-                            });
+                        var whiteboardNodes = self.getSelectedOrAllWhiteboardNodes();
+                        // every source, drawRestrictions narrows to the active one, or to all with All
+                        var classNodes = whiteboardNodes.filter(function (node) {
+                            return node.data && !self.isSourceBoxNode(node) && node.data.type !== "Container";
+                        });
+                        options.data = classNodes.map(function (node) {
+                            return node.id;
+                        });
+                    }
+                    // an empty id list sets no SPARQL filter and would draw every restriction of the source
+                    if (options.data.length == 0) {
+                        UI.message("No class node to draw relations from", true);
+                        return callbackSeries();
                     }
                     var direction = options.inverse ? "inverse" : "direct";
                     if (options.all) {
@@ -965,6 +974,7 @@ var Lineage_whiteboard = (function () {
                 onRightClickFn: Lineage_whiteboard.graphActions.showGraphPopupMenu,
                 onLongPressFn: Lineage_whiteboard.graphActions.showGraphPopupMenu,
                 onHoverNodeFn: Lineage_selection.selectNodesOnHover,
+                onSelectionChangeFn: Lineage_whiteboard.updateSelectedNodesOnlyCheckbox,
                 visjsOptions: {
                     physics: {
                         stabilization: {
@@ -1087,6 +1097,7 @@ var Lineage_whiteboard = (function () {
         Lineage_decoration.decorationDone = false;
         self.lineageVisjsGraph.draw(function () {
             UI.message("", true);
+            self.updateSelectedNodesOnlyCheckbox();
 
             //  Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
 
@@ -1135,6 +1146,58 @@ var Lineage_whiteboard = (function () {
             }
         });
         return sourceNodes;
+    };
+
+    /**
+     * Shows, hides and labels the "selected nodes only" checkbox of the Relations, Children and Parents buttons from the current selection.
+     * @function
+     * @name updateSelectedNodesOnlyCheckbox
+     * @memberof module:Lineage_whiteboard
+     * @returns {void}
+     */
+    self.updateSelectedNodesOnlyCheckbox = function () {
+        // vis.js keeps the selection of a cleared whiteboard
+        var selectedNodeIds = self.isWhiteboardDrawn() ? self.lineageVisjsGraph.network.getSelectedNodes() : [];
+        if (selectedNodeIds.length == 0) {
+            // the next selection is the scope again, even if the previous one was unchecked
+            $("#lineage_selectedNodesOnlyCheckbox").prop("checked", true);
+            $("#lineage_selectedNodesOnlyDiv").css("display", "none");
+            return;
+        }
+        var checkboxLabel = "Applied to all whiteboard";
+        if ($("#lineage_selectedNodesOnlyCheckbox").prop("checked")) {
+            checkboxLabel = "Applied to " + selectedNodeIds.length + (selectedNodeIds.length == 1 ? " selected node" : " selected nodes");
+        }
+        $("#lineage_selectedNodesOnlyLabel").text(checkboxLabel);
+        $("#lineage_selectedNodesOnlyDiv").css("display", "block");
+    };
+
+    /**
+     * Whiteboard nodes the Relations, Children and Parents buttons run on: the selection when the "selected nodes only" checkbox is checked, every node otherwise.
+     * @function
+     * @name getSelectedOrAllWhiteboardNodes
+     * @memberof module:Lineage_whiteboard
+     * @returns {Array<Object>} Vis.js nodes.
+     */
+    self.getSelectedOrAllWhiteboardNodes = function () {
+        var selectedNodeIds = self.lineageVisjsGraph.network.getSelectedNodes();
+        // the checkbox exists only in the Lineage whiteboard tab, other tools reach every node
+        if (selectedNodeIds.length == 0 || !$("#lineage_selectedNodesOnlyCheckbox").prop("checked")) {
+            return self.lineageVisjsGraph.data.nodes.get();
+        }
+        return self.lineageVisjsGraph.data.nodes.get(selectedNodeIds);
+    };
+
+    /**
+     * Whether a whiteboard node is the box standing for a source, which carries a source but no class id.
+     * @function
+     * @name isSourceBoxNode
+     * @memberof module:Lineage_whiteboard
+     * @param {Object} node - Vis.js node with a data object.
+     * @returns {boolean}
+     */
+    self.isSourceBoxNode = function (node) {
+        return node.data.id == node.data.source;
     };
 
     /**
@@ -1754,7 +1817,7 @@ var Lineage_whiteboard = (function () {
         var nodesBySource = {};
         if (!nodeIds || nodeIds.length === 0) {
             if (self.lineageVisjsGraph.isGraphNotEmpty()) {
-                self.lineageVisjsGraph.data.nodes.get().forEach(function (whiteboardNode) {
+                self.getSelectedOrAllWhiteboardNodes().forEach(function (whiteboardNode) {
                     var whiteboardNodeSource = source;
                     if (whiteboardNode.data && whiteboardNode.data.source) {
                         whiteboardNodeSource = whiteboardNode.data.source;
@@ -1931,7 +1994,7 @@ var Lineage_whiteboard = (function () {
      * @name addChildrenToGraph
      * @memberof module:Lineage
      * @param {string} [source] - The source to fetch the child nodes from. If not provided, the active source is used.
-     * @param {Array<string>} nodeIds - An array of node IDs to add as parent nodes for retrieving children. When not provided, only the whiteboard nodes belonging to that source are expanded, so the nodes drawn from the imported sources are left untouched.
+     * @param {Array<string>} nodeIds - An array of node IDs to add as parent nodes for retrieving children. When not provided, every whiteboard node is a parent, whatever its source, and only the children declared in that source are drawn.
      * @param {Object} [options] - Optional configuration options for adding child nodes.
      * @param {number} [options.depth=1] - The depth of the child nodes to retrieve.
      * @param {boolean} [options.dontClusterNodes=false] - If true, disables clustering of child nodes.
@@ -1960,15 +2023,9 @@ var Lineage_whiteboard = (function () {
             }
 
             parentIds = [];
-            var nodes = self.lineageVisjsGraph.data.nodes.get();
+            var nodes = self.getSelectedOrAllWhiteboardNodes();
             nodes.forEach(function (node) {
-                // only the nodes of the expanded source : the whiteboard also holds nodes drawn from the
-                // imported sources, and expanding them all ignores the source the user has selected
-                if (!node.data || node.data.source != source) {
-                    return;
-                }
-                // the source box node carries a source but no class id, it has no children to fetch
-                if (!node.data.id || node.data.id == source) {
+                if (!node.data || !node.data.id || self.isSourceBoxNode(node)) {
                     return;
                 }
                 parentIds.push(node.data.id);
@@ -1998,7 +2055,12 @@ var Lineage_whiteboard = (function () {
         }
         options.skipRestrictions = 1;
         options.selectGraph = 1;
-        options.includeSources = [MainController.currentSource];
+        if (nodeIds) {
+            options.includeSources = [MainController.currentSource];
+        } else {
+            // parents come from every whiteboard source, children only from the expanded one
+            options.withoutImports = true;
+        }
         // options.filter = ' FILTER (regex(str(?child1),"http"))';
 
         Sparql_generic.getNodeChildren(source, null, parentIds, depth, options, function (err, result) {
@@ -5053,6 +5115,42 @@ attrs.color=self.getSourceColor(superClassValue)
                     html += '<span class="popupMenuItem" onclick="Lineage_whiteboard.drawModel(null, null, { drawDataTypeProperties:true,notDrawDomain:true })">Data type properties</span>';
                     PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
                 });
+                $("#lineageWhiteboard_childrenBtn").bind("click", function (e) {
+                    Lineage_whiteboard.addChildrenToGraph();
+                });
+                $("#lineageWhiteboard_childrenBtn").bind("contextmenu", function (e) {
+                    e.preventDefault();
+                    var taxonomyPredicates = [];
+                    if (Config.sources[Lineage_sources.activeSource].taxonomyPredicates) {
+                        taxonomyPredicates = Config.sources[Lineage_sources.activeSource].taxonomyPredicates;
+                    }
+                    taxonomyPredicates = taxonomyPredicates.filter(function (predicate) {
+                        return (
+                            predicate != "http://www.w3.org/2000/01/rdf-schema#subClassOf" &&
+                            predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" &&
+                            predicate != "rdfs:subClassOf" &&
+                            predicate != "rdf:type"
+                        );
+                    });
+
+                    var html = '<span class="popupMenuItem" onclick="Lineage_whiteboard.addChildrenToGraph(null, null, { specificPredicates: \'all\' })">All</span>';
+                    html +=
+                        '<span class="popupMenuItem" onclick="Lineage_whiteboard.addChildrenToGraph(null,null,{specificPredicates: [\'http://www.w3.org/2000/01/rdf-schema#subClassOf\']})">Classes</span>';
+                    html +=
+                        '<span class="popupMenuItem" onclick="Lineage_whiteboard.addChildrenToGraph(null, null, { specificPredicates: [\'http://www.w3.org/1999/02/22-rdf-syntax-ns#type\'] })">Individuals</span>';
+
+                    taxonomyPredicates.forEach(function (predicate) {
+                        html +=
+                            '<span class="popupMenuItem" onclick="Lineage_whiteboard.addChildrenToGraph(null, null, { specificPredicates: \'' +
+                            predicate +
+                            "' })\">" +
+                            Sparql_common.getLabelFromURI(predicate) +
+                            "</span>";
+                    });
+                    html += "</span>";
+                    PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
+                });
+
                 $("#lateralPanelDiv").resizable({
                     maxWidth: $(window).width() - 100,
                     minWidth: 150,

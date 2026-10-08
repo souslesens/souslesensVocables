@@ -1021,7 +1021,10 @@ var MappingColumnsGraph = (function () {
                 false,
                 function (err, result, rawText) {
                     if (err) {
-                        self.handleCorruptedMappingsFile(err, rawText);
+                        // no rawText: request error, e.g. a source without mappings file yet
+                        if (rawText) {
+                            self.handleCorruptedMappingsFile(err, rawText);
+                        }
                         if (callback) {
                             return callback(err);
                         }
@@ -1591,7 +1594,7 @@ var MappingColumnsGraph = (function () {
      * @name handleCorruptedMappingsFile
      * @memberof module:MappingColumnsGraph
      * @param {string|Error} err - The JSON parse error (or its message).
-     * @param {string} [rawText] - The raw invalid file content, downloaded so the user can correct it.
+     * @param {string} rawText - The raw invalid file content, downloaded so the user can correct it.
      * @returns {void}
      */
     self.handleCorruptedMappingsFile = function (err, rawText) {
@@ -1599,11 +1602,6 @@ var MappingColumnsGraph = (function () {
         var errorMessage = err && err.message ? err.message : String(err);
 
         alert("Error loading the mappings of source " + MappingModeler.currentSLSsource + ":\n\n" + errorMessage);
-
-        if (!rawText) {
-            return;
-        }
-
         alert("The file '" + fileName + "' contains invalid JSON and could not be loaded.\n\n" + "It will now be downloaded so you can fix it and re-import it (mappings Import button).");
 
         Export.downloadStringAsFile(rawText, fileName, "application/json");

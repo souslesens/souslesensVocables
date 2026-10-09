@@ -45,6 +45,7 @@ var MappingModeler = (function () {
      */
     self.jstreeDivId = "mappingModeler_dataSourcesJstreeDiv";
     self.columnsMappingsObjects = ["Column", "RowIndex", "VirtualColumn", "URI", "Class"];
+    self.currentTable = null;
     // object properties already restricted in the model between the two columns of the relation being drawn,
     // keyed by property URI : {restrictionType, cardinality}. These are the ones highlighted in yellow.
     self.currentRelationModelRestrictionsMap = {};
@@ -104,6 +105,7 @@ var MappingModeler = (function () {
                     //reinitialize config (Change Source and reload after modification)
                     DataSourceManager.currentConfig = {};
                     DataSourceManager.rawConfig = {};
+                    self.currentTable = null;
                     return callbackSeries();
                 },
                 function (callbackSeries) {

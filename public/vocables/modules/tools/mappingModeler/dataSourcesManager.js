@@ -484,6 +484,14 @@ var DataSourceManager = (function () {
             return;
         }
 
+        // "databaseSources" and "csvSources" group the tree, selecting one changes nothing
+        if (obj.node.data.type == "sourceType") {
+            return;
+        }
+
+        // the branches below reassign it, except a database source which has no table yet
+        MappingModeler.currentTable = null;
+
         if (obj.node.data.type == "databaseSource") {
             DataSourceManager.initNewDataSource(obj.node.id, "databaseSource", obj.node.data.sqlType, obj.node.data.table);
 
@@ -520,17 +528,17 @@ var DataSourceManager = (function () {
             UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab", callback);
         }
 
+        var dataSourceLabel = obj.node.data.id;
+        if (obj.node.type == "Table") {
+            var parentDataSourceName = $("#" + self.dataSourcejstreeDivId)
+                .jstree()
+                .get_node(obj.node.parent).text;
+            dataSourceLabel = parentDataSourceName + " : " + obj.node.data.id;
+        }
+        $("#MappingModeler_currentDataSource").html(dataSourceLabel);
+
         if (obj.node.data.type == "table" || obj.node.data.type == "csvSource") {
             var table = obj.node.data.id;
-            var dataSourceLabel = table;
-            if (obj.node.type == "Table") {
-                var dataTableName = $("#" + self.dataSourcejstreeDivId)
-                    .jstree()
-                    .get_node(obj.node.parent).text;
-                var dataSourceLabel = dataTableName + " : " + table;
-            }
-            $("#MappingModeler_currentDataSource").html(dataSourceLabel);
-
             MappingColumnsGraph.zoomOnTable(table);
             if (!MappingColumnsGraph.visjsGraph.data.nodes.get(table)) {
                 var tableNode = MappingColumnsGraph.getVisjsTableNode(table);

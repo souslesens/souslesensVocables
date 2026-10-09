@@ -59,6 +59,8 @@ const UserSources = ({ handleSnackbar }: UserSourcesProps) => {
             const data = (await response.json()) as { resources: Record<string, ServerSource>; message: string };
             if (response.status == 200) {
                 setSources(Object.values(data.resources));
+                // OntoCreator checks a new source name against Config.sources
+                delete window.Config.sources[selectedSource];
                 handleSnackbar(`The source '${selectedSource}' have been deleted`);
             } else {
                 console.error(data.message);

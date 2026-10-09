@@ -32,7 +32,7 @@ var Lineage_createSLSVsource = (function () {
                 return MainController.errorAlert(err);
             }
             if (refusalMessage) {
-                $("#botPanel").html("<div style='padding: 15px; max-width: 400px;'>" + refusalMessage + "</div>");
+                $("#botDiv").html("<div style='padding: 15px; max-width: 400px;'>" + refusalMessage + "</div>");
                 return UI.openDialog("botPanel", { title: CreateSLSVsource_bot.title });
             }
             CreateSLSVsource_bot.start();
@@ -43,6 +43,7 @@ var Lineage_createSLSVsource = (function () {
      * Checks the source creation rights before the bot starts, so the user is not
      * refused by the API only after having filled every step of the workflow.
      * Both conditions are enforced again server side in POST /api/v1/sources.
+     * Read from the server on every call, so a profile edited by an admin during the session applies.
      * @function
      * @name checkSourceCreationRights
      * @memberof Lineage_createSLSVsource
@@ -56,24 +57,22 @@ var Lineage_createSLSVsource = (function () {
             return callback(null, null);
         }
 
-        if (!currentUser.allowSourceCreation) {
-            return callback(null, "Your profile does not allow creating sources.");
-        }
-
         $.ajax({
             type: "GET",
-            url: `${Config.apiUrl}/sources?ownedOnly=true`,
+            url: `${Config.apiUrl}/users/quotas`,
             dataType: "json",
-            success: function (data) {
-                var ownedSourcesCount = Object.keys(data.resources || {}).length;
-                var maxNumberCreatedSource = currentUser.maxNumberCreatedSource;
-                if (typeof maxNumberCreatedSource === "number" && ownedSourcesCount >= maxNumberCreatedSource) {
+            success: function (quotas) {
+                var sourcesQuota = quotas.sources;
+                if (!sourcesQuota.allowed) {
+                    return callback(null, "Your profile does not allow creating sources.");
+                }
+                if (typeof sourcesQuota.cap === "number" && sourcesQuota.used >= sourcesQuota.cap) {
                     return callback(
                         null,
                         "You already own " +
-                            ownedSourcesCount +
+                            sourcesQuota.used +
                             " sources, your profile allows " +
-                            maxNumberCreatedSource +
+                            sourcesQuota.cap +
                             ". Delete one in UserSettings &gt; Sources, using the trash icon, to create a new one.",
                     );
                 }

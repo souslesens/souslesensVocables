@@ -12,6 +12,8 @@ var SearchUtil = (function () {
     self.indexSourcesMap = {};
     // must stay well above the preferred language boost of 3, otherwise language ordering wins over type
     self.classTypeBoost = 20;
+    // both spellings: an index built before the indexation wrote ObjectProperty still carries property
+    self.propertyIndexTypes = ["ObjectProperty", "property"];
 
     self.initSourcesIndexesList = function (options, callback) {
         if (!options) {
@@ -553,6 +555,9 @@ indexes.push(source.toLowerCase());
                     operator: "or",
                 },
             };
+        }
+        if (options.withoutProperties) {
+            queryObj.bool.must_not = [{ terms: { "type.keyword": self.propertyIndexTypes } }];
         }
 
         if (queryObj.bool) {

@@ -664,6 +664,11 @@ indexes.push(source.toLowerCase());
         }
 
         var totalLinesAllsources = 0;
+        var failedSources = [];
+        // one failing source must leave the others indexed and the model cache refreshed below
+        function recordFailedSource(failedSourceLabel, err) {
+            failedSources.push(failedSourceLabel + " : " + (err.responseText || err.message || err));
+        }
         async.eachSeries(
             sources,
             function (sourceLabel, callbackEachSource) {
@@ -685,7 +690,8 @@ indexes.push(source.toLowerCase());
                         function (callbackSeries) {
                             Sparql_generic.getSourceTaxonomy(sourceLabel, options, function (err, result) {
                                 if (err) {
-                                    return callbackEachSource(err);
+                                    recordFailedSource(sourceLabel, err);
+                                    return callbackEachSource();
                                 }
                                 var classesArray = [];
                                 for (var key in result.classesMap) {
@@ -733,7 +739,8 @@ indexes.push(source.toLowerCase());
                             UI.message(sourceLabel + ": no taxonomy found, indexing all class labels under owl:Thing");
                             Sparql_OWL.getClassesWithoutTaxonomy(sourceLabel, options, function (err, result) {
                                 if (err) {
-                                    return callbackEachSource(err);
+                                    recordFailedSource(sourceLabel, err);
+                                    return callbackEachSource();
                                 }
                                 var classesArray = [];
                                 for (var key in result.classesMap) {
@@ -921,37 +928,37 @@ indexes.push(source.toLowerCase());
                         // containers --> like classes --> care to refresh
                     ],
                     function (err) {
-                        // UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase());
-
-                        return callbackEachSource(err);
+                        if (err) {
+                            recordFailedSource(sourceLabel, err);
+                        }
+                        return callbackEachSource();
                     },
                 );
 
                 // }
             },
-            function (err) {
-                if (err) {
-                    MainController.errorAlert(err);
+            function () {
+                var reportIndexationOutcome = function () {
+                    var indexationError = failedSources.length > 0 ? failedSources.join(" / ") : null;
                     if (callback) {
-                        return callback(err);
+                        return callback(indexationError);
                     }
-                    return;
+                    if (indexationError) {
+                        MainController.errorAlert(indexationError);
+                    }
+                };
+                if (failedSources.length == 0) {
+                    UI.message("ALL DONE  total indexed : " + totalLinesAllsources);
                 }
-                UI.message("ALL DONE  total indexed : " + totalLinesAllsources);
                 // a full reindex follows a graph change: the cached model is stale too. Partial (ids) reindexes update the model themselves
                 if (options.ids || options.skipOntologyModelRefresh) {
-                    if (callback) {
-                        return callback();
-                    }
-                    return;
+                    return reportIndexationOutcome();
                 }
                 OntologyModels.clearOntologyModelCache(sourceLabel, function (err) {
                     if (err) {
-                        MainController.errorAlert(err.responseText || err);
+                        recordFailedSource(sourceLabel + " model cache", err);
                     }
-                    if (callback) {
-                        return callback(err);
-                    }
+                    return reportIndexationOutcome();
                 });
             },
         );

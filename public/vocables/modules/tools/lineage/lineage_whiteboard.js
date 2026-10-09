@@ -380,10 +380,7 @@ var Lineage_whiteboard = (function () {
             return Lineage_linkedData.showLinkedDataPanel(self.currentGraphNode);
         }
 
-        if (nodeEvent.ctrlKey && Lineage_sqlDataExtractor.isRecording) {
-            if(node.data.type==Lineage_sqlDataExtractor.currentNodeType)
-            Lineage_sqlDataExtractor.addClassToPath(node)
-        }
+
         if (nodeEvent.ctrlKey && nodeEvent.shiftKey) {
             if (options.callee == "Graph") {
                 // remove literals
@@ -403,7 +400,11 @@ var Lineage_whiteboard = (function () {
         } else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
             Lineage_selection.addNodeToSelection(node);
         } else if (nodeEvent.ctrlKey) {
-            NodeInfosWidget.showNodeInfos(node.data.source, node, "mainDialogDiv", {resetVisited: 1});
+            if (Lineage_sqlDataExtractor.isRecording && node.data.type == Lineage_sqlDataExtractor.currentNodeType) {
+                Lineage_sqlDataExtractor.addClassToPath(node)
+            } else {
+                NodeInfosWidget.showNodeInfos(node.data.source, node, "mainDialogDiv", {resetVisited: 1});
+            }
         } else if (nodeEvent.altKey && options.callee == "Tree") {
             SearchWidget.openTreeNode(SearchWidget.currentTargetDiv, node.data.source, node, {reopen: true});
         } else {
@@ -1954,13 +1955,12 @@ var Lineage_whiteboard = (function () {
             }
 
             if (selection == "databaseMappedNodes") {
-              Lineage_sqlDataExtractor.drawDatabaseMappedNodes()
+                Lineage_sqlDataExtractor.drawDatabaseMappedNodes()
             }
         }
         SimpleListSelectorWidget.showDialog(null, loadFn, validateFn)
 
     }
-
 
 
     /**
@@ -5121,7 +5121,7 @@ attrs.color=self.getSourceColor(superClassValue)
      */
     self.initQueryTab = function () {
         $("#queryTab").html("<div id='queryTabDiv'></div>" +
-            "<div id='dataExtractorDiv'></div>" );
+            "<div id='dataExtractorDiv'></div>");
         $("#botContainerDiv").css("width", "100%");
         SparqlQuery_bot.start({divId: "queryTabDiv"});
         Lineage_sqlDataExtractor.init();

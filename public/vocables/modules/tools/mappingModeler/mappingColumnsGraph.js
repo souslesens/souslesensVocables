@@ -2547,7 +2547,7 @@ var MappingColumnsGraph = (function () {
                     return callback(err);
                 }
                 if (!filter) {
-                    return json;
+                    return callback(null,json);
                 }
                 if (filter == "ClassesAndRelations") {
                     var filteredData = {nodes: [], edges: []}

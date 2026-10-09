@@ -656,11 +656,10 @@ indexes.push(source.toLowerCase());
             options = {};
         }
 
-        var withImports = $("#admin_refreshIndexWithImportCBX").prop("checked");
         options.withoutImports = true;
         options.parentsTopDown = true;
         var sources = [sourceLabel];
-        if (withImports) {
+        if (options.indexImportedSources) {
             sources = sources.concat(Config.sources[sourceLabel].imports || []);
         }
 

@@ -105,6 +105,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
                     indexProperties: 1,
                     indexNamedIndividuals: 1,
                     skipIndividuals: skipIndividuals,
+                    indexImportedSources: $("#admin_refreshIndexWithImportCBX").prop("checked"),
                 };
                 if (indexedPredicatesBySource && indexedPredicatesBySource[source]) {
                     indexationOptions.indexedPredicates = indexedPredicatesBySource[source];

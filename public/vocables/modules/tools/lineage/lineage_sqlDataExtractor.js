@@ -2,7 +2,7 @@ import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.j
 import Lineage_sources from "./lineage_sources.js";
 import MappingColumnsGraph from "../mappingModeler/mappingColumnsGraph.js";
 
-import MappingsToSql, {extractRelationMap,buildSqlByDatabaseSources} from "../mappingModeler/mappingsToSql.js";
+import MappingsToSql, {extractRelationMap, buildSqlByDatabaseSources} from "../mappingModeler/mappingsToSql.js";
 
 var Lineage_sqlDataExtractor = (function () {
 
@@ -21,19 +21,26 @@ var Lineage_sqlDataExtractor = (function () {
         }
 
 
-    self.drawDatabaseMappedNodes = function () {
-        var source = Lineage_sources.activeSource
+    self.drawDatabaseMappedNodes = function (source) {
+        if (!source) {
+            source = Lineage_sources.activeSource
+
+        }
+        self.currentSource=source
         MappingColumnsGraph.getSourceMappingsModel(source, null, function (err, json) {
             var relationsMap = MappingsToSql.extractRelationMap(json);
-            self.currentMappingJson=json
+            self.currentMappingJson = json
 
-self.currentRelationsMap=relationsMap;
+            self.currentRelationsMap = relationsMap;
             var visjsData = {nodes: [], edges: []};
             var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
+            self.currentDatypesMap = {}
             var shape = "diamond"
             for (const [key, values] of relationsMap) {
                 values.forEach(function (value) {
-                    if (value.kind == "objectProperty") {
+                    if (value.kind == "dataProperty") {
+                        self.currentDatypesMap[key] = value
+                    } else if (value.kind == "objectProperty") {
                         if (!existingNodes[value.subjectUri]) {
                             existingNodes[value.subjectUri] = 1;
                             visjsData.nodes.push({
@@ -101,22 +108,33 @@ self.currentRelationsMap=relationsMap;
 
     self.startPathRecording = function () {
         self.isRecording = true
-        self.currentPaths=[]
+        self.currentPaths = []
+
         var jstreeData = []
-        JstreeWidget.loadJsTree("sqlDataExtractor_jstreeDiv", jstreeData, {})
+        JstreeWidget.loadJsTree("sqlDataExtractor_jstreeDiv", jstreeData, {withCheckboxes: true})
 
 
     }
     self.clearPath = function () {
+        self.currentPaths = []
         JstreeWidget.empty("sqlDataExtractor_jstreeDiv")
     }
     self.getSQL = function () {
 
+        var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("sqlDataExtractor_jstreeDiv")
 
 
+        var dataTypePaths = []
+        checkedNodes.forEach(function (node) {
+            if (node.parents.length == 2) {
+                dataTypePaths.push(node.id)
+            }
+        })
+
+        var allPaths = dataTypePaths.concat(self.currentPaths)
         const queries =
             buildSqlByDatabaseSources(
-                self.currentPaths,
+                allPaths,
                 self.currentRelationsMap,
                 self.currentMappingJson
             );
@@ -124,7 +142,7 @@ self.currentRelationsMap=relationsMap;
         for (
             const [
                 databaseName,
-                { datasource, sql }
+                {datasource, sql}
             ] of queries
             ) {
             console.log(
@@ -132,7 +150,7 @@ self.currentRelationsMap=relationsMap;
                 datasource,
                 sql
             );
-            self.sql=sql
+            self.sql = sql
 
 
         }
@@ -146,56 +164,56 @@ self.currentRelationsMap=relationsMap;
 
      self.executeSQL = function () {*/
 
-        var x= self.sql
-
+        var x = self.sql + " limit 1000"
+        $("#smallDialogDiv").html("<textarea style='width:500px;height: 350px'>" + x + "</textarea>")
+        $("#smallDialogDiv").dialog("open")
     }
 
     self.addClassToPath = function (node) {
-      // var nodes= JstreeWidget.getjsTreeNodes("sqlDataExtractor_jstreeDiv");
+        // var nodes= JstreeWidget.getjsTreeNodes("sqlDataExtractor_jstreeDiv");
 
 
-if(self.lastRecordedNode){
-    for (const [key, values] of self.currentRelationsMap) {
-        if(key.startsWith(self.lastRecordedNode.id) && key.endsWith(node.id)){
-            self.currentPaths.push(key)
-        }else if(key.endsWith(self.lastRecordedNode.id) && key.startsWith(node.id)){
-            self.currentPaths.push(key)
+        if (self.lastRecordedNode) {
+            for (const [key, values] of self.currentRelationsMap) {
+                if (key.startsWith(self.lastRecordedNode.id) && key.endsWith(node.id)) {
+                    self.currentPaths.push(key)
+                } else if (key.endsWith(self.lastRecordedNode.id) && key.startsWith(node.id)) {
+                    self.currentPaths.push(key)
+                }
+            }
         }
-    }
-}
 
 
-
-
-       self.lastRecordedNode=node
+        self.lastRecordedNode = node
 
         var jstreedata = [{
             id: node.id,
             text: node.label,
             parent: "#",
-            data:{}
+            data: {}
         }]
         JstreeWidget.addNodesToJstree("sqlDataExtractor_jstreeDiv", "#", jstreedata);
 
         jstreedata = []
         for (const [key, values] of self.currentRelationsMap) {
             values.forEach(function (value) {
-                if(value.subjectUri==node.id && value.kind=="dataProperty"){
+                if (value.subjectUri == node.id && value.kind == "dataProperty") {
                     jstreedata.push({
-                       id:key,
-                        text:value.predicateLabel,
-                        parent:node.id,
-                        data:{
-                           type: value.objectUri,
-                            path:key,
+                        id: key,
+                        text: value.predicateLabel,
+                        parent: node.id,
+                        data: {
+                            type: value.objectUri,
+                            path: key,
+                            state: {
+                                checked: true
+                            }
                         }
-
 
 
                     })
 
                 }
-
 
 
             })

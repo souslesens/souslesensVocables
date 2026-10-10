@@ -120,16 +120,19 @@ var Lineage_sqlDataExtractor = (function () {
         JstreeWidget.empty("sqlDataExtractor_jstreeDiv")
     }
     self.getSQL = function () {
-
+        var dataTypePaths = []
         var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("sqlDataExtractor_jstreeDiv")
 
 
-        var dataTypePaths = []
-        checkedNodes.forEach(function (node) {
-            if (node.parents.length == 2) {
-                dataTypePaths.push(node.id)
-            }
-        })
+        if(checkedNodes) {
+
+
+            checkedNodes.forEach(function (node) {
+                if (node && node.parents.length == 2) {
+                    dataTypePaths.push(node.id)
+                }
+            })
+        }
 
         var allPaths = dataTypePaths.concat(self.currentPaths)
         const queries =

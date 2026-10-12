@@ -12,6 +12,8 @@ var SearchUtil = (function () {
     self.indexSourcesMap = {};
     // must stay well above the preferred language boost of 3, otherwise language ordering wins over type
     self.classTypeBoost = 20;
+    // both spellings: an index built before the indexation wrote ObjectProperty still carries property
+    self.propertyIndexTypes = ["ObjectProperty", "property"];
 
     self.initSourcesIndexesList = function (options, callback) {
         if (!options) {
@@ -554,6 +556,9 @@ indexes.push(source.toLowerCase());
                 },
             };
         }
+        if (options.withoutProperties) {
+            queryObj.bool.must_not = [{ terms: { "type.keyword": self.propertyIndexTypes } }];
+        }
 
         if (queryObj.bool) {
             if (!queryObj.bool.should) {
@@ -626,7 +631,7 @@ indexes.push(source.toLowerCase());
     };
 
     self.indexData = function (indexName, data, replaceIndex, callback) {
-        if (data.length == 0) {
+        if (data.length == 0 && !replaceIndex) {
             return callback();
         }
         var options = { replaceIndex: replaceIndex, owltype: "Class" };
@@ -656,15 +661,19 @@ indexes.push(source.toLowerCase());
             options = {};
         }
 
-        var withImports = $("#admin_refreshIndexWithImportCBX").prop("checked");
         options.withoutImports = true;
         options.parentsTopDown = true;
         var sources = [sourceLabel];
-        if (withImports) {
+        if (options.indexImportedSources) {
             sources = sources.concat(Config.sources[sourceLabel].imports || []);
         }
 
         var totalLinesAllsources = 0;
+        var failedSources = [];
+        // one failing source must leave the others indexed and the model cache refreshed below
+        function recordFailedSource(failedSourceLabel, err) {
+            failedSources.push(failedSourceLabel + " : " + (err.responseText || err.message || err));
+        }
         async.eachSeries(
             sources,
             function (sourceLabel, callbackEachSource) {
@@ -672,13 +681,23 @@ indexes.push(source.toLowerCase());
                 var taxonomyClasses = [];
                 async.series(
                     [
+                        // recreated before any data: a source without classes would otherwise keep its stale or missing index
+                        function (callbackSeries) {
+                            if (options.ids) {
+                                return callbackSeries();
+                            }
+                            self.indexData(sourceLabel.toLowerCase(), [], true, function (err) {
+                                callbackSeries(err);
+                            });
+                        },
+
                         // index nodes hierarchy
                         function (callbackSeries) {
                             Sparql_generic.getSourceTaxonomy(sourceLabel, options, function (err, result) {
                                 if (err) {
-                                    return callbackEachSource(err);
+                                    recordFailedSource(sourceLabel, err);
+                                    return callbackEachSource();
                                 }
-                                var index = 0;
                                 var classesArray = [];
                                 for (var key in result.classesMap) {
                                     classesArray.push(result.classesMap[key]);
@@ -692,14 +711,10 @@ indexes.push(source.toLowerCase());
                                             return callbackEach();
                                         }
 
-                                        var replaceIndex = false;
-                                        if (index++ == 0 && !options.ids) {
-                                            replaceIndex = true;
-                                        }
                                         data.forEach(function (item) {
                                             item.type = "Class";
                                         });
-                                        self.indexData(sourceLabel.toLowerCase(), data, replaceIndex, function (err, result) {
+                                        self.indexData(sourceLabel.toLowerCase(), data, false, function (err, result) {
                                             if (err) {
                                                 return callbackEach(err);
                                             }
@@ -729,9 +744,9 @@ indexes.push(source.toLowerCase());
                             UI.message(sourceLabel + ": no taxonomy found, indexing all class labels under owl:Thing");
                             Sparql_OWL.getClassesWithoutTaxonomy(sourceLabel, options, function (err, result) {
                                 if (err) {
-                                    return callbackEachSource(err);
+                                    recordFailedSource(sourceLabel, err);
+                                    return callbackEachSource();
                                 }
-                                var index = 0;
                                 var classesArray = [];
                                 for (var key in result.classesMap) {
                                     classesArray.push(result.classesMap[key]);
@@ -745,14 +760,10 @@ indexes.push(source.toLowerCase());
                                             return callbackEach();
                                         }
 
-                                        var replaceIndex = false;
-                                        if (index++ == 0) {
-                                            replaceIndex = true;
-                                        }
                                         data.forEach(function (item) {
                                             item.type = "Class";
                                         });
-                                        self.indexData(sourceLabel.toLowerCase(), data, replaceIndex, function (err, result) {
+                                        self.indexData(sourceLabel.toLowerCase(), data, false, function (err, result) {
                                             if (err) {
                                                 return callbackEach(err);
                                             }
@@ -922,37 +933,37 @@ indexes.push(source.toLowerCase());
                         // containers --> like classes --> care to refresh
                     ],
                     function (err) {
-                        // UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase());
-
-                        return callbackEachSource(err);
+                        if (err) {
+                            recordFailedSource(sourceLabel, err);
+                        }
+                        return callbackEachSource();
                     },
                 );
 
                 // }
             },
-            function (err) {
-                if (err) {
-                    MainController.errorAlert(err);
+            function () {
+                var reportIndexationOutcome = function () {
+                    var indexationError = failedSources.length > 0 ? failedSources.join(" / ") : null;
                     if (callback) {
-                        return callback(err);
+                        return callback(indexationError);
                     }
-                    return;
+                    if (indexationError) {
+                        MainController.errorAlert(indexationError);
+                    }
+                };
+                if (failedSources.length == 0) {
+                    UI.message("ALL DONE  total indexed : " + totalLinesAllsources);
                 }
-                UI.message("ALL DONE  total indexed : " + totalLinesAllsources);
                 // a full reindex follows a graph change: the cached model is stale too. Partial (ids) reindexes update the model themselves
                 if (options.ids || options.skipOntologyModelRefresh) {
-                    if (callback) {
-                        return callback();
-                    }
-                    return;
+                    return reportIndexationOutcome();
                 }
                 OntologyModels.clearOntologyModelCache(sourceLabel, function (err) {
                     if (err) {
-                        MainController.errorAlert(err.responseText || err);
+                        recordFailedSource(sourceLabel + " model cache", err);
                     }
-                    if (callback) {
-                        return callback(err);
-                    }
+                    return reportIndexationOutcome();
                 });
             },
         );

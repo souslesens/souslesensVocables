@@ -103,7 +103,16 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
             if (!edit) {
                 const sourceIndexName = getElasticSearchIndexNameFromSourceName(value.name);
                 const existingSourceIndexNames = sourcesNames.map((existingSourceName) => getElasticSearchIndexNameFromSourceName(existingSourceName));
+                const subGroupsOfSources = groups.flatMap((group) => group.split("/"));
 
+                // same rule as SourceModel.addSource
+                if (subGroupsOfSources.includes(value.name)) {
+                    context.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: "This name is already a group name",
+                        path: ["name"],
+                    });
+                }
                 if (sourceIndexName === "admin") {
                     context.addIssue({
                         code: z.ZodIssueCode.custom,
@@ -155,6 +164,20 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                     message: "Cannot start with /",
                     path: ["group"],
                 });
+            }
+            // same exception as SourceModel.updateUserSource
+            const isGroupKept = edit && value.group === selectedSource?.group;
+            if (!isGroupKept) {
+                // same rule as SourceModel._checkNoSubGroupNamedLikeSource
+                const subGroups = value.group.split("/");
+                const subGroupNamedLikeSource = subGroups.find((subGroup) => sourcesNames.includes(subGroup) || subGroup === value.name);
+                if (subGroupNamedLikeSource) {
+                    context.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: `${subGroupNamedLikeSource} is the name of a source`,
+                        path: ["group"],
+                    });
+                }
             }
             if (value.published && value.group.trim() === "PRIVATE") {
                 context.addIssue({

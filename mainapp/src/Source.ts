@@ -267,7 +267,7 @@ export const sourceHelp = {
     isDraft: "Mark the source as draft",
     allowIndividuals: "Allows user to create named individuals",
     predicates: "",
-    group: "Group and subgroups (AAA/BBB) used to order the sources",
+    group: "Group and subgroups (AAA/BBB) used to order the sources, none of them named like a source",
     imports: "List of imported sources",
     taxonomyPredicates: "List of properties used to draw the taxonomies of classes and named individuals in lineage actions",
     published: "The source will be visible by all user (with right permission to see it)",

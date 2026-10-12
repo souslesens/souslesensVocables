@@ -32,7 +32,7 @@ var Lineage_createSLSVsource = (function () {
                 return MainController.errorAlert(err);
             }
             if (refusalMessage) {
-                $("#botPanel").html("<div style='padding: 15px; max-width: 400px;'>" + refusalMessage + "</div>");
+                $("#botDiv").html("<div style='padding: 15px; max-width: 400px;'>" + refusalMessage + "</div>");
                 return UI.openDialog("botPanel", { title: CreateSLSVsource_bot.title });
             }
             CreateSLSVsource_bot.start();
@@ -43,6 +43,7 @@ var Lineage_createSLSVsource = (function () {
      * Checks the source creation rights before the bot starts, so the user is not
      * refused by the API only after having filled every step of the workflow.
      * Both conditions are enforced again server side in POST /api/v1/sources.
+     * Read from the server on every call, so a profile edited by an admin during the session applies.
      * @function
      * @name checkSourceCreationRights
      * @memberof Lineage_createSLSVsource
@@ -56,24 +57,22 @@ var Lineage_createSLSVsource = (function () {
             return callback(null, null);
         }
 
-        if (!currentUser.allowSourceCreation) {
-            return callback(null, "Your profile does not allow creating sources.");
-        }
-
         $.ajax({
             type: "GET",
-            url: `${Config.apiUrl}/sources?ownedOnly=true`,
+            url: `${Config.apiUrl}/users/quotas`,
             dataType: "json",
-            success: function (data) {
-                var ownedSourcesCount = Object.keys(data.resources || {}).length;
-                var maxNumberCreatedSource = currentUser.maxNumberCreatedSource;
-                if (typeof maxNumberCreatedSource === "number" && ownedSourcesCount >= maxNumberCreatedSource) {
+            success: function (quotas) {
+                var sourcesQuota = quotas.sources;
+                if (!sourcesQuota.allowed) {
+                    return callback(null, "Your profile does not allow creating sources.");
+                }
+                if (typeof sourcesQuota.cap === "number" && sourcesQuota.used >= sourcesQuota.cap) {
                     return callback(
                         null,
                         "You already own " +
-                            ownedSourcesCount +
+                            sourcesQuota.used +
                             " sources, your profile allows " +
-                            maxNumberCreatedSource +
+                            sourcesQuota.cap +
                             ". Delete one in UserSettings &gt; Sources, using the trash icon, to create a new one.",
                     );
                 }
@@ -91,7 +90,7 @@ var Lineage_createSLSVsource = (function () {
     /**
      * Applies to a source name the rules the ConfigEditor form applies: the name becomes the
      * ElasticSearch index name once lowercased, so it must be a legal index name and stay unique
-     * after that lowercasing.
+     * after that lowercasing. It cannot be a subgroup either, the private group of the user included.
      * @function
      * @name validateSourceName
      * @memberof Lineage_createSLSVsource
@@ -115,7 +114,23 @@ var Lineage_createSLSVsource = (function () {
         if (existingIndexNames.indexOf(indexName) > -1) {
             return "This name is already used by another source once lowercased";
         }
+        // same rules as SourceModel.addUserSource
+        var sourcesList = Object.values(Config.sources);
+        var groups = sourcesList.map(function (source) {
+            return source.group || "";
+        });
+        groups.push(self.getUserPrivateGroup());
+        var subGroups = groups.flatMap(function (group) {
+            return group.split("/");
+        });
+        if (subGroups.indexOf(sourceName) > -1) {
+            return "This name is already a group name";
+        }
         return null;
+    };
+
+    self.getUserPrivateGroup = function () {
+        return "PRIVATE/" + Authentification.currentUser.login;
     };
 
     /**
@@ -153,7 +168,6 @@ var Lineage_createSLSVsource = (function () {
      * @returns {void}
      */
     self.createSource = function (sourceName, graphUri, imports, callback) {
-        var user = Authentification.currentUser.login;
         var sourceNameError = self.validateSourceName(sourceName);
         if (sourceNameError) {
             return callback(sourceNameError);
@@ -162,7 +176,7 @@ var Lineage_createSLSVsource = (function () {
         if (graphUriError) {
             return callback(graphUriError);
         }
-        var userPrivateProfile = "PRIVATE/" + user;
+        var userPrivateProfile = self.getUserPrivateGroup();
         var sourceConfig = {};
 
         async.series(

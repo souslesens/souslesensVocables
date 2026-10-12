@@ -190,6 +190,7 @@ export default function () {
                     },
                 },
             },
+            400: { description: "A subgroup of the group is named like a source, or the name is already a subgroup of another source." },
             401: { description: "User not allowed to create sources, or quota reached." },
             409: { description: "A source with this name already exists, or (non-admin) the `graphUri` is already declared by another source." },
             default: { description: "Server error.", schema: { additionalProperties: true } },

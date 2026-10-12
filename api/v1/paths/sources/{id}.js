@@ -94,7 +94,7 @@ export default function () {
                     },
                 },
             },
-            400: { description: "Source does not exist (use POST to create)." },
+            400: { description: "Source does not exist (use POST to create), or the new group (admin only) has a subgroup named like a source." },
             403: { description: "The caller is neither the owner of the source nor an admin." },
             409: { description: "The new `graphUri` is already declared by another source." },
             500: { description: "Mismatch between path id and body `name`, or persistence error." },

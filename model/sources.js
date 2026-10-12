@@ -288,6 +288,23 @@ class SourceModel {
     };
 
     /**
+     * The source selector tree gives a group, a subgroup and a source the same id: their name.
+     * @param {Record<string, Source>} sources - a collection of sources
+     * @param {Source} source - a source about to be written
+     * @throws {Error} with status 400 when one of its subgroups is named like a source, its own name included
+     */
+    _checkNoSubGroupNamedLikeSource = (sources, source) => {
+        const sourceNames = Object.keys(sources);
+        const subGroups = (source.group || "").split("/");
+        const subGroupNamedLikeSource = subGroups.find((subGroup) => sourceNames.includes(subGroup) || subGroup === source.name);
+        if (subGroupNamedLikeSource) {
+            const error = new Error(`Group ${source.group} cannot contain ${subGroupNamedLikeSource}, the name of a source`);
+            error.status = 400;
+            throw error;
+        }
+    };
+
+    /**
      * addSource for a user. A non admin creates a private unpublished source it owns, on a graph
      * no other source declares.
      * @param {UserAccount} user - a user account
@@ -318,6 +335,10 @@ class SourceModel {
         }
         this._checkSourceOwner(user, storedSource);
         if (this.isAdmin(user)) {
+            // a source whose group the migration has not renamed yet can still be updated while it keeps that group
+            if (updatedSource.group !== storedSource.group) {
+                this._checkNoSubGroupNamedLikeSource(sources, updatedSource);
+            }
             return this.updateSource(updatedSource);
         }
         if (updatedSource.graphUri !== storedSource.graphUri) {
@@ -362,6 +383,16 @@ class SourceModel {
             if (Object.keys(sources).includes(newSource.id)) {
                 const error = new Error("Source already exists");
                 error.status = 409;
+                throw error;
+            }
+            this._checkNoSubGroupNamedLikeSource(sources, newSource);
+            const sourcesList = Object.values(sources);
+            const groupsOfSources = sourcesList.map((source) => source.group || "");
+            const subGroupsOfSources = groupsOfSources.flatMap((group) => group.split("/"));
+            // the source of that subgroup may be private: the message names neither it nor its group
+            if (subGroupsOfSources.includes(newSource.name)) {
+                const error = new Error(`Source name ${newSource.name} is already a group name`);
+                error.status = 400;
                 throw error;
             }
             sources[newSource.id] = newSource;

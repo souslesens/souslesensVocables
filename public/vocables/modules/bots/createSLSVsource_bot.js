@@ -95,7 +95,7 @@ var CreateSLSVsource_bot = (function () {
                 var sourceNameError = Lineage_createSLSVsource.validateSourceName(value);
                 if (sourceNameError) {
                     alert(sourceNameError);
-                    return self.myBotEngine.previousStep();
+                    return self.functions.promptSourceNameFn();
                 }
                 self.params.sourceLabel = value;
                 self.myBotEngine.nextStep();

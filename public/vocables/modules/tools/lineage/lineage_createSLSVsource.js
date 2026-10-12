@@ -90,7 +90,7 @@ var Lineage_createSLSVsource = (function () {
     /**
      * Applies to a source name the rules the ConfigEditor form applies: the name becomes the
      * ElasticSearch index name once lowercased, so it must be a legal index name and stay unique
-     * after that lowercasing.
+     * after that lowercasing. It cannot be a subgroup either, the private group of the user included.
      * @function
      * @name validateSourceName
      * @memberof Lineage_createSLSVsource
@@ -114,7 +114,23 @@ var Lineage_createSLSVsource = (function () {
         if (existingIndexNames.indexOf(indexName) > -1) {
             return "This name is already used by another source once lowercased";
         }
+        // same rules as SourceModel.addUserSource
+        var sourcesList = Object.values(Config.sources);
+        var groups = sourcesList.map(function (source) {
+            return source.group || "";
+        });
+        groups.push(self.getUserPrivateGroup());
+        var subGroups = groups.flatMap(function (group) {
+            return group.split("/");
+        });
+        if (subGroups.indexOf(sourceName) > -1) {
+            return "This name is already a group name";
+        }
         return null;
+    };
+
+    self.getUserPrivateGroup = function () {
+        return "PRIVATE/" + Authentification.currentUser.login;
     };
 
     /**
@@ -152,7 +168,6 @@ var Lineage_createSLSVsource = (function () {
      * @returns {void}
      */
     self.createSource = function (sourceName, graphUri, imports, callback) {
-        var user = Authentification.currentUser.login;
         var sourceNameError = self.validateSourceName(sourceName);
         if (sourceNameError) {
             return callback(sourceNameError);
@@ -161,7 +176,7 @@ var Lineage_createSLSVsource = (function () {
         if (graphUriError) {
             return callback(graphUriError);
         }
-        var userPrivateProfile = "PRIVATE/" + user;
+        var userPrivateProfile = self.getUserPrivateGroup();
         var sourceConfig = {};
 
         async.series(

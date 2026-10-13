@@ -78,6 +78,10 @@ var Lineage_selection = (function () {
         var jstreeData = [];
         var distinctNodes = {};
         Lineage_selection.selectedNodes.forEach(function (node) {
+            // a source group node carries no data.id, nothing to decorate on it
+            if (!node.data || !node.data.id) {
+                return;
+            }
             if (!distinctNodes[node.data.id]) {
                 distinctNodes[node.data.id] = 1;
                 jstreeData.push({

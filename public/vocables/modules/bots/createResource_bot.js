@@ -321,7 +321,7 @@ var CreateResource_bot = (function () {
                     if (err) {
                         return self.myBotEngine.abort(err);
                     }
-                    self.myBotEngine.showList(classes, "resourceId");
+                    CommonBotFunctions.showVocabClassesList(self.myBotEngine, self.params.currentVocab, classes, "resourceId");
                 });
             }
         },
@@ -447,7 +447,7 @@ var CreateResource_bot = (function () {
                 if (err) {
                     return self.myBotEngine.abort(err);
                 }
-                self.myBotEngine.showList(classes, "datatypePropertyDomain");
+                CommonBotFunctions.showVocabClassesList(self.myBotEngine, self.params.source, classes, "datatypePropertyDomain");
             });
         },
         listDatatypePropertyRangeFn: function () {

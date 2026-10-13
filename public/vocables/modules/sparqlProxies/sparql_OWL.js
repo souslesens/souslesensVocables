@@ -47,6 +47,10 @@ var Sparql_OWL = (function () {
         " FILTER NOT EXISTS {?topConcept rdfs:subClassOf ?parentClass. ?parentClass rdf:type owl:Class. filter(!STRSTARTS(STR(?parentClass),'nodeID://') && !STRSTARTS(STR(?parentClass),'_:'))} ";
     // the blank node IRI shapes of defaultTopClassFilter, for the parents read in javascript
     self.blankNodeUriRegex = /^(_:|nodeID:\/\/)/;
+    // the same shapes, for a class variable bound by a query
+    self.getNamedClassFilter = function (variable) {
+        return " filter (!isBlank(?" + variable + ") && !STRSTARTS(STR(?" + variable + "),'nodeID://') && !STRSTARTS(STR(?" + variable + "),'_:')).";
+    };
 
     /**
      * Builds the SPARQL property path expressing the parent/child (taxonomy) relation for a

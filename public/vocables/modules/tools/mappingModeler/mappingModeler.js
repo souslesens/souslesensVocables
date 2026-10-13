@@ -435,6 +435,9 @@ var MappingModeler = (function () {
             });
             var sourceOrderArray = [MappingModeler.currentSLSsource];
             sourceOrderArray = sourceOrderArray.concat(Config.sources[MappingModeler.currentSLSsource].imports);
+            if (parentName == "Classes") {
+                CommonBotFunctions.addSearchClassNodes(jstreeData, sourceOrderArray, parentName, color, uniqueSources);
+            }
             var startIndex = 2;
             if (parentName == "Properties") {
                 startIndex = 7;
@@ -597,6 +600,13 @@ var MappingModeler = (function () {
             var jstreeData = [];
             var source = obj.node.data.source;
             var color = "#00afef";
+            if (OntologyModels.isAboveMaxClasses(source)) {
+                return CommonBotFunctions.addSearchClassMatches("suggestionsSelectJstreeDiv", source, word, color, function (matchingClass) {
+                    // same label as the classes listed by getAllClasses
+                    var prefixedLabel = source.substring(0, 3) + ":" + matchingClass.label;
+                    self.allResourcesMap[matchingClass.id] = { id: matchingClass.id, label: prefixedLabel, source: source, resourceType: "Class" };
+                });
+            }
             for (var resourceUri in self.allResourcesMap) {
                 var item = self.allResourcesMap[resourceUri];
                 var itemLabel = item.label.toLowerCase();

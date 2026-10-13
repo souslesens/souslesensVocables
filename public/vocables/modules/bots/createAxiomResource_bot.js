@@ -83,7 +83,7 @@ var CreateAxiomResource_bot = (function () {
                     if (err) {
                         return self.myBotEngine.abort(err);
                     }
-                    self.myBotEngine.showList(classes, "superResourceId");
+                    CommonBotFunctions.showVocabClassesList(self.myBotEngine, self.params.currentVocab, classes, "superResourceId");
                 });
             }
         },

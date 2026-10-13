@@ -8,6 +8,8 @@ import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
 import MainController from "../../shared/mainController.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
+import OntologyModels from "../../shared/ontologyModels.js";
+import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
 import Lineage_createResource from "../lineage/lineage_createResource.js";
 import Lineage_createRelation from "../lineage/lineage_createRelation.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
@@ -214,6 +216,11 @@ var Axiom_activeLegend = (function () {
             var jstreeData = [];
             var source = node.data.source;
             var color = "#00afef";
+            if (OntologyModels.isAboveMaxClasses(source)) {
+                return CommonBotFunctions.addSearchClassMatches("axiomSuggestionsSelectJstreeDiv", source, word, color, function (matchingClass) {
+                    Axiom_manager.allResourcesMap[matchingClass.id] = { id: matchingClass.id, label: matchingClass.label, source: source, resourceType: "Class" };
+                });
+            }
             for (var resourceUri in Axiom_manager.allResourcesMap) {
                 // var item = self.sourcesMap[resourceUri];
                 var item = Axiom_manager.allResourcesMap[resourceUri];
@@ -1856,6 +1863,9 @@ var Axiom_activeLegend = (function () {
                     });
                 }
             });
+            if (parentName == "Class") {
+                CommonBotFunctions.addSearchClassNodes(jstreeData, CommonBotFunctions.getSourceAndImports(self.currentSource), parentName, color, uniqueSources);
+            }
         } else {
             objects.forEach(function (item) {
                 if (item != "" && item != "#") {

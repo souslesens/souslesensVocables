@@ -203,6 +203,15 @@ var MappingsDetails = (function () {
                 var object = MappingModeler.allClasses.find(function (item) {
                     return item.id == mappingO;
                 });
+                // allClasses misses the classes of a source above Config.ontologyModelMaxClasses, a mapped class is a node of the graph
+                if (!object) {
+                    var classNode = nodes.find(function (node) {
+                        return node.data.type == "Class" && node.data.id == mappingO;
+                    });
+                    if (classNode) {
+                        object = classNode.data;
+                    }
+                }
                 if (object) {
                     objectId = object.id;
                     var objectLabel = object.label;

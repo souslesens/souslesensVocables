@@ -1164,9 +1164,9 @@ var Lineage_whiteboard = (function () {
             $("#lineage_selectedNodesOnlyDiv").css("display", "none");
             return;
         }
-        var checkboxLabel = "Applied to all whiteboard";
+        var checkboxLabel = "Apply to all whiteboard";
         if ($("#lineage_selectedNodesOnlyCheckbox").prop("checked")) {
-            checkboxLabel = "Applied to " + selectedNodeIds.length + (selectedNodeIds.length == 1 ? " selected node" : " selected nodes");
+            checkboxLabel = "Apply to " + selectedNodeIds.length + (selectedNodeIds.length == 1 ? " selected node" : " selected nodes");
         }
         $("#lineage_selectedNodesOnlyLabel").text(checkboxLabel);
         $("#lineage_selectedNodesOnlyDiv").css("display", "block");

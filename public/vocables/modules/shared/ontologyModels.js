@@ -3,6 +3,7 @@ import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
+import SearchUtil from "../search/searchUtil.js";
 //import fflate from "fflate";
 
 // eslint-disable-next-line no-global-assign
@@ -263,10 +264,14 @@ var OntologyModels = (function () {
 
                         // set model classes (if source not  declared in sources.json && classes.length<Config.ontologyModelMaxClasses)
                         function (callbackSeries) {
-                            // Anonymous nodes typed owl:Class (class expressions, orphan nodes left by imports) are not classes and must not be counted.
-                            // Same convention as Sparql_OWL.defaultTopClassFilter: recognised by the shape of the IRI, isBlank alone being unreliable.
-                            var namedClassFilter = " filter (!isBlank(?sub) && !STRSTARTS(STR(?sub),'nodeID://') && !STRSTARTS(STR(?sub),'_:')).";
-                            var query = queryP + " select (count (distinct ?sub) as ?numberOfClasses)  FROM <" + graphUri + "> where{" + " ?sub rdf:type owl:Class." + namedClassFilter + "} ";
+                            var query =
+                                queryP +
+                                " select (count (distinct ?sub) as ?numberOfClasses)  FROM <" +
+                                graphUri +
+                                "> where{" +
+                                " ?sub rdf:type owl:Class." +
+                                Sparql_OWL.getNamedClassFilter("sub") +
+                                "} ";
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
@@ -274,7 +279,7 @@ var OntologyModels = (function () {
                                 var numberOfClasses = parseFloat(result.results.bindings[0].numberOfClasses.value);
                                 Config.ontologiesVocabularyModels[source].classesCount = numberOfClasses;
 
-                                if (numberOfClasses > Config.ontologyModelMaxClasses) {
+                                if (self.isAboveMaxClasses(source)) {
                                     return callbackSeries();
                                 } else {
                                     var query =
@@ -288,7 +293,7 @@ var OntologyModels = (function () {
                                         Sparql_common.getVariableLangLabel("sub", true, true) +
                                         //   " VALUES ?class {owl:Class rdf:class rdfs:Class} filter( !isBlank(?sub))} order by ?sub";
                                         " VALUES ?class {owl:Class rdf:class rdfs:Class} .  filter (not exists{ ?superClass  rdf:type owl:Restriction})." +
-                                        namedClassFilter +
+                                        Sparql_OWL.getNamedClassFilter("sub") +
                                         "} order by ?sub";
                                     Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                         if (err) {
@@ -738,6 +743,12 @@ var OntologyModels = (function () {
         if (!Config.ontologiesVocabularyModels[source]) {
             return;
         }
+        // a partial class list would pass for the whole source
+        if (data.classes && self.isAboveMaxClasses(source)) {
+            var dataWithoutClasses = Object.assign({}, data);
+            delete dataWithoutClasses.classes;
+            data = dataWithoutClasses;
+        }
         for (var entryType in data) {
             if (!data[entryType]) {
                 continue;
@@ -958,10 +969,38 @@ var OntologyModels = (function () {
         } else if (endNodeIds && !Array.isArray(endNodeIds)) {
             endNodeIds = [endNodeIds];
         }
+        var isSourceOrImportAboveMaxClasses = self.isSourceOrImportAboveMaxClasses(source);
         async.series(
             [
+                // the SPARQL query below also returns every subclass of each ancestor, the whole source under a flat root
                 function (callbackSeries) {
-                    if (startNodeIds.length == 0) {
+                    if (!isSourceOrImportAboveMaxClasses) {
+                        return callbackSeries();
+                    }
+                    var allNodeIds = startNodeIds.concat(endNodeIds);
+                    var nodeIds = allNodeIds.filter(function (nodeId) {
+                        return !!nodeId;
+                    });
+                    async.eachSeries(
+                        nodeIds,
+                        function (nodeId, callbackEach) {
+                            SearchUtil.getClassAncestorsFromIndex(source, nodeId, function (err, ancestors) {
+                                if (err) {
+                                    UI.message(err, true);
+                                    ancestors = [];
+                                }
+                                var superClasses = ancestors.slice(1);
+                                hierarchies[nodeId] = superClasses.map(function (superClass) {
+                                    return { superClass: { value: superClass.id } };
+                                });
+                                callbackEach();
+                            });
+                        },
+                        callbackSeries,
+                    );
+                },
+                function (callbackSeries) {
+                    if (startNodeIds.length == 0 || isSourceOrImportAboveMaxClasses) {
                         return callbackSeries();
                     }
                     Sparql_OWL.getNodesAncestorsOrDescendants(
@@ -981,7 +1020,7 @@ var OntologyModels = (function () {
                     );
                 },
                 function (callbackSeries) {
-                    if (endNodeIds.length == 0) {
+                    if (endNodeIds.length == 0 || isSourceOrImportAboveMaxClasses) {
                         return callbackSeries();
                     }
                     Sparql_OWL.getNodesAncestorsOrDescendants(
@@ -2194,6 +2233,20 @@ var OntologyModels = (function () {
             return callback(null, topClasses);
         });
     };
+    self.isAboveMaxClasses = function (source) {
+        var sourceModel = Config.ontologiesVocabularyModels[source];
+        return !!sourceModel && sourceModel.classesCount > Config.ontologyModelMaxClasses;
+    };
+
+    self.getTooManyClassesMessage = function (source) {
+        return Config.ontologiesVocabularyModels[source].classesCount + " classes: type " + SearchUtil.searchClassesMinTermLength + " letters to search";
+    };
+
+    self.isSourceOrImportAboveMaxClasses = function (sourceLabel) {
+        var sources = [sourceLabel].concat(Config.sources[sourceLabel].imports || []);
+        return sources.some(self.isAboveMaxClasses);
+    };
+
     self.getClassHierarchyTreeData = function (sourcelabel, baseClassId, direction, options) {
         if (!options) {
             options = {};

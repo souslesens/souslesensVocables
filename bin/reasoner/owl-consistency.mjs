@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 /** Read-only, partial OWL contradiction checks over a SPARQL 1.1 endpoint. */
-import {pathToFileURL} from 'node:url';
-import request from "request";
+import { pathToFileURL } from 'node:url';
 
 const PREFIXES = `
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -122,64 +121,80 @@ function iri(value) {
     return `<${value}>`;
 }
 
-export function buildQuery(rule, {graphs = [], limit = 100} = {}) {
+export function buildQuery(rule, { graphs = [], limit = 100 } = {}) {
     if (!Number.isSafeInteger(limit) || limit < 1 || limit >= Number.MAX_SAFE_INTEGER) {
         throw new TypeError('limit must be a positive safe integer.');
     }
-    if (!Array.isArray(graphs)) {
-        throw new TypeError('graphs must be an array.');
-    }
+    if (!Array.isArray(graphs)) throw new TypeError('graphs must be an array.');
     const dataset = graphs.map(graph => `FROM ${iri(graph)}`).join('\n');
     return `${PREFIXES}\nSELECT DISTINCT *\n${dataset}\nWHERE {\n${rule.pattern}\n}\nLIMIT ${limit + 1}`;
 }
 
+/** Execute one query over HTTP and return the parsed SPARQL JSON result. */
+export async function requestSparql(query, {
+    endpoint, headers = {}, timeoutMs = 30_000, fetchImpl = globalThis.fetch,
+} = {}) {
+    const url = new URL(endpoint);
+    if (!['http:', 'https:'].includes(url.protocol)) throw new TypeError('Use an HTTP(S) endpoint.');
+    if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1) throw new TypeError('Invalid timeoutMs.');
+    if (typeof fetchImpl !== 'function') throw new TypeError('fetch is unavailable.');
+    const requestHeaders = new Headers(headers);
+    requestHeaders.set('Accept', 'application/sparql-results+json');
+    requestHeaders.set('Content-Type', 'application/x-www-form-urlencoded');
+    const response = await fetchImpl(url.href, {
+        method: 'POST', headers: requestHeaders,
+        body: new URLSearchParams({ query }),
+        signal: AbortSignal.timeout(timeoutMs),
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const contentType = response.headers?.get('content-type') || 'unspecified';
+    const responseInfo = `HTTP ${response.status}, Content-Type: ${contentType}`;
+    const body = await response.text();
+    if (!body.trim()) {
+        throw new Error(`Empty SPARQL response (${responseInfo}). Check the query endpoint URL, authentication, and server/proxy logs; SELECT requires a JSON results body.`);
+    }
+    try {
+        return JSON.parse(body);
+    } catch (cause) {
+        throw new Error(`Invalid or incomplete SPARQL JSON response (${responseInfo}, ${body.length} characters). Check that the endpoint returns application/sparql-results+json and that the server/proxy has not truncated the response.`, { cause });
+    }
+}
+
 /**
+ * request(query, { ruleId }): callback returning parsed SPARQL SELECT JSON
+ * (or a Promise for it). When supplied, it owns transport/auth/timeouts;
+ * endpoint, headers, timeoutMs and fetchImpl are only used by the default HTTP request.
  * graphs: explicit graphs merged into the query default graph; omitted uses
  * the endpoint default dataset. Include both ontology and instance graphs.
  * headers: e.g. { Authorization: `Bearer ${token}` }.
  * Results retain SPARQL binding objects, including datatype and language.
  * Any failed query rejects the run; it never produces a clean report.
+ * Supports run({ request, ...options }) and run(request, options).
  */
-export async function run({
-                              endpoint, graphs = [], limit = 100, timeoutMs = 30_000,
-                              headers = {}, fetchImpl = globalThis.fetch,
-                          } = {}) {
-    const url = new URL(endpoint);
-    if (!['http:', 'https:'].includes(url.protocol)) {
-        throw new TypeError('Use an HTTP(S) endpoint.');
+export async function run(requestOrOptions = {}, options = {}) {
+    const configuration = typeof requestOrOptions === 'function'
+        ? { ...options, request: requestOrOptions }
+        : requestOrOptions;
+    if (!configuration || typeof configuration !== 'object' || Array.isArray(configuration)) {
+        throw new TypeError('Use run(requestCallback, options) or run(options).');
     }
-    if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1) {
-        throw new TypeError('Invalid timeoutMs.');
+    const {
+        endpoint, graphs = [], limit = 100, timeoutMs = 30_000,
+        headers = {}, fetchImpl = globalThis.fetch, request,
+    } = configuration;
+    if (request !== undefined && typeof request !== 'function') {
+        throw new TypeError('request must be a function.');
     }
-    if (typeof fetchImpl !== 'function') {
-        throw new TypeError('fetch is unavailable.');
-    }
-    const queries = RULES.map(rule => buildQuery(rule, {graphs, limit}));
+    const executeRequest = request ?? (query => requestSparql(query, {
+        endpoint, headers, timeoutMs, fetchImpl,
+    }));
+    const queries = RULES.map(rule => buildQuery(rule, { graphs, limit }));
     const checks = [];
     // Sequential queries avoid overloading the endpoint.
     for (let i = 0; i < RULES.length; i++) {
         const rule = RULES[i];
         try {
-            const requestHeaders = new Headers(headers);
-            requestHeaders.set('Accept', 'application/sparql-results+json');
-            requestHeaders.set('Content-Type', 'application/x-www-form-urlencoded');
-            const response = await fetchImpl(url.href, {
-                method: 'POST', headers: requestHeaders,
-                body: new URLSearchParams({query: queries[i]}),
-                signal: AbortSignal.timeout(timeoutMs),
-            });
-            console.log(response.json)
-            if (false && !response.ok) {
-               var x= response.body
-            var y=  response.status()
-                throw new Error(`HTTP ${response.status}`);
-            }
-            const result = await response.json();
-
-
-
-
-
+            const result = await executeRequest(queries[i], { ruleId: rule.id });
             if (!Array.isArray(result?.head?.vars) || !Array.isArray(result?.results?.bindings)) {
                 throw new Error('Endpoint did not return a SPARQL SELECT JSON result.');
             }
@@ -191,7 +206,7 @@ export async function run({
                 examples: bindings.slice(0, limit),
             });
         } catch (cause) {
-            throw new Error(`Check "${rule.id}" failed; consistency is unknown.`, {cause});
+            throw new Error(`Check "${rule.id}" failed; consistency is unknown.`, { cause });
         }
     }
     const violationDetected = checks.some(check => check.violationDetected);
@@ -205,7 +220,7 @@ export async function run({
 }
 
 // Keep the original API available for existing callers.
-export {run as checkOwlConsistency};
+export { run as checkOwlConsistency };
 
 async function main() {
     const [endpoint, ...graphs] = process.argv.slice(2);
@@ -216,67 +231,16 @@ async function main() {
     }
     try {
         const headers = process.env.SPARQL_TOKEN
-            ? {Authorization: `Bearer ${process.env.SPARQL_TOKEN}`} : {};
-        const report = await run({endpoint, graphs, headers});
+            ? { Authorization: `Bearer ${process.env.SPARQL_TOKEN}` } : {};
+        const report = await run({ endpoint, graphs, headers });
         console.log(JSON.stringify(report, null, 2));
         process.exitCode = report.status === 'violations-detected' ? 1 : 0;
     } catch (error) {
         console.error(error.message);
-        if (error.cause) {
-            console.error(error.cause.message);
-        }
+        if (error.cause) console.error(error.cause.message);
         process.exitCode = 2;
     }
 }
-
-
-async function executeQuery(sparqlUrl, query) {
-
-    var options = {
-        "method": "POST",
-        "url": "http://51.178.139.80:8890/sparql?format=json&query=",
-        "auth": {
-            "user": process.env.SPARQL_USERNAME,
-            "pass": process.env.SPARQL_PASSWORD,
-            "sendImmediately": false
-        },
-        "headers": {
-            "Accept": "application/sparql-results+json",
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        "form": {
-            "query": query,
-            "useProxy": true,
-            "auth": {
-                "user": process.env.SPARQL_USERNAME,
-                "pass": process.env.SPARQL_PASSWORD,
-                "sendImmediately": false
-            }
-        }
-    }
-
-
-    request(options, async function (error, response, body) {
-        try {
-            if (error) {
-                console.log(error);
-                //  console.log("HTTP_PROXY_ERROR"+JSON.stringify(error, null, 2))
-
-
-                body = JSON.parse(body);
-                //  return callback(null, obj);
-            }
-        } catch (e) {
-
-
-        }
-
-        return body;
-
-
-    })
-}
-
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
     await main();

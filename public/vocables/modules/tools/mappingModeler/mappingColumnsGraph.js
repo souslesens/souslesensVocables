@@ -1641,7 +1641,7 @@ var MappingColumnsGraph = (function () {
         if (!source) {
             source = MappingModeler.currentSLSsource
         }
-        self.saveVisjsGraph(function (err) {
+        self.saveVisjsGraph(source,function (err) {
 
             self.loadMappingsFromFile(source, function (err, data) {
                 if (err) {

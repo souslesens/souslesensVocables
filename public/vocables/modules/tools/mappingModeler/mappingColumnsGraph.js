@@ -1146,11 +1146,8 @@ var MappingColumnsGraph = (function () {
      * @param {function} [callback] - Optional callback function executed after saving the graph.
      * @returns {void}
      */
-    self.saveVisjsGraph = function (source, callback) {
-        if (!source) {
-            source = MappingModeler.currentSLSsource
-        }
-        var fileName = "mappings_" + source + "_ALL" + ".json";
+    self.saveVisjsGraph = function (callback) {
+        var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
         var graph = MappingColumnsGraph.visjsGraph;
         if (graph.data?.nodes?.length == 0) {
             nodes = [];

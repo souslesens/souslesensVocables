@@ -93,7 +93,7 @@ var DateWidget = (function () {
                             return callback(calendar.datepicker("getDate"));
                         }
                     },
-                })
+                }),
             );
             // closed by a picked day, back on a click or a key in the field
             input.on("click.dateWidget", function () {
@@ -116,7 +116,7 @@ var DateWidget = (function () {
                         return callback(input.datepicker("getDate"));
                     }
                 },
-            })
+            }),
         );
     };
     self.unsetDatePickerOnInput = function (inputId, options) {

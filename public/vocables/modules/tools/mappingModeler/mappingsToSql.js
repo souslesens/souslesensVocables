@@ -1,12 +1,8 @@
 const KEY_SEPARATOR = "|";
 
-const DEFAULT_LITERAL_RANGE =
-    "http://www.w3.org/2000/01/rdf-schema#Literal";
+const DEFAULT_LITERAL_RANGE = "http://www.w3.org/2000/01/rdf-schema#Literal";
 
-const rdfsLabelPredicates = new Set([
-    "rdfs:label",
-    "http://www.w3.org/2000/01/rdf-schema#label"
-]);
+const rdfsLabelPredicates = new Set(["rdfs:label", "http://www.w3.org/2000/01/rdf-schema#label"]);
 
 /**
  * Quote a SQL identifier.
@@ -23,47 +19,25 @@ export function getUriLocalName(uri) {
 
     const value = String(uri);
 
-    const index = Math.max(
-        value.lastIndexOf("#"),
-        value.lastIndexOf("/"),
-        value.lastIndexOf(":")
-    );
+    const index = Math.max(value.lastIndexOf("#"), value.lastIndexOf("/"), value.lastIndexOf(":"));
 
-    return index >= 0
-        ? value.slice(index + 1)
-        : value;
+    return index >= 0 ? value.slice(index + 1) : value;
 }
 
 /**
  * Resolve the label of a semantic class.
  */
 export function getClassLabel(classUri, json) {
-    const node = json.nodes.find(
-        node =>
-            node.data?.type === "Class" &&
-            (
-                node.id === classUri ||
-                node.data?.id === classUri
-            )
-    );
+    const node = json.nodes.find((node) => node.data?.type === "Class" && (node.id === classUri || node.data?.id === classUri));
 
-    return (
-        node?.data?.label ??
-        node?.label ??
-        getUriLocalName(classUri)
-    );
+    return node?.data?.label ?? node?.label ?? getUriLocalName(classUri);
 }
 
 // a column linked to a column of its own class in the same table (superior_funct_loc of a functional
 // Location) is read as a value of that column, never joined on. The value column is the end with no
 // other relation: isMainColumn cannot tell, in PAZFLOR_ABOX superiorfunctionallocation is the main one.
 function getSameClassValueColumns(json) {
-    const tableByColumn = new Map(
-        json.nodes.map(node => [
-            node.id,
-            node.data?.dataTable
-        ])
-    );
+    const tableByColumn = new Map(json.nodes.map((node) => [node.id, node.data?.dataTable]));
 
     const classByColumn = new Map();
 
@@ -92,11 +66,7 @@ function getSameClassValueColumns(json) {
         const subjectClassUri = classByColumn.get(edge.from);
 
         // a node and its parent sit in the same row, a link across tables is a real relation
-        if (
-            !subjectClassUri ||
-            subjectClassUri !== classByColumn.get(edge.to) ||
-            tableByColumn.get(edge.from) !== tableByColumn.get(edge.to)
-        ) {
+        if (!subjectClassUri || subjectClassUri !== classByColumn.get(edge.to) || tableByColumn.get(edge.from) !== tableByColumn.get(edge.to)) {
             continue;
         }
 
@@ -119,32 +89,18 @@ function getSameClassValueColumns(json) {
  * Resolve the label of a semantic predicate.
  */
 export function getPredicateLabel(predicateUri, json) {
-    const edge = json.edges.find(
-        edge => edge.data?.id === predicateUri
-    );
+    const edge = json.edges.find((edge) => edge.data?.id === predicateUri);
 
-    return (
-        edge?.data?.label ??
-        edge?.label ??
-        getUriLocalName(predicateUri)
-    );
+    return edge?.data?.label ?? edge?.label ?? getUriLocalName(predicateUri);
 }
 
 /**
  * Resolve the label of a datatype or range.
  */
 export function getRangeLabel(range, json) {
-    const node = json.nodes.find(
-        node =>
-            node.id === range ||
-            node.data?.id === range
-    );
+    const node = json.nodes.find((node) => node.id === range || node.data?.id === range);
 
-    return (
-        node?.data?.label ??
-        node?.label ??
-        getUriLocalName(range)
-    );
+    return node?.data?.label ?? node?.label ?? getUriLocalName(range);
 }
 
 /**
@@ -159,53 +115,30 @@ export function getRangeLabel(range, json) {
  *   object  -> subjectLabel_predicateLabel
  */
 export function buildMappingAlias(mapping, role, json) {
-    const subjectLabel =
-        mapping.subjectLabel ??
-        getClassLabel(mapping.subjectUri, json);
+    const subjectLabel = mapping.subjectLabel ?? getClassLabel(mapping.subjectUri, json);
 
     if (role === "subject") {
         return subjectLabel;
     }
 
-    if (
-        role === "object" &&
-        mapping.kind === "objectProperty"
-    ) {
-        return (
-            mapping.objectLabel ??
-            getClassLabel(mapping.objectUri, json)
-        );
+    if (role === "object" && mapping.kind === "objectProperty") {
+        return mapping.objectLabel ?? getClassLabel(mapping.objectUri, json);
     }
 
-    if (
-        role === "object" &&
-        mapping.kind === "dataProperty"
-    ) {
-        const predicateLabel =
-            mapping.predicateLabel ??
-            getUriLocalName(mapping.predicateUri);
+    if (role === "object" && mapping.kind === "dataProperty") {
+        const predicateLabel = mapping.predicateLabel ?? getUriLocalName(mapping.predicateUri);
 
         return `${subjectLabel}_${predicateLabel}`;
     }
 
-    throw new Error(
-        `Unsupported mapping kind/role: ${mapping.kind}/${role}`
-    );
+    throw new Error(`Unsupported mapping kind/role: ${mapping.kind}/${role}`);
 }
 
 /**
  * Build the key of an object property.
  */
-export function buildObjectPropertyKey(
-    subjectClassUri,
-    predicateUri,
-    objectClassUri
-) {
-    return [
-        subjectClassUri,
-        predicateUri,
-        objectClassUri
-    ].join(KEY_SEPARATOR);
+export function buildObjectPropertyKey(subjectClassUri, predicateUri, objectClassUri) {
+    return [subjectClassUri, predicateUri, objectClassUri].join(KEY_SEPARATOR);
 }
 
 /**
@@ -214,17 +147,8 @@ export function buildObjectPropertyKey(
  * Format:
  * subjectUri|predicateUri|range[|dateFormat]
  */
-export function buildDataPropertyKey(
-    nodeUri,
-    predicateUri,
-    range,
-    format = null
-) {
-    const parts = [
-        nodeUri,
-        predicateUri,
-        range ?? DEFAULT_LITERAL_RANGE
-    ];
+export function buildDataPropertyKey(nodeUri, predicateUri, range, format = null) {
+    const parts = [nodeUri, predicateUri, range ?? DEFAULT_LITERAL_RANGE];
 
     if (format) {
         parts.push(format);
@@ -237,10 +161,7 @@ export function buildDataPropertyKey(
  * Return configured database sources.
  */
 export function getDatabaseSources(json) {
-    return (
-        json?.options?.config?.databaseSources ??
-        {}
-    );
+    return json?.options?.config?.databaseSources ?? {};
 }
 
 /**
@@ -257,11 +178,7 @@ export function getDatasource(columnData, json) {
         return undefined;
     }
 
-    const tableNode = json.nodes.find(
-        node =>
-            node.data?.type === "Table" &&
-            node.data?.dataTable === table
-    );
+    const tableNode = json.nodes.find((node) => node.data?.type === "Table" && node.data?.dataTable === table);
 
     return tableNode?.data?.datasource;
 }
@@ -272,10 +189,7 @@ export function getDatasource(columnData, json) {
 export function getDatabaseName(datasource, json) {
     const sources = getDatabaseSources(json);
 
-    return (
-        sources?.[datasource]?.name ??
-        datasource
-    );
+    return sources?.[datasource]?.name ?? datasource;
 }
 
 /**
@@ -306,21 +220,11 @@ export function getDatabaseName(datasource, json) {
  * - format
  */
 export function extractRelationMap(json) {
-    if (
-        !Array.isArray(json?.nodes) ||
-        !Array.isArray(json?.edges)
-    ) {
-        throw new Error(
-            "Invalid mapping JSON: nodes and edges are required"
-        );
+    if (!Array.isArray(json?.nodes) || !Array.isArray(json?.edges)) {
+        throw new Error("Invalid mapping JSON: nodes and edges are required");
     }
 
-    const nodesById = new Map(
-        json.nodes.map(node => [
-            node.id,
-            node
-        ])
-    );
+    const nodesById = new Map(json.nodes.map((node) => [node.id, node]));
 
     const classByColumn = new Map();
 
@@ -329,10 +233,7 @@ export function extractRelationMap(json) {
      */
     for (const edge of json.edges) {
         if (edge.data?.type === "rdf:type") {
-            classByColumn.set(
-                edge.from,
-                edge.to
-            );
+            classByColumn.set(edge.from, edge.to);
         }
     }
 
@@ -352,10 +253,7 @@ export function extractRelationMap(json) {
         }
 
         if (!classesByTable.has(table)) {
-            classesByTable.set(
-                table,
-                new Set()
-            );
+            classesByTable.set(table, new Set());
         }
 
         classesByTable.get(table).add(classUri);
@@ -400,19 +298,9 @@ export function extractRelationMap(json) {
      * descriptor when the column is not represented
      * by a graph node.
      */
-    function findColumnData(
-        table,
-        columnName,
-        fallbackDatasource
-    ) {
+    function findColumnData(table, columnName, fallbackDatasource) {
         const node = json.nodes.find(
-            candidate =>
-                (
-                    candidate.data?.type === "Column" ||
-                    candidate.data?.type === "VirtualColumn"
-                ) &&
-                candidate.data?.dataTable === table &&
-                candidate.data?.id === columnName
+            (candidate) => (candidate.data?.type === "Column" || candidate.data?.type === "VirtualColumn") && candidate.data?.dataTable === table && candidate.data?.id === columnName,
         );
 
         if (node) {
@@ -425,7 +313,7 @@ export function extractRelationMap(json) {
             type: "Column",
             dataTable: table,
             datasource: fallbackDatasource,
-            synthetic: true
+            synthetic: true,
         };
     }
 
@@ -443,10 +331,7 @@ export function extractRelationMap(json) {
         relationMap.get(key).push(mapping);
     }
 
-    const validColumnTypes = new Set([
-        "Column",
-        "VirtualColumn"
-    ]);
+    const validColumnTypes = new Set(["Column", "VirtualColumn"]);
 
     /*
      * Extract object properties.
@@ -469,10 +354,7 @@ export function extractRelationMap(json) {
             continue;
         }
 
-        if (
-            !validColumnTypes.has(fromNode.data?.type) ||
-            !validColumnTypes.has(toNode.data?.type)
-        ) {
+        if (!validColumnTypes.has(fromNode.data?.type) || !validColumnTypes.has(toNode.data?.type)) {
             continue;
         }
 
@@ -480,16 +362,13 @@ export function extractRelationMap(json) {
         const objectClassUri = getClassUri(edge.to);
 
         if (!subjectClassUri || !objectClassUri) {
-            console.warn(
-                "Cannot resolve RDF classes for object property:",
-                {
-                    predicateUri,
-                    from: edge.from,
-                    to: edge.to,
-                    subjectClassUri,
-                    objectClassUri
-                }
-            );
+            console.warn("Cannot resolve RDF classes for object property:", {
+                predicateUri,
+                from: edge.from,
+                to: edge.to,
+                subjectClassUri,
+                objectClassUri,
+            });
 
             continue;
         }
@@ -501,35 +380,28 @@ export function extractRelationMap(json) {
             const subjectColumnNode = isValueColumnTo ? fromNode : toNode;
             const valueNode = isValueColumnTo ? toNode : fromNode;
 
-            addMapping(
-                buildDataPropertyKey(subjectClassUri, predicateUri, DEFAULT_LITERAL_RANGE),
-                {
-                    kind: "dataProperty",
+            addMapping(buildDataPropertyKey(subjectClassUri, predicateUri, DEFAULT_LITERAL_RANGE), {
+                kind: "dataProperty",
 
-                    from: subjectColumnNode.data,
-                    to: valueNode.data,
+                from: subjectColumnNode.data,
+                to: valueNode.data,
 
-                    subjectUri: subjectClassUri,
-                    subjectLabel: getClassLabel(subjectClassUri, json),
+                subjectUri: subjectClassUri,
+                subjectLabel: getClassLabel(subjectClassUri, json),
 
-                    predicateUri,
-                    predicateLabel: `label_${valueNode.data.id}`,
+                predicateUri,
+                predicateLabel: `label_${valueNode.data.id}`,
 
-                    objectUri: DEFAULT_LITERAL_RANGE,
-                    objectLabel: getRangeLabel(DEFAULT_LITERAL_RANGE, json),
+                objectUri: DEFAULT_LITERAL_RANGE,
+                objectLabel: getRangeLabel(DEFAULT_LITERAL_RANGE, json),
 
-                    range: DEFAULT_LITERAL_RANGE,
-                    format: null
-                }
-            );
+                range: DEFAULT_LITERAL_RANGE,
+                format: null,
+            });
             continue;
         }
 
-        const key = buildObjectPropertyKey(
-            subjectClassUri,
-            predicateUri,
-            objectClassUri
-        );
+        const key = buildObjectPropertyKey(subjectClassUri, predicateUri, objectClassUri);
 
         addMapping(key, {
             kind: "objectProperty",
@@ -538,21 +410,13 @@ export function extractRelationMap(json) {
             to: toNode.data,
 
             subjectUri: subjectClassUri,
-            subjectLabel: getClassLabel(
-                subjectClassUri,
-                json
-            ),
+            subjectLabel: getClassLabel(subjectClassUri, json),
 
             predicateUri,
-            predicateLabel:
-                edge.data?.label ??
-                getPredicateLabel(predicateUri, json),
+            predicateLabel: edge.data?.label ?? getPredicateLabel(predicateUri, json),
 
             objectUri: objectClassUri,
-            objectLabel: getClassLabel(
-                objectClassUri,
-                json
-            )
+            objectLabel: getClassLabel(objectClassUri, json),
         });
     }
 
@@ -564,13 +428,9 @@ export function extractRelationMap(json) {
             continue;
         }
 
-        const otherPredicates = Array.isArray(node.data?.otherPredicates)
-            ? [...node.data.otherPredicates]
-            : [];
+        const otherPredicates = Array.isArray(node.data?.otherPredicates) ? [...node.data.otherPredicates] : [];
 
-        const hasRdfsLabelPredicate = otherPredicates.some(
-            predicate => rdfsLabelPredicates.has(predicate?.property)
-        );
+        const hasRdfsLabelPredicate = otherPredicates.some((predicate) => rdfsLabelPredicates.has(predicate?.property));
 
         // as the KG builder (mappingsParser.js): rdfsLabel adds rdfs:label unless otherPredicates already has one
         if (node.data?.rdfsLabel && !hasRdfsLabelPredicate) {
@@ -578,7 +438,7 @@ export function extractRelationMap(json) {
             otherPredicates.push({
                 property: "rdfs:label",
                 object: node.data.rdfsLabel,
-                range: "xsd:string"
+                range: "xsd:string",
             });
         }
 
@@ -589,56 +449,35 @@ export function extractRelationMap(json) {
         const nodeUri = getClassUri(node.id);
 
         if (!nodeUri) {
-            console.warn(
-                "Cannot resolve semantic class for otherPredicates:",
-                {
-                    nodeId: node.id,
-                    table: node.data?.dataTable,
-                    column: node.data?.id
-                }
-            );
+            console.warn("Cannot resolve semantic class for otherPredicates:", {
+                nodeId: node.id,
+                table: node.data?.dataTable,
+                column: node.data?.id,
+            });
 
             continue;
         }
 
         const table = node.data?.dataTable;
 
-        const datasource = getDatasource(
-            node.data,
-            json
-        );
+        const datasource = getDatasource(node.data, json);
 
         for (const predicate of otherPredicates) {
             // both spellings of rdfs:label share one key, so the tree shows one label
-            const predicateUri = rdfsLabelPredicates.has(predicate?.property)
-                ? "rdfs:label"
-                : predicate?.property;
+            const predicateUri = rdfsLabelPredicates.has(predicate?.property) ? "rdfs:label" : predicate?.property;
             const objectColumnName = predicate?.object;
 
             if (!predicateUri || !objectColumnName) {
                 continue;
             }
 
-            const range =
-                predicate.range ??
-                DEFAULT_LITERAL_RANGE;
+            const range = predicate.range ?? DEFAULT_LITERAL_RANGE;
 
-            const format =
-                predicate.dateFormat ??
-                null;
+            const format = predicate.dateFormat ?? null;
 
-            const objectColumn = findColumnData(
-                table,
-                objectColumnName,
-                datasource
-            );
+            const objectColumn = findColumnData(table, objectColumnName, datasource);
 
-            const key = buildDataPropertyKey(
-                nodeUri,
-                predicateUri,
-                range,
-                format
-            );
+            const key = buildDataPropertyKey(nodeUri, predicateUri, range, format);
 
             addMapping(key, {
                 kind: "dataProperty",
@@ -647,23 +486,16 @@ export function extractRelationMap(json) {
                 to: objectColumn,
 
                 subjectUri: nodeUri,
-                subjectLabel: getClassLabel(
-                    nodeUri,
-                    json
-                ),
+                subjectLabel: getClassLabel(nodeUri, json),
 
                 predicateUri,
-                predicateLabel:
-                    getUriLocalName(predicateUri),
+                predicateLabel: getUriLocalName(predicateUri),
 
                 objectUri: range,
-                objectLabel: getRangeLabel(
-                    range,
-                    json
-                ),
+                objectLabel: getRangeLabel(range, json),
 
                 range,
-                format
+                format,
             });
         }
     }
@@ -677,20 +509,14 @@ export function extractRelationMap(json) {
  * These joins are independent of semantic relations.
  */
 export function extractTableJoins(json) {
-    const nodesById = new Map(
-        json.nodes.map(node => [
-            node.id,
-            node
-        ])
-    );
+    const nodesById = new Map(json.nodes.map((node) => [node.id, node]));
 
     const joins = [];
 
     const subjectColumnByValueColumn = getSameClassValueColumns(json);
 
     for (const node of json.nodes) {
-        const parentId =
-            node.data?.definedInColumn;
+        const parentId = node.data?.definedInColumn;
 
         if (!parentId || subjectColumnByValueColumn.has(node.id)) {
             continue;
@@ -702,31 +528,20 @@ export function extractTableJoins(json) {
         const parentNode = nodesById.get(joinedParentId);
 
         if (!parentNode) {
-            console.warn(
-                `definedInColumn target not found: ${parentId}`
-            );
+            console.warn(`definedInColumn target not found: ${parentId}`);
 
             continue;
         }
 
-        const fromTable =
-            node.data?.dataTable;
+        const fromTable = node.data?.dataTable;
 
-        const fromColumn =
-            node.data?.id;
+        const fromColumn = node.data?.id;
 
-        const toTable =
-            parentNode.data?.dataTable;
+        const toTable = parentNode.data?.dataTable;
 
-        const toColumn =
-            parentNode.data?.id;
+        const toColumn = parentNode.data?.id;
 
-        if (
-            !fromTable ||
-            !fromColumn ||
-            !toTable ||
-            !toColumn
-        ) {
+        if (!fromTable || !fromColumn || !toTable || !toColumn) {
             continue;
         }
 
@@ -741,15 +556,9 @@ export function extractTableJoins(json) {
             toTable,
             toColumn,
 
-            fromDatasource: getDatasource(
-                node.data,
-                json
-            ),
+            fromDatasource: getDatasource(node.data, json),
 
-            toDatasource: getDatasource(
-                parentNode.data,
-                json
-            )
+            toDatasource: getDatasource(parentNode.data, json),
         });
     }
 
@@ -773,17 +582,17 @@ export function buildJoinGraph(joins) {
     joins.forEach((join, index) => {
         const edge = {
             ...join,
-            edgeId: index
+            edgeId: index,
         };
 
         add(join.fromTable, {
             edge,
-            nextTable: join.toTable
+            nextTable: join.toTable,
         });
 
         add(join.toTable, {
             edge,
-            nextTable: join.fromTable
+            nextTable: join.fromTable,
         });
     });
 
@@ -794,11 +603,7 @@ export function buildJoinGraph(joins) {
  * Find the shortest physical join path between
  * two tables using BFS.
  */
-export function findJoinPath(
-    graph,
-    startTable,
-    targetTable
-) {
+export function findJoinPath(graph, startTable, targetTable) {
     if (startTable === targetTable) {
         return [];
     }
@@ -806,34 +611,25 @@ export function findJoinPath(
     const queue = [
         {
             table: startTable,
-            path: []
-        }
+            path: [],
+        },
     ];
 
-    const visited = new Set([
-        startTable
-    ]);
+    const visited = new Set([startTable]);
 
     let queueIndex = 0;
 
     while (queueIndex < queue.length) {
         const current = queue[queueIndex++];
 
-        for (
-            const connection of
-        graph.get(current.table) ?? []
-            ) {
-            const nextTable =
-                connection.nextTable;
+        for (const connection of graph.get(current.table) ?? []) {
+            const nextTable = connection.nextTable;
 
             if (visited.has(nextTable)) {
                 continue;
             }
 
-            const nextPath = [
-                ...current.path,
-                connection.edge
-            ];
+            const nextPath = [...current.path, connection.edge];
 
             if (nextTable === targetTable) {
                 return nextPath;
@@ -843,7 +639,7 @@ export function findJoinPath(
 
             queue.push({
                 table: nextTable,
-                path: nextPath
+                path: nextPath,
             });
         }
     }
@@ -857,10 +653,7 @@ export function findJoinPath(
  * Tries each required table as the root and retains
  * the candidate with the fewest join edges.
  */
-export function findMinimumJoinSet(
-    requiredTables,
-    joins
-) {
+export function findMinimumJoinSet(requiredTables, joins) {
     const tables = [...requiredTables];
 
     if (tables.length <= 1) {
@@ -881,11 +674,7 @@ export function findMinimumJoinSet(
                 continue;
             }
 
-            const path = findJoinPath(
-                graph,
-                rootTable,
-                targetTable
-            );
+            const path = findJoinPath(graph, rootTable, targetTable);
 
             if (!path) {
                 valid = false;
@@ -893,10 +682,7 @@ export function findMinimumJoinSet(
             }
 
             for (const edge of path) {
-                selectedEdges.set(
-                    edge.edgeId,
-                    edge
-                );
+                selectedEdges.set(edge.edgeId, edge);
             }
         }
 
@@ -904,24 +690,15 @@ export function findMinimumJoinSet(
             continue;
         }
 
-        const candidate = [
-            ...selectedEdges.values()
-        ];
+        const candidate = [...selectedEdges.values()];
 
-        if (
-            !best ||
-            candidate.length < best.length
-        ) {
+        if (!best || candidate.length < best.length) {
             best = candidate;
         }
     }
 
     if (!best) {
-        throw new Error(
-            "Cannot connect requested tables through " +
-            "definedInColumn: " +
-            tables.join(", ")
-        );
+        throw new Error("Cannot connect requested tables through " + "definedInColumn: " + tables.join(", "));
     }
 
     return best;
@@ -931,76 +708,41 @@ export function findMinimumJoinSet(
  * Resolve requested semantic keys into physical
  * mappings and validate their datasources.
  */
-function getMappingsForKeys(
-    keys,
-    relationMap,
-    json
-) {
+function getMappingsForKeys(keys, relationMap, json) {
     const mappings = [];
 
     for (const key of keys) {
         const value = relationMap.get(key);
 
         if (!value) {
-            throw new Error(
-                `Relation key not found: ${key}`
-            );
+            throw new Error(`Relation key not found: ${key}`);
         }
 
-        const values = Array.isArray(value)
-            ? value
-            : [value];
+        const values = Array.isArray(value) ? value : [value];
 
         for (const mapping of values) {
-            if (
-                !mapping.kind ||
-                !mapping.from?.dataTable ||
-                !mapping.from?.id ||
-                !mapping.to?.dataTable ||
-                !mapping.to?.id
-            ) {
-                throw new Error(
-                    `Invalid mapping for key: ${key}`
-                );
+            if (!mapping.kind || !mapping.from?.dataTable || !mapping.from?.id || !mapping.to?.dataTable || !mapping.to?.id) {
+                throw new Error(`Invalid mapping for key: ${key}`);
             }
 
-            const fromDatasource = getDatasource(
-                mapping.from,
-                json
-            );
+            const fromDatasource = getDatasource(mapping.from, json);
 
-            const toDatasource = getDatasource(
-                mapping.to,
-                json
-            );
+            const toDatasource = getDatasource(mapping.to, json);
 
-            if (
-                fromDatasource &&
-                toDatasource &&
-                fromDatasource !== toDatasource
-            ) {
-                throw new Error(
-                    "Cross-database relation is not supported:\n" +
-                    `${key}\n` +
-                    `${fromDatasource} -> ${toDatasource}`
-                );
+            if (fromDatasource && toDatasource && fromDatasource !== toDatasource) {
+                throw new Error("Cross-database relation is not supported:\n" + `${key}\n` + `${fromDatasource} -> ${toDatasource}`);
             }
 
-            const datasource =
-                fromDatasource ??
-                toDatasource;
+            const datasource = fromDatasource ?? toDatasource;
 
             if (!datasource) {
-                throw new Error(
-                    "Cannot determine datasource for relation: " +
-                    key
-                );
+                throw new Error("Cannot determine datasource for relation: " + key);
             }
 
             mappings.push({
                 ...mapping,
                 key,
-                datasource
+                datasource,
             });
         }
     }
@@ -1011,30 +753,17 @@ function getMappingsForKeys(
 /**
  * Group mappings by datasource.
  */
-export function groupMappingsByDatasource(
-    keys,
-    relationMap,
-    json
-) {
-    const mappings = getMappingsForKeys(
-        keys,
-        relationMap,
-        json
-    );
+export function groupMappingsByDatasource(keys, relationMap, json) {
+    const mappings = getMappingsForKeys(keys, relationMap, json);
 
     const groups = new Map();
 
     for (const mapping of mappings) {
         if (!groups.has(mapping.datasource)) {
-            groups.set(
-                mapping.datasource,
-                []
-            );
+            groups.set(mapping.datasource, []);
         }
 
-        groups
-            .get(mapping.datasource)
-            .push(mapping);
+        groups.get(mapping.datasource).push(mapping);
     }
 
     return groups;
@@ -1060,12 +789,7 @@ export function groupMappingsByDatasource(
  *   aliasMap: Map<sqlAlias, metadata>
  * }
  */
-export function buildSelectColumns(
-    mappings,
-    getAlias,
-    json,
-    joinedColumnPairs = []
-) {
+export function buildSelectColumns(mappings, getAlias, json, joinedColumnPairs = []) {
     const columns = new Map();
 
     const aliasMap = new Map();
@@ -1081,10 +805,7 @@ export function buildSelectColumns(
         if (mapping.kind !== "dataProperty") {
             continue;
         }
-        dataPropertyExpressions.add(
-            `${getAlias(mapping.to.dataTable)}.` +
-            quoteIdentifier(mapping.to.id)
-        );
+        dataPropertyExpressions.add(`${getAlias(mapping.to.dataTable)}.` + quoteIdentifier(mapping.to.id));
     }
 
     // a column joined on a data property column holds the same values
@@ -1102,30 +823,21 @@ export function buildSelectColumns(
     /**
      * Register a SQL projection.
      */
-    function addSelectColumn(
-        semanticAlias,
-        expression,
-        metadata
-    ) {
+    function addSelectColumn(semanticAlias, expression, metadata) {
         const isClassIdColumn = metadata.role === "subject" || metadata.kind === "objectProperty";
 
         if (isClassIdColumn && expressionsCoveredByDataProperties.has(expression)) {
             return;
         }
 
-        const expressionKey = JSON.stringify([
-            semanticAlias,
-            expression
-        ]);
+        const expressionKey = JSON.stringify([semanticAlias, expression]);
 
         /*
          * Identical semantic projection:
          * reuse the existing SQL alias.
          */
         if (expressionAliases.has(expressionKey)) {
-            return expressionAliases.get(
-                expressionKey
-            );
+            return expressionAliases.get(expressionKey);
         }
 
         let uniqueAlias = semanticAlias;
@@ -1136,142 +848,88 @@ export function buildSelectColumns(
          * Resolve SQL alias collisions.
          */
         while (usedAliases.has(uniqueAlias)) {
-            uniqueAlias =
-                `${semanticAlias}_${suffix}`;
+            uniqueAlias = `${semanticAlias}_${suffix}`;
 
             suffix++;
         }
 
-        columns.set(
-            uniqueAlias,
-            expression
-        );
+        columns.set(uniqueAlias, expression);
 
-        aliasMap.set(
-            uniqueAlias,
-            {
-                ...metadata,
-                semanticAlias,
-                sqlAlias: uniqueAlias,
-                expression
-            }
-        );
+        aliasMap.set(uniqueAlias, {
+            ...metadata,
+            semanticAlias,
+            sqlAlias: uniqueAlias,
+            expression,
+        });
 
         usedAliases.add(uniqueAlias);
 
-        expressionAliases.set(
-            expressionKey,
-            uniqueAlias
-        );
+        expressionAliases.set(expressionKey, uniqueAlias);
 
         return uniqueAlias;
     }
 
     for (const mapping of mappings) {
-        const fromAlias = getAlias(
-            mapping.from.dataTable
-        );
+        const fromAlias = getAlias(mapping.from.dataTable);
 
-        const toAlias = getAlias(
-            mapping.to.dataTable
-        );
+        const toAlias = getAlias(mapping.to.dataTable);
 
-        const subjectAlias = buildMappingAlias(
-            mapping,
-            "subject",
-            json
-        );
+        const subjectAlias = buildMappingAlias(mapping, "subject", json);
 
-        const objectAlias = buildMappingAlias(
-            mapping,
-            "object",
-            json
-        );
+        const objectAlias = buildMappingAlias(mapping, "object", json);
 
-        const subjectExpression =
-            `${fromAlias}.` +
-            quoteIdentifier(mapping.from.id);
+        const subjectExpression = `${fromAlias}.` + quoteIdentifier(mapping.from.id);
 
-        const objectExpression =
-            `${toAlias}.` +
-            quoteIdentifier(mapping.to.id);
+        const objectExpression = `${toAlias}.` + quoteIdentifier(mapping.to.id);
 
         /*
          * Subject projection.
          */
-        addSelectColumn(
-            subjectAlias,
-            subjectExpression,
-            {
-                role: "subject",
+        addSelectColumn(subjectAlias, subjectExpression, {
+            role: "subject",
 
-                kind: mapping.kind,
+            kind: mapping.kind,
 
-                semanticUri:
-                mapping.subjectUri,
+            semanticUri: mapping.subjectUri,
 
-                semanticLabel:
-                mapping.subjectLabel,
+            semanticLabel: mapping.subjectLabel,
 
-                table:
-                mapping.from.dataTable,
+            table: mapping.from.dataTable,
 
-                column:
-                mapping.from.id,
+            column: mapping.from.id,
 
-                datasource:
-                mapping.datasource
-            }
-        );
+            datasource: mapping.datasource,
+        });
 
         /*
          * Object projection.
          */
-        addSelectColumn(
-            objectAlias,
-            objectExpression,
-            {
-                role: "object",
+        addSelectColumn(objectAlias, objectExpression, {
+            role: "object",
 
-                key: mapping.key,
+            key: mapping.key,
 
-                kind: mapping.kind,
+            kind: mapping.kind,
 
-                semanticUri:
-                    mapping.kind === "dataProperty"
-                        ? mapping.predicateUri
-                        : mapping.objectUri,
+            semanticUri: mapping.kind === "dataProperty" ? mapping.predicateUri : mapping.objectUri,
 
-                semanticLabel:
-                    mapping.kind === "dataProperty"
-                        ? mapping.predicateLabel
-                        : mapping.objectLabel,
+            semanticLabel: mapping.kind === "dataProperty" ? mapping.predicateLabel : mapping.objectLabel,
 
-                range:
-                    mapping.kind === "dataProperty"
-                        ? mapping.range
-                        : undefined,
+            range: mapping.kind === "dataProperty" ? mapping.range : undefined,
 
-                format:
-                    mapping.kind === "dataProperty"
-                        ? mapping.format
-                        : undefined,
+            format: mapping.kind === "dataProperty" ? mapping.format : undefined,
 
-                table:
-                mapping.to.dataTable,
+            table: mapping.to.dataTable,
 
-                column:
-                mapping.to.id,
+            column: mapping.to.id,
 
-                datasource:
-                mapping.datasource
-            }
-        );
+            datasource: mapping.datasource,
+        });
     }
 
     return {
         columns,
-        aliasMap
+        aliasMap,
     };
 }
 
@@ -1285,29 +943,19 @@ export function buildSelectColumns(
  *   aliasMap
  * }
  */
-export function buildSqlFromMappings(
-    mappings,
-    json
-) {
+export function buildSqlFromMappings(mappings, json) {
     if (!mappings.length) {
-        throw new Error(
-            "No mappings supplied"
-        );
+        throw new Error("No mappings supplied");
     }
 
-    const datasource =
-        mappings[0].datasource;
+    const datasource = mappings[0].datasource;
 
     const requiredTables = new Set();
 
     for (const mapping of mappings) {
-        requiredTables.add(
-            mapping.from.dataTable
-        );
+        requiredTables.add(mapping.from.dataTable);
 
-        requiredTables.add(
-            mapping.to.dataTable
-        );
+        requiredTables.add(mapping.to.dataTable);
     }
 
     /*
@@ -1316,24 +964,15 @@ export function buildSqlFromMappings(
      */
     const allJoins = extractTableJoins(json);
 
-    const datasourceJoins = allJoins.filter(
-        join => {
-            const fromOk =
-                !join.fromDatasource ||
-                join.fromDatasource === datasource;
+    const datasourceJoins = allJoins.filter((join) => {
+        const fromOk = !join.fromDatasource || join.fromDatasource === datasource;
 
-            const toOk =
-                !join.toDatasource ||
-                join.toDatasource === datasource;
+        const toOk = !join.toDatasource || join.toDatasource === datasource;
 
-            return fromOk && toOk;
-        }
-    );
+        return fromOk && toOk;
+    });
 
-    const selectedJoins = findMinimumJoinSet(
-        requiredTables,
-        datasourceJoins
-    );
+    const selectedJoins = findMinimumJoinSet(requiredTables, datasourceJoins);
 
     /*
      * Assign SQL table aliases.
@@ -1344,10 +983,7 @@ export function buildSqlFromMappings(
 
     function getAlias(table) {
         if (!aliasByTable.has(table)) {
-            aliasByTable.set(
-                table,
-                `t${aliasIndex++}`
-            );
+            aliasByTable.set(table, `t${aliasIndex++}`);
         }
 
         return aliasByTable.get(table);
@@ -1365,24 +1001,16 @@ export function buildSqlFromMappings(
     /*
      * Choose a starting table.
      */
-    const baseTable = selectedJoins.length
-        ? selectedJoins[0].toTable
-        : [...requiredTables][0];
+    const baseTable = selectedJoins.length ? selectedJoins[0].toTable : [...requiredTables][0];
 
-    const baseAlias = getAlias(
-        baseTable
-    );
+    const baseAlias = getAlias(baseTable);
 
     /*
      * Build the SQL JOIN tree.
      */
-    const joinedTables = new Set([
-        baseTable
-    ]);
+    const joinedTables = new Set([baseTable]);
 
-    const pendingJoins = [
-        ...selectedJoins
-    ];
+    const pendingJoins = [...selectedJoins];
 
     const sqlJoins = [];
 
@@ -1391,54 +1019,31 @@ export function buildSqlFromMappings(
     while (pendingJoins.length) {
         let found = false;
 
-        for (
-            let i = 0;
-            i < pendingJoins.length;
-            i++
-        ) {
+        for (let i = 0; i < pendingJoins.length; i++) {
             const join = pendingJoins[i];
 
-            const fromJoined =
-                joinedTables.has(
-                    join.fromTable
-                );
+            const fromJoined = joinedTables.has(join.fromTable);
 
-            const toJoined =
-                joinedTables.has(
-                    join.toTable
-                );
+            const toJoined = joinedTables.has(join.toTable);
 
             /*
              * Join a new destination table.
              */
             if (fromJoined && !toJoined) {
-                const fromAlias = getAlias(
-                    join.fromTable
-                );
+                const fromAlias = getAlias(join.fromTable);
 
-                const toAlias = getAlias(
-                    join.toTable
-                );
+                const toAlias = getAlias(join.toTable);
 
                 const fromExpression = `${fromAlias}.${quoteIdentifier(join.fromColumn)}`;
                 const toExpression = `${toAlias}.${quoteIdentifier(join.toColumn)}`;
 
-                sqlJoins.push(
-                    `JOIN ${quoteIdentifier(join.toTable)} ${toAlias}\n` +
-                    `  ON ${fromExpression}\n` +
-                    `   = ${toExpression}`
-                );
+                sqlJoins.push(`JOIN ${quoteIdentifier(join.toTable)} ${toAlias}\n` + `  ON ${fromExpression}\n` + `   = ${toExpression}`);
 
                 joinedColumnPairs.push([fromExpression, toExpression]);
 
-                joinedTables.add(
-                    join.toTable
-                );
+                joinedTables.add(join.toTable);
 
-                pendingJoins.splice(
-                    i,
-                    1
-                );
+                pendingJoins.splice(i, 1);
 
                 found = true;
                 break;
@@ -1448,33 +1053,20 @@ export function buildSqlFromMappings(
              * Join a new source table.
              */
             if (toJoined && !fromJoined) {
-                const fromAlias = getAlias(
-                    join.fromTable
-                );
+                const fromAlias = getAlias(join.fromTable);
 
-                const toAlias = getAlias(
-                    join.toTable
-                );
+                const toAlias = getAlias(join.toTable);
 
                 const fromExpression = `${fromAlias}.${quoteIdentifier(join.fromColumn)}`;
                 const toExpression = `${toAlias}.${quoteIdentifier(join.toColumn)}`;
 
-                sqlJoins.push(
-                    `JOIN ${quoteIdentifier(join.fromTable)} ${fromAlias}\n` +
-                    `  ON ${fromExpression}\n` +
-                    `   = ${toExpression}`
-                );
+                sqlJoins.push(`JOIN ${quoteIdentifier(join.fromTable)} ${fromAlias}\n` + `  ON ${fromExpression}\n` + `   = ${toExpression}`);
 
                 joinedColumnPairs.push([fromExpression, toExpression]);
 
-                joinedTables.add(
-                    join.fromTable
-                );
+                joinedTables.add(join.fromTable);
 
-                pendingJoins.splice(
-                    i,
-                    1
-                );
+                pendingJoins.splice(i, 1);
 
                 found = true;
                 break;
@@ -1484,10 +1076,7 @@ export function buildSqlFromMappings(
              * Both tables are already present.
              */
             if (fromJoined && toJoined) {
-                pendingJoins.splice(
-                    i,
-                    1
-                );
+                pendingJoins.splice(i, 1);
 
                 found = true;
                 break;
@@ -1495,9 +1084,7 @@ export function buildSqlFromMappings(
         }
 
         if (!found) {
-            throw new Error(
-                "Unable to build SQL join tree"
-            );
+            throw new Error("Unable to build SQL join tree");
         }
     }
 
@@ -1506,33 +1093,16 @@ export function buildSqlFromMappings(
      */
     for (const table of requiredTables) {
         if (!joinedTables.has(table)) {
-            throw new Error(
-                `Required table was not joined: ${table}`
-            );
+            throw new Error(`Required table was not joined: ${table}`);
         }
     }
 
     /*
      * Build SELECT expressions.
      */
-    const {
-        columns,
-        aliasMap
-    } = buildSelectColumns(
-        mappings,
-        getAlias,
-        json,
-        joinedColumnPairs
-    );
+    const { columns, aliasMap } = buildSelectColumns(mappings, getAlias, json, joinedColumnPairs);
 
-    const selectSql = [
-        ...columns.entries()
-    ]
-        .map(
-            ([alias, expression]) =>
-                `${expression} AS ${quoteIdentifier(alias)}`
-        )
-        .join(",\n    ");
+    const selectSql = [...columns.entries()].map(([alias, expression]) => `${expression} AS ${quoteIdentifier(alias)}`).join(",\n    ");
 
     /*
      * Build non-null conditions for subject columns.
@@ -1540,40 +1110,21 @@ export function buildSqlFromMappings(
     const whereConditions = new Set();
 
     for (const mapping of mappings) {
-        const fromAlias = getAlias(
-            mapping.from.dataTable
-        );
+        const fromAlias = getAlias(mapping.from.dataTable);
 
-        whereConditions.add(
-            `${fromAlias}.${quoteIdentifier(mapping.from.id)} IS NOT NULL`
-        );
+        whereConditions.add(`${fromAlias}.${quoteIdentifier(mapping.from.id)} IS NOT NULL`);
     }
 
-    const whereClause = whereConditions.size
-        ? (
-            "WHERE " +
-            [...whereConditions].join(
-                "\n  AND "
-            )
-        )
-        : "";
+    const whereClause = whereConditions.size ? "WHERE " + [...whereConditions].join("\n  AND ") : "";
 
     /*
      * Assemble the final SQL query.
      */
-    const sql = [
-        "SELECT",
-        `    ${selectSql}`,
-        `FROM ${quoteIdentifier(baseTable)} ${baseAlias}`,
-        ...sqlJoins,
-        whereClause
-    ]
-        .filter(Boolean)
-        .join("\n");
+    const sql = ["SELECT", `    ${selectSql}`, `FROM ${quoteIdentifier(baseTable)} ${baseAlias}`, ...sqlJoins, whereClause].filter(Boolean).join("\n");
 
     return {
         sql,
-        aliasMap
+        aliasMap,
     };
 }
 
@@ -1592,54 +1143,26 @@ export function buildSqlFromMappings(
  *   }
  * >
  */
-export function buildSqlByDatabaseSources(
-    keys,
-    relationMap,
-    json
-) {
-    if (
-        !Array.isArray(keys) ||
-        keys.length === 0
-    ) {
-        throw new Error(
-            "keys must be a non-empty array"
-        );
+export function buildSqlByDatabaseSources(keys, relationMap, json) {
+    if (!Array.isArray(keys) || keys.length === 0) {
+        throw new Error("keys must be a non-empty array");
     }
 
-    const groups = groupMappingsByDatasource(
-        keys,
-        relationMap,
-        json
-    );
+    const groups = groupMappingsByDatasource(keys, relationMap, json);
 
     const result = new Map();
 
-    for (
-        const [datasource, mappings]
-        of groups
-        ) {
-        const databaseName = getDatabaseName(
+    for (const [datasource, mappings] of groups) {
+        const databaseName = getDatabaseName(datasource, json);
+
+        const { sql, aliasMap } = buildSqlFromMappings(mappings, json);
+
+        result.set(databaseName, {
             datasource,
-            json
-        );
-
-        const {
-            sql,
-            aliasMap
-        } = buildSqlFromMappings(
-            mappings,
-            json
-        );
-
-        result.set(
             databaseName,
-            {
-                datasource,
-                databaseName,
-                sql,
-                aliasMap
-            }
-        );
+            sql,
+            aliasMap,
+        });
     }
 
     return result;
@@ -1651,38 +1174,21 @@ export function buildSqlByDatabaseSources(
  *
  * Returns only the SQL string.
  */
-export function buildSqlFromKeys(
-    keys,
-    relationMap,
-    json
-) {
-    const queries = buildSqlByDatabaseSources(
-        keys,
-        relationMap,
-        json
-    );
+export function buildSqlFromKeys(keys, relationMap, json) {
+    const queries = buildSqlByDatabaseSources(keys, relationMap, json);
 
     if (queries.size !== 1) {
-        throw new Error(
-            `Requested mappings span ${queries.size} database sources. ` +
-            "Use buildSqlByDatabaseSources() instead."
-        );
+        throw new Error(`Requested mappings span ${queries.size} database sources. ` + "Use buildSqlByDatabaseSources() instead.");
     }
 
-    return [
-        ...queries.values()
-    ][0].sql;
+    return [...queries.values()][0].sql;
 }
 
 /**
  * Return all available semantic relation keys.
  */
-export function getRelationKeys(
-    relationMap
-) {
-    return [
-        ...relationMap.keys()
-    ];
+export function getRelationKeys(relationMap) {
+    return [...relationMap.keys()];
 }
 
 /**
@@ -1719,5 +1225,5 @@ export default {
     buildSqlFromMappings,
 
     buildSqlByDatabaseSources,
-    buildSqlFromKeys
+    buildSqlFromKeys,
 };

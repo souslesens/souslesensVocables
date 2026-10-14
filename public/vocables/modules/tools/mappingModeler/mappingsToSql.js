@@ -3,6 +3,11 @@ const KEY_SEPARATOR = "|";
 const DEFAULT_LITERAL_RANGE =
     "http://www.w3.org/2000/01/rdf-schema#Literal";
 
+const rdfsLabelPredicates = new Set([
+    "rdfs:label",
+    "http://www.w3.org/2000/01/rdf-schema#label"
+]);
+
 /**
  * Quote a SQL identifier.
  */
@@ -47,6 +52,67 @@ export function getClassLabel(classUri, json) {
         node?.label ??
         getUriLocalName(classUri)
     );
+}
+
+// a column linked to a column of its own class in the same table (superior_funct_loc of a functional
+// Location) is read as a value of that column, never joined on. The value column is the end with no
+// other relation: isMainColumn cannot tell, in PAZFLOR_ABOX superiorfunctionallocation is the main one.
+function getSameClassValueColumns(json) {
+    const tableByColumn = new Map(
+        json.nodes.map(node => [
+            node.id,
+            node.data?.dataTable
+        ])
+    );
+
+    const classByColumn = new Map();
+
+    const relationCountByColumn = new Map();
+
+    for (const edge of json.edges) {
+        if (edge.data?.type === "rdf:type") {
+            classByColumn.set(edge.from, edge.to);
+            continue;
+        }
+        // a table to column edge carries no predicate
+        if (!edge.data?.id) {
+            continue;
+        }
+        relationCountByColumn.set(edge.from, (relationCountByColumn.get(edge.from) ?? 0) + 1);
+        relationCountByColumn.set(edge.to, (relationCountByColumn.get(edge.to) ?? 0) + 1);
+    }
+
+    const subjectColumnByValueColumn = new Map();
+
+    for (const edge of json.edges) {
+        if (edge.data?.type === "rdf:type" || !edge.data?.id || edge.from === edge.to) {
+            continue;
+        }
+
+        const subjectClassUri = classByColumn.get(edge.from);
+
+        // a node and its parent sit in the same row, a link across tables is a real relation
+        if (
+            !subjectClassUri ||
+            subjectClassUri !== classByColumn.get(edge.to) ||
+            tableByColumn.get(edge.from) !== tableByColumn.get(edge.to)
+        ) {
+            continue;
+        }
+
+        const isFromOnlyInThisRelation = relationCountByColumn.get(edge.from) === 1;
+        const isToOnlyInThisRelation = relationCountByColumn.get(edge.to) === 1;
+
+        if (isToOnlyInThisRelation && !isFromOnlyInThisRelation) {
+            subjectColumnByValueColumn.set(edge.to, edge.from);
+        } else if (isFromOnlyInThisRelation && !isToOnlyInThisRelation) {
+            subjectColumnByValueColumn.set(edge.from, edge.to);
+        } else {
+            console.warn("Same class relation with no value column to read:", edge.from, edge.to);
+        }
+    }
+
+    return subjectColumnByValueColumn;
 }
 
 /**
@@ -295,6 +361,8 @@ export function extractRelationMap(json) {
         classesByTable.get(table).add(classUri);
     }
 
+    const subjectColumnByValueColumn = getSameClassValueColumns(json);
+
     /**
      * Resolve the semantic class of a column.
      *
@@ -426,6 +494,37 @@ export function extractRelationMap(json) {
             continue;
         }
 
+        const isValueColumnTo = subjectColumnByValueColumn.get(edge.to) === edge.from;
+        const isValueColumnFrom = subjectColumnByValueColumn.get(edge.from) === edge.to;
+
+        if (isValueColumnTo || isValueColumnFrom) {
+            const subjectColumnNode = isValueColumnTo ? fromNode : toNode;
+            const valueNode = isValueColumnTo ? toNode : fromNode;
+
+            addMapping(
+                buildDataPropertyKey(subjectClassUri, predicateUri, DEFAULT_LITERAL_RANGE),
+                {
+                    kind: "dataProperty",
+
+                    from: subjectColumnNode.data,
+                    to: valueNode.data,
+
+                    subjectUri: subjectClassUri,
+                    subjectLabel: getClassLabel(subjectClassUri, json),
+
+                    predicateUri,
+                    predicateLabel: `label_${valueNode.data.id}`,
+
+                    objectUri: DEFAULT_LITERAL_RANGE,
+                    objectLabel: getRangeLabel(DEFAULT_LITERAL_RANGE, json),
+
+                    range: DEFAULT_LITERAL_RANGE,
+                    format: null
+                }
+            );
+            continue;
+        }
+
         const key = buildObjectPropertyKey(
             subjectClassUri,
             predicateUri,
@@ -461,17 +560,29 @@ export function extractRelationMap(json) {
      * Extract data properties from otherPredicates.
      */
     for (const node of json.nodes) {
-        if (!validColumnTypes.has(node.data?.type)) {
+        if (!validColumnTypes.has(node.data?.type) || subjectColumnByValueColumn.has(node.id)) {
             continue;
         }
 
-        const otherPredicates =
-            node.data?.otherPredicates;
+        const otherPredicates = Array.isArray(node.data?.otherPredicates)
+            ? [...node.data.otherPredicates]
+            : [];
 
-        if (
-            !Array.isArray(otherPredicates) ||
-            otherPredicates.length === 0
-        ) {
+        const hasRdfsLabelPredicate = otherPredicates.some(
+            predicate => rdfsLabelPredicates.has(predicate?.property)
+        );
+
+        // as the KG builder (mappingsParser.js): rdfsLabel adds rdfs:label unless otherPredicates already has one
+        if (node.data?.rdfsLabel && !hasRdfsLabelPredicate) {
+            // the KG builder writes it as a string
+            otherPredicates.push({
+                property: "rdfs:label",
+                object: node.data.rdfsLabel,
+                range: "xsd:string"
+            });
+        }
+
+        if (otherPredicates.length === 0) {
             continue;
         }
 
@@ -498,7 +609,10 @@ export function extractRelationMap(json) {
         );
 
         for (const predicate of otherPredicates) {
-            const predicateUri = predicate?.property;
+            // both spellings of rdfs:label share one key, so the tree shows one label
+            const predicateUri = rdfsLabelPredicates.has(predicate?.property)
+                ? "rdfs:label"
+                : predicate?.property;
             const objectColumnName = predicate?.object;
 
             if (!predicateUri || !objectColumnName) {
@@ -572,15 +686,20 @@ export function extractTableJoins(json) {
 
     const joins = [];
 
+    const subjectColumnByValueColumn = getSameClassValueColumns(json);
+
     for (const node of json.nodes) {
         const parentId =
             node.data?.definedInColumn;
 
-        if (!parentId) {
+        if (!parentId || subjectColumnByValueColumn.has(node.id)) {
             continue;
         }
 
-        const parentNode = nodesById.get(parentId);
+        // the main column can be a value column (superiorfunctionallocation in PAZFLOR_ABOX)
+        const joinedParentId = subjectColumnByValueColumn.get(parentId) || parentId;
+
+        const parentNode = nodesById.get(joinedParentId);
 
         if (!parentNode) {
             console.warn(
@@ -944,7 +1063,8 @@ export function groupMappingsByDatasource(
 export function buildSelectColumns(
     mappings,
     getAlias,
-    json
+    json,
+    joinedColumnPairs = []
 ) {
     const columns = new Map();
 
@@ -954,6 +1074,31 @@ export function buildSelectColumns(
 
     const expressionAliases = new Map();
 
+    // a class id column already selected through a checked data property is not projected again
+    const dataPropertyExpressions = new Set();
+
+    for (const mapping of mappings) {
+        if (mapping.kind !== "dataProperty") {
+            continue;
+        }
+        dataPropertyExpressions.add(
+            `${getAlias(mapping.to.dataTable)}.` +
+            quoteIdentifier(mapping.to.id)
+        );
+    }
+
+    // a column joined on a data property column holds the same values
+    const expressionsCoveredByDataProperties = new Set(dataPropertyExpressions);
+
+    for (const [leftExpression, rightExpression] of joinedColumnPairs) {
+        if (dataPropertyExpressions.has(leftExpression)) {
+            expressionsCoveredByDataProperties.add(rightExpression);
+        }
+        if (dataPropertyExpressions.has(rightExpression)) {
+            expressionsCoveredByDataProperties.add(leftExpression);
+        }
+    }
+
     /**
      * Register a SQL projection.
      */
@@ -962,6 +1107,12 @@ export function buildSelectColumns(
         expression,
         metadata
     ) {
+        const isClassIdColumn = metadata.role === "subject" || metadata.kind === "objectProperty";
+
+        if (isClassIdColumn && expressionsCoveredByDataProperties.has(expression)) {
+            return;
+        }
+
         const expressionKey = JSON.stringify([
             semanticAlias,
             expression
@@ -1081,6 +1232,8 @@ export function buildSelectColumns(
             objectExpression,
             {
                 role: "object",
+
+                key: mapping.key,
 
                 kind: mapping.kind,
 
@@ -1210,27 +1363,6 @@ export function buildSqlFromMappings(
     }
 
     /*
-     * Build SELECT expressions.
-     */
-    const {
-        columns,
-        aliasMap
-    } = buildSelectColumns(
-        mappings,
-        getAlias,
-        json
-    );
-
-    const selectSql = [
-        ...columns.entries()
-    ]
-        .map(
-            ([alias, expression]) =>
-                `${expression} AS ${quoteIdentifier(alias)}`
-        )
-        .join(",\n    ");
-
-    /*
      * Choose a starting table.
      */
     const baseTable = selectedJoins.length
@@ -1253,6 +1385,8 @@ export function buildSqlFromMappings(
     ];
 
     const sqlJoins = [];
+
+    const joinedColumnPairs = [];
 
     while (pendingJoins.length) {
         let found = false;
@@ -1286,11 +1420,16 @@ export function buildSqlFromMappings(
                     join.toTable
                 );
 
+                const fromExpression = `${fromAlias}.${quoteIdentifier(join.fromColumn)}`;
+                const toExpression = `${toAlias}.${quoteIdentifier(join.toColumn)}`;
+
                 sqlJoins.push(
                     `JOIN ${quoteIdentifier(join.toTable)} ${toAlias}\n` +
-                    `  ON ${fromAlias}.${quoteIdentifier(join.fromColumn)}\n` +
-                    `   = ${toAlias}.${quoteIdentifier(join.toColumn)}`
+                    `  ON ${fromExpression}\n` +
+                    `   = ${toExpression}`
                 );
+
+                joinedColumnPairs.push([fromExpression, toExpression]);
 
                 joinedTables.add(
                     join.toTable
@@ -1317,11 +1456,16 @@ export function buildSqlFromMappings(
                     join.toTable
                 );
 
+                const fromExpression = `${fromAlias}.${quoteIdentifier(join.fromColumn)}`;
+                const toExpression = `${toAlias}.${quoteIdentifier(join.toColumn)}`;
+
                 sqlJoins.push(
                     `JOIN ${quoteIdentifier(join.fromTable)} ${fromAlias}\n` +
-                    `  ON ${fromAlias}.${quoteIdentifier(join.fromColumn)}\n` +
-                    `   = ${toAlias}.${quoteIdentifier(join.toColumn)}`
+                    `  ON ${fromExpression}\n` +
+                    `   = ${toExpression}`
                 );
+
+                joinedColumnPairs.push([fromExpression, toExpression]);
 
                 joinedTables.add(
                     join.fromTable
@@ -1367,6 +1511,28 @@ export function buildSqlFromMappings(
             );
         }
     }
+
+    /*
+     * Build SELECT expressions.
+     */
+    const {
+        columns,
+        aliasMap
+    } = buildSelectColumns(
+        mappings,
+        getAlias,
+        json,
+        joinedColumnPairs
+    );
+
+    const selectSql = [
+        ...columns.entries()
+    ]
+        .map(
+            ([alias, expression]) =>
+                `${expression} AS ${quoteIdentifier(alias)}`
+        )
+        .join(",\n    ");
 
     /*
      * Build non-null conditions for subject columns.

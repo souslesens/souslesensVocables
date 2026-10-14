@@ -935,7 +935,7 @@ class BotEngineClass {
 
         if (options && options.datePicker) {
             //DateWidget.unsetDatePickerOnInput("botPromptInput");
-            DateWidget.setDatePickerOnInput("botPromptInput", null, function (date) {
+            DateWidget.setDatePickerOnInput("botPromptInput", null, (date) => {
                 this.currentBot.params[varToFill] = date.getTime();
                 $("#" + this.divId)
                     .find("#botPromptInput")

@@ -2,11 +2,14 @@ import Sparql_common from "../sparqlProxies/sparql_common.js";
 import SparqlQuery_bot from "./sparqlQuery_bot.js";
 import BotEngineClass from "./_botEngineClass.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
+import common from "../shared/common.js";
 
 var KGquery_filter_bot = (function () {
     var self = {};
     self.title = "Filter Class";
     self.myBotEngine = new BotEngineClass();
+    // the FILTER ( ... ) this bot writes, see writeFilterFn
+    self.filterWrapperRegex = /^\s*FILTER\s*\(([\s\S]*)\)\s*$/;
     self.start = function (data, currentQuery, validateFn) {
         var startParams = self.myBotEngine.fillStartParams(arguments);
 
@@ -68,6 +71,16 @@ var KGquery_filter_bot = (function () {
     self.functions = {}; //SparqlQuery_bot.functions;
 
     self.functions.listIndividualsFn = function () {
+        // a caller whose values do not live in the triple store, e.g. the SQL data extractor
+        if (self.params.listValuesFn) {
+            return self.params.listValuesFn(self.params.property, function (err, values) {
+                if (err) {
+                    return MainController.errorAlert(err);
+                }
+                self.params.individualsFilterType = "labelsList";
+                self.myBotEngine.showList(values, "individualsFilterValue");
+            });
+        }
         var options = {};
         if (self.params.property && self.params.property != "http://www.w3.org/2000/01/rdf-schema#label") {
             options.otherProperty = self.params.property;
@@ -170,7 +183,16 @@ var KGquery_filter_bot = (function () {
                 });
                 return;
             } else {
-                self.myBotEngine.promptValue("enter value", "propertyValue", null, { datePicker: 1 });
+                self.myBotEngine.promptValue("enter a date (yyyy-mm-dd or dd/mm/yyyy)", "propertyValue", null, { datePicker: 1 }, function (typedValue) {
+                    var typedDate = DateWidget.parseDateText(typedValue);
+                    if (!typedDate) {
+                        self.myBotEngine.insertBotMessage("not a date: " + typedValue, { isError: true });
+                        return self.functions.promptPropertyValueFn();
+                    }
+                    // setSparqlQueryFilterFn reads it with new Date(), which only reads ISO safely
+                    self.params.propertyValue = common.getSimpleDateStrFromDate(typedDate);
+                    self.myBotEngine.nextStep();
+                });
             }
         } else {
             self.myBotEngine.promptValue("enter value", "propertyValue");
@@ -245,16 +267,23 @@ var KGquery_filter_bot = (function () {
             if (self.params.property != "http://www.w3.org/2000/01/rdf-schema#label") {
                 var propertyLabel;
                 var dataType;
-                KGquery_graph.visjsData.nodes.forEach(function (node) {
-                    if (node.id == self.data.id) {
-                        node.data.nonObjectProperties.forEach(function (item) {
-                            if (item.id == self.params.property) {
-                                propertyLabel = item.label;
-                                dataType = item.datatype;
-                            }
-                        });
-                    }
-                });
+                // a caller giving its own value list (SQL data extractor) has no KGquery graph
+                var isOutsideKGquery = Boolean(self.params.listValuesFn);
+                if (isOutsideKGquery) {
+                    propertyLabel = propLabel;
+                    dataType = self.params.propertyDatatype;
+                } else {
+                    KGquery_graph.visjsData.nodes.forEach(function (node) {
+                        if (node.id == self.data.id) {
+                            node.data.nonObjectProperties.forEach(function (item) {
+                                if (item.id == self.params.property) {
+                                    propertyLabel = item.label;
+                                    dataType = item.datatype;
+                                }
+                            });
+                        }
+                    });
+                }
                 // individualsFilterValue=self.params.property;
                 self.filterItems.push(filterBooleanOperator + " ?" + varName + "_" + propertyLabel + " ='" + individualsFilterValue + "'" + "^^<" + dataType + ">");
             } else {
@@ -285,8 +314,70 @@ var KGquery_filter_bot = (function () {
         });
         var propLabel = Sparql_common.getLabelFromURI(self.params.property);
         self.filter += "FILTER (" + str + ")";
-        self.filter = self.filter.replace("Label", "_label");
+        // KGquery names its label variable ?xxx_label, a caller with its own value list has none
+        var isOutsideKGquery = Boolean(self.params.listValuesFn);
+        if (!isOutsideKGquery) {
+            self.filter = self.filter.replace("Label", "_label");
+        }
         self.filterParams = { varName: self.params.varName, property: self.params.property, propertyLabel: propLabel };
+    };
+
+    /**
+     * Translate a filter written by this bot into an SQL condition.
+     * Only the clause shapes built by setSparqlQueryFilterFn are recognized.
+     * @param {string} filter - "FILTER (...)" returned by the bot
+     * @param {Object} expressionByVariable - variable name without "?" (e.g. "v_p0") to SQL column expression
+     * @returns {string|null} the condition to add to a WHERE clause, null when the filter holds anything else
+     */
+    self.sparqlFilterToSqlCondition = function (filter, expressionByVariable) {
+        var regexClauseRegex = /(!?)regex\(\s*\?(\w+)\s*,\s*"([^"]*)"\s*,\s*"i"\)/g;
+        // a value typed by the user is double quoted, a value picked in a list is single quoted and typed
+        var comparisonClauseRegex = /\?(\w+)\s*(!=|<=|>=|=|<|>)\s*(?:"([^"]*)"|'(.*?)'(?=\^\^))(?:\^\^(?:xsd:\w+|<[^>]+>))?/g;
+        var clausePlaceholderRegex = /#clause(\d+)#/g;
+        var onlyOperatorsLeftRegex = /^(\s|\(|\)|&&|\|\||#clause\d+#)*$/;
+        var andOperatorRegex = /&&/g;
+        var orOperatorRegex = /\|\|/g;
+        var singleQuoteRegex = /'/g;
+        // Postgres LIKE escapes its wildcards with a backslash
+        var likeWildcardRegex = /[\\%_]/g;
+
+        var sqlClauses = [];
+
+        function toSqlLiteral(value) {
+            return "'" + value.replace(singleQuoteRegex, "''") + "'";
+        }
+
+        // an unknown variable stays a "?" in the text, which the final check refuses
+        function addSqlClause(variable, sqlClause) {
+            if (!expressionByVariable[variable]) {
+                return "?" + variable;
+            }
+            sqlClauses.push(expressionByVariable[variable] + " " + sqlClause);
+            return "#clause" + (sqlClauses.length - 1) + "#";
+        }
+
+        var condition = filter.match(self.filterWrapperRegex)[1];
+
+        condition = condition.replace(regexClauseRegex, function (_clause, negation, variable, value) {
+            var notKeyword = negation ? "NOT " : "";
+            var likePattern = "%" + value.replace(likeWildcardRegex, "\\$&") + "%";
+            return addSqlClause(variable, notKeyword + "ILIKE " + toSqlLiteral(likePattern));
+        });
+        condition = condition.replace(comparisonClauseRegex, function (_clause, variable, operator, typedValue, pickedValue) {
+            var sqlOperator = operator == "!=" ? "<>" : operator;
+            var value = typedValue !== undefined ? typedValue : pickedValue;
+            return addSqlClause(variable, sqlOperator + " " + toSqlLiteral(value));
+        });
+
+        // what remains is only operators and parentheses, values stay out of the rewrite
+        if (!onlyOperatorsLeftRegex.test(condition)) {
+            return null;
+        }
+        condition = condition.replace(andOperatorRegex, " AND ");
+        condition = condition.replace(orOperatorRegex, " OR ");
+        return condition.replace(clausePlaceholderRegex, function (_placeholder, clauseIndex) {
+            return sqlClauses[clauseIndex];
+        });
     };
 
     return self;

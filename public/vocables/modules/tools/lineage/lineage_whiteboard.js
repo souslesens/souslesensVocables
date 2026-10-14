@@ -30,6 +30,9 @@ import Lineage_legendOverlay from "./lineage_legendOverlay.js";
 import Axioms_graph from "../axioms/axioms_graph.js";
 import Axioms_manager from "../axioms/axioms_manager.js";
 import KGquery from "../KGquery/KGquery.js";
+import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
+import MappingColumnsGraph from "../mappingModeler/mappingColumnsGraph.js";
+import Lineage_sqlDataExtractor from "./lineage_sqlDataExtractor.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -397,7 +400,11 @@ var Lineage_whiteboard = (function () {
         } else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
             Lineage_selection.addNodeToSelection(node);
         } else if (nodeEvent.ctrlKey) {
-            NodeInfosWidget.showNodeInfos(node.data.source, node, "mainDialogDiv", { resetVisited: 1 });
+            if (Lineage_sqlDataExtractor.isRecording && node.data.type == Lineage_sqlDataExtractor.currentNodeType) {
+                Lineage_sqlDataExtractor.addClassToPath(node);
+            } else {
+                NodeInfosWidget.showNodeInfos(node.data.source, node, "mainDialogDiv", { resetVisited: 1 });
+            }
         } else if (nodeEvent.altKey && options.callee == "Tree") {
             SearchWidget.openTreeNode(SearchWidget.currentTargetDiv, node.data.source, node, { reopen: true });
         } else {
@@ -429,7 +436,13 @@ var Lineage_whiteboard = (function () {
                     if (resolvedId && resolvedId.startsWith("Recent ")) {
                         resolvedId = resolvedId.substring("Recent ".length);
                     }
-                    var resolvedNode = resolvedId !== node.id ? Object.assign({}, node, { id: resolvedId, data: Object.assign({}, node.data, { id: resolvedId }) }) : node;
+                    var resolvedNode =
+                        resolvedId !== node.id
+                            ? Object.assign({}, node, {
+                                  id: resolvedId,
+                                  data: Object.assign({}, node.data, { id: resolvedId }),
+                              })
+                            : node;
                     Lineage_sources.menuActions.sourceMetaData(resolvedNode);
                 },
             };
@@ -862,11 +875,18 @@ var Lineage_whiteboard = (function () {
                                 }
                             }
                         } else {
-                            if (existingNodes[item.topConcept.hidden]) nodesToUnhide.push({ id: item.topConcept.value, hidden: false });
+                            if (existingNodes[item.topConcept.hidden]) {
+                                nodesToUnhide.push({
+                                    id: item.topConcept.value,
+                                    hidden: false,
+                                });
+                            }
                         }
                     });
                     if (nodesToUnhide.length > 0) {
-                        if (self.lineageVisjsGraph.data && self.lineageVisjsGraph.data.nodes) self.lineageVisjsGraph.data.nodes.update(nodesToUnhide);
+                        if (self.lineageVisjsGraph.data && self.lineageVisjsGraph.data.nodes) {
+                            self.lineageVisjsGraph.data.nodes.update(nodesToUnhide);
+                        }
                     }
 
                     callbackEach();
@@ -1986,6 +2006,25 @@ var Lineage_whiteboard = (function () {
         );
     };
 
+    self.showSpecialNodesDialog = function () {
+        var loadFn = function (callbackLoad) {
+            return callbackLoad([
+                { label: "Logic axiom nodes", id: "logicalAxiomNodes" },
+                { label: "SQL Database mapped nodes ", id: "databaseMappedNodes" },
+            ]);
+        };
+        var validateFn = function (selection) {
+            if (selection == "logicalAxiomNodes") {
+                Lineage_axioms.drawClassesWithAxioms();
+            }
+
+            if (selection == "databaseMappedNodes") {
+                Lineage_sqlDataExtractor.drawDatabaseMappedNodes();
+            }
+        };
+        SimpleListSelectorWidget.showDialog(null, loadFn, validateFn);
+    };
+
     /**
      * Adds child nodes and their parent-child relationships to the graph for a given source and node IDs.
      * The method queries the SPARQL endpoint to retrieve child nodes and then processes and visualizes them as nodes and edges in the graph.
@@ -2180,8 +2219,12 @@ var Lineage_whiteboard = (function () {
                         for (var i = 1; i < depth + 1; i++) {
                             var childId = item["child" + i];
                             var childType = item["child" + i + "Type"];
-                            if (!childId) continue;
-                            if (!childEvidence[childId]) childEvidence[childId] = {};
+                            if (!childId) {
+                                continue;
+                            }
+                            if (!childEvidence[childId]) {
+                                childEvidence[childId] = {};
+                            }
                             if (childType) {
                                 if (childType.indexOf("NamedIndividual") > -1) {
                                     childEvidence[childId].hasNamedIndividualType = true;
@@ -3732,7 +3775,9 @@ restrictionSource = Config.predicatesSource;
             }
 
             result.forEach(function (item) {
-                if (!item.subjectTypes) return;
+                if (!item.subjectTypes) {
+                    return;
+                }
                 var types = item.subjectTypes.value;
                 var superClasses = item.subjectSuperClasses ? item.subjectSuperClasses.value : "";
                 if (types.indexOf("NamedIndividual") > -1) {
@@ -5170,9 +5215,10 @@ attrs.color=self.getSourceColor(superClassValue)
      * @returns {void}
      */
     self.initQueryTab = function () {
-        $("#queryTab").html("<div id='queryTabDiv'></div>");
+        $("#queryTab").html("<div id='queryTabDiv'></div>" + "<div id='dataExtractorDiv'></div>");
         $("#botContainerDiv").css("width", "100%");
         SparqlQuery_bot.start({ divId: "queryTabDiv" });
+        Lineage_sqlDataExtractor.init();
     };
 
     /**
@@ -5320,7 +5366,14 @@ attrs.color=self.getSourceColor(superClassValue)
         }
         // After the mount, never before: mount() fills the dock asynchronously and replaces its
         // content, which would throw away the handle resizable appends inside it.
-        chatbotController.mount("#lineage_chatbotDock", { reduced: true, hostWhiteboard: true }, self.makeChatbotDockResizable);
+        chatbotController.mount(
+            "#lineage_chatbotDock",
+            {
+                reduced: true,
+                hostWhiteboard: true,
+            },
+            self.makeChatbotDockResizable,
+        );
     };
 
     /**
@@ -5492,11 +5545,27 @@ attrs.color=self.getSourceColor(superClassValue)
      * exists for callers that have no button to hand.
      */
     self.lineageTabs = {
-        whiteboard: { tabId: "whiteboardTab", initFunctionName: "initWhiteboardTab", buttonSelector: "#lineage-tab-buttons .whiteBoardIcon" },
-        classes: { tabId: "classesTab", initFunctionName: "initClassesTab", buttonSelector: "#lineage-tab-buttons .classesIcon" },
-        properties: { tabId: "propertiesTab", initFunctionName: "initPropertiesTab", buttonSelector: "#lineage-tab-buttons .propertiesIcon" },
+        whiteboard: {
+            tabId: "whiteboardTab",
+            initFunctionName: "initWhiteboardTab",
+            buttonSelector: "#lineage-tab-buttons .whiteBoardIcon",
+        },
+        classes: {
+            tabId: "classesTab",
+            initFunctionName: "initClassesTab",
+            buttonSelector: "#lineage-tab-buttons .classesIcon",
+        },
+        properties: {
+            tabId: "propertiesTab",
+            initFunctionName: "initPropertiesTab",
+            buttonSelector: "#lineage-tab-buttons .propertiesIcon",
+        },
         query: { tabId: "queryTab", initFunctionName: "initQueryTab", buttonSelector: "#lineage-tab-buttons .queryIcon" },
-        containers: { tabId: "containersTab", initFunctionName: "initContainersTab", buttonSelector: "#lineage-tab-buttons .containersIcon" },
+        containers: {
+            tabId: "containersTab",
+            initFunctionName: "initContainersTab",
+            buttonSelector: "#lineage-tab-buttons .containersIcon",
+        },
     };
 
     /**

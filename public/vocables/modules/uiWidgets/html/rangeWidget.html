@@ -1,10 +1,8 @@
-<script src="js/external/jQRangeSlider-5.8.2/jQDateRangeSlider-min.js"></script>
-<script src="js/external/jQRangeSlider-5.8.2/mousewheel.min.js"></script>
-<link rel="stylesheet" href="js/external/jQRangeSlider-5.8.2/css/iThing.css" type="text/css" />
-
-<div style="width: 1000px; height: 200px">
-    <div id="slider" style="width: 800px"></div>
-    <div>
-        <button id="rangePickerOkbutton">OK</button>
+<div style="padding: 10px">
+    <div style="display: flex; gap: 20px; flex-wrap: wrap">
+        <div>from<br /><input id="dateRangeWidget_minDate" autocomplete="off" placeholder="yyyy-mm-dd or dd/mm/yyyy" /></div>
+        <div>to<br /><input id="dateRangeWidget_maxDate" autocomplete="off" placeholder="yyyy-mm-dd or dd/mm/yyyy" /></div>
     </div>
+    <div id="dateRangeWidget_message" style="color: red; margin-top: 6px"></div>
+    <button id="rangePickerOkbutton" class="w3-button classesPanelButton" style="margin-top: 6px">OK</button>
 </div>

@@ -494,12 +494,16 @@ var MappingColumnsGraph = (function () {
     };
 
     self.isClassColumn = function (node) {
-        if (!node) return false;
+        if (!node) {
+            return false;
+        }
         if (!node.id) {
             node = { id: node };
         }
         var visjsNode = self.visjsGraph.data.nodes.get(node.id);
-        if (!visjsNode) return false;
+        if (!visjsNode) {
+            return false;
+        }
         var nodeData = visjsNode.data;
         if (nodeData.definedInColumn) {
             var mainNode = self.visjsGraph.data.nodes.get(nodeData.definedInColumn);
@@ -642,13 +646,20 @@ var MappingColumnsGraph = (function () {
                     obj.node.data.id = data.name;
                     obj.node.data.sqlType = data.driver;
                     DataSourceManager.onDataSourcesJstreeSelect(undefined, obj, function () {
-                        var obj2 = { node: { label: node.data.dataTable, data: { type: "table", id: node.data.dataTable, label: node.data.dataTable } } };
+                        var obj2 = {
+                            node: {
+                                label: node.data.dataTable,
+                                data: { type: "table", id: node.data.dataTable, label: node.data.dataTable },
+                            },
+                        };
                         DataSourceManager.onDataSourcesJstreeSelect(undefined, obj2, callback);
                     });
                 },
 
                 error: function (err) {
-                    if (callback) return callback(err);
+                    if (callback) {
+                        return callback(err);
+                    }
                     return MainController.errorAlert(err);
                 },
             });
@@ -670,7 +681,9 @@ var MappingColumnsGraph = (function () {
      */
 
     self.showImplicitGraphPopupMenu = function (node, point, event) {
-        if (!node || !node.data) return;
+        if (!node || !node.data) {
+            return;
+        }
 
         var html = "";
         if (node.data.type === "Class" || node.data.type === "superClass") {
@@ -1617,36 +1630,49 @@ var MappingColumnsGraph = (function () {
      * @memberof module:MappingColumnsGraph
      * @returns {void}
      */
-    self.exportMappings = function () {
+    self.exportMappings = function (source, callback) {
+        if (!source) {
+            source = MappingModeler.currentSLSsource;
+        }
         self.saveVisjsGraph(function (err) {
-            var fileName = "mappings_" + MappingModeler.currentSLSsource + "_ALL" + ".json";
-            var payload = {
-                dir: "graphs/",
-                fileName: fileName,
-            };
-
-            $.ajax({
-                type: "GET",
-                url: `${Config.apiUrl}/data/file`,
-                data: payload,
-                dataType: "json",
-                success: function (result, _textStatus, _jqXHR) {
-                    var data = JSON.parse(result);
-                    if (data?.options?.config?.sparqlServerUrl) {
-                        data.options.config.sparqlServerUrl = "_default";
-                    }
-                    Export.downloadJSON(data, fileName);
-                },
-                error(err) {
-                    if (callback) {
-                        return callback(err);
-                    }
+            self.loadMappingsFromFile(source, function (err, data) {
+                if (err) {
                     if (err.responseJSON == "file does not exist") {
                         return;
                     }
                     return MainController.errorAlert(err);
-                },
+                }
+                if (data?.options?.config?.sparqlServerUrl) {
+                    data.options.config.sparqlServerUrl = "_default";
+                }
+                var fileName = "mappings_" + source + "_ALL" + ".json";
+                Export.downloadJSON(data, fileName);
             });
+        });
+    };
+
+    self.loadMappingsFromFile = function (source, callback) {
+        var fileName = "mappings_" + source + "_ALL" + ".json";
+        var payload = {
+            dir: "graphs/",
+            fileName: fileName,
+        };
+
+        $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/data/file`,
+            data: payload,
+            dataType: "json",
+            success: function (result, _textStatus, _jqXHR) {
+                var data = JSON.parse(result);
+
+                if (callback) {
+                    return callback(null, data);
+                }
+            },
+            error: function (err) {
+                return callback(err);
+            },
         });
     };
 
@@ -1679,12 +1705,16 @@ var MappingColumnsGraph = (function () {
     function findConfigKeyLine(jsonText, sectionName, key) {
         var sectionNeedle = `"${sectionName}": {`;
         var sectionPos = jsonText.indexOf(sectionNeedle);
-        if (sectionPos < 0) return null;
+        if (sectionPos < 0) {
+            return null;
+        }
 
         var windowText = jsonText.slice(sectionPos, sectionPos + 20000);
         var keyNeedle = `"${key}"`;
         var keyPosLocal = windowText.indexOf(keyNeedle);
-        if (keyPosLocal < 0) return null;
+        if (keyPosLocal < 0) {
+            return null;
+        }
 
         return getLineNumberFromIndex(jsonText, sectionPos + keyPosLocal);
     }
@@ -1700,7 +1730,9 @@ var MappingColumnsGraph = (function () {
     function findNodeDatasourceLine(jsonText, nodeId, datasourceId) {
         var idNeedle = `"id": "${nodeId}"`;
         var idPos = jsonText.indexOf(idNeedle);
-        if (idPos < 0) return null;
+        if (idPos < 0) {
+            return null;
+        }
 
         var windowText = jsonText.slice(idPos, idPos + 4000);
         var dsNeedle = `"datasource": "${datasourceId}"`;
@@ -1788,9 +1820,13 @@ var MappingColumnsGraph = (function () {
         (data.nodes || []).forEach(function (node, nodeIndex) {
             // datasourceId peut être stocké sous datasource ou dataSource selon les versions
             var datasourceId = node && node.data ? node.data.datasource || node.data.dataSource : null;
-            if (!datasourceId) return;
+            if (!datasourceId) {
+                return;
+            }
 
-            if (!datasourceUsagesById[datasourceId]) datasourceUsagesById[datasourceId] = [];
+            if (!datasourceUsagesById[datasourceId]) {
+                datasourceUsagesById[datasourceId] = [];
+            }
 
             datasourceUsagesById[datasourceId].push({
                 nodeIndex: nodeIndex,
@@ -1925,22 +1961,22 @@ var MappingColumnsGraph = (function () {
     }
 
     /**
-                * @function
-                * @name importMappingsFromJSONFile
-                * @memberof module:MappingColumnsGraph
-                * @description
-                * Imports a mappings JSON file into the current mapping graph and saves it on the server.
-                *
-                * To prevent crashes when importing a graph created on another server, this import validates
-                * data source identifiers before writing the graph file:
-                * 1) JSON integrity: each `nodes[i].data.datasource` must be declared in
-                *    `options.config.databaseSources` or `options.config.csvSources`.
-                * 2) Target server availability: if `options.config.databaseSources` contains ids, the import
-                *    calls `GET /databases` and checks that each id exists and/or is authorized.
-                
-                * If validation fails, an "Import blocked" dialog is shown with actionable guidance (and tries to display approximate JSON line numbers when possible).
-                * @returns {void}
-                */
+         * @function
+         * @name importMappingsFromJSONFile
+         * @memberof module:MappingColumnsGraph
+         * @description
+         * Imports a mappings JSON file into the current mapping graph and saves it on the server.
+         *
+         * To prevent crashes when importing a graph created on another server, this import validates
+         * data source identifiers before writing the graph file:
+         * 1) JSON integrity: each `nodes[i].data.datasource` must be declared in
+         *    `options.config.databaseSources` or `options.config.csvSources`.
+         * 2) Target server availability: if `options.config.databaseSources` contains ids, the import
+         *    calls `GET /databases` and checks that each id exists and/or is authorized.
+
+         * If validation fails, an "Import blocked" dialog is shown with actionable guidance (and tries to display approximate JSON line numbers when possible).
+         * @returns {void}
+         */
     self.importMappingsFromJSONFile = function () {
         ImportFileWidget.showImportDialog(function (err, importedJsonText) {
             if (err) {
@@ -2157,26 +2193,42 @@ var MappingColumnsGraph = (function () {
                     var addedColEdgeIds = {};
 
                     columns.forEach(function (column) {
-                        if (!column) return;
+                        if (!column) {
+                            return;
+                        }
 
                         var columnId = null;
-                        if (column.id) columnId = column.id;
-                        if (!columnId) return;
+                        if (column.id) {
+                            columnId = column.id;
+                        }
+                        if (!columnId) {
+                            return;
+                        }
 
                         var columnLabel = columnId;
-                        if (column.label) columnLabel = column.label;
+                        if (column.label) {
+                            columnLabel = column.label;
+                        }
 
                         var dataTable = null;
-                        if (column.data && column.data.dataTable) dataTable = column.data.dataTable;
+                        if (column.data && column.data.dataTable) {
+                            dataTable = column.data.dataTable;
+                        }
 
                         var displayLabel = columnLabel;
-                        if (dataTable) displayLabel = dataTable + ":" + columnLabel;
+                        if (dataTable) {
+                            displayLabel = dataTable + ":" + columnLabel;
+                        }
 
                         var datableKey = dataTable;
                         var columnColor = common.getResourceColor("dataTable", datableKey, "paletteIntense");
                         var classId = self.getColumnClass(column);
-                        if (!classId) return;
-                        if (!uniqueNodes[classId]) return;
+                        if (!classId) {
+                            return;
+                        }
+                        if (!uniqueNodes[classId]) {
+                            return;
+                        }
 
                         if (!uniqueNodes[columnId]) {
                             classVisjsData.nodes.push({
@@ -2189,12 +2241,18 @@ var MappingColumnsGraph = (function () {
                             uniqueNodes[columnId] = 1;
                         }
                         var edgeColumnToClass = [];
-                        if (edgesFromMap && edgesFromMap[columnId]) edgeColumnToClass = edgesFromMap[columnId];
+                        if (edgesFromMap && edgesFromMap[columnId]) {
+                            edgeColumnToClass = edgesFromMap[columnId];
+                        }
 
                         var edgeType = null;
                         edgeColumnToClass.forEach(function (edge) {
-                            if (edgeType) return;
-                            if (edge && edge.data && edge.data.type) edgeType = edge.data.type;
+                            if (edgeType) {
+                                return;
+                            }
+                            if (edge && edge.data && edge.data.type) {
+                                edgeType = edge.data.type;
+                            }
                         });
 
                         var edgeId = columnId + "->" + classId + "|" + edgeType;
@@ -2350,12 +2408,18 @@ var MappingColumnsGraph = (function () {
                     var implicitOptions = {
                         visjsOptions: { autoResize: true, width: "100%", height: "100%" },
                         onclickFn: function (node, event, options) {
-                            if (!node) return;
+                            if (!node) {
+                                return;
+                            }
                             self.currentGraphNode = node;
 
-                            if (!node.data) return;
+                            if (!node.data) {
+                                return;
+                            }
 
-                            if (!MappingModeler.columnsMappingsObjects.includes(node.data.type)) return;
+                            if (!MappingModeler.columnsMappingsObjects.includes(node.data.type)) {
+                                return;
+                            }
 
                             var baseLabel = null;
                             if (node.data && node.data.label) {
@@ -2458,6 +2522,37 @@ var MappingColumnsGraph = (function () {
             map[calculatedKey].push(edge);
         });
         return map;
+    };
+
+    /**
+     * gets json optionnaly firltered with nodes and relations  corresponding toClasses
+     *
+     */
+    self.getSourceMappingsModel = function (source, filter, callback) {
+        self.loadMappingsFromFile(source, function (err, json) {
+            if (err) {
+                return callback(err);
+            }
+            if (!filter) {
+                return callback(null, json);
+            }
+            if (filter == "ClassesAndRelations") {
+                var filteredData = { nodes: [], edges: [] };
+            }
+            var nodesMap = {};
+            json.nodes.forEach(function (node) {
+                if (node.data && node.data.type == "Class") {
+                    filteredData.nodes.push(node);
+                    nodesMap[node.id] = node;
+                }
+            });
+            json.edges.forEach(function (edge) {
+                if (nodesMap[edge.from] && nodesMap[edge.to]) {
+                    filteredData.edges.push(edge);
+                }
+            });
+            return callback(null, filteredData);
+        });
     };
 
     return self;

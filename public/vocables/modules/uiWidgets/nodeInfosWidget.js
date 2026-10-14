@@ -819,11 +819,21 @@ defaultLang = 'en';*/
         });
     };
 
-    self.showAssociatedProperties = function (sourceLabel, nodeId, divId, callback) {
+    self.showAssociatedProperties = function (sourceLabel, nodeId, divId, callback, ancestors) {
+        if (!ancestors && OntologyModels.isSourceOrImportAboveMaxClasses(sourceLabel)) {
+            return SearchUtil.getClassAncestorsFromIndex(sourceLabel, nodeId, function (err, indexAncestors) {
+                if (err) {
+                    UI.message(err, true);
+                }
+                self.showAssociatedProperties(sourceLabel, nodeId, divId, callback, indexAncestors || []);
+            });
+        }
         var sources = [sourceLabel];
         var imports = Config.sources[sourceLabel].imports;
         sources = sources.concat(imports);
-        var ancestors = OntologyModels.getClassHierarchyTreeData(sourceLabel, nodeId, "ancestors");
+        if (!ancestors) {
+            ancestors = OntologyModels.getClassHierarchyTreeData(sourceLabel, nodeId, "ancestors");
+        }
         var ancestorsIds = ancestors.map(function (x) {
             return x.id;
         });
@@ -962,9 +972,19 @@ defaultLang = 'en';*/
         }
     };
 
-    self.showClassesBreakDown = function (sourceLabel, nodeId, divId, callback) {
+    self.showClassesBreakDown = function (sourceLabel, nodeId, divId, callback, ancestors) {
+        if (!ancestors && OntologyModels.isSourceOrImportAboveMaxClasses(sourceLabel)) {
+            return SearchUtil.getClassAncestorsFromIndex(sourceLabel, nodeId, function (err, indexAncestors) {
+                if (err) {
+                    UI.message(err, true);
+                }
+                self.showClassesBreakDown(sourceLabel, nodeId, divId, callback, indexAncestors || []);
+            });
+        }
         var jstreeData = [];
-        var ancestors = OntologyModels.getClassHierarchyTreeData(sourceLabel, nodeId, "ancestors");
+        if (!ancestors) {
+            ancestors = OntologyModels.getClassHierarchyTreeData(sourceLabel, nodeId, "ancestors");
+        }
 
         if (ancestors.length == 0) {
             return callback();

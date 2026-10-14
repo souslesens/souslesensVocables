@@ -33,6 +33,8 @@ import IndexedPredicates_bot from "../../bots/indexedPredicates_bot.js";
 var Lineage_sources = (function () {
     var self = {};
     self.activeSource = null;
+    // the source Lineage was opened on, kept while other sources are added with "+" or made active
+    self.mainSource = null;
     self.loadedSources = {};
     self.sourceDivsMap = {};
 
@@ -99,6 +101,7 @@ var Lineage_sources = (function () {
 
     self.clearRegistrations = function () {
         _registrationGeneration++;
+        self.mainSource = null;
         self.loadedSources = {};
         self.sourceDivsMap = {};
     };
@@ -496,7 +499,7 @@ var Lineage_sources = (function () {
     };
 
     /**
-     * Checks if a source is indexed in ElasticSearch. If not, it triggers the indexing process.
+     * Checks if a source the user may write is indexed in ElasticSearch. If not, it triggers the indexing process.
      * @function
      * @name indexSourceIfNotIndexed
      * @memberof module:Lineage_sources
@@ -504,6 +507,10 @@ var Lineage_sources = (function () {
      * @returns {void}
      */
     self.indexSourceIfNotIndexed = function (source) {
+        // indexing writes, so a reader would collect a refusal on every open of the source
+        if (Config.sources[source].accessControl != "readwrite") {
+            return;
+        }
         SearchUtil.initSourcesIndexesList(null, function (err, indexedSources) {
             if (err) {
                 return MainController.errorAlert(err);

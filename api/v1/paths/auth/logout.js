@@ -21,8 +21,7 @@ export default function () {
         if (config.auth === "keycloak") {
             result.redirect = config.keycloak.authServerURL + "/realms/" + config.keycloak.realm + "/protocol/openid-connect/logout?redirect_uri=" + config.souslesensUrl;
         } else if (config.auth === "auth0") {
-            const logoutUrl = `https://${config.auth0.domain}/oidc/logout`;
-            result.redirect = logoutUrl;
+            result.redirect = "https://" + config.auth0.domain + "/oidc/logout?client_id=" + config.auth0.clientID + "&post_logout_redirect_uri=" + config.souslesensUrl;
         } else if (config.auth === "local" || config.auth === "database") {
             result.redirect = "/login";
         } else {
@@ -37,7 +36,7 @@ export default function () {
             'Terminates the local session via `req.logout` (no-op when `mainConfig.auth === "disabled"`) and computes a ' +
             "`redirect` URL adapted to the configured provider: " +
             "Keycloak → `<authServerURL>/realms/<realm>/protocol/openid-connect/logout?redirect_uri=<souslesensUrl>`, " +
-            "Auth0 → `https://<domain>/oidc/logout`, " +
+            "Auth0 → `https://<domain>/oidc/logout?client_id=<clientID>&post_logout_redirect_uri=<souslesensUrl>`, " +
             "local/database → `/login`. " +
             "Throws if `mainConfig.auth` is set to an unknown value.",
         operationId: "authLogout",

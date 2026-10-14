@@ -7,6 +7,7 @@ import Lineage_relations from "./lineage_relations.js";
 import LegendWidget from "../../uiWidgets/legendWidget.js";
 import Containers_graph from "../containers/containers_graph.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
+import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
 
 /**
  * @module Lineage_decoration
@@ -163,11 +164,21 @@ var Lineage_decoration = (function () {
                     /*   var uniqueTypes = {};
                     var classes = Object.keys(distinctNodeClassesMap);*/
 
+                    // the active source scope misses the classes the other whiteboard sources bring
+                    var mainSource = Lineage_sources.mainSource || Lineage_sources.activeSource;
+                    var mainSourceScope = CommonBotFunctions.getSourceAndImports(mainSource);
+
                     for (var classUri in distinctNodeClassesMap) {
-                        var ancestors = OntologyModels.getClassHierarchyTreeData(Lineage_sources.activeSource, classUri, "ancestors");
+                        var nodeSource = distinctNodeClassesMap[classUri][0].data.source;
+                        var hierarchySource = mainSource;
+                        // a source added with "+" and not imported by the main source is unknown to the main source model
+                        if (mainSourceScope.indexOf(nodeSource) < 0 && Config.ontologiesVocabularyModels[nodeSource]) {
+                            hierarchySource = nodeSource;
+                        }
+                        var ancestors = OntologyModels.getClassHierarchyTreeData(hierarchySource, classUri, "ancestors");
 
                         if (distinctNodeClassesMap[classUri][0].data.rdfType == "NamedIndividual") {
-                            ancestors = OntologyModels.getClassHierarchyTreeData(Lineage_sources.activeSource, distinctNodeClassesMap[classUri][0].data.parentClass, "ancestors");
+                            ancestors = OntologyModels.getClassHierarchyTreeData(hierarchySource, distinctNodeClassesMap[classUri][0].data.parentClass, "ancestors");
                         }
                         // don't treat containers
                         if (distinctNodeClassesMap[classUri][0].data.type == "container") {

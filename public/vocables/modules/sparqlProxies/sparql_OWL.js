@@ -45,6 +45,12 @@ var Sparql_OWL = (function () {
      */
     self.defaultTopClassFilter =
         " FILTER NOT EXISTS {?topConcept rdfs:subClassOf ?parentClass. ?parentClass rdf:type owl:Class. filter(!STRSTARTS(STR(?parentClass),'nodeID://') && !STRSTARTS(STR(?parentClass),'_:'))} ";
+    // the blank node IRI shapes of defaultTopClassFilter, for the parents read in javascript
+    self.blankNodeUriRegex = /^(_:|nodeID:\/\/)/;
+    // the same shapes, for a class variable bound by a query
+    self.getNamedClassFilter = function (variable) {
+        return " filter (!isBlank(?" + variable + ") && !STRSTARTS(STR(?" + variable + "),'nodeID://') && !STRSTARTS(STR(?" + variable + "),'_:')).";
+    };
 
     /**
      * Builds the SPARQL property path expressing the parent/child (taxonomy) relation for a
@@ -74,10 +80,19 @@ var Sparql_OWL = (function () {
         var str = " ";
 
         if (options.specificPredicates) {
+            if (options.specificPredicates == "all") {
+                var taxonomyPredicates = sourceConfig.taxonomyPredicates || [];
+                var allPredicates = ["http://www.w3.org/2000/01/rdf-schema#subClassOf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"];
+                allPredicates = allPredicates.concat(taxonomyPredicates);
+                options.specificPredicates = allPredicates;
+            }
             if (!Array.isArray(options.specificPredicates)) {
                 options.specificPredicates = [options.specificPredicates];
             }
             options.specificPredicates.forEach(function (predicate, index) {
+                if (predicate.indexOf("http") == 0) {
+                    predicate = "<" + predicate + ">";
+                }
                 if (index > 0) {
                     str += "|";
                 }
@@ -738,13 +753,11 @@ var Sparql_OWL = (function () {
 
                 if (!options.descendants) {
                     classIds.forEach(function (id) {
-                        hierarchies = {};
-
                         hierarchies[id] = [];
 
                         result.results.bindings.forEach(function (item) {
-                            if (item.superClass.type == "bnode") {
-                                // if superClass is bnode  it causes problem !!
+                            // an anonymous class expression is an axiom, not a parent
+                            if (item.superClass.type == "bnode" || self.blankNodeUriRegex.test(item.superClass.value)) {
                                 return;
                             }
 
@@ -752,33 +765,32 @@ var Sparql_OWL = (function () {
                                 hierarchies[id].push(item);
                             }
                         });
+                    });
 
-                        for (var baseClassId in hierarchies) {
-                            var hierarchy = hierarchies[baseClassId];
-                            var parentsMap = {};
-                            hierarchy.forEach(function (item) {
-                                if (item.superClassSubClass) {
-                                    parentsMap[item.superClassSubClass.value] = item;
-                                }
-                            });
-                            var uniqueClass = {};
-                            var orderedHierarchy = [];
+                    for (var baseClassId in hierarchies) {
+                        var hierarchy = hierarchies[baseClassId];
+                        var parentsMap = {};
+                        hierarchy.forEach(function (item) {
+                            if (item.superClassSubClass) {
+                                parentsMap[item.superClassSubClass.value] = item;
+                            }
+                        });
+                        var uniqueClass = {};
+                        var orderedHierarchy = [];
 
-                            function recurse(classId) {
-                                if (parentsMap[classId] && !uniqueClass[classId]) {
-                                    uniqueClass[classId] = 1;
-                                    orderedHierarchy.push(parentsMap[classId]);
-                                    if (parentsMap[classId].superClass.value) {
-                                        recurse(parentsMap[classId].superClass.value);
-                                    }
+                        function recurse(classId) {
+                            if (parentsMap[classId] && !uniqueClass[classId]) {
+                                uniqueClass[classId] = 1;
+                                orderedHierarchy.push(parentsMap[classId]);
+                                if (parentsMap[classId].superClass.value) {
+                                    recurse(parentsMap[classId].superClass.value);
                                 }
                             }
-
-                            recurse(baseClassId);
-                            hierarchies[baseClassId] = orderedHierarchy;
                         }
-                        // tions.descendants
-                    });
+
+                        recurse(baseClassId);
+                        hierarchies[baseClassId] = orderedHierarchy;
+                    }
                 } else {
                     //options.descendants
 

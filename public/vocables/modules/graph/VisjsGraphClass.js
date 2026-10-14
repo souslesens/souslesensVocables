@@ -169,6 +169,11 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 }
             }
         });
+        self.network.on("select", function () {
+            if (_options.onSelectionChangeFn) {
+                _options.onSelectionChangeFn(self.network.getSelectedNodes());
+            }
+        });
         self.network.on("oncontext", function (/** @type {{ event: { preventDefault: () => void; which: number; }; pointer: { DOM: any; }; }} */ params) {
             params.event.preventDefault();
             if (params.event.which == 3) {
@@ -1733,6 +1738,10 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         selectedNodes = common.array.distinctValues(selectedNodes);
         self.network.selectNodes(selectedNodes);
         Lineage_selection.selectedNodes = selectedNodes;
+        // vis.js emits no "select" event on a selection set by code
+        if (self.options.onSelectionChangeFn) {
+            self.options.onSelectionChangeFn(selectedNodes);
+        }
     };
 };
 export default VisjsGraphClass;

@@ -819,9 +819,11 @@ class BotEngineClass {
      * @param {Object} [scopeOptions] - Configuration for the scope dropdown.
      * @param {Array<Object>} scopeOptions.items - Dropdown entries ({id, label}).
      * @param {Function} scopeOptions.onScopeChange - Called on scope change: onScopeChange(scopeId, updateListFn) where updateListFn(newItems) refreshes the select.
+     * @param {Object} [searchOptions]
+     * @param {number} [searchOptions.searchOnKeyupMinLength] - Runs searchFn on each keystroke once the term reaches this length, instead of filtering the current list.
      * @returns {void}
      */
-    showListWithSearch(initialValues, varToFill, searchFn, onSearchResultSelected, scopeOptions) {
+    showListWithSearch(initialValues, varToFill, searchFn, onSearchResultSelected, scopeOptions, searchOptions) {
         this.showList(initialValues, varToFill);
         $("#" + this.divId)
             .find("#botFilterProposalDiv")
@@ -861,6 +863,10 @@ class BotEngineClass {
                 return;
             }
             searchFn(term, function (results) {
+                // a slower answer to an earlier keystroke must not replace the current one
+                if (filterInput.val() !== term) {
+                    return;
+                }
                 isSearchMode = true;
                 self.currentList = results;
                 var selectEl = $("#" + self.divId).find("#bot_resourcesProposalSelect");
@@ -892,6 +898,17 @@ class BotEngineClass {
             if (evt.key === "Enter" || evt.keyCode === 13) {
                 doSearch();
             } else {
+                if (searchOptions && searchOptions.searchOnKeyupMinLength) {
+                    var typedTerm = filterInput.val().trim();
+                    if (typedTerm.length >= searchOptions.searchOnKeyupMinLength) {
+                        return doSearch();
+                    }
+                    self.currentList = initialValues;
+                    var selectEl = $("#" + self.divId).find("#bot_resourcesProposalSelect");
+                    common.fillSelectOptions(selectEl, initialValues, false, "label", "id");
+                    UI.adjustSelectListSize(selectEl, 10);
+                    return;
+                }
                 if (isSearchMode) {
                     return;
                 }
@@ -918,7 +935,7 @@ class BotEngineClass {
 
         if (options && options.datePicker) {
             //DateWidget.unsetDatePickerOnInput("botPromptInput");
-            DateWidget.setDatePickerOnInput("botPromptInput", null, function (date) {
+            DateWidget.setDatePickerOnInput("botPromptInput", null, (date) => {
                 this.currentBot.params[varToFill] = date.getTime();
                 $("#" + this.divId)
                     .find("#botPromptInput")

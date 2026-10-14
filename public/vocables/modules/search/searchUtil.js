@@ -12,6 +12,11 @@ var SearchUtil = (function () {
     self.indexSourcesMap = {};
     // must stay well above the preferred language boost of 3, otherwise language ordering wins over type
     self.classTypeBoost = 20;
+    // both spellings: an index built before the indexation wrote ObjectProperty still carries property
+    self.propertyIndexTypes = ["ObjectProperty", "property"];
+    self.searchClassesMinTermLength = 3;
+    self.searchClassesMaxResults = 1000;
+    self.leadingWildcardRegex = /^[*%]/;
 
     self.initSourcesIndexesList = function (options, callback) {
         if (!options) {
@@ -439,7 +444,7 @@ indexes.push(source.toLowerCase());
         }
 
         var field = "label.keyword";
-        if (word.indexOf && word.indexOf("http://") == 0) {
+        if (word.indexOf && (word.indexOf("http://") == 0 || word.indexOf("https://") == 0)) {
             field = "id.keyword";
         } else {
             word = self.escapeElasticReservedChars(word);
@@ -554,6 +559,9 @@ indexes.push(source.toLowerCase());
                 },
             };
         }
+        if (options.withoutProperties) {
+            queryObj.bool.must_not = [{ terms: { "type.keyword": self.propertyIndexTypes } }];
+        }
 
         if (queryObj.bool) {
             if (!queryObj.bool.should) {
@@ -620,13 +628,29 @@ indexes.push(source.toLowerCase());
                 });
             },
             function (err) {
-                callback(err, allResults);
+                var hasHits = allResults.some(function (searchResponse) {
+                    return searchResponse.hits && searchResponse.hits.hits.length > 0;
+                });
+                if (err || !indexes || hasHits) {
+                    return callback(err, allResults);
+                }
+                // the results go along for the callers that ignore errors
+                var countQuery = { query: { match_all: {} }, size: 0 };
+                ElasticSearchProxy.queryElastic(countQuery, indexes, function (countError, countResult) {
+                    if (!countError && countResult.hits.total.value > 0) {
+                        return callback(null, allResults);
+                    }
+                    var sourceLabels = indexes.map(function (index) {
+                        return self.getSourceLabelFromIndexName(index) || index;
+                    });
+                    callback("The search index of " + sourceLabels.join(", ") + " is empty or missing: refresh the index", allResults);
+                });
             },
         );
     };
 
     self.indexData = function (indexName, data, replaceIndex, callback) {
-        if (data.length == 0) {
+        if (data.length == 0 && !replaceIndex) {
             return callback();
         }
         var options = { replaceIndex: replaceIndex, owltype: "Class" };
@@ -656,15 +680,19 @@ indexes.push(source.toLowerCase());
             options = {};
         }
 
-        var withImports = $("#admin_refreshIndexWithImportCBX").prop("checked");
         options.withoutImports = true;
         options.parentsTopDown = true;
         var sources = [sourceLabel];
-        if (withImports) {
+        if (options.indexImportedSources) {
             sources = sources.concat(Config.sources[sourceLabel].imports || []);
         }
 
         var totalLinesAllsources = 0;
+        var failedSources = [];
+        // one failing source must leave the others indexed and the model cache refreshed below
+        function recordFailedSource(failedSourceLabel, err) {
+            failedSources.push(failedSourceLabel + " : " + (err.responseText || err.message || err));
+        }
         async.eachSeries(
             sources,
             function (sourceLabel, callbackEachSource) {
@@ -672,13 +700,23 @@ indexes.push(source.toLowerCase());
                 var taxonomyClasses = [];
                 async.series(
                     [
+                        // recreated before any data: a source without classes would otherwise keep its stale or missing index
+                        function (callbackSeries) {
+                            if (options.ids) {
+                                return callbackSeries();
+                            }
+                            self.indexData(sourceLabel.toLowerCase(), [], true, function (err) {
+                                callbackSeries(err);
+                            });
+                        },
+
                         // index nodes hierarchy
                         function (callbackSeries) {
                             Sparql_generic.getSourceTaxonomy(sourceLabel, options, function (err, result) {
                                 if (err) {
-                                    return callbackEachSource(err);
+                                    recordFailedSource(sourceLabel, err);
+                                    return callbackEachSource();
                                 }
-                                var index = 0;
                                 var classesArray = [];
                                 for (var key in result.classesMap) {
                                     classesArray.push(result.classesMap[key]);
@@ -692,14 +730,10 @@ indexes.push(source.toLowerCase());
                                             return callbackEach();
                                         }
 
-                                        var replaceIndex = false;
-                                        if (index++ == 0 && !options.ids) {
-                                            replaceIndex = true;
-                                        }
                                         data.forEach(function (item) {
                                             item.type = "Class";
                                         });
-                                        self.indexData(sourceLabel.toLowerCase(), data, replaceIndex, function (err, result) {
+                                        self.indexData(sourceLabel.toLowerCase(), data, false, function (err, result) {
                                             if (err) {
                                                 return callbackEach(err);
                                             }
@@ -729,9 +763,9 @@ indexes.push(source.toLowerCase());
                             UI.message(sourceLabel + ": no taxonomy found, indexing all class labels under owl:Thing");
                             Sparql_OWL.getClassesWithoutTaxonomy(sourceLabel, options, function (err, result) {
                                 if (err) {
-                                    return callbackEachSource(err);
+                                    recordFailedSource(sourceLabel, err);
+                                    return callbackEachSource();
                                 }
-                                var index = 0;
                                 var classesArray = [];
                                 for (var key in result.classesMap) {
                                     classesArray.push(result.classesMap[key]);
@@ -745,14 +779,10 @@ indexes.push(source.toLowerCase());
                                             return callbackEach();
                                         }
 
-                                        var replaceIndex = false;
-                                        if (index++ == 0) {
-                                            replaceIndex = true;
-                                        }
                                         data.forEach(function (item) {
                                             item.type = "Class";
                                         });
-                                        self.indexData(sourceLabel.toLowerCase(), data, replaceIndex, function (err, result) {
+                                        self.indexData(sourceLabel.toLowerCase(), data, false, function (err, result) {
                                             if (err) {
                                                 return callbackEach(err);
                                             }
@@ -922,37 +952,37 @@ indexes.push(source.toLowerCase());
                         // containers --> like classes --> care to refresh
                     ],
                     function (err) {
-                        // UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase());
-
-                        return callbackEachSource(err);
+                        if (err) {
+                            recordFailedSource(sourceLabel, err);
+                        }
+                        return callbackEachSource();
                     },
                 );
 
                 // }
             },
-            function (err) {
-                if (err) {
-                    MainController.errorAlert(err);
+            function () {
+                var reportIndexationOutcome = function () {
+                    var indexationError = failedSources.length > 0 ? failedSources.join(" / ") : null;
                     if (callback) {
-                        return callback(err);
+                        return callback(indexationError);
                     }
-                    return;
+                    if (indexationError) {
+                        MainController.errorAlert(indexationError);
+                    }
+                };
+                if (failedSources.length == 0) {
+                    UI.message("ALL DONE  total indexed : " + totalLinesAllsources);
                 }
-                UI.message("ALL DONE  total indexed : " + totalLinesAllsources);
                 // a full reindex follows a graph change: the cached model is stale too. Partial (ids) reindexes update the model themselves
                 if (options.ids || options.skipOntologyModelRefresh) {
-                    if (callback) {
-                        return callback();
-                    }
-                    return;
+                    return reportIndexationOutcome();
                 }
                 OntologyModels.clearOntologyModelCache(sourceLabel, function (err) {
                     if (err) {
-                        MainController.errorAlert(err.responseText || err);
+                        recordFailedSource(sourceLabel + " model cache", err);
                     }
-                    if (callback) {
-                        return callback(err);
-                    }
+                    return reportIndexationOutcome();
                 });
             },
         );
@@ -1138,6 +1168,82 @@ indexes.push(source.toLowerCase());
                 },
             });
         }
+    };
+
+    self.searchClassesInIndex = function (source, term, callback) {
+        var trimmedTerm = term.trim();
+        // the index matches the start of every word of a label, the leading * of the contains convention is not needed
+        var searchedTerm = trimmedTerm.replace(self.leadingWildcardRegex, "");
+        if (searchedTerm.length < self.searchClassesMinTermLength) {
+            return callback("Type at least " + self.searchClassesMinTermLength + " characters to search the classes of " + source);
+        }
+        var options = { onlyClasses: true, prefixSearch: true, size: self.searchClassesMaxResults };
+        self.getElasticSearchMatches([searchedTerm], [source.toLowerCase()], "fuzzy", 0, self.searchClassesMaxResults, options, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            var searchResponse = result[0];
+            if (searchResponse.error) {
+                return callback("Search index of " + source + ": " + (searchResponse.error.reason || searchResponse.error.type));
+            }
+            var classes = searchResponse.hits.hits.map(function (hit) {
+                return { id: hit._source.id, label: hit._source.label, source: source };
+            });
+            var truncatedListMessage = null;
+            if (searchResponse.hits.total.value > classes.length) {
+                truncatedListMessage = "More than " + classes.length + " classes of " + source + " match " + term + ": the " + classes.length + " best matches are shown, refine the search";
+            }
+            callback(null, classes, truncatedListMessage);
+        });
+    };
+
+    /**
+     * Same output as getClassHierarchyTreeData(sourceLabel, classId, "ancestors"), for the sources whose classes are not in the model
+     * @param {string|string[]} classId - Node infos passes the types of an individual
+     * @param {Function} callback - `(err, ancestors)`, the class first, then one superClass per level
+     */
+    self.getClassAncestorsFromIndex = function (sourceLabel, classId, callback) {
+        var classIds = classId;
+        if (!Array.isArray(classIds)) {
+            classIds = [classIds];
+        }
+        // an individual with several types has no single chain
+        if (classIds.length != 1) {
+            return callback(null, []);
+        }
+        var sources = [sourceLabel].concat(Config.sources[sourceLabel].imports || []);
+        var options = { parentlabels: true, type: "Class" };
+        self.getSimilarLabelsInSources(null, sources, null, classIds, "exactMatch", options, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            var classMatch = null;
+            sources.forEach(function (source) {
+                var sourceMatches = result[0].matches[source];
+                if (!classMatch && sourceMatches && sourceMatches.length > 0) {
+                    classMatch = sourceMatches[0];
+                }
+            });
+            if (!classMatch) {
+                return callback(classIds[0] + " is not in the search index of " + sourceLabel + ": refresh the index");
+            }
+            // the index stores the source name first, then the ancestors from the top down to the direct superClass
+            var ancestorIds = classMatch.parents.slice(1);
+            var ancestorIdsBottomUp = ancestorIds.reverse();
+            var classIdsBottomUp = [classMatch.id].concat(ancestorIdsBottomUp);
+            var labelsById = result.parentIdsLabelsMap || {};
+            var ancestors = classIdsBottomUp.map(function (ancestorId, ancestorIndex) {
+                var label = ancestorIndex == 0 ? classMatch.label : labelsById[ancestorId];
+                return {
+                    id: ancestorId,
+                    // a parent missing from the index keeps the empty object getSimilarLabelsInSources put in its place
+                    label: typeof label == "string" ? label : Sparql_common.getLabelFromURI(ancestorId),
+                    superClass: classIdsBottomUp[ancestorIndex + 1] || null,
+                    source: sourceLabel,
+                };
+            });
+            callback(null, ancestors);
+        });
     };
 
     return self;

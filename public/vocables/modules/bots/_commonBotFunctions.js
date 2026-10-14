@@ -4,6 +4,8 @@ import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import JstreeWidget from "../uiWidgets/jstreeWidget.js";
 import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
+import common from "../shared/common.js";
+import MainController from "../shared/mainController.js";
 
 var CommonBotFunctions = (function () {
     var self = {};
@@ -146,6 +148,105 @@ var CommonBotFunctions = (function () {
                 return callback(null, props);
             },
         );
+    };
+
+    self.showVocabClassesList = function (botEngine, vocab, classes, varToFill) {
+        if (!OntologyModels.isAboveMaxClasses(vocab)) {
+            return botEngine.showList(classes, varToFill);
+        }
+        var searchOptions = { searchOnKeyupMinLength: SearchUtil.searchClassesMinTermLength };
+        var searchClasses = function (term, updateListFn) {
+            SearchUtil.searchClassesInIndex(vocab, term, function (err, matchingClasses, truncatedListMessage) {
+                if (err) {
+                    // a notice, an alert would pop up again on every keystroke
+                    UI.message(err, true);
+                    return updateListFn([]);
+                }
+                UI.message(truncatedListMessage || "", true);
+                updateListFn(matchingClasses);
+            });
+        };
+        var emptyInitialList = [];
+        botEngine.showListWithSearch(emptyInitialList, varToFill, searchClasses, null, null, searchOptions);
+        // an empty list looks broken without this message
+        botEngine.message(OntologyModels.getTooManyClassesMessage(vocab));
+        $("#" + botEngine.divId)
+            .find("#bot_resourcesProposalSelect")
+            .one("click", function () {
+                botEngine.message("");
+            });
+    };
+
+    /**
+     * @param {Object} uniqueSources - source nodes already in jstreeData; MappingModeler reads its values as jstree indexes to order the sources
+     */
+    self.addSearchClassNodes = function (jstreeData, sources, parentName, color, uniqueSources) {
+        sources.forEach(function (source) {
+            if (!OntologyModels.isAboveMaxClasses(source)) {
+                return;
+            }
+            // a class created during the session already put the source node in the tree
+            if (!uniqueSources[source]) {
+                uniqueSources[source] = jstreeData.length;
+                jstreeData.push({
+                    id: source,
+                    parent: parentName,
+                    text: "<span style='font-size:larger;color:" + color + "'>" + source + " (" + Config.ontologiesVocabularyModels[source].classesCount + " classes)</span>",
+                    data: {
+                        id: source,
+                        label: source,
+                    },
+                });
+            }
+            jstreeData.push({
+                id: common.getRandomHexaId(5),
+                parent: source,
+                text: "<span  style='font-weight:bold;color:" + color + "'> SEARCH...</span>",
+                data: {
+                    resourceType: "searchClass",
+                    source: source,
+                },
+            });
+        });
+    };
+
+    self.addSearchClassMatches = function (jstreeDivId, source, term, color, onMatchingClass) {
+        SearchUtil.searchClassesInIndex(source, term, function (err, matchingClasses, truncatedListMessage) {
+            if (err) {
+                return MainController.errorAlert(err);
+            }
+            if (matchingClasses.length == 0) {
+                return alert("no Match");
+            }
+            if (truncatedListMessage) {
+                alert(truncatedListMessage);
+            }
+            // a new search replaces the matches of the previous one, not the classes created in the session
+            var sourceNodes = JstreeWidget.getjsTreeNodes(jstreeDivId, false, source);
+            var previousMatchNodes = sourceNodes.filter(function (sourceNode) {
+                return sourceNode.data && sourceNode.data.isSearchMatch;
+            });
+            var previousMatchIds = previousMatchNodes.map(function (previousMatchNode) {
+                return previousMatchNode.id;
+            });
+            JstreeWidget.deleteNode(jstreeDivId, previousMatchIds);
+            var jstreeData = [];
+            matchingClasses.forEach(function (matchingClass) {
+                onMatchingClass(matchingClass);
+                jstreeData.push({
+                    id: matchingClass.id,
+                    parent: source,
+                    text: "<span  style='color:" + color + "'>" + matchingClass.label + "</span>",
+                    data: {
+                        id: matchingClass.id,
+                        text: matchingClass.label,
+                        resourceType: "Class",
+                        isSearchMatch: true,
+                    },
+                });
+            });
+            JstreeWidget.addNodesToJstree(jstreeDivId, source, jstreeData, { positionLast: true });
+        });
     };
 
     self.listSourceAllClasses = function (source, includeOwlThing, classes, callback) {

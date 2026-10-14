@@ -265,7 +265,7 @@ var MappingModeler_bot = (function () {
                 if (err) {
                     return self.myBotEngine.abort(err);
                 }
-                self.myBotEngine.showList(classes, "superClassId");
+                CommonBotFunctions.showVocabClassesList(self.myBotEngine, self.params.currentVocab, classes, "superClassId");
             });
         },
         setSubClassOfFn: function () {

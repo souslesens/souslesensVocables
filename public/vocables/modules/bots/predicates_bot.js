@@ -1,5 +1,6 @@
 import BotEngineClass from "./_botEngineClass.js";
 import OntologyModels from "../shared/ontologyModels.js";
+import SearchUtil from "../search/searchUtil.js";
 import NodeInfosWidget from "../uiWidgets/nodeInfosWidget.js";
 import PredicatesSelectorWidget from "../uiWidgets/predicatesSelectorWidget.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
@@ -378,6 +379,14 @@ var Predicates_bot = (function () {
                     if (err) {
                         return callbackEach();
                     }
+                    if (OntologyModels.isAboveMaxClasses(vocab)) {
+                        nodes.push({
+                            id: "__search__" + vocab,
+                            text: "SEARCH...",
+                            parent: "__src__" + vocab,
+                            data: { resourceType: "searchClass", source: vocab },
+                        });
+                    }
                     var model = Config.ontologiesVocabularyModels[vocab];
                     if (model) {
                         for (var classId in model.classes) {
@@ -527,7 +536,7 @@ var Predicates_bot = (function () {
                 if (err) {
                     return MainController.errorAlert(err);
                 }
-                self.myBotEngine.showTree(jstreeData, null, { withCheckboxes: false, openAll: false, parentNodeIds: parentNodeIds }, null, function (selectedId) {
+                self.myBotEngine.showTree(jstreeData, null, { withCheckboxes: false, openAll: false, parentNodeIds: parentNodeIds }, null, function (selectedId, selectedNode) {
                     if (selectedId === "__enter_uri__") {
                         function promptEnterUri() {
                             self.myBotEngine.promptValue("enter URI", "selectedObject", self.params.selectedObject || "", null, function (value) {
@@ -544,6 +553,27 @@ var Predicates_bot = (function () {
                         }
                         promptEnterUri();
                         return;
+                    }
+                    if (selectedNode.data.resourceType == "searchClass") {
+                        var word = prompt(OntologyModels.getTooManyClassesMessage(selectedNode.data.source));
+                        if (!word) {
+                            return;
+                        }
+                        return SearchUtil.searchClassesInIndex(selectedNode.data.source, word, function (err, classes, truncatedListMessage) {
+                            if (err) {
+                                return MainController.errorAlert(err);
+                            }
+                            if (classes.length == 0) {
+                                return alert("no Match");
+                            }
+                            if (truncatedListMessage) {
+                                alert(truncatedListMessage);
+                            }
+                            self.myBotEngine.showList(classes, "selectedObject", null, false, function () {
+                                self.params.enteredUri = false;
+                                executeSave();
+                            });
+                        });
                     }
                     self.params.enteredUri = false;
                     self.params.selectedObject = selectedId;

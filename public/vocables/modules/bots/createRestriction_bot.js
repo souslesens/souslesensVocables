@@ -83,7 +83,7 @@ var CreateRestriction_bot = (function () {
                 if (err) {
                     return self.myBotEngine.abort(err);
                 }
-                self.myBotEngine.showList(classes, "targetClassUri");
+                CommonBotFunctions.showVocabClassesList(self.myBotEngine, self.params.currentVocab, classes, "targetClassUri");
             });
         },
         listTargetPropertyFn: function () {

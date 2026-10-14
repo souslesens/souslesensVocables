@@ -121,7 +121,7 @@ export default function () {
                     },
                 },
             },
-            400: { description: "Source does not exist." },
+            400: { description: "Source does not exist, or the new group (admin only) has a subgroup named like a source." },
             500: { description: "Mismatch between path id and body `name`, or persistence error." },
         },
         tags: ["Sources"],

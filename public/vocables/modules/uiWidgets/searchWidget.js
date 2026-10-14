@@ -157,6 +157,8 @@ var SearchWidget = (function () {
 
         // prefix search is enabled only in the lineage tool; other tools sharing this widget keep fuzzy matching
         options.prefixSearch = !exactMatch && MainController.currentTool === "lineage";
+        // the lineage trees show classes and individuals, an object property is neither
+        options.withoutProperties = MainController.currentTool === "lineage";
 
         options.parentlabels = true;
 

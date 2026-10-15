@@ -1,16 +1,13 @@
-import { processResponse } from "./utils.js";
+import { processResponse, failure } from "./utils.js";
 import rdf from "../../../bin/RDF_IO.js";
-const { NamedNode, BlankNode, Literal, Graph } = rdf;
+import { validateTriples } from "../../../bin/shacl/validator.mjs";
+import { promisify } from "util";
 
-var Validator = null;
-import("../../../bin/shacl/validator.mjs").then((mod) => {
-    Validator = mod; // true
-});
+const triples2turtle = promisify(rdf.triples2turtle);
 
 // Route /api/v1/shaclValidate: not used client-side (no calls found in public/ or mainapp/src/). Likely deprecated.
 export default function () {
     let operations = {
-        GET,
         POST,
     };
 
@@ -25,9 +22,10 @@ export default function () {
             {
                 in: "body",
                 name: "body",
-                required: false,
+                required: true,
                 schema: {
                     type: "object",
+                    required: ["triples", "shapes"],
                     properties: {
                         triples: {
                             type: "array",
@@ -73,48 +71,25 @@ export default function () {
                 description: "SHACL validation report.",
                 schema: { properties: { output: { type: "object" } } },
             },
+            400: { description: "Invalid request: `triples` must be an array and `shapes` a string." },
             500: { description: "Parse or validation error." },
         },
         tags: ["Misc"],
     };
 
-    function POST(req, res, next) {
+    async function POST(req, res, next) {
         try {
-            var triples = req.body.triples;
-            var shapes = req.body.shapes;
-
-            rdf.triples2turtle(triples, function (err, turtle) {
-                const report = Validator.validateTriples(shapes, turtle);
-                return processResponse(res, null, { output: report });
-            });
+            const { triples, shapes } = req.body || {};
+            if (!Array.isArray(triples) || typeof shapes !== "string") {
+                return failure(res, 400, "triples must be an array and shapes must be a string");
+            }
+            const turtle = await triples2turtle(triples);
+            const report = await validateTriples(shapes, turtle);
+            return processResponse(res, null, { output: report });
         } catch (e) {
             return processResponse(res, e);
         }
     }
-
-    function GET(req, res, next) {}
-
-    GET.apiDoc = {
-        security: [{ restrictLoggedUser: [] }],
-        summary: "[GET stub] SHACL validation",
-        description: "Stub — the GET handler is currently a no-op. Use `POST /shaclValidate` to validate triples against shapes.",
-        operationId: "shaclValidateGet",
-        parameters: [
-            { name: "shapes", in: "query", type: "string", required: true, description: "SHACL rules in Turtle." },
-            { name: "triples", in: "query", type: "string", required: true, description: "SLSV-format triples." },
-        ],
-        responses: {
-            200: {
-                description: "Empty response — handler is a no-op stub.",
-                schema: {
-                    type: "object",
-                    additionalProperties: false,
-                    description: "Always empty: the GET handler exits without writing a body. Use `POST /shaclValidate` instead.",
-                },
-            },
-        },
-        tags: ["Misc"],
-    };
 
     return operations;
 }

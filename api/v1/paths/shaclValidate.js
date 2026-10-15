@@ -33,16 +33,16 @@ export default function () {
                             items: {
                                 type: "object",
                                 properties: {
-                                    s: { type: "string", example: "http://example.org/asset/1" },
-                                    p: { type: "string", example: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
-                                    o: { type: "string", example: "http://example.org/Asset" },
+                                    subject: { type: "string", example: "http://example.org/asset/1" },
+                                    predicate: { type: "string", example: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" },
+                                    object: { type: "string", example: "http://example.org/Asset" },
                                 },
                             },
                             example: [
                                 {
-                                    s: "http://example.org/asset/1",
-                                    p: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                                    o: "http://example.org/Asset",
+                                    subject: "http://example.org/asset/1",
+                                    predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                                    object: "http://example.org/Asset",
                                 },
                             ],
                         },
@@ -56,9 +56,9 @@ export default function () {
                     example: {
                         triples: [
                             {
-                                s: "http://example.org/asset/1",
-                                p: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                                o: "http://example.org/Asset",
+                                subject: "http://example.org/asset/1",
+                                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                                object: "http://example.org/Asset",
                             },
                         ],
                         shapes: "@prefix sh: <http://www.w3.org/ns/shacl#> .\n@prefix ex: <http://example.org/> .\nex:AssetShape a sh:NodeShape ; sh:targetClass ex:Asset ; sh:property [ sh:path ex:id ; sh:minCount 1 ] .",
@@ -69,7 +69,7 @@ export default function () {
         responses: {
             200: {
                 description: "SHACL validation report.",
-                schema: { properties: { output: { type: "object" } } },
+                schema: { properties: { output: { type: "string" } } },
             },
             400: { description: "Invalid request: `triples` must be an array and `shapes` a string." },
             500: { description: "Parse or validation error." },

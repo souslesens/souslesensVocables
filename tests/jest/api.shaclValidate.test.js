@@ -16,15 +16,11 @@ describe("shaclValidate route", () => {
         const operations = shaclValidateRoute();
         const schema = bodyParamSchema(operations.POST.apiDoc);
         expect(schema).toBeDefined();
-        expect(schema.required).toEqual(
-            expect.arrayContaining(["triples", "shapes"]),
-        );
+        expect(schema.required).toEqual(expect.arrayContaining(["triples", "shapes"]));
     });
 
     test("POST apiDoc documents 400 and 500 responses", () => {
         const operations = shaclValidateRoute();
-        expect(Object.keys(operations.POST.apiDoc.responses)).toEqual(
-            expect.arrayContaining(["400", "500"]),
-        );
+        expect(Object.keys(operations.POST.apiDoc.responses)).toEqual(expect.arrayContaining(["400", "500"]));
     });
 });

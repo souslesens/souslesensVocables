@@ -1,5 +1,5 @@
 import ConfigManager from "../../../bin/configManager.js";
-import httpProxy, { isVirtuosoUrl } from "../../../bin/httpProxy.js";
+import httpProxy from "../../../bin/httpProxy.js";
 import UserRequestFiltering from "../../../bin/userRequestFiltering.js";
 import { endpointAuthForUrl, endpointUrlForSource, sparqlResultsHeaders } from "../../../bin/endpointLimits.js";
 import { graphUrisForSource } from "./sparql/select.js";
@@ -11,8 +11,8 @@ const reasonerFileByOperation = {
     unsatisfiable: "../../../bin/reasoner/owl-unsatisfiable.mjs",
     inference: "../../../bin/reasoner/owl-inference.mjs",
 };
-// Virtuoso pragma: join the patterns in the order they are written
-const virtuosoWrittenJoinOrder = 'DEFINE sql:select-option "order" ';
+const ruleTimeoutMs = 60000;
+const emptySelectResult = { head: { vars: [] }, results: { bindings: [] } };
 
 export default function () {
     let operations = {
@@ -53,16 +53,20 @@ export default function () {
             const endpointUrl = endpointUrlForSource(source);
             const endpointAuth = endpointAuthForUrl(endpointUrl);
             const user = await ConfigManager.getUser(req, res);
-            const request = async function (query) {
+            const failedChecks = [];
+            const runQuery = async function (query) {
                 const allowedQuery = await UserRequestFiltering.filterSparqlRequestAsync(query, userSources, user);
-                // the rules are written axiom first; left to its optimizer Virtuoso starts from the assertions and runs past 60 s
-                const queryToRun = isVirtuosoUrl(endpointUrl) ? virtuosoWrittenJoinOrder + allowedQuery : allowedQuery;
-                const params = { query: queryToRun, format: "json" };
+                const params = { query: allowedQuery, format: "json" };
                 if (endpointAuth) {
                     params.auth = { ...endpointAuth };
                 }
                 return new Promise(function (resolve, reject) {
+                    // the endpoint keeps running an abandoned query, this only frees the report
+                    const timeout = setTimeout(function () {
+                        reject(new Error(`no answer after ${ruleTimeoutMs / 1000} s`));
+                    }, ruleTimeoutMs);
                     httpProxy.post(endpointUrl, sparqlResultsHeaders, params, function (endpointError, result) {
+                        clearTimeout(timeout);
                         if (endpointError) {
                             return reject(new Error(typeof endpointError == "string" ? endpointError : JSON.stringify(endpointError)));
                         }
@@ -70,9 +74,28 @@ export default function () {
                     });
                 });
             };
+            // the reasoner rejects the whole run on the first failing rule: a failed or unselected rule answers empty and the failure is reported
+            const request = async function (query, { ruleId }) {
+                if (ruleIds && !ruleIds.includes(ruleId)) {
+                    return emptySelectResult;
+                }
+                try {
+                    return await runQuery(query);
+                } catch (error) {
+                    failedChecks.push({ id: ruleId, error: error.message });
+                    return emptySelectResult;
+                }
+            };
 
             const reasoner = await import(reasonerFile);
-            const report = await reasoner.run({ request: request, graphs: graphs, ruleIds: ruleIds });
+            const report = await reasoner.run({ request: request, graphs: graphs });
+            if (ruleIds) {
+                report.checks = report.checks.filter((check) => ruleIds.includes(check.id));
+            }
+            report.failedChecks = failedChecks;
+            if (failedChecks.length > 0) {
+                report.status = "incomplete, " + report.status;
+            }
             return processResponse(res, null, report);
         } catch (error) {
             // the reasoner names the failing rule, the cause carries the endpoint answer
@@ -87,7 +110,8 @@ export default function () {
         description:
             "Runs the read-only SPARQL rules of bin/reasoner on the graphs of `source` and its imports. " +
             "`consistency` and `unsatisfiable` return the violations found by each rule, `inference` the triples the rules infer and the store does not hold yet. " +
-            "`inferenceRules` lists the inference rules, `ruleIds` restricts `inference` to some of them.",
+            "`inferenceRules` lists the inference rules, `ruleIds` restricts `inference` to some of them. " +
+            "A rule that fails or gets no answer within 60 s is listed in `failedChecks`, and its check then says nothing about the source.",
         operationId: "reasonerRun",
         parameters: [
             {

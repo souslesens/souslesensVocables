@@ -185,6 +185,12 @@ var Lineage_reasoner = (function () {
             dataType: "json",
 
             success: function (report, _textStatus, _jqXHR) {
+                if (report.failedChecks.length > 0) {
+                    var failedRuleIds = report.failedChecks.map(function (failedCheck) {
+                        return failedCheck.id;
+                    });
+                    UI.message("rules not evaluated: " + failedRuleIds.join(", "), true);
+                }
                 if (report.inferredTriples.length == 0) {
                     return $("#lineage_reasoner_infosDiv").html("<span style='color:blue;font-weigth:bold'>No results</span>");
                 }

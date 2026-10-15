@@ -35,6 +35,7 @@ All notable changes to this project will be documented in this file. See [standa
 * **userSettings:** use the mirrored reply arrow for the publish action ([349a8ad](https://github.com/souslesens/souslesensVocables/commit/349a8ade369d5740d8a738046db62fb65511cce9))
 * **userSettings:** use the share icon for the publish action ([899734a](https://github.com/souslesens/souslesensVocables/commit/899734ac0a22484d4aa6fa430a9256a4b3ad921a))
 * **users:** keep tokens and passwords across account edits, fix OntoCreator upload rights ([abbb757](https://github.com/souslesens/souslesensVocables/commit/abbb75750acd6eee847aff82ccda860014d84592))
+* **shaclValidate:** harden the route with input validation and async error handling, remove the GET stub
 
 ## [3.15.0](https://github.com/souslesens/souslesensVocables/compare/3.14.1...3.15.0) (2026-09-25)
 

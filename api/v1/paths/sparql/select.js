@@ -8,11 +8,7 @@ import { mcpConfig } from "../../../../bin/MCP/config.js";
 import { describeExecutionError } from "../../../../bin/sparqlQueriesRunner.js";
 // Shared with /sparqlQueries/run so a catalog call and a raw SELECT judge their own completeness
 // against the same discovered ceiling.
-import { discoverEndpointLimits, endpointAuthForUrl, sparqlResultsHeaders } from "../../../../bin/endpointLimits.js";
-
-// Value a source uses in sources.json to point at the platform's own triple store rather than an
-// external endpoint. Resolved here the same way every other caller resolves it.
-const defaultEndpointMarker = "_default";
+import { discoverEndpointLimits, endpointAuthForUrl, endpointUrlForSource, sparqlResultsHeaders } from "../../../../bin/endpointLimits.js";
 
 // Enough of the refused text to show a code fence, a stray sentence or a prologue keyword the check
 // does not accept, without echoing a whole query back into the caller's context.
@@ -61,7 +57,7 @@ function collectDeclaredPrefixNames(strippedQuery) {
 }
 
 /**
- * Build the `FROM` clauses for a source, one level of imports deep, the way the rest of SLS does.
+ * Graphs of a source, one level of imports deep, the way the rest of SLS does.
  *
  * Imports the caller may not read are dropped rather than silently widening the scope past the
  * account's own permissions, which matters because this runs before `filterSparqlRequest` waves an
@@ -69,9 +65,9 @@ function collectDeclaredPrefixNames(strippedQuery) {
  * @param {object} source - Source entry from the caller's readable sources
  * @param {object} userSources - Every source the caller may read, keyed by name
  * @param {boolean} withImports
- * @returns {string} The dataset clause, empty when the source declares no graph
+ * @returns {string[]} Graph URIs, empty when the source declares no graph
  */
-function datasetClauseForSource(source, userSources, withImports) {
+export function graphUrisForSource(source, userSources, withImports) {
     const declaredGraphUris = Array.isArray(source.graphUri) ? source.graphUri : [source.graphUri];
     const graphUris = [];
     for (const graphUri of declaredGraphUris) {
@@ -94,7 +90,11 @@ function datasetClauseForSource(source, userSources, withImports) {
             }
         }
     }
+    return graphUris;
+}
 
+function datasetClauseForSource(source, userSources, withImports) {
+    const graphUris = graphUrisForSource(source, userSources, withImports);
     const fromClauses = graphUris.map((graphUri) => `FROM <${graphUri}>`);
     return fromClauses.join(" ");
 }
@@ -288,12 +288,7 @@ export default function () {
                 }
             }
 
-            // The endpoint comes from the source, never from the caller. That is what keeps this
-            // route from becoming a way to make the server fetch an arbitrary host.
-            let endpointUrl = source.sparql_server?.url;
-            if (!endpointUrl || endpointUrl === defaultEndpointMarker) {
-                endpointUrl = ConfigManager.config.sparql_server.url;
-            }
+            const endpointUrl = endpointUrlForSource(source);
 
             const user = await ConfigManager.getUser(req, res);
             UserRequestFiltering.filterSparqlRequest(scopedQuery, userSources, user, function (filteringError, allowedQuery) {

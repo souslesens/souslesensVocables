@@ -34,6 +34,24 @@ const virtuosoIniQuery =
 
 export const sparqlResultsHeaders = { Accept: "application/sparql-results+json", "Content-Type": "application/x-www-form-urlencoded" };
 
+// Value a source uses in sources.json to point at the platform's own triple store rather than an
+// external endpoint.
+const defaultEndpointMarker = "_default";
+
+/**
+ * Endpoint of a source. It comes from the source, never from the caller, so a route cannot be made
+ * to fetch an arbitrary host.
+ * @param {object} source - Source entry from the caller's readable sources
+ * @returns {string}
+ */
+export function endpointUrlForSource(source) {
+    const endpointUrl = source.sparql_server?.url;
+    if (!endpointUrl || endpointUrl === defaultEndpointMarker) {
+        return ConfigManager.config.sparql_server.url;
+    }
+    return endpointUrl;
+}
+
 /**
  * Credentials for an endpoint, or null when it is not the platform's own or needs none.
  * @param {string} endpointUrl

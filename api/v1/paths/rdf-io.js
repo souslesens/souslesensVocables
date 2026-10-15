@@ -12,7 +12,8 @@ export default function () {
         var triples = [];
         var prefixMap = {};
 
-        rdfParser.parse(textStream, { contentType: "text/turtle", baseIRI: "" })
+        rdfParser
+            .parse(textStream, { contentType: "text/turtle", baseIRI: "" })
             .on("data", function (quad) {
                 var obj = {
                     o: quad.object.value,

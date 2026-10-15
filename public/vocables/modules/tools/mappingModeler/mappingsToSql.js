@@ -154,6 +154,17 @@ export function extractRelationMap(json) {
         }
     }
 
+    // A column rdf:type -> column of generated subclasses holds instances of their parent class.
+    // The generated subclass of each instance is read on the same row, as a property of the instance.
+    const instanceColumnByGeneratedClassColumn = new Map();
+    for (const edge of json.edges) {
+        if (getEdgePredicateKind(edge) !== "rdf:type" || classByColumn.has(edge.from)) continue;
+        if (classMappingKindByColumn.get(edge.to) !== "rdfs:subClassOf") continue;
+        classByColumn.set(edge.from, classByColumn.get(edge.to));
+        classMappingKindByColumn.set(edge.from, "rdf:type");
+        instanceColumnByGeneratedClassColumn.set(edge.to, edge.from);
+    }
+
     const classesByTable = new Map();
 
     for (const [columnNodeId, classUri] of classByColumn) {
@@ -216,15 +227,19 @@ export function extractRelationMap(json) {
     // Avoid duplicates when the same label occurs in both representations.
     const labelMappings = new Set();
     function addLabelMapping(fromNode, objectColumn, range = DEFAULT_LITERAL_RANGE, format = null) {
-        // both spellings of rdfs:label share one key, so the tree shows one label
-        const predicateUri = "rdfs:label";
-        const subjectUri = getColumnSubjectUri(fromNode);
+        // a generated subclass is labelled next to its instances, never as an instance of the parent class
+        const instanceColumnId = instanceColumnByGeneratedClassColumn.get(fromNode.id);
+        const subjectNode = instanceColumnId ? nodesById.get(instanceColumnId) : fromNode;
+        // both spellings of rdfs:label share one key, so the tree shows one label.
+        // rdf:type/rdfs:label is the SPARQL path to the label of the instance's class
+        const predicateUri = instanceColumnId ? "rdf:type/rdfs:label" : "rdfs:label";
+        const subjectUri = getColumnSubjectUri(subjectNode);
         const key = buildDataPropertyKey(subjectUri, predicateUri, range, format);
         const identity = JSON.stringify([
             key,
-            getDatasource(fromNode.data, json),
-            fromNode.data.dataTable,
-            fromNode.data.id,
+            getDatasource(subjectNode.data, json),
+            subjectNode.data.dataTable,
+            subjectNode.data.id,
             getDatasource(objectColumn, json),
             objectColumn.dataTable,
             objectColumn.id,
@@ -234,17 +249,36 @@ export function extractRelationMap(json) {
         addMapping(key, {
             kind: "dataProperty",
             semanticRelationKind: "label",
-            subjectClassMappingKind: classMappingKindByColumn.get(fromNode.id) ?? (getClassUri(fromNode.id) ? "tableInference" : "generatedClass"),
-            from: fromNode.data,
+            subjectClassMappingKind: classMappingKindByColumn.get(subjectNode.id) ?? (getClassUri(subjectNode.id) ? "tableInference" : "generatedClass"),
+            from: subjectNode.data,
             to: objectColumn,
             subjectUri,
             subjectLabel: getClassLabel(subjectUri, json),
             predicateUri,
-            predicateLabel: "label",
+            predicateLabel: instanceColumnId ? "classLabel" : "label",
             objectUri: range,
             objectLabel: getRangeLabel(range, json),
             range,
             format,
+        });
+    }
+
+    for (const [generatedClassColumnId, instanceColumnId] of instanceColumnByGeneratedClassColumn) {
+        const classUri = classByColumn.get(instanceColumnId);
+        addMapping(buildDataPropertyKey(classUri, "rdf:type", DEFAULT_LITERAL_RANGE), {
+            kind: "dataProperty",
+            semanticRelationKind: "class",
+            subjectClassMappingKind: "rdf:type",
+            from: nodesById.get(instanceColumnId).data,
+            to: nodesById.get(generatedClassColumnId).data,
+            subjectUri: classUri,
+            subjectLabel: getClassLabel(classUri, json),
+            predicateUri: "rdf:type",
+            predicateLabel: "class",
+            objectUri: DEFAULT_LITERAL_RANGE,
+            objectLabel: getRangeLabel(DEFAULT_LITERAL_RANGE, json),
+            range: DEFAULT_LITERAL_RANGE,
+            format: null,
         });
     }
 

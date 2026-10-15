@@ -376,10 +376,10 @@ var Lineage_sqlDataExtractor = (function () {
         self.updateFilterIcons();
     };
 
-    self.clearAll = function () {
+    self.clearAll = function (source) {
         self.lastRecordedNode = null;
         Lineage_whiteboard.lineageVisjsGraph.clearGraph();
-        self.drawDatabaseMappedNodes(self.currentSource);
+        self.drawDatabaseMappedNodes(source || self.currentSource);
         self.startPathRecording();
     };
 

@@ -551,7 +551,8 @@ export function findJoinPath(graph, startTable, targetTable) {
 }
 
 export function findMinimumJoinSet(requiredTables, joins) {
-    const tables = [...requiredTables];
+    // sorted: the first of equal join sets wins, it must not depend on the click order
+    const tables = [...requiredTables].sort();
     if (tables.length <= 1) return [];
 
     const graph = buildJoinGraph(joins);
@@ -586,7 +587,7 @@ export function findMinimumJoinSet(requiredTables, joins) {
     }
 
     if (!best) {
-        throw new Error(`Cannot connect requested tables through definedInColumn: ${tables.join(", ")}`);
+        throw new Error(`No join on a class of the path connects the tables: ${tables.join(", ")}`);
     }
 
     return best;
@@ -648,12 +649,63 @@ export function groupMappingsByDatasource(keys, relationMap, json) {
     return groups;
 }
 
+// a join on a class outside the selected mappings would change the meaning of the rows
+function extractPathClassJoins(mappings, json) {
+    const nodesById = new Map(json.nodes.map((node) => [node.id, node]));
+    const nodesByTableColumn = new Map(json.nodes.map((node) => [JSON.stringify([node.data?.dataTable, node.data?.id]), node]));
+    const subjectColumnByValueColumn = getSameClassValueColumns(json);
+
+    const classColumnsByKey = new Map();
+    for (const mapping of mappings) {
+        const mappingClassColumns = [{ column: mapping.from, classUri: mapping.subjectUri }];
+        if (mapping.kind === "objectProperty") {
+            mappingClassColumns.push({ column: mapping.to, classUri: mapping.objectUri });
+        }
+        for (const classColumn of mappingClassColumns) {
+            const tableColumnKey = JSON.stringify([classColumn.column.dataTable, classColumn.column.id]);
+            const classColumnKey = JSON.stringify([tableColumnKey, classColumn.classUri]);
+            if (classColumnsByKey.has(classColumnKey)) continue;
+
+            // two columns hold the same instances when their definedInColumn chains end on the same column
+            let identityColumnId = nodesByTableColumn.get(tableColumnKey)?.id;
+            const chainColumnIds = new Set();
+            while (nodesById.get(identityColumnId)?.data?.definedInColumn && !chainColumnIds.has(identityColumnId)) {
+                chainColumnIds.add(identityColumnId);
+                identityColumnId = nodesById.get(identityColumnId).data.definedInColumn;
+            }
+            // the main column can be a value column (superiorfunctionallocation in PAZFLOR_ABOX)
+            identityColumnId = subjectColumnByValueColumn.get(identityColumnId) || identityColumnId;
+            classColumnsByKey.set(classColumnKey, { ...classColumn, identityColumnId });
+        }
+    }
+
+    const classColumns = [...classColumnsByKey.values()];
+    const joins = [];
+    for (let fromIndex = 0; fromIndex < classColumns.length; fromIndex++) {
+        for (let toIndex = fromIndex + 1; toIndex < classColumns.length; toIndex++) {
+            const fromClassColumn = classColumns[fromIndex];
+            const toClassColumn = classColumns[toIndex];
+            const isSameClassInstance = fromClassColumn.classUri === toClassColumn.classUri && fromClassColumn.identityColumnId && fromClassColumn.identityColumnId === toClassColumn.identityColumnId;
+            if (!isSameClassInstance || fromClassColumn.column.dataTable === toClassColumn.column.dataTable) continue;
+            joins.push({
+                fromTable: fromClassColumn.column.dataTable,
+                fromColumn: fromClassColumn.column.id,
+                toTable: toClassColumn.column.dataTable,
+                toColumn: toClassColumn.column.id,
+            });
+        }
+    }
+    // findMinimumJoinSet keeps the first of equal candidates
+    const joinSortKey = (join) => [join.fromTable, join.fromColumn, join.toTable, join.toColumn].join(KEY_SEPARATOR);
+    joins.sort((leftJoin, rightJoin) => joinSortKey(leftJoin).localeCompare(joinSortKey(rightJoin)));
+    return joins;
+}
+
 function buildSqlFromMappings(mappings, json) {
     if (!mappings.length) {
         throw new Error("No mappings supplied");
     }
 
-    const datasource = mappings[0].datasource;
     const requiredTables = new Set();
 
     for (const mapping of mappings) {
@@ -661,17 +713,7 @@ function buildSqlFromMappings(mappings, json) {
         requiredTables.add(mapping.to.dataTable);
     }
 
-    const allJoins = extractTableJoins(json);
-
-    const datasourceJoins = allJoins.filter((join) => {
-        const fromOk = !join.fromDatasource || join.fromDatasource === datasource;
-
-        const toOk = !join.toDatasource || join.toDatasource === datasource;
-
-        return fromOk && toOk;
-    });
-
-    const selectedJoins = findMinimumJoinSet(requiredTables, datasourceJoins);
+    const selectedJoins = findMinimumJoinSet(requiredTables, extractPathClassJoins(mappings, json));
 
     const aliasByTable = new Map();
     let aliasIndex = 0;

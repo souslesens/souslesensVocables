@@ -4,6 +4,7 @@ import { useEffect, useState, SyntheticEvent } from "react";
 import { Alert, Snackbar, Stack, Tab, Tabs } from "@mui/material";
 
 import { UserInfo } from "./Component/UserInfo";
+import { UserPreferences } from "./Component/UserPreferences";
 import { UserQuotas } from "./Component/UserQuotas";
 import { UserSources } from "./Component/UserSources";
 import UsersDataManagement from "./users-data-management";
@@ -21,6 +22,7 @@ enum Sections {
     Sources = "sources",
     UsersData = "usersData",
     Quotas = "quotas",
+    Preferences = "preferences",
 }
 
 export type Severity = "error" | "info" | "success" | "warning";
@@ -46,6 +48,8 @@ const Dispatcher = ({ handleSnackbar, selectedTab }: DispatcherProps) => {
             return <UsersDataManagement />;
         case Sections.Quotas:
             return <UserQuotas handleSnackbar={handleSnackbar} />;
+        case Sections.Preferences:
+            return <UserPreferences />;
     }
 };
 
@@ -95,6 +99,7 @@ export default function UserSettings() {
                 <Tab label="Sources" value={Sections.Sources} />
                 <Tab label="Users Data" value={Sections.UsersData} />
                 <Tab label="Quotas" value={Sections.Quotas} />
+                <Tab label="Preferences" value={Sections.Preferences} />
             </Tabs>
             <Dispatcher handleSnackbar={handleSnackbar} selectedTab={selectedTab} />
         </Stack>

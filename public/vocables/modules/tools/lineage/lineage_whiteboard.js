@@ -19,6 +19,7 @@ import KGquery_graph from "../KGquery/KGquery_graph.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import NodeInfosAxioms from "../axioms/nodeInfosAxioms.js";
 import UserDataWidget from "../../uiWidgets/userDataWidget.js";
+import UserPreferences from "../../shared/userPreferences.js";
 import Containers_tree from "../containers/containers_tree.js";
 import Export from "../../shared/export.js";
 import Lineage_nodeCentricGraph from "./lineage_nodeCentricGraph.js";
@@ -127,6 +128,11 @@ var Lineage_whiteboard = (function () {
             self.firstLoad = false;
 
             SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
+            UserPreferences.loadPreferences(function (err) {
+                if (err) {
+                    MainController.errorAlert(err);
+                }
+            });
         }
         UserDataWidget.currentTreeNode = null;
         UI.initMenuBar(self.loadSources);

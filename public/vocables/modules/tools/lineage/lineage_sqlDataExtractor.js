@@ -3,8 +3,9 @@ import Lineage_sources from "./lineage_sources.js";
 import MappingColumnsGraph from "../mappingModeler/mappingColumnsGraph.js";
 
 import common from "../../shared/common.js";
-import MappingsToSql, { extractRelationMap, buildSqlByDatabaseSources, quoteIdentifier, getDatasource } from "../mappingModeler/mappingsToSql.js";
+import MappingsToSql, { extractRelationMap, buildSqlByDatabaseSources, buildObjectPropertyKey, quoteIdentifier, getDatasource } from "../mappingModeler/mappingsToSql.js";
 import KGquery_filter_bot from "../../bots/KGquery_filter_bot.js";
+import KGquery_paths from "../KGquery/KGquery_paths.js";
 
 var Lineage_sqlDataExtractor = (function () {
     var self = {};
@@ -25,6 +26,9 @@ var Lineage_sqlDataExtractor = (function () {
     // a timestamp column or an ISO text, both cast directly
     self.isoDateFormats = ["ISO", "ISO-time"];
     self.numericRangeRegex = /(int|integer|float|double|decimal)$/;
+    // the style KGquery_paths.drawPathOnGraph gives the path of its first query set
+    self.pathEdgeStyle = { color: "green", width: 3 };
+    self.edgesBeforeHighlight = [];
     self.Lineage_sqlDataExtractor = self.init = function () {
         self.isRecording = false;
         $("#dataExtractorDiv").load("./modules/tools/lineage/html/lineage_sqlDataExtractorDialog.html", function (err) {});
@@ -111,6 +115,11 @@ var Lineage_sqlDataExtractor = (function () {
     self.startPathRecording = function () {
         self.isRecording = true;
         self.currentPaths = [];
+        // clearAll empties the graph before redrawing it
+        if (Lineage_whiteboard.lineageVisjsGraph.data) {
+            Lineage_whiteboard.lineageVisjsGraph.data.edges.update(self.edgesBeforeHighlight);
+        }
+        self.edgesBeforeHighlight = [];
 
         var jstreeData = [];
         JstreeWidget.loadJsTree("sqlDataExtractor_jstreeDiv", jstreeData, { withCheckboxes: true });
@@ -142,7 +151,14 @@ var Lineage_sqlDataExtractor = (function () {
                 }
             }
         });
-        const queries = buildSqlByDatabaseSources(allPaths, self.currentRelationsMap, self.currentMappingJson);
+        var queries;
+        try {
+            queries = buildSqlByDatabaseSources(allPaths, self.currentRelationsMap, self.currentMappingJson);
+        } catch (error) {
+            // mappingsToSql throws when two tables share no class of the path to join on
+            self.sql = null;
+            return MainController.errorAlert(error.message);
+        }
 
         for (const [databaseName, { datasource, sql, aliasMap }] of queries) {
             // a property mapped in several tables has one column per table, the filter holds on each of them
@@ -383,21 +399,89 @@ var Lineage_sqlDataExtractor = (function () {
         self.startPathRecording();
     };
 
+    // same path finding as KGquery: shortest path over the relations, then managePathAmbiguousEdges
     self.addClassToPath = function (node) {
-        // var nodes= JstreeWidget.getjsTreeNodes("sqlDataExtractor_jstreeDiv");
-
-        if (self.lastRecordedNode) {
-            for (const [key, values] of self.currentRelationsMap) {
-                if (key.startsWith(self.lastRecordedNode.id) && key.endsWith(node.id)) {
-                    self.currentPaths.push(key);
-                } else if (key.endsWith(self.lastRecordedNode.id) && key.startsWith(node.id)) {
-                    self.currentPaths.push(key);
-                }
-            }
+        var previousNode = self.lastRecordedNode;
+        if (!previousNode) {
+            self.lastRecordedNode = node;
+            return self.addClassToTree(node);
+        }
+        if (previousNode.id == node.id) {
+            return;
         }
 
-        self.lastRecordedNode = node;
+        var labelByClassId = {};
+        var vicinityArray = [];
+        for (const [, mappings] of self.currentRelationsMap) {
+            var mapping = mappings[0];
+            if (mapping.kind != "objectProperty") {
+                continue;
+            }
+            labelByClassId[mapping.subjectUri] = mapping.subjectLabel;
+            labelByClassId[mapping.objectUri] = mapping.objectLabel;
+            vicinityArray.push([mapping.subjectUri, mapping.objectUri, mapping.predicateUri]);
+        }
 
+        // startPathRecording replaces it: an answer arriving after a clear all is dropped
+        var recordedPaths = self.currentPaths;
+        $.ajax({
+            type: "POST",
+            url: `${Config.apiUrl}/shortestPath`,
+            data: { body: { fromNodeUri: previousNode.id, toNodeUri: node.id, vicinityArray: vicinityArray } },
+            dataType: "json",
+            success: function (pathEdges) {
+                if (self.currentPaths !== recordedPaths) {
+                    return;
+                }
+                if (pathEdges.length == 0) {
+                    UI.message("no relation between " + previousNode.label + " and " + node.label);
+                    self.lastRecordedNode = node;
+                    return self.addClassToTree(node);
+                }
+                KGquery_paths.managePathAmbiguousEdges(pathEdges, function (unambiguousPathEdges) {
+                    unambiguousPathEdges.forEach(function (pathEdge) {
+                        // the server appends 1 to an edge it walks backwards, subject and object keep their place
+                        var [subjectUri, objectUri, predicateUri] = pathEdge;
+                        var relationKey = buildObjectPropertyKey(subjectUri, predicateUri, objectUri);
+                        if (recordedPaths.indexOf(relationKey) < 0) {
+                            recordedPaths.push(relationKey);
+                        }
+                        [subjectUri, objectUri].forEach(function (classId) {
+                            var isIntermediateClass = classId != previousNode.id && classId != node.id;
+                            if (isIntermediateClass && !JstreeWidget.getjsTreeNodeObj("sqlDataExtractor_jstreeDiv", classId)) {
+                                self.addClassToTree({ id: classId, label: labelByClassId[classId] });
+                            }
+                        });
+                    });
+                    self.lastRecordedNode = node;
+                    self.addClassToTree(node);
+                    self.highlightPathOnGraph();
+                });
+            },
+            error: function (error) {
+                MainController.errorAlert(error.responseText || error);
+            },
+        });
+    };
+
+    // the whiteboard edge of a relation has the relation key as id (drawDatabaseMappedNodes)
+    self.highlightPathOnGraph = function () {
+        var edgesDataSet = Lineage_whiteboard.lineageVisjsGraph.data.edges;
+        var highlightedEdges = [];
+        self.currentPaths.forEach(function (relationKey) {
+            var edge = edgesDataSet.get(relationKey);
+            var isAlreadyHighlighted = self.edgesBeforeHighlight.some((edgeBeforeHighlight) => edgeBeforeHighlight.id == relationKey);
+            if (!edge || isAlreadyHighlighted) {
+                return;
+            }
+            // null gives the edge back the graph default
+            self.edgesBeforeHighlight.push({ id: relationKey, color: edge.color ?? null, width: edge.width ?? null });
+            highlightedEdges.push({ id: relationKey, ...self.pathEdgeStyle });
+        });
+        edgesDataSet.update(highlightedEdges);
+    };
+
+    self.addClassToTree = function (node) {
         var jstreedata = [
             {
                 id: node.id,

@@ -78,25 +78,30 @@ var Lineage_reasoner = (function () {
      * @returns {void}
      */
     self.runConsistency = function () {
-        var fromStr = Sparql_common.getFromStr(Lineage_sources.activeSource, false, false);
-        var describeQuery = "DESCRIBE ?s ?p ?o  " + fromStr + "  WHERE {  ?s ?p ?o    } ";
+        self.runReasonerReport("consistency");
+    };
+
+    /**
+     * Runs the consistency or unsatisfiability rules of the SPARQL reasoner on the active source and shows their report.
+     * @function
+     * @name runReasonerReport
+     * @memberof module:Lineage_reasoner
+     * @param {string} operation - "consistency" or "unsatisfiable"
+     * @returns {void}
+     */
+    self.runReasonerReport = function (operation) {
         const params = new URLSearchParams({
-            operation: "consistency",
-            type: self.ontologyAccessType,
-            describeSparqlQuery: describeQuery,
-            graphName: Config.sources[Lineage_sources.activeSource].graphUri,
+            operation: operation,
+            source: Lineage_sources.activeSource,
         });
         $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + Lineage_sources.activeSource + "...</span>");
 
         $.ajax({
             type: "GET",
-            url: Config.apiUrl + "/jowl/reasoner?" + params.toString(),
-
+            url: Config.apiUrl + "/reasoner?" + params.toString(),
             dataType: "json",
-
-            success: function (data, _textStatus, _jqXHR) {
-                $("#lineage_reasoner_infosDiv").html(JSON.stringify(data, null, 2));
-                $("#lineage_reasoner_outputDiv").css("display", "block");
+            success: function (report, _textStatus, _jqXHR) {
+                $("#lineage_reasoner_infosDiv").html($("<pre>").text(JSON.stringify(report, null, 2)));
             },
             error(err) {
                 MainController.errorAlert(err);
@@ -112,29 +117,7 @@ var Lineage_reasoner = (function () {
      * @returns {void}
      */
     self.runUnsatisfiable = function () {
-        var fromStr = Sparql_common.getFromStr(Lineage_sources.activeSource, false, false);
-        var describeQuery = "DESCRIBE ?s ?p ?o  " + fromStr + "  WHERE {  ?s ?p ?o    } ";
-        const params = new URLSearchParams({
-            operation: "unsatisfiable",
-            type: self.ontologyAccessType,
-            describeSparqlQuery: describeQuery,
-            graphName: Config.sources[Lineage_sources.activeSource].graphUri,
-        });
-        $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + Lineage_sources.activeSource + "...</span>");
-
-        $.ajax({
-            type: "GET",
-            url: Config.apiUrl + "/jowl/reasoner?" + params.toString(),
-
-            dataType: "json",
-
-            success: function (data, _textStatus, _jqXHR) {
-                $("#lineage_reasoner_infosDiv").html(JSON.stringify(data, null, 2));
-            },
-            error(err) {
-                MainController.errorAlert(err);
-            },
-        });
+        self.runReasonerReport("unsatisfiable");
     };
 
     /**
@@ -145,25 +128,25 @@ var Lineage_reasoner = (function () {
      * @returns {void}
      */
     self.showInferencePredicates = function () {
-        $("#lineage_reasoner_infosDiv").html("getting ListInferenceParams ...");
+        $("#lineage_reasoner_infosDiv").html("getting inference rules ...");
 
         $.ajax({
             type: "GET",
-            url: Config.apiUrl + "/jowl/reasonerListInferenceParams",
+            url: Config.apiUrl + "/reasoner?operation=inferenceRules",
             dataType: "json",
 
-            success: function (data, _textStatus, _jqXHR) {
+            success: function (inferenceRules, _textStatus, _jqXHR) {
                 $("#lineage_reasoner_outputDiv").css("display", "block");
                 common.fillSelectWithColorPalette("lineage_reasoner_colorSelect");
                 common.fillSelectWithColorPalette("lineage_reasoner_colorSelect");
                 var jstreeData = [];
-                for (var key in data) {
+                inferenceRules.forEach(function (inferenceRule) {
                     jstreeData.push({
-                        id: key,
-                        text: key,
+                        id: inferenceRule.id,
+                        text: inferenceRule.id,
                         parent: "#",
                     });
-                }
+                });
                 var options = {
                     openAll: true,
                     withCheckboxes: true,
@@ -179,53 +162,54 @@ var Lineage_reasoner = (function () {
     };
 
     /**
-     * Runs inference on the selected predicates.
+     * Runs the selected inference rules of the SPARQL reasoner.
      * @function
      * @name runInference
      * @memberof module:Lineage_reasoner
-     * @param {Array<string>} predicates - Array of predicates to use for inference.
+     * @param {Array<string>} ruleIds - Ids of the inference rules to run.
      * @param {Function} callback - Callback function with signature (error, result).
      * @returns {void}
      */
-    self.runInference = function (predicates, callback) {
-        var operation = $("#lineage_reasoner_operationSelect").val();
-
-        var fromStr = Sparql_common.getFromStr(self.currentSource, false, false);
-        var describeQuery = "DESCRIBE ?s ?p ?o  " + fromStr + "  WHERE {  ?s ?p ?o    } ";
-
+    self.runInference = function (ruleIds, callback) {
         const params = new URLSearchParams({
             operation: "inference",
-            graphName: Config.sources[Lineage_sources.activeSource].graphUri,
-            //  type: self.ontologyAccessType,
-            predicates: JSON.stringify(predicates),
-            //  describeSparqlQuery: describeQuery,
+            source: self.currentSource,
+            ruleIds: JSON.stringify(ruleIds),
         });
-        $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + Lineage_sources.activeSource + "...</span>");
+        $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + self.currentSource + "...</span>");
 
         $.ajax({
             type: "GET",
-            url: Config.apiUrl + "/jowl/reasoner?" + params.toString(),
+            url: Config.apiUrl + "/reasoner?" + params.toString(),
 
             dataType: "json",
 
-            success: function (data, _textStatus, _jqXHR) {
-                if (data.result && data.result == "Error") {
-                    return alert(" JOWL error ");
+            success: function (report, _textStatus, _jqXHR) {
+                if (report.failedChecks.length > 0) {
+                    var failedRuleIds = report.failedChecks.map(function (failedCheck) {
+                        return failedCheck.id;
+                    });
+                    UI.message("rules not evaluated: " + failedRuleIds.join(", "), true);
                 }
-                var totalTriples = 0;
-                for (var key in data) {
-                    data[key] = self.HermitFunctionalStyleSyntaxToJson(data[key]);
-                    totalTriples += data[key].length;
-                }
-                if (totalTriples == 0) {
+                if (report.inferredTriples.length == 0) {
                     return $("#lineage_reasoner_infosDiv").html("<span style='color:blue;font-weigth:bold'>No results</span>");
                 }
+                var inferredTriplesByRuleId = {};
+                report.inferredTriples.forEach(function (inferredTriple) {
+                    var triple = { subject: inferredTriple.s.value, predicate: inferredTriple.p.value, object: inferredTriple.o.value };
+                    inferredTriple.rules.forEach(function (ruleId) {
+                        if (!inferredTriplesByRuleId[ruleId]) {
+                            inferredTriplesByRuleId[ruleId] = [];
+                        }
+                        inferredTriplesByRuleId[ruleId].push(triple);
+                    });
+                });
 
-                self.setInferenceTripleLabels(self.currentSource, data, function (err, result) {
+                self.setInferenceTripleLabels(self.currentSource, inferredTriplesByRuleId, function (err, result) {
                     if (err) {
                         return callback(err);
                     }
-                    callback(null, data);
+                    callback(null, inferredTriplesByRuleId);
                 });
             },
             error(err) {
@@ -536,8 +520,8 @@ var regexNested = /<([^>]+)> ([^\(]+)\(<([^>]+)> <([^>]+)>/gm;
     };
 
     self.setInferenceTripleLabels = function (source, inferencesMap, callback) {
+        var urisMap = {};
         for (var pred in inferencesMap) {
-            var urisMap = {};
             inferencesMap[pred].forEach(function (item) {
                 if (!urisMap[item.subject]) {
                     urisMap[item.subject] = "";

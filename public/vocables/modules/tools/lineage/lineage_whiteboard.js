@@ -2011,6 +2011,7 @@ var Lineage_whiteboard = (function () {
             return callbackLoad([
                 { label: "Logic axiom nodes", id: "logicalAxiomNodes" },
                 { label: "SQL Database mapped nodes ", id: "databaseMappedNodes" },
+                { label: "Draw axioms", id: "drawAxioms" },
             ]);
         };
         var validateFn = function (selection) {
@@ -2020,6 +2021,13 @@ var Lineage_whiteboard = (function () {
 
             if (selection == "databaseMappedNodes") {
                 Lineage_sqlDataExtractor.drawDatabaseMappedNodes();
+            }
+
+            if (selection == "drawAxioms") {
+                if (!self.isWhiteboardDrawn()) {
+                    return UI.message("no node on the whiteboard", true);
+                }
+                self.graphActions.drawAxioms(self.getSelectedOrAllWhiteboardNodes());
             }
         };
         SimpleListSelectorWidget.showDialog(null, loadFn, validateFn);
@@ -4671,34 +4679,98 @@ self.zoomGraphOnNode(node.data[0].id, false);
             Lineage_createResource.createSubClass(targetSource, label, node.data.id);
         },
 
-        drawAxioms: function () {
-            var node = self.currentGraphNode;
-            Axioms_manager.initResourcesMap(node.data.source, function (err, result) {
-                AxiomExtractor.getClassAxiomsTriples(node.data.source, node.data.id, function (err, triples) {
-                    var divId = "graphDiv";
-                    var options = {};
-                    Axioms_graph.drawNodeAxioms2(node.data.source, node.data.id, triples, divId, options, function (err, visjsdata) {
-                        if (err) {
-                            return alert(err.responseText || err);
-                        }
-                        var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
-                        var newNodes = [];
-                        var newEdges = [];
-                        visjsdata.nodes.forEach(function (node) {
-                            if (!existingNodes[node.id]) {
-                                newNodes.push(node);
-                            }
-                        });
-                        visjsdata.edges.forEach(function (edge) {
-                            if (!existingNodes[edge.id]) {
-                                newEdges.push(edge);
-                            }
-                        });
-                        Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(newNodes);
-                        Lineage_whiteboard.lineageVisjsGraph.data.edges.add(newEdges);
-                    });
-                });
+        /**
+         * Adds to the whiteboard the axioms of the given nodes, each one read in its own source.
+         *
+         * @function
+         * @name drawAxioms
+         * @memberof module:LineageWhiteboard.graphActions
+         * @param {Array<Object>} [nodes] - Vis.js nodes, the right-clicked node when omitted.
+         * @returns {void}
+         */
+        drawAxioms: function (nodes) {
+            if (!nodes) {
+                nodes = [self.currentGraphNode];
+            }
+            var nodesBySource = {};
+            nodes.forEach(function (node) {
+                if (!node.data || !node.data.id || self.isSourceBoxNode(node) || !Config.sources[node.data.source]) {
+                    return;
+                }
+                if (!nodesBySource[node.data.source]) {
+                    nodesBySource[node.data.source] = [];
+                }
+                nodesBySource[node.data.source].push(node);
             });
+
+            var axiomsVisjsDataByClass = [];
+            async.eachSeries(
+                Object.keys(nodesBySource),
+                function (source, callbackEachSource) {
+                    AxiomExtractor.getBasicAxioms(source, function (err, sourceBasicAxioms) {
+                        if (err) {
+                            return callbackEachSource(err);
+                        }
+                        var classesWithAxioms = nodesBySource[source].filter(function (node) {
+                            return sourceBasicAxioms[node.data.id];
+                        });
+                        if (classesWithAxioms.length == 0) {
+                            return callbackEachSource();
+                        }
+                        Axioms_manager.initResourcesMap(source, function (err) {
+                            if (err) {
+                                return callbackEachSource(err);
+                            }
+                            async.eachSeries(
+                                classesWithAxioms,
+                                function (node, callbackEachNode) {
+                                    AxiomExtractor.getClassAxiomsTriples(source, node.data.id, function (err, triples) {
+                                        if (err) {
+                                            return callbackEachNode(err);
+                                        }
+                                        Axioms_graph.drawNodeAxioms2(source, node.data.id, triples, "graphDiv", {}, function (err, classAxiomsVisjsData) {
+                                            if (err) {
+                                                return callbackEachNode(err);
+                                            }
+                                            axiomsVisjsDataByClass.push(classAxiomsVisjsData);
+                                            callbackEachNode();
+                                        });
+                                    });
+                                },
+                                callbackEachSource,
+                            );
+                        });
+                    });
+                },
+                function (err) {
+                    if (err) {
+                        return MainController.errorAlert(err);
+                    }
+                    if (axiomsVisjsDataByClass.length == 0) {
+                        return UI.message("no axioms found", true);
+                    }
+                    var existingIds = self.lineageVisjsGraph.getExistingIdsMap();
+                    var newNodes = [];
+                    var newEdges = [];
+                    // the axioms of two classes can share a class or a property
+                    axiomsVisjsDataByClass.forEach(function (classAxiomsVisjsData) {
+                        classAxiomsVisjsData.nodes.forEach(function (axiomNode) {
+                            if (!existingIds[axiomNode.id]) {
+                                existingIds[axiomNode.id] = 1;
+                                newNodes.push(axiomNode);
+                            }
+                        });
+                        classAxiomsVisjsData.edges.forEach(function (axiomEdge) {
+                            if (!existingIds[axiomEdge.id]) {
+                                existingIds[axiomEdge.id] = 1;
+                                newEdges.push(axiomEdge);
+                            }
+                        });
+                    });
+                    self.lineageVisjsGraph.data.nodes.add(newNodes);
+                    self.lineageVisjsGraph.data.edges.add(newEdges);
+                },
+            );
         },
     };
 

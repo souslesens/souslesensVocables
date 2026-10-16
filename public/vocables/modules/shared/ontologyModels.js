@@ -513,6 +513,41 @@ var OntologyModels = (function () {
                             }
                             return callbackSeries();
                         },
+
+                        // a class left without a named superClass takes the single named class of its intersection superClass
+                        function (callbackSeries) {
+                            if (self.isAboveMaxClasses(source)) {
+                                return callbackSeries();
+                            }
+                            var query =
+                                queryP +
+                                " select ?sub (sample(?intersectionClass) as ?superClass) (sample(?intersectionClassLabel) as ?superClassLabel) FROM <" +
+                                graphUri +
+                                "> where{" +
+                                " ?sub rdfs:subClassOf ?intersection. ?intersection owl:intersectionOf ?intersectionList." +
+                                " ?intersectionList rdf:rest*/rdf:first ?intersectionClass." +
+                                Sparql_OWL.getNamedClassFilter("intersectionClass") +
+                                " OPTIONAL {?intersectionClass rdfs:label ?intersectionClassLabel}" +
+                                "} group by ?sub having (count(distinct ?intersectionClass) = 1)";
+                            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
+                                if (err) {
+                                    return callbackSeries(err);
+                                }
+                                result.results.bindings.forEach(function (item) {
+                                    var modelClass = Config.ontologiesVocabularyModels[source].classes[item.sub.value];
+                                    if (!modelClass) {
+                                        return;
+                                    }
+                                    var hasNamedSuperClass = modelClass.superClass && !Sparql_OWL.blankNodeUriRegex.test(modelClass.superClass);
+                                    if (hasNamedSuperClass) {
+                                        return;
+                                    }
+                                    modelClass.superClass = item.superClass.value;
+                                    modelClass.superClassLabel = item.superClassLabel ? item.superClassLabel.value : Sparql_common.getLabelFromURI(item.superClass.value);
+                                });
+                                callbackSeries();
+                            });
+                        },
                         function (callbackSeries) {
                             if (true || Config.basicVocabularies[source]) {
                                 self.writeModelOnServerCache(source, Config.ontologiesVocabularyModels[source], function (err, result) {

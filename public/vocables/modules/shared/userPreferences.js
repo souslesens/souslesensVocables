@@ -72,9 +72,6 @@ var UserPreferences = (function () {
      * @returns {void}
      */
     self.applyPreferences = function () {
-        if (!self.preferenceRecord) {
-            return;
-        }
         self.preferenceTree.forEach(function (treeNode) {
             if (!treeNode.data) {
                 return;
@@ -102,7 +99,7 @@ var UserPreferences = (function () {
     self.loadPreferences = function (callback) {
         UserDataWidget.listUserData({ data_type: self.dataType }, function (err, userDataList) {
             if (err) {
-                return callback(err.responseText || err);
+                return callback(err);
             }
             // the list also holds records other users shared, a preference record never is
             var ownedRecords = userDataList.filter(function (userData) {
@@ -112,15 +109,12 @@ var UserPreferences = (function () {
                 self.preferenceRecord = null;
                 return callback();
             }
-            var firstRecordId = ownedRecords[0].id;
-            ownedRecords.forEach(function (userData) {
-                if (userData.id < firstRecordId) {
-                    firstRecordId = userData.id;
-                }
+            ownedRecords.sort(function (leftRecord, rightRecord) {
+                return leftRecord.id - rightRecord.id;
             });
-            UserDataWidget.loadUserDatabyId(firstRecordId, function (err, userData) {
+            UserDataWidget.loadUserDatabyId(ownedRecords[0].id, function (err, userData) {
                 if (err) {
-                    return callback(err.responseText || err);
+                    return callback(err);
                 }
                 self.preferenceRecord = { id: userData.id, data_content: userData.data_content };
                 self.applyPreferences();
@@ -145,10 +139,10 @@ var UserPreferences = (function () {
             }
             var options = {
                 openAll: true,
-                selectTreeNodeFn: function (_event, obj) {
+                selectTreeNodeFn: function (_event, selection) {
                     $("#" + parametersDivId).empty();
-                    if (obj.node.data) {
-                        self.showParameters(obj.node, parametersDivId);
+                    if (selection.node.data) {
+                        self.showParameters(selection.node, parametersDivId);
                     }
                 },
             };
@@ -234,7 +228,7 @@ var UserPreferences = (function () {
                 UI.message("Preferences saved");
             },
             error: function (err) {
-                MainController.errorAlert(err.responseText || err);
+                MainController.errorAlert(err);
             },
         });
     };

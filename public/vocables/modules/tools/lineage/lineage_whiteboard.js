@@ -130,7 +130,7 @@ var Lineage_whiteboard = (function () {
             SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
             UserPreferences.loadPreferences(function (err) {
                 if (err) {
-                    UI.message(err);
+                    MainController.errorAlert(err);
                 }
             });
         }

@@ -51,6 +51,27 @@ var Sparql_OWL = (function () {
     self.getNamedClassFilter = function (variable) {
         return " filter (!isBlank(?" + variable + ") && !STRSTARTS(STR(?" + variable + "),'nodeID://') && !STRSTARTS(STR(?" + variable + "),'_:')).";
     };
+    // a class subClass of or equivalent to an intersection holding a single named class is a subClass of that class
+    self.getIntersectionSuperClassQuery = function (sourceLabel, options) {
+        if (!options) {
+            options = {};
+        }
+        var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports);
+        return (
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+            " select ?sub ?subLabel ?superClass ?superClassLabel " +
+            fromStr +
+            " where{" +
+            " { select ?sub (sample(?intersectionClass) as ?superClass) where{" +
+            " ?sub rdfs:subClassOf|owl:equivalentClass ?intersection. ?intersection owl:intersectionOf ?intersectionList." +
+            " ?intersectionList rdf:rest*/rdf:first ?intersectionClass." +
+            self.getNamedClassFilter("intersectionClass") +
+            " } group by ?sub having (count(distinct ?intersectionClass) = 1) }" +
+            " OPTIONAL {?sub rdfs:label ?subLabel}" +
+            " OPTIONAL {?superClass rdfs:label ?superClassLabel}" +
+            "}"
+        );
+    };
 
     /**
      * Builds the SPARQL property path expressing the parent/child (taxonomy) relation for a

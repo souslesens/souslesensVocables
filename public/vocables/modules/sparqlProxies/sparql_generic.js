@@ -1208,7 +1208,9 @@ var Sparql_generic = (function () {
      * The parent predicate and concept type are
      * chosen from the schema (`rdfs:subClassOf`/`owl:Class` for OWL, `skos:broader`/`skos:Concept`
      * for SKOS, `rdf:type`/`owl:NamedIndividual` for KNOWLEDGE_GRAPH, or `options.parentType`).
-     * The hierarchy query is paginated (limit 500) with `async.whilst`; results are then folded
+     * The hierarchy query is paginated (limit 500) with `async.whilst`. For OWL, a class with no
+     * `rdfs:subClassOf` is added under the single named class of the intersection it is equivalent to,
+     * unless the hierarchy query found nothing at all. Results are then folded
      * into `allClassesMap` (collecting labels/altLabels per node), each node's direct parents are
      * expanded into a single most-specific ancestor chain, and orphan parents are back-filled
      * (labels fetched via {@link module:Sparql_OWL.getLabelsMap} for OWL).
@@ -1264,6 +1266,8 @@ var Sparql_generic = (function () {
         var allData = [];
         // extra datatype properties (ex skos:notation) the user selected to enrich skoslabels
         var indexedPredicates = Sparql_common.getIndexedPredicatesClauses(null, options);
+        self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+        var url = self.sparql_url + "?format=json&timeout=20000&debug=off&query=";
 
         async.series(
             [
@@ -1337,8 +1341,6 @@ var Sparql_generic = (function () {
                             var query2 = "" + query;
                             query2 += " limit " + (limitSize + 1) + " offset " + offset;
 
-                            self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-                            var url = self.sparql_url + "?format=json&timeout=20000&debug=off&query=";
                             Sparql_proxy.querySPARQL_GET_proxy(
                                 url,
                                 query2,
@@ -1366,6 +1368,34 @@ var Sparql_generic = (function () {
                             callbackSeries();
                         },
                     );
+                },
+
+                // a class with no rdfs:subClassOf has no row above
+                function (callbackSeries) {
+                    // an empty taxonomy is how the indexer spots a flat source and indexes all its classes under owl:Thing
+                    if (schemaType != "OWL" || allData.length == 0) {
+                        return callbackSeries();
+                    }
+                    var query = Sparql_OWL.getIntersectionSuperClassQuery(sourceLabel, options);
+                    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+                        // the taxonomy stays the one of the rows above
+                        if (err) {
+                            UI.message(err.responseText || err);
+                            return callbackSeries();
+                        }
+                        var subjectsWithFirstParent = {};
+                        allData.forEach(function (taxonomyRow) {
+                            subjectsWithFirstParent[taxonomyRow.subject.value] = 1;
+                        });
+                        result.results.bindings.forEach(function (binding) {
+                            // the subClassOf rows above require a label too
+                            if (subjectsWithFirstParent[binding.sub.value] || !binding.subLabel) {
+                                return;
+                            }
+                            allData.push({ subject: binding.sub, subjectLabel: binding.subLabel, firstParent: binding.superClass });
+                        });
+                        callbackSeries();
+                    });
                 },
 
                 //format result

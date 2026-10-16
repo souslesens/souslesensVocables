@@ -519,17 +519,7 @@ var OntologyModels = (function () {
                             if (self.isAboveMaxClasses(source)) {
                                 return callbackSeries();
                             }
-                            var query =
-                                queryP +
-                                " select ?sub (sample(?intersectionClass) as ?superClass) (sample(?intersectionClassLabel) as ?superClassLabel) FROM <" +
-                                graphUri +
-                                "> where{" +
-                                " ?sub ?definitionPredicate ?intersection. VALUES ?definitionPredicate {rdfs:subClassOf owl:equivalentClass}" +
-                                " ?intersection owl:intersectionOf ?intersectionList." +
-                                " ?intersectionList rdf:rest*/rdf:first ?intersectionClass." +
-                                Sparql_OWL.getNamedClassFilter("intersectionClass") +
-                                " OPTIONAL {?intersectionClass rdfs:label ?intersectionClassLabel}" +
-                                "} group by ?sub having (count(distinct ?intersectionClass) = 1)";
+                            var query = Sparql_OWL.getIntersectionSuperClassQuery(source, { withoutImports: true });
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);

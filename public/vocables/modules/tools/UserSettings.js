@@ -1,3 +1,5 @@
+import "../shared/userPreferences.js";
+
 const UserSettings = (() => {
     const self = {};
     self.createApp = null;

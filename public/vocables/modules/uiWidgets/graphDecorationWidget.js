@@ -4,6 +4,7 @@ import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 var GraphDecorationWidget = (function () {
     var self = {};
     self.currentAttrsPalette = {};
+    self.nodeShapes = ["dot", "square", "box", "text", "diamond", "star", "triangle", "ellipse", "circle", "database", "triangleDown", "hexagon"];
     var attrsShapes = ["triangle", "box", "diamond"];
     attrsShapes.index = 0;
     var colorPalette = common.paletteIntense;
@@ -20,8 +21,7 @@ var GraphDecorationWidget = (function () {
             }
             $("#lineage_decorate_applyButton").bind("click", GraphDecorationWidget.decorateNodes);
             common.fillSelectWithColorPalette("lineage_decorate_colorSelect");
-            var shapes = ["dot", "square", "box", "text", "diamond", "star", "triangle", "ellipse", "circle", "database", "triangleDown", "hexagon"];
-            common.fillSelectOptions("lineage_decorate_shapeSelect", shapes, true);
+            common.fillSelectOptions("lineage_decorate_shapeSelect", self.nodeShapes, true);
         });
     };
     self.decorateNodes = function () {

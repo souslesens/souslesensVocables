@@ -205,7 +205,7 @@ var Sparql_OWL = (function () {
             // be glued to the dot, and Virtuoso reads `owl:Class.FILTER` as one token
             query += "?topConcept rdf:type owl:Class. ";
         }
-        query += strFilterTopConcept + " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}" + "filter (!isBlank( ?topConcept))";
+        query += strFilterTopConcept + " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}" + self.getNamedClassFilter("topConcept");
         if (options.filterCollections) {
             query +=
                 "?collection skos:member ?aConcept. ?aConcept " +

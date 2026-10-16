@@ -514,7 +514,7 @@ var OntologyModels = (function () {
                             return callbackSeries();
                         },
 
-                        // a class left without a named superClass takes the single named class of its intersection superClass
+                        // a class left without a named superClass takes the single named class of the intersection it is a subClass of or equivalent to
                         function (callbackSeries) {
                             if (self.isAboveMaxClasses(source)) {
                                 return callbackSeries();
@@ -524,7 +524,8 @@ var OntologyModels = (function () {
                                 " select ?sub (sample(?intersectionClass) as ?superClass) (sample(?intersectionClassLabel) as ?superClassLabel) FROM <" +
                                 graphUri +
                                 "> where{" +
-                                " ?sub rdfs:subClassOf ?intersection. ?intersection owl:intersectionOf ?intersectionList." +
+                                " ?sub ?definitionPredicate ?intersection. VALUES ?definitionPredicate {rdfs:subClassOf owl:equivalentClass}" +
+                                " ?intersection owl:intersectionOf ?intersectionList." +
                                 " ?intersectionList rdf:rest*/rdf:first ?intersectionClass." +
                                 Sparql_OWL.getNamedClassFilter("intersectionClass") +
                                 " OPTIONAL {?intersectionClass rdfs:label ?intersectionClassLabel}" +

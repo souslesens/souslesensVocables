@@ -1208,7 +1208,10 @@ var Sparql_generic = (function () {
      * The parent predicate and concept type are
      * chosen from the schema (`rdfs:subClassOf`/`owl:Class` for OWL, `skos:broader`/`skos:Concept`
      * for SKOS, `rdf:type`/`owl:NamedIndividual` for KNOWLEDGE_GRAPH, or `options.parentType`).
-     * The hierarchy query is paginated (limit 500) with `async.whilst`; results are then folded
+     * The hierarchy query is paginated (limit 500) with `async.whilst`. A blank node (an axiom) is
+     * never counted as a parent. When the hierarchy query found rows, an OWL class without a named
+     * parent takes the single named class of the intersection it is a subClass of or equivalent to,
+     * as in the ontology model, and a class with no `rdfs:subClassOf` at all is a root. Results are then folded
      * into `allClassesMap` (collecting labels/altLabels per node), each node's direct parents are
      * expanded into a single most-specific ancestor chain, and orphan parents are back-filled
      * (labels fetched via {@link module:Sparql_OWL.getLabelsMap} for OWL).
@@ -1264,6 +1267,8 @@ var Sparql_generic = (function () {
         var allData = [];
         // extra datatype properties (ex skos:notation) the user selected to enrich skoslabels
         var indexedPredicates = Sparql_common.getIndexedPredicatesClauses(null, options);
+        self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+        var url = self.sparql_url + "?format=json&timeout=20000&debug=off&query=";
 
         async.series(
             [
@@ -1337,8 +1342,6 @@ var Sparql_generic = (function () {
                             var query2 = "" + query;
                             query2 += " limit " + (limitSize + 1) + " offset " + offset;
 
-                            self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-                            var url = self.sparql_url + "?format=json&timeout=20000&debug=off&query=";
                             Sparql_proxy.querySPARQL_GET_proxy(
                                 url,
                                 query2,
@@ -1366,6 +1369,72 @@ var Sparql_generic = (function () {
                             callbackSeries();
                         },
                     );
+                },
+
+                // same intersection rule as the ontology model
+                function (callbackSeries) {
+                    // an empty taxonomy is how the indexer spots a flat source and indexes all its classes under owl:Thing
+                    if (schemaType != "OWL" || allData.length == 0) {
+                        return callbackSeries();
+                    }
+                    var query = Sparql_OWL.getIntersectionSuperClassQuery(sourceLabel, options);
+                    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+                        // the taxonomy stays the one of the rows above
+                        if (err) {
+                            UI.message(err.responseText || err);
+                            return callbackSeries();
+                        }
+                        var subjectsWithNamedParent = {};
+                        allData.forEach(function (taxonomyRow) {
+                            if (!Sparql_OWL.blankNodeUriRegex.test(taxonomyRow.firstParent.value)) {
+                                subjectsWithNamedParent[taxonomyRow.subject.value] = 1;
+                            }
+                        });
+                        result.results.bindings.forEach(function (binding) {
+                            // the subClassOf rows above require a label too
+                            if (subjectsWithNamedParent[binding.sub.value] || !binding.subLabel) {
+                                return;
+                            }
+                            allData.push({ subject: binding.sub, subjectLabel: binding.subLabel, firstParent: binding.superClass });
+                        });
+                        callbackSeries();
+                    });
+                },
+
+                // classes with no rdfs:subClassOf at all are roots
+                function (callbackSeries) {
+                    if (schemaType != "OWL" || allData.length == 0) {
+                        return callbackSeries();
+                    }
+                    var rootClassesQuery =
+                        "PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                        " PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
+                        " SELECT DISTINCT * " +
+                        Sparql_common.getFromStr(sourceLabel, false, options.withoutImports) +
+                        " WHERE { ?subject rdf:type owl:Class. ?subject rdfs:label ?subjectLabel." +
+                        Sparql_OWL.getNamedClassFilter("subject") +
+                        " filter not exists {?subject rdfs:subClassOf ?anyParent}" +
+                        " OPTIONAL {?subject skos:prefLabel|skos:altLabel ?subjectAltLabel}" +
+                        indexedPredicates.optionalClauses +
+                        " }";
+                    Sparql_proxy.querySPARQL_GET_proxy(url, rootClassesQuery, "", { source: sourceLabel }, function (err, result) {
+                        if (err) {
+                            UI.message(err.responseText || err);
+                            return callbackSeries();
+                        }
+                        var subjectsInTaxonomy = {};
+                        allData.forEach(function (taxonomyRow) {
+                            subjectsInTaxonomy[taxonomyRow.subject.value] = 1;
+                        });
+                        result.results.bindings.forEach(function (rootClassBinding) {
+                            // a class equivalent to an intersection got its row above
+                            if (subjectsInTaxonomy[rootClassBinding.subject.value]) {
+                                return;
+                            }
+                            allData.push(rootClassBinding);
+                        });
+                        callbackSeries();
+                    });
                 },
 
                 //format result
@@ -1487,14 +1556,14 @@ var Sparql_generic = (function () {
 
                     // flag ambiguous hierarchies, else keep the single parent
                     for (var key in allClassesMap) {
-                        var parentsExcludingSelf = [];
+                        var namedParentsExcludingSelf = [];
                         var isInCycle = false;
                         allClassesMap[key]._directParents.forEach(function (directParent) {
-                            // a self reference (X subClassOf X) is always dropped
-                            if (directParent === key) {
+                            // a self reference is dropped, and so is a blank node: an anonymous class expression is an axiom, not a parent
+                            if (directParent === key || Sparql_OWL.blankNodeUriRegex.test(directParent)) {
                                 return;
                             }
-                            parentsExcludingSelf.push(directParent);
+                            namedParentsExcludingSelf.push(directParent);
                             if (allClassesMap[directParent] && allClassesMap[directParent].parents.indexOf(key) > -1) {
                                 isInCycle = true;
                             }
@@ -1502,10 +1571,10 @@ var Sparql_generic = (function () {
 
                         if (isInCycle) {
                             anomalyParents[key] = cyclicParentsClassUri;
-                        } else if (parentsExcludingSelf.length > 1) {
+                        } else if (namedParentsExcludingSelf.length > 1) {
                             anomalyParents[key] = multipleParentsClassUri;
-                        } else if (parentsExcludingSelf.length === 1) {
-                            singleParents[key] = parentsExcludingSelf[0];
+                        } else if (namedParentsExcludingSelf.length === 1) {
+                            singleParents[key] = namedParentsExcludingSelf[0];
                         }
                     }
 

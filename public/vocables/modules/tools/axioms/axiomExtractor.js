@@ -230,41 +230,44 @@ var AxiomExtractor = (function () {
         });
     };
 
+    self.classAxiomTypesByPredicate = {
+        "http://www.w3.org/2000/01/rdf-schema#subClassOf": "subClassOf",
+        "http://www.w3.org/2002/07/owl#equivalentClass": "equivalentClass",
+        "http://www.w3.org/2002/07/owl#disjointWith": "disjointWith",
+    };
+
     self.listClassesWithAxioms = function (sourceLabel, callback) {
         AxiomExtractor.getBasicAxioms(sourceLabel, function (err, basicAxioms) {
-            var classesWithAxioms = [];
             if (err) {
                 return callback(err);
             }
-            var axioms;
-            for (var uri in basicAxioms) {
-                var axioms = basicAxioms[uri];
-                axioms.forEach(function (axiom) {
-                    var label = axiom.sLabel || Sparql_common.getLabelFromURI(axiom.s);
-                    if (axiom.p == "http://www.w3.org/2002/07/owl#equivalentClass") {
-                        classesWithAxioms.push({
-                            class: axiom.s,
-                            label: label,
-                            data: {
-                                id: axiom.s,
-                                label: label,
-                                axiomType: "equivalentClass",
-                            },
-                        });
+            var classesWithAxioms = [];
+            for (var classUri in basicAxioms) {
+                var classAxioms = basicAxioms[classUri];
+                var axiomTypes = [];
+                classAxioms.forEach(function (axiom) {
+                    var axiomType = self.classAxiomTypesByPredicate[axiom.p];
+                    if (!axiomType || axiomTypes.indexOf(axiomType) > -1) {
+                        return;
                     }
-                    /*   if (axiom.p == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
-                        if (axiom.o.indexOf("http") < 0) {
-                            classesWithAxioms.push({
-                                class: axiom.s,
-                                label: label,
-                                data: {
-                                    id: axiom.s,
-                                    label: label,
-                                    axiomType:"subClassOf"
-                                },
-                            });
-                        }
-                    }*/
+                    // a named superclass is taxonomy, not a logic axiom
+                    if (axiomType == "subClassOf" && axiom.o.indexOf("http") == 0) {
+                        return;
+                    }
+                    axiomTypes.push(axiomType);
+                });
+                if (axiomTypes.length == 0) {
+                    continue;
+                }
+                var label = classAxioms[0].sLabel || Sparql_common.getLabelFromURI(classUri);
+                classesWithAxioms.push({
+                    class: classUri,
+                    label: label,
+                    data: {
+                        id: classUri,
+                        label: label,
+                        axiomTypes: axiomTypes,
+                    },
                 });
             }
             return callback(null, classesWithAxioms);

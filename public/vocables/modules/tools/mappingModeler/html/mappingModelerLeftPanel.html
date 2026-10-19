@@ -84,6 +84,9 @@
 
             <div class="w3-panel w3-border w3-round-small">
                 <button class="w3-button slsv-button-1" onclick="TripleFactory.initFilterMappingDialog()">Generate triples</button>
+                <span id="MappingModeler_metadataTriplesSpan" style="display: none">
+                    <input type="checkbox" id="MappingModeler_metadataTriplesCBX" checked title="write the dcterms:created date of each subject" />Metadata triples
+                </span>
             </div>
             <div class="w3-panel w3-border w3-round-small">
                 <button class="w3-button slsv-button-3" id="KGcreator_deleteKGcreatorTriplesBtn" onclick="TripleFactory.deleteSpecificTriples()" title="delete specific triples">

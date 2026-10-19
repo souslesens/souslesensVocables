@@ -389,81 +389,207 @@ var DataSourceManager = (function () {
         fetch(`${Config.apiUrl}/databases/${dataSource}`).then((response) => {
             response.json().then((data) => {
                 // Store connection info so RML export can build the JDBC DSN automatically
-                if (data && self.currentConfig.currentDataSource) {
+                if (self.currentConfig.currentDataSource) {
                     self.currentConfig.currentDataSource.host = data.host || null;
                     self.currentConfig.currentDataSource.port = data.port || null;
                     self.currentConfig.currentDataSource.database = data.database || null;
                 }
-                async.series(
-                    [
-                        function (callbackSeries) {
-                            const params = new URLSearchParams({
-                                name: dataSource,
-                                type: sqlType,
-                            });
-                            $.ajax({
-                                type: "GET",
-                                url: Config.apiUrl + "/kg/model?" + params.toString(),
-                                dataType: "json",
-                                success: function (data, _textStatus, _jqXHR) {
-                                    self.currentDataSourceModel = data;
-                                    self.currentSource = self.dataSource;
-                                    self.currentdabase = { type: sqlType, dbName: self.dataSource };
-                                    self.currentConfig.currentDataSource.tables = data;
-                                    callbackSeries();
-                                },
-                                error: function (err) {
-                                    return callback(err);
-                                },
-                            });
-                        },
-
-                        function (callbackSeries) {
-                            callbackSeries();
-                        },
-
-                        function (callbackSeries) {
-                            var jstreeData = [];
-                            var dataTables = MappingColumnsGraph.getDatasourceTablesFromVisjsGraph();
-                            for (var table in self.currentConfig.currentDataSource.tables) {
-                                var label = table;
-                                var color = "blue";
-                                if (dataTables.includes(table)) {
-                                    var nTriples = self.statsMap[table];
-                                    var strStats = "";
-                                    if (nTriples) {
-                                        color = "green";
-                                        strStats = "<b> " + nTriples + " Triples</b>";
-                                    }
-
-                                    label = "<span style='color:blue'>" + table + strStats + "</span>";
-                                }
-                                jstreeData.push({
-                                    id: table,
-                                    text: label,
-                                    type: "Table",
-                                    parent: self.currentConfig.dataSource,
-                                    data: {
-                                        id: table,
-                                        label: table,
-                                        type: "table",
-                                    },
-                                });
-                            }
-                            JstreeWidget.addNodesToJstree(self.dataSourcejstreeDivId, self.currentConfig.currentDataSource.id, jstreeData);
-                            callbackSeries();
-                        },
-                    ],
-                    function (err) {
-                        if (err) {
-                            return MainController.errorAlert(err);
-                        }
-                        if (callback) {
-                            callback();
-                        }
-                    },
-                );
+                var mappingDatabaseName = self.currentConfig.databaseSources[dataSource].name;
+                var isIdKnown = response.ok;
+                // a mapping copied from another server or edited by hand keeps a stale id
+                if (!mappingDatabaseName || (isIdKnown && self.isDatabaseNamed(data, mappingDatabaseName))) {
+                    return self.loadDataBaseSourceTables(dataSource, sqlType, callback);
+                }
+                self.relinkDatabaseSource(dataSource, mappingDatabaseName, function (err, isRelinked) {
+                    if (err) {
+                        return MainController.errorAlert(err);
+                    }
+                    // a relink reloads the whole mapping
+                    if (isRelinked) {
+                        return;
+                    }
+                    if (!isIdKnown) {
+                        return MainController.errorAlert("The database id " + dataSource + " of the mapping is unknown in ConfigEditor > Databases.");
+                    }
+                    self.loadDataBaseSourceTables(dataSource, sqlType, callback);
+                });
             });
+        });
+    };
+
+    /**
+     * Loads the tables of a database source into the current configuration and adds them to the Jstree.
+     * @function
+     * @name loadDataBaseSourceTables
+     * @memberof module:DataSourceManager
+     * @param {string} dataSource - The id of the database source.
+     * @param {string} sqlType - The SQL type of the database source.
+     * @param {Function} [callback] - A callback function to be executed after the tables are loaded.
+     * @returns {void}
+     */
+    self.loadDataBaseSourceTables = function (dataSource, sqlType, callback) {
+        async.series(
+            [
+                function (callbackSeries) {
+                    const params = new URLSearchParams({
+                        name: dataSource,
+                        type: sqlType,
+                    });
+                    $.ajax({
+                        type: "GET",
+                        url: Config.apiUrl + "/kg/model?" + params.toString(),
+                        dataType: "json",
+                        success: function (data, _textStatus, _jqXHR) {
+                            self.currentDataSourceModel = data;
+                            self.currentSource = self.dataSource;
+                            self.currentdabase = { type: sqlType, dbName: self.dataSource };
+                            self.currentConfig.currentDataSource.tables = data;
+                            callbackSeries();
+                        },
+                        error: function (err) {
+                            return callbackSeries(err);
+                        },
+                    });
+                },
+
+                function (callbackSeries) {
+                    callbackSeries();
+                },
+
+                function (callbackSeries) {
+                    var jstreeData = [];
+                    var dataTables = MappingColumnsGraph.getDatasourceTablesFromVisjsGraph();
+                    for (var table in self.currentConfig.currentDataSource.tables) {
+                        var label = table;
+                        var color = "blue";
+                        if (dataTables.includes(table)) {
+                            var nTriples = self.statsMap[table];
+                            var strStats = "";
+                            if (nTriples) {
+                                color = "green";
+                                strStats = "<b> " + nTriples + " Triples</b>";
+                            }
+
+                            label = "<span style='color:blue'>" + table + strStats + "</span>";
+                        }
+                        jstreeData.push({
+                            id: table,
+                            text: label,
+                            type: "Table",
+                            parent: self.currentConfig.dataSource,
+                            data: {
+                                id: table,
+                                label: table,
+                                type: "table",
+                            },
+                        });
+                    }
+                    JstreeWidget.addNodesToJstree(self.dataSourcejstreeDivId, self.currentConfig.currentDataSource.id, jstreeData);
+                    callbackSeries();
+                },
+            ],
+            function (err) {
+                if (err) {
+                    return MainController.errorAlert(err);
+                }
+                if (callback) {
+                    callback();
+                }
+            },
+        );
+    };
+
+    /**
+     * Tells whether a configured database carries the name written in a mapping file.
+     * Mapping files store either the ConfigEditor name or the database name, depending on their age.
+     * @function
+     * @name isDatabaseNamed
+     * @memberof module:DataSourceManager
+     * @param {Object} database - A database descriptor with its name and database fields.
+     * @param {string} mappingDatabaseName - The name written in options.config.databaseSources of the mapping.
+     * @returns {boolean} true if one of the two fields matches.
+     */
+    self.isDatabaseNamed = function (database, mappingDatabaseName) {
+        return database.name == mappingDatabaseName || database.database == mappingDatabaseName;
+    };
+
+    /**
+     * Replaces a stale database id of the mapping by the id of the configured database carrying the same name.
+     * The user confirms the replacement, or picks the id when several databases carry that name.
+     * The id is replaced in options.config.databaseSources and in the datasource of every node and edge,
+     * then the mapping is saved and reloaded.
+     * @function
+     * @name relinkDatabaseSource
+     * @memberof module:DataSourceManager
+     * @param {string} staleDatabaseId - The database id written in the mapping file.
+     * @param {string} mappingDatabaseName - The database name written in the mapping file.
+     * @param {Function} callback - Called with (err, isRelinked), isRelinked is false when no database matches or the user declines.
+     * @returns {void}
+     */
+    self.relinkDatabaseSource = function (staleDatabaseId, mappingDatabaseName, callback) {
+        $.ajax({
+            type: "GET",
+            url: Config.apiUrl + "/databases",
+            dataType: "json",
+            success: function (result) {
+                var homonymDatabases = result.resources.filter(function (database) {
+                    return self.isDatabaseNamed(database, mappingDatabaseName);
+                });
+                if (homonymDatabases.length == 0) {
+                    return callback(null, false);
+                }
+
+                var staleIdMessage = "The database id " + staleDatabaseId + " of the mapping does not match a database named " + mappingDatabaseName + " in ConfigEditor > Databases.";
+                var newDatabase = null;
+                if (homonymDatabases.length == 1) {
+                    if (confirm(staleIdMessage + "\nReplace it with " + homonymDatabases[0].id + " (" + homonymDatabases[0].name + ")?")) {
+                        newDatabase = homonymDatabases[0];
+                    }
+                } else {
+                    var choiceLines = homonymDatabases.map(function (database, index) {
+                        return index + 1 + ": " + database.id + " (" + database.name + ")";
+                    });
+                    var choiceList = choiceLines.join("\n");
+                    var choice = prompt(staleIdMessage + "\nSeveral databases are named " + mappingDatabaseName + ", enter the number of the one to use:\n" + choiceList);
+                    newDatabase = homonymDatabases[parseInt(choice) - 1] || null;
+                }
+                if (!newDatabase) {
+                    return callback(null, false);
+                }
+
+                self.rawConfig.databaseSources[newDatabase.id] = self.rawConfig.databaseSources[staleDatabaseId];
+                delete self.rawConfig.databaseSources[staleDatabaseId];
+                // older mappings spell the field dataSource
+                var carriesStaleId = function (item) {
+                    return item.data && (item.data.datasource == staleDatabaseId || item.data.dataSource == staleDatabaseId);
+                };
+                var visjsData = MappingColumnsGraph.visjsGraph.data;
+                var staleNodes = visjsData.nodes.get({ filter: carriesStaleId });
+                var staleEdges = visjsData.edges.get({ filter: carriesStaleId });
+                var staleItems = staleNodes.concat(staleEdges);
+                staleItems.forEach(function (item) {
+                    if (item.data.datasource == staleDatabaseId) {
+                        item.data.datasource = newDatabase.id;
+                    }
+                    if (item.data.dataSource == staleDatabaseId) {
+                        item.data.dataSource = newDatabase.id;
+                    }
+                });
+                visjsData.nodes.update(staleNodes);
+                visjsData.edges.update(staleEdges);
+
+                self.saveSlsvSourceConfig(function (err) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    UI.message("Database id replaced with " + newDatabase.id + ", select the data source again", true);
+                    MappingModeler.onLoaded();
+                    callback(null, true);
+                });
+            },
+            error: function (err) {
+                callback(err);
+            },
         });
     };
 

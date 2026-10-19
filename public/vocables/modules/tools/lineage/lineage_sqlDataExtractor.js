@@ -6,6 +6,7 @@ import common from "../../shared/common.js";
 import MappingsToSql, { extractRelationMap, buildSqlByDatabaseSources, buildObjectPropertyKey, quoteIdentifier, getDatasource } from "../mappingModeler/mappingsToSql.js";
 import KGquery_filter_bot from "../../bots/KGquery_filter_bot.js";
 import KGquery_paths from "../KGquery/KGquery_paths.js";
+import SqlLargeResult_bot from "../../bots/sqlLargeResult_bot.js";
 
 var Lineage_sqlDataExtractor = (function () {
     var self = {};
@@ -15,7 +16,7 @@ var Lineage_sqlDataExtractor = (function () {
     self.filterVariableName = "v";
     self.filterValuesLimit = 500;
     self.xsdPrefixRegex = /^xsd:/;
-    self.previewRowsLimit = 1000;
+    self.previewRowsLimit = 10000;
     self.utcIsoDateTimeRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
     // SLS dateFormat codes, see util.getDateFromSLSformat on the server
     self.postgresDateFormatBySlsFormat = {
@@ -213,12 +214,18 @@ var Lineage_sqlDataExtractor = (function () {
             console.log(databaseName, datasource, filteredSql);
             self.sql = filteredSql;
             self.sqlDatasource = datasource;
+            // views without primary key: batches are stable only when ordered on every column
+            var orderByColumns = [];
+            for (const [sqlAlias] of aliasMap) {
+                orderByColumns.push(quoteIdentifier(sqlAlias));
+            }
+            self.sortedSql = self.sql + "\nORDER BY " + orderByColumns.join(", ");
         }
 
         if (options.hideDialog) {
             return;
         }
-        var previewSql = self.sql + " limit " + self.previewRowsLimit;
+        var previewSql = self.sortedSql + "\nLIMIT " + self.previewRowsLimit;
         $("#smallDialogDiv").html("<textarea style='width:500px;height: 350px'>" + previewSql + "</textarea>");
         $("#smallDialogDiv").dialog("open");
     };
@@ -229,37 +236,87 @@ var Lineage_sqlDataExtractor = (function () {
         if (!self.sql) {
             return UI.message("no SQL generated from the selected path");
         }
-        self.runSql(self.sql + " limit " + self.previewRowsLimit, self.sqlDatasource, function (err, rows) {
-            if (err) {
-                return MainController.errorAlert(err);
-            }
-            var headers = [];
-            var tableCols = [];
-            rows.forEach(function (row) {
-                for (var column in row) {
-                    if (headers.indexOf(column) < 0) {
-                        headers.push(column);
-                        tableCols.push({ title: column, defaultContent: "", width: "15%" });
+        var rows = [];
+        var isExportChosen = false;
+        async.series(
+            [
+                function (callbackSeries) {
+                    self.runSql(self.sortedSql + "\nLIMIT " + (self.previewRowsLimit + 1), self.sqlDatasource, function (err, firstRows) {
+                        rows = firstRows;
+                        callbackSeries(err);
+                    });
+                },
+                function (callbackSeries) {
+                    if (rows.length <= self.previewRowsLimit) {
+                        return callbackSeries();
                     }
+                    SqlLargeResult_bot.start(self.previewRowsLimit, function (_err, isExport) {
+                        isExportChosen = isExport;
+                        if (!isExportChosen) {
+                            rows = rows.slice(0, self.previewRowsLimit);
+                        }
+                        callbackSeries();
+                    });
+                },
+                function (callbackSeries) {
+                    if (!isExportChosen) {
+                        return callbackSeries();
+                    }
+                    async.doWhilst(
+                        function (callbackWhilst) {
+                            self.runSql(self.sortedSql + "\nLIMIT " + self.previewRowsLimit + " OFFSET " + rows.length, self.sqlDatasource, function (err, batchRows) {
+                                if (err) {
+                                    return callbackWhilst(err);
+                                }
+                                rows = rows.concat(batchRows);
+                                UI.message("retrieving results... " + rows.length);
+                                callbackWhilst(null, batchRows.length);
+                            });
+                        },
+                        function (batchRowCount) {
+                            return batchRowCount == self.previewRowsLimit;
+                        },
+                        callbackSeries,
+                    );
+                },
+            ],
+            function (err) {
+                if (err) {
+                    return MainController.errorAlert(err);
                 }
-            });
-            var lines = [];
-            rows.forEach(function (row) {
-                var line = [];
-                headers.forEach(function (column) {
-                    var cellValue = row[column] ?? "";
-                    // the server sends a postgres timestamp as UTC ISO text, show it as stored
-                    if (self.utcIsoDateTimeRegex.test(cellValue)) {
-                        var storedDate = new Date(cellValue);
-                        var storedTime = storedDate.toTimeString().slice(0, 8);
-                        cellValue = common.getSimpleDateStrFromDate(storedDate) + " " + storedTime;
+                UI.message(rows.length + " results retrieved");
+                var headers = [];
+                var tableCols = [];
+                rows.forEach(function (row) {
+                    for (var column in row) {
+                        if (headers.indexOf(column) < 0) {
+                            headers.push(column);
+                            tableCols.push({ title: column, defaultContent: "", width: "15%" });
+                        }
                     }
-                    line.push(cellValue);
                 });
-                lines.push(line);
-            });
-            Export.showDataTable("smallDialogDiv", tableCols, lines);
-        });
+                var lines = [];
+                rows.forEach(function (row) {
+                    var line = [];
+                    headers.forEach(function (column) {
+                        var cellValue = row[column] ?? "";
+                        // the server sends a postgres timestamp as UTC ISO text, show it as stored
+                        if (self.utcIsoDateTimeRegex.test(cellValue)) {
+                            var storedDate = new Date(cellValue);
+                            var storedTimeString = storedDate.toTimeString();
+                            var storedTime = storedTimeString.slice(0, 8);
+                            cellValue = common.getSimpleDateStrFromDate(storedDate) + " " + storedTime;
+                        }
+                        line.push(cellValue);
+                    });
+                    lines.push(line);
+                });
+                if (isExportChosen) {
+                    return Export.exportDataToCSV([headers].concat(lines), self.currentSource + ".csv");
+                }
+                Export.showDataTable("smallDialogDiv", tableCols, lines);
+            },
+        );
     };
 
     self.runSql = function (sql, datasource, callback) {

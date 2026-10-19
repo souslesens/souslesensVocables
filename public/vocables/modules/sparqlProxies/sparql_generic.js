@@ -1208,9 +1208,10 @@ var Sparql_generic = (function () {
      * The parent predicate and concept type are
      * chosen from the schema (`rdfs:subClassOf`/`owl:Class` for OWL, `skos:broader`/`skos:Concept`
      * for SKOS, `rdf:type`/`owl:NamedIndividual` for KNOWLEDGE_GRAPH, or `options.parentType`).
-     * The hierarchy query is paginated (limit 500) with `async.whilst`. For OWL, a class with no
-     * `rdfs:subClassOf` is added under the single named class of the intersection it is equivalent to,
-     * unless the hierarchy query found nothing at all. Results are then folded
+     * The hierarchy query is paginated (limit 500) with `async.whilst`. A blank node (an axiom) is
+     * never counted as a parent. When the hierarchy query found rows, an OWL class without a named
+     * parent takes the single named class of the intersection it is a subClass of or equivalent to,
+     * as in the ontology model, and a class with no `rdfs:subClassOf` at all is a root. Results are then folded
      * into `allClassesMap` (collecting labels/altLabels per node), each node's direct parents are
      * expanded into a single most-specific ancestor chain, and orphan parents are back-filled
      * (labels fetched via {@link module:Sparql_OWL.getLabelsMap} for OWL).
@@ -1370,7 +1371,7 @@ var Sparql_generic = (function () {
                     );
                 },
 
-                // a class with no rdfs:subClassOf has no row above
+                // same intersection rule as the ontology model
                 function (callbackSeries) {
                     // an empty taxonomy is how the indexer spots a flat source and indexes all its classes under owl:Thing
                     if (schemaType != "OWL" || allData.length == 0) {
@@ -1383,16 +1384,54 @@ var Sparql_generic = (function () {
                             UI.message(err.responseText || err);
                             return callbackSeries();
                         }
-                        var subjectsWithFirstParent = {};
+                        var subjectsWithNamedParent = {};
                         allData.forEach(function (taxonomyRow) {
-                            subjectsWithFirstParent[taxonomyRow.subject.value] = 1;
+                            if (!Sparql_OWL.blankNodeUriRegex.test(taxonomyRow.firstParent.value)) {
+                                subjectsWithNamedParent[taxonomyRow.subject.value] = 1;
+                            }
                         });
                         result.results.bindings.forEach(function (binding) {
                             // the subClassOf rows above require a label too
-                            if (subjectsWithFirstParent[binding.sub.value] || !binding.subLabel) {
+                            if (subjectsWithNamedParent[binding.sub.value] || !binding.subLabel) {
                                 return;
                             }
                             allData.push({ subject: binding.sub, subjectLabel: binding.subLabel, firstParent: binding.superClass });
+                        });
+                        callbackSeries();
+                    });
+                },
+
+                // classes with no rdfs:subClassOf at all are roots
+                function (callbackSeries) {
+                    if (schemaType != "OWL" || allData.length == 0) {
+                        return callbackSeries();
+                    }
+                    var rootClassesQuery =
+                        "PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                        " PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
+                        " SELECT DISTINCT * " +
+                        Sparql_common.getFromStr(sourceLabel, false, options.withoutImports) +
+                        " WHERE { ?subject rdf:type owl:Class. ?subject rdfs:label ?subjectLabel." +
+                        Sparql_OWL.getNamedClassFilter("subject") +
+                        " filter not exists {?subject rdfs:subClassOf ?anyParent}" +
+                        " OPTIONAL {?subject skos:prefLabel|skos:altLabel ?subjectAltLabel}" +
+                        indexedPredicates.optionalClauses +
+                        " }";
+                    Sparql_proxy.querySPARQL_GET_proxy(url, rootClassesQuery, "", { source: sourceLabel }, function (err, result) {
+                        if (err) {
+                            UI.message(err.responseText || err);
+                            return callbackSeries();
+                        }
+                        var subjectsInTaxonomy = {};
+                        allData.forEach(function (taxonomyRow) {
+                            subjectsInTaxonomy[taxonomyRow.subject.value] = 1;
+                        });
+                        result.results.bindings.forEach(function (rootClassBinding) {
+                            // a class equivalent to an intersection got its row above
+                            if (subjectsInTaxonomy[rootClassBinding.subject.value]) {
+                                return;
+                            }
+                            allData.push(rootClassBinding);
                         });
                         callbackSeries();
                     });
@@ -1517,14 +1556,14 @@ var Sparql_generic = (function () {
 
                     // flag ambiguous hierarchies, else keep the single parent
                     for (var key in allClassesMap) {
-                        var parentsExcludingSelf = [];
+                        var namedParentsExcludingSelf = [];
                         var isInCycle = false;
                         allClassesMap[key]._directParents.forEach(function (directParent) {
-                            // a self reference (X subClassOf X) is always dropped
-                            if (directParent === key) {
+                            // a self reference is dropped, and so is a blank node: an anonymous class expression is an axiom, not a parent
+                            if (directParent === key || Sparql_OWL.blankNodeUriRegex.test(directParent)) {
                                 return;
                             }
-                            parentsExcludingSelf.push(directParent);
+                            namedParentsExcludingSelf.push(directParent);
                             if (allClassesMap[directParent] && allClassesMap[directParent].parents.indexOf(key) > -1) {
                                 isInCycle = true;
                             }
@@ -1532,10 +1571,10 @@ var Sparql_generic = (function () {
 
                         if (isInCycle) {
                             anomalyParents[key] = cyclicParentsClassUri;
-                        } else if (parentsExcludingSelf.length > 1) {
+                        } else if (namedParentsExcludingSelf.length > 1) {
                             anomalyParents[key] = multipleParentsClassUri;
-                        } else if (parentsExcludingSelf.length === 1) {
-                            singleParents[key] = parentsExcludingSelf[0];
+                        } else if (namedParentsExcludingSelf.length === 1) {
+                            singleParents[key] = namedParentsExcludingSelf[0];
                         }
                     }
 

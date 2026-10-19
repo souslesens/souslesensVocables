@@ -332,7 +332,7 @@ var KGquery_filter_bot = (function () {
     self.sparqlFilterToSqlCondition = function (filter, expressionByVariable) {
         var regexClauseRegex = /(!?)regex\(\s*\?(\w+)\s*,\s*"([^"]*)"\s*,\s*"i"\)/g;
         // a value typed by the user is double quoted, a value picked in a list is single quoted and typed
-        var comparisonClauseRegex = /\?(\w+)\s*(!=|<=|>=|=|<|>)\s*(?:"([^"]*)"|'(.*?)'(?=\^\^))(?:\^\^(?:xsd:\w+|<[^>]+>))?/g;
+        var comparisonClauseRegex = /\?(\w+)\s*(!=|<=|>=|=|<|>)\s*(?:"([^"]*)"|'([\s\S]*?)'(?=\^\^))(?:\^\^(?:xsd:\w+|<[^>]+>))?/g;
         var clausePlaceholderRegex = /#clause(\d+)#/g;
         var onlyOperatorsLeftRegex = /^(\s|\(|\)|&&|\|\||#clause\d+#)*$/;
         var andOperatorRegex = /&&/g;
@@ -348,11 +348,13 @@ var KGquery_filter_bot = (function () {
         }
 
         // an unknown variable stays a "?" in the text, which the final check refuses
-        function addSqlClause(variable, sqlClause) {
+        function addSqlClause(variable, sqlClause, isContainsClause) {
             if (!expressionByVariable[variable]) {
                 return "?" + variable;
             }
-            sqlClauses.push(expressionByVariable[variable] + " " + sqlClause);
+            // ILIKE exists on text only: a uuid or a boolean is matched on its text
+            var expression = isContainsClause ? "(" + expressionByVariable[variable] + ")::text" : expressionByVariable[variable];
+            sqlClauses.push(expression + " " + sqlClause);
             return "#clause" + (sqlClauses.length - 1) + "#";
         }
 
@@ -361,7 +363,7 @@ var KGquery_filter_bot = (function () {
         condition = condition.replace(regexClauseRegex, function (_clause, negation, variable, value) {
             var notKeyword = negation ? "NOT " : "";
             var likePattern = "%" + value.replace(likeWildcardRegex, "\\$&") + "%";
-            return addSqlClause(variable, notKeyword + "ILIKE " + toSqlLiteral(likePattern));
+            return addSqlClause(variable, notKeyword + "ILIKE " + toSqlLiteral(likePattern), true);
         });
         condition = condition.replace(comparisonClauseRegex, function (_clause, variable, operator, typedValue, pickedValue) {
             var sqlOperator = operator == "!=" ? "<>" : operator;

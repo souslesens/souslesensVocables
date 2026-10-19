@@ -3,7 +3,7 @@ import Lineage_sources from "./lineage_sources.js";
 import MappingColumnsGraph from "../mappingModeler/mappingColumnsGraph.js";
 
 import common from "../../shared/common.js";
-import MappingsToSql, { extractRelationMap, buildSqlByDatabaseSources, buildObjectPropertyKey, quoteIdentifier, getDatasource } from "../mappingModeler/mappingsToSql.js";
+import MappingsToSql, { extractRelationMap, buildSqlByDatabaseSources, buildObjectPropertyKey, quoteIdentifier, quotePublicTableName, getDatasource } from "../mappingModeler/mappingsToSql.js";
 import KGquery_filter_bot from "../../bots/KGquery_filter_bot.js";
 import KGquery_paths from "../KGquery/KGquery_paths.js";
 import SqlLargeResult_bot from "../../bots/sqlLargeResult_bot.js";
@@ -27,6 +27,9 @@ var Lineage_sqlDataExtractor = (function () {
     // a timestamp column or an ISO text, both cast directly
     self.isoDateFormats = ["ISO", "ISO-time"];
     self.numericRangeRegex = /(int|integer|float|double|decimal)$/;
+    self.dateRangeRegex = /(^xsd:|XMLSchema#)date/;
+    // postgres has no equality nor order on xml, and a listed bytea must reach the bot as text
+    self.rangesComparedAsText = ["rdf:XMLLiteral", "xsd:hexBinary"];
     // the style KGquery_paths.drawPathOnGraph gives the path of its first query set
     self.pathEdgeStyle = { color: "green", width: 3 };
     self.edgesBeforeHighlight = [];
@@ -168,14 +171,14 @@ var Lineage_sqlDataExtractor = (function () {
                 if (!column.key) {
                     continue;
                 }
-                var filterExpression = column.expression;
-                // compare dates as timestamps, never as text: '13/11/2018' > '2020-01-01' holds as text
+                var filterExpression = self.castExpressionToText(column.expression, column.range);
+                // compare dates as days, never as text: '13/11/2018' > '2020-01-01' holds as text, 10:00 on a day equals that day
                 var postgresDateFormat = self.postgresDateFormatBySlsFormat[column.format];
                 if (postgresDateFormat) {
-                    filterExpression = "TO_TIMESTAMP(NULLIF(" + column.expression + "::text, ''), '" + postgresDateFormat + "')";
-                } else if (self.isoDateFormats.indexOf(column.format) > -1) {
-                    filterExpression = column.expression + "::timestamp";
-                } else if (self.numericRangeRegex.test(column.range || "")) {
+                    filterExpression = "TO_TIMESTAMP(NULLIF(" + column.expression + "::text, ''), '" + postgresDateFormat + "')::date";
+                } else if (self.isoDateFormats.indexOf(column.format) > -1 || self.dateRangeRegex.test(column.range)) {
+                    filterExpression = "NULLIF(" + column.expression + "::text, '')::date";
+                } else if (self.numericRangeRegex.test(column.range)) {
                     // numbers can be text with a space as thousands separator: '3 422.21'
                     filterExpression = "NULLIF(REGEXP_REPLACE(" + column.expression + "::text, '\\s', '', 'g'), '')::numeric";
                 }
@@ -216,8 +219,8 @@ var Lineage_sqlDataExtractor = (function () {
             self.sqlDatasource = datasource;
             // views without primary key: batches are stable only when ordered on every column
             var orderByColumns = [];
-            for (const [sqlAlias] of aliasMap) {
-                orderByColumns.push(quoteIdentifier(sqlAlias));
+            for (const [, column] of aliasMap) {
+                orderByColumns.push(self.castExpressionToText(column.expression, column.range));
             }
             self.sortedSql = self.sql + "\nORDER BY " + orderByColumns.join(", ");
         }
@@ -306,6 +309,13 @@ var Lineage_sqlDataExtractor = (function () {
                             var storedTimeString = storedDate.toTimeString();
                             var storedTime = storedTimeString.slice(0, 8);
                             cellValue = common.getSimpleDateStrFromDate(storedDate) + " " + storedTime;
+                        } else if (cellValue.type == "Buffer") {
+                            // a bytea comes as {type: "Buffer", data: [bytes]}, shown as the \x hex text postgres compares
+                            var hexBytes = cellValue.data.map(function (byteValue) {
+                                var hexByte = byteValue.toString(16);
+                                return hexByte.padStart(2, "0");
+                            });
+                            cellValue = "\\x" + hexBytes.join("");
                         }
                         line.push(cellValue);
                     });
@@ -353,10 +363,12 @@ var Lineage_sqlDataExtractor = (function () {
             // the bot names its SPARQL variable varName_<property id>, a short id keeps it a plain word
             var propertyId = "p" + nonObjectProperties.length;
             keyByVariable[self.filterVariableName + "_" + propertyId] = key;
+            // the bot offers numeric operators to xsd:int, xsd:float and xsd:decimal only
+            var datatype = self.numericRangeRegex.test(mapping.range) ? "xsd:decimal" : mapping.range;
             nonObjectProperties.push({
                 id: propertyId,
                 label: mapping.predicateLabel,
-                datatype: (mapping.range || "").replace(self.xsdPrefixRegex, "http://www.w3.org/2001/XMLSchema#"),
+                datatype: datatype.replace(self.xsdPrefixRegex, "http://www.w3.org/2001/XMLSchema#"),
             });
         }
         if (nonObjectProperties.length == 0) {
@@ -400,10 +412,17 @@ var Lineage_sqlDataExtractor = (function () {
         });
     };
 
+    self.castExpressionToText = function (expression, range) {
+        if (self.rangesComparedAsText.indexOf(range) > -1) {
+            return expression + "::text";
+        }
+        return expression;
+    };
+
     self.listColumnValues = function (key, callback) {
         var mapping = self.currentRelationsMap.get(key)[0];
-        var column = quoteIdentifier(mapping.to.id);
-        var sql = "SELECT DISTINCT " + column + " AS value FROM " + quoteIdentifier(mapping.to.dataTable) + " WHERE " + column + " IS NOT NULL ORDER BY 1 LIMIT " + self.filterValuesLimit;
+        var column = self.castExpressionToText(quoteIdentifier(mapping.to.id), mapping.range);
+        var sql = "SELECT DISTINCT " + column + " AS value FROM " + quotePublicTableName(mapping.to.dataTable) + " WHERE " + column + " IS NOT NULL ORDER BY 1 LIMIT " + self.filterValuesLimit;
         self.runSql(sql, getDatasource(mapping.to, self.currentMappingJson), function (err, rows) {
             if (err) {
                 return callback(err);

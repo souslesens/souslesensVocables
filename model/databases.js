@@ -182,7 +182,7 @@ class DatabaseModel {
     getUserDatabasesName = async (user) => {
         const databases = await this._getUserDatabases(user);
         return databases.map((database) => {
-            return { id: database.id, database: database.database };
+            return { id: database.id, name: database.name, database: database.database };
         });
     };
 

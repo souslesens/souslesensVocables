@@ -366,6 +366,7 @@ const apiDoc = {
                 properties: {
                     id: { type: "string" },
                     name: { type: "string" },
+                    database: { type: "string" },
                 },
             },
         },

@@ -21,7 +21,8 @@ export default function () {
         operationId: "getUserDatabaseNames",
         summary: "List databases (id, name and database name only) accessible to the current user",
         description:
-            "Lightweight variant of `GET /admin/databases`. Returns only `{ id, name, database }` per database the caller can use, " + "with no host/credentials. Used by MappingModeler's database picker.",
+            "Lightweight variant of `GET /admin/databases`. Returns only `{ id, name, database }` per database the caller can use, " +
+            "with no host/credentials. Used by MappingModeler's database picker.",
         responses: responseSchema("DatabaseNames", "GET"),
         security: [{ restrictLoggedUser: [] }],
         tags: ["Databases"],

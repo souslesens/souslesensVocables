@@ -238,6 +238,7 @@ var TriplesMaker = {
         var columnMappings = tableProcessingParams.tableColumnsMappings;
 
         var batchTriples = [];
+        var metaDataOptions = { skipCreatedDateTriples: options.skipCreatedDateTriples };
 
         function addTriple(subjectUri, predicateUri, objectUri) {
             if (subjectUri && predicateUri && objectUri) {
@@ -371,7 +372,7 @@ var TriplesMaker = {
                 // add metadata if not sample
                 if (!tableProcessingParams.isSampleData && !TriplesMaker.uniqueSubjects[columnUri]) {
                     TriplesMaker.uniqueSubjects[columnUri] = 1;
-                    var metaDataTriples = TriplesMaker.getMetaDataTriples(columnUri, tableProcessingParams.tableInfos.table, {});
+                    var metaDataTriples = TriplesMaker.getMetaDataTriples(columnUri, tableProcessingParams.tableInfos.table, metaDataOptions);
                     batchTriples = batchTriples.concat(metaDataTriples);
                 }
             }
@@ -388,7 +389,7 @@ var TriplesMaker = {
                     triples.forEach(function (triple) {
                         addTriple(triple.s, triple.p, triple.o);
                         if (!tableProcessingParams.isSampleData) {
-                            var metaDataTriples = TriplesMaker.getMetaDataTriples(triple.s, tableProcessingParams.tableInfos.table);
+                            var metaDataTriples = TriplesMaker.getMetaDataTriples(triple.s, tableProcessingParams.tableInfos.table, metaDataOptions);
                             batchTriples = batchTriples.concat(metaDataTriples);
                         }
                     });
@@ -758,6 +759,14 @@ var TriplesMaker = {
 
         return triples;
     },
+    /**
+     * Builds the metadata triples of a subject: its creation date and the table it comes from.
+     *
+     * @param subjectUri
+     * @param table
+     * @param options - { skipCreatedDateTriples, customMetaData }
+     * @returns {string[]} triples
+     */
     getMetaDataTriples: function (subjectUri, table, options) {
         var creator = "KGcreator";
         var dateTime = "'" + util.dateToRDFString(new Date(), true) + "'^^xsd:dateTime";
@@ -768,7 +777,10 @@ var TriplesMaker = {
 
         if (subjectUri == null) return [];
         var metaDataTriples = [];
-        metaDataTriples.push(subjectUri + " " + "<http://purl.org/dc/terms/created>" + " " + dateTime);
+        if (!options.skipCreatedDateTriples) {
+            metaDataTriples.push(subjectUri + " " + "<http://purl.org/dc/terms/created>" + " " + dateTime);
+        }
+        // always written: delete and stats by table filter on it
         metaDataTriples.push(subjectUri + " <" + TriplesMaker.mappingFilePredicate + "> '" + table + "'");
 
         if (options.customMetaData) {

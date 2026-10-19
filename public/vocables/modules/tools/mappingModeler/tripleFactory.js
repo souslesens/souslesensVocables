@@ -109,6 +109,7 @@ var TripleFactory = (function () {
                 htmlToLoad = "./modules/tools/mappingModeler/html/specificMappingDelete.html";
             }
             $("#mappingModeler_genericPanel").load(htmlToLoad, function () {
+                $("#MappingModeler_metadataTriplesSpan").toggle(!isDelete);
                 self.showFilterMappingsDialog("detailedMappings_filterMappingsTree", MappingModeler.currentTable.name);
             });
         });
@@ -187,6 +188,9 @@ var TripleFactory = (function () {
             filterMappingIds: filterMappingIds,
             offset: offset,
         };
+        if (!$("#MappingModeler_metadataTriplesCBX").prop("checked")) {
+            options.skipCreatedDateTriples = true;
+        }
         if (runOptions.exportOnly) {
             options.exportOnly = true;
             options.outputFormat = runOptions.outputFormat;

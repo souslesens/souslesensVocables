@@ -3,9 +3,10 @@ import Lineage_sources from "./lineage_sources.js";
 import MappingColumnsGraph from "../mappingModeler/mappingColumnsGraph.js";
 
 import common from "../../shared/common.js";
-import MappingsToSql, { extractRelationMap, buildSqlByDatabaseSources, buildObjectPropertyKey, quoteIdentifier, getDatasource } from "../mappingModeler/mappingsToSql.js";
+import MappingsToSql, { extractRelationMap, buildSqlByDatabaseSources, buildObjectPropertyKey, quoteIdentifier, quotePublicTableName, getDatasource } from "../mappingModeler/mappingsToSql.js";
 import KGquery_filter_bot from "../../bots/KGquery_filter_bot.js";
 import KGquery_paths from "../KGquery/KGquery_paths.js";
+import SqlLargeResult_bot from "../../bots/sqlLargeResult_bot.js";
 
 var Lineage_sqlDataExtractor = (function () {
     var self = {};
@@ -15,7 +16,7 @@ var Lineage_sqlDataExtractor = (function () {
     self.filterVariableName = "v";
     self.filterValuesLimit = 500;
     self.xsdPrefixRegex = /^xsd:/;
-    self.previewRowsLimit = 1000;
+    self.previewRowsLimit = 10000;
     self.utcIsoDateTimeRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
     // SLS dateFormat codes, see util.getDateFromSLSformat on the server
     self.postgresDateFormatBySlsFormat = {
@@ -26,6 +27,9 @@ var Lineage_sqlDataExtractor = (function () {
     // a timestamp column or an ISO text, both cast directly
     self.isoDateFormats = ["ISO", "ISO-time"];
     self.numericRangeRegex = /(int|integer|float|double|decimal)$/;
+    self.dateRangeRegex = /(^xsd:|XMLSchema#)date/;
+    // postgres has no equality nor order on xml, and a listed bytea must reach the bot as text
+    self.rangesComparedAsText = ["rdf:XMLLiteral", "xsd:hexBinary"];
     // the style KGquery_paths.drawPathOnGraph gives the path of its first query set
     self.pathEdgeStyle = { color: "green", width: 3 };
     self.edgesBeforeHighlight = [];
@@ -167,14 +171,14 @@ var Lineage_sqlDataExtractor = (function () {
                 if (!column.key) {
                     continue;
                 }
-                var filterExpression = column.expression;
-                // compare dates as timestamps, never as text: '13/11/2018' > '2020-01-01' holds as text
+                var filterExpression = self.castExpressionToText(column.expression, column.range);
+                // compare dates as days, never as text: '13/11/2018' > '2020-01-01' holds as text, 10:00 on a day equals that day
                 var postgresDateFormat = self.postgresDateFormatBySlsFormat[column.format];
                 if (postgresDateFormat) {
-                    filterExpression = "TO_TIMESTAMP(NULLIF(" + column.expression + "::text, ''), '" + postgresDateFormat + "')";
-                } else if (self.isoDateFormats.indexOf(column.format) > -1) {
-                    filterExpression = column.expression + "::timestamp";
-                } else if (self.numericRangeRegex.test(column.range || "")) {
+                    filterExpression = "TO_TIMESTAMP(NULLIF(" + column.expression + "::text, ''), '" + postgresDateFormat + "')::date";
+                } else if (self.isoDateFormats.indexOf(column.format) > -1 || self.dateRangeRegex.test(column.range)) {
+                    filterExpression = "NULLIF(" + column.expression + "::text, '')::date";
+                } else if (self.numericRangeRegex.test(column.range)) {
                     // numbers can be text with a space as thousands separator: '3 422.21'
                     filterExpression = "NULLIF(REGEXP_REPLACE(" + column.expression + "::text, '\\s', '', 'g'), '')::numeric";
                 }
@@ -213,12 +217,18 @@ var Lineage_sqlDataExtractor = (function () {
             console.log(databaseName, datasource, filteredSql);
             self.sql = filteredSql;
             self.sqlDatasource = datasource;
+            // views without primary key: batches are stable only when ordered on every column
+            var orderByColumns = [];
+            for (const [, column] of aliasMap) {
+                orderByColumns.push(self.castExpressionToText(column.expression, column.range));
+            }
+            self.sortedSql = self.sql + "\nORDER BY " + orderByColumns.join(", ");
         }
 
         if (options.hideDialog) {
             return;
         }
-        var previewSql = self.sql + " limit " + self.previewRowsLimit;
+        var previewSql = self.sortedSql + "\nLIMIT " + self.previewRowsLimit;
         $("#smallDialogDiv").html("<textarea style='width:500px;height: 350px'>" + previewSql + "</textarea>");
         $("#smallDialogDiv").dialog("open");
     };
@@ -229,37 +239,94 @@ var Lineage_sqlDataExtractor = (function () {
         if (!self.sql) {
             return UI.message("no SQL generated from the selected path");
         }
-        self.runSql(self.sql + " limit " + self.previewRowsLimit, self.sqlDatasource, function (err, rows) {
-            if (err) {
-                return MainController.errorAlert(err);
-            }
-            var headers = [];
-            var tableCols = [];
-            rows.forEach(function (row) {
-                for (var column in row) {
-                    if (headers.indexOf(column) < 0) {
-                        headers.push(column);
-                        tableCols.push({ title: column, defaultContent: "", width: "15%" });
+        var rows = [];
+        var isExportChosen = false;
+        async.series(
+            [
+                function (callbackSeries) {
+                    self.runSql(self.sortedSql + "\nLIMIT " + (self.previewRowsLimit + 1), self.sqlDatasource, function (err, firstRows) {
+                        rows = firstRows;
+                        callbackSeries(err);
+                    });
+                },
+                function (callbackSeries) {
+                    if (rows.length <= self.previewRowsLimit) {
+                        return callbackSeries();
                     }
+                    SqlLargeResult_bot.start(self.previewRowsLimit, function (_err, isExport) {
+                        isExportChosen = isExport;
+                        if (!isExportChosen) {
+                            rows = rows.slice(0, self.previewRowsLimit);
+                        }
+                        callbackSeries();
+                    });
+                },
+                function (callbackSeries) {
+                    if (!isExportChosen) {
+                        return callbackSeries();
+                    }
+                    async.doWhilst(
+                        function (callbackWhilst) {
+                            self.runSql(self.sortedSql + "\nLIMIT " + self.previewRowsLimit + " OFFSET " + rows.length, self.sqlDatasource, function (err, batchRows) {
+                                if (err) {
+                                    return callbackWhilst(err);
+                                }
+                                rows = rows.concat(batchRows);
+                                UI.message("retrieving results... " + rows.length);
+                                callbackWhilst(null, batchRows.length);
+                            });
+                        },
+                        function (batchRowCount) {
+                            return batchRowCount == self.previewRowsLimit;
+                        },
+                        callbackSeries,
+                    );
+                },
+            ],
+            function (err) {
+                if (err) {
+                    return MainController.errorAlert(err);
                 }
-            });
-            var lines = [];
-            rows.forEach(function (row) {
-                var line = [];
-                headers.forEach(function (column) {
-                    var cellValue = row[column] ?? "";
-                    // the server sends a postgres timestamp as UTC ISO text, show it as stored
-                    if (self.utcIsoDateTimeRegex.test(cellValue)) {
-                        var storedDate = new Date(cellValue);
-                        var storedTime = storedDate.toTimeString().slice(0, 8);
-                        cellValue = common.getSimpleDateStrFromDate(storedDate) + " " + storedTime;
+                UI.message(rows.length + " results retrieved");
+                var headers = [];
+                var tableCols = [];
+                rows.forEach(function (row) {
+                    for (var column in row) {
+                        if (headers.indexOf(column) < 0) {
+                            headers.push(column);
+                            tableCols.push({ title: column, defaultContent: "", width: "15%" });
+                        }
                     }
-                    line.push(cellValue);
                 });
-                lines.push(line);
-            });
-            Export.showDataTable("smallDialogDiv", tableCols, lines);
-        });
+                var lines = [];
+                rows.forEach(function (row) {
+                    var line = [];
+                    headers.forEach(function (column) {
+                        var cellValue = row[column] ?? "";
+                        // the server sends a postgres timestamp as UTC ISO text, show it as stored
+                        if (self.utcIsoDateTimeRegex.test(cellValue)) {
+                            var storedDate = new Date(cellValue);
+                            var storedTimeString = storedDate.toTimeString();
+                            var storedTime = storedTimeString.slice(0, 8);
+                            cellValue = common.getSimpleDateStrFromDate(storedDate) + " " + storedTime;
+                        } else if (cellValue.type == "Buffer") {
+                            // a bytea comes as {type: "Buffer", data: [bytes]}, shown as the \x hex text postgres compares
+                            var hexBytes = cellValue.data.map(function (byteValue) {
+                                var hexByte = byteValue.toString(16);
+                                return hexByte.padStart(2, "0");
+                            });
+                            cellValue = "\\x" + hexBytes.join("");
+                        }
+                        line.push(cellValue);
+                    });
+                    lines.push(line);
+                });
+                if (isExportChosen) {
+                    return Export.exportDataToCSV([headers].concat(lines), self.currentSource + ".csv");
+                }
+                Export.showDataTable("smallDialogDiv", tableCols, lines);
+            },
+        );
     };
 
     self.runSql = function (sql, datasource, callback) {
@@ -296,10 +363,12 @@ var Lineage_sqlDataExtractor = (function () {
             // the bot names its SPARQL variable varName_<property id>, a short id keeps it a plain word
             var propertyId = "p" + nonObjectProperties.length;
             keyByVariable[self.filterVariableName + "_" + propertyId] = key;
+            // the bot offers numeric operators to xsd:int, xsd:float and xsd:decimal only
+            var datatype = self.numericRangeRegex.test(mapping.range) ? "xsd:decimal" : mapping.range;
             nonObjectProperties.push({
                 id: propertyId,
                 label: mapping.predicateLabel,
-                datatype: (mapping.range || "").replace(self.xsdPrefixRegex, "http://www.w3.org/2001/XMLSchema#"),
+                datatype: datatype.replace(self.xsdPrefixRegex, "http://www.w3.org/2001/XMLSchema#"),
             });
         }
         if (nonObjectProperties.length == 0) {
@@ -343,10 +412,17 @@ var Lineage_sqlDataExtractor = (function () {
         });
     };
 
+    self.castExpressionToText = function (expression, range) {
+        if (self.rangesComparedAsText.indexOf(range) > -1) {
+            return expression + "::text";
+        }
+        return expression;
+    };
+
     self.listColumnValues = function (key, callback) {
         var mapping = self.currentRelationsMap.get(key)[0];
-        var column = quoteIdentifier(mapping.to.id);
-        var sql = "SELECT DISTINCT " + column + " AS value FROM " + quoteIdentifier(mapping.to.dataTable) + " WHERE " + column + " IS NOT NULL ORDER BY 1 LIMIT " + self.filterValuesLimit;
+        var column = self.castExpressionToText(quoteIdentifier(mapping.to.id), mapping.range);
+        var sql = "SELECT DISTINCT " + column + " AS value FROM " + quotePublicTableName(mapping.to.dataTable) + " WHERE " + column + " IS NOT NULL ORDER BY 1 LIMIT " + self.filterValuesLimit;
         self.runSql(sql, getDatasource(mapping.to, self.currentMappingJson), function (err, rows) {
             if (err) {
                 return callback(err);

@@ -1,6 +1,9 @@
 const KEY_SEPARATOR = "|";
 const DEFAULT_LITERAL_RANGE = "http://www.w3.org/2000/01/rdf-schema#Literal";
 const RDFS_NAMESPACE = "http://www.w3.org/2000/01/rdf-schema#";
+// postgres cuts an identifier at 63 bytes: two long aliases sharing their first 63 bytes come back as one column
+const postgresIdentifierMaxBytes = 63;
+const utf8Encoder = new TextEncoder();
 
 // Recognize both CURIEs and full standard URIs without changing relation keys.
 function getStandardPredicateKind(value) {
@@ -16,6 +19,20 @@ function getEdgePredicateKind(edge) {
 
 export function quoteIdentifier(value) {
     return `"${String(value).replace(/"/g, '""')}"`;
+}
+
+// postgres only: dbConnector.getKGModel lists the public schema only, a database may set another search_path
+export function quotePublicTableName(table) {
+    return `"public".${quoteIdentifier(table)}`;
+}
+
+function truncateSqlAlias(alias, suffix) {
+    // code points, a cut surrogate pair would reach postgres as another character
+    const aliasCharacters = Array.from(alias);
+    while (utf8Encoder.encode(aliasCharacters.join("") + suffix).length > postgresIdentifierMaxBytes) {
+        aliasCharacters.pop();
+    }
+    return aliasCharacters.join("") + suffix;
 }
 
 export function getUriLocalName(uri) {
@@ -760,7 +777,7 @@ function buildSqlFromMappings(mappings, json) {
                 const toExpression = `${toAlias}.${quoteIdentifier(join.toColumn)}`;
 
                 sqlJoins.push(
-                    `JOIN ${quoteIdentifier(join.toTable)} ${toAlias}
+                    `JOIN ${quotePublicTableName(join.toTable)} ${toAlias}
   ON ${fromExpression}
    = ${toExpression}`,
                 );
@@ -779,7 +796,7 @@ function buildSqlFromMappings(mappings, json) {
                 const toExpression = `${toAlias}.${quoteIdentifier(join.toColumn)}`;
 
                 sqlJoins.push(
-                    `JOIN ${quoteIdentifier(join.fromTable)} ${fromAlias}
+                    `JOIN ${quotePublicTableName(join.fromTable)} ${fromAlias}
   ON ${fromExpression}
    = ${toExpression}`,
                 );
@@ -828,10 +845,10 @@ function buildSqlFromMappings(mappings, json) {
         if (isClassIdColumn && expressionsCoveredByDataProperties.has(expression)) return;
         const key = JSON.stringify([semanticAlias, expression]);
         if (expressionAliases.has(key)) return;
-        let sqlAlias = semanticAlias;
+        let sqlAlias = truncateSqlAlias(semanticAlias, "");
         let suffix = 2;
         while (selectColumns.has(sqlAlias)) {
-            sqlAlias = `${semanticAlias}_${suffix++}`;
+            sqlAlias = truncateSqlAlias(semanticAlias, `_${suffix++}`);
         }
         selectColumns.set(sqlAlias, expression);
         aliasMap.set(sqlAlias, { ...metadata, semanticAlias, sqlAlias, expression });
@@ -876,7 +893,7 @@ function buildSqlFromMappings(mappings, json) {
     const sql = `
 SELECT
     ${selectSql}
-FROM ${quoteIdentifier(baseTable)} ${baseAlias}
+FROM ${quotePublicTableName(baseTable)} ${baseAlias}
 ${sqlJoins.join("\n")}
 ${whereClause}
 `.trim();

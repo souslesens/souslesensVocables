@@ -839,9 +839,12 @@ function buildSqlFromMappings(mappings, json) {
     const selectColumns = new Map();
     const aliasMap = new Map();
     const expressionAliases = new Map();
+    const classIdExpressions = new Set();
 
     function addProjection(semanticAlias, expression, metadata) {
         const isClassIdColumn = metadata.role === "subject" || metadata.kind === "objectProperty";
+        // covered ones too: the batch ORDER BY leads with every class id
+        if (isClassIdColumn) classIdExpressions.add(expression);
         if (isClassIdColumn && expressionsCoveredByDataProperties.has(expression)) return;
         const key = JSON.stringify([semanticAlias, expression]);
         if (expressionAliases.has(key)) return;
@@ -897,7 +900,7 @@ FROM ${quotePublicTableName(baseTable)} ${baseAlias}
 ${sqlJoins.join("\n")}
 ${whereClause}
 `.trim();
-    return { sql, aliasMap };
+    return { sql, aliasMap, classIdExpressions };
 }
 
 export function buildSqlByDatabaseSources(keys, relationMap, json) {
@@ -911,13 +914,14 @@ export function buildSqlByDatabaseSources(keys, relationMap, json) {
 
     for (const [datasource, mappings] of groups) {
         const databaseName = getDatabaseName(datasource, json);
-        const { sql, aliasMap } = buildSqlFromMappings(mappings, json);
+        const { sql, aliasMap, classIdExpressions } = buildSqlFromMappings(mappings, json);
 
         result.set(databaseName, {
             datasource,
             databaseName,
             sql,
             aliasMap,
+            classIdExpressions,
         });
     }
 

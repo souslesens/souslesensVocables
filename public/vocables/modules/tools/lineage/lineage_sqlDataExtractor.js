@@ -17,7 +17,8 @@ var Lineage_sqlDataExtractor = (function () {
     self.filterValuesLimit = 500;
     self.xsdPrefixRegex = /^xsd:/;
     self.previewRowsLimit = 10000;
-    self.utcIsoDateTimeRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
+    // node-pg dataTypeID of date, timestamp and timestamptz, sent by the route as UTC ISO text
+    self.postgresDateTypeIds = [1082, 1114, 1184];
     // SLS dateFormat codes, see util.getDateFromSLSformat on the server
     self.postgresDateFormatBySlsFormat = {
         FR: "DD/MM/YYYY HH24:MI:SS",
@@ -26,10 +27,13 @@ var Lineage_sqlDataExtractor = (function () {
     };
     // a timestamp column or an ISO text, both cast directly
     self.isoDateFormats = ["ISO", "ISO-time"];
-    self.numericRangeRegex = /(int|integer|float|double|decimal)$/;
-    self.dateRangeRegex = /(^xsd:|XMLSchema#)date/;
-    // postgres has no equality nor order on xml, and a listed bytea must reach the bot as text
-    self.rangesComparedAsText = ["rdf:XMLLiteral", "xsd:hexBinary"];
+    // a range is written xsd:x or with its full XMLSchema# URI
+    self.xsdRangePrefixPattern = "(^xsd:|XMLSchema#)";
+    self.numericRangeRegex = new RegExp(
+        self.xsdRangePrefixPattern +
+            "(decimal|float|double|integer|int|long|short|byte|nonNegativeInteger|nonPositiveInteger|negativeInteger|positiveInteger|unsignedLong|unsignedInt|unsignedShort|unsignedByte)$",
+    );
+    self.dateRangeRegex = new RegExp(self.xsdRangePrefixPattern + "date");
     // the style KGquery_paths.drawPathOnGraph gives the path of its first query set
     self.pathEdgeStyle = { color: "green", width: 3 };
     self.edgesBeforeHighlight = [];
@@ -164,23 +168,25 @@ var Lineage_sqlDataExtractor = (function () {
             return MainController.errorAlert(error.message);
         }
 
-        for (const [databaseName, { datasource, sql, aliasMap }] of queries) {
+        for (const [databaseName, { datasource, sql, aliasMap, classIdExpressions }] of queries) {
             // a property mapped in several tables has one column per table, the filter holds on each of them
             var filterExpressionsByKey = {};
             for (const [, column] of aliasMap) {
                 if (!column.key) {
                     continue;
                 }
-                var filterExpression = self.castExpressionToText(column.expression, column.range);
+                // a range xsd:string can sit on an xml column, which has no equality: compare as text
+                var textExpression = column.expression + "::text";
+                var filterExpression = textExpression;
                 // compare dates as days, never as text: '13/11/2018' > '2020-01-01' holds as text, 10:00 on a day equals that day
                 var postgresDateFormat = self.postgresDateFormatBySlsFormat[column.format];
                 if (postgresDateFormat) {
-                    filterExpression = "TO_TIMESTAMP(NULLIF(" + column.expression + "::text, ''), '" + postgresDateFormat + "')::date";
+                    filterExpression = "TO_TIMESTAMP(NULLIF(" + textExpression + ", ''), '" + postgresDateFormat + "')::date";
                 } else if (self.isoDateFormats.indexOf(column.format) > -1 || self.dateRangeRegex.test(column.range)) {
-                    filterExpression = "NULLIF(" + column.expression + "::text, '')::date";
+                    filterExpression = "NULLIF(" + textExpression + ", '')::date";
                 } else if (self.numericRangeRegex.test(column.range)) {
                     // numbers can be text with a space as thousands separator: '3 422.21'
-                    filterExpression = "NULLIF(REGEXP_REPLACE(" + column.expression + "::text, '\\s', '', 'g'), '')::numeric";
+                    filterExpression = "NULLIF(REGEXP_REPLACE(" + textExpression + ", '\\s', '', 'g'), '')::numeric";
                 }
                 filterExpressionsByKey[column.key] = (filterExpressionsByKey[column.key] || []).concat(filterExpression);
             }
@@ -217,10 +223,12 @@ var Lineage_sqlDataExtractor = (function () {
             console.log(databaseName, datasource, filteredSql);
             self.sql = filteredSql;
             self.sqlDatasource = datasource;
-            // views without primary key: batches are stable only when ordered on every column
-            var orderByColumns = [];
+            // views have no key: every column, as text since xml has no order; class ids first and uncast, a cast first key sorts slower
+            var orderByColumns = Array.from(classIdExpressions);
             for (const [, column] of aliasMap) {
-                orderByColumns.push(self.castExpressionToText(column.expression, column.range));
+                if (!classIdExpressions.has(column.expression)) {
+                    orderByColumns.push(column.expression + "::text");
+                }
             }
             self.sortedSql = self.sql + "\nORDER BY " + orderByColumns.join(", ");
         }
@@ -240,13 +248,22 @@ var Lineage_sqlDataExtractor = (function () {
             return UI.message("no SQL generated from the selected path");
         }
         var rows = [];
+        var dateColumns = [];
         var isExportChosen = false;
         async.series(
             [
                 function (callbackSeries) {
-                    self.runSql(self.sortedSql + "\nLIMIT " + (self.previewRowsLimit + 1), self.sqlDatasource, function (err, firstRows) {
+                    self.runSql(self.sortedSql + "\nLIMIT " + (self.previewRowsLimit + 1), self.sqlDatasource, function (err, firstRows, fields) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
                         rows = firstRows;
-                        callbackSeries(err);
+                        fields.forEach(function (field) {
+                            if (self.postgresDateTypeIds.indexOf(field.dataTypeID) > -1) {
+                                dateColumns.push(field.name);
+                            }
+                        });
+                        callbackSeries();
                     });
                 },
                 function (callbackSeries) {
@@ -303,8 +320,8 @@ var Lineage_sqlDataExtractor = (function () {
                     var line = [];
                     headers.forEach(function (column) {
                         var cellValue = row[column] ?? "";
-                        // the server sends a postgres timestamp as UTC ISO text, show it as stored
-                        if (self.utcIsoDateTimeRegex.test(cellValue)) {
+                        // a date column comes as UTC ISO text of the server local time, show it as stored; a text column is already as stored
+                        if (dateColumns.indexOf(column) > -1 && cellValue !== "") {
                             var storedDate = new Date(cellValue);
                             var storedTimeString = storedDate.toTimeString();
                             var storedTime = storedTimeString.slice(0, 8);
@@ -340,7 +357,7 @@ var Lineage_sqlDataExtractor = (function () {
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 // knex raw result on postgres
-                return callback(null, result.rows);
+                return callback(null, result.rows, result.fields);
             },
             error(err) {
                 // the route answers {error}, a postgres error object for a failing query
@@ -412,16 +429,10 @@ var Lineage_sqlDataExtractor = (function () {
         });
     };
 
-    self.castExpressionToText = function (expression, range) {
-        if (self.rangesComparedAsText.indexOf(range) > -1) {
-            return expression + "::text";
-        }
-        return expression;
-    };
-
     self.listColumnValues = function (key, callback) {
         var mapping = self.currentRelationsMap.get(key)[0];
-        var column = self.castExpressionToText(quoteIdentifier(mapping.to.id), mapping.range);
+        // xml has no equality and a bytea comes as an object: listed as postgres text
+        var column = quoteIdentifier(mapping.to.id) + "::text";
         var sql = "SELECT DISTINCT " + column + " AS value FROM " + quotePublicTableName(mapping.to.dataTable) + " WHERE " + column + " IS NOT NULL ORDER BY 1 LIMIT " + self.filterValuesLimit;
         self.runSql(sql, getDatasource(mapping.to, self.currentMappingJson), function (err, rows) {
             if (err) {

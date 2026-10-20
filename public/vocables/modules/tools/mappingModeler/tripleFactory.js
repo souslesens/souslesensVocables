@@ -191,6 +191,7 @@ var TripleFactory = (function () {
             options.exportOnly = true;
             options.outputFormat = runOptions.outputFormat;
         }
+        options.restrictionsToShacl= $("#MappingModeler_shaclCBX").prop("checked");
 
         TripleFactory.createTriples(isSample, MappingModeler.currentTable.name, options, function (err, result) {
             if (err) {
@@ -202,12 +203,15 @@ var TripleFactory = (function () {
                 // UI.message("Done", true);
                 var indexAuto = $("#MappingModeler_indexAutoCBX").prop("checked");
 
+
+
                 if (!self.filterMappingIsSample && indexAuto) {
                     SearchUtil.generateElasticIndex(
                         MappingModeler.currentSLSsource,
                         {
                             indexProperties: 1,
                             indexNamedIndividuals: 1,
+
                         },
                         (err) => {
                             if (err && callback) {
@@ -886,6 +890,11 @@ var TripleFactory = (function () {
         hearders.forEach(function (item) {
             tableCols.push({ title: item, defaultContent: "", width: "30%" });
         });
+
+
+
+
+
 
         var tableData = [];
         var regex = /<([^>]*)> <*([^ >]*)>* <*([^>]*)>*/;

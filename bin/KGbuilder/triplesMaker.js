@@ -1,5 +1,5 @@
 import KGbuilder_socket from "./KGbuilder_socket.js";
-import { databaseModel } from "../../model/databases.js";
+import {databaseModel} from "../../model/databases.js";
 import csvCrawler from "../_csvCrawler.js";
 import async from "async";
 import sqlServerProxy from "../KG/SQLserverConnector.js";
@@ -9,6 +9,9 @@ import dataController from "../dataController.js";
 import path from "path";
 import MappingParser from "./mappingsParser.js";
 import * as modelUtils from "../../model/utils.js";
+
+import {transformOwlRestrictions as transformOwlRestrictionsToShacl} from '../shacl/owl-to-shacl_triplesl.mjs';
+
 
 var TriplesMaker = {
     batchSize: 500,
@@ -80,8 +83,8 @@ var TriplesMaker = {
      * @returns {Promise<{done: boolean}>} done=true signals the caller to stop iterating (sample mode)
      */
     processBatch: async function (batch, ctx) {
-        var { tableProcessingParams, options, message } = ctx;
-
+        var {tableProcessingParams, options, message} = ctx;
+        var shacl=null
         if (options) {
             options.currentBatchRowIndex = ctx.currentBatchRowIndex;
         }
@@ -89,7 +92,18 @@ var TriplesMaker = {
         var batchTriples = await TriplesMaker.buildTriplesAsync(batch, tableProcessingParams, options);
         ctx.currentBatchRowIndex += batch.length;
 
-        var currentTime = new Date();
+
+        if (tableProcessingParams.restrictionsToShacl) {
+            const {turtle, warnings} = transformOwlRestrictionsToShacl(batchTriples,{shapeIds: 'hash'});
+
+            shacl = turtle + "\n";
+
+        }
+
+
+
+
+            var currentTime = new Date();
         message.operation = "buildTriples";
         message.processedRecords += batch.length;
         message.totalTriples = ctx.totalTriplesCount;
@@ -98,11 +112,17 @@ var TriplesMaker = {
         message.totalDuration += message.operationDuration;
         KGbuilder_socket.message(options.clientSocketId, message);
         ctx.oldTime = new Date();
+        if(options.restrictionsToShacl){
+            if(!ctx.shacl)
+                ctx.shacl=""
+            ctx.shacl= ctx.shacl.concat(shacl);
 
+        }
         if (options.sampleSize) {
             ctx.sampleTriples = batchTriples;
-            return { done: true };
+            return {done: true};
         }
+
 
         if (options.exportOnly) {
             ctx.totalTriplesCount += batchTriples.length;
@@ -119,14 +139,21 @@ var TriplesMaker = {
             } else {
                 ctx.exportTriples = ctx.exportTriples.concat(batchTriples);
             }
-            return { done: false };
+            return {done: false};
         }
 
         var batchTriplesCount;
         if (!(await TriplesMaker.canWriteMoreTriples(options))) {
             options.writeQuotaReached = true;
-            return { done: true };
+            return {done: true};
         }
+
+        if(options.restrictionsToShacl){
+            return {done: false};
+        }
+
+
+
         await modelUtils.redoIfFailure(async function () {
             batchTriplesCount = await KGbuilder_triplesWriter.writeTriplesAsync(batchTriples, tableProcessingParams.sourceInfos.graphUri, tableProcessingParams.sourceInfos.sparqlServerUrl);
         });
@@ -144,7 +171,7 @@ var TriplesMaker = {
         KGbuilder_socket.message(options.clientSocketId, message);
         ctx.oldTime = new Date();
 
-        return { done: false };
+        return {done: false};
     },
 
     /**
@@ -188,17 +215,20 @@ var TriplesMaker = {
             options: options,
         };
 
+
         try {
             var generator;
             if (tableInfos.csvDataFilePath) {
                 KGbuilder_socket.message(options.clientSocketId, "loading data from csv file " + tableInfos.table, false);
-                generator = csvCrawler.readCsvBatchGenerator({ filePath: tableInfos.csvDataFilePath }, options.sampleSize);
+
+
+                generator = csvCrawler.readCsvBatchGenerator({filePath: tableInfos.csvDataFilePath}, options.sampleSize);
             } else if (tableInfos.dbID) {
                 KGbuilder_socket.message(options.clientSocketId, "loading data from database table " + tableInfos.table, false);
                 var select = TriplesMaker.tableColumnsSelect(tableProcessingParams);
                 var limitSize = options.sampleSize || TriplesMaker.batchSize;
                 var conn = await databaseModel.getUserConnection(user, tableInfos.dbID);
-                var connectionObject = { connection: conn, user: user, dbId: tableInfos.dbID };
+                var connectionObject = {connection: conn, user: user, dbId: tableInfos.dbID};
                 generator = databaseModel.batchSelectGenerator(connectionObject, tableInfos.table, {
                     select: select,
                     batchSize: limitSize,
@@ -225,6 +255,7 @@ var TriplesMaker = {
                 sampleTriples: ctx.sampleTriples,
                 exportTriples: ctx.exportTriples,
                 totalTriplesCount: ctx.totalTriplesCount,
+                shacl:ctx.shacl
             });
         } catch (err) {
             var errorMessage = "stopped at row : " + ctx.currentBatchRowIndex + " error in processing " + (tableInfos.table || "");
@@ -236,6 +267,7 @@ var TriplesMaker = {
 
     buildTriples: function (data, tableProcessingParams, options, callback) {
         var columnMappings = tableProcessingParams.tableColumnsMappings;
+        var shacl = ""
 
         var batchTriples = [];
 
@@ -384,14 +416,22 @@ var TriplesMaker = {
                 var property = TriplesMaker.getPropertyUri(edge.data.id);
 
                 if (edge.isRestriction) {
-                    var triples = TriplesMaker.getRestrictionTriples(subjectUri, property, objectUri, edge.restrictionType, tableProcessingParams, { cardinality: edge.cardinality });
-                    triples.forEach(function (triple) {
-                        addTriple(triple.s, triple.p, triple.o);
-                        if (!tableProcessingParams.isSampleData) {
-                            var metaDataTriples = TriplesMaker.getMetaDataTriples(triple.s, tableProcessingParams.tableInfos.table);
-                            batchTriples = batchTriples.concat(metaDataTriples);
-                        }
-                    });
+
+
+                    var triples = TriplesMaker.getRestrictionTriples(subjectUri, property, objectUri, edge.restrictionType, tableProcessingParams, {cardinality: edge.cardinality});
+
+
+
+                        triples.forEach(function (triple) {
+                            addTriple(triple.s, triple.p, triple.o);
+                            if (!tableProcessingParams.isSampleData) {
+                                var metaDataTriples = TriplesMaker.getMetaDataTriples(triple.s, tableProcessingParams.tableInfos.table);
+                                batchTriples = batchTriples.concat(metaDataTriples);
+                            }
+                        });
+
+
+
                 } else {
                     addTriple(subjectUri, property, objectUri);
                 }
@@ -415,14 +455,18 @@ var TriplesMaker = {
                         if (value && value.startsWith("http:")) {
                             object = "<" + value + ">";
                         }
-                        // cas ou le other predicate a un range URI (property est un objectProperty)
+                            // cas ou le other predicate a un range URI (property est un objectProperty)
                         // ne fonctionne que si l'objet est mappé en tant que colonne
                         else if (item.range == "URI") {
                             var colId = null;
                             for (var col in columnMappings) {
-                                if (columnMappings[col].id == item.object) colId = col;
+                                if (columnMappings[col].id == item.object) {
+                                    colId = col;
+                                }
                             }
-                            if (colId) object = TriplesMaker.getColumnUri(line, colId, columnMappings, rowIndex, tableProcessingParams);
+                            if (colId) {
+                                object = TriplesMaker.getColumnUri(line, colId, columnMappings, rowIndex, tableProcessingParams);
+                            }
                         } else {
                             object = TriplesMaker.getFormatedLiteral(line, {
                                 dataType: item.range,
@@ -441,7 +485,7 @@ var TriplesMaker = {
             var x = 3
             return callback("!!!")
         }*/
-
+        options.shacl = shacl
         return callback(null, batchTriples);
     },
 
@@ -766,7 +810,9 @@ var TriplesMaker = {
             options = {};
         }
 
-        if (subjectUri == null) return [];
+        if (subjectUri == null) {
+            return [];
+        }
         var metaDataTriples = [];
         metaDataTriples.push(subjectUri + " " + "<http://purl.org/dc/terms/created>" + " " + dateTime);
         metaDataTriples.push(subjectUri + " <" + TriplesMaker.mappingFilePredicate + "> '" + table + "'");
@@ -781,14 +827,14 @@ var TriplesMaker = {
     },
 
     readCsv: function (filePath, maxLines, callback) {
-        csvCrawler.readCsv({ filePath: filePath }, maxLines, function (err, result) {
+        csvCrawler.readCsv({filePath: filePath}, maxLines, function (err, result) {
             if (err) {
                 return callback(err);
             }
             var data = result.data;
             var headers = result.headers;
 
-            return callback(null, { headers: headers, data: data });
+            return callback(null, {headers: headers, data: data});
         });
     },
 };

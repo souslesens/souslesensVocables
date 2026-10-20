@@ -9,13 +9,14 @@ import SocketManager from "../socketManager.js";
 import KGbuilder_triplesWriter from "./KGbuilder_triplesWriter.js";
 import KGbuilder_socket from "./KGbuilder_socket.js";
 import * as dbConnector from "../KG/dbConnector.js";
-import { databaseModel as DatabaseModel } from "../../model/databases.js";
+import {databaseModel as DatabaseModel} from "../../model/databases.js";
 import MappingsParser from "./mappingsParser.js";
 import TriplesMaker from "./triplesMaker.js";
 import TripleMaker from "./triplesMaker.js";
-import { databaseModel } from "../../model/databases.js";
+import {databaseModel} from "../../model/databases.js";
 
-import { fileURLToPath } from "url";
+import {fileURLToPath} from "url";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -181,6 +182,7 @@ var KGbuilder_main = {
             tableInfos: {},
             sourceInfos: {},
             uniqueTriplesMap: {},
+            restrictionsToShacl: options.restrictionsToShacl
         };
 
         // load visj mapping file
@@ -196,6 +198,7 @@ var KGbuilder_main = {
             var sampleTriples = [];
             var exportTriples = [];
             var totalTriplesCount = {};
+            var shacl = ""
 
             /**
              * for each table get columnsMappingMap and create tripels
@@ -321,18 +324,28 @@ var KGbuilder_main = {
                                         return callbackSeries(err);
                                     }
                                     if (options.streamOutput) {
-                                        if (!totalTriplesCount[table]) totalTriplesCount[table] = 0;
+                                        if (!totalTriplesCount[table]) {
+                                            totalTriplesCount[table] = 0;
+                                        }
                                         totalTriplesCount[table] += result.totalTriplesCount;
                                     } else if (options.exportOnly) {
                                         exportTriples = exportTriples.concat(result.exportTriples || []);
-                                        if (!totalTriplesCount[table]) totalTriplesCount[table] = 0;
+                                        if (!totalTriplesCount[table]) {
+                                            totalTriplesCount[table] = 0;
+                                        }
                                         totalTriplesCount[table] += result.totalTriplesCount;
                                     } else if (options.sampleSize) {
                                         // dont write return triples sample
                                         sampleTriples = result.sampleTriples;
                                     } else {
-                                        if (!totalTriplesCount[table]) totalTriplesCount[table] = 0;
+                                        if (!totalTriplesCount[table]) {
+                                            totalTriplesCount[table] = 0;
+                                        }
                                         totalTriplesCount[table] += result.totalTriplesCount;
+                                    }
+                                    if (result.shacl) {
+                                        // dont write return triples sample
+                                        shacl =result.shacl;
                                     }
                                     callbackSeries();
                                 });
@@ -360,7 +373,11 @@ var KGbuilder_main = {
                             totalTriplesCount: exportTriples.length,
                         });
                     }
-                    return callback(err, { sampleTriples: sampleTriples, totalTriplesCount: totalTriplesCount });
+                    return callback(err, {
+                        sampleTriples: sampleTriples,
+                        totalTriplesCount: totalTriplesCount,
+                        shacl: shacl
+                    });
                 },
             );
 

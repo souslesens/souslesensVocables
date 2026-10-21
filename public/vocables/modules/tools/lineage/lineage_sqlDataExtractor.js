@@ -37,6 +37,8 @@ var Lineage_sqlDataExtractor = (function () {
     // the style KGquery_paths.drawPathOnGraph gives the path of its first query set
     self.pathEdgeStyle = { color: "green", width: 3 };
     self.edgesBeforeHighlight = [];
+    // checking it checks every class and property of the path
+    self.pathTreeRootId = "sqlDataExtractorPathRoot";
     self.Lineage_sqlDataExtractor = self.init = function () {
         self.isRecording = false;
         $("#dataExtractorDiv").load("./modules/tools/lineage/html/lineage_sqlDataExtractorDialog.html", function () {
@@ -131,11 +133,14 @@ var Lineage_sqlDataExtractor = (function () {
         }
         self.edgesBeforeHighlight = [];
 
-        var jstreeData = [];
+        var jstreeData = [{ id: self.pathTreeRootId, text: "Path", parent: "#" }];
         JstreeWidget.loadJsTree("sqlDataExtractor_jstreeDiv", jstreeData, {
             withCheckboxes: true,
             contextMenu: function (node) {
-                if (node.parent == "#") {
+                if (node.id == self.pathTreeRootId) {
+                    return null;
+                }
+                if (node.parent == self.pathTreeRootId) {
                     return {
                         removeClass: {
                             label: "Remove from path",
@@ -158,14 +163,15 @@ var Lineage_sqlDataExtractor = (function () {
     };
     self.clearPath = function () {
         self.currentPaths = [];
-        JstreeWidget.empty("sqlDataExtractor_jstreeDiv");
+        var pathTree = $("#sqlDataExtractor_jstreeDiv").jstree(true);
+        JstreeWidget.deleteNode("sqlDataExtractor_jstreeDiv", pathTree.get_node(self.pathTreeRootId).children);
     };
     self.getPathKeys = function () {
         var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("sqlDataExtractor_jstreeDiv");
 
         var dataTypePaths = [];
         checkedNodes.forEach(function (node) {
-            if (node.parents.length == 2) {
+            if (node.parents.length == 3) {
                 dataTypePaths.push(node.id);
             }
         });
@@ -540,7 +546,7 @@ var Lineage_sqlDataExtractor = (function () {
     self.removeClassFromPath = function (classId) {
         var pathTree = $("#sqlDataExtractor_jstreeDiv").jstree(true);
         // addNodesToJstree inserts first: the tree lists the classes latest first
-        var pathClassIds = pathTree.get_node("#").children;
+        var pathClassIds = pathTree.get_node(self.pathTreeRootId).children;
         var remainingClassIds = pathClassIds.filter((pathClassId) => pathClassId != classId);
         var firstClassId = remainingClassIds[remainingClassIds.length - 1];
 
@@ -581,7 +587,7 @@ var Lineage_sqlDataExtractor = (function () {
         self.edgesBeforeHighlight = self.edgesBeforeHighlight.filter((edgeBeforeHighlight) => removedRelationKeys.indexOf(edgeBeforeHighlight.id) < 0);
         Lineage_whiteboard.lineageVisjsGraph.data.edges.update(restoredEdges);
 
-        var latestClassId = pathTree.get_node("#").children[0];
+        var latestClassId = pathTree.get_node(self.pathTreeRootId).children[0];
         self.lastRecordedNode = latestClassId ? { id: latestClassId, label: pathTree.get_node(latestClassId).data.label } : null;
     };
 
@@ -685,11 +691,11 @@ var Lineage_sqlDataExtractor = (function () {
                     "onclick=\"event.stopPropagation();Lineage_sqlDataExtractor.addFilter('" +
                     node.id +
                     "')\"></button>",
-                parent: "#",
+                parent: self.pathTreeRootId,
                 data: { label: node.label },
             },
         ];
-        JstreeWidget.addNodesToJstree("sqlDataExtractor_jstreeDiv", "#", jstreedata);
+        JstreeWidget.addNodesToJstree("sqlDataExtractor_jstreeDiv", self.pathTreeRootId, jstreedata);
 
         jstreedata = [];
         for (const [key, values] of self.currentRelationsMap) {

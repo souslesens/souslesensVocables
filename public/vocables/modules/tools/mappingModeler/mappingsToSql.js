@@ -4,6 +4,17 @@ const RDFS_NAMESPACE = "http://www.w3.org/2000/01/rdf-schema#";
 // postgres cuts an identifier at 63 bytes: two long aliases sharing their first 63 bytes come back as one column
 const postgresIdentifierMaxBytes = 63;
 const utf8Encoder = new TextEncoder();
+// the data_type information_schema.columns gives the postgres text, date and time types
+const postgresTextDataTypes = ["text", "character varying", "character"];
+const postgresDateDataTypes = ["date", "timestamp without time zone", "timestamp with time zone", "time without time zone", "time with time zone"];
+// no equality, which SELECT DISTINCT needs
+const postgresDataTypesSelectedAsText = ["xml", "json", "point", "line", "lseg", "box", "path", "polygon", "circle"];
+
+// the text of a date depends on DateStyle and holds the time: a date joined on a text keeps its join error rather than
+// an empty result
+function isJoinableAsText(dataType) {
+    return Boolean(dataType) && !postgresTextDataTypes.includes(dataType) && !postgresDateDataTypes.includes(dataType);
+}
 
 // Recognize both CURIEs and full standard URIs without changing relation keys.
 function getStandardPredicateKind(value) {
@@ -824,6 +835,8 @@ function planPathTablesAndColumns(mappings, json) {
     });
 
     const outerJoinsByTable = new Map();
+    const pathColumnDataMappings = [];
+    const outerJoinedMappings = [];
     for (const mapping of outerMappings) {
         const outerTable = mapping.from.dataTable;
         const { identityColumnId } = findIdentityColumn(mapping.from);
@@ -831,6 +844,14 @@ function planPathTablesAndColumns(mappings, json) {
         if (!pathClassColumn) {
             throw new Error(`No column of ${mapping.subjectLabel} on the path to read ${mapping.predicateLabel} from ${outerTable}`);
         }
+        // read on the path column, no LEFT JOIN: an id missing from the outer table, which the graph has no triple
+        // for, still shows its value (Karim's choice)
+        const isValueOnClassColumn = mapping.to.dataTable === mapping.from.dataTable && mapping.to.id === mapping.from.id;
+        if (isValueOnClassColumn) {
+            pathColumnDataMappings.push({ ...mapping, from: pathClassColumn.column, to: pathClassColumn.column });
+            continue;
+        }
+        outerJoinedMappings.push(mapping);
         if (!outerJoinsByTable.has(outerTable)) outerJoinsByTable.set(outerTable, { conditionsByJoinColumns: new Map(), valueColumns: new Set() });
         const outerJoin = outerJoinsByTable.get(outerTable);
         const condition = { pathTable: pathClassColumn.column.dataTable, pathColumn: pathClassColumn.column.id, outerColumn: mapping.from.id };
@@ -839,7 +860,7 @@ function planPathTablesAndColumns(mappings, json) {
     }
 
     return {
-        mappings: objectMappings.concat(selectedDataMappings, outerMappings),
+        mappings: objectMappings.concat(selectedDataMappings, pathColumnDataMappings, outerJoinedMappings),
         pathTables,
         selectedJoins,
         baseTable,
@@ -847,7 +868,7 @@ function planPathTablesAndColumns(mappings, json) {
     };
 }
 
-function buildSqlFromMappings(allMappings, json) {
+function buildSqlFromMappings(allMappings, json, dataTypesByTable = {}) {
     if (!allMappings.length) {
         throw new Error("No mappings supplied");
     }
@@ -876,10 +897,25 @@ function buildSqlFromMappings(allMappings, json) {
 
     const baseAlias = getAlias(baseTable);
 
+    // postgres has no text = integer: the other side is compared as text, the text side keeps its index
+    function buildJoinCondition(fromTable, fromColumn, toTable, toColumn) {
+        const fromDataType = dataTypesByTable[fromTable]?.[fromColumn];
+        const toDataType = dataTypesByTable[toTable]?.[toColumn];
+        const shouldCastFromToText = postgresTextDataTypes.includes(toDataType) && isJoinableAsText(fromDataType);
+        const shouldCastToToText = postgresTextDataTypes.includes(fromDataType) && isJoinableAsText(toDataType);
+        const fromExpression = `${getAlias(fromTable)}.${quoteIdentifier(fromColumn)}${shouldCastFromToText ? "::text" : ""}`;
+        const toExpression = `${getAlias(toTable)}.${quoteIdentifier(toColumn)}${shouldCastToToText ? "::text" : ""}`;
+        return `${fromExpression}
+   = ${toExpression}`;
+    }
+
     const joinedTables = new Set([baseTable]);
     const pendingJoins = [...selectedJoins];
     const sqlJoins = [];
-    const joinedColumnPairs = [];
+    // an inner join gives its two columns the same value on every row: a joined column maps to the one it equals
+    // first in the FROM
+    const equalExpressionByJoinedExpression = new Map();
+    const getFirstEqualExpression = (expression) => equalExpressionByJoinedExpression.get(expression) ?? expression;
 
     while (pendingJoins.length) {
         let found = false;
@@ -898,10 +934,9 @@ function buildSqlFromMappings(allMappings, json) {
 
                 sqlJoins.push(
                     `JOIN ${quotePublicTableName(join.toTable)} ${toAlias}
-  ON ${fromExpression}
-   = ${toExpression}`,
+  ON ${buildJoinCondition(join.fromTable, join.fromColumn, join.toTable, join.toColumn)}`,
                 );
-                joinedColumnPairs.push([fromExpression, toExpression]);
+                equalExpressionByJoinedExpression.set(toExpression, getFirstEqualExpression(fromExpression));
 
                 joinedTables.add(join.toTable);
                 pendingJoins.splice(i, 1);
@@ -917,10 +952,9 @@ function buildSqlFromMappings(allMappings, json) {
 
                 sqlJoins.push(
                     `JOIN ${quotePublicTableName(join.fromTable)} ${fromAlias}
-  ON ${fromExpression}
-   = ${toExpression}`,
+  ON ${buildJoinCondition(join.fromTable, join.fromColumn, join.toTable, join.toColumn)}`,
                 );
-                joinedColumnPairs.push([fromExpression, toExpression]);
+                equalExpressionByJoinedExpression.set(fromExpression, getFirstEqualExpression(toExpression));
 
                 joinedTables.add(join.fromTable);
                 pendingJoins.splice(i, 1);
@@ -947,10 +981,7 @@ function buildSqlFromMappings(allMappings, json) {
         const onConditions = [];
         const outerColumns = new Map();
         for (const condition of conditionsByJoinColumns.values()) {
-            const pathExpression = `${getAlias(condition.pathTable)}.${quoteIdentifier(condition.pathColumn)}`;
-            const outerExpression = `${outerAlias}.${quoteIdentifier(condition.outerColumn)}`;
-            onConditions.push(`${pathExpression}\n   = ${outerExpression}`);
-            joinedColumnPairs.push([pathExpression, outerExpression]);
+            onConditions.push(buildJoinCondition(condition.pathTable, condition.pathColumn, outerTable, condition.outerColumn));
             outerColumns.set(condition.outerColumn, quoteIdentifier(condition.outerColumn));
         }
         for (const valueColumn of valueColumns) {
@@ -960,32 +991,29 @@ function buildSqlFromMappings(allMappings, json) {
         sqlJoins.push(`LEFT JOIN (SELECT DISTINCT ${distinctColumns} FROM ${quotePublicTableName(outerTable)}) ${outerAlias}\n  ON ${onConditions.join("\n  AND ")}`);
     }
 
-    // a class id column already selected through a checked data property is not projected again
-    const dataPropertyExpressions = new Set();
+    // two classes on one column stay two columns, so a wrong mapping stays visible
+    const getClassIdExpressionKey = (classUri, expression) => JSON.stringify([classUri, getFirstEqualExpression(expression)]);
+
+    // a data property, rdfs:label included, covers the class id column it equals
+    const dataPropertyClassIdExpressionKeys = new Set();
     for (const mapping of mappings) {
         if (mapping.kind !== "dataProperty") continue;
-        dataPropertyExpressions.add(`${getAlias(mapping.to.dataTable)}.${quoteIdentifier(mapping.to.id)}`);
+        dataPropertyClassIdExpressionKeys.add(getClassIdExpressionKey(mapping.subjectUri, `${getAlias(mapping.to.dataTable)}.${quoteIdentifier(mapping.to.id)}`));
     }
 
-    // a column joined on a data property column holds the same values
-    const expressionsCoveredByDataProperties = new Set(dataPropertyExpressions);
-    for (const [leftExpression, rightExpression] of joinedColumnPairs) {
-        if (dataPropertyExpressions.has(leftExpression)) expressionsCoveredByDataProperties.add(rightExpression);
-        if (dataPropertyExpressions.has(rightExpression)) expressionsCoveredByDataProperties.add(leftExpression);
-    }
-
-    // Keep distinct physical expressions even when their semantic labels match.
-    // Identical semantic label + expression pairs are deduplicated.
+    // distinct expressions stay apart, except a class id covered by a data property or equal to one already shown
     const selectColumns = new Map();
     const aliasMap = new Map();
     const expressionAliases = new Map();
-    const classIdExpressions = new Set();
+    const projectedClassIdExpressionKeys = new Set();
 
     function addProjection(semanticAlias, expression, metadata) {
         const isClassIdColumn = metadata.role === "subject" || metadata.kind === "objectProperty";
-        // covered ones too: the batch ORDER BY leads with every class id
-        if (isClassIdColumn) classIdExpressions.add(expression);
-        if (isClassIdColumn && expressionsCoveredByDataProperties.has(expression)) return;
+        if (isClassIdColumn) {
+            const classIdExpressionKey = getClassIdExpressionKey(metadata.semanticUri, expression);
+            if (dataPropertyClassIdExpressionKeys.has(classIdExpressionKey) || projectedClassIdExpressionKeys.has(classIdExpressionKey)) return;
+            projectedClassIdExpressionKeys.add(classIdExpressionKey);
+        }
         const key = JSON.stringify([semanticAlias, expression]);
         if (expressionAliases.has(key)) return;
         let sqlAlias = truncateSqlAlias(semanticAlias, "");
@@ -993,8 +1021,9 @@ function buildSqlFromMappings(allMappings, json) {
         while (selectColumns.has(sqlAlias)) {
             sqlAlias = truncateSqlAlias(semanticAlias, `_${suffix++}`);
         }
-        selectColumns.set(sqlAlias, expression);
-        aliasMap.set(sqlAlias, { ...metadata, semanticAlias, sqlAlias, expression });
+        const shouldSelectAsText = postgresDataTypesSelectedAsText.includes(dataTypesByTable[metadata.table]?.[metadata.column]);
+        selectColumns.set(sqlAlias, shouldSelectAsText ? `${expression}::text` : expression);
+        aliasMap.set(sqlAlias, { ...metadata, isClassIdColumn, semanticAlias, sqlAlias, expression });
         expressionAliases.set(key, sqlAlias);
     }
 
@@ -1041,17 +1070,18 @@ function buildSqlFromMappings(allMappings, json) {
 
     const whereClause = whereConditions.size ? `WHERE ${[...whereConditions].join("\n  AND ")}` : "";
 
+    // a table repeating its rows gives the same row twice, the graph holds each triple once
     const sql = `
-SELECT
+SELECT DISTINCT
     ${selectSql}
 FROM ${quotePublicTableName(baseTable)} ${baseAlias}
 ${sqlJoins.join("\n")}
 ${whereClause}
 `.trim();
-    return { sql, aliasMap, classIdExpressions };
+    return { sql, aliasMap };
 }
 
-export function buildSqlByDatabaseSources(keys, relationMap, json) {
+export function buildSqlByDatabaseSources(keys, relationMap, json, dataTypesByDatasource = {}) {
     if (!Array.isArray(keys) || keys.length === 0) {
         throw new Error("keys must be a non-empty array");
     }
@@ -1062,14 +1092,13 @@ export function buildSqlByDatabaseSources(keys, relationMap, json) {
 
     for (const [datasource, mappings] of groups) {
         const databaseName = getDatabaseName(datasource, json);
-        const { sql, aliasMap, classIdExpressions } = buildSqlFromMappings(mappings, json);
+        const { sql, aliasMap } = buildSqlFromMappings(mappings, json, dataTypesByDatasource[datasource]);
 
         result.set(databaseName, {
             datasource,
             databaseName,
             sql,
             aliasMap,
-            classIdExpressions,
         });
     }
 

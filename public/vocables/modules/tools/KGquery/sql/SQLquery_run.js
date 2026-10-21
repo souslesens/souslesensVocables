@@ -137,6 +137,7 @@ var SQLquery_run = (function () {
      * @param {Object} dataSourceConfig - The data source configuration
      * @param {string} dataSourceConfig.name - The name of the data source
      * @param {string} dataSourceConfig.sqlType - The SQL type (mysql, postgres, etc)
+     * @param {boolean} [dataSourceConfig.withTypes] - Answer a table to { column to data_type } map
      * @param {Function} callback - Callback function called with (err, model)
      * @returns {void}
      */
@@ -145,6 +146,9 @@ var SQLquery_run = (function () {
             name: dataSourceConfig.name,
             type: dataSourceConfig.sqlType || dataSourceConfig.type,
         });
+        if (dataSourceConfig.withTypes) {
+            params.set("withTypes", "true");
+        }
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/kg/model?" + params.toString(),

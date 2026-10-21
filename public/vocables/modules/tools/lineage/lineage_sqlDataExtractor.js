@@ -3,10 +3,11 @@ import Lineage_sources from "./lineage_sources.js";
 import MappingColumnsGraph from "../mappingModeler/mappingColumnsGraph.js";
 
 import common from "../../shared/common.js";
-import MappingsToSql, { extractRelationMap, buildSqlByDatabaseSources, buildObjectPropertyKey, quoteIdentifier, quotePublicTableName } from "../mappingModeler/mappingsToSql.js";
+import MappingsToSql, { extractRelationMap, buildSqlByDatabaseSources, buildObjectPropertyKey, quoteIdentifier, quotePublicTableName, getDatabaseSources } from "../mappingModeler/mappingsToSql.js";
 import KGquery_filter_bot from "../../bots/KGquery_filter_bot.js";
 import KGquery_paths from "../KGquery/KGquery_paths.js";
 import SqlLargeResult_bot from "../../bots/sqlLargeResult_bot.js";
+import SQLquery_run from "../KGquery/sql/SQLquery_run.js";
 
 var Lineage_sqlDataExtractor = (function () {
     var self = {};
@@ -37,9 +38,15 @@ var Lineage_sqlDataExtractor = (function () {
     // the style KGquery_paths.drawPathOnGraph gives the path of its first query set
     self.pathEdgeStyle = { color: "green", width: 3 };
     self.edgesBeforeHighlight = [];
+    // checking it checks every class and property of the path
+    self.pathTreeRootId = "sqlDataExtractorPathRoot";
+    // the data_type of each column by table, by datasource of the mapping
+    self.dataTypesByDatasource = {};
     self.Lineage_sqlDataExtractor = self.init = function () {
         self.isRecording = false;
-        $("#dataExtractorDiv").load("./modules/tools/lineage/html/lineage_sqlDataExtractorDialog.html", function (err) {});
+        $("#dataExtractorDiv").load("./modules/tools/lineage/html/lineage_sqlDataExtractorDialog.html", function () {
+            self.startPathRecording();
+        });
     };
 
     self.drawDatabaseMappedNodes = function (source) {
@@ -54,6 +61,7 @@ var Lineage_sqlDataExtractor = (function () {
             self.currentMappingJson = json;
 
             self.currentRelationsMap = relationsMap;
+            self.loadDataTypes(json);
             var visjsData = { nodes: [], edges: [] };
             var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
             self.currentDatypesMap = {};
@@ -120,6 +128,28 @@ var Lineage_sqlDataExtractor = (function () {
         });
     };
 
+    // the previous types stay until the new ones arrive: a query built meanwhile keeps its casts
+    self.loadDataTypes = function (mappingJson) {
+        var dataTypesByDatasource = {};
+        var datasources = Object.keys(getDatabaseSources(mappingJson));
+        async.each(
+            datasources,
+            function (datasource, callbackEach) {
+                SQLquery_run.getDBmodel({ name: datasource, type: "sql", withTypes: true }, function (error, dataTypesByTable) {
+                    if (error) {
+                        UI.message("data types of " + datasource + " not read");
+                        return callbackEach();
+                    }
+                    dataTypesByDatasource[datasource] = dataTypesByTable;
+                    callbackEach();
+                });
+            },
+            function () {
+                self.dataTypesByDatasource = dataTypesByDatasource;
+            },
+        );
+    };
+
     self.startPathRecording = function () {
         self.isRecording = true;
         self.currentPaths = [];
@@ -129,19 +159,45 @@ var Lineage_sqlDataExtractor = (function () {
         }
         self.edgesBeforeHighlight = [];
 
-        var jstreeData = [];
-        JstreeWidget.loadJsTree("sqlDataExtractor_jstreeDiv", jstreeData, { withCheckboxes: true });
+        var jstreeData = [{ id: self.pathTreeRootId, text: "Path", parent: "#" }];
+        JstreeWidget.loadJsTree("sqlDataExtractor_jstreeDiv", jstreeData, {
+            withCheckboxes: true,
+            contextMenu: function (node) {
+                if (node.id == self.pathTreeRootId) {
+                    return null;
+                }
+                if (node.parent == self.pathTreeRootId) {
+                    return {
+                        removeClass: {
+                            label: "Remove from path",
+                            action: function () {
+                                self.removeClassFromPath(node.id);
+                            },
+                        },
+                    };
+                }
+                return {
+                    filter: {
+                        label: "Filter",
+                        action: function () {
+                            self.addFilter(node.parent, node.id);
+                        },
+                    },
+                };
+            },
+        });
     };
     self.clearPath = function () {
         self.currentPaths = [];
-        JstreeWidget.empty("sqlDataExtractor_jstreeDiv");
+        var pathTree = $("#sqlDataExtractor_jstreeDiv").jstree(true);
+        JstreeWidget.deleteNode("sqlDataExtractor_jstreeDiv", pathTree.get_node(self.pathTreeRootId).children);
     };
     self.getPathKeys = function () {
         var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("sqlDataExtractor_jstreeDiv");
 
         var dataTypePaths = [];
         checkedNodes.forEach(function (node) {
-            if (node.parents.length == 2) {
+            if (node.parents.length == 3) {
                 dataTypePaths.push(node.id);
             }
         });
@@ -164,14 +220,19 @@ var Lineage_sqlDataExtractor = (function () {
         }
         var queries;
         try {
-            queries = buildSqlByDatabaseSources(self.getPathKeys(), self.currentRelationsMap, self.currentMappingJson);
+            queries = buildSqlByDatabaseSources(self.getPathKeys(), self.currentRelationsMap, self.currentMappingJson, self.dataTypesByDatasource);
         } catch (error) {
             // mappingsToSql throws when the path cannot be read from the mapping
             self.sql = null;
             return MainController.errorAlert(error.message);
         }
 
-        for (const [databaseName, { datasource, sql, aliasMap, classIdExpressions }] of queries) {
+        for (const [databaseName, { datasource, sql, aliasMap }] of queries) {
+            // the ::text of an xml column comes from the data types
+            if (!self.dataTypesByDatasource[datasource]) {
+                self.sql = null;
+                return MainController.errorAlert("data types of " + databaseName + " not read");
+            }
             // mappingsToSql reads a data property from one column
             var filterExpressionByKey = {};
             for (const [, column] of aliasMap) {
@@ -219,14 +280,18 @@ var Lineage_sqlDataExtractor = (function () {
             console.log(databaseName, datasource, filteredSql);
             self.sql = filteredSql;
             self.sqlDatasource = datasource;
-            // views have no key: every column, as text since xml has no order; class ids first and uncast, a cast first key sorts slower
-            var orderByColumns = Array.from(classIdExpressions);
-            for (const [, column] of aliasMap) {
-                if (!classIdExpressions.has(column.expression)) {
-                    orderByColumns.push(column.expression + "::text");
+            // views have no key, a class id sorts faster; SELECT DISTINCT orders on selected columns only
+            var classIdAliases = [];
+            var dataPropertyAliases = [];
+            for (const [sqlAlias, column] of aliasMap) {
+                if (column.isClassIdColumn) {
+                    classIdAliases.push(quoteIdentifier(sqlAlias));
+                } else {
+                    dataPropertyAliases.push(quoteIdentifier(sqlAlias));
                 }
             }
-            self.sortedSql = self.sql + "\nORDER BY " + orderByColumns.join(", ");
+            var orderByAliases = [...classIdAliases, ...dataPropertyAliases];
+            self.sortedSql = self.sql + "\nORDER BY " + orderByAliases.join(", ");
         }
 
         if (options.hideDialog) {
@@ -275,10 +340,10 @@ var Lineage_sqlDataExtractor = (function () {
                     if (rows.length <= self.previewRowsLimit) {
                         return callbackSeries();
                     }
-                    SqlLargeResult_bot.start(self.previewRowsLimit, function (_err, isExport) {
+                    SqlLargeResult_bot.start(self.previewRowsLimit, function (_err, isExport, displayedRowsLimit) {
                         isExportChosen = isExport;
                         if (!isExportChosen) {
-                            rows = rows.slice(0, self.previewRowsLimit);
+                            rows = rows.slice(0, displayedRowsLimit);
                         }
                         callbackSeries();
                     });
@@ -346,7 +411,8 @@ var Lineage_sqlDataExtractor = (function () {
                 if (isExportChosen) {
                     return Export.exportDataToCSV([headers].concat(lines), self.currentSource + ".csv");
                 }
-                Export.showDataTable("smallDialogDiv", tableCols, lines);
+                // 10000 rows drawn at once take 11 s, a page of 200 rows 1.5 s
+                Export.showDataTable("smallDialogDiv", tableCols, lines, null, { paging: true });
             },
         );
     };
@@ -372,11 +438,13 @@ var Lineage_sqlDataExtractor = (function () {
         });
     };
 
-    self.addFilter = function (classNodeId) {
+    self.addFilter = function (classNodeId, propertyKey) {
         var classLabel = JstreeWidget.getjsTreeNodeObj("sqlDataExtractor_jstreeDiv", classNodeId).data.label;
 
         var keyByVariable = {};
         var nonObjectProperties = [];
+        // the bot skips its property list when given one
+        var chosenPropertyId = "";
         for (const [key, values] of self.currentRelationsMap) {
             var mapping = values[0];
             if (mapping.kind != "dataProperty" || mapping.subjectUri != classNodeId) {
@@ -385,6 +453,9 @@ var Lineage_sqlDataExtractor = (function () {
             // the bot names its SPARQL variable varName_<property id>, a short id keeps it a plain word
             var propertyId = "p" + nonObjectProperties.length;
             keyByVariable[self.filterVariableName + "_" + propertyId] = key;
+            if (key == propertyKey) {
+                chosenPropertyId = propertyId;
+            }
             // the bot offers numeric operators to xsd:int, xsd:float and xsd:decimal only
             var datatype = self.numericRangeRegex.test(mapping.range) ? "xsd:decimal" : mapping.range;
             nonObjectProperties.push({
@@ -400,7 +471,7 @@ var Lineage_sqlDataExtractor = (function () {
         var filterQuery = {
             source: self.currentSource,
             currentClass: classNodeId,
-            property: "",
+            property: chosenPropertyId,
             varName: self.filterVariableName,
             listValuesFn: function (propertyId, callback) {
                 self.listColumnValues(keyByVariable[self.filterVariableName + "_" + propertyId], callback);
@@ -443,7 +514,7 @@ var Lineage_sqlDataExtractor = (function () {
         var filteredColumn = null;
         var datasource = null;
         try {
-            var queries = buildSqlByDatabaseSources(pathKeys, self.currentRelationsMap, self.currentMappingJson);
+            var queries = buildSqlByDatabaseSources(pathKeys, self.currentRelationsMap, self.currentMappingJson, self.dataTypesByDatasource);
             for (const [, query] of queries) {
                 for (const [, column] of query.aliasMap) {
                     if (column.key == key) {
@@ -505,6 +576,55 @@ var Lineage_sqlDataExtractor = (function () {
             return filteredKeys.indexOf(key) < 0;
         });
         self.updateFilterIcons();
+    };
+
+    // the path stays one piece: what the removed class cuts off from the first class entered goes with it
+    self.removeClassFromPath = function (classId) {
+        var pathTree = $("#sqlDataExtractor_jstreeDiv").jstree(true);
+        // addNodesToJstree inserts first: the tree lists the classes latest first
+        var pathClassIds = pathTree.get_node(self.pathTreeRootId).children;
+        var remainingClassIds = pathClassIds.filter((pathClassId) => pathClassId != classId);
+        var firstClassId = remainingClassIds[remainingClassIds.length - 1];
+
+        var keptClassIds = firstClassId ? [firstClassId] : [];
+        for (var keptClassIndex = 0; keptClassIndex < keptClassIds.length; keptClassIndex++) {
+            var keptClassId = keptClassIds[keptClassIndex];
+            self.currentPaths.forEach(function (relationKey) {
+                var mapping = self.currentRelationsMap.get(relationKey)[0];
+                var relationClassIds = [mapping.subjectUri, mapping.objectUri];
+                if (relationClassIds.indexOf(keptClassId) < 0 || relationClassIds.indexOf(classId) > -1) {
+                    return;
+                }
+                relationClassIds.forEach(function (relationClassId) {
+                    if (keptClassIds.indexOf(relationClassId) < 0) {
+                        keptClassIds.push(relationClassId);
+                    }
+                });
+            });
+        }
+
+        var removedClassIds = pathClassIds.filter((pathClassId) => keptClassIds.indexOf(pathClassId) < 0);
+        removedClassIds.forEach(function (removedClassId) {
+            pathTree.get_node(removedClassId).children.forEach(function (propertyKey) {
+                self.removePropertyFilters(propertyKey);
+            });
+            JstreeWidget.deleteNode("sqlDataExtractor_jstreeDiv", removedClassId);
+        });
+
+        var removedRelationKeys = self.currentPaths.filter(function (relationKey) {
+            var mapping = self.currentRelationsMap.get(relationKey)[0];
+            return keptClassIds.indexOf(mapping.subjectUri) < 0 || keptClassIds.indexOf(mapping.objectUri) < 0;
+        });
+        // splice, not a new array: addClassToPath tells a clear all by the array identity
+        removedRelationKeys.forEach(function (relationKey) {
+            self.currentPaths.splice(self.currentPaths.indexOf(relationKey), 1);
+        });
+        var restoredEdges = self.edgesBeforeHighlight.filter((edgeBeforeHighlight) => removedRelationKeys.indexOf(edgeBeforeHighlight.id) > -1);
+        self.edgesBeforeHighlight = self.edgesBeforeHighlight.filter((edgeBeforeHighlight) => removedRelationKeys.indexOf(edgeBeforeHighlight.id) < 0);
+        Lineage_whiteboard.lineageVisjsGraph.data.edges.update(restoredEdges);
+
+        var latestClassId = pathTree.get_node(self.pathTreeRootId).children[0];
+        self.lastRecordedNode = latestClassId ? { id: latestClassId, label: pathTree.get_node(latestClassId).data.label } : null;
     };
 
     self.clearAll = function (source) {
@@ -607,11 +727,11 @@ var Lineage_sqlDataExtractor = (function () {
                     "onclick=\"event.stopPropagation();Lineage_sqlDataExtractor.addFilter('" +
                     node.id +
                     "')\"></button>",
-                parent: "#",
+                parent: self.pathTreeRootId,
                 data: { label: node.label },
             },
         ];
-        JstreeWidget.addNodesToJstree("sqlDataExtractor_jstreeDiv", "#", jstreedata);
+        JstreeWidget.addNodesToJstree("sqlDataExtractor_jstreeDiv", self.pathTreeRootId, jstreedata);
 
         jstreedata = [];
         for (const [key, values] of self.currentRelationsMap) {

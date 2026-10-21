@@ -39,7 +39,9 @@ var Lineage_sqlDataExtractor = (function () {
     self.edgesBeforeHighlight = [];
     self.Lineage_sqlDataExtractor = self.init = function () {
         self.isRecording = false;
-        $("#dataExtractorDiv").load("./modules/tools/lineage/html/lineage_sqlDataExtractorDialog.html", function (err) {});
+        $("#dataExtractorDiv").load("./modules/tools/lineage/html/lineage_sqlDataExtractorDialog.html", function () {
+            self.startPathRecording();
+        });
     };
 
     self.drawDatabaseMappedNodes = function (source) {

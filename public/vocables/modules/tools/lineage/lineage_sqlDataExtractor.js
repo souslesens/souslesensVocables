@@ -227,7 +227,12 @@ var Lineage_sqlDataExtractor = (function () {
             return MainController.errorAlert(error.message);
         }
 
-        for (const [databaseName, { datasource, sql, aliasMap, classIdExpressions }] of queries) {
+        for (const [databaseName, { datasource, sql, aliasMap }] of queries) {
+            // the ::text of an xml column comes from the data types
+            if (!self.dataTypesByDatasource[datasource]) {
+                self.sql = null;
+                return MainController.errorAlert("data types of " + databaseName + " not read");
+            }
             // mappingsToSql reads a data property from one column
             var filterExpressionByKey = {};
             for (const [, column] of aliasMap) {
@@ -275,14 +280,18 @@ var Lineage_sqlDataExtractor = (function () {
             console.log(databaseName, datasource, filteredSql);
             self.sql = filteredSql;
             self.sqlDatasource = datasource;
-            // views have no key: every column, as text since xml has no order; class ids first and uncast, a cast first key sorts slower
-            var orderByColumns = Array.from(classIdExpressions);
-            for (const [, column] of aliasMap) {
-                if (!classIdExpressions.has(column.expression)) {
-                    orderByColumns.push(column.expression + "::text");
+            // views have no key, a class id sorts faster; SELECT DISTINCT orders on selected columns only
+            var classIdAliases = [];
+            var dataPropertyAliases = [];
+            for (const [sqlAlias, column] of aliasMap) {
+                if (column.isClassIdColumn) {
+                    classIdAliases.push(quoteIdentifier(sqlAlias));
+                } else {
+                    dataPropertyAliases.push(quoteIdentifier(sqlAlias));
                 }
             }
-            self.sortedSql = self.sql + "\nORDER BY " + orderByColumns.join(", ");
+            var orderByAliases = [...classIdAliases, ...dataPropertyAliases];
+            self.sortedSql = self.sql + "\nORDER BY " + orderByAliases.join(", ");
         }
 
         if (options.hideDialog) {

@@ -7,6 +7,8 @@ const utf8Encoder = new TextEncoder();
 // the data_type information_schema.columns gives the postgres text, date and time types
 const postgresTextDataTypes = ["text", "character varying", "character"];
 const postgresDateDataTypes = ["date", "timestamp without time zone", "timestamp with time zone", "time without time zone", "time with time zone"];
+// no equality, which SELECT DISTINCT needs
+const postgresDataTypesSelectedAsText = ["xml", "json", "point", "line", "lseg", "box", "path", "polygon", "circle"];
 
 // the text of a date depends on DateStyle and holds the time: a date joined on a text keeps its join error rather than
 // an empty result
@@ -1003,14 +1005,11 @@ function buildSqlFromMappings(allMappings, json, dataTypesByTable = {}) {
     const selectColumns = new Map();
     const aliasMap = new Map();
     const expressionAliases = new Map();
-    const classIdExpressions = new Set();
     const projectedClassIdExpressionKeys = new Set();
 
     function addProjection(semanticAlias, expression, metadata) {
         const isClassIdColumn = metadata.role === "subject" || metadata.kind === "objectProperty";
         if (isClassIdColumn) {
-            // covered ones too: the batch ORDER BY leads with every class id
-            classIdExpressions.add(expression);
             const classIdExpressionKey = getClassIdExpressionKey(metadata.semanticUri, expression);
             if (dataPropertyClassIdExpressionKeys.has(classIdExpressionKey) || projectedClassIdExpressionKeys.has(classIdExpressionKey)) return;
             projectedClassIdExpressionKeys.add(classIdExpressionKey);
@@ -1022,8 +1021,9 @@ function buildSqlFromMappings(allMappings, json, dataTypesByTable = {}) {
         while (selectColumns.has(sqlAlias)) {
             sqlAlias = truncateSqlAlias(semanticAlias, `_${suffix++}`);
         }
-        selectColumns.set(sqlAlias, expression);
-        aliasMap.set(sqlAlias, { ...metadata, semanticAlias, sqlAlias, expression });
+        const shouldSelectAsText = postgresDataTypesSelectedAsText.includes(dataTypesByTable[metadata.table]?.[metadata.column]);
+        selectColumns.set(sqlAlias, shouldSelectAsText ? `${expression}::text` : expression);
+        aliasMap.set(sqlAlias, { ...metadata, isClassIdColumn, semanticAlias, sqlAlias, expression });
         expressionAliases.set(key, sqlAlias);
     }
 
@@ -1070,14 +1070,15 @@ function buildSqlFromMappings(allMappings, json, dataTypesByTable = {}) {
 
     const whereClause = whereConditions.size ? `WHERE ${[...whereConditions].join("\n  AND ")}` : "";
 
+    // a table repeating its rows gives the same row twice, the graph holds each triple once
     const sql = `
-SELECT
+SELECT DISTINCT
     ${selectSql}
 FROM ${quotePublicTableName(baseTable)} ${baseAlias}
 ${sqlJoins.join("\n")}
 ${whereClause}
 `.trim();
-    return { sql, aliasMap, classIdExpressions };
+    return { sql, aliasMap };
 }
 
 export function buildSqlByDatabaseSources(keys, relationMap, json, dataTypesByDatasource = {}) {
@@ -1091,14 +1092,13 @@ export function buildSqlByDatabaseSources(keys, relationMap, json, dataTypesByDa
 
     for (const [datasource, mappings] of groups) {
         const databaseName = getDatabaseName(datasource, json);
-        const { sql, aliasMap, classIdExpressions } = buildSqlFromMappings(mappings, json, dataTypesByDatasource[datasource]);
+        const { sql, aliasMap } = buildSqlFromMappings(mappings, json, dataTypesByDatasource[datasource]);
 
         result.set(databaseName, {
             datasource,
             databaseName,
             sql,
             aliasMap,
-            classIdExpressions,
         });
     }
 

@@ -3,10 +3,11 @@ import Lineage_sources from "./lineage_sources.js";
 import MappingColumnsGraph from "../mappingModeler/mappingColumnsGraph.js";
 
 import common from "../../shared/common.js";
-import MappingsToSql, { extractRelationMap, buildSqlByDatabaseSources, buildObjectPropertyKey, quoteIdentifier, quotePublicTableName } from "../mappingModeler/mappingsToSql.js";
+import MappingsToSql, { extractRelationMap, buildSqlByDatabaseSources, buildObjectPropertyKey, quoteIdentifier, quotePublicTableName, getDatabaseSources } from "../mappingModeler/mappingsToSql.js";
 import KGquery_filter_bot from "../../bots/KGquery_filter_bot.js";
 import KGquery_paths from "../KGquery/KGquery_paths.js";
 import SqlLargeResult_bot from "../../bots/sqlLargeResult_bot.js";
+import SQLquery_run from "../KGquery/sql/SQLquery_run.js";
 
 var Lineage_sqlDataExtractor = (function () {
     var self = {};
@@ -39,6 +40,8 @@ var Lineage_sqlDataExtractor = (function () {
     self.edgesBeforeHighlight = [];
     // checking it checks every class and property of the path
     self.pathTreeRootId = "sqlDataExtractorPathRoot";
+    // the data_type of each column by table, by datasource of the mapping
+    self.dataTypesByDatasource = {};
     self.Lineage_sqlDataExtractor = self.init = function () {
         self.isRecording = false;
         $("#dataExtractorDiv").load("./modules/tools/lineage/html/lineage_sqlDataExtractorDialog.html", function () {
@@ -58,6 +61,7 @@ var Lineage_sqlDataExtractor = (function () {
             self.currentMappingJson = json;
 
             self.currentRelationsMap = relationsMap;
+            self.loadDataTypes(json);
             var visjsData = { nodes: [], edges: [] };
             var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
             self.currentDatypesMap = {};
@@ -122,6 +126,28 @@ var Lineage_sqlDataExtractor = (function () {
                 Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv");
             }
         });
+    };
+
+    // the previous types stay until the new ones arrive: a query built meanwhile keeps its casts
+    self.loadDataTypes = function (mappingJson) {
+        var dataTypesByDatasource = {};
+        var datasources = Object.keys(getDatabaseSources(mappingJson));
+        async.each(
+            datasources,
+            function (datasource, callbackEach) {
+                SQLquery_run.getDBmodel({ name: datasource, type: "sql", withTypes: true }, function (error, dataTypesByTable) {
+                    if (error) {
+                        UI.message("data types of " + datasource + " not read");
+                        return callbackEach();
+                    }
+                    dataTypesByDatasource[datasource] = dataTypesByTable;
+                    callbackEach();
+                });
+            },
+            function () {
+                self.dataTypesByDatasource = dataTypesByDatasource;
+            },
+        );
     };
 
     self.startPathRecording = function () {
@@ -194,7 +220,7 @@ var Lineage_sqlDataExtractor = (function () {
         }
         var queries;
         try {
-            queries = buildSqlByDatabaseSources(self.getPathKeys(), self.currentRelationsMap, self.currentMappingJson);
+            queries = buildSqlByDatabaseSources(self.getPathKeys(), self.currentRelationsMap, self.currentMappingJson, self.dataTypesByDatasource);
         } catch (error) {
             // mappingsToSql throws when the path cannot be read from the mapping
             self.sql = null;
@@ -478,7 +504,7 @@ var Lineage_sqlDataExtractor = (function () {
         var filteredColumn = null;
         var datasource = null;
         try {
-            var queries = buildSqlByDatabaseSources(pathKeys, self.currentRelationsMap, self.currentMappingJson);
+            var queries = buildSqlByDatabaseSources(pathKeys, self.currentRelationsMap, self.currentMappingJson, self.dataTypesByDatasource);
             for (const [, query] of queries) {
                 for (const [, column] of query.aliasMap) {
                     if (column.key == key) {

@@ -4,6 +4,15 @@ const RDFS_NAMESPACE = "http://www.w3.org/2000/01/rdf-schema#";
 // postgres cuts an identifier at 63 bytes: two long aliases sharing their first 63 bytes come back as one column
 const postgresIdentifierMaxBytes = 63;
 const utf8Encoder = new TextEncoder();
+// the data_type information_schema.columns gives the postgres text, date and time types
+const postgresTextDataTypes = ["text", "character varying", "character"];
+const postgresDateDataTypes = ["date", "timestamp without time zone", "timestamp with time zone", "time without time zone", "time with time zone"];
+
+// the text of a date depends on DateStyle and holds the time: a date joined on a text keeps its join error rather than
+// an empty result
+function isJoinableAsText(dataType) {
+    return Boolean(dataType) && !postgresTextDataTypes.includes(dataType) && !postgresDateDataTypes.includes(dataType);
+}
 
 // Recognize both CURIEs and full standard URIs without changing relation keys.
 function getStandardPredicateKind(value) {
@@ -857,7 +866,7 @@ function planPathTablesAndColumns(mappings, json) {
     };
 }
 
-function buildSqlFromMappings(allMappings, json) {
+function buildSqlFromMappings(allMappings, json, dataTypesByTable = {}) {
     if (!allMappings.length) {
         throw new Error("No mappings supplied");
     }
@@ -886,6 +895,18 @@ function buildSqlFromMappings(allMappings, json) {
 
     const baseAlias = getAlias(baseTable);
 
+    // postgres has no text = integer: the other side is compared as text, the text side keeps its index
+    function buildJoinCondition(fromTable, fromColumn, toTable, toColumn) {
+        const fromDataType = dataTypesByTable[fromTable]?.[fromColumn];
+        const toDataType = dataTypesByTable[toTable]?.[toColumn];
+        const shouldCastFromToText = postgresTextDataTypes.includes(toDataType) && isJoinableAsText(fromDataType);
+        const shouldCastToToText = postgresTextDataTypes.includes(fromDataType) && isJoinableAsText(toDataType);
+        const fromExpression = `${getAlias(fromTable)}.${quoteIdentifier(fromColumn)}${shouldCastFromToText ? "::text" : ""}`;
+        const toExpression = `${getAlias(toTable)}.${quoteIdentifier(toColumn)}${shouldCastToToText ? "::text" : ""}`;
+        return `${fromExpression}
+   = ${toExpression}`;
+    }
+
     const joinedTables = new Set([baseTable]);
     const pendingJoins = [...selectedJoins];
     const sqlJoins = [];
@@ -911,8 +932,7 @@ function buildSqlFromMappings(allMappings, json) {
 
                 sqlJoins.push(
                     `JOIN ${quotePublicTableName(join.toTable)} ${toAlias}
-  ON ${fromExpression}
-   = ${toExpression}`,
+  ON ${buildJoinCondition(join.fromTable, join.fromColumn, join.toTable, join.toColumn)}`,
                 );
                 equalExpressionByJoinedExpression.set(toExpression, getFirstEqualExpression(fromExpression));
 
@@ -930,8 +950,7 @@ function buildSqlFromMappings(allMappings, json) {
 
                 sqlJoins.push(
                     `JOIN ${quotePublicTableName(join.fromTable)} ${fromAlias}
-  ON ${fromExpression}
-   = ${toExpression}`,
+  ON ${buildJoinCondition(join.fromTable, join.fromColumn, join.toTable, join.toColumn)}`,
                 );
                 equalExpressionByJoinedExpression.set(fromExpression, getFirstEqualExpression(toExpression));
 
@@ -960,10 +979,7 @@ function buildSqlFromMappings(allMappings, json) {
         const onConditions = [];
         const outerColumns = new Map();
         for (const condition of conditionsByJoinColumns.values()) {
-            const pathExpression = `${getAlias(condition.pathTable)}.${quoteIdentifier(condition.pathColumn)}`;
-            const outerExpression = `${outerAlias}.${quoteIdentifier(condition.outerColumn)}`;
-            onConditions.push(`${pathExpression}
-   = ${outerExpression}`);
+            onConditions.push(buildJoinCondition(condition.pathTable, condition.pathColumn, outerTable, condition.outerColumn));
             outerColumns.set(condition.outerColumn, quoteIdentifier(condition.outerColumn));
         }
         for (const valueColumn of valueColumns) {
@@ -1064,7 +1080,7 @@ ${whereClause}
     return { sql, aliasMap, classIdExpressions };
 }
 
-export function buildSqlByDatabaseSources(keys, relationMap, json) {
+export function buildSqlByDatabaseSources(keys, relationMap, json, dataTypesByDatasource = {}) {
     if (!Array.isArray(keys) || keys.length === 0) {
         throw new Error("keys must be a non-empty array");
     }
@@ -1075,7 +1091,7 @@ export function buildSqlByDatabaseSources(keys, relationMap, json) {
 
     for (const [datasource, mappings] of groups) {
         const databaseName = getDatabaseName(datasource, json);
-        const { sql, aliasMap, classIdExpressions } = buildSqlFromMappings(mappings, json);
+        const { sql, aliasMap, classIdExpressions } = buildSqlFromMappings(mappings, json, dataTypesByDatasource[datasource]);
 
         result.set(databaseName, {
             datasource,

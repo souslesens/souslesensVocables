@@ -21,10 +21,11 @@ function getData(connection, query, successCallback, errorCallback) {
         .catch((error) => errorCallback(error));
 }
 
-function getKGModel(connection, dbName, driver, successCallback, errorCallback) {
+function getKGModel(connection, dbName, driver, successCallback, errorCallback, withTypes) {
     const where = driver == "postgres" ? { table_schema: "public" } : {};
+    const selectedColumns = withTypes ? ["table_name", "column_name", "data_type"] : ["table_name", "column_name"];
     connection
-        .distinct("table_name", "column_name")
+        .distinct(selectedColumns)
         .from("information_schema.columns")
         .where(where)
         .orderBy("table_name")

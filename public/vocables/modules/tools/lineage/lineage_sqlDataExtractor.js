@@ -299,10 +299,10 @@ var Lineage_sqlDataExtractor = (function () {
                     if (rows.length <= self.previewRowsLimit) {
                         return callbackSeries();
                     }
-                    SqlLargeResult_bot.start(self.previewRowsLimit, function (_err, isExport) {
+                    SqlLargeResult_bot.start(self.previewRowsLimit, function (_err, isExport, displayedRowsLimit) {
                         isExportChosen = isExport;
                         if (!isExportChosen) {
-                            rows = rows.slice(0, self.previewRowsLimit);
+                            rows = rows.slice(0, displayedRowsLimit);
                         }
                         callbackSeries();
                     });

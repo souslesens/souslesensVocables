@@ -7,7 +7,9 @@ var SqlLargeResult_bot = (function () {
     self.title = "Large result";
     self.exportChoiceId = "export";
     self.displayChoiceId = "display";
+    self.sampleChoiceId = "sample";
     self.dialogCloseEvent = "dialogclose.sqlLargeResult";
+    self.positiveIntegerRegex = /^\d+$/;
 
     self.workflow = {
         chooseExportOrDisplayFn: {},
@@ -19,7 +21,7 @@ var SqlLargeResult_bot = (function () {
             self.callbackFn = callbackFn;
             // closing without a choice means display
             $("#botPanel").one(self.dialogCloseEvent, function () {
-                callbackFn(null, false);
+                callbackFn(null, false, previewRowsLimit);
             });
             self.myBotEngine.nextStep();
         });
@@ -31,11 +33,28 @@ var SqlLargeResult_bot = (function () {
             var choices = [
                 { id: self.exportChoiceId, label: "Export all rows to CSV" },
                 { id: self.displayChoiceId, label: "Display the first " + self.params.previewRowsLimit + " rows" },
+                { id: self.sampleChoiceId, label: "sample" },
             ];
             self.myBotEngine.showList(choices, null, null, false, function (selectedChoiceId) {
+                if (selectedChoiceId == self.sampleChoiceId) {
+                    return self.functions.promptSampleSizeFn();
+                }
                 $("#botPanel").off(self.dialogCloseEvent);
                 self.myBotEngine.closeDialog();
-                self.callbackFn(null, selectedChoiceId == self.exportChoiceId);
+                self.callbackFn(null, selectedChoiceId == self.exportChoiceId, self.params.previewRowsLimit);
+            });
+        },
+
+        promptSampleSizeFn: function () {
+            self.myBotEngine.promptValue("enter a sample < " + self.params.previewRowsLimit, "sampleSize", "", null, function (typedValue) {
+                var trimmedValue = typedValue.trim();
+                var sampleSize = parseInt(trimmedValue);
+                if (!self.positiveIntegerRegex.test(trimmedValue) || sampleSize < 1 || sampleSize >= self.params.previewRowsLimit) {
+                    return self.functions.promptSampleSizeFn();
+                }
+                $("#botPanel").off(self.dialogCloseEvent);
+                self.myBotEngine.closeDialog();
+                self.callbackFn(null, false, sampleSize);
             });
         },
     };

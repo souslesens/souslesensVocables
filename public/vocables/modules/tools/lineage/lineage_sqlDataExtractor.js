@@ -134,7 +134,14 @@ var Lineage_sqlDataExtractor = (function () {
             withCheckboxes: true,
             contextMenu: function (node) {
                 if (node.parent == "#") {
-                    return {};
+                    return {
+                        removeClass: {
+                            label: "Remove from path",
+                            action: function () {
+                                self.removeClassFromPath(node.id);
+                            },
+                        },
+                    };
                 }
                 return {
                     filter: {
@@ -525,6 +532,55 @@ var Lineage_sqlDataExtractor = (function () {
             return filteredKeys.indexOf(key) < 0;
         });
         self.updateFilterIcons();
+    };
+
+    // the path stays one piece: what the removed class cuts off from the first class entered goes with it
+    self.removeClassFromPath = function (classId) {
+        var pathTree = $("#sqlDataExtractor_jstreeDiv").jstree(true);
+        // addNodesToJstree inserts first: the tree lists the classes latest first
+        var pathClassIds = pathTree.get_node("#").children;
+        var remainingClassIds = pathClassIds.filter((pathClassId) => pathClassId != classId);
+        var firstClassId = remainingClassIds[remainingClassIds.length - 1];
+
+        var keptClassIds = firstClassId ? [firstClassId] : [];
+        for (var keptClassIndex = 0; keptClassIndex < keptClassIds.length; keptClassIndex++) {
+            var keptClassId = keptClassIds[keptClassIndex];
+            self.currentPaths.forEach(function (relationKey) {
+                var mapping = self.currentRelationsMap.get(relationKey)[0];
+                var relationClassIds = [mapping.subjectUri, mapping.objectUri];
+                if (relationClassIds.indexOf(keptClassId) < 0 || relationClassIds.indexOf(classId) > -1) {
+                    return;
+                }
+                relationClassIds.forEach(function (relationClassId) {
+                    if (keptClassIds.indexOf(relationClassId) < 0) {
+                        keptClassIds.push(relationClassId);
+                    }
+                });
+            });
+        }
+
+        var removedClassIds = pathClassIds.filter((pathClassId) => keptClassIds.indexOf(pathClassId) < 0);
+        removedClassIds.forEach(function (removedClassId) {
+            pathTree.get_node(removedClassId).children.forEach(function (propertyKey) {
+                self.removePropertyFilters(propertyKey);
+            });
+            JstreeWidget.deleteNode("sqlDataExtractor_jstreeDiv", removedClassId);
+        });
+
+        var removedRelationKeys = self.currentPaths.filter(function (relationKey) {
+            var mapping = self.currentRelationsMap.get(relationKey)[0];
+            return keptClassIds.indexOf(mapping.subjectUri) < 0 || keptClassIds.indexOf(mapping.objectUri) < 0;
+        });
+        // splice, not a new array: addClassToPath tells a clear all by the array identity
+        removedRelationKeys.forEach(function (relationKey) {
+            self.currentPaths.splice(self.currentPaths.indexOf(relationKey), 1);
+        });
+        var restoredEdges = self.edgesBeforeHighlight.filter((edgeBeforeHighlight) => removedRelationKeys.indexOf(edgeBeforeHighlight.id) > -1);
+        self.edgesBeforeHighlight = self.edgesBeforeHighlight.filter((edgeBeforeHighlight) => removedRelationKeys.indexOf(edgeBeforeHighlight.id) < 0);
+        Lineage_whiteboard.lineageVisjsGraph.data.edges.update(restoredEdges);
+
+        var latestClassId = pathTree.get_node("#").children[0];
+        self.lastRecordedNode = latestClassId ? { id: latestClassId, label: pathTree.get_node(latestClassId).data.label } : null;
     };
 
     self.clearAll = function (source) {

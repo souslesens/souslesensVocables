@@ -130,7 +130,22 @@ var Lineage_sqlDataExtractor = (function () {
         self.edgesBeforeHighlight = [];
 
         var jstreeData = [];
-        JstreeWidget.loadJsTree("sqlDataExtractor_jstreeDiv", jstreeData, { withCheckboxes: true });
+        JstreeWidget.loadJsTree("sqlDataExtractor_jstreeDiv", jstreeData, {
+            withCheckboxes: true,
+            contextMenu: function (node) {
+                if (node.parent == "#") {
+                    return {};
+                }
+                return {
+                    filter: {
+                        label: "Filter",
+                        action: function () {
+                            self.addFilter(node.parent, node.id);
+                        },
+                    },
+                };
+            },
+        });
     };
     self.clearPath = function () {
         self.currentPaths = [];
@@ -372,11 +387,13 @@ var Lineage_sqlDataExtractor = (function () {
         });
     };
 
-    self.addFilter = function (classNodeId) {
+    self.addFilter = function (classNodeId, propertyKey) {
         var classLabel = JstreeWidget.getjsTreeNodeObj("sqlDataExtractor_jstreeDiv", classNodeId).data.label;
 
         var keyByVariable = {};
         var nonObjectProperties = [];
+        // the bot skips its property list when given one
+        var chosenPropertyId = "";
         for (const [key, values] of self.currentRelationsMap) {
             var mapping = values[0];
             if (mapping.kind != "dataProperty" || mapping.subjectUri != classNodeId) {
@@ -385,6 +402,9 @@ var Lineage_sqlDataExtractor = (function () {
             // the bot names its SPARQL variable varName_<property id>, a short id keeps it a plain word
             var propertyId = "p" + nonObjectProperties.length;
             keyByVariable[self.filterVariableName + "_" + propertyId] = key;
+            if (key == propertyKey) {
+                chosenPropertyId = propertyId;
+            }
             // the bot offers numeric operators to xsd:int, xsd:float and xsd:decimal only
             var datatype = self.numericRangeRegex.test(mapping.range) ? "xsd:decimal" : mapping.range;
             nonObjectProperties.push({
@@ -400,7 +420,7 @@ var Lineage_sqlDataExtractor = (function () {
         var filterQuery = {
             source: self.currentSource,
             currentClass: classNodeId,
-            property: "",
+            property: chosenPropertyId,
             varName: self.filterVariableName,
             listValuesFn: function (propertyId, callback) {
                 self.listColumnValues(keyByVariable[self.filterVariableName + "_" + propertyId], callback);

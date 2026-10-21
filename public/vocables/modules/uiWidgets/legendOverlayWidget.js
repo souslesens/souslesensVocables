@@ -378,7 +378,8 @@ var LegendOverlayWidget = (function () {
         var html = "";
 
         html += "<div id='" + ids.wrapperId + "'";
-        html += " style='position:absolute; z-index:1;";
+        // no z-index: the jQuery UI dialogs, appended later to the body with z-index auto, cover it
+        html += " style='position:absolute;";
         html += self.getPositionStyle(options.position);
         html += "'>";
 

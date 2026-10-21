@@ -340,6 +340,7 @@ var KGquery_filter_bot = (function () {
         var singleQuoteRegex = /'/g;
         // Postgres LIKE escapes its wildcards with a backslash
         var likeWildcardRegex = /[\\%_]/g;
+        var textCastSuffixRegex = /::text$/;
 
         var sqlClauses = [];
 
@@ -352,8 +353,11 @@ var KGquery_filter_bot = (function () {
             if (!expressionByVariable[variable]) {
                 return "?" + variable;
             }
-            // ILIKE exists on text only: a uuid or a boolean is matched on its text
-            var expression = isContainsClause ? "(" + expressionByVariable[variable] + ")::text" : expressionByVariable[variable];
+            var expression = expressionByVariable[variable];
+            // ILIKE exists on text only: a uuid, a boolean or a date expression is matched on its text
+            if (isContainsClause && !textCastSuffixRegex.test(expression)) {
+                expression = "(" + expression + ")::text";
+            }
             sqlClauses.push(expression + " " + sqlClause);
             return "#clause" + (sqlClauses.length - 1) + "#";
         }

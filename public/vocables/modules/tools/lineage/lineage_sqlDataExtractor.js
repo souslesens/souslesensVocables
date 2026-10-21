@@ -3,7 +3,7 @@ import Lineage_sources from "./lineage_sources.js";
 import MappingColumnsGraph from "../mappingModeler/mappingColumnsGraph.js";
 
 import common from "../../shared/common.js";
-import MappingsToSql, { extractRelationMap, buildSqlByDatabaseSources, buildObjectPropertyKey, quoteIdentifier, quotePublicTableName, getDatasource } from "../mappingModeler/mappingsToSql.js";
+import MappingsToSql, { extractRelationMap, buildSqlByDatabaseSources, buildObjectPropertyKey, quoteIdentifier, quotePublicTableName } from "../mappingModeler/mappingsToSql.js";
 import KGquery_filter_bot from "../../bots/KGquery_filter_bot.js";
 import KGquery_paths from "../KGquery/KGquery_paths.js";
 import SqlLargeResult_bot from "../../bots/sqlLargeResult_bot.js";
@@ -136,11 +136,7 @@ var Lineage_sqlDataExtractor = (function () {
         self.currentPaths = [];
         JstreeWidget.empty("sqlDataExtractor_jstreeDiv");
     };
-    self.getSQL = function (options) {
-        if (!options) {
-            options = {};
-        }
-
+    self.getPathKeys = function () {
         var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("sqlDataExtractor_jstreeDiv");
 
         var dataTypePaths = [];
@@ -159,23 +155,31 @@ var Lineage_sqlDataExtractor = (function () {
                 }
             }
         });
+        return allPaths;
+    };
+
+    self.getSQL = function (options) {
+        if (!options) {
+            options = {};
+        }
         var queries;
         try {
-            queries = buildSqlByDatabaseSources(allPaths, self.currentRelationsMap, self.currentMappingJson);
+            queries = buildSqlByDatabaseSources(self.getPathKeys(), self.currentRelationsMap, self.currentMappingJson);
         } catch (error) {
-            // mappingsToSql throws when two tables share no class of the path to join on
+            // mappingsToSql throws when the path cannot be read from the mapping
             self.sql = null;
             return MainController.errorAlert(error.message);
         }
 
         for (const [databaseName, { datasource, sql, aliasMap, classIdExpressions }] of queries) {
-            // a property mapped in several tables has one column per table, the filter holds on each of them
-            var filterExpressionsByKey = {};
+            // mappingsToSql reads a data property from one column
+            var filterExpressionByKey = {};
             for (const [, column] of aliasMap) {
                 if (!column.key) {
                     continue;
                 }
                 // a range xsd:string can sit on an xml column, which has no equality: compare as text
+                // KGquery_filter_bot skips its ILIKE cast on this ::text suffix
                 var textExpression = column.expression + "::text";
                 var filterExpression = textExpression;
                 // compare dates as days, never as text: '13/11/2018' > '2020-01-01' holds as text, 10:00 on a day equals that day
@@ -188,28 +192,20 @@ var Lineage_sqlDataExtractor = (function () {
                     // numbers can be text with a space as thousands separator: '3 422.21'
                     filterExpression = "NULLIF(REGEXP_REPLACE(" + textExpression + ", '\\s', '', 'g'), '')::numeric";
                 }
-                filterExpressionsByKey[column.key] = (filterExpressionsByKey[column.key] || []).concat(filterExpression);
+                filterExpressionByKey[column.key] = filterExpression;
             }
             var filterConditions = [];
             var untranslatedFilterLabels = [];
             self.sqlFilters.forEach(function (sqlFilter) {
-                var columnCount = 1;
+                var expressionByVariable = {};
                 for (var variable in sqlFilter.keyByVariable) {
-                    var variableExpressions = filterExpressionsByKey[sqlFilter.keyByVariable[variable]] || [];
-                    columnCount = Math.max(columnCount, variableExpressions.length);
+                    expressionByVariable[variable] = filterExpressionByKey[sqlFilter.keyByVariable[variable]];
                 }
-                for (var columnIndex = 0; columnIndex < columnCount; columnIndex++) {
-                    var expressionByVariable = {};
-                    for (var filteredVariable in sqlFilter.keyByVariable) {
-                        var expressions = filterExpressionsByKey[sqlFilter.keyByVariable[filteredVariable]] || [];
-                        expressionByVariable[filteredVariable] = expressions[Math.min(columnIndex, expressions.length - 1)];
-                    }
-                    var condition = KGquery_filter_bot.sparqlFilterToSqlCondition(sqlFilter.filter, expressionByVariable);
-                    if (!condition) {
-                        return untranslatedFilterLabels.push(sqlFilter.filterLabel);
-                    }
-                    filterConditions.push("(" + condition + ")");
+                var condition = KGquery_filter_bot.sparqlFilterToSqlCondition(sqlFilter.filter, expressionByVariable);
+                if (!condition) {
+                    return untranslatedFilterLabels.push(sqlFilter.filterLabel);
                 }
+                filterConditions.push("(" + condition + ")");
             });
             if (untranslatedFilterLabels.length > 0) {
                 self.sql = null;
@@ -429,12 +425,35 @@ var Lineage_sqlDataExtractor = (function () {
         });
     };
 
+    // the values of the column the filter on key reads, which depends on the path
     self.listColumnValues = function (key, callback) {
-        var mapping = self.currentRelationsMap.get(key)[0];
+        var pathKeys = self.getPathKeys();
+        if (pathKeys.indexOf(key) < 0) {
+            pathKeys.push(key);
+        }
+        var filteredColumn = null;
+        var datasource = null;
+        try {
+            var queries = buildSqlByDatabaseSources(pathKeys, self.currentRelationsMap, self.currentMappingJson);
+            for (const [, query] of queries) {
+                for (const [, column] of query.aliasMap) {
+                    if (column.key == key) {
+                        filteredColumn = column;
+                        datasource = query.datasource;
+                        break;
+                    }
+                }
+            }
+        } catch (error) {
+            return callback(error.message);
+        }
+        if (!filteredColumn) {
+            return callback("no column read for " + key);
+        }
         // xml has no equality and a bytea comes as an object: listed as postgres text
-        var column = quoteIdentifier(mapping.to.id) + "::text";
-        var sql = "SELECT DISTINCT " + column + " AS value FROM " + quotePublicTableName(mapping.to.dataTable) + " WHERE " + column + " IS NOT NULL ORDER BY 1 LIMIT " + self.filterValuesLimit;
-        self.runSql(sql, getDatasource(mapping.to, self.currentMappingJson), function (err, rows) {
+        var column = quoteIdentifier(filteredColumn.column) + "::text";
+        var sql = "SELECT DISTINCT " + column + " AS value FROM " + quotePublicTableName(filteredColumn.table) + " WHERE " + column + " IS NOT NULL ORDER BY 1 LIMIT " + self.filterValuesLimit;
+        self.runSql(sql, datasource, function (err, rows) {
             if (err) {
                 return callback(err);
             }

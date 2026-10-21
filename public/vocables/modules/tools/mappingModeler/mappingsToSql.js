@@ -666,32 +666,52 @@ export function groupMappingsByDatasource(keys, relationMap, json) {
     return groups;
 }
 
-// a join on a class outside the selected mappings would change the meaning of the rows
-function extractPathClassJoins(mappings, json) {
+// two columns hold the same instances when their definedInColumn chains end on the same column, the identity column
+// of the class (the isMainColumn flag cannot tell, see getSameClassValueColumns)
+function buildIdentityColumnFinder(json) {
     const nodesById = new Map(json.nodes.map((node) => [node.id, node]));
+    // one table column can carry the nodes of two classes: a mapping column is found by its node data first, which holds
+    // while the relation map is built from this same json
+    const nodesByData = new Map(json.nodes.map((node) => [node.data, node]));
     const nodesByTableColumn = new Map(json.nodes.map((node) => [JSON.stringify([node.data?.dataTable, node.data?.id]), node]));
     const subjectColumnByValueColumn = getSameClassValueColumns(json);
 
+    return function findIdentityColumn(column) {
+        const columnNodeId = (nodesByData.get(column) ?? nodesByTableColumn.get(JSON.stringify([column.dataTable, column.id])))?.id;
+        let identityColumnId = columnNodeId;
+        const chainColumnIds = new Set();
+        while (nodesById.get(identityColumnId)?.data?.definedInColumn && !chainColumnIds.has(identityColumnId)) {
+            chainColumnIds.add(identityColumnId);
+            identityColumnId = nodesById.get(identityColumnId).data.definedInColumn;
+        }
+        // the main column can be a value column (superiorfunctionallocation in PAZFLOR_ABOX)
+        identityColumnId = subjectColumnByValueColumn.get(identityColumnId) || identityColumnId;
+        return { identityColumnId, isIdentityColumn: identityColumnId === columnNodeId };
+    };
+}
+
+// a stable order: the JSON order of the nodes changes when the mapping is saved again
+function compareColumns(leftColumn, rightColumn) {
+    return leftColumn.dataTable.localeCompare(rightColumn.dataTable) || leftColumn.id.localeCompare(rightColumn.id);
+}
+
+function getMappingClassColumns(mapping) {
+    const classColumns = [{ column: mapping.from, classUri: mapping.subjectUri }];
+    if (mapping.kind === "objectProperty") {
+        classColumns.push({ column: mapping.to, classUri: mapping.objectUri });
+    }
+    return classColumns;
+}
+
+// a join on a class outside the selected mappings would change the meaning of the rows
+function extractPathClassJoins(mappings, findIdentityColumn) {
     const classColumnsByKey = new Map();
     for (const mapping of mappings) {
-        const mappingClassColumns = [{ column: mapping.from, classUri: mapping.subjectUri }];
-        if (mapping.kind === "objectProperty") {
-            mappingClassColumns.push({ column: mapping.to, classUri: mapping.objectUri });
-        }
-        for (const classColumn of mappingClassColumns) {
+        for (const classColumn of getMappingClassColumns(mapping)) {
             const tableColumnKey = JSON.stringify([classColumn.column.dataTable, classColumn.column.id]);
             const classColumnKey = JSON.stringify([tableColumnKey, classColumn.classUri]);
             if (classColumnsByKey.has(classColumnKey)) continue;
-
-            // two columns hold the same instances when their definedInColumn chains end on the same column
-            let identityColumnId = nodesByTableColumn.get(tableColumnKey)?.id;
-            const chainColumnIds = new Set();
-            while (nodesById.get(identityColumnId)?.data?.definedInColumn && !chainColumnIds.has(identityColumnId)) {
-                chainColumnIds.add(identityColumnId);
-                identityColumnId = nodesById.get(identityColumnId).data.definedInColumn;
-            }
-            // the main column can be a value column (superiorfunctionallocation in PAZFLOR_ABOX)
-            identityColumnId = subjectColumnByValueColumn.get(identityColumnId) || identityColumnId;
+            const { identityColumnId } = findIdentityColumn(classColumn.column);
             classColumnsByKey.set(classColumnKey, { ...classColumn, identityColumnId });
         }
     }
@@ -718,19 +738,121 @@ function extractPathClassJoins(mappings, json) {
     return joins;
 }
 
-function buildSqlFromMappings(mappings, json) {
-    if (!mappings.length) {
+// the tables of the path, its joins, and one column per data property: several tables for one data property would
+// add rows, drop rows and repeat its filter
+function planPathTablesAndColumns(mappings, json) {
+    const findIdentityColumn = buildIdentityColumnFinder(json);
+    const isIdentityColumnMapping = (mapping) => findIdentityColumn(mapping.from).isIdentityColumn;
+    const compareMappingColumns = (leftMapping, rightMapping) => compareColumns(leftMapping.from, rightMapping.from);
+
+    const objectMappings = [];
+    const dataMappingsByKey = new Map();
+    for (const mapping of mappings) {
+        if (mapping.kind === "objectProperty") {
+            objectMappings.push(mapping);
+            continue;
+        }
+        if (!dataMappingsByKey.has(mapping.key)) dataMappingsByKey.set(mapping.key, []);
+        dataMappingsByKey.get(mapping.key).push(mapping);
+    }
+    for (const keyMappings of dataMappingsByKey.values()) {
+        keyMappings.sort(compareMappingColumns);
+    }
+    for (const keyMappings of dataMappingsByKey.values()) {
+        // tables holding different individuals of the class: no column can stand for the others
+        const identityColumnIds = new Set(keyMappings.map((mapping) => findIdentityColumn(mapping.from).identityColumnId));
+        if (identityColumnIds.size > 1) {
+            const keyTables = keyMappings.map((mapping) => mapping.from.dataTable);
+            throw new Error(`${keyMappings[0].subjectLabel} ${keyMappings[0].predicateLabel} is mapped on unrelated columns of ${keyTables.join(", ")}, set their definedInColumn`);
+        }
+    }
+
+    const pathTables = new Set();
+    for (const mapping of objectMappings) {
+        pathTables.add(mapping.from.dataTable);
+        pathTables.add(mapping.to.dataTable);
+    }
+    // no object property: the table of the identity column of each class
+    let pathJoinMappings = objectMappings;
+    if (!pathTables.size) {
+        const dataMappingsByClass = new Map();
+        for (const keyMappings of dataMappingsByKey.values()) {
+            const classUri = keyMappings[0].subjectUri;
+            if (!dataMappingsByClass.has(classUri)) dataMappingsByClass.set(classUri, []);
+            dataMappingsByClass.get(classUri).push(...keyMappings);
+        }
+        for (const classMappings of dataMappingsByClass.values()) {
+            classMappings.sort(compareMappingColumns);
+            const identityMapping = classMappings.find(isIdentityColumnMapping) ?? classMappings[0];
+            pathTables.add(identityMapping.from.dataTable);
+        }
+        pathJoinMappings = [];
+        for (const keyMappings of dataMappingsByKey.values()) {
+            for (const mapping of keyMappings) {
+                if (pathTables.has(mapping.from.dataTable)) pathJoinMappings.push(mapping);
+            }
+        }
+    }
+    // the path joins come from the relations: a checked data property must not change how the rows are linked
+    const selectedJoins = findMinimumJoinSet(pathTables, extractPathClassJoins(pathJoinMappings, findIdentityColumn));
+    const baseTable = selectedJoins.length ? selectedJoins[0].toTable : [...pathTables][0];
+
+    const selectedDataMappings = [];
+    const outerMappings = [];
+    for (const keyMappings of dataMappingsByKey.values()) {
+        const pathTableMappings = keyMappings.filter((mapping) => pathTables.has(mapping.from.dataTable));
+        if (pathTableMappings.length) {
+            const baseTableMapping = pathTableMappings.find((mapping) => mapping.from.dataTable === baseTable);
+            selectedDataMappings.push(pathTableMappings.find(isIdentityColumnMapping) ?? baseTableMapping ?? pathTableMappings[0]);
+            continue;
+        }
+        outerMappings.push(keyMappings.find(isIdentityColumnMapping) ?? keyMappings[0]);
+    }
+
+    // the path column a LEFT JOIN is linked on: the base table first, then a stable order
+    const pathClassColumns = [];
+    for (const mapping of objectMappings.concat(selectedDataMappings)) {
+        for (const classColumn of getMappingClassColumns(mapping)) {
+            pathClassColumns.push({ ...classColumn, identityColumnId: findIdentityColumn(classColumn.column).identityColumnId });
+        }
+    }
+    pathClassColumns.sort((leftClassColumn, rightClassColumn) => {
+        const isLeftInBaseTable = leftClassColumn.column.dataTable === baseTable;
+        const isRightInBaseTable = rightClassColumn.column.dataTable === baseTable;
+        if (isLeftInBaseTable !== isRightInBaseTable) return isLeftInBaseTable ? -1 : 1;
+        return compareColumns(leftClassColumn.column, rightClassColumn.column);
+    });
+
+    const outerJoinsByTable = new Map();
+    for (const mapping of outerMappings) {
+        const outerTable = mapping.from.dataTable;
+        const { identityColumnId } = findIdentityColumn(mapping.from);
+        const pathClassColumn = pathClassColumns.find((classColumn) => classColumn.classUri === mapping.subjectUri && classColumn.identityColumnId === identityColumnId);
+        if (!pathClassColumn) {
+            throw new Error(`No column of ${mapping.subjectLabel} on the path to read ${mapping.predicateLabel} from ${outerTable}`);
+        }
+        if (!outerJoinsByTable.has(outerTable)) outerJoinsByTable.set(outerTable, { conditionsByJoinColumns: new Map(), valueColumns: new Set() });
+        const outerJoin = outerJoinsByTable.get(outerTable);
+        const condition = { pathTable: pathClassColumn.column.dataTable, pathColumn: pathClassColumn.column.id, outerColumn: mapping.from.id };
+        outerJoin.conditionsByJoinColumns.set(JSON.stringify(condition), condition);
+        outerJoin.valueColumns.add(mapping.to.id);
+    }
+
+    return {
+        mappings: objectMappings.concat(selectedDataMappings, outerMappings),
+        pathTables,
+        selectedJoins,
+        baseTable,
+        outerJoinsByTable,
+    };
+}
+
+function buildSqlFromMappings(allMappings, json) {
+    if (!allMappings.length) {
         throw new Error("No mappings supplied");
     }
 
-    const requiredTables = new Set();
-
-    for (const mapping of mappings) {
-        requiredTables.add(mapping.from.dataTable);
-        requiredTables.add(mapping.to.dataTable);
-    }
-
-    const selectedJoins = findMinimumJoinSet(requiredTables, extractPathClassJoins(mappings, json));
+    const { mappings, pathTables, selectedJoins, baseTable, outerJoinsByTable } = planPathTablesAndColumns(allMappings, json);
 
     const aliasByTable = new Map();
     let aliasIndex = 0;
@@ -743,7 +865,7 @@ function buildSqlFromMappings(mappings, json) {
         return aliasByTable.get(table);
     }
 
-    for (const table of requiredTables) {
+    for (const table of pathTables) {
         getAlias(table);
     }
 
@@ -751,8 +873,6 @@ function buildSqlFromMappings(mappings, json) {
         getAlias(join.fromTable);
         getAlias(join.toTable);
     }
-
-    const baseTable = selectedJoins.length ? selectedJoins[0].toTable : [...requiredTables][0];
 
     const baseAlias = getAlias(baseTable);
 
@@ -820,6 +940,26 @@ function buildSqlFromMappings(mappings, json) {
         }
     }
 
+    // the distinct rows of an outer table: a table repeating an individual would repeat the path rows. Its values
+    // are read as text since xml has no equality, its class ids as they are to join
+    for (const [outerTable, { conditionsByJoinColumns, valueColumns }] of outerJoinsByTable) {
+        const outerAlias = getAlias(outerTable);
+        const onConditions = [];
+        const outerColumns = new Map();
+        for (const condition of conditionsByJoinColumns.values()) {
+            const pathExpression = `${getAlias(condition.pathTable)}.${quoteIdentifier(condition.pathColumn)}`;
+            const outerExpression = `${outerAlias}.${quoteIdentifier(condition.outerColumn)}`;
+            onConditions.push(`${pathExpression}\n   = ${outerExpression}`);
+            joinedColumnPairs.push([pathExpression, outerExpression]);
+            outerColumns.set(condition.outerColumn, quoteIdentifier(condition.outerColumn));
+        }
+        for (const valueColumn of valueColumns) {
+            if (!outerColumns.has(valueColumn)) outerColumns.set(valueColumn, `${quoteIdentifier(valueColumn)}::text AS ${quoteIdentifier(valueColumn)}`);
+        }
+        const distinctColumns = [...outerColumns.values()].join(", ");
+        sqlJoins.push(`LEFT JOIN (SELECT DISTINCT ${distinctColumns} FROM ${quotePublicTableName(outerTable)}) ${outerAlias}\n  ON ${onConditions.join("\n  AND ")}`);
+    }
+
     // a class id column already selected through a checked data property is not projected again
     const dataPropertyExpressions = new Set();
     for (const mapping of mappings) {
@@ -863,6 +1003,8 @@ function buildSqlFromMappings(mappings, json) {
             ["subject", mapping.from],
             ["object", mapping.to],
         ]) {
+            // the class id of a LEFT JOINed table repeats the path one, empty where the table misses the individual
+            if (role === "subject" && outerJoinsByTable.has(column.dataTable)) continue;
             const semanticAlias = buildMappingAlias(mapping, role, json);
             const expression = `${getAlias(column.dataTable)}.${quoteIdentifier(column.id)}`;
             // the SQL filters find their column by key and type it by range and format
@@ -886,9 +1028,15 @@ function buildSqlFromMappings(mappings, json) {
     const whereConditions = new Set();
 
     for (const mapping of mappings) {
+        // an IS NOT NULL on a LEFT JOINed table would drop the individuals it misses
+        if (outerJoinsByTable.has(mapping.from.dataTable)) continue;
         const fromAlias = getAlias(mapping.from.dataTable);
 
         whereConditions.add(`${fromAlias}.${quoteIdentifier(mapping.from.id)} IS NOT NULL`);
+        // a row without the object of a path relation holds no such relation in the graph
+        if (mapping.kind === "objectProperty") {
+            whereConditions.add(`${getAlias(mapping.to.dataTable)}.${quoteIdentifier(mapping.to.id)} IS NOT NULL`);
+        }
     }
 
     const whereClause = whereConditions.size ? `WHERE ${[...whereConditions].join("\n  AND ")}` : "";

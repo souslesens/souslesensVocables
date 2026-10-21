@@ -233,8 +233,17 @@ var Lineage_sqlDataExtractor = (function () {
             return;
         }
         var previewSql = self.sortedSql + "\nLIMIT " + self.previewRowsLimit;
-        $("#smallDialogDiv").html("<textarea style='width:500px;height: 350px'>" + previewSql + "</textarea>");
+        $("#smallDialogDiv").html(
+            "<button onclick='Lineage_sqlDataExtractor.copySqlToClipboard()'>copy</button><br>" +
+                "<textarea id='sqlDataExtractor_sqlTextarea' style='width:500px;height: 350px'>" +
+                previewSql +
+                "</textarea>",
+        );
         $("#smallDialogDiv").dialog("open");
+    };
+
+    self.copySqlToClipboard = function () {
+        common.copyTextToClipboard($("#sqlDataExtractor_sqlTextarea").val());
     };
 
     self.executeSQL = function () {

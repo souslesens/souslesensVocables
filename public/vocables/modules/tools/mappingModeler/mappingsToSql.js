@@ -824,6 +824,8 @@ function planPathTablesAndColumns(mappings, json) {
     });
 
     const outerJoinsByTable = new Map();
+    const pathColumnDataMappings = [];
+    const outerJoinedMappings = [];
     for (const mapping of outerMappings) {
         const outerTable = mapping.from.dataTable;
         const { identityColumnId } = findIdentityColumn(mapping.from);
@@ -831,6 +833,14 @@ function planPathTablesAndColumns(mappings, json) {
         if (!pathClassColumn) {
             throw new Error(`No column of ${mapping.subjectLabel} on the path to read ${mapping.predicateLabel} from ${outerTable}`);
         }
+        // read on the path column, no LEFT JOIN: an id missing from the outer table, which the graph has no triple
+        // for, still shows its value (Karim's choice)
+        const isValueOnClassColumn = mapping.to.dataTable === mapping.from.dataTable && mapping.to.id === mapping.from.id;
+        if (isValueOnClassColumn) {
+            pathColumnDataMappings.push({ ...mapping, from: pathClassColumn.column, to: pathClassColumn.column });
+            continue;
+        }
+        outerJoinedMappings.push(mapping);
         if (!outerJoinsByTable.has(outerTable)) outerJoinsByTable.set(outerTable, { conditionsByJoinColumns: new Map(), valueColumns: new Set() });
         const outerJoin = outerJoinsByTable.get(outerTable);
         const condition = { pathTable: pathClassColumn.column.dataTable, pathColumn: pathClassColumn.column.id, outerColumn: mapping.from.id };
@@ -839,7 +849,7 @@ function planPathTablesAndColumns(mappings, json) {
     }
 
     return {
-        mappings: objectMappings.concat(selectedDataMappings, outerMappings),
+        mappings: objectMappings.concat(selectedDataMappings, pathColumnDataMappings, outerJoinedMappings),
         pathTables,
         selectedJoins,
         baseTable,
@@ -879,7 +889,10 @@ function buildSqlFromMappings(allMappings, json) {
     const joinedTables = new Set([baseTable]);
     const pendingJoins = [...selectedJoins];
     const sqlJoins = [];
-    const joinedColumnPairs = [];
+    // an inner join gives its two columns the same value on every row: a joined column maps to the one it equals
+    // first in the FROM
+    const equalExpressionByJoinedExpression = new Map();
+    const getFirstEqualExpression = (expression) => equalExpressionByJoinedExpression.get(expression) ?? expression;
 
     while (pendingJoins.length) {
         let found = false;
@@ -901,7 +914,7 @@ function buildSqlFromMappings(allMappings, json) {
   ON ${fromExpression}
    = ${toExpression}`,
                 );
-                joinedColumnPairs.push([fromExpression, toExpression]);
+                equalExpressionByJoinedExpression.set(toExpression, getFirstEqualExpression(fromExpression));
 
                 joinedTables.add(join.toTable);
                 pendingJoins.splice(i, 1);
@@ -920,7 +933,7 @@ function buildSqlFromMappings(allMappings, json) {
   ON ${fromExpression}
    = ${toExpression}`,
                 );
-                joinedColumnPairs.push([fromExpression, toExpression]);
+                equalExpressionByJoinedExpression.set(fromExpression, getFirstEqualExpression(toExpression));
 
                 joinedTables.add(join.fromTable);
                 pendingJoins.splice(i, 1);
@@ -949,8 +962,8 @@ function buildSqlFromMappings(allMappings, json) {
         for (const condition of conditionsByJoinColumns.values()) {
             const pathExpression = `${getAlias(condition.pathTable)}.${quoteIdentifier(condition.pathColumn)}`;
             const outerExpression = `${outerAlias}.${quoteIdentifier(condition.outerColumn)}`;
-            onConditions.push(`${pathExpression}\n   = ${outerExpression}`);
-            joinedColumnPairs.push([pathExpression, outerExpression]);
+            onConditions.push(`${pathExpression}
+   = ${outerExpression}`);
             outerColumns.set(condition.outerColumn, quoteIdentifier(condition.outerColumn));
         }
         for (const valueColumn of valueColumns) {
@@ -960,32 +973,32 @@ function buildSqlFromMappings(allMappings, json) {
         sqlJoins.push(`LEFT JOIN (SELECT DISTINCT ${distinctColumns} FROM ${quotePublicTableName(outerTable)}) ${outerAlias}\n  ON ${onConditions.join("\n  AND ")}`);
     }
 
-    // a class id column already selected through a checked data property is not projected again
-    const dataPropertyExpressions = new Set();
+    // two classes on one column stay two columns, so a wrong mapping stays visible
+    const getClassIdExpressionKey = (classUri, expression) => JSON.stringify([classUri, getFirstEqualExpression(expression)]);
+
+    // a data property, rdfs:label included, covers the class id column it equals
+    const dataPropertyClassIdExpressionKeys = new Set();
     for (const mapping of mappings) {
         if (mapping.kind !== "dataProperty") continue;
-        dataPropertyExpressions.add(`${getAlias(mapping.to.dataTable)}.${quoteIdentifier(mapping.to.id)}`);
+        dataPropertyClassIdExpressionKeys.add(getClassIdExpressionKey(mapping.subjectUri, `${getAlias(mapping.to.dataTable)}.${quoteIdentifier(mapping.to.id)}`));
     }
 
-    // a column joined on a data property column holds the same values
-    const expressionsCoveredByDataProperties = new Set(dataPropertyExpressions);
-    for (const [leftExpression, rightExpression] of joinedColumnPairs) {
-        if (dataPropertyExpressions.has(leftExpression)) expressionsCoveredByDataProperties.add(rightExpression);
-        if (dataPropertyExpressions.has(rightExpression)) expressionsCoveredByDataProperties.add(leftExpression);
-    }
-
-    // Keep distinct physical expressions even when their semantic labels match.
-    // Identical semantic label + expression pairs are deduplicated.
+    // distinct expressions stay apart, except a class id covered by a data property or equal to one already shown
     const selectColumns = new Map();
     const aliasMap = new Map();
     const expressionAliases = new Map();
     const classIdExpressions = new Set();
+    const projectedClassIdExpressionKeys = new Set();
 
     function addProjection(semanticAlias, expression, metadata) {
         const isClassIdColumn = metadata.role === "subject" || metadata.kind === "objectProperty";
-        // covered ones too: the batch ORDER BY leads with every class id
-        if (isClassIdColumn) classIdExpressions.add(expression);
-        if (isClassIdColumn && expressionsCoveredByDataProperties.has(expression)) return;
+        if (isClassIdColumn) {
+            // covered ones too: the batch ORDER BY leads with every class id
+            classIdExpressions.add(expression);
+            const classIdExpressionKey = getClassIdExpressionKey(metadata.semanticUri, expression);
+            if (dataPropertyClassIdExpressionKeys.has(classIdExpressionKey) || projectedClassIdExpressionKeys.has(classIdExpressionKey)) return;
+            projectedClassIdExpressionKeys.add(classIdExpressionKey);
+        }
         const key = JSON.stringify([semanticAlias, expression]);
         if (expressionAliases.has(key)) return;
         let sqlAlias = truncateSqlAlias(semanticAlias, "");

@@ -2,6 +2,67 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.17.0](https://github.com/souslesens/souslesensVocables/compare/3.16.0...3.17.0) (2026-10-22)
+
+
+### Features
+
+* **lineage:** Children expands every whiteboard node and offers a predicate menu ([c111583](https://github.com/souslesens/souslesensVocables/commit/c1115835f4ab2ce38d8a32f630c851ba6044eb7c))
+* **lineage:** Relations, Children and Parents apply to the selected nodes when a selection exists ([d7feca1](https://github.com/souslesens/souslesensVocables/commit/d7feca1781a4bf620dd48be692abfa90358b6d17))
+* **lineage:** the Axioms button draws the axioms of the selected or all whiteboard nodes ([ea105a0](https://github.com/souslesens/souslesensVocables/commit/ea105a098bc65e4cb0fe4ada094c505c34dc8b62))
+* **lineage:** the Reasoner dialog runs the SPARQL rules of bin/reasoner instead of jowl ([2253fec](https://github.com/souslesens/souslesensVocables/commit/2253fec669b9c46a7ea96f06cfdaee8af135f88f))
+* **mappingsToSql:** Claude Fauconnet integration ([d3cbc6b](https://github.com/souslesens/souslesensVocables/commit/d3cbc6b37ff0bd2b70d24c95245c75e3defc824c))
+* **mappingsToSql:** instances typed by generated subclasses take the parent class, their subclass becomes a class property ([3352361](https://github.com/souslesens/souslesensVocables/commit/3352361820bbcd83d39393a6b0d38e2f6cfbbcc5))
+* **mappingsToSql:** tables are joined only on a class of the selected path ([30253a8](https://github.com/souslesens/souslesensVocables/commit/30253a83c5d3a880dafc16d354bbdd9dc4becb6e))
+* **sql-extractor:** a result over 10000 rows offers a CSV export of every row or the display of the first ones ([674f221](https://github.com/souslesens/souslesensVocables/commit/674f221e7b510a8e404c999235cceeb0f27105e5))
+* **sql-extractor:** a right click on a class removes it from the path, with what it cuts off ([c7a3ef5](https://github.com/souslesens/souslesensVocables/commit/c7a3ef5693c6203767cff47d8359f48fb5fdf30e))
+* **sql-extractor:** a right click on a datatype property opens the filter bot on it ([53e08ec](https://github.com/souslesens/souslesensVocables/commit/53e08ec732f4bb525d3db8d7e809f27092a292d4))
+* **sql-extractor:** path recording starts with the panel, the start recording button is gone ([bfa195f](https://github.com/souslesens/souslesensVocables/commit/bfa195f2afed720d091d8716b628b42141a9a477))
+* **sql-extractor:** the get SQL dialog has a button to copy the query ([e20bf9c](https://github.com/souslesens/souslesensVocables/commit/e20bf9cbed8a7dc7622e56f4651c18e479a960b1))
+* **sql-extractor:** the large result bot offers a sample of a chosen size ([0ea3fd4](https://github.com/souslesens/souslesensVocables/commit/0ea3fd48168636ca71f4b27d4374778de00cd2ac))
+* **sql-extractor:** the path tree has a root that checks every class and property at once ([d5d3fd7](https://github.com/souslesens/souslesensVocables/commit/d5d3fd7d5d256559522b132a1b31aea6535ad234))
+* **sqlDataExtractor:** clearAll takes the source to redraw ([c05cdc8](https://github.com/souslesens/souslesensVocables/commit/c05cdc8f60ab44477ef84fecfe597363115426f3))
+* **sqlDataExtractor:** run the generated SQL, filter it with the KGquery filter bot, typed and picked dates ([dfb93ed](https://github.com/souslesens/souslesensVocables/commit/dfb93ed2e9c735fe5b1e7e6b62fa0a6276f862da))
+* **sqlDataExtractor:** the path between clicked classes is found and highlighted as in KGquery ([8c9ab29](https://github.com/souslesens/souslesensVocables/commit/8c9ab2952d11b0ff2cdad8d49d8682d18170a94d))
+
+
+### Bug Fixes
+
+* **api:** correct shaclValidate apiDoc contract and test formatting ([58dd601](https://github.com/souslesens/souslesensVocables/commit/58dd601f410297c5c4338a31b5ba412d17ec2de9))
+* **api:** harden shaclValidate route with validation and async handling ([7a6719c](https://github.com/souslesens/souslesensVocables/commit/7a6719ccba56798374f5cf0f239323a8d0673f98))
+* **auth:** le logout auth0 renvoie l'utilisateur sur souslesens ([9a20e16](https://github.com/souslesens/souslesensVocables/commit/9a20e16ece0304034a9c80694514dd4a6b87a42a))
+* **elasticsearch:** the indexsource route indexes once, under the sole right check that works ([9e7c4be](https://github.com/souslesens/souslesensVocables/commit/9e7c4be10f9c151d45598cd71d1ce30cd1e62d37))
+* **KGbuilder:** isPredicate on a mapping edge generates a predicate instead of a restriction ([a619776](https://github.com/souslesens/souslesensVocables/commit/a6197763a3d0d916834532544079364eff94aa13))
+* **KGbuilder:** relationType Predicate replaces isPredicate on a mapping edge ([340cdd9](https://github.com/souslesens/souslesensVocables/commit/340cdd93bb20c67204c83aad3664e64fdb0e49c7))
+* **legend:** the legend button no longer shows above the dialogs ([7e26dcf](https://github.com/souslesens/souslesensVocables/commit/7e26dcf3ab2034f2e956a46e3ef0a11976030c74))
+* **lineage_whiteboard:** typo in checkbox node selection message ([bbb5a9d](https://github.com/souslesens/souslesensVocables/commit/bbb5a9d78e69c676bd6cffc866bcdac7e3936bf8))
+* **lineage:** node colors use the main source scope, not the active source ([0cbd63b](https://github.com/souslesens/souslesensVocables/commit/0cbd63b3cdb6f7b851f1ea7999c9027d2a55fcb0))
+* **lineage:** the Axioms button lists classes with a subClassOf, equivalentClass or disjointWith axiom ([13159a8](https://github.com/souslesens/souslesensVocables/commit/13159a8a353fb056809b6611e5930fe989c5b477))
+* **lineage:** the classes tab no longer lists object properties ([e2070e2](https://github.com/souslesens/souslesensVocables/commit/e2070e26abf3db35b3bad1c79225482d510c82e4))
+* **lineage:** the Whiteboard section no longer shows the Clear all trash button ([5cba818](https://github.com/souslesens/souslesensVocables/commit/5cba8183c28e90589682d7c09caaee418ec88c95))
+* **mappingModeler:** changing the datasource or the source resets the current table ([72409df](https://github.com/souslesens/souslesensVocables/commit/72409dfe5523e9225058b8f29ab2187f7d8d80a2))
+* **mappingModeler:** propose restrictions inherited between subclasses in the Relations tab, grouped by source ([4ed1c10](https://github.com/souslesens/souslesensVocables/commit/4ed1c10bc10ebbf15a079a49ce5952f5e450ffcb))
+* **mappingModeler:** saveVisjsGraph takes back its callback-only signature ([1cbe1b4](https://github.com/souslesens/souslesensVocables/commit/1cbe1b4f072d24d2357256359d15b09ebe5e1a13))
+* **ontocreator:** reuse OntoCreator after deleting a source, without reloading the page ([32d1038](https://github.com/souslesens/souslesensVocables/commit/32d1038535fd238ecd43c0aa49cb22fa473116b3))
+* **ontologyModels:** a class without a named parent also takes the single named class of the intersection it is equivalent to ([24bca3c](https://github.com/souslesens/souslesensVocables/commit/24bca3cf86baa4cb3d74f9ac962df1b0e55465a8))
+* **ontologyModels:** a class without a named parent takes the single named class of its intersection superClass ([250fc8b](https://github.com/souslesens/souslesensVocables/commit/250fc8b8d23ae7d1ec566b4e747f4bb779191a57))
+* **ontologyModels:** sources above the max classes search their classes and ancestors in the search index ([0730534](https://github.com/souslesens/souslesensVocables/commit/07305341c46742ba03b3e8766fbf97c8b53330c4))
+* **reasoner:** a failing or slow rule is reported instead of failing the whole run ([db4bc32](https://github.com/souslesens/souslesensVocables/commit/db4bc32aab2540ed137506e167f5806a83881034))
+* **search:** a failing source no longer abandons the next ones nor the model cache refresh ([22520b9](https://github.com/souslesens/souslesensVocables/commit/22520b9209d0111150c34e2ccbc933f91a5902f4))
+* **search:** a full index refresh recreates the index first, so a source without classes no longer keeps a stale one ([7e81cf1](https://github.com/souslesens/souslesensVocables/commit/7e81cf1748003a491f03a1df796b59192f1ddca1))
+* **search:** the imports refresh follows an explicit option, not a checkbox of the admin tool ([5af868d](https://github.com/souslesens/souslesensVocables/commit/5af868d6c1746f85b08be6fcb672fa2880e6d82a))
+* **shacl:** parse SHACL shapes in memory instead of temp files ([a95f9d1](https://github.com/souslesens/souslesensVocables/commit/a95f9d11216464e95ae19cd2191bd8583bba5c90))
+* **sources:** a subgroup can no longer be named like a source, the migration renames the existing ones ([11bad94](https://github.com/souslesens/souslesensVocables/commit/11bad94ef89eb4e4860d06db65fdb229ead81f05))
+* **sparql_OWL:** main classes no longer list anonymous classes stored as _: IRIs ([9285812](https://github.com/souslesens/souslesensVocables/commit/9285812c7c2ad504979081fa691db40d6f7d26fb))
+* **sql-extractor:** a text column joined on another type compares the text of the other side, types read once per source ([14583c3](https://github.com/souslesens/souslesensVocables/commit/14583c3411a53efe896cbd8a9ea75b8970d3f8f1))
+* **sql-extractor:** each datatype property is read and filtered on a single column, taken from the path tables or joined apart ([829ae41](https://github.com/souslesens/souslesensVocables/commit/829ae4120b98991808bc61bcd5d346bf436b4c83))
+* **sql-extractor:** every datatype property of adventureworks runs and filters, dates compared by day ([8429845](https://github.com/souslesens/souslesensVocables/commit/84298459825e776cdf1916d7c615e08eeac98308))
+* **sql-extractor:** every postgres type sorts, filters and lists whatever the mapping range says, dates shown by their column type ([b6db6ea](https://github.com/souslesens/souslesensVocables/commit/b6db6ea6e6377d584060f50a4c83ceadfc64880c))
+* **sql-extractor:** one column per value of a class, a property on the class column read on the path without LEFT JOIN ([922f28a](https://github.com/souslesens/souslesensVocables/commit/922f28a0768dad1450d57bc41a48f3e4c8560b18))
+* **sql-extractor:** the query selects distinct rows, sorted on its selected columns, xml read as text ([b75d2af](https://github.com/souslesens/souslesensVocables/commit/b75d2af968d3045684fe42ffb83cee49873d2ced))
+* **taxonomy:** a class with no rdfs:subClassOf is indexed under the single named class of the intersection it is equivalent to ([f1d77f1](https://github.com/souslesens/souslesensVocables/commit/f1d77f13e9dc58787ba8f37f3149b9eb85601dd1))
+* **taxonomy:** blank node parents are no longer counted, classes with no rdfs:subClassOf are indexed as roots ([cc6205c](https://github.com/souslesens/souslesensVocables/commit/cc6205ce782edd7c795a714c815b784f9f8f29a9))
+
 ## [3.16.0](https://github.com/souslesens/souslesensVocables/compare/3.15.0...3.16.0) (2026-10-06)
 
 

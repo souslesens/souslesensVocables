@@ -9,8 +9,6 @@ import {
     Alert,
     Paper,
     Box,
-    ListItemButton,
-    ListItemIcon,
     ListItemText,
     InputAdornment,
     IconButton,
@@ -36,11 +34,10 @@ import {
     Tabs,
     CircularProgress,
     Link,
-    List,
     Tab,
     AlertColor,
 } from "@mui/material";
-import { Add, Edit, Extension, DeleteForever, AddCircle, Done, Download } from "@mui/icons-material";
+import { Add, Edit, DeleteForever, AddCircle, Done, Download } from "@mui/icons-material";
 
 import { SRD, success } from "srd";
 import { ulid } from "ulid";
@@ -57,6 +54,8 @@ import {
     getEnabledPlugins,
     getRepositoryPlugins,
     getRepositoryTags,
+    pluginNamesForRepository,
+    readConfig,
     readRepositories,
     Response,
     writeConfig,
@@ -67,11 +66,10 @@ import { DeleteDialog } from "./DeleteDialog";
 import { PasswordField } from "./PasswordField";
 import { cleanUpText } from "../Utils";
 
-type DispatcherProps = {
+type PluginsRepositoriesProps = {
     me: string;
     onDeleteRepository: (repositoryId: string) => void;
-    onSubmitRepository: (identifier: string | null, data: RepositoryType) => void;
-    selectedTab: string;
+    onSubmitRepository: (identifier: string | null, data: RepositoryType, pluginsConfig: Record<string, PluginOptionType>) => void;
     snack: (message: string, severity?: AlertColor) => void;
 };
 
@@ -84,11 +82,13 @@ type PluginsDialogFormProps = {
 
 type PluginsRepositoryDialogProps = {
     onClose: () => void;
-    onSubmit: (identifier: string | null, data: RepositoryType) => void;
+    onSubmit: (identifier: string | null, data: RepositoryType, pluginsConfig: Record<string, PluginOptionType>) => void;
     open: boolean;
     edit?: boolean;
     selectedRepository?: string | null;
     repositories: Record<string, RepositoryType>;
+    pluginsConfig: Record<string, PluginOptionType>;
+    snack: (message: string, severity?: AlertColor) => void;
 };
 
 const PluginsDialogForm = ({ onClose, onSubmit, open, plugin }: PluginsDialogFormProps) => {
@@ -120,6 +120,7 @@ const PluginsDialogForm = ({ onClose, onSubmit, open, plugin }: PluginsDialogFor
                 component: "form",
                 onSubmit: (event: FormEvent<HTMLFormElement>) => {
                     event.preventDefault();
+                    event.stopPropagation();
 
                     const formData = new FormData(event.currentTarget);
                     const formJSON = Object.fromEntries(formData.entries());
@@ -159,144 +160,69 @@ const PluginsDialogForm = ({ onClose, onSubmit, open, plugin }: PluginsDialogFor
     );
 };
 
-const PluginsConfiguration = ({ me, snack }: DispatcherProps) => {
-    const { model } = useModel();
+type PluginOptionsEditorProps = {
+    pluginName: string;
+    config: PluginOptionType;
+    onChange: (config: PluginOptionType) => void;
+    snack: (message: string, severity?: AlertColor) => void;
+};
 
+const PluginOptionsEditor = ({ pluginName, config, onChange, snack }: PluginOptionsEditorProps) => {
     const [openModal, setOpenModal] = useState<boolean>(false);
-    const [selectedPlugin, setSelectedPlugin] = useState<string | undefined>(undefined);
 
     const handleCloseModal = () => setOpenModal(false);
     const handleOpenModal = () => setOpenModal(true);
 
-    const pluginsConfig = SRD.unwrap({}, (a) => a, model.pluginsConfig);
+    const handleUpdateOption = (key: string, value: string) => {
+        onChange({ ...config, [key]: value });
+    };
 
-    const renderPlugins = SRD.match(
-        {
-            notAsked: () => <p>Let’s fetch some data!</p>,
-            loading: () => (
-                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                    <CircularProgress />
-                </Box>
-            ),
-            failure: (msg: string) => (
-                <Alert variant="filled" severity="error" sx={{ m: 4 }}>
-                    {`${msg}. Please, reload this page.`}
-                </Alert>
-            ),
-            success: (pluginsEnabled) => {
-                const handleUpdateOption = (key: keyof PluginOptionType, value: string) => {
-                    if (selectedPlugin) {
-                        pluginsConfig[selectedPlugin][key] = value;
-                    }
-                };
+    const handleRemoveOption = (key: string) => () => {
+        const newConfig = { ...config };
+        delete newConfig[key as keyof PluginOptionType];
+        onChange(newConfig);
+        snack(`The option “${key}” have been removed`);
+    };
 
-                const handleRemoveOption = (fieldName: keyof PluginOptionType) => () => {
-                    if (selectedPlugin) {
-                        delete pluginsConfig[selectedPlugin][fieldName];
-                        snack(`The option “${fieldName}” have been removed`);
-                    }
-                };
+    const handleSubmitNewOption = (data: PluginOptionType) => {
+        if (data.key) {
+            onChange({ ...config, [data.key]: data.option });
+            handleCloseModal();
+        }
+    };
 
-                const handleSubmitNewOption = (data: PluginOptionType) => {
-                    if (selectedPlugin && data.key) {
-                        pluginsConfig[selectedPlugin] = { ...pluginsConfig[selectedPlugin], [data.key]: data.option };
-                        handleCloseModal();
-                    }
-                };
+    return (
+        <Stack spacing={{ xs: 2 }} useFlexGap>
+            <Stack spacing={{ xs: 2 }} useFlexGap>
+                {Object.entries(config).map(([key, value]) => (
+                    <TextField
+                        key={key}
+                        id={`field-${pluginName}-${key}`}
+                        label={key}
+                        onChange={(event) => handleUpdateOption(key, event.target.value)}
+                        value={value}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="start">
+                                    <IconButton color="warning" edge="end" onClick={handleRemoveOption(key)}>
+                                        <DeleteForever />
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+                ))}
+            </Stack>
 
-                const handleSavePlugins = async () => {
-                    const response = await writeConfig(pluginsConfig);
+            <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                <Button color="success" onClick={handleOpenModal} startIcon={<AddCircle />} variant="outlined">
+                    {"Add a new option"}
+                </Button>
+            </Stack>
 
-                    void writeLog(me, "ConfigEditor", "save", "plugins");
-                    if (response.status == 200) {
-                        snack("The configuration have been saved. Reloading…", "warning");
-                    } else {
-                        snack("A problem occurs on the server.", "error");
-                    }
-                };
-
-                if (pluginsEnabled.length == 0) {
-                    return (
-                        <Stack direction="column" justifyContent="center">
-                            <Alert variant="filled" severity="info">
-                                {"No plugin have been activated for this instance"}
-                            </Alert>
-                        </Stack>
-                    );
-                } else if (selectedPlugin === undefined) {
-                    setSelectedPlugin(pluginsEnabled[0].name);
-                }
-                return (
-                    <Stack spacing={{ xs: 2 }} useFlexGap>
-                        <Stack component={Paper} direction="row" useFlexGap>
-                            <Box sx={{ borderRight: "thin solid rgba(0, 0, 0, 0.12)", width: "100%", maxWidth: 250 }}>
-                                <nav>
-                                    <List sx={{ height: 400, overflow: "auto" }} disablePadding>
-                                        {pluginsEnabled.map((plugin) => (
-                                            <ListItemButton key={plugin.name} selected={plugin.name === selectedPlugin} onClick={() => setSelectedPlugin(plugin.name)}>
-                                                <ListItemIcon>
-                                                    <Extension />
-                                                </ListItemIcon>
-                                                <ListItemText primary={plugin.name} />
-                                            </ListItemButton>
-                                        ))}
-                                    </List>
-                                </nav>
-                            </Box>
-
-                            {selectedPlugin !== undefined && (
-                                <Stack direction="column" spacing={{ xs: 2 }} sx={{ padding: 4, width: "100%", height: 400, overflow: "auto" }} useFlexGap>
-                                    {
-                                        // eslint-disable-next-line no-prototype-builtins
-                                        pluginsConfig.hasOwnProperty(selectedPlugin) && (
-                                            <Stack spacing={{ xs: 2 }} useFlexGap>
-                                                {Object.entries(pluginsConfig[selectedPlugin]).map(([key, value]) => (
-                                                    <TextField
-                                                        key={key}
-                                                        defaultValue=""
-                                                        id={`field-${selectedPlugin}-${key}`}
-                                                        label={key}
-                                                        onChange={(event) => handleUpdateOption(key as keyof PluginOptionType, event.target.value)}
-                                                        value={value}
-                                                        InputProps={{
-                                                            endAdornment: (
-                                                                <InputAdornment position="start">
-                                                                    <IconButton color="warning" edge="end" onClick={handleRemoveOption(key as keyof PluginOptionType)}>
-                                                                        <DeleteForever />
-                                                                    </IconButton>
-                                                                </InputAdornment>
-                                                            ),
-                                                        }}
-                                                    />
-                                                ))}
-                                            </Stack>
-                                        )
-                                    }
-
-                                    <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                        <Button color="success" onClick={handleOpenModal} startIcon={<AddCircle />} variant="outlined">
-                                            {"Add a new option"}
-                                        </Button>
-                                    </Stack>
-                                </Stack>
-                            )}
-                        </Stack>
-
-                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                            <Button onClick={handleSavePlugins} type="submit" variant="contained">
-                                Save Plugins
-                            </Button>
-                        </Stack>
-
-                        <PluginsDialogForm onClose={handleCloseModal} onSubmit={handleSubmitNewOption} open={openModal} plugin={selectedPlugin ? pluginsConfig[selectedPlugin] : undefined} />
-                    </Stack>
-                );
-            },
-        },
-        model.pluginsEnabled,
+            <PluginsDialogForm onClose={handleCloseModal} onSubmit={handleSubmitNewOption} open={openModal} plugin={config} />
+        </Stack>
     );
-
-    return renderPlugins;
 };
 
 const emptyRepository = {
@@ -317,12 +243,18 @@ interface RepositoryFormType {
     };
 }
 
-const PluginsRepositoryDialog = ({ onClose, onSubmit, open, edit, selectedRepository, repositories }: PluginsRepositoryDialogProps) => {
+const PluginsRepositoryDialog = ({ onClose, onSubmit, open, edit, selectedRepository, repositories, pluginsConfig, snack }: PluginsRepositoryDialogProps) => {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [pluginsAvailable, setPluginsAvailable] = useState<string[]>([]);
     const [pluginsEnabled, setPluginsEnabled] = useState<string[]>([]);
     const [repository, setRepository] = useState<RepositoryFormType>(emptyRepository);
     const [tags, setTags] = useState<string[]>([]);
+    const [pluginConfigs, setPluginConfigs] = useState<Record<string, PluginOptionType>>({});
+    const [selectedPluginTab, setSelectedPluginTab] = useState(0);
+
+    const repositoryPlugins = pluginNamesForRepository(repository.data as RepositoryType);
+    const activeTab = Math.min(selectedPluginTab, Math.max(repositoryPlugins.length - 1, 0));
+    const activePlugin = repositoryPlugins[activeTab];
 
     const handleFieldUpdate = (key: string, value: string | string[]) => {
         if (key === "plugins" && Array.isArray(value)) {
@@ -336,7 +268,7 @@ const PluginsRepositoryDialog = ({ onClose, onSubmit, open, edit, selectedReposi
 
         const parsedForm = handleValidation(repository);
         if (parsedForm.success) {
-            onSubmit(repository.identifier, repository.data);
+            onSubmit(repository.identifier, repository.data, pluginConfigs);
         }
     };
 
@@ -363,6 +295,8 @@ const PluginsRepositoryDialog = ({ onClose, onSubmit, open, edit, selectedReposi
         setPluginsAvailable([]);
         setPluginsEnabled([]);
         setTags([]);
+        setPluginConfigs(pluginsConfig);
+        setSelectedPluginTab(0);
 
         if (selectedRepository !== null && selectedRepository !== undefined) {
             const data = repositories[selectedRepository];
@@ -385,7 +319,7 @@ const PluginsRepositoryDialog = ({ onClose, onSubmit, open, edit, selectedReposi
         } else {
             setRepository(emptyRepository);
         }
-    }, [selectedRepository, repositories]);
+    }, [open, selectedRepository, repositories]);
 
     return (
         <Dialog fullWidth maxWidth="md" onClose={onClose} open={open} PaperProps={{ component: "form", onSubmit: handleSubmit }}>
@@ -448,7 +382,10 @@ const PluginsRepositoryDialog = ({ onClose, onSubmit, open, edit, selectedReposi
                                     labelId="plugins-label"
                                     multiple
                                     name="plugins"
-                                    onChange={(event) => handleFieldUpdate("plugins", event.target.value)}
+                                    onChange={(event) => {
+                                        handleFieldUpdate("plugins", event.target.value);
+                                        setSelectedPluginTab(0);
+                                    }}
                                     renderValue={(selected) => (
                                         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                                             {selected.sort().map((value) => (
@@ -468,6 +405,28 @@ const PluginsRepositoryDialog = ({ onClose, onSubmit, open, edit, selectedReposi
                             </FormControl>
                         </FormGroup>
                     )}
+                    {edit && repositoryPlugins.length > 0 && (
+                        <FormGroup sx={{ gap: 2 }}>
+                            <Divider>
+                                <Chip color="info" label="Plugins configuration" size="small" />
+                            </Divider>
+                            {repositoryPlugins.length > 1 && (
+                                <Tabs centered onChange={(_event, newValue: number) => setSelectedPluginTab(newValue)} value={activeTab}>
+                                    {repositoryPlugins.map((plugin) => (
+                                        <Tab key={plugin} label={plugin} />
+                                    ))}
+                                </Tabs>
+                            )}
+                            {activePlugin !== undefined && (
+                                <PluginOptionsEditor
+                                    pluginName={activePlugin}
+                                    config={pluginConfigs[activePlugin] ?? {}}
+                                    onChange={(config) => setPluginConfigs({ ...pluginConfigs, [activePlugin]: config })}
+                                    snack={snack}
+                                />
+                            )}
+                        </FormGroup>
+                    )}
                 </Stack>
             </DialogContent>
             <DialogActions>
@@ -481,9 +440,11 @@ const PluginsRepositoryDialog = ({ onClose, onSubmit, open, edit, selectedReposi
 
 type Order = "asc" | "desc";
 
-const PluginsRepositories = (props: DispatcherProps) => {
+const PluginsRepositories = (props: PluginsRepositoriesProps) => {
     const { onDeleteRepository, onSubmitRepository, snack } = props;
     const { model } = useModel();
+
+    const pluginsConfig = SRD.unwrap({}, (a) => a, model.pluginsConfig);
 
     const [modal, setModal] = useState<{
         open: boolean;
@@ -557,9 +518,9 @@ const PluginsRepositories = (props: DispatcherProps) => {
                     setOrderBy(property);
                 };
 
-                const handleSubmit = (identifier: string | null, data: RepositoryType) => {
+                const handleSubmit = (identifier: string | null, data: RepositoryType, pluginsConfig: Record<string, PluginOptionType>) => {
                     handleCloseModal();
-                    onSubmitRepository(identifier, data);
+                    onSubmitRepository(identifier, data, pluginsConfig);
                 };
 
                 const sortedRepositories = Object.entries(repositories)
@@ -657,6 +618,8 @@ const PluginsRepositories = (props: DispatcherProps) => {
                             edit={modal.edit}
                             repositories={repositories}
                             selectedRepository={modal.selectedRepository}
+                            pluginsConfig={pluginsConfig}
+                            snack={snack}
                         />
                         <DeleteDialog
                             description={"This repository will be erased from this instance. Are you sure?"}
@@ -675,27 +638,14 @@ const PluginsRepositories = (props: DispatcherProps) => {
     return renderRepositories;
 };
 
-const Dispatcher = (props: DispatcherProps) => {
-    switch (props.selectedTab) {
-        case "repositories":
-            return <PluginsRepositories {...props} />;
-        case "configuration":
-            return <PluginsConfiguration {...props} />;
-    }
-};
-
 const PluginsForm = () => {
     const { model, updateModel } = useModel();
-
-    const [selectedTab, setSelectedTab] = useState<string>("repositories");
 
     const [snackOpen, setSnackOpen] = useState<boolean>(false);
     const [snackSeverity, setSnackSeverity] = useState<AlertColor>("success");
     const [snackMessage, setSnackMessage] = useState<string>("");
 
     const me = SRD.withDefault("", model.me);
-
-    const handleSelectedTab = (_event: SyntheticEvent, newValue: string) => setSelectedTab(newValue);
 
     const handleSnackbar = (message: string, severity: AlertColor = "success") => {
         setSnackSeverity(severity);
@@ -719,13 +669,32 @@ const PluginsForm = () => {
         }
     };
 
-    const handleSubmitRepository = async (identifier: string | null, data: RepositoryType) => {
-        if (identifier === null) {
+    const updateModelPluginConfig = async () => {
+        try {
+            const response = await readConfig();
+            updateModel({ type: "pluginsConfig", payload: success(response) });
+        } catch (e) {
+            console.error("Error reading plugins configuration. ", e);
+        }
+    };
+
+    const handleSubmitRepository = async (identifier: string | null, data: RepositoryType, pluginsConfig: Record<string, PluginOptionType>) => {
+        handleSnackbar("Updating in progress…", "warning");
+
+        if (identifier !== null) {
+            const configResponse = await writeConfig(pluginsConfig);
+            void writeLog(me, "ConfigEditor", "save", "plugins");
+            if (configResponse.status != 200) {
+                handleSnackbar("A problem occurs on the server.", "error");
+                return;
+            }
+        } else {
             identifier = ulid();
         }
-        handleSnackbar("Updating in progress…", "warning");
+
         const response = (await writeRepository(identifier, data, true)) as Response;
         if (response.status == 200) {
+            await updateModelPluginConfig();
             await updateModelRepositories();
             handleSnackbar("The repository have been successfully updated", "success");
         } else {
@@ -758,12 +727,7 @@ const PluginsForm = () => {
                         </Alert>
                     </Snackbar>
 
-                    <Tabs centered onChange={handleSelectedTab} sx={{ marginBottom: 2 }} value={selectedTab}>
-                        <Tab label="Repositories" value="repositories" />
-                        <Tab label="Configuration" value="configuration" />
-                    </Tabs>
-
-                    <Dispatcher me={me} onDeleteRepository={handleDeleteRepository} onSubmitRepository={handleSubmitRepository} selectedTab={selectedTab} snack={handleSnackbar} />
+                    <PluginsRepositories me={me} onDeleteRepository={handleDeleteRepository} onSubmitRepository={handleSubmitRepository} snack={handleSnackbar} />
                 </Stack>
             ),
             notAsked: () => <p>{"Let’s fetch some data!"}</p>,

@@ -1,4 +1,4 @@
-import * as dbConnector from "../../../../bin/KG/dbConnector.js";
+import * as dbConnector from "../../../../bin/databases/dbConnector.js";
 import { databaseModel } from "../../../../model/databases.js";
 
 export default function () {
@@ -58,7 +58,7 @@ export default function () {
             "Returns the table-to-columns map of database `name` by calling `dbConnector.getKGModel`. " +
             "Used by MappingModeler to populate column pickers when designing a mapping. " +
             "With `withTypes`, the SQL extractor reads the postgres data_type of each column to join columns of different types.",
-        operationId: "kgGetModel",
+        operationId: "getDatabaseModel",
         parameters: [
             { name: "type", in: "query", type: "string", required: true, description: "Datasource type (e.g. `sql`, `csv`)." },
             { name: "name", in: "query", type: "string", required: true, description: "Database id from `databases.json`." },
@@ -90,7 +90,7 @@ export default function () {
             500: { description: "Database connection failure." },
             503: { description: "Connection refused by the database." },
         },
-        tags: ["KG"],
+        tags: ["Databases"],
     };
 
     return operations;

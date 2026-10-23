@@ -55,3 +55,12 @@ How to use the _SousLeSens_ API.
 :maxdepth: 2
 api/index.md
 ```
+
+# Third-party tools
+
+Tools built on top of SousLeSens and maintained outside this repository.
+
+```{toctree}
+:maxdepth: 2
+third-party-tools/index.md
+```

@@ -121,6 +121,19 @@ async function writeRepository(identifier: string, data: object, toFetch: boolea
     }
 }
 
+function pluginNameFromUrl(url: string): string {
+    const withoutQuery = url.split("?")[0].split("#")[0].replace(/\/+$/, "");
+    const lastSegment = withoutQuery.split("/").pop() ?? "";
+    return lastSegment.replace(/\.git$/, "");
+}
+
+function pluginNamesForRepository(repository: RepositoryType): string[] {
+    if (repository.plugins !== undefined && repository.plugins.length > 0) {
+        return repository.plugins;
+    }
+    return repository.url ? [pluginNameFromUrl(repository.url)] : [];
+}
+
 export {
     PluginOptionSchema,
     RepositorySchema,
@@ -129,6 +142,7 @@ export {
     getEnabledPlugins,
     getRepositoryPlugins,
     getRepositoryTags,
+    pluginNamesForRepository,
     readConfig,
     readRepositories,
     writeConfig,

@@ -63,7 +63,8 @@
         "sqlite3": "^5.1.7",
         "standard-version": "^9.5.0",
         "typescript": "^5.8.3",
-        "vite": "6.3.5"
+        "vite": "6.3.5",
+        "vitest": "^3.2.7"
     },
     "dependencies": {
         "@anthropic-ai/sdk": "^0.80.0",

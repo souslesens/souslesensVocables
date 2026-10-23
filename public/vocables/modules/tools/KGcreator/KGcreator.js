@@ -982,7 +982,7 @@ var KGcreator = (function () {
         });
         $.ajax({
             type: "GET",
-            url: Config.apiUrl + "/kg/model?" + params.toString(),
+            url: Config.apiUrl + "/databases/model?" + params.toString(),
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
                 self.currentDataSourceModel = data;

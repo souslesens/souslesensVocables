@@ -8,7 +8,7 @@ import ConfigManager from "../configManager.js";
 import SocketManager from "../socketManager.js";
 import KGbuilder_triplesWriter from "./KGbuilder_triplesWriter.js";
 import KGbuilder_socket from "./KGbuilder_socket.js";
-import * as dbConnector from "../KG/dbConnector.js";
+import * as dbConnector from "../databases/dbConnector.js";
 import { databaseModel as DatabaseModel } from "../../model/databases.js";
 import MappingsParser from "./mappingsParser.js";
 import TriplesMaker from "./triplesMaker.js";

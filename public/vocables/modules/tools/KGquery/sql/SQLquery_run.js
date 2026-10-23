@@ -151,7 +151,7 @@ var SQLquery_run = (function () {
         }
         $.ajax({
             type: "GET",
-            url: Config.apiUrl + "/kg/model?" + params.toString(),
+            url: Config.apiUrl + "/databases/model?" + params.toString(),
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
                 return callback(null, data);

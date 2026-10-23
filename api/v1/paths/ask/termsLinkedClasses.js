@@ -1,15 +1,21 @@
 import Ask from "../../../../bin/ask.js";
+import userManager from "../../../../bin/user.js";
 
 export default function () {
-    function GET(req, res, _next) {
-        const { sourceLabel, term1, term2 } = req.query;
+    async function GET(req, res, _next) {
+        try {
+            const userInfo = await userManager.getUser(req.user);
+            const { sourceLabel, term1, term2 } = req.query;
 
-        Ask.getTermsLinkedClasses(sourceLabel, term1, term2, function (err, linkedClassesMap) {
-            if (err) {
-                return res.status(500).json({ message: "" + err });
-            }
-            return res.status(200).json(linkedClassesMap);
-        });
+            Ask.getTermsLinkedClasses(userInfo.user, sourceLabel, term1, term2, function (err, linkedClassesMap) {
+                if (err) {
+                    return res.status(500).json({ message: "" + err });
+                }
+                return res.status(200).json(linkedClassesMap);
+            });
+        } catch (err) {
+            return res.status(500).json({ message: "" + err });
+        }
     }
 
     GET.apiDoc = {

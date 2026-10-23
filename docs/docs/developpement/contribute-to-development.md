@@ -118,7 +118,7 @@ If a plugin requires configuration, it can be added to the `config/pluginsConfig
 
 This configuration will be provided to the plugin by calling the `setConfig` method.
 
-Its possible to edit this configuration from the “Plugins” section in the ConfigEditor. The `admin` profile is mandatory to use this tool.
+Its possible to edit this configuration from the ConfigEditor “Plugins” section, in the **“Edit the Plugin Repository”** modal of the repository that provides the plugin (one tab per plugin when the repository ships several). The `admin` profile is mandatory to use this tool.
 
 ### Plugin communication with other tools
 

@@ -8,14 +8,14 @@ import httpProxy from "./httpProxy.js";
 import { sourceModel } from "../model/sources.js";
 
 var Ask = {
-    getTermClassesInfos: function (source, term, callback) {
+    getTermClassesInfos: function (user, source, term, callback) {
         var indexName = source.toLowerCase();
         Ask.executeElasticQuery("/_search", term, indexName, function (err, result) {
             if (err) {
                 return callback(err);
             }
             var termUrisMap = {};
-            var hits = result.body.hits.hits;
+            var hits = (result.body.hits && result.body.hits.hits) || [];
             hits.forEach(function (hit) {
                 termUrisMap[hit._source.id] = {
                     id: hit._source.id,
@@ -25,27 +25,29 @@ var Ask = {
                     relations: [],
                 };
             });
-            Ask.fillClassesInfos(source, termUrisMap, callback);
+            Ask.fillClassesInfos(user, source, termUrisMap, callback);
         });
     },
-    getUriClassesInfos: function (source, uri, callback) {
+    getUriClassesInfos: function (user, source, uri, callback) {
         // characters that cannot sit inside a SPARQL IRIREF, so the uri cannot break out of <...>
-        var iriForbiddenCharactersRegex = /[\s<>"{}|\\^`]/;
-        if (iriForbiddenCharactersRegex.test(uri)) {
+        if (!Ask.isValidIri(uri)) {
             return callback("uri is not a valid IRI: " + uri);
         }
         var uriInfos = { id: uri, label: null, ancestors: [], predicates: [], relations: [] };
-        Ask.getSourceInfos(source, function (err, sourceInfos) {
+        Ask.getSourceInfos(user, source, function (err, sourceInfos) {
             if (err) {
                 return callback(err);
+            }
+            if (!Ask.isValidIri(sourceInfos.graphUri)) {
+                return callback("source graph URI is not a valid IRI: " + sourceInfos.graphUri);
             }
             var query =
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
                 "select distinct ?label ?ancestor from <" +
                 sourceInfos.graphUri +
-                "> where { optional { <" +
+                "> where { { <" +
                 uri +
-                "> rdfs:label ?label } optional { <" +
+                "> rdfs:label ?label } UNION { <" +
                 uri +
                 "> rdfs:subClassOf+ ?ancestor filter (!isBlank(?ancestor)) } } limit 10000";
             Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
@@ -66,18 +68,21 @@ var Ask = {
                 uriInfos.label = labels.length > 0 ? labels[0] : null;
                 var uriInfosMap = {};
                 uriInfosMap[uri] = uriInfos;
-                Ask.fillClassesInfos(source, uriInfosMap, callback);
+                Ask.fillClassesInfos(user, source, uriInfosMap, callback);
             });
         });
     },
-    fillClassesInfos: function (source, termUrisMap, callback) {
+    fillClassesInfos: function (user, source, termUrisMap, callback) {
         var sourceInfos = {};
         async.series(
             [
                 function (callbackSeries) {
-                    Ask.getSourceInfos(source, function (err, result) {
+                    Ask.getSourceInfos(user, source, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
+                        }
+                        if (!Ask.isValidIri(result.graphUri)) {
+                            return callbackSeries("source graph URI is not a valid IRI: " + result.graphUri);
                         }
                         sourceInfos = result;
                         callbackSeries();
@@ -115,7 +120,7 @@ var Ask = {
                 // get restrictions
                 function (callbackSeries) {
                     var termUris = Object.keys(termUrisMap);
-                    Ask.getRestrictionsSparql(source, termUris, null, function (err, query) {
+                    Ask.getRestrictionsSparql(user, source, termUris, null, function (err, query) {
                         Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
                             if (err) {
                                 return callbackSeries(err);
@@ -124,8 +129,8 @@ var Ask = {
                                 termUrisMap[item.class1.value].relations.push({
                                     predicate: item.prop.value,
                                     predicateLabel: item.propLabel ? item.propLabel.value : item.prop.value,
-                                    object: item.superClass2.value,
-                                    objectLabel: item.superClass2Label ? item.superClass2Label.value : item.superClass2.value,
+                                    object: item.class2.value,
+                                    objectLabel: item.class2Label ? item.class2Label.value : item.class2.value,
                                 });
                             });
                             return callbackSeries();
@@ -143,7 +148,7 @@ var Ask = {
      * @param source
      * @param callback :
      */
-    getKnowledgeModelGraph: function (source, callback) {
+    getKnowledgeModelGraph: function (user, source, callback) {
         var graph = { nodes: [], edges: [] };
         var nodesMap = {};
         var sourceInfos = null;
@@ -170,9 +175,11 @@ var Ask = {
                     });
                 },
                 function (callbackSeries) {
-                    Ask.getSourceInfos(source, function (err, result) {
+                    Ask.getSourceInfos(user, source, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
+                        } else if (!Ask.isValidIri(result.graphUri)) {
+                            return callbackSeries("source graph URI is not a valid IRI: " + result.graphUri);
                         } else {
                             sourceInfos = result;
                             return callbackSeries();
@@ -226,7 +233,7 @@ var Ask = {
         Object.keys(userSources).forEach(function (sourceName) {
             var source = userSources[sourceName];
             var endpointUrl = (source.sparql_server && source.sparql_server.url) || "_default";
-            if (!source.graphUri || endpointUrl != "_default") {
+            if (!source.graphUri || !Ask.isValidIri(source.graphUri) || endpointUrl != "_default") {
                 return;
             }
             if (!sourceNamesByGraphUri[source.graphUri]) {
@@ -311,7 +318,7 @@ var Ask = {
                         if (err) {
                             return callbackSeries(err);
                         } else {
-                            var hits = result.body.hits.hits;
+                            var hits = (result.body.hits && result.body.hits.hits) || [];
                             hits.forEach(function (hit) {
                                 term1Uris.push(hit._source);
                             });
@@ -324,7 +331,7 @@ var Ask = {
                         if (err) {
                             return callbackSeries(err);
                         } else {
-                            var hits = result.body.hits.hits;
+                            var hits = (result.body.hits && result.body.hits.hits) || [];
                             hits.forEach(function (hit) {
                                 term2Uris.push(hit._source);
                             });
@@ -360,29 +367,25 @@ var Ask = {
                     // top concpt is the parent that exists in visjsgraphModel
 
                     term1Uris.forEach(function (item) {
-                        var topConcept = getTopConcept(item.parents);
+                        var topConcept = getTopConcept(item.parents || []);
                         if (topConcept && topConcepts1.indexOf(topConcept) < 0) {
                             topConcepts1.push(topConcept);
                         }
                     });
                     term2Uris.forEach(function (item) {
-                        item.parents.push(item.id);
-                        var topConcept = getTopConcept(item.parents);
+                        var parents = item.parents || [];
+                        parents.push(item.id);
+                        var topConcept = getTopConcept(parents);
                         if (topConcept && topConcepts2.indexOf(topConcept) < 0) {
                             topConcepts2.push(topConcept);
                         }
                     });
-                    var x = topConcepts1;
-                    var y = topConcepts2;
 
                     return callbackSeries();
                 },
 
                 // get shortest path between  terms and build a complete path between nodes
                 function (callbackSeries) {
-                    var start = topConcepts1[0];
-                    var end = topConcepts2[0];
-
                     topConcepts1.forEach(function (start) {
                         topConcepts2.forEach(function (end) {
                             Ask.getShortestPath(topConceptsGraphData, start, end, function (err, result) {
@@ -418,6 +421,9 @@ var Ask = {
             ],
 
             function (err) {
+                if (err) {
+                    return callback(err);
+                }
                 return callback(null, termsShortestPaths);
             },
         );
@@ -431,7 +437,7 @@ var Ask = {
      * @param callback
      */
 
-    getLinkedClasses: function (source, uri1, uri2, callback) {
+    getLinkedClasses: function (user, source, uri1, uri2, callback) {
         var resultMap = {};
         var indexName = source.toLowerCase();
         var sourceInfos = null;
@@ -439,7 +445,10 @@ var Ask = {
 
         var uris2 = uri2 ? [uri2] : null;
 
-        Ask.getRestrictionsSparql(source, [uri1], uris2, function (err, query) {
+        Ask.getRestrictionsSparql(user, source, [uri1], uris2, function (err, query) {
+            if (err) {
+                return callback(err);
+            }
             Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
                 if (err) {
                     return callback(err);
@@ -459,8 +468,11 @@ var Ask = {
                 });
 
                 // on essaie la relation  inverse
-                if (uri2 != null && (true || sparqlResult.length == 0)) {
-                    Ask.getRestrictionsSparql(source, [uri2], [uri1], function (err, queryInverse) {
+                if (uri2 != null) {
+                    Ask.getRestrictionsSparql(user, source, [uri2], [uri1], function (err, queryInverse) {
+                        if (err) {
+                            return callback(err);
+                        }
                         /*  query = query.replace("filter (?class2 in", "xx")
                                           query = query.replace("filter (?class1 in", "filter (?class2 in")
                                           query = query.replace("xx", "filter(?class1 in")*/
@@ -494,7 +506,7 @@ var Ask = {
         });
     },
 
-    getTermsLinkedClasses: function (source, term1, term2, callback) {
+    getTermsLinkedClasses: function (user, source, term1, term2, callback) {
         var term1Uris = [];
         var term2Uris = [];
         var resultMap = {};
@@ -505,9 +517,11 @@ var Ask = {
         async.series(
             [
                 function (callbackSeries) {
-                    Ask.getSourceInfos(source, function (err, result) {
+                    Ask.getSourceInfos(user, source, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
+                        } else if (!Ask.isValidIri(result.graphUri)) {
+                            return callbackSeries("source graph URI is not a valid IRI: " + result.graphUri);
                         } else {
                             sourceInfos = result;
                             return callbackSeries();
@@ -517,12 +531,11 @@ var Ask = {
 
                 // search terms and topClasses
                 function (callbackSeries) {
-                    return callbackSeries();
                     Ask.executeElasticQuery("/_search", term1, indexName, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         } else {
-                            var hits = result.body.hits.hits;
+                            var hits = (result.body.hits && result.body.hits.hits) || [];
                             hits.forEach(function (hit) {
                                 term1Uris.push(hit._source);
                             });
@@ -534,26 +547,24 @@ var Ask = {
                     if (!term2) {
                         return callbackSeries();
                     }
-
-                    term2Uris = [term2];
-                    return callbackSeries();
-
-                    /* Ask.executeElasticQuery("/_search", term2, indexName, function (err, result) {
-                             if (err) {
-                                 return callbackSeries(err)
-                             } else {
-                                 var hits = result.body.hits.hits
-                                 hits.forEach(function (hit) {
-                                     term2Uris.push(hit._source)
-                                 })
-                                 return callbackSeries()
-                             }
-                         });*/
+                    Ask.executeElasticQuery("/_search", term2, indexName, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        } else {
+                            var hits = (result.body.hits && result.body.hits.hits) || [];
+                            hits.forEach(function (hit) {
+                                term2Uris.push(hit._source);
+                            });
+                            return callbackSeries();
+                        }
+                    });
                 },
                 //build query
                 function (callbackSeries) {
-                    Ask.getRestrictionsSparql(source, term1Uris, term2Uris, function (err, query) {
-                        console.log(query);
+                    Ask.getRestrictionsSparql(user, source, term1Uris, term2Uris, function (err, query) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
                         Ask.executeSparqlQuery(source, query, function (err, sparqlResult) {
                             if (err) {
                                 return callbackSeries(err);
@@ -573,14 +584,20 @@ var Ask = {
                             });
 
                             // on essaie la relation  inverse
-                            if (term2 != null && (true || result.length == 0)) {
-                                Ask.getRestrictionsSparql(source, term2Uris, term1Uris, function (err, queryInverse) {
+                            if (term2Uris.length > 0) {
+                                Ask.getRestrictionsSparql(user, source, term2Uris, term1Uris, function (err, queryInverse) {
+                                    if (err) {
+                                        return callbackSeries(err);
+                                    }
                                     /*  query = query.replace("filter (?class2 in", "xx")
                                           query = query.replace("filter (?class1 in", "filter (?class2 in")
                                           query = query.replace("xx", "filter(?class1 in")*/
 
                                     Ask.executeSparqlQuery(source, queryInverse, function (err, result2) {
-                                        sparqlResult.results.bindings.forEach(function (item) {
+                                        if (err) {
+                                            return callbackSeries(err);
+                                        }
+                                        result2.results.bindings.forEach(function (item) {
                                             if (!resultMap[item.class1.value]) {
                                                 resultMap[item.class1.value] = [];
                                             }
@@ -597,14 +614,18 @@ var Ask = {
                                         return callbackSeries();
                                     });
                                 });
+                            } else {
+                                return callbackSeries();
                             }
-                            return callbackSeries();
                         });
                     });
                 },
             ],
 
             function (err) {
+                if (err) {
+                    return callback(err);
+                }
                 return callback(null, resultMap);
             },
         );
@@ -629,6 +650,16 @@ var Ask = {
     withoutTrailingSlash: function (uri) {
         var trailingSlashRegex = /\/$/;
         return uri.replace(trailingSlashRegex, "");
+    },
+
+    /**
+     * whether a string can sit inside a SPARQL IRIREF <...> without breaking the query
+     * @param uri
+     * @return {boolean}
+     */
+    isValidIri: function (uri) {
+        var iriForbiddenCharactersRegex = /[\s<>"{}|\\^`]/;
+        return typeof uri === "string" && uri.length > 0 && !iriForbiddenCharactersRegex.test(uri);
     },
 
     /**
@@ -723,21 +754,16 @@ var Ask = {
         return null;
     },
 
-    getSourceInfos: function (source, callback) {
-        async function getSourceInfos2(source) {
-            var user = { login: "admin" };
-            const sourceInfos = await sourceModel.getOneUserSource(user, source);
-
-            return sourceInfos;
-        }
-
-        try {
-            getSourceInfos2(source).then((sourceInfos) => {
-                callback(null, sourceInfos);
-            });
-        } catch (e) {
-            callback(e);
-        }
+    getSourceInfos: function (user, source, callback) {
+        sourceModel
+            .getOneUserSource(user, source)
+            .then(function (sourceInfos) {
+                if (!sourceInfos) {
+                    return callback("source not found or not allowed: " + source);
+                }
+                return callback(null, sourceInfos);
+            })
+            .catch(callback);
     },
     getPropertiesSparql: function (graphUri, filter) {
         var fromStr = " FROM   <" + graphUri + "> ";
@@ -757,10 +783,13 @@ var Ask = {
             "}LIMIT 10000";
         return query;
     },
-    getRestrictionsSparql: function (source, term1Uris, term2Uris, callback) {
-        Ask.getSourceInfos(source, function (err, sourceInfos) {
+    getRestrictionsSparql: function (user, source, term1Uris, term2Uris, callback) {
+        Ask.getSourceInfos(user, source, function (err, sourceInfos) {
             if (err) {
                 return callback(err);
+            }
+            if (!Ask.isValidIri(sourceInfos.graphUri)) {
+                return callback("source graph URI is not a valid IRI: " + sourceInfos.graphUri);
             }
             var graphUri = sourceInfos.graphUri;
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix owl: <http://www.w3.org/2002/07/owl#> ";
@@ -780,6 +809,7 @@ var Ask = {
                 "    ?class1Label\n" +
                 "    ?superClass1\n" +
                 "    ?prop\n" +
+                "    ?propLabel\n" +
                 "    ?class2\n" +
                 "    ?class2Label\n" +
                 "from <" +
@@ -799,7 +829,8 @@ var Ask = {
                 "    ?restr (owl:someValuesFrom|owl:allValuesFrom|owl:hasValue) ?class2 .\n" +
                 "\n" +
                 "    OPTIONAL { ?class1 rdfs:label ?class1Label . }\n" +
-                "    OPTIONAL { ?class2 rdfs:label ?class2Label . }\n";
+                "    OPTIONAL { ?class2 rdfs:label ?class2Label . }\n" +
+                "    OPTIONAL { ?prop rdfs:label ?propLabel . }\n";
 
             var filter = "";
 
@@ -816,7 +847,7 @@ var Ask = {
                 filter += "?class2 rdfs:subClassOf* ?superClass2.";
 
                 //cas uri
-                if (term2Uris[0].startsWith("http")) {
+                if (("" + (term2Uris[0].id || term2Uris[0])).startsWith("http")) {
                     filter += " filter (?superClass2 in (";
                     term2Uris.forEach(function (item, index) {
                         if (index > 0) {
@@ -836,65 +867,13 @@ var Ask = {
             return callback(null, query);
         });
     },
-    getRestrictionsSparqlOld: function (source, term1Uris, term2Uris, callback) {
-        Ask.getSourceInfos(source, function (err, sourceInfos) {
-            if (err) {
-                return callback(err);
-            }
-            var graphUri = sourceInfos.graphUri;
-            var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix owl: <http://www.w3.org/2002/07/owl#> ";
-            query +=
-                "Select * from <" +
-                graphUri +
-                "> where {" +
-                "  ?class1 rdfs:subClassOf{0,5} ?superClass1.\n" +
-                "  ?superClass1 rdf:type owl:Class.\n" +
-                "  ?superClass1 rdfs:subClassOf  ?restr. ?restr rdf:type owl:Restriction.\n" +
-                "  ?restr owl:onProperty ?prop. ?restr owl:someValuesFrom|owl:allValuesFrom|owl:hasValue ?superClass2.\n" +
-                "   { ?class1 rdfs:label ?class1Label}\n" +
-                "   optional { ?prop rdfs:label ?propLabel}\n" +
-                "     { ?superClass2 rdfs:label ?superClass2Label}";
-
-            var filter = "";
-            if (term1Uris) {
-                filter += "filter (?class1 in (";
-                term1Uris.forEach(function (item, index) {
-                    if (index > 0) {
-                        filter += ",";
-                    }
-                    filter += "<" + (item.id || item) + ">";
-                });
-                filter += ") )";
-            }
-            if (term2Uris && term2Uris.length > 0) {
-                query += "  ?superClass2 ^rdfs:subClassOf{0,5} ?class2.";
-
-                //cas uri
-                if (term2Uris[0].startsWith("http")) {
-                    filter += "filter (?class2 in (";
-                    term2Uris.forEach(function (item, index) {
-                        if (index > 0) {
-                            filter += ",";
-                        }
-                        filter += "<" + (item.id || item) + ">";
-                    });
-                    filter += ") )";
-                } // case term
-                else {
-                    filter += '   ?class2 rdfs:label ?class2Label filter (regex(?class2Label,"' + term2Uris[0] + '","i"))';
-                }
-            }
-
-            query += filter + "} limit 10000";
-
-            return callback(null, query);
-        });
-    },
     getTopConceptsGraphData: function (source, callback) {
-        var myPath = path.resolve("data/graphs/" + source + "_whiteBoard.json");
-        var str = "" + fs.readFileSync(myPath);
-        var json = JSON.parse(str);
-        return callback(null, json);
+        var myPath = path.resolve("data/graphs/" + source + "_KGmodelGraph.json");
+        try {
+            return callback(null, JSON.parse(fs.readFileSync(myPath, "utf8")));
+        } catch (err) {
+            return callback(err);
+        }
     },
     /**
      * To be implemented
@@ -906,9 +885,8 @@ var Ask = {
      */
     executeSparqlQuery: function (source, query, callback) {
         if (!query) {
-            return callback(null, oldResult);
+            return callback("no SPARQL query to run");
         }
-        var oldResult = null;
         try {
             var params = {
                 query: query,
@@ -926,11 +904,7 @@ var Ask = {
             };
 
             httpProxy.post(serverUrl, headers, params, function (err, result) {
-                if (!oldResult) {
-                    oldResult = result;
-                }
-
-                return callback(null, result);
+                return callback(err, result);
             });
         } catch (err) {
             return callback(err);
@@ -946,28 +920,45 @@ var Ask = {
         return sparqlResult;
     },
     executeElasticQuery: function (urlPath, term, indexName, callback) {
-        var query = JSON.parse('{"query": {"bool":{"must":[{"query_string":{"query":"' + term + '",' + '"fields":["label","skoslabels","skoslabels"],"default_operator":"AND"}}]}}\n}');
-        var elasticUrl = "https://51.178.139.80:9200/";
-        var url = elasticUrl + indexName + urlPath;
+        var query = {
+            query: {
+                bool: {
+                    must: [{ query_string: { query: term, fields: ["label", "skoslabels"], default_operator: "AND" } }],
+                },
+            },
+        };
+        var elasticConf = ConfigManager.config.ElasticSearch;
+        var url = elasticConf.url + indexName + urlPath;
         var method = "POST";
 
         var options = {
             method: method,
             json: query,
+            timeout: 30000,
             headers: {
                 "content-type": "application/json",
             },
             url: url,
         };
 
-        options.auth = {
-            user: "elastic",
-            password: "sls#209",
-        };
+        if (elasticConf.user) {
+            options.auth = {
+                user: elasticConf.user,
+                password: elasticConf.password,
+            };
+        }
+        if (elasticConf.skipSslVerify) {
+            options.strictSSL = false;
+        }
 
-        process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
         request(options, function (error, response, body) {
-            return callback(error, response, body);
+            if (error) {
+                return callback("" + error);
+            }
+            if (!response || response.statusCode != 200) {
+                return callback("ElasticSearch returned " + (response ? response.statusCode : "no response") + " for index " + indexName);
+            }
+            return callback(null, response, body);
         });
     },
     getShortestPath: function (visjsdata, start, end, callback) {
@@ -1080,7 +1071,7 @@ export default Ask;
 if (false) {
     Ask.whoAmI("ISO-14224-IOF", " failure mode", function (err, result) {});
 
-    Ask.getKnowledgeModelGraph("ISO-14224-IOF", function (err, result) {});
+    Ask.getKnowledgeModelGraph({ login: "admin" }, "ISO-14224-IOF", function (err, result) {});
 
     Ask.getTwoTermsShortestPath("ISO-14224-IOF", " failure mode", "centrifugal pump", function (err, result) {});
 }

@@ -1,15 +1,21 @@
 import Ask from "../../../../bin/ask.js";
+import userManager from "../../../../bin/user.js";
 
 export default function () {
-    function GET(req, res, _next) {
-        const { sourceLabel } = req.query;
+    async function GET(req, res, _next) {
+        try {
+            const userInfo = await userManager.getUser(req.user);
+            const { sourceLabel } = req.query;
 
-        Ask.getKnowledgeModelGraph(sourceLabel, function (err, graph) {
-            if (err) {
-                return res.status(500).json({ message: "" + err });
-            }
-            return res.status(200).json(graph);
-        });
+            Ask.getKnowledgeModelGraph(userInfo.user, sourceLabel, function (err, graph) {
+                if (err) {
+                    return res.status(500).json({ message: "" + err });
+                }
+                return res.status(200).json(graph);
+            });
+        } catch (err) {
+            return res.status(500).json({ message: "" + err });
+        }
     }
 
     GET.apiDoc = {

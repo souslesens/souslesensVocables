@@ -1,15 +1,21 @@
 import Ask from "../../../../bin/ask.js";
+import userManager from "../../../../bin/user.js";
 
 export default function () {
-    function GET(req, res, _next) {
-        const { sourceLabel, term } = req.query;
+    async function GET(req, res, _next) {
+        try {
+            const userInfo = await userManager.getUser(req.user);
+            const { sourceLabel, term } = req.query;
 
-        Ask.getTermClassesInfos(sourceLabel, term, function (err, termUrisMap) {
-            if (err) {
-                return res.status(500).json({ message: "" + err });
-            }
-            return res.status(200).json(termUrisMap);
-        });
+            Ask.getTermClassesInfos(userInfo.user, sourceLabel, term, function (err, termUrisMap) {
+                if (err) {
+                    return res.status(500).json({ message: "" + err });
+                }
+                return res.status(200).json(termUrisMap);
+            });
+        } catch (err) {
+            return res.status(500).json({ message: "" + err });
+        }
     }
 
     GET.apiDoc = {

@@ -1,15 +1,21 @@
 import Ask from "../../../../bin/ask.js";
+import userManager from "../../../../bin/user.js";
 
 export default function () {
-    function GET(req, res, _next) {
-        const { sourceLabel, uri } = req.query;
+    async function GET(req, res, _next) {
+        try {
+            const userInfo = await userManager.getUser(req.user);
+            const { sourceLabel, uri } = req.query;
 
-        Ask.getUriClassesInfos(sourceLabel, uri, function (err, uriInfosMap) {
-            if (err) {
-                return res.status(500).json({ message: "" + err });
-            }
-            return res.status(200).json(uriInfosMap);
-        });
+            Ask.getUriClassesInfos(userInfo.user, sourceLabel, uri, function (err, uriInfosMap) {
+                if (err) {
+                    return res.status(500).json({ message: "" + err });
+                }
+                return res.status(200).json(uriInfosMap);
+            });
+        } catch (err) {
+            return res.status(500).json({ message: "" + err });
+        }
     }
 
     GET.apiDoc = {

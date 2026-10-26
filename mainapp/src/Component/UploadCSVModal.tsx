@@ -12,6 +12,8 @@ type UploadCSVModalProps = {
 };
 
 export const UploadCSVModal = ({ apiUrl, databaseId, databaseName, onClose }: UploadCSVModalProps) => {
+    // The Python API handles Excel; the local fallback route only handles CSV.
+    const isPythonApi = apiUrl !== "/";
     const [open, setOpen] = useState(false);
     const [file, setFile] = useState<File | null>(null);
     const [table, setTable] = useState("");
@@ -45,7 +47,7 @@ export const UploadCSVModal = ({ apiUrl, databaseId, databaseName, onClose }: Up
     const handleSubmit = async (event: MouseEvent) => {
         event.preventDefault();
         if (!file) {
-            setErrorMessage("Please select a CSV or Excel file");
+            setErrorMessage(isPythonApi ? "Please select a CSV or Excel file" : "Please select a CSV file");
             return;
         }
         if (!table) {
@@ -72,8 +74,14 @@ export const UploadCSVModal = ({ apiUrl, databaseId, databaseName, onClose }: Up
             });
 
             if (response.status !== 200) {
-                const json = (await response.json()) as { detail?: string; error?: string };
-                throw new Error(json.detail ?? json.error ?? "Internal server error");
+                let reason = "Internal server error";
+                try {
+                    const json = (await response.json()) as { detail?: string; error?: string; message?: string };
+                    reason = json.detail ?? json.error ?? json.message ?? reason;
+                } catch {
+                    reason = response.statusText || reason;
+                }
+                throw new Error(reason);
             }
 
             setSuccessMessage(`Data uploaded to table ${table}`);
@@ -90,7 +98,7 @@ export const UploadCSVModal = ({ apiUrl, databaseId, databaseName, onClose }: Up
                 <UploadFile />
             </IconButton>
             <Dialog fullWidth={true} maxWidth="md" onClose={handleClose} open={open} PaperProps={{ component: "form" }}>
-                <DialogTitle id="contained-modal-title-vcenter">{`Upload CSV or Excel to ${databaseName}`}</DialogTitle>
+                <DialogTitle id="contained-modal-title-vcenter">{`Upload CSV${isPythonApi ? " or Excel" : ""} to ${databaseName}`}</DialogTitle>
                 <DialogContent sx={{ mt: 1 }}>
                     <Stack spacing={2} useFlexGap>
                         {errorMessage ? (
@@ -105,8 +113,12 @@ export const UploadCSVModal = ({ apiUrl, databaseId, databaseName, onClose }: Up
                         ) : null}
                         <Stack spacing={1} sx={{ pt: 1 }}>
                             <Button color="info" component="label" disabled={loading} fullWidth role={undefined} startIcon={<Folder />} tabIndex={-1} variant="outlined">
-                                {file ? file.name : "Select a CSV or Excel file…"}
-                                <VisuallyHiddenInput onChange={handleFileChange} type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+                                {file ? file.name : `Select a CSV${isPythonApi ? " or Excel" : ""} file…`}
+                                <VisuallyHiddenInput
+                                    onChange={handleFileChange}
+                                    type="file"
+                                    accept={isPythonApi ? ".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" : ".csv,text/csv"}
+                                />
                             </Button>
                             <TextField fullWidth id="table" label="Table" onChange={(event) => setTable(event.target.value)} required value={table} />
                             <TextField

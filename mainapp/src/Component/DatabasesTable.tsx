@@ -434,7 +434,7 @@ const DatabasesTable = () => {
                                                                 <Download />
                                                             </IconButton>
                                                             <DatabaseFormDialog database={database} me={me} />
-                                                            {apiUrl !== "/" ? <UploadCSVModal apiUrl={apiUrl} databaseId={database.id} databaseName={database.name ?? ""} onClose={() => {}} /> : null}
+                                                            <UploadCSVModal apiUrl={apiUrl} databaseId={database.id} databaseName={database.name ?? ""} onClose={() => {}} />
                                                             <ButtonWithConfirmation label="Delete" func={handleDeleteDatabase} args={[database, updateModel]} />
                                                         </Stack>
                                                     </TableCell>

@@ -1,4 +1,4 @@
-import { Done, Close, Folder, Upload } from "@mui/icons-material";
+import { Done, Close, Folder, UploadFile } from "@mui/icons-material";
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, TextField } from "@mui/material";
 import { ChangeEvent, MouseEvent, useState } from "react";
 
@@ -35,13 +35,17 @@ export const UploadCSVModal = ({ apiUrl, databaseId, databaseName, onClose }: Up
     };
 
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-        setFile(event.currentTarget.files?.[0] ?? null);
+        const selectedFile = event.currentTarget.files?.[0] ?? null;
+        setFile(selectedFile);
+        if (selectedFile) {
+            setTable(selectedFile.name.replace(/\.[^.]+$/, ""));
+        }
     };
 
     const handleSubmit = async (event: MouseEvent) => {
         event.preventDefault();
         if (!file) {
-            setErrorMessage("Please select a CSV file");
+            setErrorMessage("Please select a CSV or Excel file");
             return;
         }
         if (!table) {
@@ -72,7 +76,7 @@ export const UploadCSVModal = ({ apiUrl, databaseId, databaseName, onClose }: Up
                 throw new Error(json.detail ?? json.error ?? "Internal server error");
             }
 
-            setSuccessMessage(`CSV uploaded to table ${table}`);
+            setSuccessMessage(`Data uploaded to table ${table}`);
         } catch (err) {
             setErrorMessage((err as Error).message);
         } finally {
@@ -82,11 +86,11 @@ export const UploadCSVModal = ({ apiUrl, databaseId, databaseName, onClose }: Up
 
     return (
         <>
-            <IconButton color="primary" onClick={handleOpen} title="Upload CSV">
-                <Upload />
+            <IconButton color="primary" onClick={handleOpen} title="Upload CSV data into a database table">
+                <UploadFile />
             </IconButton>
             <Dialog fullWidth={true} maxWidth="md" onClose={handleClose} open={open} PaperProps={{ component: "form" }}>
-                <DialogTitle id="contained-modal-title-vcenter">{`Upload CSV to ${databaseName}`}</DialogTitle>
+                <DialogTitle id="contained-modal-title-vcenter">{`Upload CSV or Excel to ${databaseName}`}</DialogTitle>
                 <DialogContent sx={{ mt: 1 }}>
                     <Stack spacing={2} useFlexGap>
                         {errorMessage ? (
@@ -101,11 +105,18 @@ export const UploadCSVModal = ({ apiUrl, databaseId, databaseName, onClose }: Up
                         ) : null}
                         <Stack spacing={1} sx={{ pt: 1 }}>
                             <Button color="info" component="label" disabled={loading} fullWidth role={undefined} startIcon={<Folder />} tabIndex={-1} variant="outlined">
-                                {file ? file.name : "Select a CSV file…"}
-                                <VisuallyHiddenInput onChange={handleFileChange} type="file" accept=".csv,text/csv" />
+                                {file ? file.name : "Select a CSV or Excel file…"}
+                                <VisuallyHiddenInput onChange={handleFileChange} type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
                             </Button>
                             <TextField fullWidth id="table" label="Table" onChange={(event) => setTable(event.target.value)} required value={table} />
-                            <TextField fullWidth id="delimiter" label="Delimiter" onChange={(event) => setDelimiter(event.target.value)} value={delimiter} />
+                            <TextField
+                                disabled={file?.name.toLowerCase().endsWith(".xlsx") ?? false}
+                                fullWidth
+                                id="delimiter"
+                                label="Delimiter"
+                                onChange={(event) => setDelimiter(event.target.value)}
+                                value={delimiter}
+                            />
                         </Stack>
                     </Stack>
                 </DialogContent>

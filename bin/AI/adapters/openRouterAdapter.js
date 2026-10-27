@@ -196,6 +196,63 @@ function toAnthropicResponse(openRouterResponse) {
     };
 }
 
+const sseDataPrefix = "data: ";
+const sseDoneLine = "data: [DONE]";
+
+// Lit une réponse `stream: true` et la recompose sous la forme d'une réponse non streamée : la
+// détection d'erreur et la normalisation qui suivent restent celles du mode normal.
+async function readStreamedCompletion(response, onTextDelta, onReasoningDelta) {
+    const decoder = new TextDecoder();
+    const streamedChoice = { message: { content: "" }, finish_reason: null };
+    const streamedResponse = { choices: [streamedChoice] };
+    function readLine(rawLine) {
+        const line = rawLine.trimEnd();
+        // les lignes `: OPENROUTER PROCESSING` sont des commentaires SSE qui gardent la connexion ouverte
+        if (!line.startsWith(sseDataPrefix) || line === sseDoneLine) {
+            return;
+        }
+        const chunk = JSON.parse(line.slice(sseDataPrefix.length));
+        streamedResponse.id = chunk.id ?? streamedResponse.id;
+        streamedResponse.model = chunk.model ?? streamedResponse.model;
+        if (chunk.usage) {
+            streamedResponse.usage = chunk.usage;
+        }
+        // une erreur après les en-têtes arrive dans un chunk, le statut HTTP reste 200
+        if (chunk.error) {
+            streamedResponse.error = chunk.error;
+        }
+        const chunkChoice = chunk.choices?.[0];
+        if (!chunkChoice) {
+            return;
+        }
+        streamedChoice.finish_reason = chunkChoice.finish_reason ?? streamedChoice.finish_reason;
+        const delta = chunkChoice.delta ?? {};
+        if (delta.content) {
+            streamedChoice.message.content += delta.content;
+            onTextDelta(delta.content);
+        }
+        if (typeof delta.reasoning === "string" && delta.reasoning && onReasoningDelta) {
+            onReasoningDelta(delta.reasoning);
+        }
+    }
+
+    let pendingText = "";
+    for await (const bytes of response.body) {
+        pendingText += decoder.decode(bytes, { stream: true });
+        const lines = pendingText.split("\n");
+        // la dernière ligne peut être coupée au milieu, elle attend le paquet suivant
+        pendingText = lines.pop();
+        lines.forEach(readLine);
+    }
+    // le dernier chunk, souvent celui de l'usage, peut arriver sans saut de ligne final
+    readLine(pendingText + decoder.decode());
+    // un flux coupé sans finish_reason est une réponse tronquée, pas une réponse complète
+    if (!streamedResponse.error && !streamedChoice.finish_reason) {
+        streamedResponse.error = { message: "the stream ended before the model finished its answer" };
+    }
+    return streamedResponse;
+}
+
 function createOpenRouterAdapter(openRouterConfig) {
     const headers = {
         Authorization: `Bearer ${openRouterConfig.apiKey}`,
@@ -205,7 +262,8 @@ function createOpenRouterAdapter(openRouterConfig) {
     if (openRouterConfig.appUrl) headers["HTTP-Referer"] = openRouterConfig.appUrl;
     if (openRouterConfig.appName) headers["X-Title"] = openRouterConfig.appName;
 
-    async function createMessage({ model, system, messages, maxTokens, tools }, callback) {
+    // onTextDelta reçoit le texte de la réponse au fil de l'eau ; sans lui, la réponse arrive en une fois.
+    async function createMessage({ model, system, messages, maxTokens, tools, reasoningEffort, onTextDelta, onReasoningDelta }, callback) {
         try {
             const requestBody = {
                 model: model ?? openRouterConfig.defaultModel,
@@ -217,12 +275,31 @@ function createOpenRouterAdapter(openRouterConfig) {
             if (tools && tools.length > 0) {
                 requestBody.tools = toOpenAiTools(tools);
             }
+            if (reasoningEffort) {
+                requestBody.reasoning = { effort: reasoningEffort };
+            }
+            const isStreamed = typeof onTextDelta === "function";
+            if (isStreamed && requestBody.tools) {
+                return callback(new Error("OpenRouter streaming is read for text only, not for tool calls"));
+            }
+            if (isStreamed) {
+                requestBody.stream = true;
+            }
 
             const response = await fetch(OPENROUTER_CHAT_COMPLETIONS_URL, {
                 method: "POST",
                 headers,
                 body: JSON.stringify(requestBody),
             });
+
+            if (isStreamed && response.ok) {
+                const streamedResponse = await readStreamedCompletion(response, onTextDelta, onReasoningDelta);
+                const streamError = errorFromOpenRouterBody(streamedResponse);
+                if (streamError) {
+                    return callback(streamError);
+                }
+                return callback(null, toAnthropicResponse(streamedResponse));
+            }
 
             // Corps lu en texte dans tous les cas : une passerelle ou un proxy peut répondre du HTML
             // avec un statut 200, et `response.json()` échouait alors sur "Unexpected token <", sans

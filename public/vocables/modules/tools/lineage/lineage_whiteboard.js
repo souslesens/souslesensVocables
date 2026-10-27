@@ -671,9 +671,12 @@ var Lineage_whiteboard = (function () {
                             return node.id;
                         });
                     }
-                    // an empty id list sets no SPARQL filter and would draw every restriction of the source
+                    // an empty id list sets no SPARQL filter and would draw every restriction or datatype property of the source
                     if (options.data.length == 0) {
                         UI.message("No class node to draw relations from", true);
+                        return callbackSeries();
+                    }
+                    if (options.drawDataTypeProperties) {
                         return callbackSeries();
                     }
                     var direction = options.inverse ? "inverse" : "direct";
@@ -685,13 +688,13 @@ var Lineage_whiteboard = (function () {
                 },
 
                 function (callbackSeries) {
-                    if (!options.drawDataTypeProperties) {
+                    if (!options.drawDataTypeProperties || options.data.length == 0) {
                         return callbackSeries();
                     }
                     var datatypeOptions = {
                         notDrawDomain: options.notDrawDomain,
                     };
-                    self.drawDataTypeProperties(source, topConcepts, datatypeOptions, function (err, result) {
+                    self.drawDataTypeProperties(source, options.data, datatypeOptions, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }

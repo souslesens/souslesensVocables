@@ -3,6 +3,8 @@ import { processResponse } from "./utils.js";
 // Exported so other endpoints (e.g. admin/snapshots) can read a source's cached classes without re-querying
 // the triple store. ESM exports are live bindings, so the DELETE handler's reassignment is seen by importers.
 export var ontologyModelsCache = {};
+// the same models enriched by GET /ontologyModels/enriched, emptied whenever their source model changes
+export var enrichedOntologyModelsCache = {};
 export default function () {
     let operations = {
         GET,
@@ -102,6 +104,7 @@ export default function () {
 
     ///// POST api/v1/sources
     async function POST(req, res, _next) {
+        delete enrichedOntologyModelsCache[req.body.source];
         if (req.body.key) {
             if (!ontologyModelsCache[req.body.source]) {
                 ontologyModelsCache[req.body.source] = {};
@@ -173,8 +176,10 @@ export default function () {
     async function DELETE(req, res, _next) {
         if (req.query.source && req.query.source != "null") {
             delete ontologyModelsCache[req.query.source];
+            delete enrichedOntologyModelsCache[req.query.source];
         } else {
             ontologyModelsCache = {};
+            enrichedOntologyModelsCache = {};
         }
         return processResponse(res, null, "done");
     }
@@ -236,6 +241,7 @@ export default function () {
     };
 
     async function PUT(req, res, _next) {
+        delete enrichedOntologyModelsCache[req.body.source];
         if (!ontologyModelsCache[req.body.source]) {
             return processResponse(res, null, "source not exists in ontologyModelsCache");
         } else {

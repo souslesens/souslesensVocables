@@ -1,4 +1,5 @@
-import { getEnrichedOntologyModel } from "../enrichedOntologyModel.js";
+import { getAnnotationsQuery, getEnrichedOntologyModel } from "../enrichedOntologyModel.js";
+import { callVocablesFunction } from "../remoteCodeRunner.js";
 
 const wellKnownPrefixes = {
     rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -15,6 +16,8 @@ const prefixStartRegex = /^[A-Za-z]/;
 // IRIs and anonymous nodes only, a definition may hold other angle brackets
 const bracketedIriRegex = /<((?:https?|nodeID):[^>\s]+)>/g;
 const indent = "    ";
+const lineBreakRegex = /\s*[\r\n]+\s*/g;
+const annotationLocalNameRegex = /[^/#]+$/;
 
 // the prefixed name of an IRI, its namespace getting a prefix the first time it is met
 function getPrefixedName(iri, prefixes, prefixesByNamespace, usedPrefixes) {
@@ -105,7 +108,12 @@ async function getUpperOntologyModelText(upperOntologies, userContext) {
         modelText +=
             "\n## " + upperOntology + " (graph " + enrichedModel.graphUri + ")\n\n### Classes\n\n" + classEntries.join("\n") + "\n\n### Object properties\n\n" + propertyEntries.join("\n") + "\n";
     }
-    const prefixes = { ...wellKnownPrefixes };
+    return getPrefixedModelText(modelText, {}).text;
+}
+
+// the bracketed IRIs of a model text as prefixed names, and the prefixes they use; a declared prefix named like a well-known one is not used
+function getPrefixedModelText(modelText, declaredPrefixes) {
+    const prefixes = { ...declaredPrefixes, ...wellKnownPrefixes };
     const prefixesByNamespace = {};
     for (const [prefixName, namespace] of Object.entries(prefixes)) {
         prefixesByNamespace[namespace] = prefixName;
@@ -116,7 +124,119 @@ async function getUpperOntologyModelText(upperOntologies, userContext) {
     for (const prefixName of [...usedPrefixes].sort()) {
         usedPrefixLines.push(prefixName + ": <" + prefixes[prefixName] + ">");
     }
-    return "\nPrefixes:\n" + usedPrefixLines.join("\n") + "\n" + prefixedModelText;
+    return { text: "\nPrefixes:\n" + usedPrefixLines.join("\n") + "\n" + prefixedModelText, prefixes: prefixes };
 }
 
-export { wellKnownPrefixes, getUpperOntologyModelText };
+function isPropertyOfType(ontologyModel, propertyIri, typeLocalName) {
+    return Boolean(ontologyModel.propertyTypes?.[propertyIri]?.[wellKnownPrefixes.owl + typeLocalName]);
+}
+
+// nonObjectProperties also holds the annotation properties and the untyped ones
+function getDatatypePropertyIris(ontologyModel) {
+    const nonObjectPropertyIris = Object.keys(ontologyModel.nonObjectProperties || {});
+    return nonObjectPropertyIris.filter((propertyIri) => isPropertyOfType(ontologyModel, propertyIri, "DatatypeProperty"));
+}
+
+// the values of the local annotation properties of a graph, by term then by annotation name, English or untagged
+async function getLocalAnnotationValues(graphUri, localAnnotationIris, userContext) {
+    const valuesByAnnotationByTerm = {};
+    if (localAnnotationIris.length == 0) {
+        return valuesByAnnotationByTerm;
+    }
+    const annotationRows = await callVocablesFunction("AxiomExtractor", "execQuery", [getAnnotationsQuery(graphUri, localAnnotationIris)], userContext);
+    annotationRows.forEach(function (annotationRow) {
+        const annotationName = annotationRow.predicate.match(annotationLocalNameRegex)[0];
+        if (!valuesByAnnotationByTerm[annotationRow.term]) {
+            valuesByAnnotationByTerm[annotationRow.term] = {};
+        }
+        const termValuesByAnnotation = valuesByAnnotationByTerm[annotationRow.term];
+        if (!termValuesByAnnotation[annotationName]) {
+            termValuesByAnnotation[annotationName] = [];
+        }
+        termValuesByAnnotation[annotationName].push(annotationRow.text.replace(lineBreakRegex, " "));
+    });
+    // the endpoint returns rows in no stable order, the prompt must not change between two runs
+    for (const termValuesByAnnotation of Object.values(valuesByAnnotationByTerm)) {
+        Object.values(termValuesByAnnotation).forEach((annotationValues) => annotationValues.sort());
+    }
+    return valuesByAnnotationByTerm;
+}
+
+// read from the graph, whatever answer format produced the version and whatever was edited in it since
+async function getValidatedOntologyModelText(tboxSource, termNamespace, termPrefix, userContext) {
+    const enrichedModel = await getEnrichedOntologyModel(tboxSource, userContext);
+    if (!enrichedModel) {
+        return null;
+    }
+    const typedPropertyIris = Object.keys(enrichedModel.propertyTypes);
+    const localAnnotationIris = typedPropertyIris.filter(
+        (propertyIri) => propertyIri.indexOf(termNamespace) == 0 && isPropertyOfType(enrichedModel, propertyIri, "AnnotationProperty"),
+    );
+    const valuesByAnnotationByTerm = await getLocalAnnotationValues(enrichedModel.graphUri, localAnnotationIris, userContext);
+    const getAnnotationFields = function (termIri) {
+        const annotationFields = Object.entries(valuesByAnnotationByTerm[termIri] || {});
+        return annotationFields.sort(([annotationName1], [annotationName2]) => annotationName1.localeCompare(annotationName2));
+    };
+
+    const classEntries = [];
+    for (const classIri of Object.keys(enrichedModel.classes).sort()) {
+        const ontologyClass = enrichedModel.classes[classIri];
+        classEntries.push(
+            getTermEntry(classIri, ontologyClass.label, [
+                ["Definition", ontologyClass.definitions],
+                ["SubClassOf", ontologyClass.axioms.subClassOf],
+                ["EquivalentTo", ontologyClass.axioms.equivalentTo],
+                ["DisjointWith", ontologyClass.axioms.disjointWith],
+                ["DisjointUnionOf", ontologyClass.axioms.disjointUnionOf],
+                ...getAnnotationFields(classIri),
+            ]),
+        );
+    }
+    const objectPropertyEntries = [];
+    for (const propertyIri of Object.keys(enrichedModel.properties).sort()) {
+        const property = enrichedModel.properties[propertyIri];
+        const constraint = enrichedModel.constraints[propertyIri] || {};
+        objectPropertyEntries.push(
+            getTermEntry(propertyIri, property.label, [
+                ["Definition", property.definitions],
+                ["Domain", bracketIri(constraint.domain)],
+                ["Range", bracketIri(constraint.range)],
+                ["InverseOf", bracketIri(property.inverseProp)],
+                ["SubPropertyOf", bracketIri(property.superProp)],
+                ...getAnnotationFields(propertyIri),
+            ]),
+        );
+    }
+    const datatypePropertyIris = getDatatypePropertyIris(enrichedModel);
+    const datatypePropertyEntries = [];
+    for (const propertyIri of datatypePropertyIris.sort()) {
+        const datatypeProperty = enrichedModel.nonObjectProperties[propertyIri];
+        datatypePropertyEntries.push(
+            getTermEntry(propertyIri, datatypeProperty.label, [
+                ["Domain", bracketIri(datatypeProperty.domain)],
+                ["Range", bracketIri(datatypeProperty.range)],
+                ...getAnnotationFields(propertyIri),
+            ]),
+        );
+    }
+    const modelText =
+        "\n## " +
+        tboxSource +
+        " (graph " +
+        enrichedModel.graphUri +
+        ")\n\n### Classes\n\n" +
+        classEntries.join("\n") +
+        "\n\n### Object properties\n\n" +
+        objectPropertyEntries.join("\n") +
+        "\n\n### Datatype properties\n\n" +
+        datatypePropertyEntries.join("\n") +
+        "\n";
+    const classLabelByIri = {};
+    for (const [classIri, ontologyClass] of Object.entries(enrichedModel.classes)) {
+        classLabelByIri[classIri] = ontologyClass.label;
+    }
+    const prefixedModel = getPrefixedModelText(modelText, termPrefix ? { [termPrefix]: termNamespace } : {});
+    return { text: prefixedModel.text, prefixes: prefixedModel.prefixes, classLabelByIri: classLabelByIri, datatypePropertyIris: datatypePropertyIris };
+}
+
+export { wellKnownPrefixes, getDatatypePropertyIris, getUpperOntologyModelText, getValidatedOntologyModelText };

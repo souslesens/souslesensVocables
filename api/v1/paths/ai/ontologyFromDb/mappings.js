@@ -11,7 +11,6 @@ import {
     getCutAnswerError,
     getAnswerText,
     getTermNamespace,
-    getLocalName,
 } from "../../../../../bin/AI/ontologyAnswer.js";
 import { getMappingDocument, getLiteralRangeWarnings, checkMappingRelations } from "../../../../../bin/AI/mappingAnswer.js";
 import {
@@ -24,6 +23,7 @@ import {
     getMappingStatement,
 } from "../../../../../bin/AI/mappingRuns.js";
 import { getImportedOntologies } from "../../../../../bin/AI/restrictionCheck.js";
+import { getDatatypePropertyIris, getValidatedOntologyModelText } from "../../../../../bin/AI/upperOntologyModel.js";
 import { callVocablesFunction } from "../../../../../bin/remoteCodeRunner.js";
 import { describeDatabase } from "../../../../../bin/AI/databaseDescription.js";
 import { getSchemaDescription } from "../../../../../bin/KG/dbConnector.js";
@@ -48,11 +48,16 @@ async function getMappingInputs(req, source) {
     }
     const tboxGraphUri = found.userSources[tboxSource].graphUri;
     const validatedRun = found.runs.find((run) => getRunGraphUri(found.sourceConfig.graphUri, run.runTimestamp) == tboxGraphUri);
-    const answerMatch = validatedRun?.savedRun?.answer ? validatedRun.savedRun.answer.match(jsonBlockRegex) : null;
-    if (!answerMatch) {
-        return { status: 409, error: "the validated version " + tboxSource + " holds no readable answer" };
+    // the database, the upper ontologies and the overlaps are read in the run file of the version
+    if (!validatedRun?.savedRun) {
+        return { status: 409, error: "the validated version " + tboxSource + " has no run file" };
     }
-    const ontologyAnswer = JSON.parse(answerMatch[1]);
+    const userContext = { user: found.userInfo, userSources: found.userSources };
+    // the graph is the validated version, whatever answer format produced it and whatever was edited in it since
+    const validatedModel = await getValidatedOntologyModelText(tboxSource, getTermNamespace(found.sourceConfig), found.sourceConfig.prefix, userContext);
+    if (!validatedModel) {
+        return { status: 409, error: "the graph of the validated version " + tboxSource + " holds no ontology model" };
+    }
     const savedRun = validatedRun.savedRun;
     const allDatabases = await databaseModel.getAllDatabases();
     const database = allDatabases.find((configuredDatabase) => configuredDatabase.id == savedRun.databaseId || configuredDatabase.database == savedRun.database);
@@ -77,12 +82,12 @@ async function getMappingInputs(req, source) {
         found: found,
         tboxSource: tboxSource,
         validatedRun: validatedRun,
-        ontologyAnswer: ontologyAnswer,
+        validatedModel: validatedModel,
         database: database,
         schema: schema,
         columnsByTable: columnsByTable,
         databaseText: describeDatabase(database, schema, columnsByTable, tableInspections),
-        userContext: { user: found.userInfo, userSources: found.userSources },
+        userContext: userContext,
     };
 }
 
@@ -206,9 +211,11 @@ export default function () {
                 termNamespace +
                 "\nInstance namespace: " +
                 instanceNamespace +
-                "\n\n## Validated ontology\n\n```json\n" +
-                JSON.stringify(inputs.ontologyAnswer) +
-                "\n```\n\n## Database\n\n" +
+                "\n\n## Validated ontology\n" +
+                inputs.validatedModel.text +
+                "\n## Report of the validated version\n\n" +
+                JSON.stringify(inputs.validatedRun.savedRun.report ?? null) +
+                "\n\n## Database\n\n" +
                 inputs.databaseText +
                 "\n## Overlaps measured between candidate columns\n\nshared distinct values between left and right, with the distinct values of each\n\n" +
                 JSON.stringify(inputs.validatedRun.savedRun.measuredOverlaps || []) +
@@ -270,31 +277,36 @@ export default function () {
             if (mappingAnswer) {
                 const checksStart = Date.now();
                 sendProgress({ type: "stepStart", step: "mappingChecks" });
-                const localClassLabels = new Set();
-                const localDatatypePropertyLabels = new Set();
-                (inputs.ontologyAnswer.classes || []).forEach(function (ontologyClass) {
-                    localClassLabels.add(ontologyClass.label);
-                    (ontologyClass.datatypeProperties || []).forEach((datatypeProperty) => localDatatypePropertyLabels.add(datatypeProperty.label));
-                });
                 // a local class is read in the validated version, an upper one in the upper ontology that declares it
                 const classSourceByIri = {};
-                localClassLabels.forEach((classLabel) => (classSourceByIri[termNamespace + getLocalName(classLabel)] = inputs.tboxSource));
+                const classLabelByIri = { ...inputs.validatedModel.classLabelByIri };
+                for (const classIri of Object.keys(classLabelByIri)) {
+                    classSourceByIri[classIri] = inputs.tboxSource;
+                }
+                const datatypePropertyIris = new Set(inputs.validatedModel.datatypePropertyIris);
                 const upperOntologies = getImportedOntologies(inputs.validatedRun.savedRun.upperOntologies || [], inputs.found.userSources);
                 const upperModels = await callVocablesFunction("OntologyModels", "registerSourcesModel", [upperOntologies, {}], inputs.userContext);
-                upperOntologies.forEach(function (upperOntology) {
-                    Object.keys(upperModels[upperOntology]?.classes || {}).forEach((classIri) => (classSourceByIri[classIri] = classSourceByIri[classIri] ?? upperOntology));
-                });
+                for (const upperOntology of upperOntologies) {
+                    const upperModel = upperModels[upperOntology] || {};
+                    for (const [classIri, upperClass] of Object.entries(upperModel.classes || {})) {
+                        classSourceByIri[classIri] = classSourceByIri[classIri] ?? upperOntology;
+                        classLabelByIri[classIri] = classLabelByIri[classIri] ?? upperClass.label;
+                    }
+                    for (const propertyIri of getDatatypePropertyIris(upperModel)) {
+                        datatypePropertyIris.add(propertyIri);
+                    }
+                }
                 mappingDocument = getMappingDocument(mappingAnswer, {
                     source: source,
                     instanceNamespace: instanceNamespace,
-                    termNamespace: termNamespace,
                     databaseId: inputs.database.id,
                     databaseName: inputs.database.database,
                     schemaName: inputs.database.driver == "postgres" ? postgresSchemaName : null,
                     columnsByTable: inputs.columnsByTable,
-                    localClassLabels: localClassLabels,
-                    localDatatypePropertyLabels: localDatatypePropertyLabels,
+                    prefixes: inputs.validatedModel.prefixes,
                     classSourceByIri: classSourceByIri,
+                    classLabelByIri: classLabelByIri,
+                    datatypePropertyIris: datatypePropertyIris,
                     userLogin: inputs.found.userInfo.user?.login ?? null,
                 });
                 rangeWarnings = getLiteralRangeWarnings(mappingAnswer, inputs.columnsByTable);
@@ -441,8 +453,8 @@ export default function () {
         security: [{ restrictAdmin: [] }],
         summary: "Generate a mapping of a source from its validated version",
         description:
-            "Builds the `bin/AI/prompts/mapping_building_from_ontology.md` prompt with the validated version the source imports (its answer JSON), the schema, samples and profiles " +
-            "of the database it was built on and the measured overlaps, then calls the ontology model once. The answer is a compact JSON (resources, relations, candidates, report) " +
+            "Builds the `bin/AI/prompts/mapping_building_from_ontology.md` prompt with the validated version the source imports, read from its graph (classes, axioms, properties and provenance annotations) with the report of its generation, the schema, samples and profiles " +
+            "of the database it was built on and the measured overlaps, then calls the ontology model once. The answer is a compact JSON (resources, relations, candidates, report), terms as prefixed names, " +
             "that the route turns into the MappingModeler document. Tables, columns, classes and properties it names are checked against the schema and the validated version, " +
             "the ranges of its literals against the SQL types, and its relations with OntologyModels.getAllowedPropertiesBetweenNodes. The version is saved and becomes the mapping " +
             "MappingModeler opens. NDJSON events: stepStart and stepEnd (mapping, mappingChecks), writing, result, error.",

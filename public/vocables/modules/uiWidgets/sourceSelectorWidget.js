@@ -20,6 +20,13 @@ var SourceSelectorWidget = (function () {
         }
         SourceSelectorWidget.initWidget(null, "mainDialogDiv", true, onSourceSelect, null, null, function () {
             $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
+            // a tool able to create the source it works on offers it next to the existing ones
+            var toolController = Config.userTools[MainController.currentTool].controller;
+            if (resetAll && toolController.createNewSource) {
+                var newSourceButton = $("<button class='slsv-button-1' style='margin-left: 10px'>New source</button>");
+                newSourceButton.on("click", toolController.createNewSource);
+                $("#sourceSelector_searchInput").parent().append(newSourceButton);
+            }
         });
     };
 

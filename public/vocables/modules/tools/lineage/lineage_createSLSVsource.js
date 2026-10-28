@@ -24,9 +24,10 @@ var Lineage_createSLSVsource = (function () {
      * @function
      * @name onLoaded
      * @memberof Lineage_createSLSVsource
+     * @param {Function} [callbackFn] - called with the name of the created source, the bot then stays in the current tool
      * @returns {void}
      */
-    self.onLoaded = function () {
+    self.onLoaded = function (callbackFn) {
         self.checkSourceCreationRights(function (err, refusalMessage) {
             if (err) {
                 return MainController.errorAlert(err);
@@ -35,7 +36,7 @@ var Lineage_createSLSVsource = (function () {
                 $("#botDiv").html("<div style='padding: 15px; max-width: 400px;'>" + refusalMessage + "</div>");
                 return UI.openDialog("botPanel", { title: CreateSLSVsource_bot.title });
             }
-            CreateSLSVsource_bot.start();
+            CreateSLSVsource_bot.start(callbackFn);
         });
     };
 

@@ -7,7 +7,16 @@ var CreateSLSVsource_bot = (function () {
 
     self.title = "OntoCreator";
 
-    self.start = function () {
+    self.start = function (callbackFn) {
+        // a calling tool gets the created source back instead of the choice of a tool to launch, an empty step ends the bot
+        self.callbackFn = null;
+        self.loadingWorkflow._OR = self.toolLaunchAlternatives;
+        if (callbackFn) {
+            self.callbackFn = function () {
+                callbackFn(self.params.sourceLabel);
+            };
+            delete self.loadingWorkflow._OR;
+        }
         self.myBotEngine.init(CreateSLSVsource_bot, self.workflow, null, function () {
             self.params = { sourceLabel: "", graphUri: "", imports: [], temporarySourceName: "", temporaryGraphUri: "" };
 
@@ -22,6 +31,7 @@ var CreateSLSVsource_bot = (function () {
             "Add Ontology Metadata": { workflowMetaDataFn: {} },
         },
     };
+    self.toolLaunchAlternatives = self.loadingWorkflow._OR;
 
     self.workflowMetaData = {
         _OR: {

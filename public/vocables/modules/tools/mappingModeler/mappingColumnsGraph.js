@@ -2385,7 +2385,9 @@ var MappingColumnsGraph = (function () {
                 // draw graph
                 function (callbackSeries) {
                     if (graphDiv) {
-                        self.implicitModelVisjsGraph = new VisjsGraphClass(graphDiv, classVisjsData, { visjsOptions: { autoResize: true } });
+                        // vis draws nothing before its 1000 default stabilization iterations end, tens of seconds on a large mapping
+                        var stabilization = { iterations: 200, fit: true };
+                        self.implicitModelVisjsGraph = new VisjsGraphClass(graphDiv, classVisjsData, { visjsOptions: { autoResize: true, physics: { stabilization: stabilization } } });
                         return self.implicitModelVisjsGraph.draw(function () {
                             callbackSeries();
                         });

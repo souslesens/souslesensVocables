@@ -23,9 +23,8 @@ const axiomFieldByManchesterKeyword = {
 const lineBreakRegex = /\s*[\r\n]+\s*/g;
 const localNameRegex = /[^/#]+$/;
 
-// the definitions and examples of the terms of a graph, English or untagged
-function getAnnotationsQuery(graphUri) {
-    const annotatedPredicates = Object.keys(textFieldByPredicate);
+// the values of the given annotation predicates on the terms of a graph, English or untagged
+function getAnnotationsQuery(graphUri, annotatedPredicates) {
     const bracketedPredicates = annotatedPredicates.map((predicate) => "<" + predicate + ">");
     const annotatedPredicateList = bracketedPredicates.join(", ");
     return (
@@ -60,7 +59,7 @@ async function getEnrichedOntologyModel(source, userContext) {
         enrichedModel.restrictions = {};
     }
 
-    const annotationRows = await callVocablesFunction("AxiomExtractor", "execQuery", [getAnnotationsQuery(enrichedModel.graphUri)], userContext);
+    const annotationRows = await callVocablesFunction("AxiomExtractor", "execQuery", [getAnnotationsQuery(enrichedModel.graphUri, Object.keys(textFieldByPredicate))], userContext);
     // the module the runner has just loaded: the axioms it cached for the source may predate the change that emptied the enriched cache
     const { default: AxiomExtractor } = await import(axiomExtractorUrl);
     delete AxiomExtractor.basicAxioms[source];
@@ -138,4 +137,4 @@ async function getEnrichedOntologyModel(source, userContext) {
     return enrichedModel;
 }
 
-export { getEnrichedOntologyModel };
+export { getAnnotationsQuery, getEnrichedOntologyModel };

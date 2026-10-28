@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { callVocablesFunction } from "../remoteCodeRunner.js";
-import { getLocalName, absoluteIriRegex } from "./ontologyAnswer.js";
+import { absoluteIriRegex } from "./ontologyAnswer.js";
 import { getImportedOntologies, getLinkStatuses, getModelLabel } from "./restrictionCheck.js";
 
 // the styles, layers and editor context of a mapping MappingModeler saved for PAZFLOR (data/graphs/mappings_PAZFLOR_ABOX_ALL.json)
@@ -52,6 +52,7 @@ const rangesBySqlTypeRegex = [
     [/^date$/, ["xsd:date", "xsd:dateTime", "xsd:string"]],
 ];
 const localNameRegex = /[^/#]+$/;
+const prefixedNameRegex = /^([A-Za-z][\w-]*):(\S+)$/;
 
 // an IRI ending in / or # keeps its whole text as label
 function getIriLocalName(iri) {
@@ -75,23 +76,29 @@ function getMappingDocument(mappingAnswer, mappingContext) {
     function hasColumn(table, column) {
         return (mappingContext.columnsByTable[table] || []).some((schemaColumn) => schemaColumn.column_name == column);
     }
+    // the answer names terms as the prompt writes them, prefixed names of the prompt prefixes, or full IRIs
+    function getTermIri(termReference) {
+        const reference = String(termReference || "");
+        if (absoluteIriRegex.test(reference)) {
+            return reference;
+        }
+        const prefixedNameMatch = reference.match(prefixedNameRegex);
+        const namespace = prefixedNameMatch && Object.hasOwn(mappingContext.prefixes, prefixedNameMatch[1]) ? mappingContext.prefixes[prefixedNameMatch[1]] : null;
+        return namespace ? namespace + prefixedNameMatch[2] : null;
+    }
     function getClassIri(classReference) {
-        if (absoluteIriRegex.test(classReference)) {
-            return classReference;
+        const classIri = getTermIri(classReference);
+        if (!classIri || !mappingContext.classSourceByIri[classIri]) {
+            problems.push("class of no term of the ontologies: " + classReference);
         }
-        if (!mappingContext.localClassLabels.has(classReference)) {
-            problems.push("class of no local term: " + classReference);
-        }
-        return mappingContext.termNamespace + getLocalName(classReference);
+        return classIri || String(classReference);
     }
     function getDatatypePropertyIri(propertyReference) {
-        if (absoluteIriRegex.test(propertyReference)) {
-            return propertyReference;
+        const propertyIri = getTermIri(propertyReference);
+        if (!propertyIri || !mappingContext.datatypePropertyIris.has(propertyIri)) {
+            problems.push("datatype property of no term of the ontologies: " + propertyReference);
         }
-        if (!mappingContext.localDatatypePropertyLabels.has(propertyReference)) {
-            problems.push("datatype property of no local term: " + propertyReference);
-        }
-        return mappingContext.termNamespace + getLocalName(propertyReference);
+        return propertyIri || String(propertyReference);
     }
 
     const nodes = [];
@@ -203,7 +210,7 @@ function getMappingDocument(mappingAnswer, mappingContext) {
     }
 
     classIris.forEach(function (classIri) {
-        const classLabel = getIriLocalName(classIri);
+        const classLabel = mappingContext.classLabelByIri[classIri] || getIriLocalName(classIri);
         nodes.push({ id: classIri, label: classLabel, data: { id: classIri, label: classLabel, type: "Class", source: mappingContext.classSourceByIri[classIri] ?? null }, ...nodeStyles.Class });
     });
     tableNames.forEach(function (tableName) {
@@ -227,7 +234,8 @@ function getMappingDocument(mappingAnswer, mappingContext) {
             problems.push("relation " + relation.from + " " + relation.property + " " + relation.to + " across two tables: a relation links two resources of one row");
             return;
         }
-        if (!absoluteIriRegex.test(relation.property || "")) {
+        const propertyIri = getTermIri(relation.property);
+        if (!propertyIri) {
             problems.push("relation " + relation.from + " " + relation.to + " with a property that is no IRI: " + relation.property);
             return;
         }
@@ -238,10 +246,10 @@ function getMappingDocument(mappingAnswer, mappingContext) {
             id: "relation-" + relationIndex + "-" + getColumnNodeId(relation.from, relation.to),
             from: getColumnNodeId(fromResource.table, fromResource.column),
             to: getColumnNodeId(toResource.table, toResource.column),
-            label: getIriLocalName(relation.property),
+            label: getIriLocalName(propertyIri),
             data: {
-                id: relation.property,
-                type: relation.property,
+                id: propertyIri,
+                type: propertyIri,
                 source: null,
                 restrictionType: restrictionType,
                 cardinality: restrictionType && relation.cardinality != null ? { type: restrictionType, value: String(relation.cardinality) } : null,
@@ -253,7 +261,7 @@ function getMappingDocument(mappingAnswer, mappingContext) {
             width: edgeWidth,
             font: { size: edgeFontSize },
         });
-        checkedRelations.push({ from: relation.from, property: relation.property, to: relation.to, fromClass: classIriByColumnKey[relation.from], toClass: classIriByColumnKey[relation.to] });
+        checkedRelations.push({ from: relation.from, property: propertyIri, to: relation.to, fromClass: classIriByColumnKey[relation.from], toClass: classIriByColumnKey[relation.to] });
     });
 
     // tables side by side, each above its columns, the classes on top

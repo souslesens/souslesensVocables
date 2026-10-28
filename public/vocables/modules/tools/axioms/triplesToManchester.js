@@ -24,11 +24,8 @@ var TriplesToManchester = (function () {
     CARDINALITY_KEYWORDS[OWL + "maxQualifiedCardinality"] = "max";
     CARDINALITY_KEYWORDS[OWL + "qualifiedCardinality"] = "exactly";
 
-    self.convert = function (triples) {
-        if (!triples || triples.length === 0) {
-            return "";
-        }
-
+    // { subjectUri: { "SubClassOf:": [expression, ...], "EquivalentTo:": [...] } }
+    self.getAxiomsBySubject = function (triples) {
         var subjectIndex = self._buildSubjectIndex(triples);
         self._labelsMap = subjectIndex.labelsMap || {};
         var rootAxioms = self._findAllRootAxioms(subjectIndex);
@@ -49,7 +46,15 @@ var TriplesToManchester = (function () {
             var expression = self._resolveNode(axiom.targetNode, subjectIndex, new Set());
             bySubject[axiom.uri][keyword].push(self._renderExpression(expression));
         });
+        return bySubject;
+    };
 
+    self.convert = function (triples) {
+        if (!triples || triples.length === 0) {
+            return "";
+        }
+
+        var bySubject = self.getAxiomsBySubject(triples);
         var labelsMap = self._labelsMap;
         var lines = [];
         for (var uri in bySubject) {
@@ -137,12 +142,12 @@ var TriplesToManchester = (function () {
 
         visited.add(nodeId);
 
-        var typeTriple = predicates.find(function (p) {
-            return p.predicate === RDF + "type";
+        // a restriction used as a filler is also typed owl:Class by AxiomExtractor
+        var isRestriction = predicates.some(function (p) {
+            return p.predicate === RDF + "type" && p.object === OWL + "Restriction";
         });
-        var nodeType = typeTriple ? typeTriple.object : null;
 
-        if (nodeType === OWL + "Restriction") {
+        if (isRestriction) {
             return self._resolveRestriction(predicates, subjectIndex, visited);
         }
 

@@ -291,7 +291,8 @@ var Lineage_sqlDataExtractor = (function () {
                 }
             }
             var orderByAliases = [...classIdAliases, ...dataPropertyAliases];
-            self.sortedSql = self.sql + "\nORDER BY " + orderByAliases.join(", ");
+            // sorted outside the joins: a LIMIT on the joins makes postgres pick nested loops, hours on tables without index
+            self.sortedSql = "SELECT * FROM (\n" + self.sql + "\n) extracted\nORDER BY " + orderByAliases.join(", ");
         }
 
         if (options.hideDialog) {

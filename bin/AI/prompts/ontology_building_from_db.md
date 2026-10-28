@@ -50,6 +50,7 @@ A code list is a table, or a pair of columns, holding a short code with a name o
     • Otherwise the mapping will not populate them: each value is an individual of the class, declared directly in the ontology.
     • The code goes in skos:notation, the name in rdfs:label, the meaning in skos:definition.
     • A code column and its text column carry one value.
+    • Two columns of different tables drawing on the same list hold two separate values, one per row of each table, even when every code matches: they never share an identifier (section 17).
     • Report a list mixing kinds of values, as a list of admission types that also holds "cancelled", duplicate codes, and codes used in the data but absent from the list.
 5. Verify reusable ontology terms
 Use the definitions of the upper ontologies given in the inputs.
@@ -327,7 +328,8 @@ Do not confuse OWL's open-world semantics with database integrity checking. Use 
 For source-derived classes and properties:
     • Use a meaningful domain label in rdfs:label, never a table or column name: SousLeSens displays rdfs:label.
     • Use table or column identifiers in skos:notation.
-    • Annotate each class whose instances the database identifies with a local annotation property identifyingColumn naming that column, and every column of other tables holding the same code, so the mapping builds one IRI per instance.
+    • Annotate each class whose instances the database identifies with a local annotation property identifyingColumn naming that column, and every column of other tables referring to the same instance, so the mapping builds one IRI per instance. A column refers to the same instance when it points to it, as a foreign key or a measured overlap of a reference does. A column that only takes its values from the same code list refers to no instance of the other table: the priority of a work order and the priority of its notification share their codes, not their identity, and may differ.
+    • When a code means something only together with a qualifier column, as a priority code with its priority type, the identifier is composite: list every component in key order.
     • Keep qualified identifiers in dedicated provenance annotations.
     • Document identifier case normalization in the report.
     • Avoid arbitrary generated display suffixes.
@@ -456,7 +458,7 @@ This run returns only the following, instead of the deliverables listed in secti
 ```
     • A reference to an imported term is its full IRI, the prefix of the input model expanded. A reference to a local term is its label: the program builds its IRI (section 17).
     • parent is the one named direct superclass (section 6). definition is the skos:definition, altLabels the skos:altLabel, notation the skos:notation (section 17).
-    • identifyingColumns lists the columns holding the code that identifies the instances (section 17). sourceColumns lists the columns the class is drawn from or, for a synthesized class, the columns giving evidence for it. interpretationStatus says whether the class is grounded in keys and measured overlaps or speculative, and why.
+    • identifyingColumns lists the column holding the code that identifies the instances, then the columns referring to those same instances, never a column that only shares the code list (section 17). sourceColumns lists the columns the class is drawn from or, for a synthesized class, the columns giving evidence for it. interpretationStatus says whether the class is grounded in keys and measured overlaps or speculative, and why.
     • kind is one of someValuesFrom, allValuesFrom, hasValue, qualifiedCardinality, minQualifiedCardinality, maxQualifiedCardinality (section 16). cardinality is given for the last three only. The target of hasValue is an individual.
     • A restriction is written once, on the class it describes (section 15).
     • datatypeProperties lists the local datatype properties of the class. range is an XSD datatype name: string, date, dateTime, decimal, integer, boolean. columns lists every column holding the value. A reused imported datatype property is named in the report, with its class and its columns.

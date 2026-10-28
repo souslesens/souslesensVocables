@@ -1,13 +1,16 @@
-import { readdir, readFile } from "fs/promises";
+import { mkdir, readdir, readFile, rename, writeFile } from "fs/promises";
 import { join, resolve as resolvePath } from "path";
 import rdflib from "rdflib";
 import httpProxy from "../httpProxy.js";
 import { rdfDataModel } from "../../model/rdfData.js";
 import { mainConfigModel } from "../../model/mainConfig.js";
+import { sourceModel } from "../../model/sources.js";
+import userManager from "../user.js";
 
 // each run of POST /ai/ontologyFromDb is saved as <source>_<run timestamp>.ttl and .json in the folder of its database
 const llmAnswersDirectory = resolvePath("data", "semanticVirtualDB");
 const nonNameCharacterRegex = /[^A-Za-z0-9_-]/g;
+const timestampSeparatorRegex = /[:.]/g;
 const runTimestampRegex = /^\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d{3}Z$/;
 const trailingSlashRegex = /\/$/;
 const turtleExtension = ".ttl";
@@ -15,6 +18,18 @@ const turtleExtension = ".ttl";
 const insertedTriplesPerQuery = 200;
 // some sources store blank nodes as IRIs <_:b...>, which no RDF parser accepts
 const blankNodeAsIriRegex = /<_:([^>]+)>/g;
+// the samples, profiles and overlaps measured on a database, read again by the next runs on it
+const databaseChecksFileName = "databaseChecks.json";
+const tboxSourceInfix = "_TBOX_";
+const versionDotRegex = /\./g;
+
+// the generations running in this server process, by source: a page opened during a run finds it there
+const runningGenerations = {};
+
+// an ISO date a file name accepts, as 2026-10-27T12-45-25-821Z
+function getNewRunTimestamp() {
+    return new Date().toISOString().replace(timestampSeparatorRegex, "-");
+}
 
 function getRunName(source, runTimestamp) {
     return (source + "_" + runTimestamp).replace(nonNameCharacterRegex, "_");
@@ -23,6 +38,16 @@ function getRunName(source, runTimestamp) {
 // the graph of one run sits under the graph of its source, so it reads as an annex of that source
 function getRunGraphUri(sourceGraphUri, runTimestamp) {
     return sourceGraphUri.replace(trailingSlashRegex, "") + "/virtual-db-creator/" + runTimestamp + "/";
+}
+
+// a validated version becomes the source <source>_TBOX_<version>, "_" in place of the dots that a source name used as an HTML id cannot hold
+function getTboxSourceName(source, ontologyVersion) {
+    return source + tboxSourceInfix + ontologyVersion.replace(versionDotRegex, "_");
+}
+
+// the TBOX sources a source imports are its own validated versions, never upper ontologies of a new one
+function isTboxSourceOf(source, importedSource) {
+    return importedSource.startsWith(source + tboxSourceInfix);
 }
 
 // the runs of a source, whatever database they were built from, newest first, with the content of their run file
@@ -71,6 +96,29 @@ async function listSourceRuns(source) {
     }
     runs.sort((run1, run2) => run2.runTimestamp.localeCompare(run1.runTimestamp));
     return runs;
+}
+
+// the source config of the user and its runs, or the HTTP error to answer
+async function findSourceRuns(req, sourceName) {
+    const userInfo = await userManager.getUser(req.user);
+    const userSources = await sourceModel.getUserSources(userInfo.user);
+    if (!userSources[sourceName]) {
+        return { status: 404, error: sourceName + " not found" };
+    }
+    return { userInfo: userInfo, userSources: userSources, sourceConfig: userSources[sourceName], runs: await listSourceRuns(sourceName) };
+}
+
+// the run named in the request is looked up among the runs of the source: a name never reaches a file path
+async function findSourceRun(req, sourceName, runName) {
+    const found = await findSourceRuns(req, sourceName);
+    if (found.error) {
+        return found;
+    }
+    found.run = found.runs.find((sourceRun) => sourceRun.runName == runName);
+    if (!found.run) {
+        return { status: 404, error: "no run " + runName + " for " + sourceName };
+    }
+    return found;
 }
 
 // the triples of a subject and of the blank nodes it nests travel in one query: a blank node label only holds inside one query
@@ -138,4 +186,55 @@ async function loadTurtleIntoGraph(turtle, graphUri) {
     return store.statements.length;
 }
 
-export { llmAnswersDirectory, blankNodeAsIriRegex, nonNameCharacterRegex, trailingSlashRegex, getRunName, getRunGraphUri, listSourceRuns, loadTurtleIntoGraph };
+// a run without Turtle, a failed generation, is saved all the same: a paid answer is never lost
+async function saveRun(databaseFolder, runName, savedRun, turtle) {
+    const databaseAnswersDirectory = join(llmAnswersDirectory, databaseFolder);
+    await mkdir(databaseAnswersDirectory, { recursive: true });
+    await writeFile(join(databaseAnswersDirectory, runName + ".json"), JSON.stringify(savedRun, null, 2));
+    if (turtle) {
+        await writeFile(join(databaseAnswersDirectory, runName + turtleExtension), turtle);
+    }
+}
+
+// { inspectionsByTable: { table: { columnNames, sampleTexts, profile } }, overlapsByPairKey: { "a.x=b.y": sharedDistinctValues } },
+// empty before the first run
+async function readDatabaseChecks(databaseFolder) {
+    try {
+        return JSON.parse(await readFile(join(llmAnswersDirectory, databaseFolder, databaseChecksFileName), "utf8"));
+    } catch (readError) {
+        // a file cut by a stopped server is counted again rather than blocking every run
+        if (readError.code == "ENOENT" || readError instanceof SyntaxError) {
+            return { inspectionsByTable: {}, overlapsByPairKey: {} };
+        }
+        throw readError;
+    }
+}
+
+async function saveDatabaseChecks(databaseFolder, databaseChecks) {
+    const databaseAnswersDirectory = join(llmAnswersDirectory, databaseFolder);
+    await mkdir(databaseAnswersDirectory, { recursive: true });
+    // written aside then renamed: a run reading the file never finds it half written
+    const temporaryPath = join(databaseAnswersDirectory, databaseChecksFileName + ".tmp");
+    await writeFile(temporaryPath, JSON.stringify(databaseChecks));
+    await rename(temporaryPath, join(databaseAnswersDirectory, databaseChecksFileName));
+}
+
+export {
+    llmAnswersDirectory,
+    blankNodeAsIriRegex,
+    nonNameCharacterRegex,
+    trailingSlashRegex,
+    runningGenerations,
+    getNewRunTimestamp,
+    getRunName,
+    getTboxSourceName,
+    isTboxSourceOf,
+    getRunGraphUri,
+    listSourceRuns,
+    findSourceRuns,
+    findSourceRun,
+    loadTurtleIntoGraph,
+    saveRun,
+    readDatabaseChecks,
+    saveDatabaseChecks,
+};

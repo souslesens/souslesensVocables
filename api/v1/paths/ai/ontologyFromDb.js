@@ -1,30 +1,47 @@
 import { readFileSync } from "fs";
-import { mkdir, writeFile } from "fs/promises";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import async from "async";
-import rdflib from "rdflib";
-import llmClient from "../../../../bin/AI/llmClient.js";
-import { llmAnswersDirectory, blankNodeAsIriRegex, nonNameCharacterRegex, trailingSlashRegex, getRunName, getRunGraphUri, loadTurtleIntoGraph } from "../../../../bin/AI/ontologyRuns.js";
-import Util from "../../../../bin/util.js";
+import {
+    nonNameCharacterRegex,
+    runningGenerations,
+    getNewRunTimestamp,
+    listSourceRuns,
+    isTboxSourceOf,
+    getRunName,
+    getRunGraphUri,
+    loadTurtleIntoGraph,
+    saveRun,
+    readDatabaseChecks,
+    saveDatabaseChecks,
+} from "../../../../bin/AI/ontologyRuns.js";
+import {
+    ontologyModelId,
+    ontologyReasoningEffort,
+    modelMaxOutputTokens,
+    getNextOntologyVersion,
+    jsonBlockRegex,
+    createMessage,
+    getCutAnswerError,
+    getAnswerText,
+    getTermNamespace,
+    getAnswerTurtle,
+} from "../../../../bin/AI/ontologyAnswer.js";
 import userManager from "../../../../bin/user.js";
 import * as dbConnector from "../../../../bin/KG/dbConnector.js";
 import { databaseModel } from "../../../../model/databases.js";
 import { sourceModel } from "../../../../model/sources.js";
-import { rdfDataModel } from "../../../../model/rdfData.js";
-import { mainConfigModel } from "../../../../model/mainConfig.js";
+import { getUpperOntologyModelText } from "../../../../bin/AI/upperOntologyModel.js";
+import { checkRunRestrictions } from "../../../../bin/AI/restrictionCheck.js";
+import { describeDatabase } from "../../../../bin/AI/databaseDescription.js";
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const ontologyBuildingPromptPath = join(currentDirectory, "../../../../bin/AI/prompts/ontology_building_from_db.md");
 const linkCandidatesPromptPath = join(currentDirectory, "../../../../bin/AI/prompts/link_candidates_from_db.md");
 
 // OpenRouter ids, fixed here: the page does not choose the models
-const ontologyModelId = "anthropic/claude-opus-5.5";
-const ontologyReasoningEffort = "medium";
 const linkCandidatesModelId = "anthropic/claude-haiku-5.5";
 const linkCandidatesReasoningEffort = "medium";
-// the most OpenRouter lets the Claude 5.5 models write, reasoning included: a run is never cut by a limit of ours
-const modelMaxOutputTokens = 128000;
 const sampleRowCount = 5;
 const sampleValueMaxLength = 100;
 // YYYY-MM-DD
@@ -32,28 +49,8 @@ const dateTextLength = 10;
 // database checks run before the call, a few at once: 8 saturate a postgres server on the biggest tables
 const parallelCheckCount = 4;
 const maxMeasuredPairs = 150;
-const ontologyVersion = "0.1.0";
-const restrictionKinds = ["someValuesFrom", "allValuesFrom", "hasValue", "qualifiedCardinality", "minQualifiedCardinality", "maxQualifiedCardinality"];
-const cardinalityKinds = ["qualifiedCardinality", "minQualifiedCardinality", "maxQualifiedCardinality"];
-const localAnnotationProperties = ["identifyingColumn", "sourceColumn", "interpretationStatus"];
-// XSD local names the prompt allows as datatype property ranges
-const datatypeRanges = ["string", "date", "dateTime", "decimal", "integer", "boolean"];
 
-const wellKnownPrefixes = {
-    rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-    rdfs: "http://www.w3.org/2000/01/rdf-schema#",
-    owl: "http://www.w3.org/2002/07/owl#",
-    xsd: "http://www.w3.org/2001/XMLSchema#",
-    skos: "http://www.w3.org/2004/02/skos/core#",
-    obo: "http://purl.obolibrary.org/obo/",
-};
-const namespaceRegex = /^(.*[/#])[^/#]+$/;
-const lastNamespaceSegmentRegex = /([^/#]+)[/#]$/;
-const timestampSeparatorRegex = /[:.]/g;
-const prefixStartRegex = /^[A-Za-z]/;
 const lineBreakRegex = /\s*[\r\n]+\s*/g;
-const absoluteIriRegex = /^https?:\/\//;
-const jsonBlockRegex = /```json[ \t]*\r?\n([\s\S]*?)```/;
 const maxPairsPlaceholderRegex = /\{maxPairs\}/g;
 const answerLabelRegex = /"label"\s*:\s*"([^"]+)"/g;
 // one pair of the link candidates answer, in the key order the prompt asks for
@@ -61,311 +58,62 @@ const streamedPairRegex = /\{\s*"left"\s*:\s*"([^"]+)"\s*,\s*"right"\s*:\s*"([^"
 // the page is told what the model writes at most once a second
 const writingProgressIntervalMs = 1000;
 
-// llmClient.createMessage as a promise, its token usage added to the given counter
-function createMessage(messageParams, usageCounter) {
-    return new Promise((resolve, reject) => {
-        llmClient.createMessage(messageParams, function (error, completion) {
-            if (error) {
-                return reject(error);
-            }
-            usageCounter.input_tokens += completion.usage?.input_tokens ?? 0;
-            usageCounter.output_tokens += completion.usage?.output_tokens ?? 0;
-            resolve(completion);
-        });
-    });
-}
-
-// an answer stopped by the output limit, in words a reader of the page understands; null when the answer is whole
-function getCutAnswerError(completion, answerText) {
-    if (completion?.stop_reason != "max_tokens") {
-        return null;
-    }
-    const outputTokens = completion.usage?.output_tokens ?? 0;
-    if (!answerText) {
-        return "the model spent its whole output limit (" + outputTokens + " tokens) reasoning and wrote no answer";
-    }
-    return "the model reached its output limit (" + outputTokens + " tokens) before finishing its answer, after " + answerText.length + " characters";
-}
-
-function getAnswerText(completion) {
-    const textBlocks = completion ? completion.content.filter((block) => block.type == "text") : [];
-    const answerTexts = textBlocks.map((block) => block.text);
-    return answerTexts.join("\n");
-}
-
 export default function () {
     let operations = {
         POST,
     };
 
-    function describeDatabase(database, schema, columnsByTable, tableInspections) {
-        const primaryKeyColumnsByTable = {};
-        schema.primaryKeys.forEach(function (keyColumn) {
-            if (!primaryKeyColumnsByTable[keyColumn.table_name]) {
-                primaryKeyColumnsByTable[keyColumn.table_name] = [];
-            }
-            primaryKeyColumnsByTable[keyColumn.table_name].push(keyColumn.column_name);
+    // one line per sample row, values as the prompt shows them: saved as text, they read the same at every run
+    function getSampleTexts(rows, columns) {
+        const columnTypes = {};
+        columns.forEach(function (column) {
+            columnTypes[column.column_name] = column.data_type;
         });
-        const foreignKeysByTable = {};
-        schema.foreignKeys.forEach(function (keyColumn) {
-            if (!foreignKeysByTable[keyColumn.table_name]) {
-                foreignKeysByTable[keyColumn.table_name] = {};
-            }
-            if (!foreignKeysByTable[keyColumn.table_name][keyColumn.constraint_name]) {
-                foreignKeysByTable[keyColumn.table_name][keyColumn.constraint_name] = { columns: [], referencedTable: keyColumn.referenced_table, referencedColumns: [] };
-            }
-            const foreignKey = foreignKeysByTable[keyColumn.table_name][keyColumn.constraint_name];
-            foreignKey.columns.push(keyColumn.column_name);
-            foreignKey.referencedColumns.push(keyColumn.referenced_column);
-        });
-
-        let databaseDescription = "Database " + database.database + " (" + database.driver + ")\n";
-        for (const tableName of Object.keys(columnsByTable)) {
-            const inspection = tableInspections[tableName];
-            const columnTypes = {};
-            columnsByTable[tableName].forEach(function (column) {
-                columnTypes[column.column_name] = column.data_type;
-            });
-            const columnTexts = columnsByTable[tableName].map(function (column) {
-                const nullability = column.is_nullable == "NO" ? ", NOT NULL" : "";
-                const columnProfile = inspection.profile ? inspection.profile.columnsByName[column.column_name] : null;
-                const profileText = columnProfile ? ", " + columnProfile.distinctCount + " distinct, " + (inspection.profile.rowCount - columnProfile.filledCount) + " null" : "";
-                return column.column_name + " (" + column.data_type + nullability + profileText + ")";
-            });
-            databaseDescription += "\nTable " + tableName + "\n";
-            databaseDescription += inspection.profile ? "Rows: " + inspection.profile.rowCount + "\n" : "Rows: not counted (" + inspection.profileError + ")\n";
-            databaseDescription += "Columns: " + columnTexts.join(", ") + "\n";
-            if (primaryKeyColumnsByTable[tableName]) {
-                databaseDescription += "Primary key: (" + primaryKeyColumnsByTable[tableName].join(", ") + ")\n";
-            }
-            const foreignKeys = foreignKeysByTable[tableName] || {};
-            for (const [constraintName, foreignKey] of Object.entries(foreignKeys)) {
-                databaseDescription +=
-                    "Foreign key " + constraintName + ": (" + foreignKey.columns.join(", ") + ") -> " + foreignKey.referencedTable + "(" + foreignKey.referencedColumns.join(", ") + ")\n";
-            }
-
-            if (!inspection.rows) {
-                databaseDescription += "Sample rows: unavailable (" + inspection.sampleError + ")\n";
-                continue;
-            }
-            databaseDescription += "Sample rows:\n";
-            inspection.rows.forEach(function (row) {
-                const values = Object.entries(row).map(function ([columnName, value]) {
-                    if (value === null || value === undefined) {
-                        return "NULL";
+        return rows.map(function (row) {
+            const values = Object.entries(row).map(function ([columnName, value]) {
+                if (value === null || value === undefined) {
+                    return "NULL";
+                }
+                if (Buffer.isBuffer(value)) {
+                    return "<binary>";
+                }
+                let valueText;
+                if (value instanceof Date) {
+                    // pg reads a stored date in the server time zone: its local fields are the stored value
+                    valueText = value.toLocaleString("sv-SE");
+                    if (columnTypes[columnName] == "date") {
+                        valueText = valueText.substring(0, dateTextLength);
                     }
-                    if (Buffer.isBuffer(value)) {
-                        return "<binary>";
-                    }
-                    let valueText;
-                    if (value instanceof Date) {
-                        // pg reads a stored date in the server time zone: its local fields are the stored value
-                        valueText = value.toLocaleString("sv-SE");
-                        if (columnTypes[columnName] == "date") {
-                            valueText = valueText.substring(0, dateTextLength);
-                        }
-                    } else if (typeof value == "object") {
-                        valueText = JSON.stringify(value);
-                    } else {
-                        valueText = String(value);
-                    }
-                    valueText = valueText.replace(lineBreakRegex, " ");
-                    if (valueText.length > sampleValueMaxLength) {
-                        valueText = valueText.substring(0, sampleValueMaxLength) + "...";
-                    }
-                    return valueText;
-                });
-                databaseDescription += values.join(" | ") + "\n";
-            });
-        }
-        return databaseDescription;
-    }
-
-    // the whole graph of a source as Turtle grouped by subject, restrictions nested in their class,
-    // one prefix per namespace, the configured one when a source owns it
-    async function getOntologyTurtle(graphUri, pageSize, sourcePrefixesByGraphUri) {
-        const tripleCount = await rdfDataModel.getTripleCount(graphUri);
-        let nTriples = "";
-        for (let offset = 0; offset < tripleCount; offset += pageSize) {
-            nTriples += (await rdfDataModel.getGraphPartNt(graphUri, pageSize, offset)) + "\n";
-        }
-
-        // some sources store blank nodes as IRIs <_:b...>, which no RDF parser accepts
-        const blankNodesAsTerms = nTriples.replace(blankNodeAsIriRegex, "_:$1");
-        // one parse for every page, so a blank node keeps one identity across pages; N-Triples is a subset of Turtle
-        const store = rdflib.graph();
-        rdflib.parse(blankNodesAsTerms, store, graphUri, "text/turtle");
-
-        const prefixes = { ...wellKnownPrefixes };
-        store.statements.forEach(function (statement) {
-            [statement.subject, statement.predicate, statement.object].forEach(function (term) {
-                const namespaceMatch = term.termType == "NamedNode" ? term.value.match(namespaceRegex) : null;
-                if (!namespaceMatch || Object.values(prefixes).includes(namespaceMatch[1])) {
-                    return;
-                }
-                const namespace = namespaceMatch[1];
-                let prefixName = sourcePrefixesByGraphUri[namespace];
-                if (!prefixName) {
-                    const segmentMatch = namespace.match(lastNamespaceSegmentRegex);
-                    prefixName = segmentMatch ? segmentMatch[1] : "ns";
-                }
-                // a Turtle prefix starts with a letter and holds letters, digits, _ and -
-                prefixName = prefixName.replace(nonNameCharacterRegex, "_");
-                if (!prefixStartRegex.test(prefixName)) {
-                    prefixName = "ns" + prefixName;
-                }
-                let uniquePrefixName = prefixName;
-                for (let suffix = 2; prefixes[uniquePrefixName]; suffix++) {
-                    uniquePrefixName = prefixName + suffix;
-                }
-                prefixes[uniquePrefixName] = namespace;
-            });
-        });
-
-        // rdflib rather than the N3 writer, which neither groups triples by subject nor nests blank nodes
-        const serializer = rdflib.Serializer(store);
-        // rdflib ignores the prefixes starting with ns and names those namespaces itself
-        serializer.setNamespaces(prefixes);
-        return serializer.statementsToN3(store.statements);
-    }
-
-    // the compact answer of the model as Turtle, local IRIs built from labels as SousLeSens builds them;
-    // what cannot be written is listed in problems rather than guessed
-    function getAnswerTurtle(ontologyAnswer, source, sourceConfig, termNamespace, upperOntologyGraphUris) {
-        const rdf = rdflib.Namespace(wellKnownPrefixes.rdf);
-        const rdfs = rdflib.Namespace(wellKnownPrefixes.rdfs);
-        const owl = rdflib.Namespace(wellKnownPrefixes.owl);
-        const xsd = rdflib.Namespace(wellKnownPrefixes.xsd);
-        const skos = rdflib.Namespace(wellKnownPrefixes.skos);
-        const local = rdflib.Namespace(termNamespace);
-        const store = rdflib.graph();
-        const problems = [];
-        const classes = ontologyAnswer.classes || [];
-        const individuals = ontologyAnswer.individuals || [];
-        const groups = ontologyAnswer.groups || [];
-
-        const localLabels = new Set();
-        const labelsByLocalName = {};
-        const datatypeProperties = classes.flatMap((ontologyClass) => ontologyClass.datatypeProperties || []);
-        [...classes, ...individuals, ...groups, ...datatypeProperties].forEach(function (localTerm) {
-            const localName = Util.formatStringForTriple(String(localTerm.label), true);
-            if (labelsByLocalName[localName] !== undefined || localName == "") {
-                problems.push("local terms sharing the IRI " + termNamespace + localName + ": " + labelsByLocalName[localName] + ", " + localTerm.label);
-            }
-            labelsByLocalName[localName] = localTerm.label;
-            localLabels.add(localTerm.label);
-        });
-        function getTerm(reference) {
-            if (absoluteIriRegex.test(reference)) {
-                return rdflib.sym(reference);
-            }
-            if (!localLabels.has(reference)) {
-                problems.push("reference to no local term: " + reference);
-            }
-            return local(Util.formatStringForTriple(String(reference), true));
-        }
-        function addTexts(subject, predicate, textOrTexts, language) {
-            const texts = Array.isArray(textOrTexts) ? textOrTexts : [textOrTexts];
-            const writtenTexts = texts.filter((text) => typeof text == "string" && text != "");
-            writtenTexts.forEach((text) => store.add(subject, predicate, rdflib.literal(text, language)));
-        }
-
-        const ontology = rdflib.sym(sourceConfig.graphUri);
-        store.add(ontology, rdf("type"), owl("Ontology"));
-        store.add(ontology, rdfs("label"), rdflib.literal(source));
-        addTexts(ontology, rdfs("comment"), ontologyAnswer.ontologyComment, "en");
-        store.add(ontology, owl("versionIRI"), rdflib.sym(sourceConfig.graphUri.replace(trailingSlashRegex, "") + "/version/" + ontologyVersion));
-        store.add(ontology, owl("versionInfo"), rdflib.literal(ontologyVersion));
-        upperOntologyGraphUris.forEach((graphUri) => store.add(ontology, owl("imports"), rdflib.sym(graphUri)));
-        localAnnotationProperties.forEach(function (annotationName) {
-            store.add(local(annotationName), rdf("type"), owl("AnnotationProperty"));
-            store.add(local(annotationName), rdfs("label"), rdflib.literal(annotationName, "en"));
-        });
-
-        classes.forEach(function (ontologyClass) {
-            const classTerm = getTerm(ontologyClass.label);
-            store.add(classTerm, rdf("type"), owl("Class"));
-            store.add(classTerm, rdfs("label"), rdflib.literal(ontologyClass.label, "en"));
-            if (ontologyClass.parent) {
-                store.add(classTerm, rdfs("subClassOf"), getTerm(ontologyClass.parent));
-            } else {
-                problems.push("class without parent: " + ontologyClass.label);
-            }
-            addTexts(classTerm, skos("definition"), ontologyClass.definition, "en");
-            addTexts(classTerm, skos("altLabel"), ontologyClass.altLabels, "en");
-            addTexts(classTerm, skos("notation"), ontologyClass.notation);
-            addTexts(classTerm, local("identifyingColumn"), ontologyClass.identifyingColumns);
-            addTexts(classTerm, local("sourceColumn"), ontologyClass.sourceColumns);
-            addTexts(classTerm, local("interpretationStatus"), ontologyClass.interpretationStatus, "en");
-
-            (ontologyClass.restrictions || []).forEach(function (restriction) {
-                const isCardinality = cardinalityKinds.includes(restriction.kind);
-                if (!restrictionKinds.includes(restriction.kind) || !restriction.property || !restriction.target || (isCardinality && !Number.isInteger(restriction.cardinality))) {
-                    problems.push("restriction not written on " + ontologyClass.label + ": " + JSON.stringify(restriction));
-                    return;
-                }
-                const restrictionNode = rdflib.blankNode();
-                store.add(classTerm, rdfs("subClassOf"), restrictionNode);
-                store.add(restrictionNode, rdf("type"), owl("Restriction"));
-                store.add(restrictionNode, owl("onProperty"), getTerm(restriction.property));
-                if (isCardinality) {
-                    store.add(restrictionNode, owl(restriction.kind), rdflib.literal(String(restriction.cardinality), xsd("nonNegativeInteger")));
-                    store.add(restrictionNode, owl("onClass"), getTerm(restriction.target));
+                } else if (typeof value == "object") {
+                    valueText = JSON.stringify(value);
                 } else {
-                    store.add(restrictionNode, owl(restriction.kind), getTerm(restriction.target));
+                    valueText = String(value);
                 }
+                valueText = valueText.replace(lineBreakRegex, " ");
+                if (valueText.length > sampleValueMaxLength) {
+                    valueText = valueText.substring(0, sampleValueMaxLength) + "...";
+                }
+                return valueText;
             });
-
-            (ontologyClass.datatypeProperties || []).forEach(function (datatypeProperty) {
-                if (absoluteIriRegex.test(datatypeProperty.label)) {
-                    problems.push("imported datatype property not written on " + ontologyClass.label + ": " + datatypeProperty.label);
-                    return;
-                }
-                const propertyTerm = getTerm(datatypeProperty.label);
-                const columnNames = (datatypeProperty.columns || []).map((qualifiedName) => qualifiedName.substring(qualifiedName.lastIndexOf(".") + 1));
-                store.add(propertyTerm, rdf("type"), owl("DatatypeProperty"));
-                store.add(propertyTerm, rdfs("label"), rdflib.literal(datatypeProperty.label, "en"));
-                store.add(propertyTerm, rdfs("domain"), classTerm);
-                if (datatypeRanges.includes(datatypeProperty.range)) {
-                    store.add(propertyTerm, rdfs("range"), xsd(datatypeProperty.range));
-                } else {
-                    problems.push("range not written on " + datatypeProperty.label + ": " + datatypeProperty.range);
-                }
-                addTexts(propertyTerm, skos("notation"), [...new Set(columnNames)]);
-                addTexts(propertyTerm, local("sourceColumn"), datatypeProperty.columns);
-            });
+            return values.join(" | ");
         });
-
-        individuals.forEach(function (individual) {
-            const individualTerm = getTerm(individual.label);
-            store.add(individualTerm, rdf("type"), owl("NamedIndividual"));
-            store.add(individualTerm, rdf("type"), getTerm(individual.type));
-            store.add(individualTerm, rdfs("label"), rdflib.literal(individual.label, "en"));
-            addTexts(individualTerm, skos("notation"), individual.notation);
-        });
-
-        groups.forEach(function (group) {
-            const groupTerm = getTerm(group.label);
-            store.add(groupTerm, rdfs("label"), rdflib.literal(group.label, "en"));
-            addTexts(groupTerm, skos("notation"), group.notation);
-            (group.members || []).forEach((member) => store.add(groupTerm, rdfs("member"), getTerm(member)));
-        });
-
-        const prefixes = { ...wellKnownPrefixes };
-        if (sourceConfig.prefix) {
-            prefixes[sourceConfig.prefix] = termNamespace;
-        }
-        const serializer = rdflib.Serializer(store);
-        serializer.setNamespaces(prefixes);
-        return { turtle: serializer.statementsToN3(store.statements), problems: problems };
     }
 
     async function POST(req, res, _next) {
         const runStart = Date.now();
         // a generation streams its progress, one JSON object per line; the prompt-only calls answer at once
         const isProgressStreamed = !req.body.promptOnly && !req.body.linkCandidatesPromptOnly;
+        // the entry of this generation in runningGenerations, which pages opened later read
+        let runningGeneration = null;
         function sendProgress(progressEvent) {
             if (!isProgressStreamed) {
+                return;
+            }
+            if (progressEvent.type == "stepStart") {
+                runningGeneration.step = progressEvent.step;
+            }
+            // the page that started the run may be closed: the run goes on and is saved all the same
+            if (res.destroyed || res.writableEnded) {
                 return;
             }
             if (!res.headersSent) {
@@ -384,7 +132,8 @@ export default function () {
         try {
             const source = req.body.source;
             const databaseId = req.body.databaseId;
-            const upperOntologies = req.body.upperOntologies || [];
+            // a validated version of the source is imported by it, it is not an upper ontology of the next one
+            const upperOntologies = (req.body.upperOntologies || []).filter((upperOntology) => !isTboxSourceOf(req.body.source, upperOntology));
 
             const userInfo = await userManager.getUser(req.user);
             const userSources = await sourceModel.getUserSources(userInfo.user);
@@ -392,11 +141,24 @@ export default function () {
             if (unknownSources.length > 0) {
                 return res.status(404).json({ error: "sources not found: " + unknownSources.join(", ") });
             }
+            if (isProgressStreamed) {
+                if (runningGenerations[source]) {
+                    return res.status(409).json({ error: "a generation is already running for " + source + ", started at " + runningGenerations[source].startedAt });
+                }
+                runningGeneration = { startedAt: new Date(runStart).toISOString(), database: null, step: null };
+                runningGenerations[source] = runningGeneration;
+            }
 
             const connection = await databaseModel.getUserConnection(userInfo.user, databaseId);
             const database = await databaseModel.getDatabase(databaseId);
             const schema = await dbConnector.getSchemaDescription(connection, database.driver);
             const clientDriver = databaseModel.getClientDriver(database.driver);
+            const databaseFolder = database.database.replace(nonNameCharacterRegex, "_");
+            if (runningGeneration) {
+                runningGeneration.database = database.database;
+            }
+            // the samples, profiles and overlaps of the previous runs on the database, unless the caller asks to count again
+            const databaseChecks = req.body.refreshDatabaseChecks ? { inspectionsByTable: {}, overlapsByPairKey: {} } : await readDatabaseChecks(databaseFolder);
 
             const preparationStart = Date.now();
             // the qualified name table.column is the form of the prompt and of the link candidates
@@ -410,48 +172,70 @@ export default function () {
                 columnsByTable[column.table_name].push(column);
             });
             const tableNames = Object.keys(columnsByTable);
+            const tableInspections = {};
             sendProgress({ type: "stepStart", step: "profiles", tableCount: tableNames.length, columnCount: schema.columns.length });
-            let inspectedTableCount = 0;
-            const inspectionList = await async.mapLimit(tableNames, parallelCheckCount, async function (tableName) {
-                const inspection = { tableName: tableName };
-                const columnNames = columnsByTable[tableName].map((column) => column.column_name);
+            // the samples first: the link candidates step reads the schema and the samples while the profiles are counted
+            await async.eachLimit(tableNames, parallelCheckCount, async function (tableName) {
+                const columnNames = columnsByTable[tableName].map((column) => column.column_name).join(",");
+                const cachedInspection = databaseChecks.inspectionsByTable[tableName];
+                // a table whose columns changed since the earlier runs is read again
+                const inspection = cachedInspection && cachedInspection.columnNames == columnNames ? { ...cachedInspection } : { columnNames: columnNames };
+                tableInspections[tableName] = inspection;
+                if (inspection.sampleTexts) {
+                    return;
+                }
                 // a view without select right, or a broken one, must not stop the whole description
                 try {
-                    inspection.rows = await dbConnector.getSampleData(connection, tableName, sampleRowCount, clientDriver);
+                    const sampleRows = await dbConnector.getSampleData(connection, tableName, sampleRowCount, clientDriver);
+                    inspection.sampleTexts = getSampleTexts(sampleRows, columnsByTable[tableName]);
                 } catch (sampleError) {
                     inspection.sampleError = sampleError.message;
                 }
-                try {
-                    inspection.profile = await dbConnector.getColumnProfile(connection, clientDriver, tableName, columnNames);
-                } catch (profileError) {
-                    inspection.profileError = profileError.message;
-                }
-                inspectedTableCount++;
-                sendProgress({ type: "progress", step: "profiles", done: inspectedTableCount, total: tableNames.length, item: tableName });
-                return inspection;
             });
-            endStep("profiles", preparationStart, {});
-            const tableInspections = {};
-            inspectionList.forEach(function (inspection) {
-                tableInspections[inspection.tableName] = inspection;
-            });
-            const databaseText = describeDatabase(database, schema, columnsByTable, tableInspections);
+            // without the profiles, even those of earlier runs: the link candidates read the same text at every run
+            const sampleInspections = {};
+            for (const [tableName, inspection] of Object.entries(tableInspections)) {
+                sampleInspections[tableName] = { sampleTexts: inspection.sampleTexts, sampleError: inspection.sampleError };
+            }
+            const samplesDatabaseText = describeDatabase(database, schema, columnsByTable, sampleInspections);
 
             // the pairs worth measuring: given by the caller, or proposed by a small model that reads the database only
             const linkCandidatesTemplate = readFileSync(linkCandidatesPromptPath, "utf8");
-            const linkCandidatesPrompt = linkCandidatesTemplate.replace(maxPairsPlaceholderRegex, String(maxMeasuredPairs)) + "\n\n# Database\n\n" + databaseText;
+            const linkCandidatesPrompt = linkCandidatesTemplate.replace(maxPairsPlaceholderRegex, String(maxMeasuredPairs)) + "\n\n# Database\n\n" + samplesDatabaseText;
             if (req.body.linkCandidatesPromptOnly) {
                 return res.status(200).json({ prompt: linkCandidatesPrompt, promptCharacters: linkCandidatesPrompt.length });
             }
+
+            let profiledTableCount = 0;
+            let cachedProfileCount = 0;
+            const profilesDone = async
+                .eachLimit(tableNames, parallelCheckCount, async function (tableName) {
+                    const inspection = tableInspections[tableName];
+                    if (inspection.profile) {
+                        cachedProfileCount++;
+                    } else {
+                        const columnNames = columnsByTable[tableName].map((column) => column.column_name);
+                        try {
+                            inspection.profile = await dbConnector.getColumnProfile(connection, clientDriver, tableName, columnNames);
+                        } catch (profileError) {
+                            inspection.profileError = profileError.message;
+                        }
+                    }
+                    profiledTableCount++;
+                    sendProgress({ type: "progress", step: "profiles", done: profiledTableCount, total: tableNames.length, item: tableName });
+                })
+                .then(() => endStep("profiles", preparationStart, { cachedTableCount: cachedProfileCount }));
+
             // a pair and its reverse are one measure; a pair is measured as soon as it is known, while the model still writes the next ones
             const distinctCountOf = (column) => tableInspections[column.table_name].profile?.columnsByName[column.column_name]?.distinctCount;
             const measuredPairKeys = new Set();
             // indexed by the order the pairs were proposed in, so the prompt lists them the same way at every run
             const measuredOverlaps = [];
             let measuredPairCount = 0;
+            let cachedOverlapCount = 0;
             const pairsStart = Date.now();
             sendProgress({ type: "stepStart", step: "pairs" });
-            const pairMeasureQueue = async.queue(async function ({ pair, pairIndex }) {
+            const pairMeasureQueue = async.queue(async function ({ pair, pairKey, pairIndex }) {
                 const measuredOverlap = { left: pair.left, right: pair.right };
                 const leftColumn = columnsByQualifiedName.get(pair.left);
                 const rightColumn = columnsByQualifiedName.get(pair.right);
@@ -461,23 +245,35 @@ export default function () {
                     // the distinct values of each column come from the profiles, one query per pair is left
                     measuredOverlap.leftDistinctValues = distinctCountOf(leftColumn);
                     measuredOverlap.rightDistinctValues = distinctCountOf(rightColumn);
-                    try {
-                        measuredOverlap.sharedDistinctValues = await dbConnector.getSharedDistinctValueCount(
-                            connection,
-                            clientDriver,
-                            leftColumn.table_name,
-                            leftColumn.column_name,
-                            rightColumn.table_name,
-                            rightColumn.column_name,
-                        );
-                    } catch (overlapError) {
-                        measuredOverlap.error = overlapError.message;
+                    const cachedSharedValues = databaseChecks.overlapsByPairKey[pairKey];
+                    if (cachedSharedValues !== undefined) {
+                        measuredOverlap.sharedDistinctValues = cachedSharedValues;
+                        cachedOverlapCount++;
+                    } else {
+                        try {
+                            measuredOverlap.sharedDistinctValues = await dbConnector.getSharedDistinctValueCount(
+                                connection,
+                                clientDriver,
+                                leftColumn.table_name,
+                                leftColumn.column_name,
+                                rightColumn.table_name,
+                                rightColumn.column_name,
+                            );
+                            databaseChecks.overlapsByPairKey[pairKey] = measuredOverlap.sharedDistinctValues;
+                        } catch (overlapError) {
+                            measuredOverlap.error = overlapError.message;
+                        }
                     }
                 }
                 measuredOverlaps[pairIndex] = measuredOverlap;
                 measuredPairCount++;
                 sendProgress({ type: "progress", step: "pairs", done: measuredPairCount, total: measuredPairKeys.size, item: pair.left + " = " + pair.right });
             }, parallelCheckCount);
+            // the measures wait for the profiles: both at once saturate a postgres server
+            pairMeasureQueue.pause();
+            // resumed on a failure too: the failure is met where profilesDone is awaited
+            const resumePairMeasures = () => pairMeasureQueue.resume();
+            profilesDone.then(resumePairMeasures, resumePairMeasures);
             function queuePairMeasure(pair) {
                 // the answer of a model may hold a pair of another shape
                 if (!pair || typeof pair.left != "string" || typeof pair.right != "string") {
@@ -489,7 +285,7 @@ export default function () {
                     return;
                 }
                 measuredPairKeys.add(pairKey);
-                pairMeasureQueue.push({ pair: pair, pairIndex: measuredPairKeys.size - 1 });
+                pairMeasureQueue.push({ pair: pair, pairKey: pairKey, pairIndex: measuredPairKeys.size - 1 });
             }
 
             let linkCandidates = req.body.linkCandidates;
@@ -544,13 +340,27 @@ export default function () {
             if (Array.isArray(linkCandidates?.pairs)) {
                 linkCandidates.pairs.forEach(queuePairMeasure);
             }
+            await profilesDone;
             // drain() never resolves on a queue that is already idle
             if (!pairMeasureQueue.idle()) {
                 await pairMeasureQueue.drain();
             }
             const sharingOverlaps = measuredOverlaps.filter((overlap) => overlap.sharedDistinctValues > 0);
-            endStep("pairs", pairsStart, { sharingCount: sharingOverlaps.length });
+            endStep("pairs", pairsStart, { sharingCount: sharingOverlaps.length, cachedPairCount: cachedOverlapCount });
             const preparationSeconds = Math.round((Date.now() - preparationStart) / 1000);
+            const databaseText = describeDatabase(database, schema, columnsByTable, tableInspections);
+
+            // only what was read without error is kept, a failed check is tried again at the next run
+            for (const [tableName, inspection] of Object.entries(tableInspections)) {
+                if (inspection.sampleTexts && inspection.profile) {
+                    databaseChecks.inspectionsByTable[tableName] = { columnNames: inspection.columnNames, sampleTexts: inspection.sampleTexts, profile: inspection.profile };
+                }
+            }
+            try {
+                await saveDatabaseChecks(databaseFolder, databaseChecks);
+            } catch (writeError) {
+                console.warn("[ai/ontologyFromDb] database checks not saved: " + writeError.message);
+            }
 
             let overlapsText = "\n## Overlaps measured between candidate columns\n\n";
             if (linkCandidatesError && measuredOverlaps.length == 0) {
@@ -585,27 +395,14 @@ export default function () {
                 overlapsText += "Not measured: " + failedPairTexts.join(", ") + "\n";
             }
 
-            const sourcePrefixesByGraphUri = {};
-            Object.values(userSources).forEach(function (sourceConfig) {
-                if (sourceConfig.prefix && sourceConfig.graphUri) {
-                    sourcePrefixesByGraphUri[sourceConfig.graphUri] = sourceConfig.prefix;
-                }
-            });
-            const config = await mainConfigModel.getConfig();
             const upperOntologiesStart = Date.now();
             sendProgress({ type: "stepStart", step: "upperOntologies", sources: upperOntologies });
-            let ontologiesText = "";
-            for (const upperOntology of upperOntologies) {
-                const graphUri = userSources[upperOntology].graphUri;
-                const turtle = await getOntologyTurtle(graphUri, config.sparqlDownloadLimit, sourcePrefixesByGraphUri);
-                ontologiesText += "\n## " + upperOntology + " (graph " + graphUri + ")\n```turtle\n" + turtle + "```\n";
-            }
+            const ontologiesText = await getUpperOntologyModelText(upperOntologies, { user: userInfo, userSources: userSources });
             endStep("upperOntologies", upperOntologiesStart, {});
 
             const basePrompt = readFileSync(ontologyBuildingPromptPath, "utf8");
             const sourceConfig = userSources[source];
-            // the IRIs of the terms are built on baseUri, which may differ from the graph
-            const termNamespace = sourceConfig.baseUri || sourceConfig.graphUri;
+            const termNamespace = getTermNamespace(sourceConfig);
             const prompt =
                 basePrompt +
                 "\n\n# Inputs\n\nSource whose ontology is built: " +
@@ -706,17 +503,17 @@ export default function () {
                 }
             }
             const upperOntologyGraphUris = upperOntologies.map((upperOntology) => userSources[upperOntology].graphUri);
+            const ontologyVersion = getNextOntologyVersion(await listSourceRuns(source));
             let answerOntology = null;
             // an answer of an unexpected shape must not stop the save of a paid generation
             try {
-                answerOntology = ontologyAnswer ? getAnswerTurtle(ontologyAnswer, source, sourceConfig, termNamespace, upperOntologyGraphUris) : null;
+                answerOntology = ontologyAnswer ? getAnswerTurtle(ontologyAnswer, source, sourceConfig, termNamespace, upperOntologyGraphUris, ontologyVersion) : null;
             } catch (conversionError) {
                 answerError = "answer not turned into Turtle: " + conversionError.message;
             }
             const turtle = answerOntology ? answerOntology.turtle : null;
 
-            const runDate = new Date().toISOString();
-            const runTimestamp = runDate.replace(timestampSeparatorRegex, "-");
+            const runTimestamp = getNewRunTimestamp();
             const runGraphUri = getRunGraphUri(sourceConfig.graphUri, runTimestamp);
             let graphTripleCount = null;
             let graphError = null;
@@ -730,16 +527,36 @@ export default function () {
                 }
                 endStep("graph", graphStart, { tripleCount: graphTripleCount, error: graphError });
             }
+            // the hierarchy of the local classes is read in the run graph: no graph, no check
+            let restrictionChecks = null;
+            let restrictionCheckError = null;
+            if (graphTripleCount) {
+                const restrictionCheckStart = Date.now();
+                sendProgress({ type: "stepStart", step: "restrictionCheck" });
+                try {
+                    restrictionChecks = await checkRunRestrictions(turtle, runGraphUri, source, upperOntologies, { user: userInfo, userSources: userSources });
+                } catch (checkError) {
+                    restrictionCheckError = checkError.message || String(checkError);
+                }
+                const notAllowedChecks = (restrictionChecks || []).filter((restrictionCheck) => restrictionCheck.status == "notAllowed");
+                const uncheckedChecks = (restrictionChecks || []).filter((restrictionCheck) => restrictionCheck.status == "unchecked");
+                endStep("restrictionCheck", restrictionCheckStart, {
+                    checkedCount: restrictionChecks ? restrictionChecks.length : 0,
+                    notAllowedCount: notAllowedChecks.length,
+                    uncheckedCount: uncheckedChecks.length,
+                    error: restrictionCheckError,
+                });
+            }
             const totalSeconds = Math.round((Date.now() - runStart) / 1000);
 
             // every run is kept, failed ones included, a paid generation is never lost
-            const databaseFolder = database.database.replace(nonNameCharacterRegex, "_");
-            const databaseAnswersDirectory = join(llmAnswersDirectory, databaseFolder);
             const runName = getRunName(source, runTimestamp);
             const savedRun = {
                 source: source,
                 database: database.database,
+                databaseId: databaseId,
                 upperOntologies: upperOntologies,
+                ontologyVersion: ontologyVersion,
                 model: completion?.model ?? null,
                 reasoningEffort: completion ? ontologyReasoningEffort : null,
                 stopReason: completion?.stop_reason ?? null,
@@ -750,6 +567,8 @@ export default function () {
                 graphUri: turtle ? runGraphUri : null,
                 graphTripleCount: graphTripleCount,
                 graphError: graphError,
+                restrictionChecks: restrictionChecks,
+                restrictionCheckError: restrictionCheckError,
                 preparationSeconds: preparationSeconds,
                 linkCandidatesModel: linkCandidatesModel,
                 linkCandidatesUsage: linkCandidatesUsage,
@@ -764,11 +583,7 @@ export default function () {
             };
             let saveError = null;
             try {
-                await mkdir(databaseAnswersDirectory, { recursive: true });
-                await writeFile(join(databaseAnswersDirectory, runName + ".json"), JSON.stringify(savedRun, null, 2));
-                if (turtle) {
-                    await writeFile(join(databaseAnswersDirectory, runName + ".ttl"), turtle);
-                }
+                await saveRun(databaseFolder, runName, savedRun, turtle);
             } catch (writeError) {
                 console.warn("[ai/ontologyFromDb] answer not saved: " + writeError.message);
                 saveError = writeError.message;
@@ -791,6 +606,8 @@ export default function () {
                 graphUri: savedRun.graphUri,
                 graphTripleCount: graphTripleCount,
                 graphError: graphError,
+                restrictionChecks: restrictionChecks,
+                restrictionCheckError: restrictionCheckError,
                 savedAs: savedAs,
                 saveError: saveError,
             });
@@ -802,6 +619,10 @@ export default function () {
             }
             sendProgress({ type: "error", error: error.message });
             res.end();
+        } finally {
+            if (runningGeneration && runningGenerations[req.body.source] === runningGeneration) {
+                delete runningGenerations[req.body.source];
+            }
         }
     }
 
@@ -811,12 +632,13 @@ export default function () {
         description:
             "Builds the `bin/AI/prompts/ontology_building_from_db.md` prompt with the database schema (columns, nullability, primary and foreign keys, " +
             "sample rows, row count and per column distinct and null counts), the overlaps measured beforehand between the pairs of columns " +
-            "a first LLM call (Claude Haiku 5.5) proposes from the database description alone (150 at most) and the Turtle of the upper ontologies, most abstract first, then calls Claude Sonnet 5.5 once, at xhigh reasoning effort, through OpenRouter. " +
+            "a first LLM call (Claude Haiku 5.5) proposes from the database description alone (150 at most) and the enriched model of the upper ontologies (as GET /ontologyModels/enriched returns it), most abstract first, then calls Claude Opus 5.5 once, at medium reasoning effort, through OpenRouter. " +
             "The answer is one compact JSON object (classes, restrictions, datatype properties, individuals, groups, report) that the route turns into Turtle. " +
             "Each run is saved under `data/semanticVirtualDB/<database>/`, the Turtle in a `.ttl` file, the report, the problems met while writing the Turtle and the whole answer in a `.json` file. " +
             "The Turtle is then loaded into the run graph `<source graphUri>/virtual-db-creator/<run timestamp>/`. " +
-            "A generation answers in NDJSON, one event per line while it runs: stepStart and stepEnd (profiles, linkCandidates, pairs, upperOntologies, ontology, graph) with their seconds, " +
-            "progress (tables profiled, pairs measured), writing (characters written, reasoning excerpt, labels completed) and a last result event with the total time, or an error event.",
+            "Each restriction of the run graph is then checked with OntologyModels.getAllowedPropertiesBetweenNodes against the domains and ranges of the upper ontologies, inherited ones included: allowed, notAllowed, or unchecked when the property has no named domain nor range. " +
+            "A generation answers in NDJSON, one event per line while it runs: stepStart and stepEnd (profiles, linkCandidates, pairs, upperOntologies, ontology, graph, restrictionCheck) with their seconds, " +
+            "progress (tables profiled, pairs measured; the samples, profiles and overlaps of earlier runs on the database are read from its databaseChecks.json), writing (characters written, reasoning excerpt, labels completed) and a last result event with the total time, or an error event.",
         operationId: "postOntologyFromDb",
         parameters: [
             {
@@ -842,13 +664,22 @@ export default function () {
                                 "Pairs of columns to measure, as the link candidates step returns them: { pairs: [{ left: table.column, right: table.column }], repeatingTables: [[table, table]] }. Skips that step.",
                         },
                         answer: { type: "string", description: "Answer of an earlier call to turn into Turtle and save again, without calling the LLM." },
+                        refreshDatabaseChecks: {
+                            type: "boolean",
+                            description:
+                                "Read the samples, profiles and overlaps from the database again instead of the ones the earlier runs saved in `data/semanticVirtualDB/<database>/databaseChecks.json`.",
+                        },
                     },
                 },
             },
         ],
         responses: {
-            200: { description: "Prompt-only calls: the prompt as JSON. A generation: NDJSON progress events ending with a result event (run name, run graph, total time, usage, problems) or an error event." },
+            200: {
+                description:
+                    "Prompt-only calls: the prompt as JSON. A generation: NDJSON progress events ending with a result event (run name, run graph, total time, usage, problems) or an error event.",
+            },
             404: { description: "A source is unknown to the user." },
+            409: { description: "A generation is already running for the source." },
         },
         tags: ["AI"],
     };

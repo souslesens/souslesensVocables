@@ -1,7 +1,5 @@
 import { readFile, rm } from "fs/promises";
-import userManager from "../../../../../bin/user.js";
-import { getRunGraphUri, listSourceRuns, loadTurtleIntoGraph } from "../../../../../bin/AI/ontologyRuns.js";
-import { sourceModel } from "../../../../../model/sources.js";
+import { runningGenerations, getRunGraphUri, findSourceRuns, findSourceRun, loadTurtleIntoGraph } from "../../../../../bin/AI/ontologyRuns.js";
 import { rdfDataModel } from "../../../../../model/rdfData.js";
 
 export default function () {
@@ -11,51 +9,38 @@ export default function () {
         DELETE,
     };
 
-    // the source config of the user and its runs, or the HTTP error to answer
-    async function findSourceRuns(req, sourceName) {
-        const userInfo = await userManager.getUser(req.user);
-        const userSources = await sourceModel.getUserSources(userInfo.user);
-        if (!userSources[sourceName]) {
-            return { status: 404, error: sourceName + " not found" };
-        }
-        return { sourceConfig: userSources[sourceName], runs: await listSourceRuns(sourceName) };
-    }
-
-    // the run named in the request is looked up among the runs of the source: a name never reaches a file path
-    async function findSourceRun(req, sourceName, runName) {
-        const found = await findSourceRuns(req, sourceName);
-        if (found.error) {
-            return found;
-        }
-        found.run = found.runs.find((sourceRun) => sourceRun.runName == runName);
-        if (!found.run) {
-            return { status: 404, error: "no run " + runName + " for " + sourceName };
-        }
-        return found;
-    }
-
     async function GET(req, res, _next) {
         try {
             const found = await findSourceRuns(req, req.query.source);
             if (found.error) {
                 return res.status(found.status).json({ error: found.error });
             }
+            // a validated version is the graph of a TBOX source
+            const sourceNamesByGraphUri = {};
+            for (const [sourceName, sourceConfig] of Object.entries(found.userSources)) {
+                sourceNamesByGraphUri[sourceConfig.graphUri] = sourceName;
+            }
             const runDescriptions = [];
             for (const run of found.runs) {
                 const graphUri = getRunGraphUri(found.sourceConfig.graphUri, run.runTimestamp);
                 runDescriptions.push({
+                    validatedAs: sourceNamesByGraphUri[graphUri] ?? null,
                     runName: run.runName,
                     runTimestamp: run.runTimestamp,
                     database: run.database,
                     graphUri: graphUri,
                     model: run.savedRun?.model ?? null,
+                    ontologyVersion: run.savedRun?.ontologyVersion ?? null,
+                    // a revision names the run it was made from
+                    parentRunName: run.savedRun?.revision?.parentRunName ?? null,
+                    revisionSummary: run.savedRun?.revision?.summary ?? null,
                     // the first runs were saved before the run file carried a total time
                     totalSeconds: run.savedRun?.totalSeconds ?? null,
                     usage: run.savedRun?.usage ?? null,
                     isGraphLoaded: await rdfDataModel.ask(graphUri, [null, null, null]),
                 });
             }
-            res.status(200).json({ runs: runDescriptions });
+            res.status(200).json({ runs: runDescriptions, generating: runningGenerations[req.query.source] ?? null });
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: error.message });
@@ -84,7 +69,12 @@ export default function () {
             if (found.error) {
                 return res.status(found.status).json({ error: found.error });
             }
-            await rdfDataModel.deleteGraph(getRunGraphUri(found.sourceConfig.graphUri, found.run.runTimestamp));
+            const graphUri = getRunGraphUri(found.sourceConfig.graphUri, found.run.runTimestamp);
+            const validatingSource = Object.values(found.userSources).find((sourceConfig) => sourceConfig.graphUri == graphUri);
+            if (validatingSource) {
+                return res.status(409).json({ error: found.run.runName + " is validated as the source " + validatingSource.name + ", which reads its graph" });
+            }
+            await rdfDataModel.deleteGraph(graphUri);
             await rm(found.run.turtlePath, { force: true });
             await rm(found.run.jsonPath, { force: true });
             res.status(200).json({ deleted: found.run.runName });
@@ -102,11 +92,15 @@ export default function () {
         summary: "List the ontology generation runs of a source",
         description:
             "Lists the runs of POST /ai/ontologyFromDb saved for a source under `data/semanticVirtualDB/<database>/`, newest first, " +
-            "with the model, the total time and the token usage of the run file, its graph `<source graphUri>/virtual-db-creator/<run timestamp>/` and whether that graph holds triples.",
+            "with the model, the total time and the token usage of the run file, its graph `<source graphUri>/virtual-db-creator/<run timestamp>/` and whether that graph holds triples. " +
+            "`generating` describes the generation running for the source in this server process, if any.",
         operationId: "getOntologyFromDbRuns",
         parameters: [sourceParameter],
         responses: {
-            200: { description: "{ runs: [{ runName, runTimestamp, database, graphUri, model, totalSeconds, usage, isGraphLoaded }] }" },
+            200: {
+                description:
+                    "{ runs: [{ validatedAs, runName, runTimestamp, database, graphUri, model, ontologyVersion, parentRunName, revisionSummary, totalSeconds, usage, isGraphLoaded }] }, parentRunName and revisionSummary set on a run made by POST /ai/ontologyFromDb/revise, generating: { startedAt, database, step } or null",
+            },
             404: { description: "The source is unknown to the user." },
         },
         tags: ["AI"],

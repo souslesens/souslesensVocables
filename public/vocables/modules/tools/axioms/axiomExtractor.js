@@ -1,8 +1,5 @@
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
-import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
-import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
-import Lineage_selection from "../lineage/lineage_selection.js";
 import sparql_common from "../../sparqlProxies/sparql_common.js";
 
 var AxiomExtractor = (function () {
@@ -313,8 +310,8 @@ var AxiomExtractor = (function () {
 
     self.getClassAxiomsTriples = function (source, classUri, callback) {
         self.getBasicAxioms(source, function (err, sourceBasicAxioms) {
-            if (!sourceBasicAxioms) {
-                return alert("source axioms not loaded");
+            if (err) {
+                return callback(err);
             }
             var rootNode = sourceBasicAxioms[classUri];
             if (!rootNode) {
@@ -377,6 +374,10 @@ var AxiomExtractor = (function () {
                                 predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
                                 object: "http://www.w3.org/2002/07/owl#ObjectProperty",
                             });
+                            // an anonymous property, inverse of a named one
+                            if (child.p.indexOf("http") < 0) {
+                                recurse(child.p, level + 1);
+                            }
                         }
                         if (!distinctNodes[child.o] && child.o.indexOf("http") < 0) {
                             recurse(child.o, level + 1);

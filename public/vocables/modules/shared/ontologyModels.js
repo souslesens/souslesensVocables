@@ -1077,16 +1077,17 @@ var OntologyModels = (function () {
                     var allDomains = {};
                     var allRanges = {};
 
+                    // a root class, as BFO entity, has no superclass and so no hierarchy
                     startNodeIds.forEach(function (startNodeId) {
                         startNodeAncestorIds.push(startNodeId);
-                        hierarchies[startNodeId].forEach(function (item) {
+                        (hierarchies[startNodeId] || []).forEach(function (item) {
                             startNodeAncestorIds.push(item.superClass.value);
                         });
                     });
                     endNodeIds.forEach(function (endNodeId) {
                         if (endNodeId) {
                             endNodeAncestorIds.push(endNodeId);
-                            hierarchies[endNodeId].forEach(function (item, startNodeIndex) {
+                            (hierarchies[endNodeId] || []).forEach(function (item, startNodeIndex) {
                                 endNodeAncestorIds.push(item.superClass.value);
                             });
                         }

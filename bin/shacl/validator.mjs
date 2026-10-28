@@ -29,6 +29,19 @@ export async function validateTriples(shapes, triples) {
 
     const validator = new SHACLValidator(shapeDataset, { factory: rdf });
     const report = await validator.validate(dataDataset);
+var result2=[]
+    for (const result of report.results) {
+        result2.push({
+            subject: result.focusNode,
+            path: result.path,
+            value: result.value,
+            messages: result.message.map(m => m.value),
+            constraint: result.sourceConstraintComponent?.value
+        })
+    }
 
-    return serializeReport(report.dataset);
+
+
+   // return serializeReport(report.dataset);
+    return JSON.stringify(result2);
 }

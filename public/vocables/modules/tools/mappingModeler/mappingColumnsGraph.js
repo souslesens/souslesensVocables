@@ -2104,8 +2104,7 @@ var MappingColumnsGraph = (function () {
         $("#mappingModeler_relationInfos").html("from: <b>" + (fromLabel ?? "None") + "</b> to: <b>" + (toLabel ?? "None") + "</b>");
     };
 
-    // graphDiv: draw the implicit model in that div instead of a dialog, as the virtual-db-creator plugin does
-    self.drawClassesGraph = function (graphDiv) {
+    self.drawClassesGraph = function () {
         var columns = self.getNodesOfType(MappingModeler.columnsMappingsObjects);
         var edgesFromMap = self.getEdgesMap("from");
         var classNodesMap = self.getNodesMap("Class");
@@ -2384,14 +2383,6 @@ var MappingColumnsGraph = (function () {
 
                 // draw graph
                 function (callbackSeries) {
-                    if (graphDiv) {
-                        // vis draws nothing before its 1000 default stabilization iterations end, tens of seconds on a large mapping
-                        var stabilization = { iterations: 200, fit: true };
-                        self.implicitModelVisjsGraph = new VisjsGraphClass(graphDiv, classVisjsData, { visjsOptions: { autoResize: true, physics: { stabilization: stabilization } } });
-                        return self.implicitModelVisjsGraph.draw(function () {
-                            callbackSeries();
-                        });
-                    }
                     //  classVisjsData={nodes:[], edges:[]}
                     var html = "";
                     html += "<div id='implicitModelContainer' style='position:relative; width:1000px; height:800px;'>";

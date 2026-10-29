@@ -99,14 +99,24 @@ async function listSourceRuns(source) {
     return runs;
 }
 
-// the source config of the user and its runs, or the HTTP error to answer
-async function findSourceRuns(req, sourceName) {
+// the source config of the user, or the HTTP error to answer
+async function findUserSource(req, sourceName) {
     const userInfo = await userManager.getUser(req.user);
     const userSources = await sourceModel.getUserSources(userInfo.user);
     if (!userSources[sourceName]) {
         return { status: 404, error: sourceName + " not found" };
     }
-    return { userInfo: userInfo, userSources: userSources, sourceConfig: userSources[sourceName], runs: await listSourceRuns(sourceName) };
+    return { userInfo: userInfo, userSources: userSources, sourceConfig: userSources[sourceName] };
+}
+
+// the source config of the user and its runs, or the HTTP error to answer
+async function findSourceRuns(req, sourceName) {
+    const found = await findUserSource(req, sourceName);
+    if (found.error) {
+        return found;
+    }
+    found.runs = await listSourceRuns(sourceName);
+    return found;
 }
 
 // the run named in the request is looked up among the runs of the source: a name never reaches a file path
@@ -252,6 +262,7 @@ export {
     getRunGraphUri,
     listSourceRuns,
     readLastOntologyVersion,
+    findUserSource,
     findSourceRuns,
     findSourceRun,
     loadTurtleIntoGraph,

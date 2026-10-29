@@ -68,6 +68,17 @@ function getColumnNodeId(table, column) {
     return columnHash.slice(0, columnNodeIdLength);
 }
 
+// a term named as the prompt writes it, a prefixed name of its prefixes, or a full IRI; null for anything else
+function getTermIri(termReference, prefixes) {
+    const reference = String(termReference || "");
+    if (absoluteIriRegex.test(reference)) {
+        return reference;
+    }
+    const prefixedNameMatch = reference.match(prefixedNameRegex);
+    const namespace = prefixedNameMatch && Object.hasOwn(prefixes, prefixedNameMatch[1]) ? prefixes[prefixedNameMatch[1]] : null;
+    return namespace ? namespace + prefixedNameMatch[2] : null;
+}
+
 // what names no table, column, class or property of the inputs is listed in problems, never guessed
 function getMappingDocument(mappingAnswer, mappingContext) {
     const problems = [];
@@ -76,25 +87,15 @@ function getMappingDocument(mappingAnswer, mappingContext) {
     function hasColumn(table, column) {
         return (mappingContext.columnsByTable[table] || []).some((schemaColumn) => schemaColumn.column_name == column);
     }
-    // the answer names terms as the prompt writes them, prefixed names of the prompt prefixes, or full IRIs
-    function getTermIri(termReference) {
-        const reference = String(termReference || "");
-        if (absoluteIriRegex.test(reference)) {
-            return reference;
-        }
-        const prefixedNameMatch = reference.match(prefixedNameRegex);
-        const namespace = prefixedNameMatch && Object.hasOwn(mappingContext.prefixes, prefixedNameMatch[1]) ? mappingContext.prefixes[prefixedNameMatch[1]] : null;
-        return namespace ? namespace + prefixedNameMatch[2] : null;
-    }
     function getClassIri(classReference) {
-        const classIri = getTermIri(classReference);
+        const classIri = getTermIri(classReference, mappingContext.prefixes);
         if (!classIri || !mappingContext.classSourceByIri[classIri]) {
             problems.push("class of no term of the ontologies: " + classReference);
         }
         return classIri || String(classReference);
     }
     function getDatatypePropertyIri(propertyReference) {
-        const propertyIri = getTermIri(propertyReference);
+        const propertyIri = getTermIri(propertyReference, mappingContext.prefixes);
         if (!propertyIri || !mappingContext.datatypePropertyIris.has(propertyIri)) {
             problems.push("datatype property of no term of the ontologies: " + propertyReference);
         }
@@ -234,7 +235,7 @@ function getMappingDocument(mappingAnswer, mappingContext) {
             problems.push("relation " + relation.from + " " + relation.property + " " + relation.to + " across two tables: a relation links two resources of one row");
             return;
         }
-        const propertyIri = getTermIri(relation.property);
+        const propertyIri = getTermIri(relation.property, mappingContext.prefixes);
         if (!propertyIri) {
             problems.push("relation " + relation.from + " " + relation.to + " with a property that is no IRI: " + relation.property);
             return;
@@ -261,7 +262,15 @@ function getMappingDocument(mappingAnswer, mappingContext) {
             width: edgeWidth,
             font: { size: edgeFontSize },
         });
-        checkedRelations.push({ from: relation.from, property: propertyIri, to: relation.to, fromClass: classIriByColumnKey[relation.from], toClass: classIriByColumnKey[relation.to] });
+        checkedRelations.push({
+            from: relation.from,
+            property: propertyIri,
+            // the key of the relation in the compact answer, as a revision names it
+            answerProperty: relation.property,
+            to: relation.to,
+            fromClass: classIriByColumnKey[relation.from],
+            toClass: classIriByColumnKey[relation.to],
+        });
     });
 
     // tables side by side, each above its columns, the classes on top
@@ -340,4 +349,4 @@ async function checkMappingRelations(checkedRelations, source, userContext) {
     });
 }
 
-export { getMappingDocument, getLiteralRangeWarnings, checkMappingRelations };
+export { getTermIri, getMappingDocument, getLiteralRangeWarnings, checkMappingRelations };

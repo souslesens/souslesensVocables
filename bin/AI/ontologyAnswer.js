@@ -1,7 +1,7 @@
 import rdflib from "rdflib";
 import llmClient from "./llmClient.js";
 import Util from "../util.js";
-import { trailingSlashRegex } from "./ontologyRuns.js";
+import { trailingSlashRegex, listSourceRuns, readLastOntologyVersion } from "./ontologyRuns.js";
 import { wellKnownPrefixes } from "./upperOntologyModel.js";
 
 // the compact JSON answer the ontology prompts ask for, the calls that write it, and its Turtle
@@ -193,11 +193,16 @@ function getAnswerTurtle(ontologyAnswer, source, sourceConfig, termNamespace, up
 }
 
 // each generation and each revision is a new minor version, above every version of the source: a version number names one
-// version, the one a validation turns into the source <source>_TBOX_<version>
-function getNextOntologyVersion(sourceRuns) {
+// version, the one a validation turns into the source <source>_TBOX_<version>, even once its run is deleted
+async function getNextOntologyVersion(source) {
+    const sourceRuns = await listSourceRuns(source);
+    const givenVersions = sourceRuns.map((sourceRun) => sourceRun.savedRun?.ontologyVersion || firstOntologyVersion);
+    const lastOntologyVersion = await readLastOntologyVersion(source);
+    if (lastOntologyVersion) {
+        givenVersions.push(lastOntologyVersion);
+    }
     let highestMinorVersion = 0;
-    sourceRuns.forEach(function (sourceRun) {
-        const ontologyVersion = sourceRun.savedRun?.ontologyVersion || firstOntologyVersion;
+    givenVersions.forEach(function (ontologyVersion) {
         const minorVersion = Number(ontologyVersion.split(".")[1]);
         highestMinorVersion = Math.max(highestMinorVersion, minorVersion);
     });

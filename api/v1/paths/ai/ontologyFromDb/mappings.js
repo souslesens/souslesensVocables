@@ -1,18 +1,9 @@
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-import { findSourceRuns, getRunGraphUri, getNewRunTimestamp, isTboxSourceOf, readDatabaseChecks } from "../../../../../bin/AI/ontologyRuns.js";
-import {
-    ontologyModelId,
-    ontologyReasoningEffort,
-    modelMaxOutputTokens,
-    jsonBlockRegex,
-    createMessage,
-    getCutAnswerError,
-    getAnswerText,
-    getTermNamespace,
-} from "../../../../../bin/AI/ontologyAnswer.js";
-import { getMappingDocument, getLiteralRangeWarnings, checkMappingRelations } from "../../../../../bin/AI/mappingAnswer.js";
+import { findSourceRuns, getNewRunTimestamp } from "../../../../../bin/AI/ontologyRuns.js";
+import { ontologyModelId, ontologyReasoningEffort, modelMaxOutputTokens, jsonBlockRegex, createMessage, getCutAnswerError, getAnswerText } from "../../../../../bin/AI/ontologyAnswer.js";
+import { getMappingInputs, checkMappingAnswer } from "../../../../../bin/AI/mappingInputs.js";
 import {
     getMappingName,
     listSourceMappings,
@@ -22,74 +13,11 @@ import {
     writeMappingModelerFile,
     getMappingStatement,
 } from "../../../../../bin/AI/mappingRuns.js";
-import { getImportedOntologies } from "../../../../../bin/AI/restrictionCheck.js";
-import { getDatatypePropertyIris, getValidatedOntologyModelText } from "../../../../../bin/AI/upperOntologyModel.js";
-import { callVocablesFunction } from "../../../../../bin/remoteCodeRunner.js";
-import { describeDatabase } from "../../../../../bin/AI/databaseDescription.js";
-import { getSchemaDescription } from "../../../../../bin/KG/dbConnector.js";
-import { databaseModel } from "../../../../../model/databases.js";
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const mappingPromptPath = join(currentDirectory, "../../../../../bin/AI/prompts/mapping_building_from_ontology.md");
 // the page is told what the model writes at most once a second
 const writingProgressIntervalMs = 1000;
-// MappingModeler reads the public schema of a postgres database, see getSchemaDescription
-const postgresSchemaName = "public";
-
-// the database is the one the validated version was built on, read as its generation read it
-async function getMappingInputs(req, source) {
-    const found = await findSourceRuns(req, source);
-    if (found.error) {
-        return found;
-    }
-    const tboxSource = (found.sourceConfig.imports || []).find((importedSource) => isTboxSourceOf(source, importedSource));
-    if (!tboxSource || !found.userSources[tboxSource]) {
-        return { status: 409, error: "no validated version of " + source + ": validate a version before mapping it" };
-    }
-    const tboxGraphUri = found.userSources[tboxSource].graphUri;
-    const validatedRun = found.runs.find((run) => getRunGraphUri(found.sourceConfig.graphUri, run.runTimestamp) == tboxGraphUri);
-    // the database, the upper ontologies and the overlaps are read in the run file of the version
-    if (!validatedRun?.savedRun) {
-        return { status: 409, error: "the validated version " + tboxSource + " has no run file" };
-    }
-    const userContext = { user: found.userInfo, userSources: found.userSources };
-    // the graph is the validated version, whatever answer format produced it and whatever was edited in it since
-    const validatedModel = await getValidatedOntologyModelText(tboxSource, getTermNamespace(found.sourceConfig), found.sourceConfig.prefix, userContext);
-    if (!validatedModel) {
-        return { status: 409, error: "the graph of the validated version " + tboxSource + " holds no ontology model" };
-    }
-    const savedRun = validatedRun.savedRun;
-    const allDatabases = await databaseModel.getAllDatabases();
-    const database = allDatabases.find((configuredDatabase) => configuredDatabase.id == savedRun.databaseId || configuredDatabase.database == savedRun.database);
-    if (!database) {
-        return { status: 409, error: "the database " + savedRun.database + " of the validated version is no longer configured" };
-    }
-    const connection = await databaseModel.getUserConnection(found.userInfo.user, database.id);
-    const schema = await getSchemaDescription(connection, database.driver);
-    const columnsByTable = {};
-    schema.columns.forEach(function (column) {
-        if (!columnsByTable[column.table_name]) {
-            columnsByTable[column.table_name] = [];
-        }
-        columnsByTable[column.table_name].push(column);
-    });
-    const databaseChecks = await readDatabaseChecks(validatedRun.database);
-    const tableInspections = {};
-    for (const tableName of Object.keys(columnsByTable)) {
-        tableInspections[tableName] = databaseChecks.inspectionsByTable[tableName] || { sampleError: "not read by the generation" };
-    }
-    return {
-        found: found,
-        tboxSource: tboxSource,
-        validatedRun: validatedRun,
-        validatedModel: validatedModel,
-        database: database,
-        schema: schema,
-        columnsByTable: columnsByTable,
-        databaseText: describeDatabase(database, schema, columnsByTable, tableInspections),
-        userContext: userContext,
-    };
-}
 
 // a file written before any version counts as edited
 async function activateMappingVersion(source, mappingName, mapping, databaseFolder, mappingVersions) {
@@ -129,13 +57,17 @@ export default function () {
                 return res.status(found.status).json({ error: found.error });
             }
             const mappingVersions = await listSourceMappings(req.query.source);
-            // one version: what its checks and its report say, without the document and the answer
+            // one version, its document drawing it; the answer and the conversation stay on the server
             if (req.query.mappingName) {
                 const mappingVersion = mappingVersions.find((sourceMapping) => sourceMapping.mappingName == req.query.mappingName);
                 if (!mappingVersion) {
                     return res.status(404).json({ error: "no mapping version " + req.query.mappingName + " for " + req.query.source });
                 }
-                const { mapping: _mapping, answer: _answer, ...mappingDetails } = mappingVersion.savedMapping;
+                const { answer: _answer, revision, ...mappingDetails } = mappingVersion.savedMapping;
+                if (revision) {
+                    const { conversation: _conversation, ...revisionDetails } = revision;
+                    mappingDetails.revision = revisionDetails;
+                }
                 return res.status(200).json({ mappingName: mappingVersion.mappingName, ...mappingDetails });
             }
             const mappingModelerFile = await readMappingModelerFile(req.query.source);
@@ -143,6 +75,7 @@ export default function () {
             const activeMappingVersion = mappingVersions.find((mappingVersion) => mappingVersion.mappingName == activeMappingName);
             const versionDescriptions = mappingVersions.map(function (mappingVersion) {
                 const savedMapping = mappingVersion.savedMapping;
+                const notAllowedRelationChecks = (savedMapping.relationChecks || []).filter((relationCheck) => relationCheck.status == "notAllowed");
                 return {
                     mappingName: mappingVersion.mappingName,
                     kind: savedMapping.kind,
@@ -154,7 +87,8 @@ export default function () {
                     summary: savedMapping.revision?.summary ?? null,
                     problemCount: (savedMapping.problems || []).length,
                     warningCount: (savedMapping.rangeWarnings || []).length,
-                    notAllowedRelationCount: (savedMapping.relationChecks || []).filter((relationCheck) => relationCheck.status == "notAllowed").length,
+                    notAllowedRelationCount: notAllowedRelationChecks.length,
+                    hasMapping: Boolean(savedMapping.mapping),
                     isActive: mappingVersion.mappingName == activeMappingName,
                 };
             });
@@ -197,10 +131,6 @@ export default function () {
             if (inputs.error) {
                 return res.status(inputs.status).json({ error: inputs.error });
             }
-            const sourceConfig = inputs.found.sourceConfig;
-            const termNamespace = getTermNamespace(sourceConfig);
-            // the namespace MappingModeler builds the instance URIs on
-            const instanceNamespace = sourceConfig.baseUri || sourceConfig.graphUri;
             const prompt =
                 readFileSync(mappingPromptPath, "utf8") +
                 "\n\n# Inputs\n\nSource: " +
@@ -208,13 +138,11 @@ export default function () {
                 "\nValidated ontology: " +
                 inputs.tboxSource +
                 ", namespace of its terms " +
-                termNamespace +
+                inputs.termNamespace +
                 "\nInstance namespace: " +
-                instanceNamespace +
+                inputs.instanceNamespace +
                 "\n\n## Validated ontology\n" +
                 inputs.validatedModel.text +
-                "\n## Report of the validated version\n\n" +
-                JSON.stringify(inputs.validatedRun.savedRun.report ?? null) +
                 "\n\n## Database\n\n" +
                 inputs.databaseText +
                 "\n## Overlaps measured between candidate columns\n\nshared distinct values between left and right, with the distinct values of each\n\n" +
@@ -277,44 +205,7 @@ export default function () {
             if (mappingAnswer) {
                 const checksStart = Date.now();
                 sendProgress({ type: "stepStart", step: "mappingChecks" });
-                // a local class is read in the validated version, an upper one in the upper ontology that declares it
-                const classSourceByIri = {};
-                const classLabelByIri = { ...inputs.validatedModel.classLabelByIri };
-                for (const classIri of Object.keys(classLabelByIri)) {
-                    classSourceByIri[classIri] = inputs.tboxSource;
-                }
-                const datatypePropertyIris = new Set(inputs.validatedModel.datatypePropertyIris);
-                const upperOntologies = getImportedOntologies(inputs.validatedRun.savedRun.upperOntologies || [], inputs.found.userSources);
-                const upperModels = await callVocablesFunction("OntologyModels", "registerSourcesModel", [upperOntologies, {}], inputs.userContext);
-                for (const upperOntology of upperOntologies) {
-                    const upperModel = upperModels[upperOntology] || {};
-                    for (const [classIri, upperClass] of Object.entries(upperModel.classes || {})) {
-                        classSourceByIri[classIri] = classSourceByIri[classIri] ?? upperOntology;
-                        classLabelByIri[classIri] = classLabelByIri[classIri] ?? upperClass.label;
-                    }
-                    for (const propertyIri of getDatatypePropertyIris(upperModel)) {
-                        datatypePropertyIris.add(propertyIri);
-                    }
-                }
-                mappingDocument = getMappingDocument(mappingAnswer, {
-                    source: source,
-                    instanceNamespace: instanceNamespace,
-                    databaseId: inputs.database.id,
-                    databaseName: inputs.database.database,
-                    schemaName: inputs.database.driver == "postgres" ? postgresSchemaName : null,
-                    columnsByTable: inputs.columnsByTable,
-                    prefixes: inputs.validatedModel.prefixes,
-                    classSourceByIri: classSourceByIri,
-                    classLabelByIri: classLabelByIri,
-                    datatypePropertyIris: datatypePropertyIris,
-                    userLogin: inputs.found.userInfo.user?.login ?? null,
-                });
-                rangeWarnings = getLiteralRangeWarnings(mappingAnswer, inputs.columnsByTable);
-                try {
-                    relationChecks = await checkMappingRelations(mappingDocument.checkedRelations, source, inputs.userContext);
-                } catch (checkError) {
-                    relationCheckError = checkError.message || String(checkError);
-                }
+                ({ mappingDocument, rangeWarnings, relationChecks, relationCheckError } = await checkMappingAnswer(mappingAnswer, inputs, source));
                 const notAllowedRelations = (relationChecks || []).filter((relationCheck) => relationCheck.status == "notAllowed");
                 endStep("mappingChecks", checksStart, {
                     problemCount: mappingDocument.problems.length,
@@ -352,19 +243,11 @@ export default function () {
                 mapping: mappingDocument?.mapping ?? null,
                 answer: answerText,
             };
+            // MappingModeler opens a version once the ontologist validates it (PUT)
             await saveMappingVersion(inputs.validatedRun.database, mappingName, savedMapping);
-            // the newest mapping is the one MappingModeler opens, unless it names what the inputs do not hold
-            let keptMappingName = null;
-            const isActivated = Boolean(mappingDocument) && mappingDocument.problems.length == 0;
-            if (isActivated) {
-                const mappingVersions = await listSourceMappings(source);
-                keptMappingName = await activateMappingVersion(source, mappingName, mappingDocument.mapping, inputs.validatedRun.database, mappingVersions);
-            }
             sendProgress({
                 type: "result",
                 mappingName: mappingName,
-                isActive: isActivated,
-                keptMappingName: keptMappingName,
                 failure: failure,
                 answerError: answerError,
                 problems: savedMapping.problems,
@@ -393,8 +276,16 @@ export default function () {
             }
             const mappingVersions = await listSourceMappings(req.body.source);
             const mappingVersion = mappingVersions.find((sourceMapping) => sourceMapping.mappingName == req.body.mappingName);
-            if (!mappingVersion || !mappingVersion.savedMapping.mapping) {
+            if (!mappingVersion) {
                 return res.status(404).json({ error: "no mapping version " + req.body.mappingName + " for " + req.body.source });
+            }
+            if (!mappingVersion.savedMapping.mapping) {
+                return res.status(409).json({ error: mappingVersion.mappingName + " has no mapping: its generation failed" });
+            }
+            // a problem names a table, a column or a term the inputs do not hold: MappingModeler would build a broken graph
+            const problems = mappingVersion.savedMapping.problems || [];
+            if (problems.length > 0) {
+                return res.status(409).json({ error: mappingVersion.mappingName + " has " + problems.length + " problems: revise it before validating it" });
             }
             const keptMappingName = await activateMappingVersion(req.body.source, mappingVersion.mappingName, mappingVersion.savedMapping.mapping, mappingVersion.databaseFolder, mappingVersions);
             res.status(200).json({ activeMappingName: mappingVersion.mappingName, keptMappingName: keptMappingName });
@@ -434,14 +325,14 @@ export default function () {
         summary: "List the mapping versions of a source",
         description:
             "Lists the mapping versions saved under `data/semanticVirtualDB/<database>/mappings/`, newest first: generations, revisions, and MappingModeler files kept before " +
-            "another version replaced them. The active version is the one written to `data/graphs/mappings_<source>_ALL.json`, which MappingModeler opens.",
+            "another version replaced them. The active version is the validated one, written to `data/graphs/mappings_<source>_ALL.json`, which MappingModeler opens.",
         operationId: "getOntologyFromDbMappings",
-        parameters: [sourceParameter, { name: "mappingName", in: "query", type: "string", required: false, description: "A version to read the checks and the report of, instead of the list." }],
+        parameters: [sourceParameter, { name: "mappingName", in: "query", type: "string", required: false, description: "A version to read, its MappingModeler document included, instead of the list." }],
         responses: {
             200: {
                 description:
-                    "With mappingName: the saved version without its document and its answer (problems, rangeWarnings, relationChecks, report, candidates...). Otherwise " +
-                    "{ mappings: [{ mappingName, kind, createdAt, tboxSource, model, totalSeconds, basedOn, summary, problemCount, warningCount, notAllowedRelationCount, isActive }], " +
+                    "With mappingName: the saved version without its answer (mapping, problems, rangeWarnings, relationChecks, report, candidates...). Otherwise " +
+                    "{ mappings: [{ mappingName, kind, createdAt, tboxSource, model, totalSeconds, basedOn, summary, problemCount, warningCount, notAllowedRelationCount, hasMapping, isActive }], " +
                     "activeMappingName, hasMappingModelerFile, isEditedInMappingModeler }",
             },
             404: { description: "The source is unknown to the user." },
@@ -453,11 +344,11 @@ export default function () {
         security: [{ restrictAdmin: [] }],
         summary: "Generate a mapping of a source from its validated version",
         description:
-            "Builds the `bin/AI/prompts/mapping_building_from_ontology.md` prompt with the validated version the source imports, read from its graph (classes, axioms, properties and provenance annotations) with the report of its generation, the schema, samples and profiles " +
+            "Builds the `bin/AI/prompts/mapping_building_from_ontology.md` prompt with the validated version the source imports, read from its graph (classes, axioms, properties and provenance annotations), the schema, samples and profiles " +
             "of the database it was built on and the measured overlaps, then calls the ontology model once. The answer is a compact JSON (resources, relations, candidates, report), terms as prefixed names, " +
             "that the route turns into the MappingModeler document. Tables, columns, classes and properties it names are checked against the schema and the validated version, " +
-            "the ranges of its literals against the SQL types, and its relations with OntologyModels.getAllowedPropertiesBetweenNodes. The version is saved and becomes the mapping " +
-            "MappingModeler opens. NDJSON events: stepStart and stepEnd (mapping, mappingChecks), writing, result, error.",
+            "the ranges of its literals against the SQL types, and its relations with OntologyModels.getAllowedPropertiesBetweenNodes. The version is saved, MappingModeler " +
+            "opens it once PUT validates it. NDJSON events: stepStart and stepEnd (mapping, mappingChecks), writing, result, error.",
         operationId: "postOntologyFromDbMappings",
         parameters: [
             {
@@ -485,10 +376,10 @@ export default function () {
 
     PUT.apiDoc = {
         security: [{ restrictAdmin: [] }],
-        summary: "Make a mapping version the one MappingModeler opens",
+        summary: "Validate a mapping version: MappingModeler opens it",
         description:
-            "Writes the version to `data/graphs/mappings_<source>_ALL.json`. A file edited in MappingModeler since the active version, or written before any version, " +
-            "is saved first as a version of kind mappingModeler.",
+            "Writes the version to `data/graphs/mappings_<source>_ALL.json`, refused when its checks found problems. A file edited in MappingModeler since the active version, " +
+            "or written before any version, is saved first as a version of kind mappingModeler.",
         operationId: "putOntologyFromDbMappings",
         parameters: [
             {
@@ -501,6 +392,7 @@ export default function () {
         responses: {
             200: { description: "{ activeMappingName, keptMappingName }: keptMappingName names the version the replaced file was saved as, or is null." },
             404: { description: "The source or the mapping version is unknown." },
+            409: { description: "The version has no mapping, or its checks found problems." },
         },
         tags: ["AI"],
     };

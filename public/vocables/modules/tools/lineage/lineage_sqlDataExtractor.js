@@ -49,14 +49,21 @@ var Lineage_sqlDataExtractor = (function () {
         });
     };
 
-    self.drawDatabaseMappedNodes = function (source) {
+    // mappingJson: a mapping not written to the MappingModeler file yet, as the virtual-db-creator plugin draws a version before validating it
+    self.drawDatabaseMappedNodes = function (source, mappingJson) {
         if (!source) {
             source = Lineage_sources.activeSource;
         }
         self.currentSource = source;
         // filters point at relation keys of the previous source
         self.sqlFilters = [];
-        MappingColumnsGraph.getSourceMappingsModel(source, null, function (err, json) {
+        var getMappingJson = function (callback) {
+            if (mappingJson) {
+                return callback(null, mappingJson);
+            }
+            MappingColumnsGraph.getSourceMappingsModel(source, null, callback);
+        };
+        getMappingJson(function (err, json) {
             var relationsMap = MappingsToSql.extractRelationMap(json);
             self.currentMappingJson = json;
 

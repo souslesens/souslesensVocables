@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-import { findSourceRun, listSourceRuns, readDatabaseChecks, getNewRunTimestamp, getRunName, getRunGraphUri, loadTurtleIntoGraph, saveRun } from "../../../../../bin/AI/ontologyRuns.js";
+import { findSourceRun, readDatabaseChecks, getNewRunTimestamp, getRunName, getRunGraphUri, loadTurtleIntoGraph, saveRun } from "../../../../../bin/AI/ontologyRuns.js";
 import {
     ontologyModelId,
     ontologyReasoningEffort,
@@ -363,7 +363,7 @@ export default function () {
                     revisedAnswer.ontologyComment = toolInput.ontologyComment;
                 }
                 // the runs saved since the request started count too
-                const ontologyVersion = getNextOntologyVersion(await listSourceRuns(source));
+                const ontologyVersion = await getNextOntologyVersion(source);
                 const answerOntology = getAnswerTurtle(revisedAnswer, source, sourceConfig, termNamespace, upperOntologyGraphUris, ontologyVersion);
                 const newProblems = answerOntology.problems.filter((problem) => !discussedVersion.problems.includes(problem));
                 if (newProblems.length > 0 && !toolInput.acceptProblems) {

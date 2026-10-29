@@ -20,6 +20,7 @@ const insertedTriplesPerQuery = 200;
 const blankNodeAsIriRegex = /<_:([^>]+)>/g;
 // the samples, profiles and overlaps measured on a database, read again by the next runs on it
 const databaseChecksFileName = "databaseChecks.json";
+const lastOntologyVersionSuffix = "lastOntologyVersion";
 const tboxSourceInfix = "_TBOX_";
 const versionDotRegex = /\./g;
 
@@ -194,6 +195,25 @@ async function saveRun(databaseFolder, runName, savedRun, turtle) {
     if (turtle) {
         await writeFile(join(databaseAnswersDirectory, runName + turtleExtension), turtle);
     }
+    // a new version is numbered above every other one, so the last saved is the highest
+    await writeFile(getLastOntologyVersionPath(savedRun.source), savedRun.ontologyVersion);
+}
+
+// outside the database folders, so that it outlives the deletion of the run it numbers
+function getLastOntologyVersionPath(source) {
+    return join(llmAnswersDirectory, getRunName(source, lastOntologyVersionSuffix) + ".txt");
+}
+
+// null for a source whose runs were all saved before the last version was kept
+async function readLastOntologyVersion(source) {
+    try {
+        return await readFile(getLastOntologyVersionPath(source), "utf8");
+    } catch (readError) {
+        if (readError.code == "ENOENT") {
+            return null;
+        }
+        throw readError;
+    }
 }
 
 // { inspectionsByTable: { table: { columnNames, sampleTexts, profile } }, overlapsByPairKey: { "a.x=b.y": sharedDistinctValues } },
@@ -231,6 +251,7 @@ export {
     isTboxSourceOf,
     getRunGraphUri,
     listSourceRuns,
+    readLastOntologyVersion,
     findSourceRuns,
     findSourceRun,
     loadTurtleIntoGraph,

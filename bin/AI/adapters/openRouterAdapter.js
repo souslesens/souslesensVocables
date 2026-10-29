@@ -62,9 +62,14 @@ function toToolResultText(toolResultContent) {
 //     messages `role: "tool"` distincts.
 // C'est cette traduction de la *requête*, et pas seulement de la réponse, qui permet à la route
 // /ai/complete de garder un contrat unique en blocs Anthropic quel que soit le provider.
-function toOpenAiMessages(system, messages) {
+function toOpenAiMessages(system, messages, isSystemCached) {
     const openAiMessages = [];
-    if (system) openAiMessages.push({ role: "system", content: system });
+    // le point de cache sur le system couvre aussi les outils qui le précèdent dans le préfixe Anthropic
+    if (system && isSystemCached) {
+        openAiMessages.push({ role: "system", content: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }] });
+    } else if (system) {
+        openAiMessages.push({ role: "system", content: system });
+    }
 
     (messages ?? []).forEach((message) => {
         if (typeof message.content === "string") {
@@ -192,10 +197,13 @@ function toAnthropicResponse(openRouterResponse) {
         usage: {
             input_tokens: usage.prompt_tokens ?? 0,
             output_tokens: usage.completion_tokens ?? 0,
+            cached_input_tokens: usage.prompt_tokens_details?.cached_tokens ?? 0,
         },
     };
 }
 
+// les modèles Anthropic sont nommés anthropic/<modèle> chez OpenRouter
+const anthropicModelPrefix = "anthropic/";
 const sseDataPrefix = "data: ";
 const sseDoneLine = "data: [DONE]";
 
@@ -205,6 +213,7 @@ async function readStreamedCompletion(response, onTextDelta, onReasoningDelta) {
     const decoder = new TextDecoder();
     const streamedChoice = { message: { content: "" }, finish_reason: null };
     const streamedResponse = { choices: [streamedChoice] };
+    const streamedToolCalls = [];
     function readLine(rawLine) {
         const line = rawLine.trimEnd();
         // les lignes `: OPENROUTER PROCESSING` sont des commentaires SSE qui gardent la connexion ouverte
@@ -234,6 +243,23 @@ async function readStreamedCompletion(response, onTextDelta, onReasoningDelta) {
         if (typeof delta.reasoning === "string" && delta.reasoning && onReasoningDelta) {
             onReasoningDelta(delta.reasoning);
         }
+        // un appel d'outil arrive en morceaux repérés par leur index : l'id et le nom au premier, les arguments JSON en texte découpé
+        (delta.tool_calls ?? []).forEach(function (toolCallDelta) {
+            // sans index, un nouvel id ouvre un nouvel appel, sinon le morceau continue le dernier
+            let toolCallIndex = toolCallDelta.index;
+            if (toolCallIndex === undefined) {
+                const lastToolCall = streamedToolCalls[streamedToolCalls.length - 1];
+                const isNewToolCall = !lastToolCall || (toolCallDelta.id && toolCallDelta.id != lastToolCall.id);
+                toolCallIndex = isNewToolCall ? streamedToolCalls.length : streamedToolCalls.length - 1;
+            }
+            if (!streamedToolCalls[toolCallIndex]) {
+                streamedToolCalls[toolCallIndex] = { id: "", type: "function", function: { name: "", arguments: "" } };
+            }
+            const streamedToolCall = streamedToolCalls[toolCallIndex];
+            streamedToolCall.id = toolCallDelta.id ?? streamedToolCall.id;
+            streamedToolCall.function.name += toolCallDelta.function?.name ?? "";
+            streamedToolCall.function.arguments += toolCallDelta.function?.arguments ?? "";
+        });
     }
 
     let pendingText = "";
@@ -246,6 +272,13 @@ async function readStreamedCompletion(response, onTextDelta, onReasoningDelta) {
     }
     // le dernier chunk, souvent celui de l'usage, peut arriver sans saut de ligne final
     readLine(pendingText + decoder.decode());
+    if (streamedToolCalls.length > 0) {
+        // un outil sans paramètre ne reçoit aucun morceau d'arguments, le mode non streamé lui donne "{}"
+        streamedToolCalls.forEach(function (streamedToolCall) {
+            streamedToolCall.function.arguments = streamedToolCall.function.arguments || "{}";
+        });
+        streamedChoice.message.tool_calls = streamedToolCalls;
+    }
     // un flux coupé sans finish_reason est une réponse tronquée, pas une réponse complète
     if (!streamedResponse.error && !streamedChoice.finish_reason) {
         streamedResponse.error = { message: "the stream ended before the model finished its answer" };
@@ -263,12 +296,17 @@ function createOpenRouterAdapter(openRouterConfig) {
     if (openRouterConfig.appName) headers["X-Title"] = openRouterConfig.appName;
 
     // onTextDelta reçoit le texte de la réponse au fil de l'eau ; sans lui, la réponse arrive en une fois.
-    async function createMessage({ model, system, messages, maxTokens, tools, reasoningEffort, onTextDelta, onReasoningDelta }, callback) {
+    // isPromptCached : le system est renvoyé identique à chaque tour d'une boucle d'agent, Anthropic le relit alors depuis son cache.
+    // Une génération en un seul appel ne le demande pas : l'écriture du cache coûte plus cher qu'une lecture simple.
+    async function createMessage({ model, system, messages, maxTokens, tools, reasoningEffort, onTextDelta, onReasoningDelta, isPromptCached }, callback) {
         try {
+            const requestedModel = model ?? openRouterConfig.defaultModel;
+            // OpenRouter ne transmet cache_control qu'aux modèles Anthropic, les autres fournisseurs cachent seuls
+            const isSystemCached = Boolean(isPromptCached) && String(requestedModel).startsWith(anthropicModelPrefix);
             const requestBody = {
-                model: model ?? openRouterConfig.defaultModel,
+                model: requestedModel,
                 max_tokens: maxTokens ?? openRouterConfig.maxTokens,
-                messages: toOpenAiMessages(system, messages),
+                messages: toOpenAiMessages(system, messages, isSystemCached),
             };
             // Renseigné seulement quand l'appelant déclare des outils : un tableau vide bascule
             // certains modèles en erreur, et classify/alignment n'en passent jamais.
@@ -279,9 +317,6 @@ function createOpenRouterAdapter(openRouterConfig) {
                 requestBody.reasoning = { effort: reasoningEffort };
             }
             const isStreamed = typeof onTextDelta === "function";
-            if (isStreamed && requestBody.tools) {
-                return callback(new Error("OpenRouter streaming is read for text only, not for tool calls"));
-            }
             if (isStreamed) {
                 requestBody.stream = true;
             }

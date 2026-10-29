@@ -6,7 +6,6 @@ import {
     nonNameCharacterRegex,
     runningGenerations,
     getNewRunTimestamp,
-    listSourceRuns,
     isTboxSourceOf,
     getRunName,
     getRunGraphUri,
@@ -503,7 +502,7 @@ export default function () {
                 }
             }
             const upperOntologyGraphUris = upperOntologies.map((upperOntology) => userSources[upperOntology].graphUri);
-            const ontologyVersion = getNextOntologyVersion(await listSourceRuns(source));
+            const ontologyVersion = await getNextOntologyVersion(source);
             let answerOntology = null;
             // an answer of an unexpected shape must not stop the save of a paid generation
             try {

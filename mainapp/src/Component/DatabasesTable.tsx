@@ -1,4 +1,4 @@
-import { useReducer, useState, useRef, ChangeEvent, SyntheticEvent, MouseEventHandler, Dispatch } from "react";
+import { useReducer, useState, useRef, useEffect, ChangeEvent, SyntheticEvent, MouseEventHandler, Dispatch } from "react";
 import {
     Button,
     Dialog,
@@ -31,9 +31,10 @@ import { Msg, useModel } from "../Admin";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { PasswordField } from "./PasswordField";
 import { TestingButton } from "./TestingButton";
+import { UploadCSVModal } from "./UploadCSVModal";
 import { addDatabase, Database, DatabaseSchema, defaultDatabase, deleteDatabase, editDatabase } from "../Database";
 import { writeLog } from "../Log";
-import { cleanUpText, jsonToDownloadUrl } from "../Utils";
+import { cleanUpText, getApiUrl, jsonToDownloadUrl } from "../Utils";
 
 const enum Type {
     ResetDatabase,
@@ -254,8 +255,16 @@ const DatabasesTable = () => {
     const [snackOpen, setSnackOpen] = useState(false);
     const [snackMessage, setSnackMessage] = useState("");
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [apiUrl, setApiUrl] = useState("/");
 
     const me = SRD.withDefault("", model.me);
+
+    useEffect(() => {
+        const getAndSetApiUrl = async () => {
+            setApiUrl(await getApiUrl());
+        };
+        void getAndSetApiUrl();
+    }, []);
 
     type Order = "asc" | "desc";
 
@@ -425,6 +434,7 @@ const DatabasesTable = () => {
                                                                 <Download />
                                                             </IconButton>
                                                             <DatabaseFormDialog database={database} me={me} />
+                                                            <UploadCSVModal apiUrl={apiUrl} databaseId={database.id} databaseName={database.name ?? ""} onClose={() => {}} />
                                                             <ButtonWithConfirmation label="Delete" func={handleDeleteDatabase} args={[database, updateModel]} />
                                                         </Stack>
                                                     </TableCell>

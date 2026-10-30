@@ -4,7 +4,7 @@ import userManager from "../../../bin/user.js";
 import { sourceModel } from "../../../model/sources.js";
 
 // Route POST /kg: not used client-side (no calls found in public/).
-// Likely deprecated — active routes are sub-paths /kg/data, /kg/model, /kg/triples, /kg/mappings, /kg/clearGraph.
+// Likely deprecated — active routes are sub-paths /kg/data, /kg/triples, /kg/mappings, /kg/clearGraph.
 export default function () {
     let operations = {
         POST,

@@ -1,4 +1,4 @@
-import * as dbConnector from "../../../../bin/KG/dbConnector.js";
+import * as dbConnector from "../../../../bin/databases/dbConnector.js";
 import { databaseModel } from "../../../../model/databases.js";
 import userManager from "../../../../bin/user.js";
 import UserRequestFiltering from "../../../../bin/userRequestFiltering.js";

@@ -1,5 +1,5 @@
-import { findUserSource } from "../../../../../bin/AI/ontologyRuns.js";
-import { conversationIdRegex, conversationKinds, listVersionConversations, saveConversation } from "../../../../../bin/AI/revisionConversations.js";
+import { findUserSource } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
+import { conversationIdRegex, conversationKinds, listVersionConversations, saveConversation } from "../../../../../bin/AI/ontologyFromDb/revision/revisionConversations.js";
 
 export default function () {
     let operations = {

@@ -14,8 +14,8 @@ import {
     saveRun,
     readDatabaseChecks,
     saveDatabaseChecks,
-} from "../../../../bin/AI/ontologyRuns.js";
-import { fixNotAllowedRestrictions } from "../../../../bin/AI/restrictionFix.js";
+} from "../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
+import { fixNotAllowedRestrictions } from "../../../../bin/AI/ontologyFromDb/ontology/restrictionFix.js";
 import {
     ontologyModelId,
     ontologyReasoningEffort,
@@ -28,18 +28,18 @@ import {
     toJsonBlock,
     getTermNamespace,
     getAnswerTurtle,
-} from "../../../../bin/AI/ontologyAnswer.js";
+} from "../../../../bin/AI/ontologyFromDb/ontology/ontologyAnswer.js";
 import userManager from "../../../../bin/user.js";
 import * as dbConnector from "../../../../bin/databases/dbConnector.js";
 import { databaseModel } from "../../../../model/databases.js";
 import { sourceModel } from "../../../../model/sources.js";
-import { getUpperOntologyModelText } from "../../../../bin/AI/upperOntologyModel.js";
-import { checkRunRestrictions } from "../../../../bin/AI/restrictionCheck.js";
-import { describeDatabase } from "../../../../bin/AI/databaseDescription.js";
+import { getUpperOntologyModelText } from "../../../../bin/AI/ontologyFromDb/upperOntologyModel.js";
+import { checkRunRestrictions } from "../../../../bin/AI/ontologyFromDb/ontology/restrictionCheck.js";
+import { describeDatabase } from "../../../../bin/AI/ontologyFromDb/databaseDescription.js";
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
-const ontologyBuildingPromptPath = join(currentDirectory, "../../../../bin/AI/prompts/ontology_building_from_db.md");
-const linkCandidatesPromptPath = join(currentDirectory, "../../../../bin/AI/prompts/link_candidates_from_db.md");
+const ontologyBuildingPromptPath = join(currentDirectory, "../../../../bin/AI/ontologyFromDb/prompts/ontology_building_from_db.md");
+const linkCandidatesPromptPath = join(currentDirectory, "../../../../bin/AI/ontologyFromDb/prompts/link_candidates_from_db.md");
 
 // OpenRouter ids, fixed here: the page does not choose the models
 const linkCandidatesModelId = "anthropic/claude-haiku-5.5";
@@ -675,14 +675,14 @@ export default function () {
         security: [{ restrictQuota: [], restrictAdmin: [] }],
         summary: "Generate a domain ontology from a database and the upper ontologies of a source",
         description:
-            "Builds the `bin/AI/prompts/ontology_building_from_db.md` prompt with the database schema (columns, nullability, primary and foreign keys, " +
+            "Builds the `bin/AI/ontologyFromDb/prompts/ontology_building_from_db.md` prompt with the database schema (columns, nullability, primary and foreign keys, " +
             "sample rows, row count and per column distinct and null counts), the overlaps measured beforehand between the pairs of columns " +
             "a first LLM call (Claude Haiku 5.5) proposes from the database description alone (150 at most) and the enriched model of the upper ontologies (as GET /ontologyModels/enriched returns it), most abstract first, then calls Claude Opus 5.5 once, at medium reasoning effort, through OpenRouter. " +
             "The answer is one compact JSON object (classes, restrictions, datatype properties, individuals, groups, report) that the route turns into Turtle. " +
             "Each run is saved under `data/semanticVirtualDB/<database>/`, the Turtle in a `.ttl` file, the report, the problems met while writing the Turtle and the whole answer in a `.json` file. " +
             "The Turtle is then loaded into the run graph `<source graphUri>/virtual-db-creator/<run timestamp>/`. " +
             "Each restriction of the run graph is then checked with OntologyModels.getAllowedPropertiesBetweenNodes against the domains and ranges of the upper ontologies, inherited ones included: allowed, notAllowed, or unchecked when the property has no named domain nor range. " +
-            "When some are notAllowed, a second call of the same model (`bin/AI/prompts/ontology_restriction_fix.md`) gets them, with the properties whose domain or range fit each class and target, and chooses for each one of those properties or its removal, a property outside them being refused; " +
+            "When some are notAllowed, a second call of the same model (`bin/AI/ontologyFromDb/prompts/ontology_restriction_fix.md`) gets them, with the properties whose domain or range fit each class and target, and chooses for each one of those properties or its removal, a property outside them being refused; " +
             "the Turtle is written again, loaded and checked once more, and the run file keeps that turn under restrictionFix, the generated answer included. " +
             "A generation answers in NDJSON, one event per line while it runs: stepStart and stepEnd (profiles, linkCandidates, pairs, upperOntologies, ontology, graph, restrictionCheck, restrictionFix) with their seconds, " +
             "progress (tables profiled, pairs measured; the samples, profiles and overlaps of earlier runs on the database are read from its databaseChecks.json), writing (characters written, reasoning excerpt, labels completed) and a last result event with the total time, or an error event.",

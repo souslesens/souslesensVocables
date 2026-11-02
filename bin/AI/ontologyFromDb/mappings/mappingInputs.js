@@ -1,12 +1,12 @@
-import { findSourceRuns, getRunGraphUri, getValidatedTboxSource, readDatabaseChecks } from "./ontologyRuns.js";
-import { getTermNamespace } from "./ontologyAnswer.js";
+import { findSourceRuns, getRunGraphUri, getValidatedTboxSource, readDatabaseChecks } from "../ontology/ontologyRuns.js";
+import { getTermNamespace } from "../ontology/ontologyAnswer.js";
 import { getMappingDocument, getLiteralRangeWarnings, checkMappingRelations } from "./mappingAnswer.js";
-import { getImportedOntologies } from "./restrictionCheck.js";
-import { getDatatypePropertyIris, getValidatedOntologyModelText } from "./upperOntologyModel.js";
-import { describeDatabase } from "./databaseDescription.js";
-import { callVocablesFunction } from "../remoteCodeRunner.js";
-import { getSchemaDescription } from "../KG/dbConnector.js";
-import { databaseModel } from "../../model/databases.js";
+import { getImportedOntologies } from "../ontology/restrictionCheck.js";
+import { getDatatypePropertyIris, getValidatedOntologyModelText } from "../upperOntologyModel.js";
+import { describeDatabase } from "../databaseDescription.js";
+import { callVocablesFunction } from "../../../remoteCodeRunner.js";
+import { getSchemaDescription } from "../../../KG/dbConnector.js";
+import { databaseModel } from "../../../../model/databases.js";
 
 // MappingModeler reads the public schema of a postgres database, see getSchemaDescription
 const postgresSchemaName = "public";

@@ -1,6 +1,6 @@
 import { mkdir, readdir, readFile, rm, writeFile } from "fs/promises";
 import { join, resolve as resolvePath } from "path";
-import { llmAnswersDirectory, nonNameCharacterRegex } from "./ontologyRuns.js";
+import { llmAnswersDirectory, nonNameCharacterRegex } from "../ontology/ontologyRuns.js";
 
 // the mapping versions of a source sit in the mappings folder of their database, next to its ontology runs
 const mappingsFolderName = "mappings";

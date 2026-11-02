@@ -1,8 +1,8 @@
-import { findSourceRun, getRunGraphUri, getTboxSourceName, isTboxSourceOf, getRunProblems } from "../../../../../bin/AI/ontologyRuns.js";
-import { firstOntologyVersion } from "../../../../../bin/AI/ontologyAnswer.js";
+import { findSourceRun, getRunGraphUri, getTboxSourceName, isTboxSourceOf, getRunProblems } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
+import { firstOntologyVersion } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyAnswer.js";
 import { setRunnerSource } from "../../../../../bin/remoteCodeRunner.js";
 import { sourceModel } from "../../../../../model/sources.js";
-import { readGraphTriples, updateGraphCheck } from "../../../../../bin/AI/versionGraph.js";
+import { readGraphTriples, updateGraphCheck } from "../../../../../bin/AI/ontologyFromDb/ontology/versionGraph.js";
 
 export default function () {
     let operations = {

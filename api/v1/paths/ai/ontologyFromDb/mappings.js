@@ -1,9 +1,17 @@
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-import { findSourceRuns, getNewRunTimestamp, getValidatedTboxSource } from "../../../../../bin/AI/ontologyRuns.js";
-import { ontologyModelId, ontologyReasoningEffort, modelMaxOutputTokens, jsonBlockRegex, createMessage, getCutAnswerError, getAnswerText } from "../../../../../bin/AI/ontologyAnswer.js";
-import { getMappingInputs, checkMappingAnswer } from "../../../../../bin/AI/mappingInputs.js";
+import { findSourceRuns, getNewRunTimestamp, getValidatedTboxSource } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
+import {
+    ontologyModelId,
+    ontologyReasoningEffort,
+    modelMaxOutputTokens,
+    jsonBlockRegex,
+    createMessage,
+    getCutAnswerError,
+    getAnswerText,
+} from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyAnswer.js";
+import { getMappingInputs, checkMappingAnswer } from "../../../../../bin/AI/ontologyFromDb/mappings/mappingInputs.js";
 import {
     getMappingName,
     listSourceMappings,
@@ -12,10 +20,10 @@ import {
     readMappingModelerFile,
     writeMappingModelerFile,
     getMappingStatement,
-} from "../../../../../bin/AI/mappingRuns.js";
+} from "../../../../../bin/AI/ontologyFromDb/mappings/mappingRuns.js";
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
-const mappingPromptPath = join(currentDirectory, "../../../../../bin/AI/prompts/mapping_building_from_ontology.md");
+const mappingPromptPath = join(currentDirectory, "../../../../../bin/AI/ontologyFromDb/prompts/mapping_building_from_ontology.md");
 // the page is told what the model writes at most once a second
 const writingProgressIntervalMs = 1000;
 
@@ -353,7 +361,7 @@ export default function () {
         security: [{ restrictQuota: [], restrictAdmin: [] }],
         summary: "Generate a mapping of a source from its validated version",
         description:
-            "Builds the `bin/AI/prompts/mapping_building_from_ontology.md` prompt with the validated version the source imports, read from its graph (classes, axioms, properties and provenance annotations), the schema, samples and profiles " +
+            "Builds the `bin/AI/ontologyFromDb/prompts/mapping_building_from_ontology.md` prompt with the validated version the source imports, read from its graph (classes, axioms, properties and provenance annotations), the schema, samples and profiles " +
             "of the database it was built on and the measured overlaps, then calls the ontology model once. The answer is a compact JSON (resources, relations, candidates, report), terms as prefixed names, " +
             "that the route turns into the MappingModeler document. Tables, columns, classes and properties it names are checked against the schema and the validated version, " +
             "the ranges of its literals against the SQL types, and its relations with OntologyModels.getAllowedPropertiesBetweenNodes. The version is saved, MappingModeler " +

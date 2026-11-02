@@ -11,8 +11,8 @@
  * Run: node scripts/tests/test-openrouter-tools.js
  */
 
-import createOpenRouterAdapter from "../../bin/AI/adapters/openRouterAdapter.js";
-import { normalizeCompletion } from "../../bin/AI/normalizeCompletion.js";
+import createOpenRouterAdapter from "../../bin/AI/llm/adapters/openRouterAdapter.js";
+import { normalizeCompletion } from "../../bin/AI/llm/normalizeCompletion.js";
 
 const capturedRequests = [];
 let cannedResponse = null;

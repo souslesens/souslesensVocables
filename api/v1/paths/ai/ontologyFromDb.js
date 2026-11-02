@@ -431,9 +431,10 @@ export default function () {
             let completion = null;
             let failure = null;
             const ontologyStart = Date.now();
+            // what the model wrote before a failure is paid all the same: it is saved as the answer of the run
+            let writtenText = "";
             if (!req.body.answer) {
                 sendProgress({ type: "stepStart", step: "ontology", model: ontologyModelId, reasoningEffort: ontologyReasoningEffort, promptCharacters: prompt.length });
-                let writtenText = "";
                 let reasoningText = "";
                 let labelScanPosition = 0;
                 let sentReasoningLength = 0;
@@ -487,7 +488,7 @@ export default function () {
             }
             endStep("ontology", ontologyStart, { usage: usage, failure: failure });
 
-            const answerText = req.body.answer || getAnswerText(completion);
+            const answerText = req.body.answer || getAnswerText(completion) || writtenText;
             const answerMatch = answerText.match(jsonBlockRegex);
             let ontologyAnswer = null;
             let answerError = getCutAnswerError(completion, answerText);

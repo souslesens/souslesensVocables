@@ -6,6 +6,7 @@ import { rdfDataModel } from "../../model/rdfData.js";
 import { mainConfigModel } from "../../model/mainConfig.js";
 import { sourceModel } from "../../model/sources.js";
 import userManager from "../user.js";
+import { tryCheckRunRestrictions, getNotAllowedRestrictionText } from "./restrictionCheck.js";
 
 // each run of POST /ai/ontologyFromDb is saved as <source>_<run timestamp>.ttl and .json in the folder of its database
 const llmAnswersDirectory = resolvePath("data", "semanticVirtualDB");
@@ -55,6 +56,20 @@ function isTboxSourceOf(source, importedSource) {
 function getValidatedTboxSource(source, sourceConfig) {
     const tboxSource = (sourceConfig.imports || []).find((importedSource) => isTboxSourceOf(source, importedSource)) ?? null;
     return tboxSource;
+}
+
+function getRunProblems(savedRun) {
+    const notAllowedChecks = (savedRun?.restrictionChecks || []).filter((restrictionCheck) => restrictionCheck.status == "notAllowed");
+    const notAllowedTexts = notAllowedChecks.map(getNotAllowedRestrictionText);
+    // once its graph is checked, what the graph holds replaces what writing the Turtle met, see updateGraphCheck
+    const contentProblems = savedRun?.graphProblems ?? savedRun?.answerProblems ?? [];
+    const runProblems = [...contentProblems, ...notAllowedTexts];
+    // no graph to check, a check that failed, or a run saved before the check existed
+    if (!savedRun?.restrictionChecks) {
+        const notCheckedReason = savedRun?.restrictionCheckError ?? savedRun?.graphError ?? savedRun?.failure ?? savedRun?.answerError;
+        runProblems.push("restrictions not checked" + (notCheckedReason ? ": " + notCheckedReason : ""));
+    }
+    return runProblems;
 }
 
 // the runs of a source, whatever database they were built from, newest first, with the content of their run file
@@ -203,6 +218,23 @@ async function loadTurtleIntoGraph(turtle, graphUri) {
     return store.statements.length;
 }
 
+// the hierarchy of the local classes is read in the version graph: no graph, no check
+async function loadAndCheckTurtle(turtle, graphUri, source, upperOntologies, userContext) {
+    const checkedVersion = { graphTripleCount: null, graphError: null, restrictionChecks: null, restrictionCheckError: null };
+    try {
+        checkedVersion.graphTripleCount = await loadTurtleIntoGraph(turtle, graphUri);
+    } catch (loadError) {
+        checkedVersion.graphError = loadError.message;
+    }
+    if (!checkedVersion.graphTripleCount) {
+        return checkedVersion;
+    }
+    const restrictionCheckResult = await tryCheckRunRestrictions(turtle, graphUri, source, upperOntologies, userContext);
+    checkedVersion.restrictionChecks = restrictionCheckResult.restrictionChecks;
+    checkedVersion.restrictionCheckError = restrictionCheckResult.restrictionCheckError;
+    return checkedVersion;
+}
+
 // a run without Turtle, a failed generation, is saved all the same: a paid answer is never lost
 async function saveRun(databaseFolder, runName, savedRun, turtle) {
     const databaseAnswersDirectory = join(llmAnswersDirectory, databaseFolder);
@@ -266,6 +298,7 @@ export {
     getTboxSourceName,
     isTboxSourceOf,
     getValidatedTboxSource,
+    getRunProblems,
     getRunGraphUri,
     listSourceRuns,
     readLastOntologyVersion,
@@ -273,6 +306,7 @@ export {
     findSourceRuns,
     findSourceRun,
     loadTurtleIntoGraph,
+    loadAndCheckTurtle,
     saveRun,
     readDatabaseChecks,
     saveDatabaseChecks,

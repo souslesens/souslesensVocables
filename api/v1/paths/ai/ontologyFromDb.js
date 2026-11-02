@@ -10,10 +10,12 @@ import {
     getRunName,
     getRunGraphUri,
     loadTurtleIntoGraph,
+    loadAndCheckTurtle,
     saveRun,
     readDatabaseChecks,
     saveDatabaseChecks,
 } from "../../../../bin/AI/ontologyRuns.js";
+import { fixNotAllowedRestrictions } from "../../../../bin/AI/restrictionFix.js";
 import {
     ontologyModelId,
     ontologyReasoningEffort,
@@ -23,6 +25,7 @@ import {
     createMessage,
     getCutAnswerError,
     getAnswerText,
+    toJsonBlock,
     getTermNamespace,
     getAnswerTurtle,
 } from "../../../../bin/AI/ontologyAnswer.js";
@@ -511,7 +514,7 @@ export default function () {
             } catch (conversionError) {
                 answerError = "answer not turned into Turtle: " + conversionError.message;
             }
-            const turtle = answerOntology ? answerOntology.turtle : null;
+            let turtle = answerOntology ? answerOntology.turtle : null;
 
             const runTimestamp = getNewRunTimestamp();
             const runGraphUri = getRunGraphUri(sourceConfig.graphUri, runTimestamp);
@@ -547,6 +550,47 @@ export default function () {
                     error: restrictionCheckError,
                 });
             }
+
+            // a second turn on the refused restrictions, checked once more: what stays refused is a problem of the version
+            let restrictionFix = null;
+            let savedAnswerText = answerText;
+            const refusedChecks = (restrictionChecks || []).filter((restrictionCheck) => restrictionCheck.status == "notAllowed");
+            if (refusedChecks.length > 0) {
+                const restrictionFixStart = Date.now();
+                sendProgress({ type: "stepStart", step: "restrictionFix", model: ontologyModelId, reasoningEffort: ontologyReasoningEffort });
+                let fixedAnswer = null;
+                ({ fixedAnswer, restrictionFix } = await fixNotAllowedRestrictions(ontologyAnswer, refusedChecks));
+                let fixedAnswerOntology = null;
+                if (fixedAnswer) {
+                    try {
+                        fixedAnswerOntology = getAnswerTurtle(fixedAnswer, source, sourceConfig, termNamespace, upperOntologyGraphUris, ontologyVersion);
+                    } catch (conversionError) {
+                        // the version keeps the generated answer: no fix of the turn is applied
+                        restrictionFix.error = "fixed answer not turned into Turtle: " + conversionError.message;
+                        restrictionFix.replacedCount = 0;
+                        restrictionFix.removedCount = 0;
+                    }
+                }
+                if (fixedAnswerOntology) {
+                    answerOntology = fixedAnswerOntology;
+                    turtle = fixedAnswerOntology.turtle;
+                    ({ graphTripleCount, graphError, restrictionChecks, restrictionCheckError } = await loadAndCheckTurtle(turtle, runGraphUri, source, upperOntologies, {
+                        user: userInfo,
+                        userSources: userSources,
+                    }));
+                    // a revision starts from the answer of the version, the generated one stays in the record of the turn
+                    restrictionFix.generatedAnswer = answerText;
+                    savedAnswerText = toJsonBlock(fixedAnswer);
+                }
+                const stillRefusedChecks = (restrictionChecks || []).filter((restrictionCheck) => restrictionCheck.status == "notAllowed");
+                endStep("restrictionFix", restrictionFixStart, {
+                    usage: restrictionFix.usage,
+                    replacedCount: restrictionFix.replacedCount,
+                    removedCount: restrictionFix.removedCount,
+                    notAllowedCount: stillRefusedChecks.length,
+                    error: restrictionFix.error ?? graphError ?? restrictionCheckError,
+                });
+            }
             const totalSeconds = Math.round((Date.now() - runStart) / 1000);
 
             // every run is kept, failed ones included, a paid generation is never lost
@@ -579,7 +623,8 @@ export default function () {
                 report: ontologyAnswer?.report ?? null,
                 answerError: answerError,
                 answerProblems: answerOntology?.problems ?? null,
-                answer: answerText,
+                restrictionFix: restrictionFix,
+                answer: savedAnswerText,
             };
             let saveError = null;
             try {
@@ -637,7 +682,9 @@ export default function () {
             "Each run is saved under `data/semanticVirtualDB/<database>/`, the Turtle in a `.ttl` file, the report, the problems met while writing the Turtle and the whole answer in a `.json` file. " +
             "The Turtle is then loaded into the run graph `<source graphUri>/virtual-db-creator/<run timestamp>/`. " +
             "Each restriction of the run graph is then checked with OntologyModels.getAllowedPropertiesBetweenNodes against the domains and ranges of the upper ontologies, inherited ones included: allowed, notAllowed, or unchecked when the property has no named domain nor range. " +
-            "A generation answers in NDJSON, one event per line while it runs: stepStart and stepEnd (profiles, linkCandidates, pairs, upperOntologies, ontology, graph, restrictionCheck) with their seconds, " +
+            "When some are notAllowed, a second call of the same model (`bin/AI/prompts/ontology_restriction_fix.md`) gets them, with the properties whose domain or range fit each class and target, and chooses for each one of those properties or its removal, a property outside them being refused; " +
+            "the Turtle is written again, loaded and checked once more, and the run file keeps that turn under restrictionFix, the generated answer included. " +
+            "A generation answers in NDJSON, one event per line while it runs: stepStart and stepEnd (profiles, linkCandidates, pairs, upperOntologies, ontology, graph, restrictionCheck, restrictionFix) with their seconds, " +
             "progress (tables profiled, pairs measured; the samples, profiles and overlaps of earlier runs on the database are read from its databaseChecks.json), writing (characters written, reasoning excerpt, labels completed) and a last result event with the total time, or an error event.",
         operationId: "postOntologyFromDb",
         parameters: [

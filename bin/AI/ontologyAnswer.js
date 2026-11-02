@@ -45,6 +45,12 @@ function getCutAnswerError(completion, answerText) {
     return "the model reached its output limit (" + outputTokens + " tokens) before finishing its answer, after " + answerText.length + " characters";
 }
 
+// the JSON block a saved answer holds, read back with jsonBlockRegex
+function toJsonBlock(value) {
+    const jsonBlock = "```json\n" + JSON.stringify(value, null, 2) + "\n```";
+    return jsonBlock;
+}
+
 function getAnswerText(completion) {
     const textBlocks = completion ? completion.content.filter((block) => block.type == "text") : [];
     const answerTexts = textBlocks.map((block) => block.text);
@@ -118,9 +124,11 @@ function getAnswerTurtle(ontologyAnswer, source, sourceConfig, termNamespace, up
         const classTerm = getTerm(ontologyClass.label);
         store.add(classTerm, rdf("type"), owl("Class"));
         store.add(classTerm, rdfs("label"), rdflib.literal(ontologyClass.label, "en"));
-        if (ontologyClass.parent) {
-            store.add(classTerm, rdfs("subClassOf"), getTerm(ontologyClass.parent));
-        } else {
+        // the model writes one parent, a class given a second one in the whiteboard comes back from its graph with a list
+        const classParents = Array.isArray(ontologyClass.parent) ? ontologyClass.parent : [ontologyClass.parent];
+        const namedParents = classParents.filter((parent) => parent);
+        namedParents.forEach((parent) => store.add(classTerm, rdfs("subClassOf"), getTerm(parent)));
+        if (namedParents.length == 0) {
             problems.push("class without parent: " + ontologyClass.label);
         }
         addTexts(classTerm, skos("definition"), ontologyClass.definition, "en");
@@ -219,6 +227,11 @@ export {
     createMessage,
     getCutAnswerError,
     getAnswerText,
+    toJsonBlock,
+    restrictionKinds,
+    cardinalityKinds,
+    localAnnotationProperties,
+    datatypeRanges,
     getTermNamespace,
     getLocalName,
     absoluteIriRegex,

@@ -51,6 +51,12 @@ function isTboxSourceOf(source, importedSource) {
     return importedSource.startsWith(source + tboxSourceInfix);
 }
 
+// a validation replaces the TBOX source a source imports, so it imports one at most
+function getValidatedTboxSource(source, sourceConfig) {
+    const tboxSource = (sourceConfig.imports || []).find((importedSource) => isTboxSourceOf(source, importedSource)) ?? null;
+    return tboxSource;
+}
+
 // the runs of a source, whatever database they were built from, newest first, with the content of their run file
 async function listSourceRuns(source) {
     const runNamePrefix = getRunName(source, "");
@@ -259,6 +265,7 @@ export {
     getRunName,
     getTboxSourceName,
     isTboxSourceOf,
+    getValidatedTboxSource,
     getRunGraphUri,
     listSourceRuns,
     readLastOntologyVersion,

@@ -349,7 +349,7 @@ export default function () {
     };
 
     POST.apiDoc = {
-        security: [{ restrictAdmin: [] }],
+        security: [{ restrictQuota: [], restrictAdmin: [] }],
         summary: "Generate a mapping of a source from its validated version",
         description:
             "Builds the `bin/AI/prompts/mapping_building_from_ontology.md` prompt with the validated version the source imports, read from its graph (classes, axioms, properties and provenance annotations), the schema, samples and profiles " +

@@ -157,9 +157,10 @@ export default function () {
             let completion = null;
             let failure = null;
             const mappingStart = Date.now();
+            // what the model wrote before a failure is paid all the same: it is saved as the answer of the version
+            let writtenText = "";
             if (!req.body.answer) {
                 sendProgress({ type: "stepStart", step: "mapping", model: ontologyModelId, reasoningEffort: ontologyReasoningEffort, promptCharacters: prompt.length });
-                let writtenCharacters = 0;
                 let lastWritingProgress = 0;
                 try {
                     completion = await createMessage(
@@ -169,10 +170,10 @@ export default function () {
                             model: ontologyModelId,
                             reasoningEffort: ontologyReasoningEffort,
                             onTextDelta: function (textDelta) {
-                                writtenCharacters += textDelta.length;
+                                writtenText += textDelta;
                                 if (Date.now() - lastWritingProgress >= writingProgressIntervalMs) {
                                     lastWritingProgress = Date.now();
-                                    sendProgress({ type: "writing", writtenCharacters: writtenCharacters });
+                                    sendProgress({ type: "writing", writtenCharacters: writtenText.length });
                                 }
                             },
                         },
@@ -184,7 +185,7 @@ export default function () {
             }
             endStep("mapping", mappingStart, { usage: usage, failure: failure });
 
-            const answerText = req.body.answer || getAnswerText(completion);
+            const answerText = req.body.answer || getAnswerText(completion) || writtenText;
             const answerMatch = answerText.match(jsonBlockRegex);
             let answerError = getCutAnswerError(completion, answerText);
             let mappingAnswer = null;

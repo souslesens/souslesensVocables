@@ -52,8 +52,8 @@ await new Promise(function (resolve) {
 // Set before importing the adapter: the Anthropic SDK reads this when the client is constructed.
 process.env.ANTHROPIC_BASE_URL = `http://localhost:${stubPort}`;
 
-const { default: createAnthropicAdapter } = await import("../../bin/AI/adapters/anthropicAdapter.js");
-const { normalizeCompletion } = await import("../../bin/AI/normalizeCompletion.js");
+const { default: createAnthropicAdapter } = await import("../../bin/AI/llm/adapters/anthropicAdapter.js");
+const { normalizeCompletion } = await import("../../bin/AI/llm/normalizeCompletion.js");
 
 const adapter = createAnthropicAdapter({ apiKey: "stub-key", defaultModel: "claude-stub", maxTokens: 1024 });
 

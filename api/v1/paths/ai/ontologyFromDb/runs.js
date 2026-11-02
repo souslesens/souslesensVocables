@@ -1,5 +1,6 @@
 import { readFile, rm } from "fs/promises";
-import { runningGenerations, getRunGraphUri, findSourceRuns, findSourceRun, loadTurtleIntoGraph } from "../../../../../bin/AI/ontologyRuns.js";
+import { runningGenerations, getRunGraphUri, findSourceRuns, findSourceRun, loadTurtleIntoGraph, getRunProblems } from "../../../../../bin/AI/ontologyRuns.js";
+import { readGraphTriples, updateGraphCheck } from "../../../../../bin/AI/versionGraph.js";
 import { rdfDataModel } from "../../../../../model/rdfData.js";
 
 export default function () {
@@ -37,7 +38,7 @@ export default function () {
                     // the first runs were saved before the run file carried a total time
                     totalSeconds: run.savedRun?.totalSeconds ?? null,
                     usage: run.savedRun?.usage ?? null,
-                    isGraphLoaded: await rdfDataModel.ask(graphUri, [null, null, null]),
+                    problems: getRunProblems(run.savedRun),
                 });
             }
             res.status(200).json({ runs: runDescriptions, generating: runningGenerations[req.query.source] ?? null });
@@ -54,9 +55,17 @@ export default function () {
                 return res.status(found.status).json({ error: found.error });
             }
             const graphUri = getRunGraphUri(found.sourceConfig.graphUri, found.run.runTimestamp);
-            const turtle = await readFile(found.run.turtlePath, "utf8");
-            const tripleCount = await loadTurtleIntoGraph(turtle, graphUri);
-            res.status(200).json({ graphUri: graphUri, tripleCount: tripleCount });
+            // the graph holds the version with the edits made in the whiteboard: the file loads it only when it is empty
+            let graphTriples = await readGraphTriples(graphUri);
+            if (!graphTriples) {
+                const turtle = await readFile(found.run.turtlePath, "utf8");
+                await loadTurtleIntoGraph(turtle, graphUri);
+                graphTriples = await readGraphTriples(graphUri);
+            }
+            // checked again when the graph changed since its last check, never fixed: no LLM call
+            await updateGraphCheck(found, req.body.source, graphTriples);
+            const runProblems = getRunProblems(found.run.savedRun);
+            res.status(200).json({ graphUri: graphUri, problems: runProblems });
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: error.message });
@@ -92,14 +101,16 @@ export default function () {
         summary: "List the ontology generation runs of a source",
         description:
             "Lists the runs of POST /ai/ontologyFromDb saved for a source under `data/semanticVirtualDB/<database>/`, newest first, " +
-            "with the model, the total time and the token usage of the run file, its graph `<source graphUri>/virtual-db-creator/<run timestamp>/` and whether that graph holds triples. " +
+            "with the model, the total time and the token usage of the run file, its graph `<source graphUri>/virtual-db-creator/<run timestamp>/` and the problems its last check found. " +
             "`generating` describes the generation running for the source in this server process, if any.",
         operationId: "getOntologyFromDbRuns",
         parameters: [sourceParameter],
         responses: {
             200: {
                 description:
-                    "{ runs: [{ validatedAs, runName, runTimestamp, database, graphUri, model, ontologyVersion, parentRunName, revisionSummary, totalSeconds, usage, isGraphLoaded }] }, parentRunName and revisionSummary set on a run made by POST /ai/ontologyFromDb/revise, generating: { startedAt, database, step } or null",
+                    "{ runs: [{ validatedAs, runName, runTimestamp, database, graphUri, model, ontologyVersion, parentRunName, revisionSummary, totalSeconds, usage, problems }] }, parentRunName and revisionSummary set on a run made by POST /ai/ontologyFromDb/revise, " +
+                    "problems the texts of what keeps the version from being validated, as its last check found them: once its graph is checked, a class without parent, a reference to a local term the graph does not declare, " +
+                    "before, the problems met writing its Turtle; then the restrictions outside the domain or range of their property, or restrictions not checked. generating: { startedAt, database, step } or null",
             },
             404: { description: "The source is unknown to the user." },
         },
@@ -108,8 +119,12 @@ export default function () {
 
     POST.apiDoc = {
         security: [{ restrictAdmin: [] }],
-        summary: "Load the Turtle of a run into its graph",
-        description: "Replaces the content of the run graph `<source graphUri>/virtual-db-creator/<run timestamp>/` by the triples of the `.ttl` file of the run.",
+        summary: "Open a run: load its graph if empty, check it if it changed",
+        description:
+            "Loads the triples of the `.ttl` file of the run into its graph `<source graphUri>/virtual-db-creator/<run timestamp>/` when that graph is empty: " +
+            "a graph already loaded holds the version with the edits made in the whiteboard and is kept. " +
+            "When the graph changed since its last check, or was never checked, it is checked again, without any LLM call: " +
+            "the problems are written in the run file and the graph in its `.ttl`.",
         operationId: "postOntologyFromDbRun",
         parameters: [
             {
@@ -124,7 +139,7 @@ export default function () {
             },
         ],
         responses: {
-            200: { description: "{ graphUri, tripleCount }" },
+            200: { description: "{ graphUri, problems }: problems as GET lists them, once the graph is checked." },
             404: { description: "The source or the run is unknown." },
         },
         tags: ["AI"],

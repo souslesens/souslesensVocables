@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import { getNewRunTimestamp } from "../../../../../../bin/AI/ontologyRuns.js";
-import { ontologyModelId, ontologyReasoningEffort, jsonBlockRegex } from "../../../../../../bin/AI/ontologyAnswer.js";
+import { ontologyModelId, ontologyReasoningEffort, jsonBlockRegex, toJsonBlock } from "../../../../../../bin/AI/ontologyAnswer.js";
 import { getMappingInputs, checkMappingAnswer } from "../../../../../../bin/AI/mappingInputs.js";
 import { getMappingName, listSourceMappings, saveMappingVersion } from "../../../../../../bin/AI/mappingRuns.js";
 import {
@@ -38,7 +38,7 @@ const revisionTools = [
             "set adds or replaces the item of that key with item, a whole object in the format of the mapping rules. remove deletes the item of that key. " +
             "A resource is keyed table.column, a relation 'from property to' as the version writes them, a candidate by its description. " +
             "Refused, with the reasons, when an operation does not apply, when the checks find problems the version under discussion did not have, " +
-            "or relations whose property does not allow their two classes, unless acceptProblems is true. The new version is not validated: the ontologist validates it in the plugin.",
+            "or relations whose property does not allow their two classes. The new version is not validated: the ontologist validates it in the plugin.",
         input_schema: {
             type: "object",
             properties: {
@@ -58,10 +58,6 @@ const revisionTools = [
                     },
                 },
                 report: { type: "object", description: "The whole updated report, when the change touches it." },
-                acceptProblems: {
-                    type: "boolean",
-                    description: "Save despite new problems or relations not allowed, only when the ontologist asked for the change knowing them.",
-                },
             },
             required: ["summary", "operations"],
         },
@@ -238,7 +234,8 @@ export default function () {
                 const discussedNotAllowed = getNotAllowedRelationTexts(discussedVersion.checks.relationChecks);
                 const revisedNotAllowed = getNotAllowedRelationTexts(revisedChecks.relationChecks);
                 const notAllowedRelations = revisedNotAllowed.filter((relationText) => !discussedNotAllowed.includes(relationText));
-                if ((newProblems.length > 0 || notAllowedRelations.length > 0) && !toolInput.acceptProblems) {
+                // never saved with a problem it brings, whatever the conversation says: a database value can steer the model
+                if (newProblems.length > 0 || notAllowedRelations.length > 0) {
                     return newProblems.length > 0 ? { saved: false, newProblems: newProblems } : { saved: false, notAllowedRelations: notAllowedRelations };
                 }
 
@@ -266,11 +263,9 @@ export default function () {
                     revision: {
                         summary: toolInput.summary,
                         operations: operations,
-                        acceptedProblems: newProblems,
-                        acceptedNotAllowedRelations: notAllowedRelations,
                         conversation: conversation,
                     },
-                    answer: "```json\n" + JSON.stringify(revisedAnswer, null, 2) + "\n```",
+                    answer: toJsonBlock(revisedAnswer),
                 };
                 await saveMappingVersion(baseVersion.databaseFolder, mappingName, savedMapping);
                 discussedVersion = { mappingName: mappingName, answer: revisedAnswer, checks: revisedChecks };
@@ -278,8 +273,6 @@ export default function () {
                 return {
                     saved: true,
                     mappingName: mappingName,
-                    acceptedProblems: newProblems,
-                    acceptedNotAllowedRelations: notAllowedRelations,
                     rangeWarnings: revisedChecks.rangeWarnings,
                     relationCheckError: revisedChecks.relationCheckError,
                 };

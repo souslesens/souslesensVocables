@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-import { findSourceRuns, getNewRunTimestamp } from "../../../../../bin/AI/ontologyRuns.js";
+import { findSourceRuns, getNewRunTimestamp, getValidatedTboxSource } from "../../../../../bin/AI/ontologyRuns.js";
 import { ontologyModelId, ontologyReasoningEffort, modelMaxOutputTokens, jsonBlockRegex, createMessage, getCutAnswerError, getAnswerText } from "../../../../../bin/AI/ontologyAnswer.js";
 import { getMappingInputs, checkMappingAnswer } from "../../../../../bin/AI/mappingInputs.js";
 import {
@@ -33,6 +33,7 @@ async function activateMappingVersion(source, mappingName, mapping, databaseFold
                 source: source,
                 kind: "mappingModeler",
                 basedOn: activeMappingName ?? null,
+                tboxSource: activeMappingVersion?.savedMapping.tboxSource ?? null,
                 createdAt: new Date().toISOString(),
                 mapping: mappingModelerFile,
             });
@@ -287,6 +288,13 @@ export default function () {
             if (problems.length > 0) {
                 return res.status(409).json({ error: mappingVersion.mappingName + " has " + problems.length + " problems: revise it before validating it" });
             }
+            // its classes and properties were checked against that ontology only
+            const validatedTboxSource = getValidatedTboxSource(req.body.source, found.sourceConfig);
+            if (mappingVersion.savedMapping.tboxSource != validatedTboxSource) {
+                const mappedTboxSource = mappingVersion.savedMapping.tboxSource ?? "an unknown ontology version";
+                const staleMappingError = mappingVersion.mappingName + " maps " + mappedTboxSource + ", not the validated " + validatedTboxSource + ": generate or revise a mapping of it";
+                return res.status(409).json({ error: staleMappingError });
+            }
             const keptMappingName = await activateMappingVersion(req.body.source, mappingVersion.mappingName, mappingVersion.savedMapping.mapping, mappingVersion.databaseFolder, mappingVersions);
             res.status(200).json({ activeMappingName: mappingVersion.mappingName, keptMappingName: keptMappingName });
         } catch (error) {
@@ -378,7 +386,7 @@ export default function () {
         security: [{ restrictAdmin: [] }],
         summary: "Validate a mapping version: MappingModeler opens it",
         description:
-            "Writes the version to `data/graphs/mappings_<source>_ALL.json`, refused when its checks found problems. A file edited in MappingModeler since the active version, " +
+            "Writes the version to `data/graphs/mappings_<source>_ALL.json`, refused when its checks found problems or when it maps another ontology version than the validated one. A file edited in MappingModeler since the active version, " +
             "or written before any version, is saved first as a version of kind mappingModeler.",
         operationId: "putOntologyFromDbMappings",
         parameters: [
@@ -392,7 +400,7 @@ export default function () {
         responses: {
             200: { description: "{ activeMappingName, keptMappingName }: keptMappingName names the version the replaced file was saved as, or is null." },
             404: { description: "The source or the mapping version is unknown." },
-            409: { description: "The version has no mapping, or its checks found problems." },
+            409: { description: "The version has no mapping, its checks found problems, or it maps another ontology version than the validated one." },
         },
         tags: ["AI"],
     };

@@ -626,7 +626,7 @@ export default function () {
     }
 
     POST.apiDoc = {
-        security: [{ restrictAdmin: [] }],
+        security: [{ restrictQuota: [], restrictAdmin: [] }],
         summary: "Generate a domain ontology from a database and the upper ontologies of a source",
         description:
             "Builds the `bin/AI/prompts/ontology_building_from_db.md` prompt with the database schema (columns, nullability, primary and foreign keys, " +

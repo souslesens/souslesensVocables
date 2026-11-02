@@ -206,10 +206,16 @@ function toAnthropicResponse(openRouterResponse) {
 const anthropicModelPrefix = "anthropic/";
 const sseDataPrefix = "data: ";
 const sseDoneLine = "data: [DONE]";
+// Une requête qui ne reçoit plus rien est bloquée : arrêtée, elle libère ce que tient l'appelant, le verrou de génération d'une source d'abord.
+// Un flux envoie son raisonnement tant que le modèle travaille, une réponse non streamée n'arrive qu'à la fin.
+// Les commentaires SSE de maintien de connexion ne comptent pas : OpenRouter les envoie aussi quand le fournisseur ne répond plus.
+const millisecondsPerMinute = 60 * 1000;
+const streamedIdleTimeoutMs = 10 * millisecondsPerMinute;
+const wholeAnswerTimeoutMs = 30 * millisecondsPerMinute;
 
 // Lit une réponse `stream: true` et la recompose sous la forme d'une réponse non streamée : la
 // détection d'erreur et la normalisation qui suivent restent celles du mode normal.
-async function readStreamedCompletion(response, onTextDelta, onReasoningDelta) {
+async function readStreamedCompletion(response, onTextDelta, onReasoningDelta, onDataReceived) {
     const decoder = new TextDecoder();
     const streamedChoice = { message: { content: "" }, finish_reason: null };
     const streamedResponse = { choices: [streamedChoice] };
@@ -220,6 +226,7 @@ async function readStreamedCompletion(response, onTextDelta, onReasoningDelta) {
         if (!line.startsWith(sseDataPrefix) || line === sseDoneLine) {
             return;
         }
+        onDataReceived();
         const chunk = JSON.parse(line.slice(sseDataPrefix.length));
         streamedResponse.id = chunk.id ?? streamedResponse.id;
         streamedResponse.model = chunk.model ?? streamedResponse.model;
@@ -299,6 +306,16 @@ function createOpenRouterAdapter(openRouterConfig) {
     // isPromptCached : le system est renvoyé identique à chaque tour d'une boucle d'agent, Anthropic le relit alors depuis son cache.
     // Une génération en un seul appel ne le demande pas : l'écriture du cache coûte plus cher qu'une lecture simple.
     async function createMessage({ model, system, messages, maxTokens, tools, reasoningEffort, onTextDelta, onReasoningDelta, isPromptCached }, callback) {
+        const isStreamed = typeof onTextDelta === "function";
+        const idleTimeoutMs = isStreamed ? streamedIdleTimeoutMs : wholeAnswerTimeoutMs;
+        const abortController = new AbortController();
+        let idleTimer = null;
+        function restartIdleTimer() {
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(function () {
+                abortController.abort(new Error(`OpenRouter sent nothing for ${idleTimeoutMs / millisecondsPerMinute} minutes, the request was stopped`));
+            }, idleTimeoutMs);
+        }
         try {
             const requestedModel = model ?? openRouterConfig.defaultModel;
             // OpenRouter ne transmet cache_control qu'aux modèles Anthropic, les autres fournisseurs cachent seuls
@@ -316,19 +333,20 @@ function createOpenRouterAdapter(openRouterConfig) {
             if (reasoningEffort) {
                 requestBody.reasoning = { effort: reasoningEffort };
             }
-            const isStreamed = typeof onTextDelta === "function";
             if (isStreamed) {
                 requestBody.stream = true;
             }
 
+            restartIdleTimer();
             const response = await fetch(OPENROUTER_CHAT_COMPLETIONS_URL, {
                 method: "POST",
                 headers,
                 body: JSON.stringify(requestBody),
+                signal: abortController.signal,
             });
 
             if (isStreamed && response.ok) {
-                const streamedResponse = await readStreamedCompletion(response, onTextDelta, onReasoningDelta);
+                const streamedResponse = await readStreamedCompletion(response, onTextDelta, onReasoningDelta, restartIdleTimer);
                 const streamError = errorFromOpenRouterBody(streamedResponse);
                 if (streamError) {
                     return callback(streamError);
@@ -365,7 +383,10 @@ function createOpenRouterAdapter(openRouterConfig) {
 
             callback(null, toAnthropicResponse(openRouterResponse));
         } catch (error) {
-            callback(error);
+            // fetch et la lecture du flux rejettent un arrêt sous des formes diverses selon le moment : la raison donnée à abort les remplace
+            callback(abortController.signal.aborted ? abortController.signal.reason : error);
+        } finally {
+            clearTimeout(idleTimer);
         }
     }
 

@@ -1,5 +1,5 @@
 import rdflib from "rdflib";
-import { callVocablesFunction } from "../remoteCodeRunner.js";
+import { callVocablesFunction } from "../../../remoteCodeRunner.js";
 
 const rdfNamespace = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 const rdfsNamespace = "http://www.w3.org/2000/01/rdf-schema#";

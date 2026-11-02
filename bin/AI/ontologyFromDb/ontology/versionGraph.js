@@ -1,11 +1,11 @@
 import { writeFile } from "fs/promises";
 import { createHash } from "crypto";
 import rdflib from "rdflib";
-import { rdfDataModel } from "../../model/rdfData.js";
+import { rdfDataModel } from "../../../../model/rdfData.js";
 import { getRunGraphUri } from "./ontologyRuns.js";
 import { getTermNamespace, restrictionKinds, cardinalityKinds, localAnnotationProperties, datatypeRanges } from "./ontologyAnswer.js";
 import { tryCheckRunRestrictions } from "./restrictionCheck.js";
-import { wellKnownPrefixes } from "./upperOntologyModel.js";
+import { wellKnownPrefixes } from "../upperOntologyModel.js";
 
 // once loaded, the graph of a version is its reference: the whiteboard edits it, its checks and its revisions read it
 

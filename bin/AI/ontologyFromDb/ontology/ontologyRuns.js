@@ -1,11 +1,11 @@
 import { mkdir, readdir, readFile, rename, writeFile } from "fs/promises";
 import { join, resolve as resolvePath } from "path";
 import rdflib from "rdflib";
-import httpProxy from "../httpProxy.js";
-import { rdfDataModel } from "../../model/rdfData.js";
-import { mainConfigModel } from "../../model/mainConfig.js";
-import { sourceModel } from "../../model/sources.js";
-import userManager from "../user.js";
+import httpProxy from "../../../httpProxy.js";
+import { rdfDataModel } from "../../../../model/rdfData.js";
+import { mainConfigModel } from "../../../../model/mainConfig.js";
+import { sourceModel } from "../../../../model/sources.js";
+import userManager from "../../../user.js";
 import { tryCheckRunRestrictions, getNotAllowedRestrictionText } from "./restrictionCheck.js";
 
 // each run of POST /ai/ontologyFromDb is saved as <source>_<run timestamp>.ttl and .json in the folder of its database

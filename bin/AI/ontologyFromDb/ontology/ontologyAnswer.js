@@ -1,8 +1,8 @@
 import rdflib from "rdflib";
-import llmClient from "./llmClient.js";
-import Util from "../util.js";
+import llmClient from "../../llm/llmClient.js";
+import Util from "../../../util.js";
 import { trailingSlashRegex, listSourceRuns, readLastOntologyVersion } from "./ontologyRuns.js";
-import { wellKnownPrefixes } from "./upperOntologyModel.js";
+import { wellKnownPrefixes } from "../upperOntologyModel.js";
 
 // the compact JSON answer the ontology prompts ask for, the calls that write it, and its Turtle
 // OpenRouter ids, fixed here: the page does not choose the models

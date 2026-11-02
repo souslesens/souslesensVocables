@@ -5,7 +5,7 @@ import { ontologyModelId, ontologyReasoningEffort, modelMaxOutputTokens, jsonBlo
 import { getNotAllowedRestrictionText } from "./restrictionCheck.js";
 
 // the second turn of a generation: the model picks, for each refused restriction, a property among those that fit, or its removal
-const restrictionFixPromptPath = join(dirname(fileURLToPath(import.meta.url)), "prompts/ontology_restriction_fix.md");
+const restrictionFixPromptPath = join(dirname(fileURLToPath(import.meta.url)), "../prompts/ontology_restriction_fix.md");
 
 // each refused restriction found in the answer, with its place there and the check that refused it
 function findRefusedRestrictions(ontologyAnswer, notAllowedChecks) {

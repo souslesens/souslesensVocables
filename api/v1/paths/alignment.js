@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-import llmClient from "../../../bin/AI/llmClient.js";
+import llmClient from "../../../bin/AI/llm/llmClient.js";
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const SEMANTIC_ALIGNMENT_PROMPT_PATH = join(currentDirectory, "../../../bin/AI/prompts/semantic_alignment_prompt.md");

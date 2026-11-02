@@ -1,10 +1,10 @@
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-import { getNewRunTimestamp } from "../../../../../../bin/AI/ontologyRuns.js";
-import { ontologyModelId, ontologyReasoningEffort, jsonBlockRegex, toJsonBlock } from "../../../../../../bin/AI/ontologyAnswer.js";
-import { getMappingInputs, checkMappingAnswer } from "../../../../../../bin/AI/mappingInputs.js";
-import { getMappingName, listSourceMappings, saveMappingVersion } from "../../../../../../bin/AI/mappingRuns.js";
+import { getNewRunTimestamp } from "../../../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
+import { ontologyModelId, ontologyReasoningEffort, jsonBlockRegex, toJsonBlock } from "../../../../../../bin/AI/ontologyFromDb/ontology/ontologyAnswer.js";
+import { getMappingInputs, checkMappingAnswer } from "../../../../../../bin/AI/ontologyFromDb/mappings/mappingInputs.js";
+import { getMappingName, listSourceMappings, saveMappingVersion } from "../../../../../../bin/AI/ontologyFromDb/mappings/mappingRuns.js";
 import {
     searchUpperOntologiesTool,
     getUpperOntologyTermsTool,
@@ -13,11 +13,11 @@ import {
     getDatabaseTablesDescriber,
     getReadingToolOutcome,
     runAgentLoop,
-} from "../../../../../../bin/AI/revisionAgent.js";
+} from "../../../../../../bin/AI/ontologyFromDb/revision/revisionAgent.js";
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
-const revisionPromptPath = join(currentDirectory, "../../../../../../bin/AI/prompts/mapping_revision.md");
-const mappingPromptPath = join(currentDirectory, "../../../../../../bin/AI/prompts/mapping_building_from_ontology.md");
+const revisionPromptPath = join(currentDirectory, "../../../../../../bin/AI/ontologyFromDb/prompts/mapping_revision.md");
+const mappingPromptPath = join(currentDirectory, "../../../../../../bin/AI/ontologyFromDb/prompts/mapping_building_from_ontology.md");
 
 // the compact answer keys each item: a resource by its column, a relation by its two ends and its property, a candidate by its description
 const itemCollectionByKind = { resource: "resources", relation: "relations", candidate: "candidates" };
@@ -318,7 +318,7 @@ export default function () {
         summary: "Discuss a mapping version and propose new versions, in natural language",
         description:
             "Runs Claude Opus 5.5, at medium reasoning effort, through OpenRouter, on the conversation of an ontologist about one mapping version of POST /ai/ontologyFromDb/mappings. " +
-            "The model reads the `bin/AI/prompts/mapping_revision.md` prompt, the mapping rules, the validated ontology read from its graph, the compact answer of the version and its checks, " +
+            "The model reads the `bin/AI/ontologyFromDb/prompts/mapping_revision.md` prompt, the mapping rules, the validated ontology read from its graph, the compact answer of the version and its checks, " +
             "and through a tool the tables of the database. A change is a new mapping version: a copy of the discussed answer with set and remove operations applied, checked as a generation is, " +
             "refused when it brings new problems or relations not allowed. It is not validated: PUT /ai/ontologyFromDb/mappings validates it. " +
             "Answers in NDJSON: toolCall and toolResult events, a version event per new version, then an answer event with the reply, or an error event.",

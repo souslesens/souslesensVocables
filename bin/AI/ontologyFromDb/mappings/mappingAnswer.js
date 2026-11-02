@@ -1,7 +1,7 @@
 import crypto from "crypto";
-import { callVocablesFunction } from "../remoteCodeRunner.js";
-import { absoluteIriRegex } from "./ontologyAnswer.js";
-import { getImportedOntologies, getLinkStatuses, getModelLabel } from "./restrictionCheck.js";
+import { callVocablesFunction } from "../../../remoteCodeRunner.js";
+import { absoluteIriRegex } from "../ontology/ontologyAnswer.js";
+import { getImportedOntologies, getLinkStatuses, getModelLabel } from "../ontology/restrictionCheck.js";
 
 // the styles, layers and editor context of a mapping MappingModeler saved for PAZFLOR (data/graphs/mappings_PAZFLOR_ABOX_ALL.json)
 const nodeStyles = {

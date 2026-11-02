@@ -339,12 +339,12 @@ async function checkMappingRelations(checkedRelations, source, userContext) {
     const checkedOntologies = getImportedOntologies(userContext.userSources[source].imports || [], userContext.userSources);
     const ontologyModels = await callVocablesFunction("OntologyModels", "registerSourcesModel", [checkedOntologies, {}], userContext);
     const links = checkedRelations.map((relation) => ({ from: relation.fromClass, property: relation.property, to: relation.toClass }));
-    const statuses = await getLinkStatuses(source, checkedOntologies, ontologyModels, links, userContext);
+    const linkStatuses = await getLinkStatuses(source, checkedOntologies, ontologyModels, links, userContext);
     return checkedRelations.map(function (relation, relationIndex) {
         return {
             ...relation,
             propertyLabel: getModelLabel(relation.property, checkedOntologies, ontologyModels),
-            status: statuses[relationIndex],
+            status: linkStatuses[relationIndex].status,
         };
     });
 }

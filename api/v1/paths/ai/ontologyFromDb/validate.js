@@ -1,8 +1,8 @@
-import { findSourceRun, getRunGraphUri, getTboxSourceName, isTboxSourceOf } from "../../../../../bin/AI/ontologyRuns.js";
+import { findSourceRun, getRunGraphUri, getTboxSourceName, isTboxSourceOf, getRunProblems } from "../../../../../bin/AI/ontologyRuns.js";
 import { firstOntologyVersion } from "../../../../../bin/AI/ontologyAnswer.js";
 import { setRunnerSource } from "../../../../../bin/remoteCodeRunner.js";
 import { sourceModel } from "../../../../../model/sources.js";
-import { rdfDataModel } from "../../../../../model/rdfData.js";
+import { readGraphTriples, updateGraphCheck } from "../../../../../bin/AI/versionGraph.js";
 
 export default function () {
     let operations = {
@@ -17,7 +17,8 @@ export default function () {
                 return res.status(found.status).json({ error: found.error });
             }
             const graphUri = getRunGraphUri(found.sourceConfig.graphUri, found.run.runTimestamp);
-            if (!(await rdfDataModel.ask(graphUri, [null, null, null]))) {
+            const graphTriples = await readGraphTriples(graphUri);
+            if (!graphTriples) {
                 return res.status(409).json({ error: "the graph of " + req.body.runName + " holds no triple: open the version once to load it" });
             }
             const ontologyVersion = found.run.savedRun?.ontologyVersion ?? firstOntologyVersion;
@@ -26,6 +27,14 @@ export default function () {
             const storedSources = await sourceModel.getAllSources();
             if (storedSources[tboxSourceName]) {
                 return res.status(409).json({ error: "version " + ontologyVersion + " is already validated as " + tboxSourceName });
+            }
+            // the graph validated is the graph checked: an edit made in the whiteboard since the last opening is checked here
+            await updateGraphCheck(found, source, graphTriples);
+            const runProblems = getRunProblems(found.run.savedRun);
+            if (runProblems.length > 0) {
+                // a check that failed is retried when the version is opened again: revising would not help
+                const runProblemsError = req.body.runName + " cannot be validated: " + runProblems.length + " problems, listed under the version";
+                return res.status(409).json({ error: runProblemsError, problems: runProblems });
             }
             const storedSource = storedSources[source];
 
@@ -90,7 +99,7 @@ export default function () {
         responses: {
             200: { description: "{ tboxSource, tboxSourceConfig, graphUri, imports, replacedImports }: imports is the new import list of the source." },
             404: { description: "The source or the run is unknown to the user." },
-            409: { description: "The graph of the version is empty, or the version is already validated." },
+            409: { description: "The version has problems, its graph checked again if it changed, listed in problems; or its graph is empty, or it is already validated." },
         },
         tags: ["AI"],
     };

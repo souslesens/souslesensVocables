@@ -1,6 +1,6 @@
 import { mkdir, readdir, readFile, rename, writeFile } from "fs/promises";
 import { join } from "path";
-import { llmAnswersDirectory, nonNameCharacterRegex } from "./ontologyRuns.js";
+import { llmAnswersDirectory, nonNameCharacterRegex } from "../ontology/ontologyRuns.js";
 
 // a conversation with a revision agent, kept with the names of every version it discussed or saved: it reopens from any of them
 const conversationsDirectory = join(llmAnswersDirectory, "conversations");

@@ -1,6 +1,6 @@
 import { readMainConfig } from "../../../../model/config.js";
-import llmClient from "../../../../bin/AI/llmClient.js";
-import { normalizeCompletion, normalizersByProvider } from "../../../../bin/AI/normalizeCompletion.js";
+import llmClient from "../../../../bin/AI/llm/llmClient.js";
+import { normalizeCompletion, normalizersByProvider } from "../../../../bin/AI/llm/normalizeCompletion.js";
 
 export default function () {
     let operations = {
@@ -89,7 +89,7 @@ export default function () {
         security: [{ restrictQuota: [], restrictAdmin: [] }],
         summary: "Run one LLM turn, with optional tool calling",
         description:
-            "Forwards `{system, messages, tools}` to the configured LLM provider through `bin/AI/llmClient.js`, which applies the shared rate limiter and " +
+            "Forwards `{system, messages, tools}` to the configured LLM provider through `bin/AI/llm/llmClient.js`, which applies the shared rate limiter and " +
             "decrypts the API key. Exists so that an agent loop can run in the browser without the API key ever leaving the server: the caller drives the " +
             "conversation and executes the tools, this route only produces the model's next turn. " +
             'The wire format is Anthropic content blocks whatever the provider: `llm.provider` may be "anthropic" or "openrouter" (which fronts any tool-calling ' +

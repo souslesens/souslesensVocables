@@ -19,8 +19,8 @@
  * Run: node scripts/tests/test-llm-failure-modes.js
  */
 
-import createOpenRouterAdapter from "../../bin/AI/adapters/openRouterAdapter.js";
-import llmClient from "../../bin/AI/llmClient.js";
+import createOpenRouterAdapter from "../../bin/AI/llm/adapters/openRouterAdapter.js";
+import llmClient from "../../bin/AI/llm/llmClient.js";
 import { readMainConfig } from "../../model/config.js";
 
 const results = [];

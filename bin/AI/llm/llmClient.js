@@ -1,4 +1,4 @@
-import { readMainConfig } from "../../model/config.js";
+import { readMainConfig } from "../../../model/config.js";
 import createAnthropicAdapter from "./adapters/anthropicAdapter.js";
 import createOpenRouterAdapter from "./adapters/openRouterAdapter.js";
 import createOllamaAdapter from "./adapters/ollamaAdapter.js";

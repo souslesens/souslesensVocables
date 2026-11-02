@@ -4,11 +4,11 @@
 //
 // Two modes:
 //   1) Encrypt a key you provide (prints the enc:v1:... value to paste yourself):
-//        bash:        SLS_SECRET_KEY="my-passphrase" node bin/AI/encryptKey.js sk-ant-...
-//        PowerShell:  $env:SLS_SECRET_KEY="my-passphrase"; node bin/AI/encryptKey.js sk-ant-...
+//        bash:        SLS_SECRET_KEY="my-passphrase" node bin/AI/llm/encryptKey.js sk-ant-...
+//        PowerShell:  $env:SLS_SECRET_KEY="my-passphrase"; node bin/AI/llm/encryptKey.js sk-ant-...
 //
 //   2) Encrypt the apiKey already in mainConfig.json, in place (you never re-type the key):
-//        SLS_SECRET_KEY="my-passphrase" node bin/AI/encryptKey.js --in-place
+//        SLS_SECRET_KEY="my-passphrase" node bin/AI/llm/encryptKey.js --in-place
 //
 // In both cases the server must have the same SLS_SECRET_KEY set at runtime to decrypt.
 import { readFileSync, writeFileSync } from "fs";
@@ -19,8 +19,8 @@ const arg = process.argv[2];
 
 function printUsageAndExit() {
     console.error("Usage:");
-    console.error("  SLS_SECRET_KEY=<passphrase> node bin/AI/encryptKey.js <api-key>     # prints enc:v1:...");
-    console.error("  SLS_SECRET_KEY=<passphrase> node bin/AI/encryptKey.js --in-place    # encrypts apiKey in mainConfig.json");
+    console.error("  SLS_SECRET_KEY=<passphrase> node bin/AI/llm/encryptKey.js <api-key>     # prints enc:v1:...");
+    console.error("  SLS_SECRET_KEY=<passphrase> node bin/AI/llm/encryptKey.js --in-place    # encrypts apiKey in mainConfig.json");
     process.exit(1);
 }
 

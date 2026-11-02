@@ -5,7 +5,7 @@
 
 ## Overview
 
-AI routes expose LLM-backed operations through the HTTP API. They use `bin/AI/llmClient.js`, which
+AI routes expose LLM-backed operations through the HTTP API. They use `bin/AI/llm/llmClient.js`, which
 selects the provider configured in `mainConfig.llm`.
 
 The OpenAPI descriptions live directly in the route files through `GET.apiDoc` and `POST.apiDoc`.

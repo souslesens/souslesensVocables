@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-import { findSourceRun, readDatabaseChecks, getNewRunTimestamp, getRunName, getRunGraphUri, loadAndCheckTurtle, saveRun } from "../../../../../bin/AI/ontologyRuns.js";
+import { findSourceRun, readDatabaseChecks, getNewRunTimestamp, getRunName, getRunGraphUri, loadAndCheckTurtle, saveRun } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
 import {
     ontologyModelId,
     ontologyReasoningEffort,
@@ -11,7 +11,7 @@ import {
     toJsonBlock,
     getTermNamespace,
     getAnswerTurtle,
-} from "../../../../../bin/AI/ontologyAnswer.js";
+} from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyAnswer.js";
 import { rdfDataModel } from "../../../../../model/rdfData.js";
 import {
     searchUpperOntologiesTool,
@@ -21,13 +21,13 @@ import {
     getDatabaseTablesDescriber,
     getReadingToolOutcome,
     runAgentLoop,
-} from "../../../../../bin/AI/revisionAgent.js";
-import { getTurtleRestrictions, getRestrictionKey, getNotAllowedRestrictionText } from "../../../../../bin/AI/restrictionCheck.js";
-import { readGraphTriples, getGraphAnswer } from "../../../../../bin/AI/versionGraph.js";
+} from "../../../../../bin/AI/ontologyFromDb/revision/revisionAgent.js";
+import { getTurtleRestrictions, getRestrictionKey, getNotAllowedRestrictionText } from "../../../../../bin/AI/ontologyFromDb/ontology/restrictionCheck.js";
+import { readGraphTriples, getGraphAnswer } from "../../../../../bin/AI/ontologyFromDb/ontology/versionGraph.js";
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
-const revisionPromptPath = join(currentDirectory, "../../../../../bin/AI/prompts/ontology_revision.md");
-const ontologyBuildingPromptPath = join(currentDirectory, "../../../../../bin/AI/prompts/ontology_building_from_db.md");
+const revisionPromptPath = join(currentDirectory, "../../../../../bin/AI/ontologyFromDb/prompts/ontology_revision.md");
+const ontologyBuildingPromptPath = join(currentDirectory, "../../../../../bin/AI/ontologyFromDb/prompts/ontology_building_from_db.md");
 
 // a term of the answer is named by its label: these fields hold the label of another term
 const termCollectionByKind = { class: "classes", individual: "individuals", group: "groups" };
@@ -377,7 +377,7 @@ export default function () {
         summary: "Discuss a version of a generated ontology and propose new versions, in natural language",
         description:
             "Runs Claude Opus 5.5, at medium reasoning effort, through OpenRouter, on the conversation of an ontologist about one run of POST /ai/ontologyFromDb. " +
-            "The model reads the `bin/AI/prompts/ontology_revision.md` prompt, the building rules of the run, its JSON answer with its report and its measured overlaps; once the run graph is loaded, the answer is read back from that graph, with the edits made in the whiteboard, its report from the file, and the statements the answer format cannot hold listed to the model and in a notCarried event. " +
+            "The model reads the `bin/AI/ontologyFromDb/prompts/ontology_revision.md` prompt, the building rules of the run, its JSON answer with its report and its measured overlaps; once the run graph is loaded, the answer is read back from that graph, with the edits made in the whiteboard, its report from the file, and the statements the answer format cannot hold listed to the model and in a notCarried event. " +
             "and through tools the enriched model of the upper ontologies of the run and the tables of its database (schema read live, samples and profiles from the `databaseChecks.json` the runs saved). " +
             "A change is a new run: a copy of the discussed answer with set, remove and rename operations applied, a minor version above it, its parent, operations and rationale kept in its `.json` file, loaded into its own run graph. " +
             "The run discussed is never modified. Answers in NDJSON: a notCarried event first when the graph holds such statements, toolCall and toolResult events, a version event per new run, then an answer event with the reply, or an error event.",

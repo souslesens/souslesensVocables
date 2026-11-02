@@ -1,5 +1,5 @@
-import { getAnnotationsQuery, getEnrichedOntologyModel } from "../enrichedOntologyModel.js";
-import { callVocablesFunction } from "../remoteCodeRunner.js";
+import { getAnnotationsQuery, getEnrichedOntologyModel } from "../../enrichedOntologyModel.js";
+import { callVocablesFunction } from "../../remoteCodeRunner.js";
 
 const wellKnownPrefixes = {
     rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",

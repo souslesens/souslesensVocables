@@ -1,6 +1,6 @@
 import { readFile, rm } from "fs/promises";
-import { runningGenerations, getRunGraphUri, findSourceRuns, findSourceRun, loadTurtleIntoGraph, getRunProblems } from "../../../../../bin/AI/ontologyRuns.js";
-import { readGraphTriples, updateGraphCheck } from "../../../../../bin/AI/versionGraph.js";
+import { runningGenerations, getRunGraphUri, findSourceRuns, findSourceRun, loadTurtleIntoGraph, getRunProblems } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
+import { readGraphTriples, updateGraphCheck } from "../../../../../bin/AI/ontologyFromDb/ontology/versionGraph.js";
 import { rdfDataModel } from "../../../../../model/rdfData.js";
 
 export default function () {

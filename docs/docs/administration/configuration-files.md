@@ -118,7 +118,7 @@ The `mainConfig.json` contain all the `souslesensVocables` configuration.
 ### LLM provider configuration
 
 The AI integration is configured in `config/mainConfig.json` under the `llm` section. SLS reads and
-validates this section at startup from `model/config.js`, then `bin/AI/llmClient.js` selects the
+validates this section at startup from `model/config.js`, then `bin/AI/llm/llmClient.js` selects the
 adapter matching `llm.provider`.
 
 Only one provider is active at a time:
@@ -163,14 +163,14 @@ To print an encrypted key:
 
 ```powershell
 $env:SLS_SECRET_KEY = "my-passphrase"
-node bin/AI/encryptKey.js sk-ant-api03-...
+node bin/AI/llm/encryptKey.js sk-ant-api03-...
 ```
 
 To encrypt the current `llm.<provider>.apiKey` in place:
 
 ```powershell
 $env:SLS_SECRET_KEY = "my-passphrase"
-node bin/AI/encryptKey.js --in-place
+node bin/AI/llm/encryptKey.js --in-place
 ```
 
 The same `SLS_SECRET_KEY` must be available when the SLS server starts.

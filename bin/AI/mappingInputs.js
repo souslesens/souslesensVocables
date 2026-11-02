@@ -1,4 +1,4 @@
-import { findSourceRuns, getRunGraphUri, isTboxSourceOf, readDatabaseChecks } from "./ontologyRuns.js";
+import { findSourceRuns, getRunGraphUri, getValidatedTboxSource, readDatabaseChecks } from "./ontologyRuns.js";
 import { getTermNamespace } from "./ontologyAnswer.js";
 import { getMappingDocument, getLiteralRangeWarnings, checkMappingRelations } from "./mappingAnswer.js";
 import { getImportedOntologies } from "./restrictionCheck.js";
@@ -17,7 +17,7 @@ async function getMappingInputs(req, source) {
     if (found.error) {
         return found;
     }
-    const tboxSource = (found.sourceConfig.imports || []).find((importedSource) => isTboxSourceOf(source, importedSource));
+    const tboxSource = getValidatedTboxSource(source, found.sourceConfig);
     if (!tboxSource || !found.userSources[tboxSource]) {
         return { status: 409, error: "no validated version of " + source + ": validate a version before mapping it" };
     }

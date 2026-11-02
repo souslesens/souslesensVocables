@@ -321,7 +321,7 @@ export default function () {
     }
 
     POST.apiDoc = {
-        security: [{ restrictAdmin: [] }],
+        security: [{ restrictQuota: [], restrictAdmin: [] }],
         summary: "Discuss a mapping version and propose new versions, in natural language",
         description:
             "Runs Claude Opus 5.5, at medium reasoning effort, through OpenRouter, on the conversation of an ontologist about one mapping version of POST /ai/ontologyFromDb/mappings. " +

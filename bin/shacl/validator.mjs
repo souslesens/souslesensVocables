@@ -33,6 +33,7 @@ var result2=[]
     for (const result of report.results) {
         result2.push({
             subject: result.focusNode,
+            shape: result.sourceShape,
             path: result.path,
             value: result.value,
             messages: result.message.map(m => m.value),

@@ -9,6 +9,7 @@ const postgresTextDataTypes = ["text", "character varying", "character"];
 const postgresDateDataTypes = ["date", "timestamp without time zone", "timestamp with time zone", "time without time zone", "time with time zone"];
 // no equality, which SELECT DISTINCT needs
 const postgresDataTypesSelectedAsText = ["xml", "json", "point", "line", "lseg", "box", "path", "polygon", "circle"];
+const validColumnTypes = ["Column", "VirtualColumn"];
 
 // the text of a date depends on DateStyle and holds the time: a date joined on a text keeps its join error rather than
 // an empty result
@@ -154,15 +155,18 @@ export function getDatabaseName(datasource, json) {
     return databaseSources?.[datasource]?.name ?? datasource;
 }
 
-export function extractRelationMap(json) {
-    if (!json?.nodes || !json?.edges) {
-        throw new Error("Invalid mapping JSON: nodes and edges are required");
-    }
-
+/**
+ * Reads the class each column of a mapping identifies, and how: "rdf:type" for a column of instances,
+ * "rdfs:subClassOf" for a column of generated subclasses.
+ * @function
+ * @name getClassByColumn
+ * @param {Object} json - Mapping model, nodes and edges.
+ * @returns {{classByColumn: Map, classMappingKindByColumn: Map, instanceColumnByGeneratedClassColumn: Map}} Maps keyed by column node id.
+ */
+export function getClassByColumn(json) {
     const nodesById = new Map(json.nodes.map((node) => [node.id, node]));
     const classByColumn = new Map();
     const classMappingKindByColumn = new Map();
-    const validColumnTypes = ["Column", "VirtualColumn"];
 
     // A column -> Class rdf:type maps instance identifiers.
     // A column -> Class rdfs:subClassOf maps identifiers of generated subclasses.
@@ -192,6 +196,17 @@ export function extractRelationMap(json) {
         classMappingKindByColumn.set(edge.from, "rdf:type");
         instanceColumnByGeneratedClassColumn.set(edge.to, edge.from);
     }
+
+    return { classByColumn, classMappingKindByColumn, instanceColumnByGeneratedClassColumn };
+}
+
+export function extractRelationMap(json) {
+    if (!json?.nodes || !json?.edges) {
+        throw new Error("Invalid mapping JSON: nodes and edges are required");
+    }
+
+    const nodesById = new Map(json.nodes.map((node) => [node.id, node]));
+    const { classByColumn, classMappingKindByColumn, instanceColumnByGeneratedClassColumn } = getClassByColumn(json);
 
     const classesByTable = new Map();
 

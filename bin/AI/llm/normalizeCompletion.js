@@ -48,6 +48,7 @@ const normalizersByProvider = {
     // OpenAI-style provider carries tool results as `role: "tool"` messages instead of blocks, and
     // only the adapter sees the request.
     openrouter: normalizeAnthropicCompletion,
+    claudeCode: normalizeAnthropicCompletion,
 };
 
 /**

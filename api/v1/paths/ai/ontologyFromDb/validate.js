@@ -55,6 +55,8 @@ export default function () {
 
             // the graph of the source also holds what the mappings build: only what the last validation wrote is taken back.
             // Every triple is written again: a failure in the middle is repaired by validating again, and so is a graph emptied since
+            // both lists until the write ends: a failure leaves no triple written that no list remembers
+            await writeFile(getValidatedTriplesPath(source), [...validatedTriples, ...draftTripleLines].join("\n"));
             await updateGraphTriples(found.sourceConfig.graphUri, removedTriples, draftTripleLines);
             await writeFile(getValidatedTriplesPath(source), draftTripleLines.join("\n"));
             savedRun.validatedAt = new Date().toISOString();

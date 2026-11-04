@@ -10,6 +10,7 @@ What to list
     • Links that no declared foreign key gives. Skip the pairs a declared foreign key already links.
 
 How to read the description
+    • A table or column may carry a comment saying what it holds: it is a hint, as a name is.
     • Each column shows its type, its number of distinct values and its number of nulls; each table shows its number of rows. The identifier of a table usually has many distinct values; a column referring to it has as many or fewer.
     • A table may hold duplicated rows, so an identifier may have fewer distinct values than the table has rows.
     • Compare the sample values: the same code format (prefixes, separators, lengths) in two columns is a strong hint, even when their names differ.

@@ -76,6 +76,15 @@ html {
 .vis-network {
     background-color: if((@isDarkTheme=true), black, white);
 }
+// a selected or hovered node keeps the light background of the jsTree theme, so its dark text
+.jstree-default .jstree-anchor:not(.jstree-clicked):not(.jstree-hovered) {
+    color: if((@isDarkTheme=true), white, inherit);
+}
+// the jsTree sprite and the filter icon are drawn for a light background
+.jstree-default .jstree-ocl,
+.jstree-default .filterIcon {
+    filter: if((@isDarkTheme=true), invert(1), none);
+}
 .lateralPanelSection-width {
     width: 89%;
 }

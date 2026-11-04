@@ -663,6 +663,8 @@ var Lineage_whiteboard = (function () {
                     Lineage_relations.whiteboardSourcesFromStatus = Lineage_sources.fromAllWhiteboardSources;
                     if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                         var whiteboardNodes = self.getSelectedOrAllWhiteboardNodes();
+                        // drawRelations takes no callback, it ends the action itself
+                        options.clearSelectionAtEnd = true;
                         // every source, drawRestrictions narrows to the active one, or to all with All
                         var classNodes = whiteboardNodes.filter(function (node) {
                             return node.data && !self.isSourceBoxNode(node) && node.data.type !== "Container";
@@ -698,6 +700,7 @@ var Lineage_whiteboard = (function () {
                         if (err) {
                             return callbackSeries(err);
                         }
+                        self.lineageVisjsGraph.setSelectedNodes([]);
                         callbackSeries();
                     });
                 },
@@ -2004,6 +2007,9 @@ var Lineage_whiteboard = (function () {
                     }
                     return UI.message("No data found", true);
                 }
+                if (!nodeIds || nodeIds.length === 0) {
+                    self.lineageVisjsGraph.setSelectedNodes([]);
+                }
                 if (self.lineageVisjsGraph.network) {
                     self.lineageVisjsGraph.network.fit();
                 }
@@ -2132,6 +2138,9 @@ var Lineage_whiteboard = (function () {
             if (result.length == 0) {
                 $("#waitImg").css("display", "none");
                 UI.message("No data found", true);
+                if (!nodeIds) {
+                    self.lineageVisjsGraph.setSelectedNodes([]);
+                }
                 if (callback) {
                     return callback(null, { nodes: [], edges: [] });
                 }
@@ -2346,6 +2355,9 @@ var Lineage_whiteboard = (function () {
             Lineage_whiteboard.addVisDataToGraph(visjsData);
             // self.lineageVisjsGraph.data.edges.add(visjsData.edges);
             self.lineageVisjsGraph.network.fit();
+            if (!nodeIds) {
+                self.lineageVisjsGraph.setSelectedNodes([]);
+            }
 
             $("#waitImg").css("display", "none");
             if (callback) {
@@ -4450,9 +4462,11 @@ self.zoomGraphOnNode(node.data[0].id, false);
             if (nodesSelected.length > 1) {
                 // `getSelectedNodes` answers with ids, not node objects: reading `.id` off them used
                 // to leave every connected edge behind.
-                return self.removeNodesFromWhiteboard(nodesSelected);
+                self.removeNodesFromWhiteboard(nodesSelected);
+            } else {
+                self.removeNodesFromWhiteboard([Lineage_whiteboard.currentGraphNode.id]);
             }
-            self.removeNodesFromWhiteboard([Lineage_whiteboard.currentGraphNode.id]);
+            self.lineageVisjsGraph.setSelectedNodes([]);
         },
 
         /**
@@ -4470,11 +4484,11 @@ self.zoomGraphOnNode(node.data[0].id, false);
             var nodesSelected = self.lineageVisjsGraph.network.getSelectedNodes();
             if (nodesSelected.length > 1) {
                 self.lineageVisjsGraph.removeOtherNodesFromGraph(nodesSelected);
-                Lineage_decoration.decorateByUpperOntologyByClass();
-                return;
+            } else {
+                self.lineageVisjsGraph.removeOtherNodesFromGraph(Lineage_whiteboard.currentGraphNode.id);
             }
-            self.lineageVisjsGraph.removeOtherNodesFromGraph(Lineage_whiteboard.currentGraphNode.id);
             Lineage_decoration.decorateByUpperOntologyByClass();
+            self.lineageVisjsGraph.setSelectedNodes([]);
         },
 
         showHierarchicalView: function () {
@@ -4698,6 +4712,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
          * @returns {void}
          */
         drawAxioms: function (nodes) {
+            var isFromSelection = !!nodes;
             if (!nodes) {
                 nodes = [self.currentGraphNode];
             }
@@ -4754,6 +4769,9 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 function (err) {
                     if (err) {
                         return MainController.errorAlert(err);
+                    }
+                    if (isFromSelection) {
+                        self.lineageVisjsGraph.setSelectedNodes([]);
                     }
                     if (axiomsVisjsDataByClass.length == 0) {
                         return UI.message("no axioms found", true);

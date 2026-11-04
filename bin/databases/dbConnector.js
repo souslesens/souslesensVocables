@@ -76,7 +76,21 @@ async function getSchemaDescription(connection, driver) {
         })
         .where(isPostgres ? { "keyColumn.table_schema": "public" } : {})
         .orderBy(["keyColumn.table_name", "keyColumn.constraint_name", "keyColumn.ordinal_position"]);
-    return { columns, primaryKeys, foreignKeys };
+    // a comment without a column is the comment of its table
+    let comments = [];
+    if (isPostgres) {
+        const commentRows = await connection.raw(
+            "SELECT tableClass.relname AS table_name, tableColumn.attname AS column_name, objectComment.description AS comment " +
+                "FROM pg_description objectComment " +
+                "JOIN pg_class tableClass ON tableClass.oid = objectComment.objoid " +
+                "JOIN pg_namespace tableSchema ON tableSchema.oid = tableClass.relnamespace " +
+                "LEFT JOIN pg_attribute tableColumn ON tableColumn.attrelid = tableClass.oid AND tableColumn.attnum = objectComment.objsubid AND objectComment.objsubid > 0 " +
+                "WHERE objectComment.classoid = 'pg_class'::regclass AND tableSchema.nspname = 'public' " +
+                "ORDER BY tableClass.relname, objectComment.objsubid",
+        );
+        comments = commentRows.rows;
+    }
+    return { columns, primaryKeys, foreignKeys, comments };
 }
 
 // the tables of a postgres database are read in public whatever the search_path of its connection

@@ -102,7 +102,15 @@ const MainConfigObject = z
             .strict(),
         llm: z
             .object({
-                provider: z.enum(["anthropic", "openrouter", "ollama"]),
+                provider: z.enum(["anthropic", "openrouter", "ollama", "claudeCode"]),
+                claudeCode: z
+                    .object({
+                        defaultModel: z.string().default("opus"),
+                        maxTokens: z.number().positive().optional(),
+                        rateLimitTPM: z.number().positive().default(10000000),
+                    })
+                    .strict()
+                    .optional(),
                 anthropic: z
                     .object({
                         apiKey: z.string(),

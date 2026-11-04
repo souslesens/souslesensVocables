@@ -2,9 +2,10 @@ import { readMainConfig } from "../../../model/config.js";
 import createAnthropicAdapter from "./adapters/anthropicAdapter.js";
 import createOpenRouterAdapter from "./adapters/openRouterAdapter.js";
 import createOllamaAdapter from "./adapters/ollamaAdapter.js";
+import createClaudeCodeAdapter from "./adapters/claudeCodeAdapter.js";
 import { decryptSecret } from "./secret.js";
 
-const ADAPTERS = { anthropic: createAnthropicAdapter, openrouter: createOpenRouterAdapter, ollama: createOllamaAdapter };
+const ADAPTERS = { anthropic: createAnthropicAdapter, openrouter: createOpenRouterAdapter, ollama: createOllamaAdapter, claudeCode: createClaudeCodeAdapter };
 
 // ── Rate limiter (module-level singleton — shared across all callers) ───────
 const oneMinuteMs = 60000;

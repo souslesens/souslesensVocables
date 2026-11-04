@@ -120,6 +120,24 @@ This configuration will be provided to the plugin by calling the `setConfig` met
 
 Its possible to edit this configuration from the ConfigEditor “Plugins” section, in the **“Edit the Plugin Repository”** modal of the repository that provides the plugin (one tab per plugin when the repository ships several). The `admin` profile is mandatory to use this tool.
 
+### Plugin tool parameters
+
+The parameters that describe how SLS opens the plugin belong to the plugin code, in a `toolParams` member of its main module:
+
+```javascript
+self.toolParams = { useSource: true };
+```
+
+| Name                | Description                                                    | Default     |
+| ------------------- | -------------------------------------------------------------- | ----------- |
+| `label`             | Name displayed for the tool                                    | plugin name |
+| `useSource`         | The tool opens on a source                                     | `false`     |
+| `multiSources`      | The tool accepts several sources                               | `false`     |
+| `displayImports`    | The tool displays the imports of the source                    | `false`     |
+| `resetURLParamsDiv` | Id of the dialog to close when leaving the tool                | `false`     |
+
+A value in `toolParams` wins over the same key in `config/pluginsConfig.json`. Keep that file for the values specific to an instance.
+
 ### Plugin communication with other tools
 
 Other tools can communicate with plugins. To configure a communication from a tool to a plugin,

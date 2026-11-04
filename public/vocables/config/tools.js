@@ -64,7 +64,8 @@ function mergeToolsAndPlugins(tools, plugins) {
     let pluginsToMerge = {};
     plugins.forEach((element) => {
         if (window[element.name]) {
-            const config = element.config ?? {};
+            // pluginsConfig.json stays the fallback for a plugin that does not declare toolParams yet
+            const config = { ...element.config, ...window[element.name].toolParams };
             pluginsToMerge[element.name] = {
                 label: config.label ?? element.name,
                 noSource: !config.useSource,

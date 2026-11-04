@@ -7,12 +7,31 @@ import { describeDatabase } from "../databaseDescription.js";
 import { callVocablesFunction } from "../../../remoteCodeRunner.js";
 import { getSchemaDescription } from "../../../KG/dbConnector.js";
 import { databaseModel } from "../../../../model/databases.js";
+import { listSourceMappings } from "./mappingRuns.js";
 
 // MappingModeler reads the public schema of a postgres database, see getSchemaDescription
 const postgresSchemaName = "public";
 
+function findValidatedRun(found, tboxSource) {
+    const tboxGraphUri = found.userSources[tboxSource]?.graphUri;
+    return found.runs.find((run) => getRunGraphUri(found.sourceConfig.graphUri, run.runTimestamp) == tboxGraphUri);
+}
+
 // the database is the one the validated version was built on, read as its generation read it
-async function getMappingInputs(req, source) {
+// a version built from a schema file has none: the database of its last mapping stays until another one is chosen
+async function getMappingDatabase(source, validatedRun, chosenDatabaseId) {
+    const savedRun = validatedRun.savedRun;
+    const allDatabases = await databaseModel.getAllDatabases();
+    if (!savedRun.schemaFile) {
+        return allDatabases.find((configuredDatabase) => configuredDatabase.id == savedRun.databaseId || configuredDatabase.database == savedRun.database);
+    }
+    const mappingVersions = await listSourceMappings(source);
+    const lastMappingOfRun = mappingVersions.find((mappingVersion) => mappingVersion.savedMapping.ontologyRunName == validatedRun.runName && mappingVersion.savedMapping.databaseId);
+    const mappedDatabaseId = chosenDatabaseId ?? lastMappingOfRun?.savedMapping.databaseId;
+    return allDatabases.find((configuredDatabase) => configuredDatabase.id == mappedDatabaseId);
+}
+
+async function getMappingInputs(req, source, chosenDatabaseId) {
     const found = await findSourceRuns(req, source);
     if (found.error) {
         return found;
@@ -21,8 +40,7 @@ async function getMappingInputs(req, source) {
     if (!tboxSource || !found.userSources[tboxSource]) {
         return { status: 409, error: "no validated version of " + source + ": validate a version before mapping it" };
     }
-    const tboxGraphUri = found.userSources[tboxSource].graphUri;
-    const validatedRun = found.runs.find((run) => getRunGraphUri(found.sourceConfig.graphUri, run.runTimestamp) == tboxGraphUri);
+    const validatedRun = findValidatedRun(found, tboxSource);
     // the database, the upper ontologies and the overlaps are read in the run file of the version
     if (!validatedRun?.savedRun) {
         return { status: 409, error: "the validated version " + tboxSource + " has no run file" };
@@ -34,8 +52,10 @@ async function getMappingInputs(req, source) {
         return { status: 409, error: "the graph of the validated version " + tboxSource + " holds no ontology model" };
     }
     const savedRun = validatedRun.savedRun;
-    const allDatabases = await databaseModel.getAllDatabases();
-    const database = allDatabases.find((configuredDatabase) => configuredDatabase.id == savedRun.databaseId || configuredDatabase.database == savedRun.database);
+    const database = await getMappingDatabase(source, validatedRun, chosenDatabaseId);
+    if (!database && savedRun.schemaFile) {
+        return { status: 409, error: "the validated version was built from the schema file " + savedRun.schemaFile.fileName + ": choose the database to map" };
+    }
     if (!database) {
         return { status: 409, error: "the database " + savedRun.database + " of the validated version is no longer configured" };
     }
@@ -115,4 +135,4 @@ async function checkMappingAnswer(mappingAnswer, inputs, source) {
     return { mappingDocument: mappingDocument, rangeWarnings: rangeWarnings, relationChecks: relationChecks, relationCheckError: relationCheckError };
 }
 
-export { getMappingInputs, checkMappingAnswer };
+export { findValidatedRun, getMappingInputs, checkMappingAnswer };

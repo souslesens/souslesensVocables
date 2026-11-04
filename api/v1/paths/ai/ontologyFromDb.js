@@ -36,10 +36,12 @@ import { sourceModel } from "../../../../model/sources.js";
 import { getUpperOntologyModelText } from "../../../../bin/AI/ontologyFromDb/upperOntologyModel.js";
 import { checkRunRestrictions } from "../../../../bin/AI/ontologyFromDb/ontology/restrictionCheck.js";
 import { describeDatabase } from "../../../../bin/AI/ontologyFromDb/databaseDescription.js";
+import { readSchemaFile } from "../../../../bin/AI/ontologyFromDb/schemaFile.js";
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const ontologyBuildingPromptPath = join(currentDirectory, "../../../../bin/AI/ontologyFromDb/prompts/ontology_building_from_db.md");
 const linkCandidatesPromptPath = join(currentDirectory, "../../../../bin/AI/ontologyFromDb/prompts/link_candidates_from_db.md");
+const schemaOnlyPromptPath = join(currentDirectory, "../../../../bin/AI/ontologyFromDb/prompts/ontology_schema_only.md");
 
 // OpenRouter ids, fixed here: the page does not choose the models
 const linkCandidatesModelId = "anthropic/claude-haiku-5.5";
@@ -54,6 +56,11 @@ const maxMeasuredPairs = 150;
 
 const lineBreakRegex = /\s*[\r\n]+\s*/g;
 const maxPairsPlaceholderRegex = /\{maxPairs\}/g;
+const sqlFileExtensionRegex = /\.sql$/i;
+// the steps that read the data of a database, which a schema file does not hold
+const databaseReadingSteps = ["profiles", "linkCandidates", "pairs"];
+// keeps the runs of a schema file apart from those of a database of the same name, and from its databaseChecks.json
+const schemaFileFolderSuffix = "_schemaFile";
 const answerLabelRegex = /"label"\s*:\s*"([^"]+)"/g;
 // one pair of the link candidates answer, in the key order the prompt asks for
 const streamedPairRegex = /\{\s*"left"\s*:\s*"([^"]+)"\s*,\s*"right"\s*:\s*"([^"]+)"\s*\}/g;
@@ -108,7 +115,7 @@ export default function () {
         // the entry of this generation in runningGenerations, which pages opened later read
         let runningGeneration = null;
         function sendProgress(progressEvent) {
-            if (!isProgressStreamed) {
+            if (!isProgressStreamed || (req.body.schemaFile && databaseReadingSteps.includes(progressEvent.step))) {
                 return;
             }
             if (progressEvent.type == "stepStart") {
@@ -134,6 +141,10 @@ export default function () {
         try {
             const source = req.body.source;
             const databaseId = req.body.databaseId;
+            const schemaFile = req.body.schemaFile;
+            if (Boolean(databaseId) == Boolean(schemaFile)) {
+                return res.status(400).json({ error: "give either a databaseId or a schemaFile" });
+            }
             // a validated version of the source is imported by it, it is not an upper ontology of the next one
             const upperOntologies = (req.body.upperOntologies || []).filter((upperOntology) => !isTboxSourceOf(req.body.source, upperOntology));
 
@@ -151,9 +162,23 @@ export default function () {
                 runningGenerations[source] = runningGeneration;
             }
 
-            const connection = await databaseModel.getUserConnection(userInfo.user, databaseId);
-            const database = await databaseModel.getDatabase(databaseId);
-            const schema = await dbConnector.getSchemaDescription(connection, database.driver);
+            let connection = null;
+            let database = null;
+            let schema = null;
+            let savedSchemaFile;
+            if (schemaFile) {
+                const schemaFileContent = readSchemaFile(schemaFile.text);
+                if (schemaFileContent.error) {
+                    return res.status(400).json({ error: schemaFileContent.error });
+                }
+                schema = schemaFileContent.schema;
+                database = { database: schemaFile.name.replace(sqlFileExtensionRegex, "") + schemaFileFolderSuffix, driver: "postgres" };
+                savedSchemaFile = { fileName: schemaFile.name, schema: schema, leftOutViewCount: schemaFileContent.leftOutViewCount, leftOutTables: schemaFileContent.leftOutTables };
+            } else {
+                connection = await databaseModel.getUserConnection(userInfo.user, databaseId);
+                database = await databaseModel.getDatabase(databaseId);
+                schema = await dbConnector.getSchemaDescription(connection, database.driver);
+            }
             const clientDriver = databaseModel.getClientDriver(database.driver);
             const databaseFolder = database.database.replace(nonNameCharacterRegex, "_");
             if (runningGeneration) {
@@ -175,6 +200,15 @@ export default function () {
             });
             const tableNames = Object.keys(columnsByTable);
             const tableInspections = {};
+            if (savedSchemaFile) {
+                endStep("schemaFile", preparationStart, {
+                    tableCount: tableNames.length,
+                    columnCount: schema.columns.length,
+                    foreignKeyColumnCount: schema.foreignKeys.length,
+                    leftOutViewCount: savedSchemaFile.leftOutViewCount,
+                    leftOutTableCount: savedSchemaFile.leftOutTables.length,
+                });
+            }
             sendProgress({ type: "stepStart", step: "profiles", tableCount: tableNames.length, columnCount: schema.columns.length });
             // the samples first: the link candidates step reads the schema and the samples while the profiles are counted
             await async.eachLimit(tableNames, parallelCheckCount, async function (tableName) {
@@ -183,7 +217,7 @@ export default function () {
                 // a table whose columns changed since the earlier runs is read again
                 const inspection = cachedInspection && cachedInspection.columnNames == columnNames ? { ...cachedInspection } : { columnNames: columnNames };
                 tableInspections[tableName] = inspection;
-                if (inspection.sampleTexts) {
+                if (inspection.sampleTexts || schemaFile) {
                     return;
                 }
                 // a view without select right, or a broken one, must not stop the whole description
@@ -211,7 +245,7 @@ export default function () {
             let profiledTableCount = 0;
             let cachedProfileCount = 0;
             const profilesDone = async
-                .eachLimit(tableNames, parallelCheckCount, async function (tableName) {
+                .eachLimit(schemaFile ? [] : tableNames, parallelCheckCount, async function (tableName) {
                     const inspection = tableInspections[tableName];
                     if (inspection.profile) {
                         cachedProfileCount++;
@@ -290,7 +324,8 @@ export default function () {
                 pairMeasureQueue.push({ pair: pair, pairKey: pairKey, pairIndex: measuredPairKeys.size - 1 });
             }
 
-            let linkCandidates = req.body.linkCandidates;
+            // no value to measure a pair on: the links of a schema file are its declared keys
+            let linkCandidates = schemaFile ? { pairs: [] } : req.body.linkCandidates;
             let linkCandidatesAnswer = null;
             let linkCandidatesModel = null;
             let linkCandidatesError = null;
@@ -359,13 +394,17 @@ export default function () {
                 }
             }
             try {
-                await saveDatabaseChecks(databaseFolder, databaseChecks);
+                if (!schemaFile) {
+                    await saveDatabaseChecks(databaseFolder, databaseChecks);
+                }
             } catch (writeError) {
                 console.warn("[ai/ontologyFromDb] database checks not saved: " + writeError.message);
             }
 
             let overlapsText = "\n## Overlaps measured between candidate columns\n\n";
-            if (linkCandidatesError && measuredOverlaps.length == 0) {
+            if (schemaFile) {
+                overlapsText = "";
+            } else if (linkCandidatesError && measuredOverlaps.length == 0) {
                 overlapsText += "The first reading of the database failed (" + linkCandidatesError + "): no overlap was measured, every link hypothesis without a declared key stays unchecked.\n";
             } else if (measuredOverlaps.length == 0) {
                 overlapsText += "The first reading of the database proposed no pair of columns to measure.\n";
@@ -407,6 +446,7 @@ export default function () {
             const termNamespace = getTermNamespace(sourceConfig);
             const prompt =
                 basePrompt +
+                (schemaFile ? "\n\n" + readFileSync(schemaOnlyPromptPath, "utf8") : "") +
                 "\n\n# Inputs\n\nSource whose ontology is built: " +
                 source +
                 "\nGraph: " +
@@ -599,6 +639,7 @@ export default function () {
                 source: source,
                 database: database.database,
                 databaseId: databaseId,
+                schemaFile: savedSchemaFile,
                 upperOntologies: upperOntologies,
                 ontologyVersion: ontologyVersion,
                 model: completion?.model ?? null,
@@ -684,6 +725,7 @@ export default function () {
             "Each restriction of the run graph is then checked with OntologyModels.getAllowedPropertiesBetweenNodes against the domains and ranges of the upper ontologies, inherited ones included: allowed, notAllowed, or unchecked when the property has no named domain nor range. " +
             "When some are notAllowed, a second call of the same model (`bin/AI/ontologyFromDb/prompts/ontology_restriction_fix.md`) gets them, with the properties whose domain or range fit each class and target, and chooses for each one of those properties or its removal, a property outside them being refused; " +
             "the Turtle is written again, loaded and checked once more, and the run file keeps that turn under restrictionFix, the generated answer included. " +
+            "A `schemaFile` replaces the database: a plain SQL dump of a Postgres schema, its tables, keys and comments are the only evidence, no sample, profile, link candidate nor overlap is read, and the `bin/AI/ontologyFromDb/prompts/ontology_schema_only.md` rules are added to the prompt. " +
             "A generation answers in NDJSON, one event per line while it runs: stepStart and stepEnd (profiles, linkCandidates, pairs, upperOntologies, ontology, graph, restrictionCheck, restrictionFix) with their seconds, " +
             "progress (tables profiled, pairs measured; the samples, profiles and overlaps of earlier runs on the database are read from its databaseChecks.json), writing (characters written, reasoning excerpt, labels completed) and a last result event with the total time, or an error event.",
         operationId: "postOntologyFromDb",
@@ -694,10 +736,16 @@ export default function () {
                 required: true,
                 schema: {
                     type: "object",
-                    required: ["source", "databaseId"],
+                    required: ["source"],
                     properties: {
                         source: { type: "string", description: "Source the ontology is built for." },
-                        databaseId: { type: "string", description: "Database id from `databases.json`." },
+                        databaseId: { type: "string", description: "Database id from `databases.json`. Required unless a schemaFile is given." },
+                        schemaFile: {
+                            type: "object",
+                            required: ["name", "text"],
+                            properties: { name: { type: "string" }, text: { type: "string" } },
+                            description: "Name and content of a plain SQL dump of a Postgres schema, read in place of a database.",
+                        },
                         upperOntologies: { type: "array", items: { type: "string" }, description: "Imports of the source, most abstract first." },
                         promptOnly: { type: "boolean", description: "Return the assembled prompt without calling the LLM." },
                         linkCandidatesPromptOnly: { type: "boolean", description: "Return the prompt of the link candidates step (database description only) without calling any LLM." },
@@ -725,6 +773,7 @@ export default function () {
                 description:
                     "Prompt-only calls: the prompt as JSON. A generation: NDJSON progress events ending with a result event (run name, run graph, total time, usage, problems) or an error event.",
             },
+            400: { description: "Neither or both of databaseId and schemaFile, or a schema file that cannot be read." },
             404: { description: "A source is unknown to the user." },
             409: { description: "A generation is already running for the source." },
         },

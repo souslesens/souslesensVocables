@@ -28,6 +28,7 @@ import { readGraphTriples, getGraphAnswer } from "../../../../../bin/AI/ontology
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const revisionPromptPath = join(currentDirectory, "../../../../../bin/AI/ontologyFromDb/prompts/ontology_revision.md");
 const ontologyBuildingPromptPath = join(currentDirectory, "../../../../../bin/AI/ontologyFromDb/prompts/ontology_building_from_db.md");
+const schemaOnlyPromptPath = join(currentDirectory, "../../../../../bin/AI/ontologyFromDb/prompts/ontology_schema_only.md");
 
 // a term of the answer is named by its label: these fields hold the label of another term
 const termCollectionByKind = { class: "classes", individual: "individuals", group: "groups" };
@@ -204,9 +205,11 @@ export default function () {
             const userContext = { user: runContext.userInfo, userSources: runContext.userSources };
             // the samples and profiles the runs counted on the database, the schema read when a table is asked for
             const databaseChecks = await readDatabaseChecks(runContext.run.database);
-            const inspectedTableNames = Object.keys(databaseChecks.inspectionsByTable).sort();
+            const schemaFileColumns = baseRun.schemaFile?.schema.columns ?? [];
+            const schemaFileTableNames = schemaFileColumns.map((column) => column.table_name);
+            const inspectedTableNames = [...new Set([...Object.keys(databaseChecks.inspectionsByTable), ...schemaFileTableNames])].sort();
             const tableListLines = inspectedTableNames.map(function (tableName) {
-                const tableProfile = databaseChecks.inspectionsByTable[tableName].profile;
+                const tableProfile = databaseChecks.inspectionsByTable[tableName]?.profile;
                 return tableName + (tableProfile ? " (" + tableProfile.rowCount + " rows)" : "");
             });
 
@@ -229,6 +232,7 @@ export default function () {
                 readFileSync(revisionPromptPath, "utf8") +
                 "\n\n# Building rules\n\n" +
                 readFileSync(ontologyBuildingPromptPath, "utf8") +
+                (baseRun.schemaFile ? "\n\n" + readFileSync(schemaOnlyPromptPath, "utf8") : "") +
                 "\n\n# Version under discussion: " +
                 runContext.run.runName +
                 ", ontology version " +
@@ -292,6 +296,7 @@ export default function () {
                     source: source,
                     database: baseRun.database,
                     databaseId: baseRun.databaseId ?? null,
+                    schemaFile: baseRun.schemaFile,
                     upperOntologies: upperOntologies,
                     ontologyVersion: ontologyVersion,
                     model: ontologyModelId,

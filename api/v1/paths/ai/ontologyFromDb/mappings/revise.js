@@ -146,14 +146,14 @@ export default function () {
                 return res.status(400).json({ error: "messages must be the conversation, ending with a message of the ontologist" });
             }
             const source = req.body.source;
-            const inputs = await getMappingInputs(req, source);
-            if (inputs.error) {
-                return res.status(inputs.status).json({ error: inputs.error });
-            }
             const mappingVersions = await listSourceMappings(source);
             const baseVersion = mappingVersions.find((mappingVersion) => mappingVersion.mappingName == req.body.mappingName);
             if (!baseVersion) {
                 return res.status(404).json({ error: "no mapping version " + req.body.mappingName + " for " + source });
+            }
+            const inputs = await getMappingInputs(req, source, baseVersion.savedMapping.databaseId);
+            if (inputs.error) {
+                return res.status(inputs.status).json({ error: inputs.error });
             }
             // a file edited in MappingModeler, or a generation that failed, has no compact answer: it can be questioned, not revised
             const baseAnswerMatch = baseVersion.savedMapping.answer ? baseVersion.savedMapping.answer.match(jsonBlockRegex) : null;

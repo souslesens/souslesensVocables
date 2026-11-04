@@ -11,7 +11,7 @@ import {
     getCutAnswerError,
     getAnswerText,
 } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyAnswer.js";
-import { getMappingInputs, checkMappingAnswer } from "../../../../../bin/AI/ontologyFromDb/mappings/mappingInputs.js";
+import { findValidatedRun, getMappingInputs, checkMappingAnswer } from "../../../../../bin/AI/ontologyFromDb/mappings/mappingInputs.js";
 import {
     getMappingName,
     listSourceMappings,
@@ -101,8 +101,10 @@ export default function () {
                     isActive: mappingVersion.mappingName == activeMappingName,
                 };
             });
+            const validatedRun = findValidatedRun(found, getValidatedTboxSource(req.query.source, found.sourceConfig));
             res.status(200).json({
                 mappings: versionDescriptions,
+                validatedSchemaFileName: validatedRun?.savedRun?.schemaFile?.fileName ?? null,
                 activeMappingName: activeMappingName,
                 hasMappingModelerFile: Boolean(mappingModelerFile),
                 isEditedInMappingModeler:
@@ -136,7 +138,7 @@ export default function () {
         }
         try {
             const source = req.body.source;
-            const inputs = await getMappingInputs(req, source);
+            const inputs = await getMappingInputs(req, source, req.body.databaseId);
             if (inputs.error) {
                 return res.status(inputs.status).json({ error: inputs.error });
             }
@@ -377,6 +379,7 @@ export default function () {
                     required: ["source"],
                     properties: {
                         source: { type: "string", description: "Source whose validated version is mapped." },
+                        databaseId: { type: "string", description: "Database to map a version built from a schema file. By default, the one of its last mapping." },
                         promptOnly: { type: "boolean", description: "Return the assembled prompt without calling the LLM." },
                         answer: { type: "string", description: "Answer of an earlier call to convert, check and save again, without calling the LLM." },
                     },

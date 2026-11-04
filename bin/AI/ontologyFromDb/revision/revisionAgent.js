@@ -35,13 +35,14 @@ const getUpperOntologyTermsTool = {
 const describeDatabaseTablesTool = {
     name: "describe_database_tables",
     description:
-        "Read tables of the database the version was built from, as the generation read them: row count, columns with their type, nullability, distinct and null counts, primary and foreign keys, sample rows.",
+        "Read tables of the database the version was built from, as the generation read them: comments, row count, columns with their type, nullability, distinct and null counts, primary and foreign keys, sample rows. A version built from a schema file has no count nor sample.",
     input_schema: { type: "object", properties: { tables: { type: "array", items: { type: "string" } } }, required: ["tables"] },
 };
 
-// the schema is read live once, unless the caller already read it; the samples and profiles are those the runs saved in databaseChecks
+// the schema is read live once, unless the caller already read it or the run saved its schema file; the samples and profiles are those the runs saved in databaseChecks
 function getDatabaseTablesDescriber(userInfo, savedRun, databaseChecks, knownDatabaseSchema) {
-    let databaseSchema = knownDatabaseSchema ?? null;
+    const schemaFileDatabase = savedRun.schemaFile ? { database: { database: savedRun.database, driver: "postgres" }, schema: savedRun.schemaFile.schema } : null;
+    let databaseSchema = knownDatabaseSchema ?? schemaFileDatabase;
     return async function describeDatabaseTables(toolInput) {
         if (!databaseSchema) {
             // the first runs saved the name of their database only

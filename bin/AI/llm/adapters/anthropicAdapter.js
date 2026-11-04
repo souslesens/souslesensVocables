@@ -6,7 +6,7 @@ function createAnthropicAdapter(anthropicConfig) {
     // server-side only — the API key never reaches the client — so enabling the flag here is safe.
     const client = new Anthropic({ apiKey: anthropicConfig.apiKey, dangerouslyAllowBrowser: true });
 
-    async function createMessage({ model, system, messages, maxTokens, tools }, callback) {
+    async function createMessage({ model, system, messages, maxTokens, tools, abortSignal }, callback) {
         try {
             const requestBody = {
                 model: model ?? anthropicConfig.defaultModel,
@@ -19,7 +19,7 @@ function createAnthropicAdapter(anthropicConfig) {
             if (tools && tools.length > 0) {
                 requestBody.tools = tools;
             }
-            const response = await client.messages.create(requestBody);
+            const response = await client.messages.create(requestBody, { signal: abortSignal });
             callback(null, response);
         } catch (error) {
             callback(error);

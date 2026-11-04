@@ -26,7 +26,7 @@ function findRefusedRestrictions(ontologyAnswer, notAllowedChecks) {
 }
 
 // the answer with the chosen fixes applied, null when none applies, and the record of the turn the run file keeps
-async function fixNotAllowedRestrictions(ontologyAnswer, notAllowedChecks) {
+async function fixNotAllowedRestrictions(ontologyAnswer, notAllowedChecks, abortSignal) {
     const restrictionFix = {
         // the only trace of what the first check refused once the version is fixed
         refusedRestrictions: notAllowedChecks.map(getNotAllowedRestrictionText),
@@ -56,7 +56,7 @@ async function fixNotAllowedRestrictions(ontologyAnswer, notAllowedChecks) {
         };
     });
     const prompt = readFileSync(restrictionFixPromptPath, "utf8") + "\n\n" + toJsonBlock(restrictionFixInput);
-    const restrictionFixMessage = { messages: [{ role: "user", content: prompt }], maxTokens: modelMaxOutputTokens, model: ontologyModelId, reasoningEffort: ontologyReasoningEffort };
+    const restrictionFixMessage = { messages: [{ role: "user", content: prompt }], maxTokens: modelMaxOutputTokens, model: ontologyModelId, reasoningEffort: ontologyReasoningEffort, abortSignal: abortSignal, onTextDelta: function () {} };
     let completion = null;
     try {
         completion = await createMessage(restrictionFixMessage, restrictionFix.usage);

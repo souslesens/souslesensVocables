@@ -93,7 +93,7 @@ export default function () {
         operationId: "getOntologyFromDbRuns",
         parameters: [{ name: "source", in: "query", type: "string", required: true, description: "Source whose ontology is read." }],
         responses: {
-            200: { description: "{ ontology, generating }: ontology " + ontologyFields + " Null before the first generation. generating: { startedAt, database, step } or null" },
+            200: { description: "{ ontology, generating }: ontology " + ontologyFields + " Null before the first generation. generating: { startedAt, database, step, isStopping } or null" },
             404: { description: "The source is unknown to the user." },
         },
         tags: ["AI"],

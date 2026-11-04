@@ -1,6 +1,7 @@
 import { readFile, rm } from "fs/promises";
 import { runningGenerations, getDraftGraphUri, findSourceOntology, findSourceRun, loadTurtleIntoGraph, getRunProblems } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
 import { readDraftTriples, getGraphHash, updateGraphCheck } from "../../../../../bin/AI/ontologyFromDb/ontology/draftGraph.js";
+import { deleteVersionConversations } from "../../../../../bin/AI/ontologyFromDb/revision/revisionConversations.js";
 
 export default function () {
     let operations = {
@@ -61,6 +62,7 @@ export default function () {
                 delete found.run.savedRun.answer;
                 await rm(found.run.turtlePath, { force: true });
                 found.run.hasPendingTurtle = false;
+                await deleteVersionConversations(source, "ontology", found.run.runName);
             }
             const draftTriples = await readDraftTriples(graphUri);
             if (!draftTriples) {

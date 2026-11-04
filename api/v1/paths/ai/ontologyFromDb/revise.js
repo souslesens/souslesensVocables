@@ -259,17 +259,30 @@ export default function () {
                 }
 
                 const { deletedTriples, insertedTriples, droppedTriples } = getGraphChange(currentGraphAnswer, answerOntology.turtle, draftGraphUri);
-                async function takeBackChange() {
-                    await updateGraphTriples(draftGraphUri, insertedTriples, deletedTriples);
-                }
                 // only the restrictions this change brings stop it, not those the ontology already had
                 const currentRestrictions = getTurtleRestrictions(currentTriples, draftGraphUri);
                 const currentRestrictionKeys = new Set(currentRestrictions.map(getRestrictionKey));
+                const savedRun = found.run.savedRun;
+                const previousReport = savedRun.report ?? null;
+                async function saveRunFile() {
+                    await writeFile(found.run.jsonPath, JSON.stringify(savedRun, null, 2));
+                }
+                // kept before the write: a server stopped in between leaves a change that can be undone, and undoing one that was not written changes nothing
+                savedRun.chatbotChanges = savedRun.chatbotChanges ?? [];
+                savedRun.chatbotChanges.push({ summary: toolInput.summary, deletedTriples: deletedTriples, insertedTriples: insertedTriples, previousReport: previousReport });
+                savedRun.report = revisedAnswer.report ?? null;
+                await saveRunFile();
+                async function takeBackChange() {
+                    await updateGraphTriples(draftGraphUri, insertedTriples, deletedTriples);
+                    savedRun.chatbotChanges.pop();
+                    savedRun.report = previousReport;
+                    await saveRunFile();
+                }
                 try {
                     await updateGraphTriples(draftGraphUri, deletedTriples, insertedTriples);
                     // the check reads the hierarchy of the local classes in the graph: it comes after the write
                     await updateGraphCheck(found, source, await readDraftTriples(draftGraphUri));
-                    const newNotAllowedChecks = (found.run.savedRun.restrictionChecks || []).filter(
+                    const newNotAllowedChecks = (savedRun.restrictionChecks || []).filter(
                         (restrictionCheck) => restrictionCheck.status == "notAllowed" && !currentRestrictionKeys.has(getRestrictionKey(restrictionCheck)),
                     );
                     if (newNotAllowedChecks.length > 0) {
@@ -277,21 +290,9 @@ export default function () {
                         await updateGraphCheck(found, source, await readDraftTriples(draftGraphUri));
                         return { saved: false, notAllowedRestrictions: newNotAllowedChecks.map(getNotAllowedRestrictionText) };
                     }
-                    const savedRun = found.run.savedRun;
-                    savedRun.chatbotChanges = savedRun.chatbotChanges ?? [];
-                    savedRun.chatbotChanges.push({
-                        summary: toolInput.summary,
-                        operations: operations,
-                        changedAt: new Date().toISOString(),
-                        deletedTriples: deletedTriples,
-                        insertedTriples: insertedTriples,
-                        previousReport: savedRun.report ?? null,
-                    });
-                    savedRun.report = revisedAnswer.report ?? null;
-                    await writeFile(found.run.jsonPath, JSON.stringify(savedRun, null, 2));
                 } catch (changeError) {
-                    // takes back what was written, whether the failure came in the middle of the batches or after them
-                    await takeBackChange();
+                    // a triple store that stopped refuses this too: the change stays in the list, the button takes it back later
+                    await takeBackChange().catch((takeBackError) => console.error("[ai/ontologyFromDb/revise] change not taken back: " + takeBackError.message));
                     throw changeError;
                 }
                 sendProgress({ type: "version", runName: found.run.runName, summary: toolInput.summary, droppedTripleCount: droppedTriples.length });

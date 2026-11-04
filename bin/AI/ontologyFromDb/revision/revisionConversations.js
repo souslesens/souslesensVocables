@@ -1,4 +1,4 @@
-import { mkdir, readdir, readFile, rename, writeFile } from "fs/promises";
+import { mkdir, readdir, readFile, rename, rm, writeFile } from "fs/promises";
 import { join } from "path";
 import { llmAnswersDirectory, nonNameCharacterRegex } from "../ontology/ontologyRuns.js";
 
@@ -57,4 +57,12 @@ async function saveConversation(source, conversation) {
     await rename(conversationPath + ".tmp", conversationPath);
 }
 
-export { conversationIdRegex, conversationKinds, listVersionConversations, saveConversation };
+// what they said is about an ontology replaced by a new generation
+async function deleteVersionConversations(source, kind, versionName) {
+    const versionConversations = await listVersionConversations(source, kind, versionName);
+    for (const conversation of versionConversations) {
+        await rm(join(getSourceConversationsDirectory(source), conversation.conversationId + ".json"), { force: true });
+    }
+}
+
+export { conversationIdRegex, conversationKinds, listVersionConversations, saveConversation, deleteVersionConversations };

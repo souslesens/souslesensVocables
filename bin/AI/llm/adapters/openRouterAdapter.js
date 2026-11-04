@@ -1,13 +1,13 @@
 const OPENROUTER_CHAT_COMPLETIONS_URL = "https://openrouter.ai/api/v1/chat/completions";
 
-// OpenRouter ne fournit pas d'endpoint de comptage de tokens.
-// Estimation pré-appel pour le budget du rate-limiter : ratio moyen observé sur
-// les tokenizers BPE (~3.5 caractères par token). Volontairement conservateur
-// (on divise par un petit nombre) pour ne pas sous-estimer le budget consommé.
+// OpenRouter offers no token counting endpoint.
+// Pre-call estimate for the rate limiter budget: average ratio observed on
+// BPE tokenizers (~3.5 characters per token). Deliberately conservative
+// (dividing by a small number) so as not to underestimate the budget used.
 const AVERAGE_CHARS_PER_TOKEN = 3.5;
 
-// finish_reason OpenAI -> stop_reason Anthropic, pour que la boucle d'agent lise le même
-// vocabulaire quel que soit le provider configuré.
+// OpenAI finish_reason -> Anthropic stop_reason, so that the agent loop reads the same
+// vocabulary whatever the configured provider.
 const ANTHROPIC_STOP_REASONS = { stop: "end_turn", length: "max_tokens", tool_calls: "tool_use" };
 
 function estimateTokens({ system, messages, tools }) {
@@ -17,22 +17,22 @@ function estimateTokens({ system, messages, tools }) {
             totalCharacters += message.content.length;
             return;
         }
-        // JSON.stringify rend `undefined` sur un contenu absent, et lire `.length` dessus faisait
-        // échouer l'estimation avant même l'appel, avec une TypeError qui ne parle pas de tokens.
+        // JSON.stringify returns `undefined` on a missing content, and reading `.length` on it made
+        // the estimate fail before the call even started, with a TypeError that says nothing about tokens.
         const serializedContent = JSON.stringify(message.content);
         totalCharacters += serializedContent ? serializedContent.length : 0;
     });
-    // Les schémas d'outils dominent l'entrée d'un tour d'agent : le catalogue MCP seul pèse environ
-    // 5 800 tokens, renvoyés à chaque itération. Les omettre rendrait le rate-limiter aveugle à
-    // l'essentiel du trafic qu'il est censé cadencer.
+    // Tool schemas dominate the input of an agent turn: the MCP catalog alone weighs about
+    // 5 800 tokens, sent again at each iteration. Leaving them out would make the rate limiter blind to
+    // most of the traffic it is supposed to pace.
     if (tools && tools.length > 0) {
         totalCharacters += JSON.stringify(tools).length;
     }
     return Math.ceil(totalCharacters / AVERAGE_CHARS_PER_TOKEN);
 }
 
-// Convertit les schémas d'outils du format Anthropic ({ name, description, input_schema }) vers le
-// format function calling OpenAI attendu par OpenRouter.
+// Converts tool schemas from the Anthropic format ({ name, description, input_schema }) to the
+// OpenAI function calling format OpenRouter expects.
 function toOpenAiTools(anthropicTools) {
     return anthropicTools.map((anthropicTool) => ({
         type: "function",
@@ -40,8 +40,8 @@ function toOpenAiTools(anthropicTools) {
     }));
 }
 
-// Aplatit le `content` d'un bloc tool_result Anthropic (string, ou tableau de blocs) vers la string
-// unique qu'attend un message OpenAI `role: "tool"`.
+// Flattens the `content` of an Anthropic tool_result block (string, or array of blocks) to the single
+// string an OpenAI `role: "tool"` message expects.
 function toToolResultText(toolResultContent) {
     if (typeof toolResultContent === "string") {
         return toolResultContent;
@@ -54,17 +54,17 @@ function toToolResultText(toolResultContent) {
     return resultTextParts.join("\n");
 }
 
-// Convertit le couple { system, messages } (format Anthropic) vers le tableau messages
-// OpenAI/OpenRouter. Trois divergences de format sont absorbées ici :
-//   - le system prompt devient un message à part entière ;
-//   - les blocs tool_use d'un tour assistant deviennent un tableau `tool_calls` à côté du texte ;
-//   - les blocs tool_result, portés côté Anthropic par un message `user`, deviennent autant de
-//     messages `role: "tool"` distincts.
-// C'est cette traduction de la *requête*, et pas seulement de la réponse, qui permet à la route
-// /ai/complete de garder un contrat unique en blocs Anthropic quel que soit le provider.
+// Converts the { system, messages } pair (Anthropic format) to the OpenAI/OpenRouter
+// messages array. Three format differences are absorbed here:
+//   - the system prompt becomes a message of its own;
+//   - the tool_use blocks of an assistant turn become a `tool_calls` array next to the text;
+//   - the tool_result blocks, carried by a `user` message on the Anthropic side, become as many
+//     separate `role: "tool"` messages.
+// This translation of the *request*, not only of the response, is what lets the
+// /ai/complete route keep a single contract in Anthropic blocks whatever the provider.
 function toOpenAiMessages(system, messages, isSystemCached) {
     const openAiMessages = [];
-    // le point de cache sur le system couvre aussi les outils qui le précèdent dans le préfixe Anthropic
+    // the cache point on the system also covers the tools that precede it in the Anthropic prefix
     if (system && isSystemCached) {
         openAiMessages.push({ role: "system", content: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }] });
     } else if (system) {
@@ -98,14 +98,14 @@ function toOpenAiMessages(system, messages, isSystemCached) {
             }
         }
 
-        // Les résultats d'outils passent avant le texte du même message : ils répondent au tour
-        // assistant précédent, alors que le texte qui les accompagne appartient au tour courant.
+        // Tool results go before the text of the same message: they answer the previous assistant
+        // turn, while the text that comes with them belongs to the current turn.
         toolResultMessages.forEach((toolResultMessage) => openAiMessages.push(toolResultMessage));
 
         const text = textParts.join("");
         if (toolCalls.length > 0) {
-            // `content: null` et non `""` : c'est ce que l'API OpenAI spécifie pour un tour
-            // assistant qui n'appelle que des outils, et certains modèles rejettent la chaîne vide.
+            // `content: null` and not `""`: this is what the OpenAI API specifies for an assistant
+            // turn that only calls tools, and some models reject the empty string.
             openAiMessages.push({ role: message.role, content: text || null, tool_calls: toolCalls });
         } else if (text) {
             openAiMessages.push({ role: message.role, content: text });
@@ -115,19 +115,19 @@ function toOpenAiMessages(system, messages, isSystemCached) {
     return openAiMessages;
 }
 
-// Statut HTTP par défaut d'une erreur signalée dans un corps 200 sans code exploitable : 502, la
-// même valeur que la route /ai/complete attribue à un provider qui refuse.
+// Default HTTP status of an error reported in a 200 body without a usable code: 502, the
+// same value the /ai/complete route gives to a provider that refuses.
 const openRouterBodyErrorStatus = 502;
 
 /**
- * Détecte une erreur signalée *dans* une réponse HTTP 200.
+ * Detects an error reported *inside* an HTTP 200 response.
  *
- * OpenRouter renvoie les pannes côté provider aussi souvent dans le corps qu'avec un statut HTTP :
- * `{error: {code, message}}` au premier niveau, une erreur portée par le choix, ou un
- * `finish_reason: "error"`. Lue comme une réponse normale, aucune de ces formes ne produit
- * d'exception : `choices?.[0]` vaut `undefined`, le message reconstruit est vide, et le tour
- * d'assistant renvoyé est un bloc texte vide avec `usage` à zéro. C'est par là qu'un dépassement de
- * quota arrivait jusqu'à la boucle d'agent sous forme de silence plutôt que d'erreur.
+ * OpenRouter reports provider outages in the body as often as with an HTTP status:
+ * `{error: {code, message}}` at the top level, an error carried by the choice, or a
+ * `finish_reason: "error"`. Read as a normal response, none of these forms raises an
+ * exception: `choices?.[0]` is `undefined`, the rebuilt message is empty, and the assistant
+ * turn returned is an empty text block with `usage` at zero. This is how an exceeded quota
+ * reached the agent loop as silence rather than as an error.
  *
  * @param {*} openRouterResponse
  * @returns {Error|null}
@@ -159,9 +159,9 @@ function errorFromOpenRouterBody(openRouterResponse) {
     return null;
 }
 
-// Normalise la réponse OpenRouter (format OpenAI) vers le format de réponse Anthropic, blocs
-// tool_use compris, pour que cet adapter reste un drop-in du anthropicAdapter et que
-// normalizeCompletion puisse réutiliser le normalizer Anthropic sans le dupliquer.
+// Normalizes the OpenRouter response (OpenAI format) to the Anthropic response format, tool_use
+// blocks included, so that this adapter stays a drop-in for anthropicAdapter and
+// normalizeCompletion can reuse the Anthropic normalizer without duplicating it.
 function toAnthropicResponse(openRouterResponse) {
     const firstChoice = openRouterResponse.choices?.[0];
     const responseMessage = firstChoice?.message ?? {};
@@ -169,8 +169,8 @@ function toAnthropicResponse(openRouterResponse) {
     const toolCalls = responseMessage.tool_calls ?? [];
 
     const contentBlocks = [];
-    // Le bloc texte reste présent même vide quand le modèle n'appelle aucun outil : classify.js et
-    // alignment.js lisent `content[0].text` sans garde.
+    // The text block stays present even when empty if the model calls no tool: classify.js and
+    // alignment.js read `content[0].text` without a guard.
     if (responseMessage.content || toolCalls.length === 0) {
         contentBlocks.push({ type: "text", text: responseMessage.content ?? "" });
     }
@@ -180,9 +180,9 @@ function toAnthropicResponse(openRouterResponse) {
         try {
             parsedArguments = JSON.parse(rawArguments);
         } catch {
-            // Échec bruyant plutôt qu'un repli sur {} : une boucle d'agent qui exécuterait l'outil
-            // avec des arguments vides produirait un résultat faux que rien en aval ne
-            // distinguerait d'un vrai.
+            // A loud failure rather than a fallback on {}: an agent loop running the tool
+            // with empty arguments would produce a wrong result that nothing downstream could
+            // tell from a real one.
             throw new Error(`OpenRouter returned malformed tool arguments for "${toolCall.function?.name}": ${rawArguments}`);
         }
         contentBlocks.push({ type: "tool_use", id: toolCall.id, name: toolCall.function?.name, input: parsedArguments });
@@ -202,21 +202,21 @@ function toAnthropicResponse(openRouterResponse) {
     };
 }
 
-// les modèles Anthropic sont nommés anthropic/<modèle> chez OpenRouter
+// Anthropic models are named anthropic/<model> on OpenRouter
 const anthropicModelPrefix = "anthropic/";
 // Bedrock and Google also serve these models, but cutting the connection there does not stop the billing (OpenRouter doc, stream cancellation)
 const anthropicProviderRouting = { order: ["anthropic"], allow_fallbacks: false };
 const sseDataPrefix = "data: ";
 const sseDoneLine = "data: [DONE]";
-// Une requête qui ne reçoit plus rien est bloquée : arrêtée, elle libère ce que tient l'appelant, le verrou de génération d'une source d'abord.
-// Un flux envoie son raisonnement tant que le modèle travaille, une réponse non streamée n'arrive qu'à la fin.
-// Les commentaires SSE de maintien de connexion ne comptent pas : OpenRouter les envoie aussi quand le fournisseur ne répond plus.
+// A request that receives nothing more is stuck: stopping it frees what the caller holds, the generation lock of a source first.
+// A stream sends its reasoning while the model works, a non-streamed answer only arrives at the end.
+// The SSE keep-alive comments do not count: OpenRouter also sends them when the provider no longer answers.
 const millisecondsPerMinute = 60 * 1000;
 const streamedIdleTimeoutMs = 10 * millisecondsPerMinute;
 const wholeAnswerTimeoutMs = 30 * millisecondsPerMinute;
 
-// Lit une réponse `stream: true` et la recompose sous la forme d'une réponse non streamée : la
-// détection d'erreur et la normalisation qui suivent restent celles du mode normal.
+// Reads a `stream: true` response and rebuilds it in the shape of a non-streamed one: the
+// error detection and the normalization that follow stay those of the normal mode.
 async function readStreamedCompletion(response, onTextDelta, onReasoningDelta, onDataReceived) {
     const decoder = new TextDecoder();
     const streamedChoice = { message: { content: "" }, finish_reason: null };
@@ -224,7 +224,7 @@ async function readStreamedCompletion(response, onTextDelta, onReasoningDelta, o
     const streamedToolCalls = [];
     function readLine(rawLine) {
         const line = rawLine.trimEnd();
-        // les lignes `: OPENROUTER PROCESSING` sont des commentaires SSE qui gardent la connexion ouverte
+        // the `: OPENROUTER PROCESSING` lines are SSE comments that keep the connection open
         if (!line.startsWith(sseDataPrefix) || line === sseDoneLine) {
             return;
         }
@@ -235,7 +235,7 @@ async function readStreamedCompletion(response, onTextDelta, onReasoningDelta, o
         if (chunk.usage) {
             streamedResponse.usage = chunk.usage;
         }
-        // une erreur après les en-têtes arrive dans un chunk, le statut HTTP reste 200
+        // an error after the headers arrives in a chunk, the HTTP status stays 200
         if (chunk.error) {
             streamedResponse.error = chunk.error;
         }
@@ -252,9 +252,9 @@ async function readStreamedCompletion(response, onTextDelta, onReasoningDelta, o
         if (typeof delta.reasoning === "string" && delta.reasoning && onReasoningDelta) {
             onReasoningDelta(delta.reasoning);
         }
-        // un appel d'outil arrive en morceaux repérés par leur index : l'id et le nom au premier, les arguments JSON en texte découpé
+        // a tool call arrives in pieces identified by their index: the id and the name in the first, the JSON arguments as split text
         (delta.tool_calls ?? []).forEach(function (toolCallDelta) {
-            // sans index, un nouvel id ouvre un nouvel appel, sinon le morceau continue le dernier
+            // without an index, a new id opens a new call, otherwise the piece continues the last one
             let toolCallIndex = toolCallDelta.index;
             if (toolCallIndex === undefined) {
                 const lastToolCall = streamedToolCalls[streamedToolCalls.length - 1];
@@ -275,20 +275,20 @@ async function readStreamedCompletion(response, onTextDelta, onReasoningDelta, o
     for await (const bytes of response.body) {
         pendingText += decoder.decode(bytes, { stream: true });
         const lines = pendingText.split("\n");
-        // la dernière ligne peut être coupée au milieu, elle attend le paquet suivant
+        // the last line may be cut in the middle, it waits for the next packet
         pendingText = lines.pop();
         lines.forEach(readLine);
     }
-    // le dernier chunk, souvent celui de l'usage, peut arriver sans saut de ligne final
+    // the last chunk, often the usage one, may arrive without a final line break
     readLine(pendingText + decoder.decode());
     if (streamedToolCalls.length > 0) {
-        // un outil sans paramètre ne reçoit aucun morceau d'arguments, le mode non streamé lui donne "{}"
+        // a tool without parameters receives no arguments piece, the non-streamed mode gives it "{}"
         streamedToolCalls.forEach(function (streamedToolCall) {
             streamedToolCall.function.arguments = streamedToolCall.function.arguments || "{}";
         });
         streamedChoice.message.tool_calls = streamedToolCalls;
     }
-    // un flux coupé sans finish_reason est une réponse tronquée, pas une réponse complète
+    // a stream cut without finish_reason is a truncated answer, not a whole one
     if (!streamedResponse.error && !streamedChoice.finish_reason) {
         streamedResponse.error = { message: "the stream ended before the model finished its answer" };
     }
@@ -300,13 +300,13 @@ function createOpenRouterAdapter(openRouterConfig) {
         Authorization: `Bearer ${openRouterConfig.apiKey}`,
         "Content-Type": "application/json",
     };
-    // Headers de classement optionnels recommandés par OpenRouter.
+    // Optional ranking headers recommended by OpenRouter.
     if (openRouterConfig.appUrl) headers["HTTP-Referer"] = openRouterConfig.appUrl;
     if (openRouterConfig.appName) headers["X-Title"] = openRouterConfig.appName;
 
-    // onTextDelta reçoit le texte de la réponse au fil de l'eau ; sans lui, la réponse arrive en une fois.
-    // isPromptCached : le system est renvoyé identique à chaque tour d'une boucle d'agent, Anthropic le relit alors depuis son cache.
-    // Une génération en un seul appel ne le demande pas : l'écriture du cache coûte plus cher qu'une lecture simple.
+    // onTextDelta receives the text of the answer as it comes; without it, the answer arrives all at once.
+    // isPromptCached: the system is sent again unchanged at each turn of an agent loop, Anthropic then reads it from its cache.
+    // A generation in a single call does not ask for it: writing the cache costs more than a plain read.
     async function createMessage({ model, system, messages, maxTokens, tools, reasoningEffort, onTextDelta, onReasoningDelta, isPromptCached, abortSignal }, callback) {
         const isStreamed = typeof onTextDelta === "function";
         const idleTimeoutMs = isStreamed ? streamedIdleTimeoutMs : wholeAnswerTimeoutMs;
@@ -321,7 +321,7 @@ function createOpenRouterAdapter(openRouterConfig) {
         }
         try {
             const requestedModel = model ?? openRouterConfig.defaultModel;
-            // OpenRouter ne transmet cache_control qu'aux modèles Anthropic, les autres fournisseurs cachent seuls
+            // OpenRouter passes cache_control only to Anthropic models, the other providers cache on their own
             const isAnthropicModel = String(requestedModel).startsWith(anthropicModelPrefix);
             const isSystemCached = Boolean(isPromptCached) && isAnthropicModel;
             const requestBody = {
@@ -329,8 +329,8 @@ function createOpenRouterAdapter(openRouterConfig) {
                 max_tokens: maxTokens ?? openRouterConfig.maxTokens,
                 messages: toOpenAiMessages(system, messages, isSystemCached),
             };
-            // Renseigné seulement quand l'appelant déclare des outils : un tableau vide bascule
-            // certains modèles en erreur, et classify/alignment n'en passent jamais.
+            // Set only when the caller declares tools: an empty array puts
+            // some models in error, and classify/alignment never pass any.
             if (tools && tools.length > 0) {
                 requestBody.tools = toOpenAiTools(tools);
             }
@@ -361,9 +361,9 @@ function createOpenRouterAdapter(openRouterConfig) {
                 return callback(null, toAnthropicResponse(streamedResponse));
             }
 
-            // Corps lu en texte dans tous les cas : une passerelle ou un proxy peut répondre du HTML
-            // avec un statut 200, et `response.json()` échouait alors sur "Unexpected token <", sans
-            // rien montrer de ce qui avait réellement été reçu.
+            // Body read as text in every case: a gateway or a proxy may answer HTML
+            // with a 200 status, and `response.json()` then failed on "Unexpected token <", without
+            // showing anything of what was really received.
             const rawBody = await response.text();
 
             if (!response.ok) {
@@ -390,7 +390,7 @@ function createOpenRouterAdapter(openRouterConfig) {
 
             callback(null, toAnthropicResponse(openRouterResponse));
         } catch (error) {
-            // fetch et la lecture du flux rejettent un arrêt sous des formes diverses selon le moment : la raison donnée à abort les remplace
+            // fetch and the stream reading reject a stop in various forms depending on the moment: the reason given to abort replaces them
             callback(requestSignal.aborted ? requestSignal.reason : error);
         } finally {
             clearTimeout(idleTimer);

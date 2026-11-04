@@ -104,9 +104,14 @@ function toCliError(message, status) {
 
 function createClaudeCodeAdapter(claudeCodeConfig) {
     // `model` is ignored: the callers name OpenRouter ids, which the CLI does not know
-    function createMessage({ system, messages, maxTokens, tools, reasoningEffort, onTextDelta, abortSignal }, callback) {
+    function createMessage({ system, messages, maxTokens, tools, reasoningEffort, onTextDelta, onReasoningDelta, abortSignal }, callback) {
         const isToolTurn = Boolean(tools && tools.length > 0);
-        const cliArguments = ["-p", "--output-format", "json", "--model", claudeCodeConfig.defaultModel];
+        const isStreamed = Boolean(onTextDelta) && !isToolTurn;
+        const cliArguments = ["-p", "--output-format", isStreamed ? "stream-json" : "json", "--model", claudeCodeConfig.defaultModel];
+        if (isStreamed) {
+            // --thinking-display is missing from claude --help; without it the reasoning arrives empty
+            cliArguments.push("--verbose", "--include-partial-messages", "--thinking-display", "summarized");
+        }
         // no tool, setting, hook, MCP server or skill of the developer's own setup in the answer
         cliArguments.push("--tools", "", "--setting-sources", "", "--strict-mcp-config", "--disable-slash-commands", "--no-session-persistence");
         cliArguments.push("--system-prompt", backendSystemPrompt);
@@ -126,8 +131,10 @@ function createClaudeCodeAdapter(claudeCodeConfig) {
 
         // outside the repo, so that its CLAUDE.md stays out of the answer
         const cliProcess = spawn("claude", cliArguments, { cwd: os.tmpdir(), env: cliEnvironment, stdio: ["pipe", "pipe", "pipe"], signal: abortSignal });
-        let standardOutput = "";
+        let pendingOutput = "";
+        let unreadOutput = "";
         let standardError = "";
+        let cliResult = null;
         let isSettled = false;
         const settle = function (error, response) {
             if (isSettled) {
@@ -142,27 +149,54 @@ function createClaudeCodeAdapter(claudeCodeConfig) {
             settle(toCliError("claude -p did not answer within " + wholeAnswerTimeoutMs / millisecondsPerMinute + " minutes, it was stopped"));
         }, wholeAnswerTimeoutMs);
 
+        // both output formats end on the same result object, stream-json sends the deltas before it
+        const readOutputLine = function (outputLine) {
+            if (!outputLine) {
+                return;
+            }
+            let outputEvent;
+            try {
+                outputEvent = JSON.parse(outputLine);
+            } catch {
+                unreadOutput += outputLine;
+                return;
+            }
+            if (outputEvent.type == "result") {
+                cliResult = outputEvent;
+            }
+            const delta = outputEvent.type == "stream_event" ? outputEvent.event.delta : null;
+            if (delta?.type == "text_delta") {
+                onTextDelta(delta.text);
+            } else if (delta?.type == "thinking_delta" && delta.thinking && onReasoningDelta) {
+                onReasoningDelta(delta.thinking);
+            }
+        };
+
         // a character cut between two chunks would otherwise be silently corrupted
         cliProcess.stdout.setEncoding("utf8");
         cliProcess.stderr.setEncoding("utf8");
-        cliProcess.stdout.on("data", (chunk) => (standardOutput += chunk));
+        cliProcess.stdout.on("data", function (chunk) {
+            const outputLines = (pendingOutput + chunk).split("\n");
+            // the last line may be cut in the middle, it waits for the next chunk
+            pendingOutput = outputLines.pop();
+            outputLines.forEach(readOutputLine);
+        });
         cliProcess.stderr.on("data", (chunk) => (standardError += chunk));
         cliProcess.on("error", (spawnError) => settle(toCliError("could not run claude -p: " + spawnError.message)));
         // already reported by the close or error event of the process
         cliProcess.stdin.on("error", () => {});
         cliProcess.on("close", function (exitCode) {
-            let cliResult;
-            try {
-                cliResult = JSON.parse(standardOutput);
-            } catch {
-                return settle(toCliError("claude -p exited with code " + exitCode + " without a JSON answer: " + (standardError || standardOutput).slice(0, 500)));
+            readOutputLine(pendingOutput);
+            if (!cliResult) {
+                return settle(toCliError("claude -p exited with code " + exitCode + " without a JSON answer: " + (standardError || unreadOutput).slice(0, 500)));
             }
             if (cliResult.is_error) {
                 return settle(toCliError("claude -p failed: " + cliResult.result, cliResult.api_error_status));
             }
             const response = toAnthropicResponse(cliResult, isToolTurn, claudeCodeConfig.defaultModel);
             const answerText = response.content[0]?.text;
-            if (onTextDelta && answerText) {
+            // a tool turn is not streamed: its text comes out of the structured output
+            if (onTextDelta && answerText && !isStreamed) {
                 onTextDelta(answerText);
             }
             settle(null, response);

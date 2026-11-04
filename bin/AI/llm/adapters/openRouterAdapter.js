@@ -305,10 +305,11 @@ function createOpenRouterAdapter(openRouterConfig) {
     // onTextDelta reçoit le texte de la réponse au fil de l'eau ; sans lui, la réponse arrive en une fois.
     // isPromptCached : le system est renvoyé identique à chaque tour d'une boucle d'agent, Anthropic le relit alors depuis son cache.
     // Une génération en un seul appel ne le demande pas : l'écriture du cache coûte plus cher qu'une lecture simple.
-    async function createMessage({ model, system, messages, maxTokens, tools, reasoningEffort, onTextDelta, onReasoningDelta, isPromptCached }, callback) {
+    async function createMessage({ model, system, messages, maxTokens, tools, reasoningEffort, onTextDelta, onReasoningDelta, isPromptCached, abortSignal }, callback) {
         const isStreamed = typeof onTextDelta === "function";
         const idleTimeoutMs = isStreamed ? streamedIdleTimeoutMs : wholeAnswerTimeoutMs;
         const abortController = new AbortController();
+        const requestSignal = abortSignal ? AbortSignal.any([abortController.signal, abortSignal]) : abortController.signal;
         let idleTimer = null;
         function restartIdleTimer() {
             clearTimeout(idleTimer);
@@ -342,7 +343,7 @@ function createOpenRouterAdapter(openRouterConfig) {
                 method: "POST",
                 headers,
                 body: JSON.stringify(requestBody),
-                signal: abortController.signal,
+                signal: requestSignal,
             });
 
             if (isStreamed && response.ok) {
@@ -384,7 +385,7 @@ function createOpenRouterAdapter(openRouterConfig) {
             callback(null, toAnthropicResponse(openRouterResponse));
         } catch (error) {
             // fetch et la lecture du flux rejettent un arrêt sous des formes diverses selon le moment : la raison donnée à abort les remplace
-            callback(abortController.signal.aborted ? abortController.signal.reason : error);
+            callback(requestSignal.aborted ? requestSignal.reason : error);
         } finally {
             clearTimeout(idleTimer);
         }

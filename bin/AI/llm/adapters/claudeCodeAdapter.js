@@ -104,7 +104,7 @@ function toCliError(message, status) {
 
 function createClaudeCodeAdapter(claudeCodeConfig) {
     // `model` is ignored: the callers name OpenRouter ids, which the CLI does not know
-    function createMessage({ system, messages, maxTokens, tools, reasoningEffort, onTextDelta }, callback) {
+    function createMessage({ system, messages, maxTokens, tools, reasoningEffort, onTextDelta, abortSignal }, callback) {
         const isToolTurn = Boolean(tools && tools.length > 0);
         const cliArguments = ["-p", "--output-format", "json", "--model", claudeCodeConfig.defaultModel];
         // no tool, setting, hook, MCP server or skill of the developer's own setup in the answer
@@ -125,7 +125,7 @@ function createClaudeCodeAdapter(claudeCodeConfig) {
         }
 
         // outside the repo, so that its CLAUDE.md stays out of the answer
-        const cliProcess = spawn("claude", cliArguments, { cwd: os.tmpdir(), env: cliEnvironment, stdio: ["pipe", "pipe", "pipe"] });
+        const cliProcess = spawn("claude", cliArguments, { cwd: os.tmpdir(), env: cliEnvironment, stdio: ["pipe", "pipe", "pipe"], signal: abortSignal });
         let standardOutput = "";
         let standardError = "";
         let isSettled = false;

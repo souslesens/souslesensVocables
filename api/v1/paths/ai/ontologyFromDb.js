@@ -641,7 +641,7 @@ export default function () {
                 });
             }
 
-            // a second turn on the refused restrictions, checked once more: what stays refused is a problem of the version
+            // a second turn on the refused restrictions, checked once more: what stays refused is a problem of the ontology
             const refusedChecks = (restrictionChecks || []).filter((restrictionCheck) => restrictionCheck.status == "notAllowed");
             if (refusedChecks.length > 0) {
                 const restrictionFixStart = Date.now();
@@ -653,7 +653,7 @@ export default function () {
                     try {
                         fixedAnswerOntology = getAnswerTurtle(fixedAnswer, source, sourceConfig, termNamespace, upperOntologyGraphUris);
                     } catch (conversionError) {
-                        // the version keeps the generated answer: no fix of the turn is applied
+                        // the ontology keeps the generated answer: no fix of the turn is applied
                         restrictionFix.error = "fixed answer not turned into Turtle: " + conversionError.message;
                         restrictionFix.replacedCount = 0;
                         restrictionFix.removedCount = 0;

@@ -1,9 +1,9 @@
-import { writeFile } from "fs/promises";
+import { readFile, writeFile } from "fs/promises";
 import { createHash, randomBytes } from "crypto";
 import rdflib from "rdflib";
 import { rdfDataModel } from "../../../../model/rdfData.js";
 import { getDraftGraphUri, updateGraphTriples, deleteGenuineBlankNodeTriples } from "./ontologyRuns.js";
-import { getTermNamespace, getRestrictionNodeKey, restrictionKinds, cardinalityKinds, localAnnotationProperties, datatypeRanges } from "./ontologyAnswer.js";
+import { getTermNamespace, getRestrictionNodeKey, anonymousNodePrefix, restrictionKinds, cardinalityKinds, localAnnotationProperties, datatypeRanges } from "./ontologyAnswer.js";
 import { isAnonymousNode, tryCheckRunRestrictions } from "./restrictionCheck.js";
 import { wellKnownPrefixes } from "../upperOntologyModel.js";
 
@@ -24,6 +24,12 @@ const localNameRegex = /[^/#]+$/;
 async function readGraphTriples(graphUri) {
     const tripleCount = await rdfDataModel.getTripleCount(graphUri);
     const graphTriples = tripleCount > 0 ? await rdfDataModel.getGraphPartNt(graphUri, tripleCount, 0) : "";
+    // an endpoint cuts a result at its row limit without saying so, see bin/endpointLimits.js: a validation would take the missing triples for removed ones
+    const readStore = rdflib.graph();
+    rdflib.parse(graphTriples, readStore, graphUri, "text/turtle");
+    if (readStore.statements.length != tripleCount) {
+        throw new Error("the graph " + graphUri + " holds " + tripleCount + " triples, " + readStore.statements.length + " were read: above the row limit of the endpoint");
+    }
     return graphTriples;
 }
 
@@ -42,7 +48,7 @@ async function readDraftTriples(graphUri) {
         if (term.termType != "BlankNode") {
             return term.toNT();
         }
-        iriByBlankNode[term.value] = iriByBlankNode[term.value] ?? "_:b" + randomBytes(8).toString("hex");
+        iriByBlankNode[term.value] = iriByBlankNode[term.value] ?? anonymousNodePrefix + randomBytes(8).toString("hex");
         return "<" + iriByBlankNode[term.value] + ">";
     }
     const namedTriples = blankNodeStatements.map((statement) => toNamedNodeText(statement.subject) + " " + statement.predicate.toNT() + " " + toNamedNodeText(statement.object) + " .");
@@ -71,7 +77,7 @@ function getGraphAnswer(graphTriples, graphUri, termNamespace, upperOntologyGrap
     const store = rdflib.graph();
     rdflib.parse(graphTriples, store, graphUri, "text/turtle");
     const carriedStatements = new Set();
-    // read to be listed as one line, not stated by the answer
+    // a restriction the answer format cannot hold, listed as one line
     const listedStatements = new Set();
     const restrictionNodeByKey = {};
     const problems = new Set();
@@ -129,7 +135,10 @@ function getGraphAnswer(graphTriples, graphUri, termNamespace, upperOntologyGrap
     const labelStatementByIri = {};
     for (const localNode of [...classNodes, ...datatypePropertyNodes, ...individualNodes, ...groupNodes]) {
         // the answer holds one label: a second one, added in the whiteboard, is listed
-        const labelStatement = store.statementsMatching(localNode, rdfs("label"), null)[0];
+        // sorted on its value: the order the triple store returns changes from one reading to the next
+        const labelStatements = store.statementsMatching(localNode, rdfs("label"), null);
+        const sortedLabelStatements = labelStatements.sort((leftStatement, rightStatement) => leftStatement.object.value.localeCompare(rightStatement.object.value));
+        const labelStatement = sortedLabelStatements[0];
         labelByIri[localNode.value] = labelStatement ? labelStatement.object.value : localNode.value;
         labelStatementByIri[localNode.value] = labelStatement;
     }
@@ -142,7 +151,7 @@ function getGraphAnswer(graphTriples, graphUri, termNamespace, upperOntologyGrap
             carriedStatements.add(labelStatementByIri[localNode.value]);
         }
     }
-    // the whiteboard names a new term in the namespace of the version graph, the generation in the namespace of the source
+    // the whiteboard names a new term in the namespace of the draft, the generation in the namespace of the source
     function getReference(referencedNode) {
         const iri = referencedNode.value;
         const isLocalNamespace = iri.startsWith(termNamespace) || iri.startsWith(graphUri);
@@ -201,15 +210,15 @@ function getGraphAnswer(graphTriples, graphUri, termNamespace, upperOntologyGrap
                 continue;
             }
             const restriction = readRestriction(classNode, superClassNode);
-            carriedStatements.add(subClassStatement);
             if (restriction) {
+                carriedStatements.add(subClassStatement);
                 restrictions.push(restriction);
                 continue;
             }
             listedStatements.add(subClassStatement);
             // listed as one line rather than as statements on a blank node
             const restrictionParts = [];
-            for (const restrictionStatement of readStatements(superClassNode, null, null)) {
+            for (const restrictionStatement of store.statementsMatching(superClassNode, null, null)) {
                 listedStatements.add(restrictionStatement);
                 const predicateName = restrictionStatement.predicate.value.match(localNameRegex)[0];
                 const objectText = labelByIri[restrictionStatement.object.value] ?? restrictionStatement.object.value;
@@ -290,7 +299,7 @@ function getGraphAnswer(graphTriples, graphUri, termNamespace, upperOntologyGrap
 
     for (const statement of store.statements) {
         const isEditProvenance = editProvenancePredicates.includes(statement.predicate.value) || statement.predicate.value.startsWith(editOptionPredicatePrefix);
-        if (carriedStatements.has(statement) || isEditProvenance) {
+        if (carriedStatements.has(statement) || listedStatements.has(statement) || isEditProvenance) {
             continue;
         }
         const subjectText = labelByIri[statement.subject.value] ?? statement.subject.value;
@@ -303,10 +312,12 @@ function getGraphAnswer(graphTriples, graphUri, termNamespace, upperOntologyGrap
         iriByLabel[label] = iri;
     }
     const carriedTriples = [];
+    const carriedSubjects = new Set();
     const uncarriedStatements = [];
     for (const statement of store.statements) {
-        if (carriedStatements.has(statement) && !listedStatements.has(statement)) {
+        if (carriedStatements.has(statement)) {
             carriedTriples.push(statement.toNT());
+            carriedSubjects.add(statement.subject.value);
         } else {
             uncarriedStatements.push(statement);
         }
@@ -316,6 +327,7 @@ function getGraphAnswer(graphTriples, graphUri, termNamespace, upperOntologyGrap
         problems: [...problems],
         notCarried: notCarried,
         carriedTriples: carriedTriples,
+        carriedSubjects: carriedSubjects,
         uncarriedStatements: uncarriedStatements,
         graphTerms: { iriByLabel: iriByLabel, restrictionNodeByKey: restrictionNodeByKey },
     };
@@ -331,11 +343,7 @@ function getGraphChange(graphAnswer, answerTurtle, graphUri) {
     const answerSubjects = new Set(answerStore.statements.map((statement) => statement.subject.value));
     const uncarriedTriples = graphAnswer.uncarriedStatements.map((statement) => statement.toNT());
     const graphTripleSet = new Set([...graphAnswer.carriedTriples, ...uncarriedTriples]);
-    const carriedSubjects = new Set();
-    for (const carriedTriple of graphAnswer.carriedTriples) {
-        carriedSubjects.add(carriedTriple.substring(1, carriedTriple.indexOf(">")));
-    }
-    const droppedStatements = graphAnswer.uncarriedStatements.filter((statement) => carriedSubjects.has(statement.subject.value) && !answerSubjects.has(statement.subject.value));
+    const droppedStatements = graphAnswer.uncarriedStatements.filter((statement) => graphAnswer.carriedSubjects.has(statement.subject.value) && !answerSubjects.has(statement.subject.value));
     const droppedTriples = droppedStatements.map((statement) => statement.toNT());
     const removedTriples = graphAnswer.carriedTriples.filter((carriedTriple) => !answerTripleSet.has(carriedTriple));
     const graphChange = {
@@ -357,13 +365,19 @@ async function updateGraphCheck(found, source, graphTriples) {
     const upperOntologies = (savedRun.upperOntologies || []).filter((upperOntology) => found.userSources[upperOntology]);
     const upperOntologyGraphUris = upperOntologies.map((upperOntology) => found.userSources[upperOntology].graphUri);
     const userContext = { user: found.userInfo, userSources: found.userSources };
-    savedRun.graphProblems = getGraphAnswer(graphTriples, graphUri, getTermNamespace(found.sourceConfig), upperOntologyGraphUris, null).problems;
+    const graphProblems = getGraphAnswer(graphTriples, graphUri, getTermNamespace(found.sourceConfig), upperOntologyGraphUris, null).problems;
     const restrictionCheckResult = await tryCheckRunRestrictions(graphTriples, graphUri, source, upperOntologies, userContext);
-    savedRun.restrictionChecks = restrictionCheckResult.restrictionChecks;
-    savedRun.restrictionCheckError = restrictionCheckResult.restrictionCheckError;
-    // a check that failed runs again at the next opening
-    savedRun.graphHash = savedRun.restrictionChecks ? graphHash : null;
-    await writeFile(found.run.jsonPath, JSON.stringify(savedRun, null, 2));
+    const checkFields = {
+        graphProblems: graphProblems,
+        restrictionChecks: restrictionCheckResult.restrictionChecks,
+        restrictionCheckError: restrictionCheckResult.restrictionCheckError,
+        // a check that failed runs again at the next opening
+        graphHash: restrictionCheckResult.restrictionChecks ? graphHash : null,
+    };
+    Object.assign(savedRun, checkFields);
+    // a check takes seconds, the page opens the draft while the chatbot goes on: the file read now keeps a change saved meanwhile
+    const latestSavedRun = JSON.parse(await readFile(found.run.jsonPath, "utf8"));
+    await writeFile(found.run.jsonPath, JSON.stringify({ ...latestSavedRun, ...checkFields }, null, 2));
 }
 
-export { readDraftTriples, getGraphHash, getGraphAnswer, getGraphChange, updateGraphCheck };
+export { readGraphTriples, readDraftTriples, getGraphHash, getGraphAnswer, getGraphChange, updateGraphCheck };

@@ -16,6 +16,8 @@ const localAnnotationProperties = ["identifyingColumn", "sourceColumn", "interpr
 // XSD local names the prompt allows as datatype property ranges
 const datatypeRanges = ["string", "date", "dateTime", "decimal", "integer", "boolean"];
 const absoluteIriRegex = /^https?:\/\//;
+// the start of the IRIs SousLeSens writes in place of blank nodes, as <_:b123>
+const anonymousNodePrefix = "_:b";
 const jsonBlockRegex = /```json[ \t]*\r?\n([\s\S]*?)```/;
 
 // llmClient.createMessage as a promise, its token usage added to the given counter
@@ -111,7 +113,7 @@ function getAnswerTurtle(ontologyAnswer, source, sourceConfig, termNamespace, up
     // Derived from what it states: two writings of one restriction compare equal. The "r" keeps it from being all digits, which sparql_generic.js writes as a genuine blank node
     function getRestrictionNode(restrictionKey) {
         const existingNodeIri = graphTerms?.restrictionNodeByKey[restrictionKey];
-        return rdflib.sym(existingNodeIri ?? "_:br" + createHash("sha1").update(restrictionKey).digest("hex"));
+        return rdflib.sym(existingNodeIri ?? anonymousNodePrefix + "r" + createHash("sha1").update(restrictionKey).digest("hex"));
     }
     function addTexts(subject, predicate, textOrTexts, language) {
         const texts = Array.isArray(textOrTexts) ? textOrTexts : [textOrTexts];
@@ -228,6 +230,7 @@ export {
     getTermNamespace,
     getLocalName,
     absoluteIriRegex,
+    anonymousNodePrefix,
     getRestrictionNodeKey,
     getAnswerTurtle,
 };

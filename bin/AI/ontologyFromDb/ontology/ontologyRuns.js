@@ -178,19 +178,19 @@ async function loadTurtleIntoGraph(turtle, graphUri) {
 
 // the hierarchy of the local classes is read in the draft: no graph, no check
 async function loadAndCheckTurtle(turtle, graphUri, source, upperOntologies, userContext) {
-    const checkedVersion = { graphTripleCount: null, graphError: null, restrictionChecks: null, restrictionCheckError: null };
+    const checkedDraft = { graphTripleCount: null, graphError: null, restrictionChecks: null, restrictionCheckError: null };
     try {
-        checkedVersion.graphTripleCount = await loadTurtleIntoGraph(turtle, graphUri);
+        checkedDraft.graphTripleCount = await loadTurtleIntoGraph(turtle, graphUri);
     } catch (loadError) {
-        checkedVersion.graphError = loadError.message;
+        checkedDraft.graphError = loadError.message;
     }
-    if (!checkedVersion.graphTripleCount) {
-        return checkedVersion;
+    if (!checkedDraft.graphTripleCount) {
+        return checkedDraft;
     }
     const restrictionCheckResult = await tryCheckRunRestrictions(turtle, graphUri, source, upperOntologies, userContext);
-    checkedVersion.restrictionChecks = restrictionCheckResult.restrictionChecks;
-    checkedVersion.restrictionCheckError = restrictionCheckResult.restrictionCheckError;
-    return checkedVersion;
+    checkedDraft.restrictionChecks = restrictionCheckResult.restrictionChecks;
+    checkedDraft.restrictionCheckError = restrictionCheckResult.restrictionCheckError;
+    return checkedDraft;
 }
 
 // given a Turtle, its graph is still to load; without one, it is loaded and the Turtle is removed. A source built from another database leaves no file there

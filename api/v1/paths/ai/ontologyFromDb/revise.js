@@ -1,18 +1,9 @@
 import { readFileSync } from "fs";
+import { writeFile } from "fs/promises";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-import { findSourceRun, readDatabaseChecks, getNewRunTimestamp, getRunName, getRunGraphUri, loadAndCheckTurtle, saveRun } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
-import {
-    ontologyModelId,
-    ontologyReasoningEffort,
-    firstOntologyVersion,
-    getNextOntologyVersion,
-    jsonBlockRegex,
-    toJsonBlock,
-    getTermNamespace,
-    getAnswerTurtle,
-} from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyAnswer.js";
-import { rdfDataModel } from "../../../../../model/rdfData.js";
+import { findSourceRun, readSourceRun, readDatabaseChecks, getDraftGraphUri, runningGenerations, updateGraphTriples } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
+import { getTermNamespace, getAnswerTurtle } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyAnswer.js";
 import {
     searchUpperOntologiesTool,
     getUpperOntologyTermsTool,
@@ -23,7 +14,7 @@ import {
     runAgentLoop,
 } from "../../../../../bin/AI/ontologyFromDb/revision/revisionAgent.js";
 import { getTurtleRestrictions, getRestrictionKey, getNotAllowedRestrictionText } from "../../../../../bin/AI/ontologyFromDb/ontology/restrictionCheck.js";
-import { readGraphTriples, getGraphAnswer } from "../../../../../bin/AI/ontologyFromDb/ontology/versionGraph.js";
+import { readDraftTriples, getGraphAnswer, getGraphChange, updateGraphCheck } from "../../../../../bin/AI/ontologyFromDb/ontology/draftGraph.js";
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const revisionPromptPath = join(currentDirectory, "../../../../../bin/AI/ontologyFromDb/prompts/ontology_revision.md");
@@ -38,17 +29,17 @@ const revisionTools = [
     getUpperOntologyTermsTool,
     describeDatabaseTablesTool,
     {
-        name: "propose_version",
+        name: "apply_change",
         description:
-            "Save a new version: a copy of the version under discussion with the operations applied, in order. " +
+            "Change the ontology: the operations are applied in order, and only the triples they touch are written. " +
             "set adds or replaces the term of that label with term, a whole object in the answer format of the building rules. " +
             "remove deletes the term of that label. rename changes its label and every reference to the old label: parents, restriction targets, individual types, group members. " +
-            "Refused, with the reasons, when an operation does not apply, when the Turtle meets problems the version under discussion did not have, " +
+            "Refused, and nothing changes, with the reasons, when an operation does not apply, when the Turtle meets problems the ontology did not have, " +
             "or when a restriction it brings uses a property whose domain or range in the upper ontologies does not fit its class or its target.",
         input_schema: {
             type: "object",
             properties: {
-                summary: { type: "string", description: "What the new version changes, in one sentence." },
+                summary: { type: "string", description: "What the change does, in one sentence." },
                 operations: {
                     type: "array",
                     items: {
@@ -56,7 +47,7 @@ const revisionTools = [
                         properties: {
                             action: { type: "string", enum: ["set", "remove", "rename"] },
                             kind: { type: "string", enum: Object.keys(termCollectionByKind) },
-                            label: { type: "string", description: "Label of the term in the version under discussion, or of the new term for a set that adds one." },
+                            label: { type: "string", description: "Label of the term in the ontology, or of the new term for a set that adds one." },
                             newLabel: { type: "string", description: "rename only." },
                             term: { type: "object", description: "set only: the whole term, its label equal to label." },
                             rationale: { type: "string", description: "The request, the evidence and the building rule behind the operation." },
@@ -141,7 +132,7 @@ function getToolOutcome(toolName, toolResult) {
         return readingToolOutcome;
     }
     if (toolResult.saved) {
-        return "version " + toolResult.ontologyVersion + " saved";
+        return "change applied";
     }
     const refusalReasons = toolResult.operationErrors || toolResult.newProblems || toolResult.notAllowedRestrictions;
     return "refused: " + refusalReasons.join("; ");
@@ -153,8 +144,7 @@ export default function () {
     };
 
     async function POST(req, res, _next) {
-        const requestStart = Date.now();
-        // a closed page stops the loop at the next turn, no model call nor version is paid for nobody
+        // a closed page stops the loop at the next turn, no model call nor change is paid for nobody
         let isRequestClosed = false;
         res.on("close", function () {
             isRequestClosed = true;
@@ -172,36 +162,29 @@ export default function () {
             if (!Array.isArray(conversation) || conversation.length == 0 || conversation[conversation.length - 1].role != "user") {
                 return res.status(400).json({ error: "messages must be the conversation, ending with a message of the ontologist" });
             }
-            const runContext = await findSourceRun(req, req.body.source, req.body.runName);
+            const source = req.body.source;
+            const runContext = await findSourceRun(req, source);
             if (runContext.error) {
                 return res.status(runContext.status).json({ error: runContext.error });
             }
-            const baseRun = runContext.run.savedRun;
-            if (!baseRun) {
-                return res.status(400).json({ error: req.body.runName + " holds no readable answer to revise" });
+            if (runningGenerations[source]) {
+                return res.status(409).json({ error: "a generation is running for " + source });
             }
-            const source = req.body.source;
+            const baseRun = runContext.run.savedRun;
             const sourceConfig = runContext.sourceConfig;
             const termNamespace = getTermNamespace(sourceConfig);
             // an import the user lost access to since the generation is left out
             const upperOntologies = (baseRun.upperOntologies || []).filter((upperOntology) => runContext.userSources[upperOntology]);
             const upperOntologyGraphUris = upperOntologies.map((upperOntology) => runContext.userSources[upperOntology].graphUri);
-            const fileAnswerMatch = baseRun.answer ? baseRun.answer.match(jsonBlockRegex) : null;
-            let fileAnswer = null;
-            try {
-                fileAnswer = fileAnswerMatch ? JSON.parse(fileAnswerMatch[1]) : null;
-            } catch (_parseError) {
-                fileAnswer = null;
+            const draftGraphUri = getDraftGraphUri(sourceConfig.graphUri);
+            const baseTriples = await readDraftTriples(draftGraphUri);
+            if (!baseTriples) {
+                return res.status(409).json({ error: "the draft of " + source + " holds no triple: open it once to load it" });
             }
-            // once loaded, the graph holds the version with the edits made in the whiteboard: the revision starts from it, its report from the file
-            const baseGraphUri = getRunGraphUri(sourceConfig.graphUri, runContext.run.runTimestamp);
-            const baseGraphTriples = await readGraphTriples(baseGraphUri);
-            const graphAnswer = baseGraphTriples ? getGraphAnswer(baseGraphTriples, baseGraphUri, termNamespace, upperOntologyGraphUris, fileAnswer?.report) : null;
-            const baseAnswer = graphAnswer ? graphAnswer.ontologyAnswer : fileAnswer;
-            const notCarried = graphAnswer ? graphAnswer.notCarried : [];
-            if (!baseAnswer) {
-                return res.status(400).json({ error: req.body.runName + " holds no readable answer to revise" });
-            }
+            // the report is not ontology: the graph does not hold it
+            const graphAnswer = getGraphAnswer(baseTriples, draftGraphUri, termNamespace, upperOntologyGraphUris, baseRun.report);
+            const baseAnswer = graphAnswer.ontologyAnswer;
+            const notCarried = graphAnswer.notCarried;
             const userContext = { user: runContext.userInfo, userSources: runContext.userSources };
             // the samples and profiles the runs counted on the database, the schema read when a table is asked for
             const databaseChecks = await readDatabaseChecks(runContext.run.database);
@@ -213,14 +196,10 @@ export default function () {
                 return tableName + (tableProfile ? " (" + tableProfile.rowCount + " rows)" : "");
             });
 
-            const baseOntologyVersion = baseRun.ontologyVersion || firstOntologyVersion;
-            const baseProblems = getAnswerTurtle(baseAnswer, source, sourceConfig, termNamespace, upperOntologyGraphUris, baseOntologyVersion).problems;
-            // the version a proposal applies to: the requested one, then each version saved during this request
-            let discussedVersion = { runName: runContext.run.runName, answer: baseAnswer, problems: baseProblems };
             const usage = { input_tokens: 0, output_tokens: 0 };
             const notCarriedSection =
                 notCarried.length > 0
-                    ? "\n\n# Statements of the graph the answer format cannot hold\n\nThe ontologist added them in the whiteboard. A version you propose is written from the JSON above, without them: " +
+                    ? "\n\n# Statements of the graph the answer format cannot hold\n\nThe ontologist added them in the whiteboard. A change leaves them as they are, unless it removes or renames the term they are about: " +
                       "say so when a change you propose would drop one that matters.\n\n" +
                       notCarried.join("\n")
                     : "";
@@ -233,10 +212,7 @@ export default function () {
                 "\n\n# Building rules\n\n" +
                 readFileSync(ontologyBuildingPromptPath, "utf8") +
                 (baseRun.schemaFile ? "\n\n" + readFileSync(schemaOnlyPromptPath, "utf8") : "") +
-                "\n\n# Version under discussion: " +
-                runContext.run.runName +
-                ", ontology version " +
-                baseOntologyVersion +
+                "\n\n# Ontology under discussion, as its draft holds it" +
                 "\n\nSource " +
                 source +
                 ", upper ontologies " +
@@ -252,12 +228,19 @@ export default function () {
                 ", read with describe_database_tables\n\n" +
                 tableListLines.join("\n");
 
-            async function proposeVersion(toolInput) {
+            // read again at each change: the whiteboard or an earlier change may have touched the draft since the request started
+            async function applyChange(toolInput) {
+                if (runningGenerations[source]) {
+                    return { saved: false, operationErrors: ["a generation started for " + source + ": it replaces the ontology"] };
+                }
                 const operations = toolInput.operations || [];
                 if (operations.length == 0 && !toolInput.report && !toolInput.ontologyComment) {
-                    return { saved: false, operationErrors: ["no operation, report nor ontologyComment: the version would be a copy"] };
+                    return { saved: false, operationErrors: ["no operation, report nor ontologyComment: nothing to change"] };
                 }
-                const { revisedAnswer, operationErrors } = applyOperations(discussedVersion.answer, operations);
+                const found = { ...runContext, run: await readSourceRun(source) };
+                const currentTriples = await readDraftTriples(draftGraphUri);
+                const currentGraphAnswer = getGraphAnswer(currentTriples, draftGraphUri, termNamespace, upperOntologyGraphUris, found.run.savedRun.report);
+                const { revisedAnswer, operationErrors } = applyOperations(currentGraphAnswer.ontologyAnswer, operations);
                 if (operationErrors.length > 0) {
                     return { saved: false, operationErrors: operationErrors };
                 }
@@ -267,90 +250,58 @@ export default function () {
                 if (toolInput.ontologyComment) {
                     revisedAnswer.ontologyComment = toolInput.ontologyComment;
                 }
-                // the runs saved since the request started count too
-                const ontologyVersion = await getNextOntologyVersion(source);
-                const answerOntology = getAnswerTurtle(revisedAnswer, source, sourceConfig, termNamespace, upperOntologyGraphUris, ontologyVersion);
-                const newProblems = answerOntology.problems.filter((problem) => !discussedVersion.problems.includes(problem));
-                // never saved with a problem it brings, whatever the conversation says: a database value can steer the model
+                const currentProblems = getAnswerTurtle(currentGraphAnswer.ontologyAnswer, source, sourceConfig, termNamespace, upperOntologyGraphUris, currentGraphAnswer.graphTerms).problems;
+                const answerOntology = getAnswerTurtle(revisedAnswer, source, sourceConfig, termNamespace, upperOntologyGraphUris, currentGraphAnswer.graphTerms);
+                const newProblems = answerOntology.problems.filter((problem) => !currentProblems.includes(problem));
+                // never applied with a problem it brings, whatever the conversation says: a database value can steer the model
                 if (newProblems.length > 0) {
                     return { saved: false, newProblems: newProblems };
                 }
 
-                const runTimestamp = getNewRunTimestamp();
-                const runName = getRunName(source, runTimestamp);
-                const graphUri = getRunGraphUri(sourceConfig.graphUri, runTimestamp);
-                const { graphTripleCount, graphError, restrictionChecks, restrictionCheckError } = await loadAndCheckTurtle(answerOntology.turtle, graphUri, source, upperOntologies, userContext);
-                // only the restrictions this proposal brings stop it, not those the version under discussion already had
-                const discussedTurtle = getAnswerTurtle(discussedVersion.answer, source, sourceConfig, termNamespace, upperOntologyGraphUris, ontologyVersion).turtle;
-                const discussedRestrictions = getTurtleRestrictions(discussedTurtle, graphUri);
-                const discussedRestrictionKeys = new Set(discussedRestrictions.map(getRestrictionKey));
-                const newNotAllowedChecks = (restrictionChecks || []).filter(
-                    (restrictionCheck) => restrictionCheck.status == "notAllowed" && !discussedRestrictionKeys.has(getRestrictionKey(restrictionCheck)),
-                );
-                const notAllowedRestrictions = newNotAllowedChecks.map(getNotAllowedRestrictionText);
-                if (notAllowedRestrictions.length > 0) {
-                    await rdfDataModel.deleteGraph(graphUri);
-                    return { saved: false, notAllowedRestrictions: notAllowedRestrictions };
+                const { deletedTriples, insertedTriples, droppedTriples } = getGraphChange(currentGraphAnswer, answerOntology.turtle, draftGraphUri);
+                async function takeBackChange() {
+                    await updateGraphTriples(draftGraphUri, insertedTriples, deletedTriples);
                 }
-                const savedRun = {
-                    source: source,
-                    database: baseRun.database,
-                    databaseId: baseRun.databaseId ?? null,
-                    schemaFile: baseRun.schemaFile,
-                    upperOntologies: upperOntologies,
-                    ontologyVersion: ontologyVersion,
-                    model: ontologyModelId,
-                    reasoningEffort: ontologyReasoningEffort,
-                    usage: usage,
-                    totalSeconds: Math.round((Date.now() - requestStart) / 1000),
-                    graphUri: graphUri,
-                    graphTripleCount: graphTripleCount,
-                    graphError: graphError,
-                    restrictionChecks: restrictionChecks,
-                    restrictionCheckError: restrictionCheckError,
-                    // the evidence of the generation, the next revisions argue from it too
-                    linkCandidates: baseRun.linkCandidates ?? null,
-                    measuredOverlaps: baseRun.measuredOverlaps ?? [],
-                    report: revisedAnswer.report ?? null,
-                    answerProblems: answerOntology.problems,
-                    revision: {
-                        parentRunName: discussedVersion.runName,
+                // only the restrictions this change brings stop it, not those the ontology already had
+                const currentRestrictions = getTurtleRestrictions(currentTriples, draftGraphUri);
+                const currentRestrictionKeys = new Set(currentRestrictions.map(getRestrictionKey));
+                try {
+                    await updateGraphTriples(draftGraphUri, deletedTriples, insertedTriples);
+                    // the check reads the hierarchy of the local classes in the graph: it comes after the write
+                    await updateGraphCheck(found, source, await readDraftTriples(draftGraphUri));
+                    const newNotAllowedChecks = (found.run.savedRun.restrictionChecks || []).filter(
+                        (restrictionCheck) => restrictionCheck.status == "notAllowed" && !currentRestrictionKeys.has(getRestrictionKey(restrictionCheck)),
+                    );
+                    if (newNotAllowedChecks.length > 0) {
+                        await takeBackChange();
+                        await updateGraphCheck(found, source, await readDraftTriples(draftGraphUri));
+                        return { saved: false, notAllowedRestrictions: newNotAllowedChecks.map(getNotAllowedRestrictionText) };
+                    }
+                    const savedRun = found.run.savedRun;
+                    savedRun.chatbotChanges = savedRun.chatbotChanges ?? [];
+                    savedRun.chatbotChanges.push({
                         summary: toolInput.summary,
                         operations: operations,
-                        conversation: conversation,
-                    },
-                    answer: toJsonBlock(revisedAnswer),
-                };
-                try {
-                    await saveRun(runContext.run.database, runName, savedRun, answerOntology.turtle);
-                } catch (saveError) {
-                    // a graph without its files is listed by no run and never deleted
-                    await rdfDataModel.deleteGraph(graphUri);
-                    throw saveError;
+                        changedAt: new Date().toISOString(),
+                        deletedTriples: deletedTriples,
+                        insertedTriples: insertedTriples,
+                        previousReport: savedRun.report ?? null,
+                    });
+                    savedRun.report = revisedAnswer.report ?? null;
+                    await writeFile(found.run.jsonPath, JSON.stringify(savedRun, null, 2));
+                } catch (changeError) {
+                    // takes back what was written, whether the failure came in the middle of the batches or after them
+                    await takeBackChange();
+                    throw changeError;
                 }
-                discussedVersion = { runName: runName, answer: revisedAnswer, problems: answerOntology.problems };
-                sendProgress({
-                    type: "version",
-                    runName: runName,
-                    ontologyVersion: ontologyVersion,
-                    summary: toolInput.summary,
-                    graphUri: graphUri,
-                    graphTripleCount: graphTripleCount,
-                    graphError: graphError,
-                });
-                return {
-                    saved: true,
-                    runName: runName,
-                    ontologyVersion: ontologyVersion,
-                    graphError: graphError,
-                    restrictionCheckError: restrictionCheckError,
-                };
+                sendProgress({ type: "version", runName: found.run.runName, summary: toolInput.summary, droppedTripleCount: droppedTriples.length });
+                return { saved: true, droppedStatements: droppedTriples, restrictionCheckError: found.run.savedRun.restrictionCheckError };
             }
 
             const toolFunctionsByName = {
                 ...getUpperOntologyReaders(upperOntologies, userContext, {}),
                 describe_database_tables: getDatabaseTablesDescriber(runContext.userInfo, baseRun, databaseChecks),
-                propose_version: proposeVersion,
+                apply_change: applyChange,
             };
             const answerText = await runAgentLoop({
                 system: system,
@@ -379,13 +330,13 @@ export default function () {
 
     POST.apiDoc = {
         security: [{ restrictQuota: [], restrictAdmin: [] }],
-        summary: "Discuss a version of a generated ontology and propose new versions, in natural language",
+        summary: "Discuss the ontology of a source and change its draft, in natural language",
         description:
-            "Runs Claude Opus 5.5, at medium reasoning effort, through OpenRouter, on the conversation of an ontologist about one run of POST /ai/ontologyFromDb. " +
-            "The model reads the `bin/AI/ontologyFromDb/prompts/ontology_revision.md` prompt, the building rules of the run, its JSON answer with its report and its measured overlaps; once the run graph is loaded, the answer is read back from that graph, with the edits made in the whiteboard, its report from the file, and the statements the answer format cannot hold listed to the model and in a notCarried event. " +
-            "and through tools the enriched model of the upper ontologies of the run and the tables of its database (schema read live, samples and profiles from the `databaseChecks.json` the runs saved). " +
-            "A change is a new run: a copy of the discussed answer with set, remove and rename operations applied, a minor version above it, its parent, operations and rationale kept in its `.json` file, loaded into its own run graph. " +
-            "The run discussed is never modified. Answers in NDJSON: a notCarried event first when the graph holds such statements, toolCall and toolResult events, a version event per new run, then an answer event with the reply, or an error event.",
+            "Runs Claude Opus 5.5, at medium reasoning effort, through OpenRouter, on the conversation of an ontologist about the draft `<source graphUri>/semanticvirtualdb/`. " +
+            "The model reads the `bin/AI/ontologyFromDb/prompts/ontology_revision.md` prompt, the building rules, the draft read back in the answer format with the edits made in the whiteboard, the report and the measured overlaps of the run file, and the statements the answer format cannot hold, listed to the model and in a notCarried event, " +
+            "and through tools the enriched model of the upper ontologies and the tables of the database (schema read live, samples and profiles from the `databaseChecks.json` the generations saved). " +
+            "A change is set, remove and rename operations on the answer: only the triples they touch are deleted and inserted in the draft, what the answer format cannot hold stays unless its term goes. A change the checks refuse is taken back. " +
+            "Each change keeps its triples in the run file, for POST /ai/ontologyFromDb/undo. Answers in NDJSON: a notCarried event first when the graph holds such statements, toolCall and toolResult events, a version event per change applied, then an answer event with the reply, or an error event.",
         operationId: "reviseOntologyFromDbRun",
         parameters: [
             {
@@ -394,10 +345,9 @@ export default function () {
                 required: true,
                 schema: {
                     type: "object",
-                    required: ["source", "runName", "messages"],
+                    required: ["source", "messages"],
                     properties: {
                         source: { type: "string" },
-                        runName: { type: "string", description: "Run discussed, as GET /ai/ontologyFromDb/runs lists it." },
                         messages: {
                             type: "array",
                             description: "The conversation, ending with a message of the ontologist.",
@@ -409,8 +359,9 @@ export default function () {
         ],
         responses: {
             200: { description: "NDJSON events: toolCall, toolResult, version, answer, error." },
-            400: { description: "No conversation, or a run with no answer to revise." },
-            404: { description: "The source or the run is unknown." },
+            400: { description: "No conversation." },
+            404: { description: "The source is unknown, or it has no ontology." },
+            409: { description: "A generation is running, or the draft is empty." },
         },
         tags: ["AI"],
     };

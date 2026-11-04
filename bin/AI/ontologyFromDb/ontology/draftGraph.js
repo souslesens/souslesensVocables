@@ -1,13 +1,13 @@
 import { writeFile } from "fs/promises";
-import { createHash } from "crypto";
+import { createHash, randomBytes } from "crypto";
 import rdflib from "rdflib";
 import { rdfDataModel } from "../../../../model/rdfData.js";
-import { getRunGraphUri } from "./ontologyRuns.js";
-import { getTermNamespace, restrictionKinds, cardinalityKinds, localAnnotationProperties, datatypeRanges } from "./ontologyAnswer.js";
-import { tryCheckRunRestrictions } from "./restrictionCheck.js";
+import { getDraftGraphUri, updateGraphTriples, deleteGenuineBlankNodeTriples } from "./ontologyRuns.js";
+import { getTermNamespace, getRestrictionNodeKey, restrictionKinds, cardinalityKinds, localAnnotationProperties, datatypeRanges } from "./ontologyAnswer.js";
+import { isAnonymousNode, tryCheckRunRestrictions } from "./restrictionCheck.js";
 import { wellKnownPrefixes } from "../upperOntologyModel.js";
 
-// once loaded, the graph of a version is its reference: the whiteboard edits it, its checks and its revisions read it
+// once loaded, the draft is the reference of the ontology: the whiteboard and the chatbot edit it, the checks and the validation read it
 
 // a whiteboard edit records who made it and when: provenance, not ontology
 const editProvenancePredicates = [
@@ -27,6 +27,30 @@ async function readGraphTriples(graphUri) {
     return graphTriples;
 }
 
+// a genuine blank node cannot be reached from one query to the next, and sparql_generic.js writes one for an edit whose random id is all digits:
+// the draft holds IRIs <_:b...> only. Inserted before the delete, a failure in between leaves a duplicate rather than a loss
+async function readDraftTriples(graphUri) {
+    const graphTriples = await readGraphTriples(graphUri);
+    const store = rdflib.graph();
+    rdflib.parse(graphTriples, store, graphUri, "text/turtle");
+    const blankNodeStatements = store.statements.filter((statement) => statement.subject.termType == "BlankNode" || statement.object.termType == "BlankNode");
+    if (blankNodeStatements.length == 0) {
+        return graphTriples;
+    }
+    const iriByBlankNode = {};
+    function toNamedNodeText(term) {
+        if (term.termType != "BlankNode") {
+            return term.toNT();
+        }
+        iriByBlankNode[term.value] = iriByBlankNode[term.value] ?? "_:b" + randomBytes(8).toString("hex");
+        return "<" + iriByBlankNode[term.value] + ">";
+    }
+    const namedTriples = blankNodeStatements.map((statement) => toNamedNodeText(statement.subject) + " " + statement.predicate.toNT() + " " + toNamedNodeText(statement.object) + " .");
+    await updateGraphTriples(graphUri, [], namedTriples);
+    await deleteGenuineBlankNodeTriples(graphUri);
+    return readGraphTriples(graphUri);
+}
+
 // sorted lines: the triple store returns them in no fixed order
 function getGraphHash(graphTriples) {
     const graphLines = graphTriples.split("\n");
@@ -36,7 +60,8 @@ function getGraphHash(graphTriples) {
 }
 
 // the graph in the answer format the revision agent edits, the inverse of getAnswerTurtle. What that format cannot hold is
-// listed in notCarried; problems lists what the graph shows wrong, in the words of getAnswerTurtle where it has them
+// listed in notCarried and left alone by a change of the answer; problems lists what the graph shows wrong, in the words of getAnswerTurtle where it has them.
+// carriedTriples are what the answer states, graphTerms the IRIs getAnswerTurtle keeps for them
 function getGraphAnswer(graphTriples, graphUri, termNamespace, upperOntologyGraphUris, report) {
     const rdf = rdflib.Namespace(wellKnownPrefixes.rdf);
     const rdfs = rdflib.Namespace(wellKnownPrefixes.rdfs);
@@ -46,6 +71,9 @@ function getGraphAnswer(graphTriples, graphUri, termNamespace, upperOntologyGrap
     const store = rdflib.graph();
     rdflib.parse(graphTriples, store, graphUri, "text/turtle");
     const carriedStatements = new Set();
+    // read to be listed as one line, not stated by the answer
+    const listedStatements = new Set();
+    const restrictionNodeByKey = {};
     const problems = new Set();
     const notCarried = [];
 
@@ -72,11 +100,11 @@ function getGraphAnswer(graphTriples, graphUri, termNamespace, upperOntologyGrap
         return typedNodes;
     }
 
-    // what getAnswerTurtle writes on the ontology node, from the ontologyComment and the run; another statement there is listed
+    // what getAnswerTurtle writes on the ontology node, from the ontologyComment; another statement there is listed
     const ontologyNodes = getTypedNodes(owl("Ontology"));
     const ontologyComment = ontologyNodes.length > 0 ? readTexts(ontologyNodes[0], rdfs("comment")) : undefined;
     for (const ontologyNode of ontologyNodes) {
-        for (const ontologyPredicate of [rdf("type"), rdfs("label"), owl("versionIRI"), owl("versionInfo")]) {
+        for (const ontologyPredicate of [rdf("type"), rdfs("label")]) {
             readStatements(ontologyNode, ontologyPredicate, null);
         }
         for (const upperOntologyGraphUri of upperOntologyGraphUris) {
@@ -126,21 +154,22 @@ function getGraphAnswer(graphTriples, graphUri, termNamespace, upperOntologyGrap
     }
 
     // a restriction of another shape stays uncarried, then listed
-    function readRestriction(restrictionNode) {
+    function readRestriction(classNode, restrictionNode) {
         const restrictionKind = restrictionKinds.find((kind) => store.any(restrictionNode, owl(kind)));
         const property = store.any(restrictionNode, owl("onProperty"));
-        if (!restrictionKind || !property || property.termType != "NamedNode") {
+        if (!restrictionKind || !property || isAnonymousNode(property)) {
             return null;
         }
         const isCardinality = cardinalityKinds.includes(restrictionKind);
         const target = isCardinality ? store.any(restrictionNode, owl("onClass")) : store.any(restrictionNode, owl(restrictionKind));
         const cardinality = isCardinality ? Number(store.any(restrictionNode, owl(restrictionKind)).value) : null;
-        if (!target || target.termType != "NamedNode" || (isCardinality && !Number.isInteger(cardinality))) {
+        if (!target || isAnonymousNode(target) || (isCardinality && !Number.isInteger(cardinality))) {
             return null;
         }
         readStatements(restrictionNode, rdf("type"), owl("Restriction"));
         readStatements(restrictionNode, owl("onProperty"), null);
         readStatements(restrictionNode, owl(restrictionKind), null);
+        restrictionNodeByKey[getRestrictionNodeKey(classNode.value, property.value, restrictionKind, target.value, isCardinality ? cardinality : null)] = restrictionNode.value;
         const restriction = { property: getReference(property), kind: restrictionKind, target: getReference(target) };
         if (isCardinality) {
             readStatements(restrictionNode, owl("onClass"), null);
@@ -166,20 +195,22 @@ function getGraphAnswer(graphTriples, graphUri, termNamespace, upperOntologyGrap
         const restrictions = [];
         for (const subClassStatement of store.statementsMatching(classNode, rdfs("subClassOf"), null)) {
             const superClassNode = subClassStatement.object;
-            if (superClassNode.termType == "NamedNode") {
+            if (!isAnonymousNode(superClassNode)) {
                 parents.push(getReference(superClassNode));
                 carriedStatements.add(subClassStatement);
                 continue;
             }
-            const restriction = readRestriction(superClassNode);
+            const restriction = readRestriction(classNode, superClassNode);
             carriedStatements.add(subClassStatement);
             if (restriction) {
                 restrictions.push(restriction);
                 continue;
             }
+            listedStatements.add(subClassStatement);
             // listed as one line rather than as statements on a blank node
             const restrictionParts = [];
             for (const restrictionStatement of readStatements(superClassNode, null, null)) {
+                listedStatements.add(restrictionStatement);
                 const predicateName = restrictionStatement.predicate.value.match(localNameRegex)[0];
                 const objectText = labelByIri[restrictionStatement.object.value] ?? restrictionStatement.object.value;
                 restrictionParts.push(predicateName + " " + objectText);
@@ -267,18 +298,62 @@ function getGraphAnswer(graphTriples, graphUri, termNamespace, upperOntologyGrap
         notCarried.push(subjectText + " " + statement.predicate.value + " " + objectText);
     }
     const ontologyAnswer = { ontologyComment: ontologyComment, classes: classes, individuals: individuals, groups: groups, report: report ?? undefined };
-    const graphAnswer = { ontologyAnswer: ontologyAnswer, problems: [...problems], notCarried: notCarried };
+    const iriByLabel = {};
+    for (const [iri, label] of Object.entries(labelByIri)) {
+        iriByLabel[label] = iri;
+    }
+    const carriedTriples = [];
+    const uncarriedStatements = [];
+    for (const statement of store.statements) {
+        if (carriedStatements.has(statement) && !listedStatements.has(statement)) {
+            carriedTriples.push(statement.toNT());
+        } else {
+            uncarriedStatements.push(statement);
+        }
+    }
+    const graphAnswer = {
+        ontologyAnswer: ontologyAnswer,
+        problems: [...problems],
+        notCarried: notCarried,
+        carriedTriples: carriedTriples,
+        uncarriedStatements: uncarriedStatements,
+        graphTerms: { iriByLabel: iriByLabel, restrictionNodeByKey: restrictionNodeByKey },
+    };
     return graphAnswer;
 }
 
-// a version whose graph changed since its last check is checked again on its graph, and its .ttl rewritten from it
+// the triples to delete and to insert for the graph to state an answer: what the answer does not state stays, unless its subject is a term the answer no longer holds
+function getGraphChange(graphAnswer, answerTurtle, graphUri) {
+    const answerStore = rdflib.graph();
+    rdflib.parse(answerTurtle, answerStore, graphUri, "text/turtle");
+    const answerTriples = answerStore.statements.map((statement) => statement.toNT());
+    const answerTripleSet = new Set(answerTriples);
+    const answerSubjects = new Set(answerStore.statements.map((statement) => statement.subject.value));
+    const uncarriedTriples = graphAnswer.uncarriedStatements.map((statement) => statement.toNT());
+    const graphTripleSet = new Set([...graphAnswer.carriedTriples, ...uncarriedTriples]);
+    const carriedSubjects = new Set();
+    for (const carriedTriple of graphAnswer.carriedTriples) {
+        carriedSubjects.add(carriedTriple.substring(1, carriedTriple.indexOf(">")));
+    }
+    const droppedStatements = graphAnswer.uncarriedStatements.filter((statement) => carriedSubjects.has(statement.subject.value) && !answerSubjects.has(statement.subject.value));
+    const droppedTriples = droppedStatements.map((statement) => statement.toNT());
+    const removedTriples = graphAnswer.carriedTriples.filter((carriedTriple) => !answerTripleSet.has(carriedTriple));
+    const graphChange = {
+        deletedTriples: [...removedTriples, ...droppedTriples],
+        insertedTriples: answerTriples.filter((answerTriple) => !graphTripleSet.has(answerTriple)),
+        droppedTriples: droppedTriples,
+    };
+    return graphChange;
+}
+
+// a draft that changed since its last check is checked again, without any LLM call
 async function updateGraphCheck(found, source, graphTriples) {
     const savedRun = found.run.savedRun;
     const graphHash = getGraphHash(graphTriples);
     if (!savedRun || savedRun.graphHash == graphHash) {
         return;
     }
-    const graphUri = getRunGraphUri(found.sourceConfig.graphUri, found.run.runTimestamp);
+    const graphUri = getDraftGraphUri(found.sourceConfig.graphUri);
     const upperOntologies = (savedRun.upperOntologies || []).filter((upperOntology) => found.userSources[upperOntology]);
     const upperOntologyGraphUris = upperOntologies.map((upperOntology) => found.userSources[upperOntology].graphUri);
     const userContext = { user: found.userInfo, userSources: found.userSources };
@@ -289,7 +364,6 @@ async function updateGraphCheck(found, source, graphTriples) {
     // a check that failed runs again at the next opening
     savedRun.graphHash = savedRun.restrictionChecks ? graphHash : null;
     await writeFile(found.run.jsonPath, JSON.stringify(savedRun, null, 2));
-    await writeFile(found.run.turtlePath, graphTriples);
 }
 
-export { readGraphTriples, getGraphAnswer, updateGraphCheck };
+export { readDraftTriples, getGraphHash, getGraphAnswer, getGraphChange, updateGraphCheck };

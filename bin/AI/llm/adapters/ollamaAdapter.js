@@ -62,7 +62,7 @@ function createOllamaAdapter(ollamaConfig) {
     }
     const chatUrl = baseUrl.replace(/\/+$/, "") + "/api/chat";
 
-    async function createMessage({ model, system, messages, maxTokens }, callback) {
+    async function createMessage({ model, system, messages, maxTokens, abortSignal }, callback) {
         try {
             const body = {
                 model: model ?? ollamaConfig.defaultModel,
@@ -78,6 +78,7 @@ function createOllamaAdapter(ollamaConfig) {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body),
+                signal: abortSignal,
             });
 
             if (!response.ok) {

@@ -66,6 +66,7 @@ const answerLabelRegex = /"label"\s*:\s*"([^"]+)"/g;
 const streamedPairRegex = /\{\s*"left"\s*:\s*"([^"]+)"\s*,\s*"right"\s*:\s*"([^"]+)"\s*\}/g;
 // the page is told what the model writes at most once a second
 const writingProgressIntervalMs = 1000;
+const generationStoppedMessage = "stopped by the user";
 
 export default function () {
     let operations = {
@@ -114,6 +115,8 @@ export default function () {
         const isProgressStreamed = !req.body.promptOnly && !req.body.linkCandidatesPromptOnly;
         // the entry of this generation in runningGenerations, which pages opened later read
         let runningGeneration = null;
+        const stopController = new AbortController();
+        const stopSignal = stopController.signal;
         function sendProgress(progressEvent) {
             if (!isProgressStreamed || (req.body.schemaFile && databaseReadingSteps.includes(progressEvent.step))) {
                 return;
@@ -137,6 +140,10 @@ export default function () {
             stepSeconds[stepName] = Math.round((Date.now() - stepStart) / 1000);
             sendProgress({ type: "stepEnd", step: stepName, seconds: stepSeconds[stepName], ...stepDetails });
         }
+        function endStoppedPreparation() {
+            sendProgress({ type: "result", isStopped: true, totalSeconds: Math.round((Date.now() - runStart) / 1000) });
+            res.end();
+        }
 
         try {
             const source = req.body.source;
@@ -157,7 +164,17 @@ export default function () {
                 if (runningGenerations[source]) {
                     return res.status(409).json({ error: "a generation is already running for " + source + ", started at " + runningGenerations[source].startedAt });
                 }
-                runningGeneration = { startedAt: new Date(runStart).toISOString(), database: null, step: null };
+                // stop stays out of the JSON the runs route answers
+                runningGeneration = {
+                    startedAt: new Date(runStart).toISOString(),
+                    database: null,
+                    step: null,
+                    isStopping: false,
+                    stop: function () {
+                        runningGeneration.isStopping = true;
+                        stopController.abort(new Error(generationStoppedMessage));
+                    },
+                };
                 runningGenerations[source] = runningGeneration;
             }
 
@@ -216,7 +233,7 @@ export default function () {
                 // a table whose columns changed since the earlier runs is read again
                 const inspection = cachedInspection && cachedInspection.columnNames == columnNames ? { ...cachedInspection } : { columnNames: columnNames };
                 tableInspections[tableName] = inspection;
-                if (inspection.sampleTexts || schemaFile) {
+                if (inspection.sampleTexts || schemaFile || stopSignal.aborted) {
                     return;
                 }
                 // a view without select right, or a broken one, must not stop the whole description
@@ -245,6 +262,9 @@ export default function () {
             let cachedProfileCount = 0;
             const profilesDone = async
                 .eachLimit(schemaFile ? [] : tableNames, parallelCheckCount, async function (tableName) {
+                    if (stopSignal.aborted) {
+                        return;
+                    }
                     const inspection = tableInspections[tableName];
                     if (inspection.profile) {
                         cachedProfileCount++;
@@ -271,6 +291,9 @@ export default function () {
             const pairsStart = Date.now();
             sendProgress({ type: "stepStart", step: "pairs" });
             const pairMeasureQueue = async.queue(async function ({ pair, pairKey, pairIndex }) {
+                if (stopSignal.aborted) {
+                    return;
+                }
                 const measuredOverlap = { left: pair.left, right: pair.right };
                 const leftColumn = columnsByQualifiedName.get(pair.left);
                 const rightColumn = columnsByQualifiedName.get(pair.right);
@@ -340,6 +363,7 @@ export default function () {
                         maxTokens: modelMaxOutputTokens,
                         model: linkCandidatesModelId,
                         reasoningEffort: linkCandidatesReasoningEffort,
+                        abortSignal: stopSignal,
                         onTextDelta: function (textDelta) {
                             streamedCandidatesText += textDelta;
                             // a pair cut in the middle is left for the next delta
@@ -370,7 +394,7 @@ export default function () {
             if (linkCandidatesError) {
                 console.warn("[ai/ontologyFromDb] link candidates: " + linkCandidatesError);
             }
-            endStep("linkCandidates", linkCandidatesStart, { pairCount: linkCandidates?.pairs?.length ?? measuredPairKeys.size, error: linkCandidatesError });
+            endStep("linkCandidates", linkCandidatesStart, { pairCount: linkCandidates?.pairs?.length ?? measuredPairKeys.size, error: linkCandidatesError, isStopped: stopSignal.aborted });
 
             // pairs given by the caller, or written in a shape the streamed reading missed
             if (Array.isArray(linkCandidates?.pairs)) {
@@ -398,6 +422,10 @@ export default function () {
                 }
             } catch (writeError) {
                 console.warn("[ai/ontologyFromDb] database checks not saved: " + writeError.message);
+            }
+            // after the save: what was measured before the stop serves the next run
+            if (stopSignal.aborted) {
+                return endStoppedPreparation();
             }
 
             let overlapsText = "\n## Overlaps measured between candidate columns\n\n";
@@ -439,6 +467,9 @@ export default function () {
             sendProgress({ type: "stepStart", step: "upperOntologies", sources: upperOntologies });
             const ontologiesText = await getUpperOntologyModelText(upperOntologies, { user: userInfo, userSources: userSources });
             endStep("upperOntologies", upperOntologiesStart, {});
+            if (stopSignal.aborted) {
+                return endStoppedPreparation();
+            }
 
             const basePrompt = readFileSync(ontologyBuildingPromptPath, "utf8");
             const sourceConfig = userSources[source];
@@ -511,6 +542,7 @@ export default function () {
                     maxTokens: modelMaxOutputTokens,
                     model: ontologyModelId,
                     reasoningEffort: ontologyReasoningEffort,
+                    abortSignal: stopSignal,
                     onTextDelta: function (textDelta) {
                         writtenText += textDelta;
                         sendWritingProgress();
@@ -524,11 +556,12 @@ export default function () {
                     completion = await createMessage(ontologyMessage, usage);
                 } catch (llmError) {
                     console.warn("[ai/ontologyFromDb] " + llmError.message);
-                    failure = llmError.message;
+                    // each provider words an abort its own way
+                    failure = stopSignal.aborted ? generationStoppedMessage : llmError.message;
                 }
                 sendWritingProgress(true);
             }
-            endStep("ontology", ontologyStart, { usage: usage, failure: failure });
+            endStep("ontology", ontologyStart, { usage: usage, failure: failure, isStopped: stopSignal.aborted });
 
             const answerText = req.body.answer || getAnswerText(completion) || writtenText;
             const answerMatch = answerText.match(jsonBlockRegex);
@@ -609,6 +642,11 @@ export default function () {
                     saveError = writeError.message;
                 }
             }
+            // last moment a stop leaves the draft and the run file as they are, even with a whole answer written
+            if (stopSignal.aborted) {
+                turtle = null;
+                failure = generationStoppedMessage;
+            }
             if (turtle) {
                 await saveRunBeforeLoad();
             }
@@ -623,7 +661,8 @@ export default function () {
                 endStep("graph", graphStart, { tripleCount: graphTripleCount, error: graphError });
             }
             // the hierarchy of the local classes is read in the draft: no graph, no check
-            if (graphTripleCount) {
+            // the load itself is never cut, it would leave half a draft
+            if (graphTripleCount && !stopSignal.aborted) {
                 const restrictionCheckStart = Date.now();
                 sendProgress({ type: "stepStart", step: "restrictionCheck" });
                 try {
@@ -643,11 +682,11 @@ export default function () {
 
             // a second turn on the refused restrictions, checked once more: what stays refused is a problem of the ontology
             const refusedChecks = (restrictionChecks || []).filter((restrictionCheck) => restrictionCheck.status == "notAllowed");
-            if (refusedChecks.length > 0) {
+            if (refusedChecks.length > 0 && !stopSignal.aborted) {
                 const restrictionFixStart = Date.now();
                 sendProgress({ type: "stepStart", step: "restrictionFix", model: ontologyModelId, reasoningEffort: ontologyReasoningEffort });
                 let fixedAnswer = null;
-                ({ fixedAnswer, restrictionFix } = await fixNotAllowedRestrictions(ontologyAnswer, refusedChecks));
+                ({ fixedAnswer, restrictionFix } = await fixNotAllowedRestrictions(ontologyAnswer, refusedChecks, stopSignal));
                 let fixedAnswerOntology = null;
                 if (fixedAnswer) {
                     try {
@@ -678,6 +717,7 @@ export default function () {
                     removedCount: restrictionFix.removedCount,
                     notAllowedCount: stillRefusedChecks.length,
                     error: restrictionFix.error ?? graphError ?? restrictionCheckError,
+                    isStopped: stopSignal.aborted,
                 });
             }
             const totalSeconds = Math.round((Date.now() - runStart) / 1000);
@@ -704,7 +744,8 @@ export default function () {
             sendProgress({
                 type: "result",
                 runName: runName,
-                failure: failure,
+                isStopped: stopSignal.aborted,
+                failure: stopSignal.aborted ? null : failure,
                 model: completion?.model ?? null,
                 answerError: answerError,
                 answerProblems: answerOntology?.problems ?? null,
@@ -754,7 +795,8 @@ export default function () {
             "the Turtle is written again, loaded and checked once more, and the run file keeps that turn under restrictionFix, the generated answer included. " +
             "A `schemaFile` replaces the database: a plain SQL dump of a Postgres schema, its tables, keys and comments are the only evidence, no sample, profile, link candidate nor overlap is read, and the `bin/AI/ontologyFromDb/prompts/ontology_schema_only.md` rules are added to the prompt. " +
             "A generation answers in NDJSON, one event per line while it runs: stepStart and stepEnd (profiles, linkCandidates, pairs, upperOntologies, ontology, graph, restrictionCheck, restrictionFix) with their seconds, " +
-            "progress (tables profiled, pairs measured; the samples, profiles and overlaps of earlier runs on the database are read from its databaseChecks.json), writing (characters written, reasoning excerpt, labels completed) and a last result event with the total time, or an error event.",
+            "progress (tables profiled, pairs measured; the samples, profiles and overlaps of earlier runs on the database are read from its databaseChecks.json), writing (characters written, reasoning excerpt, labels completed) and a last result event with the total time, or an error event. " +
+            "POST /ai/ontologyFromDb/stop stops it: before the answer of the model is whole, the draft stays and what the model wrote is kept as a failed generation; once its load has started, the load ends and the steps after it are skipped; isStopped is set on the result event.",
         operationId: "postOntologyFromDb",
         parameters: [
             {

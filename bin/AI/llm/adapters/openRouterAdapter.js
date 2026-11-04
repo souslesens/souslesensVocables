@@ -204,6 +204,8 @@ function toAnthropicResponse(openRouterResponse) {
 
 // les modèles Anthropic sont nommés anthropic/<modèle> chez OpenRouter
 const anthropicModelPrefix = "anthropic/";
+// Bedrock and Google also serve these models, but cutting the connection there does not stop the billing (OpenRouter doc, stream cancellation)
+const anthropicProviderRouting = { order: ["anthropic"], allow_fallbacks: false };
 const sseDataPrefix = "data: ";
 const sseDoneLine = "data: [DONE]";
 // Une requête qui ne reçoit plus rien est bloquée : arrêtée, elle libère ce que tient l'appelant, le verrou de génération d'une source d'abord.
@@ -320,7 +322,8 @@ function createOpenRouterAdapter(openRouterConfig) {
         try {
             const requestedModel = model ?? openRouterConfig.defaultModel;
             // OpenRouter ne transmet cache_control qu'aux modèles Anthropic, les autres fournisseurs cachent seuls
-            const isSystemCached = Boolean(isPromptCached) && String(requestedModel).startsWith(anthropicModelPrefix);
+            const isAnthropicModel = String(requestedModel).startsWith(anthropicModelPrefix);
+            const isSystemCached = Boolean(isPromptCached) && isAnthropicModel;
             const requestBody = {
                 model: requestedModel,
                 max_tokens: maxTokens ?? openRouterConfig.maxTokens,
@@ -336,6 +339,9 @@ function createOpenRouterAdapter(openRouterConfig) {
             }
             if (isStreamed) {
                 requestBody.stream = true;
+            }
+            if (isAnthropicModel) {
+                requestBody.provider = anthropicProviderRouting;
             }
 
             restartIdleTimer();

@@ -11,6 +11,12 @@ const allowedPropertyBuckets = ["both", "domain", "range", "noConstraints"];
 // a property without domain nor range is allowed everywhere: offered as a fix, it would hide the relationship instead of naming it
 const fittingPropertyBuckets = ["both", "domain", "range"];
 const localNameRegex = /[^/#]+$/;
+const anonymousIriPrefix = "_:";
+
+// a blank node, or one of the IRIs <_:b...> SousLeSens writes in place of one
+function isAnonymousNode(term) {
+    return term.termType == "BlankNode" || term.value.startsWith(anonymousIriPrefix);
+}
 
 // { class, property, target } of each restriction a class is a subclass of; an anonymous property or target is null
 function getStoreRestrictions(store) {
@@ -28,8 +34,8 @@ function getStoreRestrictions(store) {
         }
         restrictions.push({
             class: subClassStatement.subject.value,
-            property: property.termType == "NamedNode" ? property.value : null,
-            target: target.termType == "NamedNode" ? target.value : null,
+            property: isAnonymousNode(property) ? null : property.value,
+            target: isAnonymousNode(target) ? null : target.value,
         });
     });
     return restrictions;
@@ -41,7 +47,7 @@ function getTurtleRestrictions(turtle, baseUri) {
     return getStoreRestrictions(store);
 }
 
-// one restriction of a version, found again in the next one
+// one restriction, found again after a change
 function getRestrictionKey(restriction) {
     return restriction.class + " " + restriction.property + " " + restriction.target;
 }
@@ -141,7 +147,8 @@ async function checkRunRestrictions(turtle, runGraphUri, source, upperOntologies
     const checkedOntologies = getImportedOntologies(upperOntologies, userContext.userSources);
     // the first call of the code runner loads its Config, where the run graph is then declared
     const ontologyModels = await callVocablesFunction("OntologyModels", "registerSourcesModel", [checkedOntologies, {}], userContext);
-    const checkSource = runGraphUri;
+    // a name of its own: the code runner keeps a model by source name, and the draft changes under one graph URI
+    const checkSource = runGraphUri + "#" + Date.now();
     globalThis.Config.sources[checkSource] = { ...globalThis.Config.sources[source], graphUri: runGraphUri, imports: checkedOntologies };
     let linkStatuses = [];
     try {
@@ -181,4 +188,14 @@ async function tryCheckRunRestrictions(turtle, runGraphUri, source, upperOntolog
     return restrictionCheckResult;
 }
 
-export { checkRunRestrictions, tryCheckRunRestrictions, getTurtleRestrictions, getRestrictionKey, getNotAllowedRestrictionText, getImportedOntologies, getLinkStatuses, getModelLabel };
+export {
+    isAnonymousNode,
+    checkRunRestrictions,
+    tryCheckRunRestrictions,
+    getTurtleRestrictions,
+    getRestrictionKey,
+    getNotAllowedRestrictionText,
+    getImportedOntologies,
+    getLinkStatuses,
+    getModelLabel,
+};

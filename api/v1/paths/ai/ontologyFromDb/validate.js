@@ -1,72 +1,72 @@
-import { findSourceRun, getRunGraphUri, getTboxSourceName, isTboxSourceOf, getRunProblems } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
-import { firstOntologyVersion } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyAnswer.js";
-import { setRunnerSource } from "../../../../../bin/remoteCodeRunner.js";
-import { sourceModel } from "../../../../../model/sources.js";
-import { readGraphTriples, updateGraphCheck } from "../../../../../bin/AI/ontologyFromDb/ontology/versionGraph.js";
+import { readFile, writeFile } from "fs/promises";
+import rdflib from "rdflib";
+import { findSourceRun, getDraftGraphUri, getValidatedTriplesPath, getRunProblems, runningGenerations, updateGraphTriples } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
+import { readDraftTriples, getGraphHash, updateGraphCheck } from "../../../../../bin/AI/ontologyFromDb/ontology/draftGraph.js";
+import { getEnrichedOntologyModel } from "../../../../../bin/enrichedOntologyModel.js";
+import { ontologyModelsCache, enrichedOntologyModelsCache } from "../../ontologyModels.js";
 
 export default function () {
     let operations = {
         POST,
     };
 
+    async function readValidatedTriples(source) {
+        try {
+            const validatedText = await readFile(getValidatedTriplesPath(source), "utf8");
+            return validatedText.split("\n");
+        } catch (readError) {
+            if (readError.code == "ENOENT") {
+                return [];
+            }
+            throw readError;
+        }
+    }
+
     async function POST(req, res, _next) {
         try {
             const source = req.body.source;
-            const found = await findSourceRun(req, source, req.body.runName);
+            const found = await findSourceRun(req, source);
             if (found.error) {
                 return res.status(found.status).json({ error: found.error });
             }
-            const graphUri = getRunGraphUri(found.sourceConfig.graphUri, found.run.runTimestamp);
-            const graphTriples = await readGraphTriples(graphUri);
-            if (!graphTriples) {
-                return res.status(409).json({ error: "the graph of " + req.body.runName + " holds no triple: open the version once to load it" });
+            if (runningGenerations[source]) {
+                return res.status(409).json({ error: "a generation is running for " + source });
             }
-            const ontologyVersion = found.run.savedRun?.ontologyVersion ?? firstOntologyVersion;
-            const tboxSourceName = getTboxSourceName(source, ontologyVersion);
-            // sources.json as stored, without the fields getUserSources adds for the user
-            const storedSources = await sourceModel.getAllSources();
-            if (storedSources[tboxSourceName]) {
-                return res.status(409).json({ error: "version " + ontologyVersion + " is already validated as " + tboxSourceName });
+            const draftGraphUri = getDraftGraphUri(found.sourceConfig.graphUri);
+            const draftTriples = await readDraftTriples(draftGraphUri);
+            if (!draftTriples) {
+                return res.status(409).json({ error: "the draft of " + source + " holds no triple: open it once to load it" });
             }
             // the graph validated is the graph checked: an edit made in the whiteboard since the last opening is checked here
-            await updateGraphCheck(found, source, graphTriples);
-            const runProblems = getRunProblems(found.run.savedRun);
+            await updateGraphCheck(found, source, draftTriples);
+            const savedRun = found.run.savedRun;
+            const runProblems = getRunProblems(savedRun);
             if (runProblems.length > 0) {
-                // a check that failed is retried when the version is opened again: revising would not help
-                const runProblemsError = req.body.runName + " cannot be validated: " + runProblems.length + " problems, listed under the version";
+                // a check that failed is retried when the draft is opened again: the chatbot would not help
+                const runProblemsError = source + " cannot be validated: " + runProblems.length + " problems, listed under the ontology";
                 return res.status(409).json({ error: runProblemsError, problems: runProblems });
             }
-            const storedSource = storedSources[source];
+            const draftStore = rdflib.graph();
+            rdflib.parse(draftTriples, draftStore, draftGraphUri, "text/turtle");
+            const draftTripleLines = draftStore.statements.map((statement) => statement.toNT());
+            const draftTripleSet = new Set(draftTripleLines);
+            const validatedTriples = await readValidatedTriples(source);
+            const removedTriples = validatedTriples.filter((validatedTriple) => !draftTripleSet.has(validatedTriple));
 
-            // the validated version is read only: a change is a new version, validated in turn
-            const tboxSource = { ...structuredClone(storedSource), name: tboxSourceName, graphUri: graphUri, imports: found.run.savedRun?.upperOntologies ?? [], editable: false };
-            delete tboxSource.id;
-            await sourceModel.addSource(tboxSource);
-            const previousTboxSources = (storedSource.imports || []).filter((importedSource) => isTboxSourceOf(source, importedSource));
-            const otherImports = (storedSource.imports || []).filter((importedSource) => !isTboxSourceOf(source, importedSource));
-            const updatedSource = { ...storedSource, imports: [tboxSourceName, ...otherImports] };
-            // a TBOX source the source does not import would block every later validation of this version
-            let isSourceUpdated = false;
-            try {
-                isSourceUpdated = await sourceModel.updateSource(updatedSource);
-            } finally {
-                if (!isSourceUpdated) {
-                    await sourceModel.deleteSource(tboxSourceName);
-                }
-            }
-            if (!isSourceUpdated) {
-                return res.status(404).json({ error: source + " is no longer declared" });
-            }
-            setRunnerSource(tboxSourceName, tboxSource);
-            setRunnerSource(source, updatedSource);
+            // the graph of the source also holds what the mappings build: only what the last validation wrote is taken back.
+            // Every triple is written again: a failure in the middle is repaired by validating again, and so is a graph emptied since
+            await updateGraphTriples(found.sourceConfig.graphUri, removedTriples, draftTripleLines);
+            await writeFile(getValidatedTriplesPath(source), draftTripleLines.join("\n"));
+            savedRun.validatedAt = new Date().toISOString();
+            savedRun.validatedGraphHash = getGraphHash(draftTriples);
+            await writeFile(found.run.jsonPath, JSON.stringify(savedRun, null, 2));
 
-            res.status(200).json({
-                tboxSource: tboxSourceName,
-                tboxSourceConfig: tboxSource,
-                graphUri: graphUri,
-                imports: updatedSource.imports,
-                replacedImports: previousTboxSources,
-            });
+            // the mapping tab reads the model of the source
+            delete ontologyModelsCache[source];
+            delete enrichedOntologyModelsCache[source];
+            await getEnrichedOntologyModel(source, { user: found.userInfo, userSources: found.userSources });
+
+            res.status(200).json({ validatedAt: savedRun.validatedAt, writtenTripleCount: draftTripleLines.length, removedTripleCount: removedTriples.length });
         } catch (error) {
             console.error(error);
             res.status(error.status || 500).json({ error: error.message });
@@ -75,11 +75,10 @@ export default function () {
 
     POST.apiDoc = {
         security: [{ restrictAdmin: [] }],
-        summary: "Validate an ontology version of a source",
+        summary: "Validate the ontology of a source",
         description:
-            "Declares the version as the source `<source>_TBOX_<version>` (dots of the version as `_`), read only, whose graph is the graph of the version " +
-            "and whose imports are the upper ontologies the version was built on. The source then imports it in place of the TBOX source of a version validated before, " +
-            "which stays declared. A new generation leaves the TBOX imports out of its upper ontologies.",
+            "Checks the draft `<source graphUri>/semanticvirtualdb/` and writes its triples in the graph of the source. " +
+            "The triples the last validation wrote and the draft no longer holds are deleted there, from the list kept in `data/semanticVirtualDB/<source>_validatedTriples.nt`: the other triples of that graph, what the mappings build among them, stay.",
         operationId: "validateOntologyFromDbRun",
         parameters: [
             {
@@ -88,18 +87,17 @@ export default function () {
                 required: true,
                 schema: {
                     type: "object",
-                    required: ["source", "runName"],
+                    required: ["source"],
                     properties: {
-                        source: { type: "string", description: "Source the version was built for." },
-                        runName: { type: "string", description: "Run name, as GET /ai/ontologyFromDb/runs lists it." },
+                        source: { type: "string", description: "Source whose draft is validated." },
                     },
                 },
             },
         ],
         responses: {
-            200: { description: "{ tboxSource, tboxSourceConfig, graphUri, imports, replacedImports }: imports is the new import list of the source." },
-            404: { description: "The source or the run is unknown to the user." },
-            409: { description: "The version has problems, its graph checked again if it changed, listed in problems; or its graph is empty, or it is already validated." },
+            200: { description: "{ validatedAt, writtenTripleCount, removedTripleCount }" },
+            404: { description: "The source is unknown to the user, or it has no ontology." },
+            409: { description: "The draft has problems, its graph checked again if it changed, listed in problems; or it is empty, or a generation is running." },
         },
         tags: ["AI"],
     };

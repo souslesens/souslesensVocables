@@ -1,7 +1,7 @@
+import { createHash } from "crypto";
 import rdflib from "rdflib";
 import llmClient from "../../llm/llmClient.js";
 import Util from "../../../util.js";
-import { trailingSlashRegex, listSourceRuns, readLastOntologyVersion } from "./ontologyRuns.js";
 import { wellKnownPrefixes } from "../upperOntologyModel.js";
 
 // the compact JSON answer the ontology prompts ask for, the calls that write it, and its Turtle
@@ -10,7 +10,6 @@ const ontologyModelId = "anthropic/claude-opus-5.5";
 const ontologyReasoningEffort = "medium";
 // the most OpenRouter lets the Claude 5.5 models write, reasoning included: a run is never cut by a limit of ours
 const modelMaxOutputTokens = 128000;
-const firstOntologyVersion = "0.1.0";
 const restrictionKinds = ["someValuesFrom", "allValuesFrom", "hasValue", "qualifiedCardinality", "minQualifiedCardinality", "maxQualifiedCardinality"];
 const cardinalityKinds = ["qualifiedCardinality", "minQualifiedCardinality", "maxQualifiedCardinality"];
 const localAnnotationProperties = ["identifyingColumn", "sourceColumn", "interpretationStatus"];
@@ -67,9 +66,15 @@ function getTermNamespace(sourceConfig) {
     return sourceConfig.baseUri || sourceConfig.graphUri;
 }
 
+// one restriction of a class, found again from one reading of the graph to the next
+function getRestrictionNodeKey(classIri, propertyIri, restrictionKind, targetIri, cardinality) {
+    return [classIri, propertyIri, restrictionKind, targetIri, cardinality ?? ""].join(" ");
+}
+
 // the compact answer of the model as Turtle, local IRIs built from labels as SousLeSens builds them;
-// what cannot be written is listed in problems rather than guessed
-function getAnswerTurtle(ontologyAnswer, source, sourceConfig, termNamespace, upperOntologyGraphUris, ontologyVersion) {
+// what cannot be written is listed in problems rather than guessed.
+// graphTerms: { iriByLabel, restrictionNodeByKey } of the graph the answer was read from, whose terms keep their IRIs
+function getAnswerTurtle(ontologyAnswer, source, sourceConfig, termNamespace, upperOntologyGraphUris, graphTerms) {
     const rdf = rdflib.Namespace(wellKnownPrefixes.rdf);
     const rdfs = rdflib.Namespace(wellKnownPrefixes.rdfs);
     const owl = rdflib.Namespace(wellKnownPrefixes.owl);
@@ -100,7 +105,13 @@ function getAnswerTurtle(ontologyAnswer, source, sourceConfig, termNamespace, up
         if (!localLabels.has(reference)) {
             problems.push("reference to no local term: " + reference);
         }
-        return local(getLocalName(reference));
+        return graphTerms?.iriByLabel[reference] ? rdflib.sym(graphTerms.iriByLabel[reference]) : local(getLocalName(reference));
+    }
+    // as SousLeSens writes them, an IRI <_:b...> rather than a blank node: a delete reaches it by its name.
+    // Derived from what it states: two writings of one restriction compare equal. The "r" keeps it from being all digits, which sparql_generic.js writes as a genuine blank node
+    function getRestrictionNode(restrictionKey) {
+        const existingNodeIri = graphTerms?.restrictionNodeByKey[restrictionKey];
+        return rdflib.sym(existingNodeIri ?? "_:br" + createHash("sha1").update(restrictionKey).digest("hex"));
     }
     function addTexts(subject, predicate, textOrTexts, language) {
         const texts = Array.isArray(textOrTexts) ? textOrTexts : [textOrTexts];
@@ -112,8 +123,6 @@ function getAnswerTurtle(ontologyAnswer, source, sourceConfig, termNamespace, up
     store.add(ontology, rdf("type"), owl("Ontology"));
     store.add(ontology, rdfs("label"), rdflib.literal(source));
     addTexts(ontology, rdfs("comment"), ontologyAnswer.ontologyComment, "en");
-    store.add(ontology, owl("versionIRI"), rdflib.sym(sourceConfig.graphUri.replace(trailingSlashRegex, "") + "/version/" + ontologyVersion));
-    store.add(ontology, owl("versionInfo"), rdflib.literal(ontologyVersion));
     upperOntologyGraphUris.forEach((graphUri) => store.add(ontology, owl("imports"), rdflib.sym(graphUri)));
     localAnnotationProperties.forEach(function (annotationName) {
         store.add(local(annotationName), rdf("type"), owl("AnnotationProperty"));
@@ -144,15 +153,18 @@ function getAnswerTurtle(ontologyAnswer, source, sourceConfig, termNamespace, up
                 problems.push("restriction not written on " + ontologyClass.label + ": " + JSON.stringify(restriction));
                 return;
             }
-            const restrictionNode = rdflib.blankNode();
+            const propertyTerm = getTerm(restriction.property);
+            const targetTerm = getTerm(restriction.target);
+            const restrictionKey = getRestrictionNodeKey(classTerm.value, propertyTerm.value, restriction.kind, targetTerm.value, isCardinality ? restriction.cardinality : null);
+            const restrictionNode = getRestrictionNode(restrictionKey);
             store.add(classTerm, rdfs("subClassOf"), restrictionNode);
             store.add(restrictionNode, rdf("type"), owl("Restriction"));
-            store.add(restrictionNode, owl("onProperty"), getTerm(restriction.property));
+            store.add(restrictionNode, owl("onProperty"), propertyTerm);
             if (isCardinality) {
                 store.add(restrictionNode, owl(restriction.kind), rdflib.literal(String(restriction.cardinality), xsd("nonNegativeInteger")));
-                store.add(restrictionNode, owl("onClass"), getTerm(restriction.target));
+                store.add(restrictionNode, owl("onClass"), targetTerm);
             } else {
-                store.add(restrictionNode, owl(restriction.kind), getTerm(restriction.target));
+                store.add(restrictionNode, owl(restriction.kind), targetTerm);
             }
         });
 
@@ -200,29 +212,10 @@ function getAnswerTurtle(ontologyAnswer, source, sourceConfig, termNamespace, up
     return { turtle: serializer.statementsToN3(store.statements), problems: problems };
 }
 
-// each generation and each revision is a new minor version, above every version of the source: a version number names one
-// version, the one a validation turns into the source <source>_TBOX_<version>, even once its run is deleted
-async function getNextOntologyVersion(source) {
-    const sourceRuns = await listSourceRuns(source);
-    const givenVersions = sourceRuns.map((sourceRun) => sourceRun.savedRun?.ontologyVersion || firstOntologyVersion);
-    const lastOntologyVersion = await readLastOntologyVersion(source);
-    if (lastOntologyVersion) {
-        givenVersions.push(lastOntologyVersion);
-    }
-    let highestMinorVersion = 0;
-    givenVersions.forEach(function (ontologyVersion) {
-        const minorVersion = Number(ontologyVersion.split(".")[1]);
-        highestMinorVersion = Math.max(highestMinorVersion, minorVersion);
-    });
-    return "0." + (highestMinorVersion + 1) + ".0";
-}
-
 export {
     ontologyModelId,
     ontologyReasoningEffort,
     modelMaxOutputTokens,
-    firstOntologyVersion,
-    getNextOntologyVersion,
     jsonBlockRegex,
     createMessage,
     getCutAnswerError,
@@ -235,5 +228,6 @@ export {
     getTermNamespace,
     getLocalName,
     absoluteIriRegex,
+    getRestrictionNodeKey,
     getAnswerTurtle,
 };

@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-import { findSourceRuns, getNewRunTimestamp, getValidatedTboxSource } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
+import { findSourceOntology, getNewRunTimestamp, getValidatedSource } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
 import {
     ontologyModelId,
     ontologyReasoningEffort,
@@ -11,7 +11,7 @@ import {
     getCutAnswerError,
     getAnswerText,
 } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyAnswer.js";
-import { findValidatedRun, getMappingInputs, checkMappingAnswer } from "../../../../../bin/AI/ontologyFromDb/mappings/mappingInputs.js";
+import { getMappingInputs, checkMappingAnswer } from "../../../../../bin/AI/ontologyFromDb/mappings/mappingInputs.js";
 import {
     getMappingName,
     listSourceMappings,
@@ -61,7 +61,7 @@ export default function () {
 
     async function GET(req, res, _next) {
         try {
-            const found = await findSourceRuns(req, req.query.source);
+            const found = await findSourceOntology(req, req.query.source);
             if (found.error) {
                 return res.status(found.status).json({ error: found.error });
             }
@@ -101,7 +101,7 @@ export default function () {
                     isActive: mappingVersion.mappingName == activeMappingName,
                 };
             });
-            const validatedRun = findValidatedRun(found, getValidatedTboxSource(req.query.source, found.sourceConfig));
+            const validatedRun = getValidatedSource(req.query.source, found.run) ? found.run : null;
             res.status(200).json({
                 mappings: versionDescriptions,
                 validatedSchemaFileName: validatedRun?.savedRun?.schemaFile?.fileName ?? null,
@@ -282,7 +282,7 @@ export default function () {
 
     async function PUT(req, res, _next) {
         try {
-            const found = await findSourceRuns(req, req.body.source);
+            const found = await findSourceOntology(req, req.body.source);
             if (found.error) {
                 return res.status(found.status).json({ error: found.error });
             }
@@ -300,7 +300,7 @@ export default function () {
                 return res.status(409).json({ error: mappingVersion.mappingName + " has " + problems.length + " problems: revise it before validating it" });
             }
             // its classes and properties were checked against that ontology only
-            const validatedTboxSource = getValidatedTboxSource(req.body.source, found.sourceConfig);
+            const validatedTboxSource = getValidatedSource(req.body.source, found.run);
             if (mappingVersion.savedMapping.tboxSource != validatedTboxSource) {
                 const mappedTboxSource = mappingVersion.savedMapping.tboxSource ?? "an unknown ontology version";
                 const staleMappingError = mappingVersion.mappingName + " maps " + mappedTboxSource + ", not the validated " + validatedTboxSource + ": generate or revise a mapping of it";
@@ -316,7 +316,7 @@ export default function () {
 
     async function DELETE(req, res, _next) {
         try {
-            const found = await findSourceRuns(req, req.query.source);
+            const found = await findSourceOntology(req, req.query.source);
             if (found.error) {
                 return res.status(found.status).json({ error: found.error });
             }

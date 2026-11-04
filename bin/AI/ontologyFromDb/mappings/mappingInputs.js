@@ -1,4 +1,4 @@
-import { findSourceRuns, getRunGraphUri, getValidatedTboxSource, readDatabaseChecks } from "../ontology/ontologyRuns.js";
+import { findSourceOntology, getValidatedSource, readDatabaseChecks } from "../ontology/ontologyRuns.js";
 import { getTermNamespace } from "../ontology/ontologyAnswer.js";
 import { getMappingDocument, getLiteralRangeWarnings, checkMappingRelations } from "./mappingAnswer.js";
 import { getImportedOntologies } from "../ontology/restrictionCheck.js";
@@ -11,11 +11,6 @@ import { listSourceMappings } from "./mappingRuns.js";
 
 // MappingModeler reads the public schema of a postgres database, see getSchemaDescription
 const postgresSchemaName = "public";
-
-function findValidatedRun(found, tboxSource) {
-    const tboxGraphUri = found.userSources[tboxSource]?.graphUri;
-    return found.runs.find((run) => getRunGraphUri(found.sourceConfig.graphUri, run.runTimestamp) == tboxGraphUri);
-}
 
 // the database is the one the validated version was built on, read as its generation read it
 // a version built from a schema file has none: the database of its last mapping stays until another one is chosen
@@ -32,19 +27,16 @@ async function getMappingDatabase(source, validatedRun, chosenDatabaseId) {
 }
 
 async function getMappingInputs(req, source, chosenDatabaseId) {
-    const found = await findSourceRuns(req, source);
+    const found = await findSourceOntology(req, source);
     if (found.error) {
         return found;
     }
-    const tboxSource = getValidatedTboxSource(source, found.sourceConfig);
-    if (!tboxSource || !found.userSources[tboxSource]) {
-        return { status: 409, error: "no validated version of " + source + ": validate a version before mapping it" };
+    const tboxSource = getValidatedSource(source, found.run);
+    if (!tboxSource) {
+        return { status: 409, error: "no validated ontology for " + source + ": validate it before mapping it" };
     }
-    const validatedRun = findValidatedRun(found, tboxSource);
-    // the database, the upper ontologies and the overlaps are read in the run file of the version
-    if (!validatedRun?.savedRun) {
-        return { status: 409, error: "the validated version " + tboxSource + " has no run file" };
-    }
+    // the database, the upper ontologies and the overlaps are read in the run file
+    const validatedRun = found.run;
     const userContext = { user: found.userInfo, userSources: found.userSources };
     // the graph is the validated version, whatever answer format produced it and whatever was edited in it since
     const validatedModel = await getValidatedOntologyModelText(tboxSource, getTermNamespace(found.sourceConfig), found.sourceConfig.prefix, userContext);
@@ -135,4 +127,4 @@ async function checkMappingAnswer(mappingAnswer, inputs, source) {
     return { mappingDocument: mappingDocument, rangeWarnings: rangeWarnings, relationChecks: relationChecks, relationCheckError: relationCheckError };
 }
 
-export { findValidatedRun, getMappingInputs, checkMappingAnswer };
+export { getMappingInputs, checkMappingAnswer };

@@ -5,13 +5,13 @@ import async from "async";
 import {
     nonNameCharacterRegex,
     runningGenerations,
-    getNewRunTimestamp,
-    isTboxSourceOf,
     getRunName,
-    getRunGraphUri,
+    getDraftGraphUri,
+    readSourceRun,
     loadTurtleIntoGraph,
     loadAndCheckTurtle,
     saveRun,
+    saveFailedGeneration,
     readDatabaseChecks,
     saveDatabaseChecks,
 } from "../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
@@ -20,7 +20,6 @@ import {
     ontologyModelId,
     ontologyReasoningEffort,
     modelMaxOutputTokens,
-    getNextOntologyVersion,
     jsonBlockRegex,
     createMessage,
     getCutAnswerError,
@@ -37,6 +36,7 @@ import { getUpperOntologyModelText } from "../../../../bin/AI/ontologyFromDb/upp
 import { checkRunRestrictions } from "../../../../bin/AI/ontologyFromDb/ontology/restrictionCheck.js";
 import { describeDatabase } from "../../../../bin/AI/ontologyFromDb/databaseDescription.js";
 import { readSchemaFile } from "../../../../bin/AI/ontologyFromDb/schemaFile.js";
+import { deleteVersionConversations } from "../../../../bin/AI/ontologyFromDb/revision/revisionConversations.js";
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const ontologyBuildingPromptPath = join(currentDirectory, "../../../../bin/AI/ontologyFromDb/prompts/ontology_building_from_db.md");
@@ -145,8 +145,7 @@ export default function () {
             if (Boolean(databaseId) == Boolean(schemaFile)) {
                 return res.status(400).json({ error: "give either a databaseId or a schemaFile" });
             }
-            // a validated version of the source is imported by it, it is not an upper ontology of the next one
-            const upperOntologies = (req.body.upperOntologies || []).filter((upperOntology) => !isTboxSourceOf(req.body.source, upperOntology));
+            const upperOntologies = req.body.upperOntologies || [];
 
             const userInfo = await userManager.getUser(req.user);
             const userSources = await sourceModel.getUserSources(userInfo.user);
@@ -546,21 +545,74 @@ export default function () {
                 }
             }
             const upperOntologyGraphUris = upperOntologies.map((upperOntology) => userSources[upperOntology].graphUri);
-            const ontologyVersion = await getNextOntologyVersion(source);
             let answerOntology = null;
             // an answer of an unexpected shape must not stop the save of a paid generation
             try {
-                answerOntology = ontologyAnswer ? getAnswerTurtle(ontologyAnswer, source, sourceConfig, termNamespace, upperOntologyGraphUris, ontologyVersion) : null;
+                answerOntology = ontologyAnswer ? getAnswerTurtle(ontologyAnswer, source, sourceConfig, termNamespace, upperOntologyGraphUris) : null;
             } catch (conversionError) {
                 answerError = "answer not turned into Turtle: " + conversionError.message;
             }
             let turtle = answerOntology ? answerOntology.turtle : null;
 
-            const runTimestamp = getNewRunTimestamp();
-            const runGraphUri = getRunGraphUri(sourceConfig.graphUri, runTimestamp);
+            const runName = getRunName(source);
+            const runGraphUri = getDraftGraphUri(sourceConfig.graphUri);
+            const previousSavedRun = (await readSourceRun(source))?.savedRun;
             let graphTripleCount = null;
             let graphError = null;
+            let restrictionChecks = null;
+            let restrictionCheckError = null;
+            let restrictionFix = null;
+            let savedAnswerText = answerText;
+            let saveError = null;
+            function getSavedRun() {
+                return {
+                    source: source,
+                    database: database.database,
+                    databaseId: databaseId,
+                    schemaFile: savedSchemaFile,
+                    upperOntologies: upperOntologies,
+                    model: completion?.model ?? null,
+                    reasoningEffort: completion ? ontologyReasoningEffort : null,
+                    stopReason: completion?.stop_reason ?? null,
+                    failure: failure,
+                    usage: usage,
+                    totalSeconds: Math.round((Date.now() - runStart) / 1000),
+                    stepSeconds: stepSeconds,
+                    graphUri: turtle ? runGraphUri : null,
+                    graphTripleCount: graphTripleCount,
+                    graphError: graphError,
+                    restrictionChecks: restrictionChecks,
+                    restrictionCheckError: restrictionCheckError,
+                    preparationSeconds: preparationSeconds,
+                    linkCandidatesModel: linkCandidatesModel,
+                    linkCandidatesUsage: linkCandidatesUsage,
+                    linkCandidates: linkCandidates,
+                    linkCandidatesError: linkCandidatesError,
+                    linkCandidatesAnswer: linkCandidatesAnswer,
+                    measuredOverlaps: measuredOverlaps,
+                    report: ontologyAnswer?.report ?? null,
+                    answerError: answerError,
+                    answerProblems: answerOntology?.problems ?? null,
+                    restrictionFix: restrictionFix,
+                    // the graph of the source stays validated until the next validation
+                    validatedAt: previousSavedRun?.validatedAt,
+                    validatedGraphHash: previousSavedRun?.validatedGraphHash,
+                    answer: savedAnswerText,
+                };
+            }
+            // written before the load empties the draft: a load that fails is done again without paying the model
+            async function saveRunBeforeLoad() {
+                try {
+                    await saveRun(databaseFolder, getSavedRun(), turtle);
+                } catch (writeError) {
+                    console.warn("[ai/ontologyFromDb] answer not saved: " + writeError.message);
+                    saveError = writeError.message;
+                }
+            }
             if (turtle) {
+                await saveRunBeforeLoad();
+            }
+            if (turtle && !saveError) {
                 const graphStart = Date.now();
                 sendProgress({ type: "stepStart", step: "graph", graphUri: runGraphUri });
                 try {
@@ -570,9 +622,7 @@ export default function () {
                 }
                 endStep("graph", graphStart, { tripleCount: graphTripleCount, error: graphError });
             }
-            // the hierarchy of the local classes is read in the run graph: no graph, no check
-            let restrictionChecks = null;
-            let restrictionCheckError = null;
+            // the hierarchy of the local classes is read in the draft: no graph, no check
             if (graphTripleCount) {
                 const restrictionCheckStart = Date.now();
                 sendProgress({ type: "stepStart", step: "restrictionCheck" });
@@ -592,8 +642,6 @@ export default function () {
             }
 
             // a second turn on the refused restrictions, checked once more: what stays refused is a problem of the version
-            let restrictionFix = null;
-            let savedAnswerText = answerText;
             const refusedChecks = (restrictionChecks || []).filter((restrictionCheck) => restrictionCheck.status == "notAllowed");
             if (refusedChecks.length > 0) {
                 const restrictionFixStart = Date.now();
@@ -603,7 +651,7 @@ export default function () {
                 let fixedAnswerOntology = null;
                 if (fixedAnswer) {
                     try {
-                        fixedAnswerOntology = getAnswerTurtle(fixedAnswer, source, sourceConfig, termNamespace, upperOntologyGraphUris, ontologyVersion);
+                        fixedAnswerOntology = getAnswerTurtle(fixedAnswer, source, sourceConfig, termNamespace, upperOntologyGraphUris);
                     } catch (conversionError) {
                         // the version keeps the generated answer: no fix of the turn is applied
                         restrictionFix.error = "fixed answer not turned into Turtle: " + conversionError.message;
@@ -614,13 +662,14 @@ export default function () {
                 if (fixedAnswerOntology) {
                     answerOntology = fixedAnswerOntology;
                     turtle = fixedAnswerOntology.turtle;
+                    // the generated answer stays in the record of the turn
+                    restrictionFix.generatedAnswer = answerText;
+                    savedAnswerText = toJsonBlock(fixedAnswer);
+                    await saveRunBeforeLoad();
                     ({ graphTripleCount, graphError, restrictionChecks, restrictionCheckError } = await loadAndCheckTurtle(turtle, runGraphUri, source, upperOntologies, {
                         user: userInfo,
                         userSources: userSources,
                     }));
-                    // a revision starts from the answer of the version, the generated one stays in the record of the turn
-                    restrictionFix.generatedAnswer = answerText;
-                    savedAnswerText = toJsonBlock(fixedAnswer);
                 }
                 const stillRefusedChecks = (restrictionChecks || []).filter((restrictionCheck) => restrictionCheck.status == "notAllowed");
                 endStep("restrictionFix", restrictionFixStart, {
@@ -633,43 +682,19 @@ export default function () {
             }
             const totalSeconds = Math.round((Date.now() - runStart) / 1000);
 
-            // every run is kept, failed ones included, a paid generation is never lost
-            const runName = getRunName(source, runTimestamp);
-            const savedRun = {
-                source: source,
-                database: database.database,
-                databaseId: databaseId,
-                schemaFile: savedSchemaFile,
-                upperOntologies: upperOntologies,
-                ontologyVersion: ontologyVersion,
-                model: completion?.model ?? null,
-                reasoningEffort: completion ? ontologyReasoningEffort : null,
-                stopReason: completion?.stop_reason ?? null,
-                failure: failure,
-                usage: usage,
-                totalSeconds: totalSeconds,
-                stepSeconds: stepSeconds,
-                graphUri: turtle ? runGraphUri : null,
-                graphTripleCount: graphTripleCount,
-                graphError: graphError,
-                restrictionChecks: restrictionChecks,
-                restrictionCheckError: restrictionCheckError,
-                preparationSeconds: preparationSeconds,
-                linkCandidatesModel: linkCandidatesModel,
-                linkCandidatesUsage: linkCandidatesUsage,
-                linkCandidates: linkCandidates,
-                linkCandidatesError: linkCandidatesError,
-                linkCandidatesAnswer: linkCandidatesAnswer,
-                measuredOverlaps: measuredOverlaps,
-                report: ontologyAnswer?.report ?? null,
-                answerError: answerError,
-                answerProblems: answerOntology?.problems ?? null,
-                restrictionFix: restrictionFix,
-                answer: savedAnswerText,
-            };
-            let saveError = null;
+            const isGraphLoaded = Boolean(turtle && graphTripleCount && !graphError);
+            const savedRun = getSavedRun();
             try {
-                await saveRun(databaseFolder, runName, savedRun, turtle);
+                if (isGraphLoaded) {
+                    // the graph is the reference from now on
+                    delete savedRun.answer;
+                    await saveRun(databaseFolder, savedRun, null);
+                    await deleteVersionConversations(source, "ontology", runName);
+                } else if (turtle) {
+                    await saveRun(databaseFolder, savedRun, turtle);
+                } else {
+                    await saveFailedGeneration(databaseFolder, savedRun);
+                }
             } catch (writeError) {
                 console.warn("[ai/ontologyFromDb] answer not saved: " + writeError.message);
                 saveError = writeError.message;
@@ -690,6 +715,7 @@ export default function () {
                 totalSeconds: totalSeconds,
                 stepSeconds: stepSeconds,
                 graphUri: savedRun.graphUri,
+                isLoadPending: Boolean(turtle) && !isGraphLoaded,
                 graphTripleCount: graphTripleCount,
                 graphError: graphError,
                 restrictionChecks: restrictionChecks,
@@ -720,9 +746,10 @@ export default function () {
             "sample rows, row count and per column distinct and null counts), the overlaps measured beforehand between the pairs of columns " +
             "a first LLM call (Claude Haiku 5.5) proposes from the database description alone (150 at most) and the enriched model of the upper ontologies (as GET /ontologyModels/enriched returns it), most abstract first, then calls Claude Opus 5.5 once, at medium reasoning effort, through OpenRouter. " +
             "The answer is one compact JSON object (classes, restrictions, datatype properties, individuals, groups, report) that the route turns into Turtle. " +
-            "Each run is saved under `data/semanticVirtualDB/<database>/`, the Turtle in a `.ttl` file, the report, the problems met while writing the Turtle and the whole answer in a `.json` file. " +
-            "The Turtle is then loaded into the run graph `<source graphUri>/virtual-db-creator/<run timestamp>/`. " +
-            "Each restriction of the run graph is then checked with OntologyModels.getAllowedPropertiesBetweenNodes against the domains and ranges of the upper ontologies, inherited ones included: allowed, notAllowed, or unchecked when the property has no named domain nor range. " +
+            "A source has one ontology. A run that produced a Turtle replaces it: saved under `data/semanticVirtualDB/<database>/<source>_ontology`, the Turtle in a `.ttl` file, the report, the problems met while writing the Turtle and the whole answer in a `.json` file, the Turtle is then loaded into the draft `<source graphUri>/semanticvirtualdb/`. " +
+            "Once loaded, the graph is the reference: the `.ttl` and the answer are removed, the conversations and the chatbot changes of the ontology replaced go, the graph of the source stays as validated until the next validation. A load that failed keeps them, and POST /ai/ontologyFromDb/runs loads the Turtle again. " +
+            "A run that produced no Turtle leaves the ontology as it is, and is kept as `<source>_failedGeneration_<timestamp>.json`. " +
+            "Each restriction of the draft is then checked with OntologyModels.getAllowedPropertiesBetweenNodes against the domains and ranges of the upper ontologies, inherited ones included: allowed, notAllowed, or unchecked when the property has no named domain nor range. " +
             "When some are notAllowed, a second call of the same model (`bin/AI/ontologyFromDb/prompts/ontology_restriction_fix.md`) gets them, with the properties whose domain or range fit each class and target, and chooses for each one of those properties or its removal, a property outside them being refused; " +
             "the Turtle is written again, loaded and checked once more, and the run file keeps that turn under restrictionFix, the generated answer included. " +
             "A `schemaFile` replaces the database: a plain SQL dump of a Postgres schema, its tables, keys and comments are the only evidence, no sample, profile, link candidate nor overlap is read, and the `bin/AI/ontologyFromDb/prompts/ontology_schema_only.md` rules are added to the prompt. " +
@@ -758,7 +785,7 @@ export default function () {
                             description:
                                 "Pairs of columns to measure, as the link candidates step returns them: { pairs: [{ left: table.column, right: table.column }], repeatingTables: [[table, table]] }. Skips that step.",
                         },
-                        answer: { type: "string", description: "Answer of an earlier call to turn into Turtle and save again, without calling the LLM." },
+                        answer: { type: "string", description: "Answer of an earlier call to turn into Turtle and load in the draft, without calling the LLM." },
                         refreshDatabaseChecks: {
                             type: "boolean",
                             description:
@@ -771,7 +798,7 @@ export default function () {
         responses: {
             200: {
                 description:
-                    "Prompt-only calls: the prompt as JSON. A generation: NDJSON progress events ending with a result event (run name, run graph, total time, usage, problems) or an error event.",
+                    "Prompt-only calls: the prompt as JSON. A generation: NDJSON progress events ending with a result event (run name, draft graph, isLoadPending, total time, usage, problems) or an error event.",
             },
             400: { description: "Neither or both of databaseId and schemaFile, or a schema file that cannot be read." },
             404: { description: "A source is unknown to the user." },

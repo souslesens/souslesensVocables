@@ -1,5 +1,7 @@
-// the database as the ontology prompts read it: per table its rows, its columns with their profile, its keys and its sample rows
-// tableInspections: { table: { profile, profileError, sampleTexts, sampleError } }, as the runs save them in databaseChecks.json
+const lineBreakRegex = /\s*[\r\n]+\s*/g;
+
+// the database as the ontology prompts read it: per table its comments, its rows, its columns with their profile, its keys and its sample rows
+// tableInspections: { table: { profile, profileError, sampleTexts, sampleError } }, as the runs save them in databaseChecks.json; a schema file gives none of them
 function describeDatabase(database, schema, columnsByTable, tableInspections) {
     const primaryKeyColumnsByTable = {};
     schema.primaryKeys.forEach(function (keyColumn) {
@@ -20,6 +22,19 @@ function describeDatabase(database, schema, columnsByTable, tableInspections) {
         foreignKey.columns.push(keyColumn.column_name);
         foreignKey.referencedColumns.push(keyColumn.referenced_column);
     });
+    const tableCommentByTable = {};
+    const columnCommentTextsByTable = {};
+    schema.comments.forEach(function (objectComment) {
+        const commentText = objectComment.comment.replace(lineBreakRegex, " ");
+        if (!objectComment.column_name) {
+            tableCommentByTable[objectComment.table_name] = commentText;
+            return;
+        }
+        if (!columnCommentTextsByTable[objectComment.table_name]) {
+            columnCommentTextsByTable[objectComment.table_name] = [];
+        }
+        columnCommentTextsByTable[objectComment.table_name].push(objectComment.column_name + ": " + commentText);
+    });
 
     let databaseDescription = "Database " + database.database + " (" + database.driver + ")\n";
     for (const tableName of Object.keys(columnsByTable)) {
@@ -31,6 +46,9 @@ function describeDatabase(database, schema, columnsByTable, tableInspections) {
             return column.column_name + " (" + column.data_type + nullability + profileText + ")";
         });
         databaseDescription += "\nTable " + tableName + "\n";
+        if (tableCommentByTable[tableName]) {
+            databaseDescription += "Comment: " + tableCommentByTable[tableName] + "\n";
+        }
         // the description read by the link candidates step is written before the profiles are counted
         if (inspection.profile) {
             databaseDescription += "Rows: " + inspection.profile.rowCount + "\n";
@@ -38,6 +56,9 @@ function describeDatabase(database, schema, columnsByTable, tableInspections) {
             databaseDescription += "Rows: not counted (" + inspection.profileError + ")\n";
         }
         databaseDescription += "Columns: " + columnTexts.join(", ") + "\n";
+        if (columnCommentTextsByTable[tableName]) {
+            databaseDescription += "Column comments:\n" + columnCommentTextsByTable[tableName].join("\n") + "\n";
+        }
         if (primaryKeyColumnsByTable[tableName]) {
             databaseDescription += "Primary key: (" + primaryKeyColumnsByTable[tableName].join(", ") + ")\n";
         }
@@ -47,11 +68,11 @@ function describeDatabase(database, schema, columnsByTable, tableInspections) {
                 "Foreign key " + constraintName + ": (" + foreignKey.columns.join(", ") + ") -> " + foreignKey.referencedTable + "(" + foreignKey.referencedColumns.join(", ") + ")\n";
         }
 
-        if (!inspection.sampleTexts) {
+        if (inspection.sampleTexts) {
+            databaseDescription += "Sample rows:\n" + inspection.sampleTexts.join("\n") + "\n";
+        } else if (inspection.sampleError) {
             databaseDescription += "Sample rows: unavailable (" + inspection.sampleError + ")\n";
-            continue;
         }
-        databaseDescription += "Sample rows:\n" + inspection.sampleTexts.join("\n") + "\n";
     }
     return databaseDescription;
 }

@@ -5,6 +5,7 @@ import async from "async";
 import {
     nonNameCharacterRegex,
     runningGenerations,
+    lastGenerationEnds,
     getRunName,
     getDraftGraphUri,
     readSourceRun,
@@ -115,6 +116,8 @@ export default function () {
         const isProgressStreamed = !req.body.promptOnly && !req.body.linkCandidatesPromptOnly;
         // the entry of this generation in runningGenerations, which pages opened later read
         let runningGeneration = null;
+        let generationFailure = null;
+        let restrictionFixError = null;
         const stopController = new AbortController();
         const stopSignal = stopController.signal;
         function sendProgress(progressEvent) {
@@ -741,11 +744,17 @@ export default function () {
             }
 
             const savedAs = saveError ? null : "data/semanticVirtualDB/" + databaseFolder + "/" + runName;
+            // a stop is no failure, and the error of a cut restriction fix is only that stop
+            const modelFailure = stopSignal.aborted ? null : failure;
+            restrictionFixError = stopSignal.aborted ? null : (restrictionFix?.error ?? null);
+            generationFailure = modelFailure ?? answerError ?? graphError ?? saveError;
             sendProgress({
                 type: "result",
                 runName: runName,
                 isStopped: stopSignal.aborted,
-                failure: stopSignal.aborted ? null : failure,
+                // the ontology is there, this reaches the page as an error of the run and not as its failure
+                restrictionFixError: restrictionFixError,
+                failure: modelFailure,
                 model: completion?.model ?? null,
                 answerError: answerError,
                 answerProblems: answerOntology?.problems ?? null,
@@ -767,6 +776,7 @@ export default function () {
             res.end();
         } catch (error) {
             console.error("ontologyFromDb route error:", error);
+            generationFailure = error.message;
             if (!res.headersSent) {
                 return res.status(error.status || 500).json({ error: error.message });
             }
@@ -775,6 +785,7 @@ export default function () {
         } finally {
             if (runningGeneration && runningGenerations[req.body.source] === runningGeneration) {
                 delete runningGenerations[req.body.source];
+                lastGenerationEnds[req.body.source] = { isStopped: stopSignal.aborted, failure: generationFailure, restrictionFixError: restrictionFixError };
             }
         }
     }

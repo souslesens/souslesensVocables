@@ -1,5 +1,5 @@
 import { readFile, rm } from "fs/promises";
-import { runningGenerations, getDraftGraphUri, findSourceOntology, findSourceRun, loadTurtleIntoGraph, getRunProblems } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
+import { runningGenerations, lastGenerationEnds, getDraftGraphUri, findSourceOntology, findSourceRun, loadTurtleIntoGraph, getRunProblems } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
 import { readDraftTriples, getGraphHash, updateGraphCheck } from "../../../../../bin/AI/ontologyFromDb/ontology/draftGraph.js";
 import { deleteVersionConversations } from "../../../../../bin/AI/ontologyFromDb/revision/revisionConversations.js";
 
@@ -35,11 +35,12 @@ export default function () {
                 return res.status(found.status).json({ error: found.error });
             }
             const generating = runningGenerations[req.query.source] ?? null;
+            const lastGeneration = lastGenerationEnds[req.query.source] ?? null;
             if (!found.run) {
-                return res.status(200).json({ ontology: null, generating: generating });
+                return res.status(200).json({ ontology: null, generating: generating, lastGeneration: lastGeneration });
             }
             const draftTriples = await readDraftTriples(getDraftGraphUri(found.sourceConfig.graphUri));
-            res.status(200).json({ ontology: getOntologyDescription(found, draftTriples), generating: generating });
+            res.status(200).json({ ontology: getOntologyDescription(found, draftTriples), generating: generating, lastGeneration: lastGeneration });
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: error.message });
@@ -93,7 +94,7 @@ export default function () {
         operationId: "getOntologyFromDbRuns",
         parameters: [{ name: "source", in: "query", type: "string", required: true, description: "Source whose ontology is read." }],
         responses: {
-            200: { description: "{ ontology, generating }: ontology " + ontologyFields + " Null before the first generation. generating: { startedAt, database, step, isStopping } or null" },
+            200: { description: "{ ontology, generating, lastGeneration }: ontology " + ontologyFields + " Null before the first generation. generating: { startedAt, database, step, isStopping } or null. lastGeneration: { isStopped, failure, restrictionFixError } of the last generation this server process ran for the source, or null" },
             404: { description: "The source is unknown to the user." },
         },
         tags: ["AI"],

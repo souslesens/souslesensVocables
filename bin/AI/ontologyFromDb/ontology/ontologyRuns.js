@@ -24,6 +24,8 @@ const databaseChecksFileName = "databaseChecks.json";
 
 // the generations running in this server process, by source: a page opened during a run finds it there
 const runningGenerations = {};
+// how the last generation of each source ended, for a page that did not start it
+const lastGenerationEnds = {};
 
 // an ISO date a file name accepts, as 2026-10-27T12-45-25-821Z
 function getNewRunTimestamp() {
@@ -252,6 +254,7 @@ export {
     nonNameCharacterRegex,
     trailingSlashRegex,
     runningGenerations,
+    lastGenerationEnds,
     getNewRunTimestamp,
     getRunName,
     getValidatedSource,

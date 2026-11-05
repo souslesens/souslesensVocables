@@ -1,0 +1,2562 @@
+import common from "../../shared/common.js";
+import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
+import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
+import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
+import AIMappingsDetails from "./aiMappingsDetails.js";
+import AIDataSourceManager from "./aiDataSourcesManager.js";
+import AIMappingModeler from "./aiMappingModeler.js";
+import Lineage_graphPaths from "../lineage/lineage_graphPaths.js";
+import AIUIcontroller from "./aiUiController.js";
+import LegendOverlayWidget from "../../uiWidgets/legendOverlayWidget.js";
+import AIMapping_legendOverlay from "./aiMapping_legendOverlay.js";
+import AIImplicit_legendOverlay from "./aiImplicit_legendOverlay.js";
+
+/**
+ * AIMappingColumnsGraph module.
+ * Handles the visualization and management of mapping columns in a graph.
+ * @module AIMappingColumnsGraph
+ * @see [Tutorial: Overview]{@tutorial overview}
+ */
+var AIMappingColumnsGraph = (function () {
+    var self = {};
+
+    /**
+     * Current graph node being manipulated.
+     * @type {Object}
+     * @memberof module:AIMappingColumnsGraph
+     */
+    self.currentOffset = null;
+
+    /**
+     * Stores the currently selected graph node.
+     * @memberof module:AIMappingColumnsGraph
+     */
+    self.currentGraphNode = {};
+
+    /**
+     * Instance of the Vis.js graph.
+     * @type {Object}
+     * @memberof module:AIMappingColumnsGraph
+     */
+    self.visjsGraph = {};
+
+    /**
+     * ID of the HTML container where the graph is rendered.
+     * @memberof module:AIMappingColumnsGraph
+     */
+    self.graphDiv = "mappingModeler_graphDiv";
+
+    /**
+     * X-axis step size for node positioning.
+     * @type {number}
+     * @memberof module:AIMappingColumnsGraph
+     */
+    var stepX = 200;
+
+    /**
+     * Y-axis step size for node positioning.
+     * @type {number}
+     * @memberof module:AIMappingColumnsGraph
+     */
+    var stepY = 150;
+
+    /**
+     * Minimum X position for graph layout adjustments.
+     * @type {number}
+     * @memberof module:AIMappingColumnsGraph
+     */
+    var minX = 0;
+
+    /**
+     *  returns a visjsNode representing a table
+     * @param table
+     * @returns {{shape: string, color: string, data: {id, label, type: string}, id, label}}
+     */
+
+    /**
+     * defines the parameters of the hierachical layout of visjs Graph graph
+     * @type {{treeSpacing: number, sortMethod: string, blockShifting: boolean, levelSeparation: number, parentCentralization: boolean, nodeSpacing: number, shakeTowards: string, edgeMinimization: boolean, direction: string}}
+     */
+    self.layoutHierarchical = {
+        direction: "DU",
+        sortMethod: "hubsize",
+        shakeTowards: "roots",
+        blockShifting: true,
+        edgeMinimization: true,
+        parentCentralization: true,
+        treeSpacing: 200,
+        nodeSpacing: 200,
+        levelSeparation: 300,
+    };
+    self.physicsHierarchical = {
+        enabled: false,
+        hierarchicalRepulsion: {
+            centralGravity: 0.3,
+            nodeDistance: 200,
+        },
+    };
+    self.getVisjsTableNode = function (table) {
+        var newRessource = {
+            id: table,
+            label: table,
+
+            shape: "box",
+            color: "#d8cacd",
+            level: 1,
+            data: {
+                id: table,
+                label: table,
+                type: "Table",
+                dataTable: table,
+            },
+        };
+        return newRessource;
+    };
+
+    /**
+     * return a visJsEdge
+     * @param from
+     * @param to
+     * @param label
+     * @param arrowType
+     * @param uri
+     * @returns {{data: {id, source: (*|null), type}, color: *, arrows: {to: {type, enabled: boolean}}, from, to, label, smooth: {forceDirection: string, roundness: number, type: string}}}
+     */
+    self.getVisjsObjectPropertyEdge = function (from, to, label, arrowType, property, uri, color, restrictionType, cardinality) {
+        var edge = {
+            from: from,
+            to: to,
+            label: label,
+            width: 4,
+            arrows: {
+                to: {
+                    enabled: true,
+                    type: arrowType,
+                },
+            },
+            smooth: {
+                type: "curvedCW",
+                forceDirection: "vertical",
+                roundness: 0.65,
+            },
+            data: {
+                id: uri,
+                type: uri,
+                source: property ? property.source : null,
+                restrictionType: restrictionType || null,
+                cardinality: cardinality || null,
+            },
+            color: color,
+        };
+        return edge;
+    };
+
+    self.getVisjsDatatypePropertyEdgeBetweenClassAndRange = function (domainId, rangeId, propUri, propLabel) {
+        return {
+            id: domainId + "_dp_" + propUri + "_" + rangeId,
+            from: domainId,
+            to: rangeId,
+            label: propLabel,
+            width: 3,
+            arrows: { to: { enabled: true, type: "arrow" } },
+            smooth: { type: "curvedCCW", forceDirection: "vertical", roundness: 0.5 },
+            color: "#9b59b6",
+            data: { id: propUri, type: "DatatypeProperty" },
+        };
+    };
+
+    /**
+     * Draws a new resource node in the Vis.js graph.
+     * Positions the node dynamically and links it with existing nodes if necessary.
+     * @function
+     * @name drawResource
+     * @memberof module:AIMappingColumnsGraph
+     * @param {Object} newResource - The resource to be added to the graph.
+     * @returns {void}
+     */
+    self.drawResource = function (newResource, options, callback) {
+        if (!options) {
+            options = {};
+        }
+        self.graphDivWidth = $("#mappingModeler_graphDiv").width();
+        minX = -self.graphDivWidth / 2 + stepX;
+        var arrows = {
+            to: {
+                enabled: true,
+                type: "arrow",
+            },
+        };
+        var edgeColor = "#00afef";
+
+        if (self.currentGraphNode && newResource.data.type == "Class") {
+            newResource.level = 3;
+        } else if (self.currentGraphNode && newResource.data.type == "Table") {
+            newResource.level = 1;
+        } else if (newResource.data.type == "superClass" && newResource.level) {
+            // keep level of superClass
+        } else {
+            newResource.level = 2;
+        }
+        var existingNodes = self.visjsGraph.getExistingIdsMap();
+
+        var visjsData = { nodes: [], edges: [] };
+        var visjsNode = newResource;
+
+        if (newResource.data.type == "Class") {
+            var tableWithSameClass = AIMappingsDetails.isColumnAllreadyMappedInAnotherTable(self.currentGraphNode, newResource.data.id);
+            if (!tableWithSameClass && !existingNodes[visjsNode.id]) {
+                visjsData.nodes.push(visjsNode);
+            } else {
+                self.visjsGraph.data.nodes.update({ id: newResource.id, hidden: false });
+            }
+            self.saveVisjsGraph();
+        } else {
+            visjsData.nodes.push(visjsNode);
+        }
+
+        if (self.visjsGraph) {
+            if (options.noSave) {
+                var existingNodes = self.visjsGraph.getExistingIdsMap();
+                if (!existingNodes[newResource.id]) {
+                    self.visjsGraph.data.nodes.add(visjsData.nodes);
+                }
+            } else {
+                self.addNodes(visjsData.nodes);
+            }
+
+            //  self.visjsGraph.network.fit();
+
+            if (self.currentGraphNode && self.currentGraphNode.data) {
+                if ((newResource.data.type == "Class" || newResource.data.type == "superClass") && self.currentGraphNode) {
+                    var label, type;
+                    if (self.currentGraphNode.data.type == "Class" || self.isClassColumn(self.currentGraphNode)) {
+                        label = "subClassOf";
+                        type = "rdfs:subClassOf";
+                    } else {
+                        label = "";
+                        type = "rdf:type";
+                    }
+
+                    var edgeId = common.getRandomHexaId(5);
+                    visjsData.edges.push({
+                        id: edgeId,
+                        from: self.currentGraphNode.id,
+                        label: label,
+                        to: newResource.id,
+                        width: 3,
+                        data: { type: type },
+                        arrows: arrows,
+                        color: edgeColor,
+                    });
+
+                    //  self.updateCurrentGraphNode(visjsNode);
+                    if (options.noSave) {
+                        self.visjsGraph.data.edges.add(visjsData.edges);
+                    } else {
+                        self.addEdge(visjsData.edges);
+                    }
+                }
+            }
+
+            //
+        } else {
+            self.drawGraphCanvas(self.graphDiv, visjsData);
+        }
+
+        if (self.visjsGraph.network) {
+            self.visjsGraph.network.redraw();
+        }
+
+        // AIMappingModeler.hideForbiddenResources(newResource.data.type);
+        JstreeWidget.empty("suggestionsSelectJstreeDiv");
+        self.currentGraphNode = newResource;
+
+        if (callback) {
+            callback();
+        }
+    };
+
+    /**
+     * Initializes the offset values for positioning nodes in the graph.
+     * Ensures that the offset is set correctly before adding new nodes.
+     * @function
+     * @name initOffsets
+     * @memberof module:AIMappingColumnsGraph
+     * @returns {void}
+     */
+    self.initOffsets = function () {
+        if (!self.currentOffset) {
+            self.currentOffset = { x: -self.graphDivWidth / 2, y: 0 };
+        }
+    };
+
+    /**
+     * Checks if a given object ID already exists in the Vis.js graph.
+     * Iterates through existing nodes to determine if the ID is present.
+     * @function
+     * @name objectIdExistsInGraph
+     * @memberof module:AIMappingColumnsGraph
+     * @param {string} id - The ID of the object to check.
+     * @returns {boolean} True if the object exists, otherwise false.
+     */
+    self.objectIdExistsInGraph = function (id) {
+        var items = self.visjsGraph.data.nodes.get();
+        var exists = false;
+        items.forEach(function (item) {
+            if (item.data && item.data.id == id) {
+                exists = true;
+            }
+        });
+        return exists;
+    };
+    //
+    /**
+     * Draws the graph canvas using Vis.js with specified options.
+     * Configures the graph's visual settings and event handlers.
+     * @function
+     * @name drawGraphCanvas
+     * @memberof module:AIMappingColumnsGraph
+     * @param {string} graphDiv - The ID of the div container for the graph.
+     * @param {Object} visjsData - Data containing nodes and edges for the graph.
+     * @param {Function} [callback] - Optional callback function to execute after drawing.
+     * @returns {void}
+     */
+    self.drawGraphCanvas = function (graphDiv, visjsData, callback) {
+        self.graphOptions = {
+            keepNodePositionOnDrag: true,
+            physics: self.physicsHierarchical,
+
+            visjsOptions: {
+                edges: {
+                    smooth: true,
+                },
+            },
+
+            layoutHierarchical: self.layoutHierarchical,
+            onclickFn: AIMappingColumnsGraph.onVisjsGraphClick,
+            onRightClickFn: AIMappingColumnsGraph.showGraphPopupMenu,
+        };
+
+        self.visjsGraph = new VisjsGraphClass(graphDiv, visjsData, self.graphOptions);
+        self.visjsGraph.draw(function () {
+            // Initialize mapping legend overlay after graph draw
+            self.refreshLegend(graphDiv);
+            LegendOverlayWidget.installAutoHideOnDialogs(graphDiv, {
+                namespace: "mappingLegendAutoHide",
+            });
+            if (callback) {
+                return callback();
+            }
+        });
+    };
+
+    /**
+     * Adjusts edge curvatures so that multiple edges between the same node pair
+     * do not overlap. Edges are spread using alternating curvedCW / curvedCCW
+     * directions with increasing roundness.
+     * @function
+     * @name adjustEdgeCurvatures
+     * @memberof module:AIMappingColumnsGraph
+     * @returns {void}
+     */
+    self.adjustEdgeCurvatures = function () {
+        if (!self.visjsGraph || !self.visjsGraph.data || !self.visjsGraph.data.edges) {
+            return;
+        }
+        var edges = self.visjsGraph.data.edges.get();
+
+        var pairMap = {};
+        edges.forEach(function (edge) {
+            var key;
+            if (edge.from < edge.to) {
+                key = edge.from + "|||" + edge.to;
+            } else {
+                key = edge.to + "|||" + edge.from;
+            }
+            if (!pairMap[key]) {
+                pairMap[key] = [];
+            }
+            pairMap[key].push(edge);
+        });
+
+        var updates = [];
+        Object.keys(pairMap).forEach(function (key) {
+            var group = pairMap[key];
+            if (group.length <= 1) {
+                return;
+            }
+            group.forEach(function (edge, index) {
+                var direction;
+                if (index % 2 === 0) {
+                    direction = "curvedCW";
+                } else {
+                    direction = "curvedCCW";
+                }
+                var roundness = 0.2 + Math.floor(index / 2) * 0.2;
+                if (roundness > 0.8) {
+                    roundness = 0.8;
+                }
+                updates.push({
+                    id: edge.id,
+                    smooth: {
+                        type: direction,
+                        forceDirection: "vertical",
+                        roundness: roundness,
+                    },
+                });
+            });
+        });
+
+        if (updates.length > 0) {
+            self.visjsGraph.data.edges.update(updates);
+        }
+    };
+
+    /**
+     * Normalize rdf:type / rdfs:subClassOf edge display for consistency.
+     * It updates the edges store in place.
+     * @param {Object} visjsGraph
+     * @returns {void}
+     */
+    self.normalizeRdfTypeEdgesColor = function (visjsGraph) {
+        if (!visjsGraph || !visjsGraph.data || !visjsGraph.data.edges) {
+            return;
+        }
+        var edgesStore = visjsGraph.data.edges;
+        if (!edgesStore || typeof edgesStore.get !== "function" || typeof edgesStore.update !== "function") {
+            return;
+        }
+        var edges = edgesStore.get();
+        var updates = [];
+
+        edges.forEach(function (edge) {
+            var edgeType = edge && edge.data ? edge.data.type : null;
+            if (edgeType === "rdf:type" || edgeType === "rdfs:subClassOf") {
+                var currentColor = "";
+                if (typeof edge.color === "string") {
+                    currentColor = edge.color.toLowerCase();
+                } else if (edge.color && typeof edge.color.color === "string") {
+                    currentColor = edge.color.color.toLowerCase();
+                }
+                var edgeUpdate = { id: edge.id };
+                var shouldUpdateEdge = false;
+                if (currentColor !== "#00afef") {
+                    edgeUpdate.color = "#00afef";
+                    shouldUpdateEdge = true;
+                }
+                if (!edge.label && edgeType === "rdfs:subClassOf") {
+                    edgeUpdate.label = "subClassOf";
+                    shouldUpdateEdge = true;
+                }
+                if (!edge.label && edgeType === "rdf:type") {
+                    edgeUpdate.label = "a";
+                    shouldUpdateEdge = true;
+                }
+                if (shouldUpdateEdge) {
+                    updates.push(edgeUpdate);
+                }
+            }
+        });
+
+        if (updates.length > 0) {
+            edgesStore.update(updates);
+        }
+    };
+
+    /**
+     * Refresh the legend (widget or legacy) using current visjsGraph state.
+     * @param {string} containerId
+     * @returns {void}
+     */
+    self.refreshLegend = function (containerId) {
+        if (!containerId) {
+            containerId = self.graphDiv;
+        }
+        if (!self.visjsGraph) {
+            return;
+        }
+        AIMapping_legendOverlay.init(containerId, self.visjsGraph, { title: "🔍 Legend" });
+    };
+
+    self.getColumnClass = function (node) {
+        if (!node.id) {
+            node = { id: node };
+        }
+        var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id);
+
+        var classId = null;
+        connections.forEach(function (connection) {
+            if (connection.edge.data && (connection.edge.data.type == "rdf:type" || connection.edge.data.type == "rdfs:subClassOf")) {
+                classId = connection.toNode.data.id;
+            }
+        });
+        return classId;
+    };
+
+    self.isClassColumn = function (node) {
+        if (!node) {
+            return false;
+        }
+        if (!node.id) {
+            node = { id: node };
+        }
+        var visjsNode = self.visjsGraph.data.nodes.get(node.id);
+        if (!visjsNode) {
+            return false;
+        }
+        var nodeData = visjsNode.data;
+        if (nodeData.definedInColumn) {
+            var mainNode = self.visjsGraph.data.nodes.get(nodeData.definedInColumn);
+            nodeData = mainNode ? mainNode.data : nodeData;
+        }
+        return nodeData.rdfType == "owl:Class";
+    };
+
+    self.getClassColumns = function (node) {
+        if (!node.id) {
+            node = { id: node };
+        }
+        var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id, true);
+
+        var columns = [];
+        connections.forEach(function (connection) {
+            if (connection.edge.data.type == "rdf:type" || connection.edge.data.type == "rdfs:subClassOf") {
+                columns.push(connection.fromNode);
+            }
+        });
+        return columns;
+    };
+
+    self.getAllColumnsClasses = function (nodes) {
+        if (!nodes) {
+            nodes = self.visjsGraph.data.nodes.get();
+        }
+        if (!Array.isArray(nodes)) {
+            nodes = [nodes];
+        }
+        var map = {};
+        nodes.forEach(function (node) {
+            map[node.id] = self.getColumnClass(node);
+        });
+        return map;
+    };
+
+    /**
+     * Handles click events on the Vis.js graph.
+     * Updates the current selected node and manages relations between columns.
+     * @function
+     * @name onVisjsGraphClick
+     * @memberof module:AIMappingColumnsGraph
+     * @param {Object} node - The clicked node object.
+     * @param {Object} event - The click event object.
+     * @param {Object} options - Additional event options.
+     * @param {boolean} [options.ctrlKey=false] - Indicates if the Ctrl key was pressed during the click.
+     * @param {boolean} [options.shiftKey=false] - Indicates if the Shift key was pressed during the click.
+     * @param {boolean} [options.altKey=false] - Indicates if the Alt key was pressed during the click.
+     * @returns {void}
+     */
+    self.onVisjsGraphClick = function (node, event, options) {
+        if (!node) {
+            AIMappingModeler.currentRelation = null;
+            self.relationMessage();
+
+            return;
+        }
+
+        if (self.visjsGraph.network.isCluster(node.id) == true) {
+            self.visjsGraph.network.openCluster(node.id);
+        }
+        self.currentGraphNode = node;
+
+        //add relation between columns
+        if (options.ctrlKey) {
+            if (!AIDataSourceManager.currentConfig.currentDataSource) {
+                return alert("Choose a data source first");
+            }
+
+            if (!AIMappingModeler.currentRelation) {
+                self.relationMessage(node.data.label, null);
+                AIMappingModeler.currentRelation = {
+                    from: { id: node.id, classId: self.getColumnClass(node), dataTable: node.data.dataTable },
+                    to: null,
+                    type: node.data.type,
+                };
+            } else {
+                if (node.data.dataTable && node.data.dataTable != AIMappingModeler.currentRelation.from.dataTable) {
+                    AIMappingModeler.currentRelation = null;
+                    self.relationMessage();
+                    return alert("Relations between columns from different tables are not possible");
+                }
+                AIMappingModeler.currentRelation.to = { id: node.id, classId: self.getColumnClass(node) };
+                if (AIMappingModeler.currentRelation.type != "Class" && node.data.type == "Class") {
+                    self.graphActions.drawColumnToClassEdge(AIMappingModeler.currentRelation);
+                } else if (AIMappingModeler.currentRelation.from.type != "Class" && node.data.type != "Class") {
+                    AIMappingModeler.onLegendNodeClick({ id: "ObjectProperty" });
+                }
+            }
+        } else {
+            if (node.data && node.data.type == "Table") {
+                var tableSourceType = node.id.indexOf(".") > -1 ? "csvSource" : "table";
+
+                if (tableSourceType == "table" && !AIDataSourceManager.currentConfig.currentDataSource) {
+                    // return alert("choose a data source first");
+                    AIMappingColumnsGraph.activeSourceFromNode(node, function () {});
+                }
+
+                var obj = {
+                    event: "xx",
+                    node: {
+                        id: node.id,
+                        data: { type: tableSourceType, id: node.id, label: node.id },
+                    },
+                };
+                AIDataSourceManager.onDataSourcesJstreeSelect(null, obj);
+                //  self.zoomOnTable(node.id)
+            }
+
+            AIMappingModeler.currentRelation = null;
+            self.relationMessage();
+        }
+    };
+
+    self.activeSourceFromNode = function (node, callback) {
+        var obj = {};
+        obj.node = {};
+        var dataSource = node.data.datasource;
+        var csvSource = AIDataSourceManager.currentConfig.csvSources;
+        var dataBaseSource = AIDataSourceManager.currentConfig.databaseSources;
+        obj.node.id = dataSource;
+        obj.node.data = {};
+        Object.keys(dataBaseSource).forEach(function (key) {
+            if (key == dataSource) {
+                obj.node.data.type = "databaseSource";
+            }
+        });
+        Object.keys(csvSource).forEach(function (key) {
+            if (key == dataSource) {
+                obj.node.data.type = "csvSource";
+            }
+        });
+        if (obj.node.data.type == "databaseSource") {
+            $.ajax({
+                type: "GET",
+                url: Config.apiUrl + "/databases/" + dataSource,
+                dataType: "json",
+                success: function (data, _textStatus, _jqXHR) {
+                    obj.node.data.id = data.name;
+                    obj.node.data.sqlType = data.driver;
+                    AIDataSourceManager.onDataSourcesJstreeSelect(undefined, obj, function () {
+                        var obj2 = {
+                            node: {
+                                label: node.data.dataTable,
+                                data: { type: "table", id: node.data.dataTable, label: node.data.dataTable },
+                            },
+                        };
+                        AIDataSourceManager.onDataSourcesJstreeSelect(undefined, obj2, callback);
+                    });
+                },
+
+                error: function (err) {
+                    if (callback) {
+                        return callback(err);
+                    }
+                    return MainController.errorAlert(err);
+                },
+            });
+        } else {
+            obj.node.data.id = dataSource;
+            AIDataSourceManager.onDataSourcesJstreeSelect(undefined, obj, callback);
+        }
+    };
+    /**
+     * @function
+     * @name showImplicitGraphPopupMenu
+     * @memberof module:AIMappingColumnsGraph
+     * Displays a minimal context menu for implicit-model nodes (Class/superClass only).
+     * Sets `currentGraphNode`, renders a “Node Infos” action, and positions the popup at the event coordinates.
+     * @param {Object} node - Vis.js node object; must include `data.type`.
+     * @param {{x:number,y:number}} point - Screen point (will be updated from `event`).
+     * @param {{x:number,y:number}} event - Mouse event with screen coordinates.
+     * @returns {void}
+     */
+
+    self.showImplicitGraphPopupMenu = function (node, point, event) {
+        if (!node || !node.data) {
+            return;
+        }
+
+        var html = "";
+        if (node.data.type === "Class" || node.data.type === "superClass") {
+            self.currentGraphNode = node;
+            html += '    <span class="popupMenuItem" onclick="AIMappingColumnsGraph.graphActions.showNodeInfos()">Node Infos</span>';
+        }
+
+        if (html !== "") {
+            $("#popupMenuWidgetDiv").html(html);
+            point.x = event.x;
+            point.y = event.y;
+            PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
+        }
+    };
+
+    /**
+     * Displays the context menu for a graph node.
+     * Shows relevant options based on the node type (Class, Column, or Edge).
+     * @function
+     * @name showGraphPopupMenu
+     * @memberof module:AIMappingColumnsGraph
+     * @param {Object} node - The node where the menu should appear.
+     * @param {Object} point - The coordinates for the popup menu.
+     * @param {Object} event - The event triggering the menu.
+     * @returns {void}
+     */
+    self.showGraphPopupMenu = function (node, point, event) {
+        if (!node) {
+            return;
+        }
+
+        self.currentGraphNode = node;
+        self.graphActions.outlineNode(node.id);
+
+        if (!node) {
+            return;
+        }
+        var html = "";
+        if (node.from) {
+            //edge
+            html = '    <span class="popupMenuItem" onclick="AIMappingColumnsGraph.graphActions.removeNodeEdgeGraph();"> Remove Edge</span>';
+        } else {
+            html = '    <span class="popupMenuItem" onclick="AIMappingColumnsGraph.graphActions.removeNodeFromGraph();"> Remove Node</span>';
+        }
+        html += "--------------<br>";
+        if (node.data) {
+            if (node.data.type == "Class" || node.data.type == "superClass") {
+                html += '    <span class="popupMenuItem" onclick="AIMappingColumnsGraph.graphActions.showNodeInfos()">Node Infos</span>';
+                html += '    <span class="popupMenuItem" onclick="AIMappingColumnsGraph.graphActions.addSuperClassToGraph()">draw superClass</span>';
+            }
+            if (node.data.type == "Column") {
+                html += '    <span class="popupMenuItem" onclick="AIMappingColumnsGraph.graphActions.showColumnDetails()">Detailed mappings</span>';
+                html += '    <span class="popupMenuItem" onclick="AIMappingColumnsGraph.graphActions.showSampledata()">show sample data</span>';
+            }
+        }
+
+        $("#popupMenuWidgetDiv").html(html);
+        point.x = event.x;
+        point.y = event.y;
+        PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
+    };
+
+    self.graphActions = {
+        /**
+         * Outlines a selected node by increasing its border width.
+         * @function
+         * @name outlineNode
+         * @memberof module:AIMappingColumnsGraph
+         * @param {string} nodeId - The ID of the node to highlight.
+         * @returns {void}
+         */
+        outlineNode: function (nodeId) {
+            self.visjsGraph.decorateNodes(null, { borderWidth: 1 });
+            self.visjsGraph.decorateNodes(nodeId, { borderWidth: 5 });
+        },
+
+        /**
+         * Removes a node from the graph after user confirmation.
+         * Also removes its connected edges.
+         * @function
+         * @name removeNodeFromGraph
+         * @memberof module:AIMappingColumnsGraph
+         * @returns {void}
+         */
+        removeNodeFromGraph: function () {
+            if (!confirm("Delete node?")) {
+                return;
+            }
+            var node = self.currentGraphNode;
+            if (node.data && node.data.type === "Class") {
+                var allConnectedColumns = self.getClassColumns(node);
+                var currentTable = AIMappingModeler.currentTable ? AIMappingModeler.currentTable.name : null;
+                var columnsFromOtherTables = allConnectedColumns.filter(function (col) {
+                    return col.data && col.data.dataTable !== currentTable;
+                });
+                if (columnsFromOtherTables.length > 0) {
+                    var edgesToRemove = allConnectedColumns
+                        .filter(function (col) {
+                            return col.data && col.data.dataTable === currentTable;
+                        })
+                        .map(function (col) {
+                            return self.visjsGraph.network.getConnectedEdges(col.id);
+                        })
+                        .reduce(function (acc, val) {
+                            return acc.concat(val);
+                        }, []);
+                    self.removeEdge(edgesToRemove);
+                    self.saveVisjsGraph();
+                    return;
+                }
+            }
+            var edges = self.visjsGraph.network.getConnectedEdges(node.id);
+            self.removeEdge(edges);
+            self.removeNode(node.id);
+        },
+
+        /**
+         * Removes an edge from the graph after user confirmation.
+         * @function
+         * @name removeNodeEdgeGraph
+         * @memberof module:AIMappingColumnsGraph
+         * @returns {void}
+         */
+        removeNodeEdgeGraph: function () {
+            if (confirm("Delete edge?")) {
+                self.removeEdge(self.currentGraphNode.id);
+            }
+        },
+
+        /**
+         * Adds a superclass to the graph for the selected node.
+         * Queries the ontology for superclass relationships.
+         * @function
+         * @name addSuperClassToGraph
+         * @memberof module:AIMappingColumnsGraph
+         * @returns {void}
+         */
+        addSuperClassToGraph: function () {
+            var options = {
+                filter: " ?object rdf:type owl:Class",
+                withImports: true,
+            };
+            Sparql_OWL.getFilteredTriples(AIMappingModeler.currentSLSsource, self.currentGraphNode.data.id, "http://www.w3.org/2000/01/rdf-schema#subClassOf", null, options, function (err, result) {
+                if (err) {
+                    return MainController.errorAlert(err);
+                }
+                if (result.length == 0) {
+                    return alert("No superClass");
+                }
+                var item = result[0];
+
+                var classLegendItem = AIMappingModeler.legendItemsArray.filter(function (item) {
+                    return item.label == "Class";
+                });
+                if (classLegendItem.length > 0) {
+                    classLegendItem = classLegendItem[0];
+                }
+                var level = 3;
+                if (self.currentGraphNode.level) {
+                    level = self.currentGraphNode.level + 1;
+                }
+                var newResource = {
+                    id: item.object.value,
+                    label: item.objectLabel.value,
+                    shape: classLegendItem.shape ? classLegendItem.shape : "",
+                    color: classLegendItem.color ? classLegendItem.color : "",
+                    level: level,
+                    data: {
+                        id: item.object.value,
+                        label: item.objectLabel.value,
+                        type: "superClass",
+                    },
+                };
+
+                self.drawResource(newResource, { noSave: true }, function (err) {});
+            });
+        },
+
+        /**
+         * Draws an edge between a column and a class in the graph.
+         * @function
+         * @name drawColumnToClassEdge
+         * @memberof module:AIMappingColumnsGraph
+         * @returns {void}
+         */
+        drawColumnToClassEdge: function () {
+            if (!AIMappingModeler.currentRelation) {
+                return;
+            }
+            var edges = [
+                {
+                    from: AIMappingModeler.currentRelation.from.id,
+                    to: AIMappingModeler.currentRelation.to.id,
+                    label: "",
+                    color: "#00afef",
+                    width: 3,
+                    arrows: {
+                        to: {
+                            enabled: true,
+                            type: "arrow",
+                        },
+                    },
+                    data: { type: "rdf:type" },
+                },
+            ];
+
+            self.addEdge(edges);
+            AIMappingModeler.currentRelation = null;
+            self.relationMessage();
+        },
+
+        /**
+         * Displays detailed information about the selected node.
+         * @function
+         * @name showNodeInfos
+         * @memberof module:AIMappingColumnsGraph
+         * @returns {void}
+         */
+        showNodeInfos: function () {
+            if (self.currentGraphNode.data.type == "URI") {
+            } else if (AIMappingModeler.columnsMappingsObjects.indexOf(self.currentGraphNode.data.type) > -1) {
+                return;
+                /*  AIMappingsDetails.mappingColumnInfo.editColumnInfos();
+                  AIMappingsDetails.mappingColumnInfo.columnClass = self.getColumnType(self.currentGraphNode.id);*/
+            } else {
+                NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "smallDialogDiv");
+            }
+        },
+
+        /**
+         * Displays sample data related to the selected column.
+         * @function
+         * @name showSampledata
+         * @memberof module:AIMappingColumnsGraph
+         * @returns {void}
+         */
+        showSampledata: function () {
+            AIMappingModeler.showSampleData(self.currentGraphNode);
+        },
+
+        /**
+         * Shows detailed mappings for the selected column in a dialog.
+         * @function
+         * @name showColumnDetails
+         * @memberof module:AIMappingColumnsGraph
+         * @param {Object} [node] - The node for which details should be displayed. Defaults to the currently selected node.
+         * @returns {void}
+         */
+        showColumnDetails: function (node) {
+            var divId = "columnMappingDetailsDiv";
+            $("#smallDialogDiv").html("<div id='" + divId + "'></div>");
+
+            UI.openDialog("smallDialogDiv", { title: "Column Technical Mappings" });
+            UI.clampAndCenterDialog("smallDialogDiv");
+            AIMappingsDetails.showColumnTechnicalMappingsDialog(divId, node || self.currentGraphNode, function () {
+                $("#smallDialogDiv").dialog("close");
+            });
+        },
+    };
+
+    /**
+     * Adds nodes to the Vis.js graph in batches based on their associated data tables.
+     * Nodes are grouped by their `dataTable` property and added to the graph incrementally.
+     * Ensures that the graph layout is adjusted after each batch is added.
+     * Permits to have a structured visualisation
+     *
+     * @function
+     * @name addNodesByDataTableBatch
+     * @memberof module:AIMappingColumnsGraph
+     * @param {Array<Object>} nodes - The list of nodes to be added to the graph.
+     * @returns {void}
+     */
+
+    self.addNodesByDataTableBatch = function (nodes, callback) {
+        var dataTables = nodes.map(function (node) {
+            return node.data.dataTable;
+        });
+        dataTables = common.array.distinctValues(dataTables);
+        dataTables = dataTables.filter(function (item) {
+            return item != undefined;
+        });
+
+        if (dataTables.length == 0) {
+            AIMappingColumnsGraph.visjsGraph.data.nodes = nodes;
+            AIMappingColumnsGraph.visjsGraph.draw(function () {
+                AIMappingColumnsGraph.visjsGraph.network.fit();
+                AIMappingColumnsGraph.refreshLegend(AIMappingColumnsGraph.graphDiv);
+                if (callback) {
+                    callback();
+                }
+            });
+            return;
+        }
+
+        var index = 0;
+        async.eachSeries(
+            dataTables,
+            function (table, callbackEach) {
+                var tableNodes = nodes.filter(function (node) {
+                    return node.data.dataTable == table;
+                });
+                if (index == 0) {
+                    AIMappingColumnsGraph.visjsGraph.data.nodes = tableNodes;
+                    AIMappingColumnsGraph.visjsGraph.draw(function () {
+                        AIMappingColumnsGraph.visjsGraph.network.fit();
+                        callbackEach();
+                    });
+                } else {
+                    AIMappingColumnsGraph.visjsGraph.data.nodes.add(tableNodes);
+                    AIMappingColumnsGraph.visjsGraph.network.fit();
+                    callbackEach();
+                }
+                index++;
+            },
+            function (err) {
+                if (err) {
+                    return MainController.errorAlert(err);
+                }
+                var classNodes = nodes.filter(function (node) {
+                    return node.data.type == "Class";
+                });
+                AIMappingColumnsGraph.visjsGraph.data.nodes.add(classNodes);
+                AIMappingColumnsGraph.visjsGraph.network.fit();
+                AIMappingColumnsGraph.refreshLegend(AIMappingColumnsGraph.graphDiv);
+                if (callback) {
+                    callback();
+                }
+            },
+        );
+    };
+
+    /**
+     * Loads the Vis.js graph for the current mapping source.
+     * Retrieves graph data from a JSON file and adjusts layout positioning.
+     * Clusters nodes based on data tables for better visualization.
+     * @function
+     * @name loadVisjsGraph
+     * @memberof module:AIMappingColumnsGraph
+     * @param {function} [callback] - Optional callback function executed after loading the graph.
+     * @returns {void}
+     */
+    self.loadVisjsGraph = function (callback) {
+        AIMappingModeler.clearMappings();
+        //   return callback()
+        setTimeout(function () {
+            self.visjsGraph.loadGraph(
+                "mappings_" + AIMappingModeler.currentSLSsource + "_ALL" + ".json",
+                false,
+                function (err, result, rawText) {
+                    if (err) {
+                        // no rawText: request error, e.g. a source without mappings file yet
+                        if (rawText) {
+                            self.handleCorruptedMappingsFile(err, rawText);
+                        }
+                        if (callback) {
+                            return callback(err);
+                        }
+                        return err;
+                    }
+                    if (result?.options?.config) {
+                        AIDataSourceManager.rawConfig = result.options.config;
+                        AIDataSourceManager.currentConfig = result.options.config;
+                    }
+                    AIMappingColumnsGraph.visjsGraph.data = result;
+                    self.normalizeRdfTypeEdgesColor(AIMappingColumnsGraph.visjsGraph);
+                    if (result.nodes.length == 0) {
+                        return AIMappingColumnsGraph.visjsGraph.draw(function () {
+                            AIMappingColumnsGraph.refreshLegend(AIMappingColumnsGraph.graphDiv);
+                            if (callback) {
+                                return callback();
+                            }
+                        });
+                    }
+                    // Draw graph by DataTable batches
+                    self.addNodesByDataTableBatch(result.nodes, function () {
+                        if (true) {
+                            self.visjsGraph.data.nodes.get().forEach(function (node) {
+                                if (node.data.type == "Class") {
+                                    node.level = 3;
+                                } else if (node.data.type == "Table") {
+                                    node.level = 1;
+                                } else {
+                                    node.level = 2;
+                                }
+                            });
+                            self.visjsGraph.data.edges.get().forEach(function (edge) {
+                                if (edge.smooth === null) {
+                                    edge.smooth = "smooth";
+                                }
+                            });
+                        }
+
+                        AIMappingColumnsGraph.visjsGraph.network.setOptions({ physics: self.physicsHierarchical });
+                        self.adjustEdgeCurvatures();
+                        UI.resetWindowSize();
+
+                        if (callback) {
+                            return callback();
+                        }
+                    });
+                },
+                true,
+                self.migrateToHierarchicalGraphFn,
+            );
+        }, 500);
+    };
+    /**
+     * Creates clusters from the different data sources used in the graph.
+     * Groups nodes based on their associated data tables and clusters them for better visualization.
+     *
+     * @function
+     * @name createDataSourcesClusters
+     * @returns {void}
+     */
+    self.createDataSourcesClusters = function () {
+        var map = {};
+        var index = 0;
+        var dataTables = self.getDatasourceTablesFromVisjsGraph();
+
+        for (var tableIndex in dataTables) {
+            var table = dataTables[tableIndex];
+
+            var clusterOptionsByData = {
+                joinCondition: function (node) {
+                    if (node.data && node.data.dataTable == table && table != AIMappingModeler?.currentTable?.name) {
+                        if (!map[node.id]) {
+                            map[node.id] = table;
+                            return true;
+                        }
+                    }
+                    return false;
+                },
+
+                clusterNodeProperties: {
+                    id: "cluster_" + table,
+                    borderWidth: 3,
+                    shape: "ellipse",
+                    color: "#ddd",
+                    label: table,
+                    y: -200,
+                    x: index++ * 250 - 400,
+                    fixed: { x: true, y: true },
+                    data: { table: table },
+                    allowSingleNodeCluster: true,
+                },
+            };
+
+            self.visjsGraph.network.clustering.cluster(clusterOptionsByData);
+        }
+    };
+
+    /**
+     * Saves the current Vis.js graph to a JSON file.
+     * Captures nodes, edges, positions, and configuration data before sending it to the backend for storage.
+     * @function
+     * @name saveVisjsGraph
+     * @memberof module:AIMappingColumnsGraph
+     * @param {function} [callback] - Optional callback function executed after saving the graph.
+     * @returns {void}
+     */
+    self.saveVisjsGraph = function (callback) {
+        var fileName = "mappings_" + AIMappingModeler.currentSLSsource + "_ALL" + ".json";
+        var graph = AIMappingColumnsGraph.visjsGraph;
+        if (graph.data?.nodes?.length == 0) {
+            nodes = [];
+        } else {
+            var nodes = graph.data.nodes.get();
+        }
+        if (graph.data?.edges?.length == 0) {
+            edges = [];
+        } else {
+            var edges = graph.data.edges.get();
+        }
+        //var nodes = graph.data.nodes.get();
+        //var positions = {};
+        var positions = graph.network.getPositions();
+        // Initialisation of Config if there isn't
+
+        // AIMappingsDetails.setIsMainColumnKey()
+
+        if (!AIDataSourceManager.rawConfig || Object.keys(AIDataSourceManager.rawConfig).length == 0) {
+            if (Config.sources[AIMappingModeler.currentSLSsource].baseUri) {
+                var graphUri = Config.sources[AIMappingModeler.currentSLSsource].baseUri;
+            } else {
+                var graphUri = Config.sources[AIMappingModeler.currentSLSsource].graphUri;
+            }
+
+            var newJson = {
+                sparqlServerUrl: Config.sources[AIMappingModeler.currentSLSsource].sparql_server.url,
+                graphUri: graphUri,
+                prefixes: {},
+                lookups: {},
+                databaseSources: {},
+                csvSources: {},
+                isConfigInMappingGraph: true,
+            };
+            AIDataSourceManager.rawConfig = newJson;
+        }
+        nodes = self.sortVisjsColumns(nodes);
+        var config = JSON.parse(JSON.stringify(AIDataSourceManager.rawConfig));
+        // replace the graphUri by baseUri (graphUri used in old versions)
+        if (Config.sources[AIMappingModeler.currentSLSsource].baseUri) {
+            config.graphUri = Config.sources[AIMappingModeler.currentSLSsource].baseUri;
+        } else {
+            config.graphUri = Config.sources[AIMappingModeler.currentSLSsource].graphUri;
+        }
+        // add lastUpdated dict on update
+        if (!config.lastUpdate) {
+            config.lastUpdate = {};
+        }
+        config.lastUpdate.user = authentication.currentUser.identifiant;
+        config.lastUpdate.date = new Date().toISOString();
+        delete config.currentDataSource;
+        var data = {
+            nodes: nodes,
+            edges: edges,
+            context: graph.currentContext,
+            positions: positions,
+            options: { config: config },
+        };
+        if (!fileName) {
+            fileName = prompt("Graph name");
+        }
+        if (!fileName || fileName == "") {
+            return;
+        }
+        if (fileName.indexOf(".json") < 0) {
+            fileName = fileName + ".json";
+        }
+        var payload = {
+            fileName: fileName,
+            data: data,
+        };
+        var dataStr = JSON.stringify(data, null, 2);
+        var payload = {
+            dir: "graphs/",
+            fileName: fileName,
+            data: dataStr,
+        };
+
+        try {
+            JSON.parse(dataStr);
+
+            $.ajax({
+                type: "POST",
+                url: `${Config.apiUrl}/data/file`,
+                data: payload,
+                dataType: "json",
+                success: function (_result, _textStatus, _jqXHR) {
+                    $("#visjsGraph_savedGraphsSelect").append($("<option></option>").attr("value", fileName).text(fileName));
+                    UI.message("Graph saved");
+                    if (callback) {
+                        callback();
+                    }
+                },
+                error(err) {
+                    return MainController.errorAlert(err);
+                },
+            });
+        } catch (e) {
+            return MainController.errorAlert(e);
+        }
+    };
+
+    /**
+     * Retrieves distinct data tables from the Vis.js graph nodes.
+     * Filters out undefined values and returns a list of unique data tables.
+     * @function
+     * @name getDatasourceTablesFromVisjsGraph
+     * @memberof module:AIMappingColumnsGraph
+     * @returns {Array<string>} List of unique data table names.
+     */
+    self.getDatasourceTablesFromVisjsGraph = function () {
+        if (self?.visjsGraph?.data?.nodes?.length == 0) {
+            return [];
+        }
+        var tables = self.visjsGraph.data.nodes.get().map(function (node) {
+            return node?.data?.dataTable;
+        });
+        if (tables.length > 0) {
+            tables = common.array.distinctValues(tables);
+            tables = tables.filter(function (item) {
+                return item != undefined;
+            });
+        } else {
+            tables = [];
+        }
+        return tables;
+    };
+
+    /**
+     * Updates a node in the Vis.js graph and saves the updated graph.
+     * @function
+     * @name updateNode
+     * @memberof module:AIMappingColumnsGraph
+     * @param {Object} node - The node to be updated.
+     * @returns {void}
+     */
+    self.updateNode = function (node, callback) {
+        if (!node) {
+            return;
+        }
+        self.visjsGraph.data.nodes.update(node);
+        self.saveVisjsGraph(function () {
+            if (callback) {
+                callback();
+            }
+        });
+    };
+
+    /**
+     * Removes a node from the Vis.js graph and saves the updated graph.
+     * @function
+     * @name removeNode
+     * @memberof module:AIMappingColumnsGraph
+     * @param {Object} node - The node to be removed.
+     * @returns {void}
+     */
+    self.removeNode = function (node, callback) {
+        if (!node) {
+            return;
+        }
+
+        self.visjsGraph.data.nodes.remove(node);
+        self.saveVisjsGraph(function () {
+            if (callback) {
+                callback();
+            }
+        });
+    };
+
+    /**
+     * Adds a new node to the Vis.js graph and saves the updated graph.
+     * @function
+     * @name addNodes
+     * @memberof module:AIMappingColumnsGraph
+     * @param {Object} node - The node to be added.
+     * @returns {void}
+     */
+    self.addNodes = function (nodes, callback) {
+        if (!nodes) {
+            return;
+        }
+        if (!Array.isArray(nodes)) {
+            nodes = [nodes];
+        }
+
+        var save = false;
+        var existingNodeIds = self.visjsGraph.data.nodes.getIds();
+        nodes.forEach(function (node) {
+            if (existingNodeIds.indexOf(node.id) > -1) {
+                return;
+            }
+            save = true;
+            self.visjsGraph.data.nodes.add(node);
+        });
+        if (save) {
+            self.saveVisjsGraph(function () {
+                if (callback) {
+                    callback();
+                }
+            });
+        }
+    };
+
+    /**
+     * Updates an edge in the Vis.js graph and saves the updated graph.
+     * @function
+     * @name updateEdge
+     * @memberof module:AIMappingColumnsGraph
+     * @param {Object} edge - The edge to be updated.
+     * @returns {void}
+     */
+    self.updateEdge = function (edge, callback) {
+        if (!edge) {
+            return;
+        }
+        self.visjsGraph.data.edges.update(edge);
+        self.saveVisjsGraph(function () {
+            if (callback) {
+                callback();
+            }
+        });
+    };
+
+    /**
+     * Removes an edge from the Vis.js graph and saves the updated graph.
+     * @function
+     * @name removeEdge
+     * @memberof module:AIMappingColumnsGraph
+     * @param {Object} edge - The edge to be removed.
+     * @returns {void}
+     */
+    self.removeEdge = function (edge, callback) {
+        if (!edge) {
+            return;
+        }
+        self.visjsGraph.data.edges.remove(edge);
+        self.saveVisjsGraph(function () {
+            if (callback) {
+                callback();
+            }
+        });
+    };
+
+    /**
+     * Adds a new edge to the Vis.js graph and saves the updated graph.
+     * @function
+     * @name sortVisjsColumns
+     * @memberof module:AIMappingColumnsGraph
+     * @param {array}  nodes - The nodes to be sorted.
+     * @returns {void}
+     */
+    self.sortVisjsColumns = function (nodes) {
+        //var typesWithDataTable = ["Table", "Column", "RowIndex", "VirtualColumn"];
+        nodes.sort(function (a, b) {
+            if (!a.data.dataTable && !b.data.dataTable) {
+                return 0;
+            }
+            if (!a.data.dataTable) {
+                return -1;
+            }
+            if (!b.data.dataTable) {
+                return 1;
+            }
+            if (a.data.dataTable < b.data.dataTable) {
+                return -1;
+            } else if (a.data.dataTable > b.data.dataTable) {
+                return 1;
+            }
+            return 0;
+        });
+        return nodes;
+    };
+
+    /**
+     * Adds a new edge to the Vis.js graph and saves the updated graph.
+     * @function
+     * @name addEdge
+     * @memberof module:AIMappingColumnsGraph
+     * @param {Object} edge - The edge to be added.
+     * @returns {void}
+     */
+    self.addEdge = function (edge) {
+        if (!edge) {
+            return;
+        }
+        try {
+            self.visjsGraph.data.edges.add(edge);
+        } catch (e) {
+            // Ignore duplicate/invalid edge addition
+        }
+        self.adjustEdgeCurvatures();
+        self.saveVisjsGraph();
+    };
+
+    /**
+     * Saves the Vis.js graph with the current configuration.
+     * @function
+     * @name saveVisjsGraphWithConfig
+     * @memberof module:AIMappingColumnsGraph
+     * @param {Function} callback - Optional callback to execute after saving.
+     * @returns {void}
+     */
+    self.saveVisjsGraphWithConfig = function (callback) {
+        self.saveVisjsGraph(callback);
+    };
+
+    /**
+     * Clears the current graph, resets offsets, and reinitializes the graph canvas.
+     * @function
+     * @name clearGraph
+     * @memberof module:AIMappingColumnsGraph
+     * @returns {void}
+     */
+    self.clearGraph = function () {
+        var currentDataSource = AIDataSourceManager.currentConfig.currentDataSource;
+        AIMappingColumnsGraph.visjsGraph.clearGraph();
+        AIMappingColumnsGraph.visjsGraph = null;
+        var visjsData = { nodes: [], edges: [] };
+        AIMappingColumnsGraph.drawGraphCanvas(AIMappingColumnsGraph.graphDiv, visjsData, function () {
+            AIDataSourceManager.currentConfig.currentDataSource = currentDataSource;
+        });
+        self.initOffsets();
+    };
+
+    /**
+     *
+     * @param table
+     */
+    self.zoomOnTable = function (table) {
+        AIMappingColumnsGraph.hideNodesFromOtherTables(table);
+        self.visjsGraph.network.focus(table, {
+            scale: 0.85,
+            offset: { x: 10, y: 200 },
+            locked: false,
+            animation: true,
+        });
+        self.visjsGraph.network.fit();
+    };
+
+    /**
+     * migrates existing graphs based on previous version to hierarchical graph without fixed positions
+     * @param data
+     */
+    self.migrateToHierarchicalGraphFn = function (data) {
+        var visjsOptions = data.context.options.visjsOptions;
+        data.positions = {};
+        var isHierarchical = visjsOptions.layout && visjsOptions.layout.hierarchical;
+        var distinctEdges = {};
+        var dataSources = {};
+        var dataTables = self.getDatasourceTablesFromVisjsGraph();
+
+        if (data && data.nodes) {
+            data.nodes.forEach(function (node) {
+                if (node && node.data && AIMappingModeler.columnsMappingsObjects.indexOf(node.data.type) !== -1) {
+                    if (node.data.dataTable && (node.data.datasource || node.data.dataSource)) {
+                        dataSources[node.data.dataTable] = node.data.datasource || node.data.dataSource;
+                    }
+                }
+            });
+        }
+
+        data.nodes.forEach(function (node) {
+            if (node && node.data && node.data.type == "Table") {
+                if (Object.keys(dataSources).indexOf(node.id) !== -1) {
+                    node.data.datasource = dataSources[node.id];
+                }
+            }
+        });
+        if (true || !isHierarchical) {
+            var tables = {};
+            var nodesMap = {};
+            var newNodes = [];
+            data.nodes.forEach(function (oldNode) {
+                var node = {};
+                node.id = oldNode.id;
+                node.label = oldNode.label;
+                node.data = oldNode.data;
+                node.shape = oldNode.shape || "box";
+                node.color = oldNode.color;
+                node.size = 18;
+                /*if(oldNode.data.prefixURI){
+                    if(data?.options?.config){
+                        if(!data?.options?.config?.prefixURI){
+                            data.options.config.prefixURI = {};
+                        }
+                        data.options.config.prefixURI[oldNode.label] = oldNode.data.prefixURI;
+
+                    }
+                   
+                }*/
+                if (oldNode.data.type == "Class") {
+                    node.level = 3;
+                } else if (oldNode.data.type == "Table") {
+                    node.color = "#d8cacd";
+                    node.level = 1;
+                    node.data.dataTable = node.id;
+                } else {
+                    node.level = 2;
+
+                    if (node.data.dataTable) {
+                        var dataTableToNodeEdges = data.edges.filter(function (edge) {
+                            return edge.to == node.id && edge.from == node.data.dataTable;
+                        });
+                        if (dataTableToNodeEdges.length == 0) {
+                            var edgeKey = node.data.dataTable + node.id;
+                            if (!distinctEdges[edgeKey]) {
+                                distinctEdges[edgeKey] = 1;
+                                data.edges.push({
+                                    id: common.getRandomHexaId(5),
+                                    to: node.id,
+                                    from: node.data.dataTable,
+                                    color: "#ef4270",
+                                    width: 2,
+                                });
+                            }
+                        }
+                        if (!tables[node.data.dataTable]) {
+                            tables[node.data.dataTable] = 1;
+                        }
+                    }
+                }
+
+                nodesMap[node.id] = node;
+                newNodes.push(node);
+            });
+            //newNodes=self.sortVisjsColumns(newNodes);
+            data.nodes = newNodes;
+
+            data.edges.forEach(function (edge) {
+                edge.width = 3;
+                edge.font = { size: 16 };
+                if (edge.smooth === null) {
+                    edge.smooth = {
+                        type: "curvedCW",
+                        forceDirection: "vertical",
+                        roundness: 0.45,
+                    };
+                }
+            });
+
+            for (var table in tables) {
+                if (!nodesMap[table]) {
+                    var tableNode = AIMappingColumnsGraph.getVisjsTableNode(table);
+                    data.nodes.push(tableNode);
+                }
+            }
+            data.context.options.layoutHierarchical = self.layoutHierarchical;
+            data.nodes = self.sortVisjsColumns(data.nodes);
+        }
+
+        return data;
+    };
+    /**
+     * Handles a mappings JSON file that failed to parse: shows the exact parse error, warns the user
+     * that the raw (invalid) file will be downloaded so they can fix it and re-import it, then triggers
+     * the download of the raw content. Used when loadVisjsGraph cannot parse the source mappings file.
+     *
+     * @function
+     * @name handleCorruptedMappingsFile
+     * @memberof module:AIMappingColumnsGraph
+     * @param {string|Error} err - The JSON parse error (or its message).
+     * @param {string} rawText - The raw invalid file content, downloaded so the user can correct it.
+     * @returns {void}
+     */
+    self.handleCorruptedMappingsFile = function (err, rawText) {
+        var fileName = "mappings_" + AIMappingModeler.currentSLSsource + "_ALL" + ".json";
+        var errorMessage = err && err.message ? err.message : String(err);
+
+        alert("Error loading the mappings of source " + AIMappingModeler.currentSLSsource + ":\n\n" + errorMessage);
+        alert("The file '" + fileName + "' contains invalid JSON and could not be loaded.\n\n" + "It will now be downloaded so you can fix it and re-import it (mappings Import button).");
+
+        Export.downloadStringAsFile(rawText, fileName, "application/json");
+    };
+
+    /**
+     * Exports the current mappings from the Vis.js graph to a JSON file.
+     * Saves the graph data before exporting
+     * Handles errors during the export process and displays appropriate messages.
+     *
+     * @function
+     * @name exportMappings
+     * @memberof module:AIMappingColumnsGraph
+     * @returns {void}
+     */
+    self.exportMappings = function (source, callback) {
+        if (!source) {
+            source = AIMappingModeler.currentSLSsource;
+        }
+        self.saveVisjsGraph(function (err) {
+            self.loadMappingsFromFile(source, function (err, data) {
+                if (err) {
+                    if (err.responseJSON == "file does not exist") {
+                        return;
+                    }
+                    return MainController.errorAlert(err);
+                }
+                if (data?.options?.config?.sparqlServerUrl) {
+                    data.options.config.sparqlServerUrl = "_default";
+                }
+                var fileName = "mappings_" + source + "_ALL" + ".json";
+                Export.downloadJSON(data, fileName);
+            });
+        });
+    };
+
+    self.loadMappingsFromFile = function (source, callback) {
+        var fileName = "mappings_" + source + "_ALL" + ".json";
+        var payload = {
+            dir: "graphs/",
+            fileName: fileName,
+        };
+
+        $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/data/file`,
+            data: payload,
+            dataType: "json",
+            success: function (result, _textStatus, _jqXHR) {
+                var data = JSON.parse(result);
+
+                if (callback) {
+                    return callback(null, data);
+                }
+            },
+            error: function (err) {
+                return callback(err);
+            },
+        });
+    };
+
+    // -------------------------------
+    // Mapping import helpers
+    // -------------------------------
+
+    /**
+     * Returns the 1-based line number for a character index in a JSON text.
+     * Used to provide approximate locations in user-imported JSON files.
+     * @param {string} jsonText
+     * @param {number} idx
+     * @returns {number|null}
+     */
+    function getLineNumberFromIndex(jsonText, idx) {
+        if (!jsonText || typeof idx !== "number" || idx < 0) {
+            return null;
+        }
+        return jsonText.slice(0, idx).split("\n").length;
+    }
+
+    /**
+     * Tries to locate the line number of a datasource id under options.config.<sectionName>.
+     * Best-effort heuristic (may return null if formatting differs or JSON is minified).
+     * @param {string} jsonText
+     * @param {string} sectionName
+     * @param {string} key
+     * @returns {number|null}
+     */
+    function findConfigKeyLine(jsonText, sectionName, key) {
+        var sectionNeedle = `"${sectionName}": {`;
+        var sectionPos = jsonText.indexOf(sectionNeedle);
+        if (sectionPos < 0) {
+            return null;
+        }
+
+        var windowText = jsonText.slice(sectionPos, sectionPos + 20000);
+        var keyNeedle = `"${key}"`;
+        var keyPosLocal = windowText.indexOf(keyNeedle);
+        if (keyPosLocal < 0) {
+            return null;
+        }
+
+        return getLineNumberFromIndex(jsonText, sectionPos + keyPosLocal);
+    }
+
+    /**
+     * Tries to locate the line number where a node references a datasource id.
+     * Best-effort heuristic based on textual search near the node id.
+     * @param {string} jsonText
+     * @param {string} nodeId
+     * @param {string} datasourceId
+     * @returns {number|null}
+     */
+    function findNodeDatasourceLine(jsonText, nodeId, datasourceId) {
+        var idNeedle = `"id": "${nodeId}"`;
+        var idPos = jsonText.indexOf(idNeedle);
+        if (idPos < 0) {
+            return null;
+        }
+
+        var windowText = jsonText.slice(idPos, idPos + 4000);
+        var dsNeedle = `"datasource": "${datasourceId}"`;
+        var dsPosLocal = windowText.indexOf(dsNeedle);
+
+        var finalPos = dsPosLocal >= 0 ? idPos + dsPosLocal : idPos;
+        return getLineNumberFromIndex(jsonText, finalPos);
+    }
+
+    /** Shows a modal dialog explaining why the import is blocked. @returns {void} */
+    function showImportBlockingDialog(title, htmlBody) {
+        var html = "<div style='font-size:13px;line-height:1.45'>" + htmlBody + "</div>";
+        $("#mainDialogDiv").html(html);
+        UI.openDialog("mainDialogDiv", { title: title });
+        UI.clampAndCenterDialog("mainDialogDiv");
+    }
+
+    /** Posts the imported mapping graph JSON to the backend. @returns {void} */
+    function doImportPost(dataToSave) {
+        var fileName = "mappings_" + AIMappingModeler.currentSLSsource + "_ALL" + ".json";
+        var payload = {
+            dir: "graphs/",
+            fileName: fileName,
+            data: JSON.stringify(dataToSave, null, 2),
+        };
+        $.ajax({
+            type: "POST",
+            url: `${Config.apiUrl}/data/file`,
+            data: payload,
+            dataType: "json",
+            success: function (_result, _textStatus, _jqXHR) {
+                AIMappingModeler.onLoaded();
+            },
+            error: function (err) {
+                return MainController.errorAlert(err);
+            },
+        });
+    }
+
+    /**
+     * Parses and validates the imported mapping JSON text.
+     * Removes lastUpdate and ensures graphUri matches current source.
+     * @returns {{data:Object, error:string}}
+     */
+    function parseAndSanitizeImport(importedJsonText) {
+        var data = null;
+
+        try {
+            data = JSON.parse(importedJsonText);
+        } catch (e) {
+            return { data: null, error: "Invalid JSON: " + (e && e.message ? e.message : e) };
+        }
+
+        // Basic validation
+        if (!data || !data.nodes) {
+            return { data: null, error: "Invalid mapping file: missing nodes." };
+        }
+
+        // Remove lastUpdate if present
+        if (data.options && data.options.config && data.options.config.lastUpdate) {
+            delete data.options.config.lastUpdate;
+        }
+
+        // Check graphUri match (same behavior as before)
+        var currentGraphUri = Config.sources[MainController.currentSource].graphUri;
+        if (data.options && data.options.config && data.options.config.graphUri != currentGraphUri) {
+            return {
+                data: null,
+                error: "graphUri in file is not the same as the current graphUri, update graphURI in JSON file",
+            };
+        }
+
+        return { data: data, error: null };
+    }
+
+    /**
+     * Builds an index of datasource usages in nodes.
+     * @param {Object} data Parsed mapping JSON object.
+     * @param {string} importedJsonText Raw JSON text (used to locate approximate line numbers).
+     * @returns {Object<string, Array>} Map datasourceId -> usage occurrences.
+     */
+    function indexDatasourceUsages(data, importedJsonText) {
+        var datasourceUsagesById = {}; // { dsId: [ {nodeIndex,nodeId,nodeType,dataTable,line} ] }
+
+        (data.nodes || []).forEach(function (node, nodeIndex) {
+            // datasourceId peut être stocké sous datasource ou dataSource selon les versions
+            var datasourceId = node && node.data ? node.data.datasource || node.data.dataSource : null;
+            if (!datasourceId) {
+                return;
+            }
+
+            if (!datasourceUsagesById[datasourceId]) {
+                datasourceUsagesById[datasourceId] = [];
+            }
+
+            datasourceUsagesById[datasourceId].push({
+                nodeIndex: nodeIndex,
+                nodeId: node.id,
+                nodeType: node.data.type,
+                dataTable: node.data.dataTable,
+                line: findNodeDatasourceLine(importedJsonText, node.id, datasourceId),
+            });
+        });
+        return datasourceUsagesById;
+    }
+
+    /**
+     * Checks that datasource ids used in nodes are declared in options.config (databaseSources/csvSources).
+     * @returns {{unknownIds:string[], dbSourcesFromFile:Object, csvSourcesFromFile:Object, requiredDbIds:string[]}}
+     */
+    function validateDatasourcesDeclared(data, datasourceUsagesById) {
+        var cfg = data && data.options && data.options.config ? data.options.config : {};
+
+        var dbSourcesFromFile = cfg.databaseSources || {};
+        var csvSourcesFromFile = cfg.csvSources || {};
+
+        var dbIdsFromConfig = Object.keys(dbSourcesFromFile);
+        var csvIdsFromConfig = Object.keys(csvSourcesFromFile);
+
+        var usedIds = Object.keys(datasourceUsagesById || {});
+        var unknownIds = usedIds.filter(function (id) {
+            return dbIdsFromConfig.indexOf(id) < 0 && csvIdsFromConfig.indexOf(id) < 0;
+        });
+        return {
+            unknownIds: unknownIds,
+            dbSourcesFromFile: dbSourcesFromFile,
+            csvSourcesFromFile: csvSourcesFromFile,
+            requiredDbIds: dbIdsFromConfig.slice(),
+        };
+    }
+
+    /**
+     * Renders up to 5 occurrences of datasource usage in nodes[].
+     * @param {Array<Object>} usages
+     * @returns {string} HTML fragment
+     */
+    function renderDatasourceOccurrences(usages) {
+        return (usages || [])
+            .slice(0, 5)
+            .map(function (usage) {
+                return (
+                    " • <code>nodes[" +
+                    usage.nodeIndex +
+                    "].data.datasource</code> (line " +
+                    (usage.line || "?") +
+                    ") - type=" +
+                    usage.nodeType +
+                    (usage.dataTable ? " - table=" + usage.dataTable : "")
+                );
+            })
+            .join("<br>");
+    }
+
+    /**
+     * Builds the HTML list for unknown datasources.
+     * @param {string[]} unknownIds
+     * @param {Object<string,Array>} datasourceUsagesById
+     * @returns {string} HTML <li>...</li> list
+     */
+    function renderUnknownDatasourcesHtml(unknownIds, datasourceUsagesById) {
+        return (unknownIds || [])
+            .map(function (id) {
+                var usages = datasourceUsagesById && datasourceUsagesById[id] ? datasourceUsagesById[id] : [];
+                var occurrences = renderDatasourceOccurrences(usages);
+                var more = usages.length > 5 ? "<br> … (+" + (usages.length - 5) + " more occurrences)" : "";
+                return "<li><b>" + id + "</b><br>" + occurrences + more + "</li>";
+            })
+            .join("");
+    }
+
+    /**
+     * Builds the HTML list for missing databases on target server.
+     * @param {string[]} missing
+     * @param {Object} dbSourcesFromFile
+     * @param {Object<string,Array>} datasourceUsagesById
+     * @param {string} importedJsonText
+     * @returns {string} HTML <li>...</li> list
+     */
+    function renderMissingDatabasesHtml(missing, dbSourcesFromFile, datasourceUsagesById, importedJsonText) {
+        return (missing || [])
+            .map(function (id) {
+                var name = dbSourcesFromFile && dbSourcesFromFile[id] && dbSourcesFromFile[id].name ? dbSourcesFromFile[id].name : "(unknown name)";
+
+                var cfgLine = findConfigKeyLine(importedJsonText, "databaseSources", id);
+
+                var usages = datasourceUsagesById && datasourceUsagesById[id] ? datasourceUsagesById[id] : [];
+                var occurrences = renderDatasourceOccurrences(usages);
+                var more = usages.length > 5 ? "<br> … (+" + (usages.length - 5) + " more occurrences)" : "";
+
+                return (
+                    "<li><b>" +
+                    id +
+                    "</b> - " +
+                    name +
+                    "<br>Declared in file: <code>options.config.databaseSources." +
+                    id +
+                    "</code> (line " +
+                    (cfgLine || "?") +
+                    ")" +
+                    "<br>" +
+                    occurrences +
+                    more +
+                    "</li>"
+                );
+            })
+            .join("");
+    }
+
+    /**
+     * Computes which database ids declared in the file are missing on the target server.
+     * @param {string[]} requiredDbIds
+     * @param {Object|Array} resp API response from GET /databases
+     * @returns {{missing: string[]}}
+     */
+    function validateDatabasesAvailable(requiredDbIds, resp) {
+        var available = Array.isArray(resp) ? resp : resp && resp.resources ? resp.resources : [];
+        var availableIds = new Set(
+            available.map(function (db) {
+                return db.id;
+            }),
+        );
+        var missing = (requiredDbIds || []).filter(function (id) {
+            return !availableIds.has(id);
+        });
+        return { missing: missing };
+    }
+
+    /**
+         * @function
+         * @name importMappingsFromJSONFile
+         * @memberof module:AIMappingColumnsGraph
+         * @description
+         * Imports a mappings JSON file into the current mapping graph and saves it on the server.
+         *
+         * To prevent crashes when importing a graph created on another server, this import validates
+         * data source identifiers before writing the graph file:
+         * 1) JSON integrity: each `nodes[i].data.datasource` must be declared in
+         *    `options.config.databaseSources` or `options.config.csvSources`.
+         * 2) Target server availability: if `options.config.databaseSources` contains ids, the import
+         *    calls `GET /databases` and checks that each id exists and/or is authorized.
+
+         * If validation fails, an "Import blocked" dialog is shown with actionable guidance (and tries to display approximate JSON line numbers when possible).
+         * @returns {void}
+         */
+    self.importMappingsFromJSONFile = function () {
+        ImportFileWidget.showImportDialog(function (err, importedJsonText) {
+            if (err) {
+                return MainController.errorAlert(err);
+            }
+
+            var parsed = parseAndSanitizeImport(importedJsonText);
+            if (parsed.error) {
+                return alert(parsed.error);
+            }
+            var data = parsed.data;
+
+            var datasourceUsagesById = indexDatasourceUsages(data, importedJsonText);
+
+            var declared = validateDatasourcesDeclared(data, datasourceUsagesById);
+            var unknownIds = declared.unknownIds;
+            var dbSourcesFromFile = declared.dbSourcesFromFile;
+            var csvSourcesFromFile = declared.csvSourcesFromFile;
+            var requiredDbIds = declared.requiredDbIds;
+
+            // Block import and show actionable guidance if datasource validation fails.
+            if (unknownIds.length > 0) {
+                var unknownHtml = renderUnknownDatasourcesHtml(unknownIds, datasourceUsagesById);
+
+                showImportBlockingDialog(
+                    "Import blocked",
+                    "<p>These data sources are used in <code>nodes[].data.datasource</code> but are declared neither in <code>options.config.databaseSources</code> nor in <code>options.config.csvSources</code>.</p>" +
+                        "<ul>" +
+                        unknownHtml +
+                        "</ul>" +
+                        "<p><b>Fix:</b> add these ids to the config, or replace the value in the nodes listed below.</p>",
+                );
+                return; // STOP
+            }
+
+            if (requiredDbIds.length === 0) {
+                return doImportPost(data);
+            }
+
+            $.ajax({
+                type: "GET",
+                url: `${Config.apiUrl}/databases`,
+                dataType: "json",
+                success: function (resp) {
+                    var check = validateDatabasesAvailable(requiredDbIds, resp);
+                    var missing = check.missing;
+
+                    if (missing.length > 0) {
+                        var missingHtml = renderMissingDatabasesHtml(missing, dbSourcesFromFile, datasourceUsagesById, importedJsonText);
+
+                        showImportBlockingDialog(
+                            "Import blocked",
+                            "<p>These databases are referenced by the mapping but are not available on this server (missing or not authorized).</p>" +
+                                "<ul>" +
+                                missingHtml +
+                                "</ul>" +
+                                "<p><b>To fix:</b><br>" +
+                                "1) Create/add these databases on the target server (ConfigEditor ▸ Databases).<br>" +
+                                "2) Grant access to your account (ConfigEditor ▸ profiles/allowedDatabases).<br>" +
+                                "3) Or edit the imported JSON to point to an existing id.</p>",
+                        );
+                        return;
+                    }
+                    return doImportPost(data);
+                },
+
+                error: function (e) {
+                    var status = e && typeof e.status !== "undefined" ? e.status : 0;
+
+                    var details =
+                        (e && e.responseJSON && (e.responseJSON.message || e.responseJSON.error)) ||
+                        (e && e.responseText) ||
+                        (e && e.statusText) ||
+                        "Unable to reach the /databases API (offline or server unavailable).";
+
+                    return MainController.errorAlert("Database validation failed (status=" + status + ") : " + details);
+                },
+            });
+        });
+    };
+
+    self.hideNodesFromOtherTables = function (table) {
+        var nodes = AIMappingColumnsGraph.visjsGraph.data.nodes.get();
+        var edges = AIMappingColumnsGraph.visjsGraph.data.edges.get();
+
+        self.normalizeRdfTypeEdgesColor(AIMappingColumnsGraph.visjsGraph);
+
+        var newNodes = [];
+        var newNodesMap = {};
+        var tableNodes = {};
+
+        nodes.forEach(function (node) {
+            var hidden = true;
+            if (node.data && node.data.dataTable) {
+                if (node.data.dataTable == table) {
+                    tableNodes[node.id] = node;
+                    hidden = false;
+                }
+            }
+            newNodesMap[node.id] = { id: node.id, hidden: hidden };
+        });
+        //show classes linked to column
+        var edgesFromClassMap = {};
+        edges.forEach(function (edge) {
+            if (!edge.data || !tableNodes[edge.from]) {
+                return;
+            }
+            var isTypeLink = edge.data.type == "rdf:type" || edge.data.type == "owl:Class";
+            var isSubClassOfLink = edge.data.type == "rdfs:subClassOf";
+            if (isTypeLink || isSubClassOfLink) {
+                newNodesMap[edge.to].hidden = false;
+                newNodesMap[edge.from].hidden = false;
+            }
+        });
+        for (var nodeId in newNodesMap) {
+            newNodes.push(newNodesMap[nodeId]);
+        }
+        AIMappingColumnsGraph.visjsGraph.data.nodes.update(newNodes);
+    };
+
+    self.relationMessage = function (fromLabel, toLabel) {
+        if (AIMappingModeler.currentResourceType != "ObjectProperty") {
+            return;
+        }
+        $("#mappingModeler_relationInfos").html("from: <b>" + (fromLabel ?? "None") + "</b> to: <b>" + (toLabel ?? "None") + "</b>");
+    };
+
+    self.drawClassesGraph = function () {
+        var columns = self.getNodesOfType(AIMappingModeler.columnsMappingsObjects);
+        var edgesFromMap = self.getEdgesMap("from");
+        var classNodesMap = self.getNodesMap("Class");
+        var linkedClasses = {};
+        var classVisjsData = { nodes: [], edges: [] };
+        var uniqueNodes = {};
+
+        async.series(
+            [
+                //get transitive linked classes
+                function (callbackSeries) {
+                    columns.forEach(function (column) {
+                        var columnClass = self.getColumnClass(column);
+                        if (edgesFromMap[column.id]) {
+                            var edgesFrom = edgesFromMap[column.id];
+                            edgesFrom.forEach(function (edge) {
+                                if (edge.from == column.id) {
+                                    var edgeType = edge.data ? edge.data.id : null;
+
+                                    if (edgeType && edgeType != "owl:Class" && edgeType != "rdf:type") {
+                                        if (!linkedClasses[columnClass]) {
+                                            linkedClasses[columnClass] = [];
+                                        }
+                                        edge.targetClass = self.getColumnClass(edge.to);
+                                        linkedClasses[columnClass].push(edge);
+                                    } else {
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    callbackSeries();
+                },
+
+                //build visjgraph
+                function (callbackSeries) {
+                    for (var classId in linkedClasses) {
+                        if (!uniqueNodes[classId]) {
+                            uniqueNodes[classId] = 1;
+                            var startClass = classNodesMap[classId];
+
+                            if (startClass) {
+                                startClass.hidden = false;
+                                classVisjsData.nodes.push(startClass);
+                            }
+                        }
+                        var targetClass;
+                        var targetEdges = linkedClasses[classId];
+                        targetEdges.forEach(function (edge) {
+                            targetClass = classNodesMap[edge.targetClass];
+                            if (targetClass && !uniqueNodes[edge.targetClass]) {
+                                uniqueNodes[edge.targetClass] = 1;
+                                targetClass.hidden = false;
+                                classVisjsData.nodes.push(targetClass);
+                            }
+
+                            if (targetClass) {
+                                var edge2 = {
+                                    label: edge.label,
+                                    data: {
+                                        label: edge.label,
+                                        id: edge.data.id,
+                                    },
+                                    from: classId,
+                                    to: targetClass.id,
+                                    arrows: {
+                                        to: {
+                                            enabled: true,
+                                            type: "arrow",
+                                        },
+                                    },
+
+                                    //  NEW: propagate original edge style from Mapping Modeler
+                                    color: edge.color,
+                                    width: edge.width || 3,
+                                };
+
+                                classVisjsData.edges.push(edge2);
+                            }
+                        });
+                    }
+                    callbackSeries();
+                },
+                // --- get link from column to class and build vijsgraph
+                function (callbackSeries) {
+                    var addedColEdgeIds = {};
+
+                    columns.forEach(function (column) {
+                        if (!column) {
+                            return;
+                        }
+
+                        var columnId = null;
+                        if (column.id) {
+                            columnId = column.id;
+                        }
+                        if (!columnId) {
+                            return;
+                        }
+
+                        var columnLabel = columnId;
+                        if (column.label) {
+                            columnLabel = column.label;
+                        }
+
+                        var dataTable = null;
+                        if (column.data && column.data.dataTable) {
+                            dataTable = column.data.dataTable;
+                        }
+
+                        var displayLabel = columnLabel;
+                        if (dataTable) {
+                            displayLabel = dataTable + ":" + columnLabel;
+                        }
+
+                        var datableKey = dataTable;
+                        var columnColor = common.getResourceColor("dataTable", datableKey, "paletteIntense");
+                        var classId = self.getColumnClass(column);
+                        if (!classId) {
+                            return;
+                        }
+                        if (!uniqueNodes[classId]) {
+                            return;
+                        }
+
+                        if (!uniqueNodes[columnId]) {
+                            classVisjsData.nodes.push({
+                                id: columnId,
+                                label: displayLabel,
+                                shape: "box",
+                                color: columnColor,
+                                data: column.data,
+                            });
+                            uniqueNodes[columnId] = 1;
+                        }
+                        var edgeColumnToClass = [];
+                        if (edgesFromMap && edgesFromMap[columnId]) {
+                            edgeColumnToClass = edgesFromMap[columnId];
+                        }
+
+                        var edgeType = null;
+                        edgeColumnToClass.forEach(function (edge) {
+                            if (edgeType) {
+                                return;
+                            }
+                            if (edge && edge.data && edge.data.type) {
+                                edgeType = edge.data.type;
+                            }
+                        });
+
+                        var edgeId = columnId + "->" + classId + "|" + edgeType;
+                        if (!addedColEdgeIds[edgeId]) {
+                            classVisjsData.edges.push({
+                                id: edgeId,
+                                from: columnId,
+                                to: classId,
+                                label: "",
+                                color: "#00afef",
+                                width: 3,
+                                arrows: { to: { enabled: true, type: "arrow" } },
+                                data: { type: edgeType },
+                            });
+                            addedColEdgeIds[edgeId] = 1;
+                        }
+                    });
+
+                    callbackSeries();
+                },
+
+                // build datatype property edge
+                function (callbackSeries) {
+                    var addedDpEdgeIds = {};
+                    var cols = columns;
+                    cols.forEach(function (column) {
+                        // columnId
+                        var columnId = null;
+                        if (column) {
+                            if (column.id) {
+                                columnId = column.id;
+                            }
+                        }
+                        if (!columnId) {
+                            return;
+                        }
+
+                        // columnLabel
+                        var columnLabel = columnId;
+                        if (column) {
+                            if (column.label) {
+                                columnLabel = String(column.label);
+                            }
+                        }
+
+                        // dataTable
+                        var dataTable = null;
+                        if (column && column.data && column.data.dataTable) {
+                            dataTable = column.data.dataTable;
+                        }
+
+                        if (!uniqueNodes[columnId]) {
+                            classVisjsData.nodes.push({
+                                id: columnId,
+                                label: String(columnLabel),
+                                shape: "box",
+                                color: "#eaf4ff",
+                                data: column.data,
+                            });
+                            uniqueNodes[columnId] = 1;
+                        }
+
+                        // otherPredicates
+                        var dataTypeNodes = null;
+                        if (column && column.data && column.data.otherPredicates) {
+                            dataTypeNodes = column.data.otherPredicates;
+                        }
+                        if (!dataTypeNodes) {
+                            return;
+                        }
+                        dataTypeNodes.forEach(function (predItem) {
+                            if (!predItem) {
+                                return;
+                            }
+                            var dpColumnId = predItem.object;
+
+                            var propUri = null;
+                            if (predItem.property) {
+                                propUri = Sparql_common.getLabelFromURI(predItem.property);
+                            }
+                            if (!propUri) {
+                                return;
+                            }
+
+                            // create node if not existing
+                            if (!uniqueNodes[dpColumnId]) {
+                                classVisjsData.nodes.push({
+                                    id: dpColumnId,
+                                    label: dpColumnId,
+                                    shape: "box",
+                                    size: 10,
+                                    color: "#ddd",
+                                    data: {
+                                        id: dpColumnId,
+                                        type: "DatatypeProperty",
+                                        source: AIMappingModeler.currentSLSsource,
+                                        prop: propUri,
+                                        propLabel: propUri,
+                                        dataTable: dataTable,
+                                    },
+                                });
+                                uniqueNodes[dpColumnId] = 1;
+                            }
+
+                            // edge from datatype propertie to column
+                            var edgeId = columnId + "->" + dpColumnId + "|" + propUri;
+                            if (!addedDpEdgeIds[edgeId]) {
+                                var dpColor = Lineage_whiteboard && Lineage_whiteboard.datatypeColor ? Lineage_whiteboard.datatypeColor : "#9b59b6";
+                                classVisjsData.edges.push({
+                                    id: edgeId,
+                                    from: columnId,
+                                    to: dpColumnId,
+                                    label: propUri,
+                                    arrows: { to: { enabled: true, type: "solid" } },
+                                    font: { color: Lineage_whiteboard.datatypeColor, size: 12 },
+                                    color: dpColor,
+                                    width: 3,
+                                    dashes: true,
+                                    data: { id: propUri, type: "DatatypeProperty" },
+                                });
+                                addedDpEdgeIds[edgeId] = 1;
+                            }
+                        });
+                    });
+
+                    callbackSeries();
+                },
+
+                // draw graph
+                function (callbackSeries) {
+                    //  classVisjsData={nodes:[], edges:[]}
+                    var html = "";
+                    html += "<div id='implicitModelContainer' style='position:relative; width:1000px; height:800px;'>";
+                    html += "<div id='mappingModeler_implicitModelGraph' style='width:100%; height:100%;'></div>";
+                    html += "</div>";
+
+                    $("#mainDialogDiv").html(html);
+                    UI.openDialog("mainDialogDiv", { title: "Implicit Model" });
+                    UI.clampAndCenterDialog("mainDialogDiv");
+                    $("#mainDialogDiv")
+                        .off("dialogclose.mappingLegend")
+                        .on("dialogclose.mappingLegend", function () {
+                            LegendOverlayWidget.uninstallAutoHideOnDialogs("implicitModelContainer", {
+                                namespace: "implicitLegendAutoHide",
+                            });
+                            AIImplicit_legendOverlay.destroy();
+                            LegendOverlayWidget.setVisible(self.graphDiv, true);
+                        });
+
+                    // Hide Mapping Modeler legend when opening Implicit Model
+                    LegendOverlayWidget.setVisible(self.graphDiv, false);
+
+                    var implicitOptions = {
+                        visjsOptions: { autoResize: true, width: "100%", height: "100%" },
+                        onclickFn: function (node, event, options) {
+                            if (!node) {
+                                return;
+                            }
+                            self.currentGraphNode = node;
+
+                            if (!node.data) {
+                                return;
+                            }
+
+                            if (!AIMappingModeler.columnsMappingsObjects.includes(node.data.type)) {
+                                return;
+                            }
+
+                            var baseLabel = null;
+                            if (node.data && node.data.label) {
+                                baseLabel = node.data.label;
+                            }
+
+                            var parentTable = null;
+                            if (node.data && node.data.dataTable) {
+                                parentTable = node.data.dataTable;
+                            }
+
+                            var dialogNode = {
+                                id: node.id,
+                                label: baseLabel,
+                                data: node.data,
+                            };
+                            AIMappingColumnsGraph.activeSourceFromNode(dialogNode, function () {
+                                AIMappingsDetails.openColumnTechDialog(dialogNode, function () {});
+                            });
+                        },
+
+                        onRightClickFn: function (node, point, event) {
+                            self.showImplicitGraphPopupMenu(node, point, event);
+                        },
+                    };
+
+                    self.implicitModelVisjsGraph = new VisjsGraphClass("mappingModeler_implicitModelGraph", classVisjsData, implicitOptions);
+                    self.implicitModelVisjsGraph.draw(function () {
+                        AIImplicit_legendOverlay.init("implicitModelContainer", self.implicitModelVisjsGraph, { title: "🔍 Legend" });
+                        LegendOverlayWidget.installAutoHideOnDialogs("implicitModelContainer", {
+                            namespace: "implicitLegendAutoHide",
+                            ignoreDialogIds: ["mainDialogDiv"],
+                        });
+                        callbackSeries();
+                    });
+                },
+            ],
+            function (err) {},
+        );
+    };
+
+    /**
+     * @function
+     * @name getNodesOfType
+     * @memberof module:AIMappingColumnsGraph
+     * Returns nodes (or their ids) whose `data.type` matches one or more requested types.
+     * @param {string|string[]} types - Type name or list of types to include.
+     * @param {boolean} [onlyIds=false] - If true, returns node ids instead of full node objects.
+     * @returns {Array<string|Object>} Array of nodes or ids filtered by type; empty array if none.
+     */
+
+    self.getNodesOfType = function (types, onlyIds) {
+        if (!types) {
+            return [];
+        }
+        if (!Array.isArray(types)) {
+            types = [types];
+        }
+        if (types.length == 0) {
+            return [];
+        }
+
+        var nodes = self.visjsGraph.data.nodes.get();
+        var filteredNodes = [];
+        nodes.forEach(function (node) {
+            if (node?.data?.type && types.includes(node.data.type)) {
+                if (onlyIds) {
+                    filteredNodes.push(node.id);
+                } else {
+                    filteredNodes.push(node);
+                }
+            }
+        });
+        return filteredNodes;
+    };
+
+    self.getNodesMap = function (type) {
+        var nodes = self.visjsGraph.data.nodes.get();
+        var map = {};
+        nodes.forEach(function (node) {
+            if (!type || (node.data && node.data.type == type)) {
+                map[node.id] = node;
+            }
+        });
+        return map;
+    };
+    self.getEdgesMap = function (key) {
+        var edges = self.visjsGraph.data.edges.get();
+        var map = {};
+        var calculatedKey;
+        edges.forEach(function (edge) {
+            if (!key || key == "id") {
+                calculatedKey = edge.id;
+            } else {
+                calculatedKey = edge[key];
+            }
+            if (!map[calculatedKey]) {
+                map[calculatedKey] = [];
+            }
+            map[calculatedKey].push(edge);
+        });
+        return map;
+    };
+
+    /**
+     * gets json optionnaly firltered with nodes and relations  corresponding toClasses
+     *
+     */
+    self.getSourceMappingsModel = function (source, filter, callback) {
+        self.loadMappingsFromFile(source, function (err, json) {
+            if (err) {
+                return callback(err);
+            }
+            if (!filter) {
+                return callback(null, json);
+            }
+            if (filter == "ClassesAndRelations") {
+                var filteredData = { nodes: [], edges: [] };
+            }
+            var nodesMap = {};
+            json.nodes.forEach(function (node) {
+                if (node.data && node.data.type == "Class") {
+                    filteredData.nodes.push(node);
+                    nodesMap[node.id] = node;
+                }
+            });
+            json.edges.forEach(function (edge) {
+                if (nodesMap[edge.from] && nodesMap[edge.to]) {
+                    filteredData.edges.push(edge);
+                }
+            });
+            return callback(null, filteredData);
+        });
+    };
+
+    return self;
+})();
+
+export default AIMappingColumnsGraph;
+window.AIMappingColumnsGraph = AIMappingColumnsGraph;

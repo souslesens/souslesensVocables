@@ -1,0 +1,1383 @@
+import common from "../../shared/common.js";
+import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
+import AIMappingModeler from "./aiMappingModeler.js";
+import AITripleFactory from "./aiTripleFactory.js";
+import AIMappingTransform from "./aiMappingTransform.js";
+import AIUIcontroller from "./aiUiController.js";
+import AIDataSourceManager from "./aiDataSourcesManager.js";
+import AIMappingColumnsGraph from "./aiMappingColumnsGraph.js";
+
+/**
+ * AIMappingsDetails manages technical mappings (non structural mappings)
+ *
+ *
+ * @module AIMappingsDetails
+ * @type {{}}
+ * @see [Tutorial: Overview]{@tutorial overview}
+ */
+var AIMappingsDetails = (function () {
+    var self = {};
+    var filterMappingIsSample;
+    self.colorsMap = {
+        rdfType: "#33caff",
+        rdfsLabel: "#33ff36",
+        transform: "#ffe333",
+        otherPredicates: "#ca33ff",
+        lookup: "#eeff33",
+    };
+
+    /**
+     * Displays the details dialog for mappings.
+     * If no table is selected, an alert is shown. Otherwise, it loads the details dialog HTML
+     * and activates the right panel in the UI. It also sets up the detailed mappings tree
+     * and graph, and binds the search input to search the mappings in the tree.
+     * @function
+     * @name showDetailsDialog
+     * @memberof module:AIMappingsDetails
+     * @param {string} [divId="mainDialogDiv"] - The ID of the dialog div to display the details in. Default is "mainDialogDiv".
+     * @param {Function} [callback] - Optional callback function to execute after showing the dialog.
+     * @returns {void}
+     */
+    self.showDetailsDialog = function (divId, callback) {
+        if (!AIMappingModeler.currentTable) {
+            return alert("Select a table");
+        }
+        if (!divId) {
+            divId = "mainDialogDiv";
+        }
+        AIUIcontroller.activateRightPanel("generic");
+        $("#mappingModeler_genericPanel").load("./modules/tools/aiMappingModeler/html/detailsDialog.html", function () {
+            self.showDetailedMappingsTree();
+            self.drawDetailedMappingsGraph();
+            if (callback) {
+                callback();
+            }
+            $("#detailedMappings_searchInput").bind("keydown", null, function () {
+                if (event.keyCode != 13 && event.keyCode != 9) {
+                    return;
+                }
+                var value = $(this).val();
+                $("#detailedMappings_jsTreeDiv").jstree(true).search(value);
+            });
+            // $("#mainDialogDiv").dialog("open");
+        });
+    };
+    self.generateMappingsTreeData = function (columns) {
+        var table = AIMappingModeler.currentTable.name;
+        var jstreeData = [];
+        var uniqueSubjects = {};
+        var nodes = AIMappingColumnsGraph.visjsGraph.data.nodes.get();
+        var buttonStr = "<img src='icons\\KGA\\MoreOptionsIcon-KGA.png' onClick=''>";
+
+        if (!columns) {
+            columns = [];
+        }
+        if (!Array.isArray(columns)) {
+            if (columns && typeof columns == "string") {
+                columns = [columns];
+            } else {
+                columns = [];
+            }
+        }
+
+        jstreeData.push({
+            id: AIMappingModeler.currentTable.name,
+            text: "<b>" + AIMappingModeler.currentTable.name + "</b>",
+            data: {},
+            parent: "#",
+        });
+
+        var allreadyDefinedNodes = []; // nodes that are allready defined that need to be saved together after running isColumnAllreadyMappedInAnotherTable
+        var allreadyDefinedNodes = []; // nodes that are allready defined that need to be saved together after running isColumnAllreadyMappedInAnotherTable
+        nodes.forEach(function (node) {
+            if (node.data.dataTable !== table) {
+                return;
+            }
+            if (node.data.type == "Class") {
+                return;
+            }
+            if (node.data.type == "Table") {
+                return;
+            }
+            if (columns.length > 0 && !columns.includes(node.label)) {
+                return;
+            }
+
+            if (!uniqueSubjects[node.label]) {
+                uniqueSubjects[node.label] = node;
+                var definitionTable = self.isColumnAllreadyMappedInAnotherTable(node);
+                var color = "#cb9801";
+                if (definitionTable) {
+                    allreadyDefinedNodes.push(node);
+                    definitionTable = "<font color='#eab3b3'><i> def: " + definitionTable + "</i></font>";
+                    color = "#eab3b3";
+                } else {
+                    definitionTable = "";
+                }
+
+                jstreeData.push({
+                    id: node.id,
+                    text: "<span style='background-color: " + color + ";padding: 3px;border-radius: 7px;'>" + node.label + "</span>&nbsp;" + buttonStr + definitionTable,
+                    data: node.data,
+                    parent: AIMappingModeler.currentTable.name,
+                });
+
+                var predicates = {
+                    rdfType: "rdf:type",
+                    rdfsLabel: "rdfs:label",
+                    uriType: "uri Type",
+                };
+
+                var color = "";
+                for (var key in node.data) {
+                    if (node.data[key]) {
+                        if (predicates[key]) {
+                            if (self.colorsMap[key]) {
+                                color = self.colorsMap[key];
+                            } else {
+                                color = "#3339ff";
+                            }
+                            jstreeData.push({
+                                id: node.id + "|" + key + "|" + node.data[key],
+                                text: "<span style='color: " + color + "'>" + key + "</span>  " + node.data[key],
+                                parent: node.id,
+                            });
+                        }
+                    }
+                }
+
+                if (node.data.otherPredicates) {
+                    node.data.otherPredicates.forEach(function (item) {
+                        jstreeData.push({
+                            id: node.id + "|" + "otherPredicates" + "|" + item.property + "|" + item.object,
+                            text: "<span style='color: " + self.colorsMap["otherPredicates"] + "'>" + item.property + "</span>  " + item.object,
+                            parent: node.id,
+                        });
+                    });
+                }
+                if (node.data.transform) {
+                    jstreeData.push({
+                        id: node.id + "|" + "transform" + "|" + node.data.transform,
+                        text: "<span style='color: " + self.colorsMap["transform"] + "'>" + "transform" + "</span>  " + node.data.transform,
+                        parent: node.id,
+                    });
+                }
+                var currentLookupName = node.data.dataTable + "|" + node.data.label;
+                if (AIDataSourceManager.currentConfig.lookups[currentLookupName]) {
+                    var lookup = AIDataSourceManager.currentConfig.lookups[currentLookupName];
+                    if (lookup.name == currentLookupName) {
+                        jstreeData.push({
+                            id: lookup.fileName + "|" + "lookup",
+                            text: "<span style='color: " + self.colorsMap["lookup"] + "'>" + "lookup" + "</span>  " + JSON.stringify(lookup),
+                            parent: node.id,
+                            data: lookup,
+                        });
+                    }
+                }
+            }
+        });
+        var columnsMap = Object.fromEntries(Object.values(uniqueSubjects).map((obj) => [obj.id, obj]));
+        var columnMappings = AIMappingTransform.mappingsToKGcreatorJson(columnsMap, { getColumnMappingsOnly: true });
+        var seenColumnMappings = {};
+        columnMappings.forEach(function (mapping) {
+            if (!mapping.s || !mapping.p || !mapping.o) {
+                return;
+            }
+            var mappingS = mapping.s.replaceAll("_$", "").replaceAll("_£", "").replaceAll("@", "");
+            var mappingO = mapping.o.replaceAll("_$", "").replaceAll("_£", "").replaceAll("@", "");
+
+            var propertyLabel = mapping.p;
+            if (mapping.p.indexOf("http://") === 0) {
+                var allPropertiesCorrespondance = AIMappingModeler.allProperties.filter(function (prop) {
+                    return prop.id == mapping.p;
+                });
+                propertyLabel = allPropertiesCorrespondance.length > 0 ? allPropertiesCorrespondance[0].label : mapping.p;
+            }
+            var subjectId = uniqueSubjects[mappingS]?.id;
+            var objectId = uniqueSubjects[mappingO]?.id;
+            if (!subjectId) {
+                return;
+            }
+            var objectLabel = mappingO;
+            if (!objectId && mappingO.indexOf("http://") === 0) {
+                var object = AIMappingModeler.allClasses.find(function (item) {
+                    return item.id == mappingO;
+                });
+                // allClasses misses the classes of a source above Config.ontologyModelMaxClasses, a mapped class is a node of the graph
+                if (!object) {
+                    var classNode = nodes.find(function (node) {
+                        return node.data.type == "Class" && node.data.id == mappingO;
+                    });
+                    if (classNode) {
+                        object = classNode.data;
+                    }
+                }
+                if (object) {
+                    objectId = object.id;
+                    var objectLabel = object.label;
+                }
+            }
+            if (!objectId) {
+                return;
+            }
+            if (seenColumnMappings[mappingS + "-->" + mapping.p + "-->" + mappingO]) {
+                return;
+            }
+            seenColumnMappings[mappingS + "-->" + mapping.p + "-->" + mappingO] = true;
+            // mapping.s is a column no label case
+            jstreeData.push({
+                id: mappingS + "-->" + mapping.p + "-->" + mappingO,
+                text: mappingS + "-->" + propertyLabel + "-->" + objectLabel,
+                parent: subjectId,
+                data: {
+                    fromNodeColumn: mappingS,
+                    fromNodeId: subjectId,
+                    toNodeColumn: mappingO,
+                    toNodeId: objectId,
+                    toNodeLabel: objectLabel,
+                    propertyId: mapping.p,
+                    propertyLabel: propertyLabel,
+                    type: "ColumnMapping",
+                },
+            });
+        });
+
+        if (allreadyDefinedNodes.length > 0) {
+            self.savejsTreeNodesToVisjsGraph(allreadyDefinedNodes);
+        }
+
+        return jstreeData;
+    };
+
+    /**
+     * Displays the detailed mappings tree for the current table.
+     * It populates the tree with nodes and mappings related to the selected table and columns.
+     * The tree allows search and interaction with mapping nodes.
+     * @function
+     * @name showDetailedMappingsTree
+     * @memberof module:AIMappingsDetails
+     * @param {Object} [column] - Optional column data to filter the tree by.
+     * @param {string} [divId="detailedMappings_jsTreeDiv"] - The ID of the div to display the tree in. Default is "detailedMappings_jsTreeDiv".
+     * @param {Object} [_options={}] - Optional configuration options for the tree, such as context menu behavior.
+     * @param {boolean} [_options.withoutContextMenu=false] - If true, disables the context menu.
+     * @param {boolean} [_options.searchPlugin=true] - Enables or disables the search plugin.
+     * @param {boolean} [_options.openAll=true] - If true, expands all nodes by default.
+     * @param {Function} [_options.selectTreeNodeFn] - Callback function for when a tree node is selected.
+     * @returns {void}
+     */
+    self.showDetailedMappingsTree = function (column, divId, _options) {
+        if (!_options) {
+            _options = {};
+        }
+
+        if (!divId) {
+            divId = "detailedMappings_jsTreeDiv";
+        }
+
+        var table = AIMappingModeler.currentTable.name;
+
+        if (!table) {
+            table = AIMappingModeler.currentTable.name;
+        }
+
+        var nodes = AIMappingColumnsGraph.visjsGraph.data.nodes.get();
+
+        var columnsMap = {};
+        var jstreeData = self.generateMappingsTreeData();
+        var uniqueSubjects = {};
+        var buttonStr = "<img src='icons\\KGA\\MoreOptionsIcon-KGA.png' onClick=''>";
+
+        var options = {
+            searchPlugin: true,
+            openAll: true,
+            selectTreeNodeFn: self.onSelectTreeNode,
+            contextMenu: function (node) {
+                var items = {};
+                if (_options.withoutContextMenu) {
+                    return;
+                }
+
+                if (node.id.split("|")[1] == "transform") {
+                    items["edit transform"] = {
+                        label: "edit transform",
+                        action: function (_e) {
+                            var column = AIMappingColumnsGraph.visjsGraph.data.nodes.get(node.id.split("|")[0]);
+                            var columnLabel = column.label;
+                            var transformValue = column.data.transform;
+                            if (transformValue) {
+                                transformValue = transformValue.match(/function{(.*)}/s)[1];
+                                AIMappingsDetails.transform.showTansformDialog(columnLabel, function () {
+                                    $("#MappingModeler_fnBody").val(transformValue);
+                                });
+                            }
+                        },
+                    };
+                }
+                if (node.id.split("|")[1] == "lookup") {
+                    items["edit lookup"] = {
+                        label: "edit lookup",
+                        action: function (_e) {
+                            AIMappingColumnsGraph.currentGraphNode = AIMappingColumnsGraph.visjsGraph.data.nodes.get(node.parent);
+                            AILookups_bot.start(AILookups_bot.lookUpWorkflow, {}, function (err, result) {
+                                if (err) {
+                                    return MainController.errorAlert(err);
+                                }
+                            });
+                        },
+                    };
+                }
+                if (node.parents.length == 3) {
+                    //only for node data
+                    items["deletemapping"] = {
+                        label: "delete",
+                        action: function (_e) {
+                            var node = AIMappingsDetails.deleteMappingInVisjsNode(self.currentTreeNode);
+                        },
+                    };
+                }
+
+                return items;
+            },
+            noScroll: true,
+        };
+
+        for (var key in _options) {
+            options[key] = _options[key];
+        }
+
+        JstreeWidget.loadJsTree(divId, jstreeData, options, function () {
+            $("#detailedMappings_treeContainer").css("overflow", "unset");
+        });
+    };
+
+    /**
+     * @function
+     * @name showColumnTechnicalMappingsDialog
+     * @memberof AIMappingsDetails
+     * Displays a dialog for configuring technical mappings for a specific column.
+     * This includes URI type, rdf:type, and rdfs:label, with options pre-filled based on the column's data.
+     * @param {string} divId - The ID of the HTML element where the dialog content will be rendered.
+     * @param {object} column - The column object containing the metadata (e.g., column label, rdfType, uriType).
+     * @param {function} callbackFn - A callback function to be executed after saving the mappings.
+     * @returns {void}
+     */
+    self.showColumnTechnicalMappingsDialog = function (divId, column, callbackFn) {
+        self.afterSaveColumnTechnicalMappingsDialog = callbackFn;
+
+        console.log(column);
+        var isColumnAllreadyMapped = self.isColumnAllreadyMappedInAnotherTable(column);
+        var html = `<table><tr><td>Table column</td></tr><tr><td><span id='class-column' ><b> ${column.text || column.label} </b></span> </td></tr>`;
+
+        if (isColumnAllreadyMapped) {
+            html += "<tr><td> column already defined in table " + isColumnAllreadyMapped + "</td></tr>";
+        } else {
+            html += `<tr></tr>`;
+            html += `<tr><td>URI syntax*</td><td><select id='columnDetails-UriType' onchange='AIMappingsDetails.onChangeUriType()' style='padding:6px 6px'> </select>  </td></tr>`;
+            html += `<tr><td >Base URI</td><td><input id='columnDetails-baseUri' style='width:300px;    background-color: #eee;margin-right:15px;'> </input>  </td>
+            <td  id='columnDetails-prefixURI-label' style='margin-left:10px;'>URI prefix</td><td><input id='columnDetails-prefixURI' style='width:300px;    background-color: #eee;margin-left:15px;'> </input>  </td>
+            <td  id='columnDetails-prefixURI-label' style='margin-left:10px;'>URI suffix</td> <td><input id='columnDetails-suffixURI' style='width:300px;    background-color: #eee;margin-left:15px;'> </input>  </td></tr>`;
+            html += `<tr><td>rdf:type*</td><td><select id='columnDetails-rdfType' style='padding:6px 6px'> </select> </td></tr> `;
+
+            html += `<tr><td>rdfs:label column</td><td><select id='columnDetails-rdfsLabel' style='padding:6px 6px'> </select> </td></tr>`;
+        }
+
+        html += "<tr><td style='display:flex' >";
+        html += isColumnAllreadyMapped
+            ? `<button class='slsv-button-1' id='class-datatype' style='padding:6px 6px;margin:0px;margin-right: 5px;' onclick='AIMappingsDetails.setNodeAsMainColumn("${column.id}")'>set as mainColumn </button>`
+            : "";
+        html += `<button class='slsv-button-1' id='class-datatype' style='padding:6px 6px;margin:0px;margin-right: 5px;' onclick='AIMappingsDetails.saveMappingsDetailsToVisjsGraph("${column.id}");AIMappingsDetails.showSpecificMappingsBot("${column.id}")'> More mappings... </button>`;
+        html += `<button class='slsv-button-1' id='class-datatype' style='padding:6px 6px;margin:0px;margin-right: 5px;' onclick='AIMappingsDetails.saveMappingsDetailsToVisjsGraph("${column.id}");AIMappingsDetails.afterSaveColumnTechnicalMappingsDialog() '> Save </button> </td></tr></table>`;
+
+        $("#" + divId).html(html);
+
+        var URITType = ["fromLabel", "blankNode", "randomIdentifier"];
+
+        var rdfObjectsType = ["owl:NamedIndividual", "owl:Class"];
+
+        //  sort by similarity for others than rowIndex
+
+        var columns = JSON.parse(JSON.stringify(AIMappingModeler.currentTable.columns));
+        columns.unshift("");
+        common.array.moveItemToFirst(columns, column);
+        if (column.data.rdfType) {
+            common.array.moveItemToFirst(rdfObjectsType, column.data.rdfType);
+        }
+        if (column.data.rdfType == "") {
+            rdfObjectsType.unshift("");
+        } else {
+            rdfObjectsType.push("");
+        }
+
+        if (column.data.uriType) {
+            common.array.moveItemToFirst(URITType, column.data.uriType);
+        }
+        if (column.data.rdfsLabel) {
+            common.array.moveItemToFirst(columns, column.data.rdfsLabel);
+        }
+
+        common.fillSelectOptions(`columnDetails-rdfsLabel`, columns, false);
+        common.fillSelectOptions(`columnDetails-rdfType`, rdfObjectsType, false);
+        common.fillSelectOptions(`columnDetails-UriType`, URITType, false);
+
+        var sourceObj = Config.sources[AIMappingModeler.currentSLSsource];
+
+        $("#columnDetails-baseUri").val(column.data.baseURI || "");
+        $("#columnDetails-prefixURI").val(column.data.prefixURI || "");
+        $("#columnDetails-suffixURI").val(column.data.suffixURI || "");
+        self.onChangeUriType();
+
+        self.setMappingDefaultFieds(column);
+        console.log(column);
+    };
+
+    self.openColumnTechDialog = function (dialogNode, callback) {
+        var html =
+            '<div style="height:80vh">' +
+            '  <div style="display:flex; flex-direction:row">' +
+            "    <div>" +
+            '      <div id="detailedMappings_techDetailsDiv" style="background-color:#fff; padding:5px; border:2px #278ecc solid"></div>' +
+            '      <div id="detailedMappingsGraphDiv" style="width:70vw; height:65vh"></div>' +
+            "    </div>" +
+            "  </div>" +
+            "</div>";
+
+        function vhToPx(v) {
+            return Math.round(window.innerHeight * (v / 200));
+        }
+        function vwToPx(v) {
+            return Math.round(window.innerWidth * (v / 150));
+        }
+
+        var dialogHeightPx = vhToPx(80);
+        var dialogWidthPx = vwToPx(75);
+
+        $("#smallDialogDiv").html(html);
+        $("#smallDialogDiv")
+            .dialog("option", {
+                title: "Column Technical Mappings",
+                resizable: true,
+                draggable: true,
+                modal: false,
+                width: dialogWidthPx,
+                height: dialogHeightPx,
+                position: { my: "center", at: "center", of: window },
+            })
+            .dialog("open");
+
+        self.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", dialogNode, function () {});
+        $(window)
+            .off("resize.mcgTechDlg")
+            .on("resize.mcgTechDlg", function () {
+                $("#smallDialogDiv").dialog("option", {
+                    width: vwToPx(75),
+                    height: vhToPx(80),
+                });
+            });
+    };
+
+    /**
+     * Saves the mapping details to the Vis.js graph for a specific column.
+     * It updates the column's URI type, RDF type, and rdfs:label based on the user's selection,
+     * then saves the updated data to the graph and triggers any necessary transformations.
+     * @function
+     * @name saveMappingsDetailsToVisjsGraph
+     * @memberof module:AIMappingsDetails
+     * @param {string} columnId - The ID of the column whose mapping details are to be saved.
+     * @returns {void}
+     */
+    self.saveMappingsDetailsToVisjsGraph = function (columnId) {
+        var currentGraphNode = AIMappingColumnsGraph.visjsGraph.data.nodes.get(columnId);
+        if (!currentGraphNode) {
+            return alert("no current graphNode ");
+        }
+        currentGraphNode.data.uriType = $("#columnDetails-UriType").val();
+        currentGraphNode.data.rdfsLabel = $("#columnDetails-rdfsLabel").val();
+        currentGraphNode.data.rdfType = $("#columnDetails-rdfType").val();
+        var prefix = $("#columnDetails-prefixURI").val();
+        if (prefix && currentGraphNode.data.uriType == "fromLabel") {
+            currentGraphNode.data.prefixURI = prefix;
+        }
+        if (currentGraphNode.data.prefixURI && !prefix) {
+            delete currentGraphNode.data.prefixURI;
+        }
+
+        var suffix = $("#columnDetails-suffixURI").val();
+        if (suffix && currentGraphNode.data.uriType == "fromLabel") {
+            currentGraphNode.data.suffixURI = suffix;
+        }
+        if (currentGraphNode.data.suffixURI && !suffix) {
+            delete currentGraphNode.data.suffix;
+        }
+
+        var baseUri = $("#columnDetails-baseUri").val();
+        var sourceObj = Config.sources[AIMappingModeler.currentSLSsource];
+        var sourceBaseUri = sourceObj.baseUri || sourceObj.graphUri;
+        if (baseUri && baseUri != sourceBaseUri) {
+            currentGraphNode.data.baseURI = $("#columnDetails-baseUri").val();
+        } else {
+            if (currentGraphNode.data.baseURI) {
+                delete currentGraphNode.data.baseURI;
+            }
+        }
+
+        AIMappingColumnsGraph.updateNode(currentGraphNode);
+        self.switchTypeToSubclass(currentGraphNode);
+
+        // });
+        AIMappingColumnsGraph.saveVisjsGraph(function () {});
+    };
+
+    self.savejsTreeNodesToVisjsGraph = function (nodes) {
+        if (nodes.length == 0) {
+            return;
+        }
+        nodes.forEach(function (node) {
+            var currentGraphNode = AIMappingColumnsGraph.visjsGraph.data.nodes.get(node.id);
+            currentGraphNode.data.uriType = node.data.uriType;
+            currentGraphNode.data.prefixURI = node.data.prefixURI;
+            currentGraphNode.data.suffixURI = node.data.suffixURI;
+            currentGraphNode.data.baseURI = node.data.baseURI;
+            AIMappingColumnsGraph.updateNode(currentGraphNode);
+        });
+        AIMappingColumnsGraph.saveVisjsGraph(function () {});
+    };
+
+    /**
+     * Deletes a specific mapping from the Vis.js graph node.
+     * It identifies the mapping based on the node's ID and removes the corresponding property
+     * or predicate from the node's data. After deletion, the tree is updated and the graph is re-rendered.
+     * @function
+     * @name deleteMappingInVisjsNode
+     * @memberof module:AIMappingsDetails
+     * @param {Object} treeNode - The tree node representing the mapping to be deleted.
+     * @returns {void}
+     */
+    self.deleteMappingInVisjsNode = function (treeNode) {
+        var array = treeNode.id.split("|");
+
+        var graphNode = AIMappingColumnsGraph.visjsGraph.data.nodes.get(array[0]);
+
+        if (array.length == 3) {
+            for (var key in graphNode.data) {
+                if (key == array[1] && graphNode.data[key] === array[2]) {
+                    delete graphNode.data[key];
+                }
+            }
+        } else if (array.length == 4) {
+            //otherPredicates
+            graphNode.data.otherPredicates.forEach(function (item, index) {
+                if (item.property == array[2] && item.object == array[3]) {
+                    graphNode.data.otherPredicates.splice(index, 1);
+                }
+            });
+        }
+        //transform gestion
+        if (array.length >= 2 && array[1] == "transform") {
+            if (graphNode.data.transform) {
+                delete graphNode.data.transform;
+                delete graphNode.data.prefixURI; //remove prefix URI
+                delete graphNode.data.suffixURI; //remove prefix URI
+            }
+        }
+        // lookup gestion
+        if (array.length >= 2 && array[1] == "lookup") {
+            if (treeNode?.data?.name) {
+                delete AIDataSourceManager.currentConfig.lookups[treeNode.data.name];
+                //delete lookup
+            }
+        }
+
+        JstreeWidget.deleteNode("detailedMappings_jsTreeDiv", treeNode.id);
+
+        AIMappingColumnsGraph.saveVisjsGraph(function () {
+            self.drawDetailedMappingsGraph();
+            self.showDetailedMappingsTree();
+            if (graphNode) {
+                self.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", graphNode, function () {});
+            }
+        });
+    };
+
+    /**
+     * Displays a button for configuring specific mappings for a column.
+     * The button initiates a workflow that allows the user to add various predicates (rdf:type, rdfs:subClassOf, non-object properties) to the column's data in the graph.
+     * The changes are applied and saved to the graph upon completion of the workflow.
+     * @function
+     * @name showSpecificMappingsBot
+     * @memberof module:AIMappingsDetails
+     * @param {string} columnId - The ID of the column for which the specific mappings are to be configured.
+     * @returns {void}
+     */
+    self.showSpecificMappingsBot = function (columnId) {
+        AIMappingColumnsGraph.currentGraphNode = AIMappingColumnsGraph.visjsGraph.data.nodes.get(columnId);
+
+        var params = {
+            source: AIMappingModeler.currentSLSsource,
+            columns: AIMappingModeler.currentTable.columns,
+            title: "" + AIMappingModeler.currentTable.name,
+            columnClass: self.getColumnType(columnId),
+        };
+
+        AIMappingModeler_bot.start(AIMappingModeler_bot.workflowColumnmMappingOther, params, function (err, result) {
+            var params = AIMappingModeler_bot.params;
+
+            var data = AIMappingColumnsGraph.currentGraphNode.data;
+            if (!data.otherPredicates) {
+                data.otherPredicates = [];
+            }
+
+            if (params.predicate == "owl:equivalentClass") {
+                data.otherPredicates.push({
+                    property: "owl:equivalentClass",
+                    object: params.predicateObjectColumn,
+                });
+                AIMappingColumnsGraph.updateNode({ id: AIMappingColumnsGraph.currentGraphNode.id, data: data });
+                AIMappingColumnsGraph.saveVisjsGraph();
+            } else if (params.addingTransform) {
+                return; // function processing made in save transform
+            } else if (params.addingType) {
+                data.otherPredicates.push({
+                    property: "rdf:type",
+                    object: params.rdfType,
+                });
+                AIMappingColumnsGraph.updateNode({ id: AIMappingColumnsGraph.currentGraphNode.id, data: data });
+                AIMappingColumnsGraph.saveVisjsGraph();
+            } else if (params.addingSubClassOf) {
+                data.otherPredicates.push({
+                    property: "rdfs:subClassOf",
+                    object: params.addingSubClassOf,
+                });
+                AIMappingColumnsGraph.updateNode({ id: AIMappingColumnsGraph.currentGraphNode.id, data: data });
+                AIMappingColumnsGraph.saveVisjsGraph();
+            } else if (params.nonObjectPropertyId) {
+                var range = params.datatypePropertyRange || Config.ontologiesVocabularyModels[params.nonObjectPropertyVocab].nonObjectProperties[params.nonObjectPropertyId].range;
+                var isDuplicate = data.otherPredicates.some(function (p) {
+                    return p.property === params.nonObjectPropertyId && p.object === params.predicateObjectColumn;
+                });
+                if (isDuplicate) {
+                    alert("Predicat already exist !");
+                    return;
+                } else {
+                    data.otherPredicates.push({
+                        property: params.nonObjectPropertyId,
+                        object: params.predicateObjectColumn,
+                        range: range,
+                        dateFormat: params.nonObjectPropertyDateFormat || null,
+                    });
+                }
+                AIMappingColumnsGraph.updateNode({ id: AIMappingColumnsGraph.currentGraphNode.id, data: data });
+                AIMappingColumnsGraph.saveVisjsGraph();
+            }
+
+            if (AIMappingsDetails.afterSaveColumnTechnicalMappingsDialog) {
+                AIMappingsDetails.afterSaveColumnTechnicalMappingsDialog();
+            }
+            // self.showDetailsDialog();
+        });
+    };
+    /**
+     * Handles the selection of a tree node and displays the corresponding column's technical details.
+     * If the selected node is a column node, it opens the column technical mappings dialog.
+     * @function
+     * @name onSelectTreeNode
+     * @memberof module:AIMappingsDetails
+     * @param {Object} event - The event object triggered by the tree node selection.
+     * @param {Object} obj - The selected tree node object containing node details.
+     * @returns {void}
+     */
+    self.onSelectTreeNode = function (event, obj) {
+        self.currentTreeNode = obj.node;
+
+        if (obj.node.parent == AIMappingModeler.currentTable.name) {
+            //column node
+            self.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", obj.node, function () {
+                AIMappingModeler.currentTreeNode = AIMappingColumnsGraph.visjsGraph.data.nodes.get(obj.node.id);
+                self.showDetailsDialog(null, function () {
+                    self.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", AIMappingModeler.currentTreeNode, self.afterSaveColumnTechnicalMappingsDialog);
+                });
+            });
+        } else {
+            AIMappingModeler.currentTreeNode = null;
+        }
+    };
+
+    /**
+     * Draws a detailed mappings graph based on the column's mappings.
+     * It visualizes the mappings in a graph format, with nodes representing the columns and edges representing the relationships between them.
+     * Optionally filters the graph to a specific column if provided.
+     * @function
+     * @name drawDetailedMappingsGraph
+     * @memberof module:AIMappingsDetails
+     * @param {string} [column] - The column to filter the mappings by (optional).
+     * @returns {void}
+     */
+    self.drawDetailedMappingsGraph = function (column) {
+        //datatypeMappingGraph
+        var mappings = AIMappingTransform.getSLSmappingsFromVisjsGraph();
+        if (column) {
+            mappings = mappings.filter(function (mapping) {
+                return mapping.s.replaceAll("_$", "").replaceAll("_£", "").replaceAll("@", "") == column || mapping.o.replaceAll("_$", "").replaceAll("_£", "").replaceAll("@", "") == column;
+            });
+        }
+
+        var divId = "detailedMappingsGraphDiv";
+
+        var visjsData = { nodes: [], edges: [] };
+
+        var existingNodes = {};
+        var json = {};
+        var shape = "box";
+        var table = AIMappingModeler.currentTable.name;
+        if (!existingNodes[table]) {
+            existingNodes[table] = 1;
+        }
+
+        //var mappings = sourceMappings[table];
+        var columns = AIMappingModeler.currentTable.columns;
+
+        function getTripleLabelRole(id) {
+            if (id.endsWith("_$")) {
+                return "column";
+            }
+            if (id.startsWith("@")) {
+                return "column";
+            }
+            var role = null;
+            columns.forEach(function (column) {
+                if (column == id) {
+                    role = "column";
+                }
+            });
+            return role;
+        }
+
+        var predicates = {
+            "rdf:type": "rdfType",
+            "rdfs:label": "rdfsLabel",
+        };
+        mappings.forEach(function (item, index) {
+            if (!item.s || !item.p || !item.o) {
+                return alert("tripleModel is malformed " + JSON.stringify(item));
+            }
+            if (item.p == "transform") {
+                item.o = "transform";
+            }
+
+            function getNodeAttrs(str) {
+                if (str.indexOf("http") > -1) {
+                    return { type: "Class", color: "#00afef", shape: "box", size: 30 };
+                } else if (str.indexOf(":") > -1) {
+                    drawRelation = false; //rdf Bag
+                    return null;
+                    return { type: "OwlType", color: "#aaa", shape: "ellipse" };
+                } else if (str.endsWith("_$")) {
+                    return { type: "blankNode", color: "#00afef", shape: "square" };
+                } else if (str.indexOf("_rowIndex") > -1) {
+                    return { type: "rowIndex", color: "#f90edd", shape: "star" };
+                } else {
+                    drawRelation = false;
+                    return { type: "Column", color: "#cb9801", shape: "ellipse" };
+                }
+            }
+
+            var sId = table + "_" + item.s;
+            var oId = table + "_" + item.o;
+
+            if (!existingNodes[sId]) {
+                if (!sId) {
+                    return;
+                }
+                existingNodes[sId] = 1;
+                var label = Sparql_common.getLabelFromURI(item.s);
+
+                var attrs = getNodeAttrs(item.s);
+                var drawRelation = true;
+                if (item.o == "owl:NamedIndividual") {
+                    // attrs.shape = "triangle";
+                    drawRelation = false;
+                }
+                if (item.o == "owl:Class") {
+                    // attrs.shape = "triangle";
+                    drawRelation = false;
+                }
+                if (item.o == "rdf:Bag") {
+                    //   attrs.shape = "box";
+                    drawRelation = false;
+                } else if (item.s.startsWith("@")) {
+                    attrs.shape = "box";
+                }
+                /*  if (item.isString) {
+                attrs.shape = "text";
+
+            }*/
+
+                visjsData.nodes.push({
+                    id: sId,
+                    label: label,
+                    shape: attrs.shape,
+                    color: attrs.color,
+
+                    size: Lineage_whiteboard.defaultShapeSize,
+                    data: {
+                        id: item.s,
+                        label: label,
+                        fileName: table,
+                        type: attrs.type,
+                        role: getTripleLabelRole(item.s),
+                        table: table,
+                    },
+                });
+            }
+            if (item.o != "owl:NamedIndividual" && item.o != "owl:Class") {
+                if (!existingNodes[oId]) {
+                    existingNodes[oId] = 1;
+                    var label = Sparql_common.getLabelFromURI(item.o);
+
+                    var attrs = getNodeAttrs(item.o);
+                    if (!attrs) {
+                        return;
+                    }
+                    visjsData.nodes.push({
+                        id: oId,
+                        label: label,
+                        shape: attrs.shape,
+                        color: attrs.color,
+                        font: attrs.shape == "box" ? { color: "white" } : { color: "black" },
+                        size: Lineage_whiteboard.defaultShapeSize,
+                        data: {
+                            id: item.o,
+                            label: label,
+                            fileName: table,
+                            type: attrs.type,
+                            role: getTripleLabelRole(item.o),
+                            table: table,
+                        },
+                    });
+                }
+
+                var edgeId = sId + item.p + oId;
+                var label = Sparql_common.getLabelFromURI(item.p);
+                if (label.endsWith("member")) {
+                    var color = "#07b611";
+                    var dashes = true;
+                }
+                if (!existingNodes[edgeId]) {
+                    existingNodes[edgeId] = 1;
+                    if (self.colorsMap[label]) {
+                        color = self.colorsMap[label];
+                    } else {
+                        if (predicates[label] && self.colorsMap[predicates[label]]) {
+                            color = self.colorsMap[predicates[label]];
+                        }
+                    }
+                    visjsData.edges.push({
+                        id: edgeId,
+                        from: sId,
+                        to: oId,
+                        label: label,
+                        color: color,
+                        dashes: dashes,
+
+                        // color: getNodeAttrs(item.o),
+                        arrows: {
+                            to: {
+                                enabled: true,
+                                type: Lineage_whiteboard.defaultEdgeArrowType,
+                                scaleFactor: 0.5,
+                            },
+                        },
+                    });
+                } else {
+                }
+            }
+            if (index == 0) {
+                var edgeId = table + "_" + sId;
+                var label = Sparql_common.getLabelFromURI(item.p);
+                if (!existingNodes[edgeId]) {
+                    existingNodes[edgeId] = 1;
+                    visjsData.edges.push({
+                        id: edgeId,
+                        from: table,
+                        to: sId,
+                        //  label: label
+                    });
+                }
+            }
+        });
+
+        var options = {
+            onclickFn: self.onDetailedMappingsGraphClick,
+            visjsOptions: {
+                manipulation: {
+                    enabled: false,
+                },
+            },
+        };
+
+        self.datatypeVisjsGraph = new VisjsGraphClass(divId, visjsData, options);
+        self.datatypeVisjsGraph.draw();
+
+        // self.showDetailedMappingsTree(column);
+    };
+
+    /**
+     * Handles the click event on the detailed mappings graph.
+     * Currently, it serves as a placeholder function for handling interactions with the graph.
+     * @function
+     * @name onDetailedMappingsGraphClick
+     * @memberof module:AIMappingsDetails
+     * @param {Object} obj - The clicked object details from the graph.
+     * @param {Object} event - The event object triggered by the click.
+     * @param {Object} options - Additional options for handling the click event.
+     * @returns {void}
+     */
+    self.onDetailedMappingsGraphClick = function (obj, event, options) {};
+
+    /**
+     * Retrieves the RDF type of a column based on its connected edges in the graph.
+     * Searches through the edges to find the rdf:type and returns the type if it's a valid URI.
+     * @function
+     * @name getColumnType
+     * @memberof module:AIMappingsDetails
+     * @param {string} nodeId - The ID of the node whose type is to be retrieved.
+     * @returns {string|null} - The RDF type of the column if found, otherwise null.
+     */
+    self.getColumnType = function (nodeId) {
+        var connections = AIMappingColumnsGraph.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
+        var type = null;
+        connections.forEach(function (connection) {
+            if (connection.edge.data.type == "rdf:type" && connection.toNode.data.id.indexOf("http") > -1) {
+                type = connection.toNode.data.id;
+            }
+        });
+        return type;
+    };
+
+    /**
+     * The transform module handles operations related to transforming columns in the mapping model.
+     * It includes functions for displaying a dialog, creating prefix transformation functions, testing the transformation, and saving the transformation.
+     *
+     * @namespace transform
+     * @memberof module:AIMappingsDetails
+     */
+    self.transform = {
+        /**
+         * Displays a dialog for transforming the selected column.
+         * If no column is provided, it defaults to the currently selected column.
+         * @function
+         * @name showTansformDialog
+         * @memberof module:AIMappingsDetails.transform
+         * @param {string} [column] - The column to transform (optional).
+         * @returns {void}
+         */
+        showTansformDialog: function (column, callback) {
+            // return if  virtuals and rowIndex
+            if (!column) {
+                column = AIMappingColumnsGraph.currentGraphNode.label;
+            }
+            $("#smallDialogDiv").load("./modules/tools/aiMappingModeler/html/transformColumnDialog.html", function (err) {
+                UI.openDialog("smallDialogDiv", { title: "Transform for " + column });
+                UI.clampAndCenterDialog("smallDialogDiv");
+                self.transformColumn = column;
+                if (callback) {
+                    callback();
+                }
+            });
+        },
+
+        /**
+         * Creates a prefix transformation function and applies it to the selected column.
+         * The user is prompted to enter a prefix, and the function is generated accordingly.
+         *
+         * @function
+         * @name createPrefixTransformFn
+         * @memberof module:AIMappingsDetails.transform
+         *
+         * @returns {void}
+         */
+        createPrefixTransformFn: function (prefix, options) {
+            /*if (!AIMappingModeler.currentTreeNode) {
+                var column_selected = '';
+            } else {
+                var column_selected = AIMappingColumnsGraph.currentGraphNode.label;
+            }*/
+            if (!options) {
+                options = {};
+            }
+
+            if (!prefix) {
+                prefix = prompt("Enter Prefix");
+            }
+
+            if (!prefix) {
+                return;
+            }
+            prefix = prefix.replace(/[-_/]/g, "");
+
+            var str = "if((mapping.isString||mapping.dataType) && role=='o') return value; else return '" + prefix + "-'+value;";
+
+            $("#MappingModeler_fnBody").val(str);
+            if (options.notDialog) {
+                return str;
+            }
+        },
+
+        /**
+         * Tests the transformation function by applying it to a sample mapping.
+         * It checks for any errors in the transformation code and then creates triples using the mapping.
+         * @function
+         * @name testTransform
+         * @memberof module:AIMappingsDetails.transform
+         * @returns {void}
+         */
+        testTransform: function () {
+            //  display view sample triples with added transform for column mapping
+            var transformFnStr = $("#MappingModeler_fnBody").val();
+
+            transformFnStr = transformFnStr.replace(/"/g, "'");
+
+            try {
+                new Function("row", "mapping", transformFnStr);
+            } catch (err) {
+                return alert("error in function code " + err.message);
+            }
+            var transformFn = "function{" + transformFnStr + "}";
+            var table = AIMappingModeler.currentTable.name;
+            var mappings = AIMappingTransform.getSLSmappingsFromVisjsGraph(table);
+
+            var filteredMapping = mappings.filter(function (mapping) {
+                return mapping.s.replace("@", "").replace("_$", "").replace("_£", "") == self.transformColumn || mapping.o.replace("@", "").replace("_$", "").replace("_£", "") == self.transformColumn;
+            });
+            filteredMapping = filteredMapping.filter(function (mapping) {
+                return mapping.p != "transform";
+            });
+            var mappingWithTransform = {};
+            mappingWithTransform[AIMappingModeler.currentTable.name] = { tripleModels: filteredMapping, transform: {} };
+            mappingWithTransform[AIMappingModeler.currentTable.name].transform[self.transformColumn] = transformFn;
+            AITripleFactory.createTriples(
+                true,
+                AIMappingModeler.currentTable.name,
+                {
+                    filteredMappings: mappingWithTransform,
+                    table: AIMappingModeler.currentTable.name,
+                },
+                function (err, result) {},
+            );
+        },
+        saveTransform: function (transformFnStr) {
+            if (!transformFnStr) {
+                transformFnStr = $("#MappingModeler_fnBody").val();
+            }
+            transformFnStr = transformFnStr.replace(/"/g, "'");
+
+            try {
+                new Function("row", "mapping", transformFnStr);
+            } catch (err) {
+                return alert("error in function code " + err.message);
+            }
+            var transformFn = "function{" + transformFnStr + "}";
+            var nodes = AIMappingColumnsGraph.visjsGraph.data.nodes.get();
+            var currentNode = nodes.filter(function (node) {
+                return node.label == self.transformColumn && node.data.dataTable == AIMappingModeler.currentTable.name;
+            })[0];
+            currentNode.data.transform = transformFn;
+            AIMappingColumnsGraph.updateNode(currentNode);
+
+            var columnCheckNodeData = AIMappingsDetails.generateMappingsTreeData(self.transformColumn);
+
+            AIMappingColumnsGraph.saveVisjsGraph(function () {
+                self.showDetailedMappingsTree();
+                $("#smallDialogDiv").dialog("close");
+            });
+        },
+    };
+
+    /**
+     * modidies the label type of an edge in the visijs graph file
+     *
+     *
+     * @param node
+     */
+    self.switchTypeToSubclass = function (node) {
+        var edges = AIMappingColumnsGraph.visjsGraph.data.edges.get();
+
+        edges.forEach(function (edge) {
+            if (edge.from == node.id) {
+                var nodeTo = AIMappingColumnsGraph.visjsGraph.data.nodes.get(edge.to);
+                if (nodeTo && nodeTo.data.type == "Class") {
+                    edge.label = node.data.rdfType == "owl:Class" ? "subClassOf" : "a";
+                    edge.data.type = node.data.rdfType == "owl:Class" ? "rdfs:subClassOf" : "rdf:type";
+                    AIMappingColumnsGraph.updateEdge(edge);
+                }
+            }
+        });
+    };
+    self.onChangeUriType = function () {
+        var uriType = $("#columnDetails-UriType").val();
+        if (uriType == "fromLabel") {
+            $("#columnDetails-baseUri").show();
+            $("#columnDetails-baseUri-label").show();
+            $("#columnDetails-prefixURI").show();
+            $("#columnDetails-suffixURI").show();
+            $("#columnDetails-prefixURI-label").show();
+            $("#columnDetails-suffixURI-label").show();
+        } else {
+            $("#columnDetails-baseUri").hide();
+            $("#columnDetails-baseUri-label").hide();
+            $("#columnDetails-prefixURI").hide();
+            $("#columnDetails-suffixURI").show();
+            $("#columnDetails-prefixURI-label").hide();
+            $("#columnDetails-suffixURI-label").hide();
+        }
+    };
+
+    /**
+     *  fill basigraphUri and prefix with same values found for the node class in other mappings
+     * @param columnNodeId
+     */
+    self.setMappingDefaultFieds = function (columnNode) {
+        var columnsClassMap = {};
+        var columnClass = AIMappingColumnsGraph.getColumnClass(columnNode);
+        if (columnClass) {
+            AIMappingColumnsGraph.visjsGraph.data.nodes.get().forEach(function (node) {
+                if (node.data && node.data.type == "Class" && node.data.id == columnClass) {
+                    var sameClassColumns = AIMappingColumnsGraph.getClassColumns(node);
+                    if (sameClassColumns) {
+                        sameClassColumns.forEach(function (sameColumn) {
+                            if (!$("#columnDetails-prefixURI").val() && sameColumn.data.prefixURI) {
+                                $("#columnDetails-prefixURI").val(sameColumn.data.prefixURI);
+                            }
+                            if (!$("#columnDetails-suffixURI").val() && sameColumn.data.suffixURI) {
+                                $("#columnDetails-suffixURI").val(sameColumn.data.suffixURI);
+                            }
+                            if ($(!"#columnDetails-baseURI").val() && sameColumn.data.baseURI) {
+                                $("#columnDetails-baseURI").val(sameColumn.data.baseURI);
+                            }
+                        });
+                    }
+                }
+
+                if (!$("#columnDetails-rdfsLabel").val()) {
+                    $("#columnDetails-rdfsLabel").val(columnNode.data.label);
+                }
+            });
+        }
+    };
+    /**
+     * Checks whether a column belonging to a given class is already mapped
+     * in another data table and enforces mapping consistency rules.
+     *
+     * This function ensures that, for a given class:
+     * - There is always exactly one logical "main column" (`isMainColumn`).
+     * - Columns belonging to the same class but different tables are properly
+     *   linked using `definedInColumn`.
+     * - Conflicts where multiple main columns exist across tables are resolved
+     *   automatically to preserve mapping integrity.
+     *
+     * During execution, the function may mutate the provided column node and
+     * other related column nodes by:
+     * - Assigning or removing the `isMainColumn` flag.
+     * - Setting or deleting the `definedInColumn` reference.
+     * - Synchronizing URI-related properties to the mainColumnClass.
+     *
+     * @param {Object} columnNode
+     *   The column node currently being processed. This object may be modified
+     *   by the function to reflect updated main/dependent column relationships.
+     *
+     * @param {string} [columnClass]
+     *   The identifier of the class to which the column belongs. If not provided,
+     *   it is automatically resolved from the given column node.
+     *
+     * @returns {string|false}
+     *   Returns the name/identifier of the data table in which a conflicting
+     *   main column already exists, if the column is already mapped in another
+     *   table. Returns `false` if no such conflict is detected.
+     */
+
+    self.isColumnAllreadyMappedInAnotherTable = function (columnNode, columnClass) {
+        var table = false;
+
+        var columnsClassMap = {};
+        if (!columnClass) {
+            columnClass = AIMappingColumnsGraph.getColumnClass(columnNode);
+        }
+        var sameTableMainColumnIds = [];
+        if (columnClass) {
+            AIMappingColumnsGraph.visjsGraph.data.nodes.get().forEach(function (node) {
+                if (node.data && node.data.type == "Class" && node.data.id == columnClass) {
+                    var sameClassColumns = AIMappingColumnsGraph.getClassColumns(node);
+                    var sameClassColumns = sameClassColumns.filter(function (column) {
+                        return AIMappingModeler.columnsMappingsObjects.includes(column.data.type) && column.data.type != "URI";
+                    });
+
+                    if (sameClassColumns && sameClassColumns.length > 0) {
+                        var stop = false;
+                        // Assure there is a main column,
+                        // if not set the first classNode shown on technical mappings as main
+                        var mainColumns = sameClassColumns.filter(function (column) {
+                            return column.data.isMainColumn;
+                        });
+                        if (mainColumns.length == 0) {
+                            columnNode.data.isMainColumn = true;
+                            delete columnNode.data.definedInColumn;
+                        }
+                        // treat all classNodes isMainColumn, definedInColumn supposing there
+                        // is only one main column
+                        sameClassColumns.forEach(function (column2) {
+                            if (stop) {
+                                return;
+                            }
+                            // same node no treat
+                            if (column2.id == columnNode.id) {
+                                return;
+                            }
+                            var table2 = column2.data.dataTable;
+                            // nodes which are same columnClass and in the same table and one of them is mainColumn
+                            if (table2 == columnNode.data.dataTable && (node.data.isMainColumn || column2.data.isMainColumn)) {
+                                delete columnNode.data.definedInColumn;
+                                delete column2.data.definedInColumn;
+                                column2.data.isMainColumn = true;
+                                columnNode.data.isMainColumn = true;
+                                self.copyUriProperties(node, column2);
+                                return;
+                            }
+                            //pass others nodess
+                            if (table2 == columnNode.data.dataTable) {
+                                return;
+                            }
+
+                            if (columnNode.data.isMainColumn && column2.data.isMainColumn) {
+                                // This case is not expected but in case there is two main columns in different tables
+                                // we set the definedInColumn to the first main column found to not break the mapping
+                                column2.data.definedInColumn = columnNode.id;
+                                delete column2.data.isMainColumn;
+                                delete columnNode.data.definedInColumn;
+                            } else if (column2.data.isMainColumn) {
+                                columnNode.data.definedInColumn = column2.id;
+                                delete column2.data.definedInColumn;
+                                //stop = true;
+                                /*
+                                  delete columnNode.data.uriType
+                                  delete columnNode.data.baseURI
+                                  delete columnNode.data.prefixURI
+                                  delete columnNode.data.rdfType
+
+
+                              }*/
+
+                                table = table2;
+                            } else if (columnNode.data.isMainColumn) {
+                                column2.data.definedInColumn = columnNode.id;
+                                delete columnNode.data.definedInColumn;
+                            }
+                        });
+                    }
+                }
+            });
+        }
+        self.setDefinedInColumnNodesProperties();
+        return table;
+    };
+
+    self.setIsMainColumnKey = function () {
+        AIMappingColumnsGraph.visjsGraph.data.nodes.forEach(function (node) {
+            if (node.data && node.data.type == "Column" && node.data.rdfsLabel) {
+                node.data.isMainColumn = true;
+            }
+        });
+    };
+    // Helper function to copy URI properties from reference node to target node
+    self.copyUriProperties = function (targetNodeData, referenceNodeData) {
+        var uriProperties = ["prefixURI", "suffixURI", "baseURI", "uriType"];
+        var updated = false;
+        uriProperties.forEach(function (prop) {
+            if (referenceNodeData[prop] !== undefined) {
+                targetNodeData[prop] = referenceNodeData[prop];
+                updated = true;
+            }
+        });
+        return updated;
+    };
+
+    /**
+     * Updates URI properties of nodes that reference other nodes via definedInColumn.
+     * For each node with data.definedInColumn, copies prefixURI, suffixURI, baseURI, and uriType
+     * from the referenced node. Also processes edges' fromNode and toNode if they have definedInColumn.
+     * @function
+     * @name setDefinedInColumnNodesProperties
+     * @memberof module:AIMappingsDetails
+     * @returns {void}
+     */
+    self.setDefinedInColumnNodesProperties = function () {
+        var nodes = AIMappingColumnsGraph.visjsGraph.data.nodes.get();
+        var edges = AIMappingColumnsGraph.visjsGraph.data.edges.get();
+
+        // Process nodes with definedInColumn
+        nodes.forEach(function (node) {
+            if (node.data && node.data.definedInColumn) {
+                var referenceNode = AIMappingColumnsGraph.visjsGraph.data.nodes.get(node.data.definedInColumn);
+                if (referenceNode && referenceNode.data) {
+                    self.copyUriProperties(node.data, referenceNode.data);
+                    AIMappingColumnsGraph.updateNode(node);
+                }
+            }
+        });
+
+        // Process edges with fromNode or toNode containing definedInColumn
+        edges.forEach(function (edge) {
+            var edgeUpdated = false;
+
+            // Check fromNode
+            if (edge.fromNode && edge.fromNode.data && edge.fromNode.data.definedInColumn) {
+                var fromReferenceNode = AIMappingColumnsGraph.visjsGraph.data.nodes.get(edge.fromNode.data.definedInColumn);
+                if (fromReferenceNode && fromReferenceNode.data) {
+                    edgeUpdated = self.copyUriProperties(edge.fromNode.data, fromReferenceNode.data) || edgeUpdated;
+                }
+            }
+
+            // Check toNode
+            if (edge.toNode && edge.toNode.data && edge.toNode.data.definedInColumn) {
+                var toReferenceNode = AIMappingColumnsGraph.visjsGraph.data.nodes.get(edge.toNode.data.definedInColumn);
+                if (toReferenceNode && toReferenceNode.data) {
+                    edgeUpdated = self.copyUriProperties(edge.toNode.data, toReferenceNode.data) || edgeUpdated;
+                }
+            }
+
+            // Update the edge if any changes were made
+            if (edgeUpdated) {
+                AIMappingColumnsGraph.updateEdge(edge);
+            }
+        });
+    };
+
+    /**
+     * Sets a node as the main column for its class.
+     * Removes definedInColumn reference, sets isMainColumn to true, and reapplies mapping logic.
+     * @function
+     * @name setNodeAsMainColumn
+     * @memberof module:AIMappingsDetails
+     * @param {string} nodeId - The ID of the node to set as main column
+     * @returns {void}
+     */
+    self.setNodeAsMainColumn = function (nodeId) {
+        var node = AIMappingColumnsGraph.visjsGraph.data.nodes.get(nodeId);
+
+        if (!node || !node.data) {
+            return;
+        }
+
+        delete node.data.definedInColumn;
+        node.data.isMainColumn = true;
+
+        AIMappingColumnsGraph.updateNode(node, function () {
+            self.isColumnAllreadyMappedInAnotherTable(node);
+            self.showDetailedMappingsTree();
+            self.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv", node, function () {});
+        });
+    };
+
+    return self;
+})();
+
+export default AIMappingsDetails;
+window.window.AIMappingsDetails = AIMappingsDetails;

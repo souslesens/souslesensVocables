@@ -1,0 +1,130 @@
+<div id="MappingModeler_leftTabs" style="width: 100%; overflow: auto; padding: 0px; border-radius: 0px">
+    <ul>
+        <li class="mappingModeler-tabDiv">
+            <a href="#MappingModeler_dataSourcesTab" style="padding: 7px">Data<br />Sources</a>
+        </li>
+        <li class="mappingModeler-tabDiv">
+            <a href="#MappingModeler_columnsTab" style="padding: 7px">Column<br />Mappings</a>
+        </li>
+        <li class="mappingModeler-tabDiv">
+            <a href="#MappingModeler_RelationsTab" style="padding: 7px">Relations<br />&nbsp;</a>
+        </li>
+        <li class="mappingModeler-tabDiv">
+            <a href="#MappingModeler_technicalDetailTab" style="padding: 7px">Technical<br />Mappings</a>
+        </li>
+        <li class="mappingModeler-tabDiv">
+            <a href="#MappingModeler_tripleFactoryTab" style="padding: 7px">Triples<br />&nbsp;</a>
+        </li>
+    </ul>
+
+    <!-- <div style="display: flex; flex-direction: row">-->
+    <div id="MappingModeler_dataSourcesTab" class="coloredContainerImportant" style="margin-top: 0px !important">
+        <div id="mappingModeler_dataSourcesJstreeDiv"></div>
+    </div>
+
+    <div id="MappingModeler_columnsTab" style="display: flex; flex-direction: column" class="coloredContainerImportant">
+        <!--   <button class="w3-button slsv-button-2" onclick="aiMappingModeler.newAxiom()">New axiom</button>-->
+        <div id="nodeInfosAxioms_activeLegendDiv" style="width: 400px; height: 50px"></div>
+
+        <div style="display: flex; flex-direction: row" id="mappingModeler_newAxiomPanel">
+            <!--  <button onclick="aiMappingModeler.actions.setLayout('randomlayout')">Random Layout</button>-->
+
+            <div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <input
+                            id="mappingModeler_suggestionsnput"
+                            onkeyup="AIMappingModeler.filterSuggestionTree()"
+                            style="width: 280px; height: 33.5px; border-bottom-left-radius: 14px; border-top-left-radius: 14px"
+                        />
+                    </div>
+                    <div class="SearchButtonIconRight border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 5px">
+                        <button class="search-icon slsv-invisible-button" onclick="AIMappingModeler.filterSuggestionTree()" style="margin-top: 4px; height: 20px; width: 20px"></button>
+                    </div>
+                    <button
+                        class="w3-button slsv-invisible-button resetIcon"
+                        title="refresh ontology model"
+                        onclick="AIMappingModeler.refreshColumnsClassesTree()"
+                        style="margin-top: 4px; margin-left: 15px; height: 20px; width: 20px"
+                    ></button>
+                </div>
+
+                <br />
+                <div id="mappingModeler_relationInfosDiv"><span id="mappingModeler_relationInfos"></span></div>
+                <div>
+                    <div id="suggestionsSelectJstreeDiv"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="MappingModeler_technicalDetailTab" class="coloredContainerImportant" style="overflow: auto">
+        <div style="display: flex; flex-direction: row">
+            <div>
+                <input
+                    id="detailedMappings_searchInput"
+                    class="w3-input w3-border w3-padding"
+                    type="text"
+                    value=""
+                    autocomplete="off"
+                    style="width: 200px; font-size: 12px; margin: 3px; padding: 3px"
+                />
+                <div id="detailedMappings_treeContainer" style="">
+                    <div id="detailedMappings_jsTreeDiv"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="MappingModeler_tripleFactoryTab" class="coloredContainerImportant">
+        <div>
+            <div class="w3-panel w3-border w3-round-small">
+                <button class="w3-button slsv-button-3" onclick="AIMappingTransform.generateR2MLmappings()">view RML/R2RML mappings</button>
+            </div>
+
+            <div class="w3-panel w3-border w3-round-small">
+                <button class="w3-button slsv-button-1" onclick="AITripleFactory.initFilterMappingDialog()">Generate triples</button>
+                <span id="MappingModeler_metadataTriplesSpan" style="display: none">
+                    <input type="checkbox" id="MappingModeler_metadataTriplesCBX" checked title="write the dcterms:created date of each subject" />Metadata triples
+                </span>
+            </div>
+            <div class="w3-panel w3-border w3-round-small">
+                <button class="w3-button slsv-button-3" id="KGcreator_deleteKGcreatorTriplesBtn" onclick="AITripleFactory.deleteSpecificTriples()" title="delete specific triples">
+                    delete specific triples
+                </button>
+                <button class="w3-button slsv-button-3" onclick="AITripleFactory.deleteTriples()" title="delete current file triples">delete current file triples</button>
+                <button class="w3-button slsv-button-3" id="KGcreator_deleteKGcreatorTriplesBtn" onclick="AITripleFactory.deleteTriples('all')" title="delete ALL KGreator triples">
+                    delete ALL mapped triples
+                </button>
+            </div>
+            <div class="w3-panel w3-border w3-round-small">
+                <button class="w3-button slsv-button-2" onclick="AITripleFactory.recreateGraphSelectTables()" title="Recreate graph">Recreate graph</button>
+                <button class="w3-button slsv-button-2" onclick="AITripleFactory.indexGraph()" title="Index graph">Index graph</button>
+            </div>
+
+            &nbsp; &nbsp;
+
+            <!--   <button class="w3-button slsv-button-1 " onclick="KGcreator_run.testSelectedMappings()" title="Test Selected Mappings">
+                Test Selected Mappings
+            </button>-->
+
+            <!--  <button class="w3-button slsv-button-2 " onclick="KGcreator_run.stopCreateTriples()" title="Abort">Abort</button>-->
+        </div>
+    </div>
+    <div id="MappingModeler_RelationsTab" class="coloredContainerImportant">
+        <div style="height: 500px">
+            <!--<button class="w3-button slsv-button-2" onclick="AIMappingModelerRelations.drawPossibleRelations()" title="listPossibleRelations">list possible relations</button>-->
+            <button class="w3-button slsv-button-2" onclick="AIMappingModelerRelations.applyColumnRelations()" title="applyColumnRelations">apply selected relations</button>
+            <button
+                class="w3-button slsv-invisible-button resetIcon"
+                title="refresh ontology model"
+                onclick="AIMappingModeler.refreshSourceOntologyModel(function(){AIMappingModelerRelations.drawPossibleRelations()})"
+                style="margin-top: 4px; margin-left: 15px; height: 20px; width: 20px"
+            ></button>
+
+            <div style="width: 400px; height: 400px; overflow: auto">
+                <div id="mappingModelerRelations_jstreeDiv"></div>
+            </div>
+        </div>
+    </div>
+</div>

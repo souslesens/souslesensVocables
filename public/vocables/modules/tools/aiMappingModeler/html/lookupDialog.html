@@ -1,0 +1,45 @@
+<style>
+    .linkColumn_tripleDiv {
+        margin: 2px;
+        padding: 2px;
+        border-radius: 3px;
+    }
+</style>
+
+<div>
+    <div style="display: flex; flex-direction: row; justify-content: space-evenly">
+        <div>
+            <div id="LinkColumn_classTypeDiv" style="color: #0d6efd; font-size: 18px; margin: 5px"></div>
+
+            <pre id="KGcreator_columnJsonDisplay" style="width: 430px; height: 510px; font-size: 12px; background-color: #1e1b1d; overflow: auto"></pre>
+        </div>
+
+        <div>
+            Create Lookup
+            <table>
+                <tr>
+                    <td>Name</td>
+                    <td><input class="KGcreator_tripleInput" id="KGCreator_lookupName" /></td>
+                </tr>
+                <tr>
+                    <td>FileName</td>
+                    <td><input class="KGcreator_tripleInput" id="KGCreator_lookupTable" /></td>
+                </tr>
+                <tr>
+                    <td>Source column</td>
+                    <td><select class="KGcreator_tripleInput" id="KGCreator_lookupSourceColumnSelect"></select></td>
+                </tr>
+                <tr>
+                    <td>Target column</td>
+                    <td><select class="KGcreator_tripleInput" id="KGCreator_lookupTargetColumnSelect"></select></td>
+                </tr>
+                <tr>
+                    <td>Target transformFn</td>
+                    <td><textarea style="height: 200px" class="KGcreator_tripleInput" id="KGCreator_lookupTransformFn"></textarea></td>
+                </tr>
+            </table>
+
+            <button onclick="KGcreator_mappings.addLookup()">Add lookup</button>
+        </div>
+    </div>
+</div>

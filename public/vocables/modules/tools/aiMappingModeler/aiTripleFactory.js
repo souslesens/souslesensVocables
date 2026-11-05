@@ -1,0 +1,1422 @@
+import AIMappingsDetails from "./aiMappingsDetails.js";
+
+import AIMappingTransform from "./aiMappingTransform.js";
+import AIMappingModeler from "./aiMappingModeler.js";
+import SearchUtil from "../../search/searchUtil.js";
+import MainController from "../../shared/mainController.js";
+import Export from "../../shared/export.js";
+import AIUIcontroller from "./aiUiController.js";
+import AIDataSourceManager from "./aiDataSourcesManager.js";
+import OntologyModels from "../../shared/ontologyModels.js";
+import AIMappingColumnsGraph from "./aiMappingColumnsGraph.js";
+import IndexedPredicates_bot from "../../bots/indexedPredicates_bot.js";
+
+/**
+ * The AITripleFactory module handles the creation, filtering, and writing of RDF triples.
+ * It includes functions for generating sample triples, creating all mappings triples, and indexing the graph.
+ * @module AITripleFactory
+ * @see [Tutorial: Overview]{@tutorial overview}
+ */
+var AITripleFactory = (function () {
+    var self = {};
+
+    /**
+     * Indexes the RDF graph in ElasticSearch for the current AIMappingModeler source.
+     * @function
+     * @name indexGraph
+     * @memberof module:AITripleFactory
+     */
+    self.indexGraph = function (callback) {
+        var graphSource = AIMappingModeler.currentSLSsource;
+        if (!graphSource) {
+            return alert("no source selected");
+        }
+        if (!Config.sources[graphSource].graphUri) {
+            return alert("no graphUri for source " + graphSource);
+        }
+
+        // a callback means a programmatic call: no user to answer the predicates bot
+        if (callback) {
+            return self.indexSourceGraph(graphSource, callback);
+        }
+        if (confirm("index source " + graphSource)) {
+            IndexedPredicates_bot.start(graphSource, function (indexedPredicatesBySource) {
+                self.indexSourceGraph(graphSource, null, indexedPredicatesBySource);
+            });
+        }
+    };
+
+    /**
+     * Indexes a given source RDF graph in ElasticSearch, displaying progress and completion messages.
+     * Unlike {@link module:AITripleFactory.indexGraph}, this does not prompt the user and targets an explicit source,
+     * so it can be triggered automatically at the end of a graph recreation.
+     * @function
+     * @name indexSourceGraph
+     * @memberof module:AITripleFactory
+     * @param {string} graphSource - The SLS source name whose graph must be indexed.
+     * @param {function} [callback] - Error-first callback invoked once indexing finishes.
+     * @param {Object} [indexedPredicatesBySource] - Optional map source -> indexable predicates (from
+     *   IndexedPredicates_bot); when it holds an entry for graphSource, only those predicates are indexed.
+     */
+    self.indexSourceGraph = function (graphSource, callback, indexedPredicatesBySource) {
+        if (!graphSource || !Config.sources[graphSource] || !Config.sources[graphSource].graphUri) {
+            var missingSourceError = "no graphUri for source " + graphSource;
+            if (callback) {
+                return callback(missingSourceError);
+            }
+            return alert(missingSourceError);
+        }
+
+        UI.message("indexing graph...", false, true);
+        var indexationOptions = {};
+        if (indexedPredicatesBySource && indexedPredicatesBySource[graphSource]) {
+            indexationOptions.indexedPredicates = indexedPredicatesBySource[graphSource];
+        }
+        SearchUtil.generateElasticIndex(graphSource, indexationOptions, function (err, _result) {
+            if (err) {
+                var indexError = err.responseText || err;
+                if (callback) {
+                    return callback(indexError);
+                }
+                return MainController.errorAlert(indexError);
+            }
+            UI.message("indexed graph " + Config.sources[graphSource].graphUri + " in index " + graphSource.toLowerCase(), true);
+            setTimeout(function () {
+                UI.message("", false, true);
+            }, 5000);
+            if (callback) {
+                return callback();
+            }
+        });
+    };
+
+    /**
+     * Displays a dialog for filtering mappings, allowing the user to choose between sample and actual triples.
+     * The dialog is populated with a tree view of detailed mappings that can be filtered by the user.
+     * @function
+     * @name initFilterMappingDialog
+     * @memberof module:AITripleFactory
+     * @param {boolean} isSample - If true, the dialog is for displaying sample mappings; if false, for writing actual triples.
+     */
+    self.initFilterMappingDialog = function (isSample, isDelete) {
+        self.filterMappingIsSample = isSample;
+        self.filterMappingIsDelete = isDelete;
+        AIUIcontroller.activateRightPanel("generic");
+        // save current mappings before opening the dialog
+        AIMappingColumnsGraph.saveVisjsGraph(function () {
+            var htmlToLoad = "./modules/tools/aiMappingModeler/html/filterMappingDialog.html";
+            if (isDelete) {
+                htmlToLoad = "./modules/tools/aiMappingModeler/html/specificMappingDelete.html";
+            }
+            $("#mappingModeler_genericPanel").load(htmlToLoad, function () {
+                $("#MappingModeler_metadataTriplesSpan").toggle(!isDelete);
+                self.showFilterMappingsDialog("detailedMappings_filterMappingsTree", AIMappingModeler.currentTable.name);
+            });
+        });
+    };
+
+    function submitNtExportForm(payload) {
+        var iframeName = "mappingModeler_ntExportFrame";
+        var iframe = document.getElementsByName(iframeName)[0];
+        if (!iframe) {
+            iframe = document.createElement("iframe");
+            iframe.name = iframeName;
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+        }
+
+        var form = document.createElement("form");
+        form.method = "POST";
+        form.action = `${Config.apiUrl}/kg/triples`;
+        form.target = iframeName;
+        form.style.display = "none";
+
+        Object.keys(payload).forEach(function (fieldName) {
+            var input = document.createElement("input");
+            input.type = "hidden";
+            input.name = fieldName;
+            input.value = payload[fieldName];
+            form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+    }
+
+    /**
+     * Runs the filtered mappings for the SLS (Semantic Linked Set) based on the selected nodes in the tree view.
+     * It filters and creates unique mappings by checking the selected attributes and mapping nodes.
+     * @function
+     * @name runSlsFilteredMappings
+     * @memberof module:AITripleFactory
+     */
+    self.runSlsFilteredMappings = function (isSample, runOptions) {
+        runOptions = runOptions || {};
+        var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("detailedMappings_filterMappingsTree");
+        if (checkedNodes.length == 0) {
+            return alert(" no mappings selected");
+        }
+        if (!self.checkBlankNodeGroupsAreComplete("detailedMappings_filterMappingsTree", checkedNodes)) {
+            return;
+        }
+        var filterMappingIds = [];
+        // a leaf predicate (id composite "columnId>predicate") fait cocher en cascade son parent colonne :
+        // on exclut alors l'id colonne nu pour ne garder que le prédicat sélectionné
+        var parentColumnIdsOfSelectedPredicates = {};
+        checkedNodes.forEach(function (item) {
+            if (item.parent == "Relations") {
+                // classRelation (rdf:type / rdfs:subClassOf) carries a composite "column>predicate>class"
+                // matched column-side in triplesMaker; column->column object properties are matched
+                // by bare edge.id in mappingsParser.getColumnToColumnMappings
+                if (item.data && item.data.filterMappingId) {
+                    filterMappingIds.push(item.data.filterMappingId);
+                } else {
+                    filterMappingIds.push(item.id);
+                }
+                return;
+            }
+            filterMappingIds.push(item.id);
+        });
+        try {
+            var offset = parseInt($("#mappingTripleFactory_offset").val());
+        } catch (err) {
+            return MainController.errorAlert(err);
+        }
+
+        var options = {
+            filterMappingIds: filterMappingIds,
+            offset: offset,
+        };
+        if (!$("#MappingModeler_metadataTriplesCBX").prop("checked")) {
+            options.skipCreatedDateTriples = true;
+        }
+        if (runOptions.exportOnly) {
+            options.exportOnly = true;
+            options.outputFormat = runOptions.outputFormat;
+        }
+
+        AITripleFactory.createTriples(isSample, AIMappingModeler.currentTable.name, options, function (err, result) {
+            if (err) {
+                MainController.errorAlert(err);
+            } else {
+                if (runOptions.exportOnly) {
+                    return;
+                }
+                // UI.message("Done", true);
+                var indexAuto = $("#MappingModeler_indexAutoCBX").prop("checked");
+
+                if (!self.filterMappingIsSample && indexAuto) {
+                    SearchUtil.generateElasticIndex(
+                        AIMappingModeler.currentSLSsource,
+                        {
+                            indexProperties: 1,
+                            indexNamedIndividuals: 1,
+                        },
+                        (err) => {
+                            if (err && callback) {
+                                return callback(err);
+                            }
+                        },
+                    );
+                }
+            }
+        });
+    };
+
+    /**
+     * Checks if the current table is valid and if its mappings details are loaded.
+     * Prompts the user to select a table or load the mappings details if they are not available.
+     * @function
+     * @name checkCurrentTable
+     * @memberof module:AITripleFactory
+     * @returns {boolean} - Returns true if the current table is valid and its mappings details are loaded, otherwise false.
+     */
+    self.checkCurrentTable = function () {
+        //obsolete avec le systeme des definedInColumn
+        return true;
+
+        var check = false;
+        if (!AIMappingModeler.currentTable) {
+            alert("select a table or a csv source");
+        }
+        var mappingsDetailsIsLoaded = false;
+        AIMappingColumnsGraph.visjsGraph.data.nodes.get().forEach(function (node) {
+            if (node?.data?.dataTable === AIMappingModeler.currentTable.name) {
+                if (node.data.uriType) {
+                    mappingsDetailsIsLoaded = true;
+                }
+            }
+        });
+        if (mappingsDetailsIsLoaded) {
+            check = true;
+        } else {
+            alert("Mappings details are not loaded for this table. Please load mappings details first");
+            AIMappingsDetails.showDetailsDialog();
+        }
+        return check;
+    };
+
+    /**
+     * Deletes triples created by KGCreator from the datasource.
+     * Confirms with the user before deleting triples, and sends a DELETE request to the API.
+     * @function
+     * @name deleteTriples
+     * @memberof module:AITripleFactory
+     * @param {boolean} all - Indicates whether to delete all triples or just for the current table.
+     * @param {function} [callback] - A callback function to be executed after the deletion process.
+     */
+    self.deleteTriples = function (all, callback) {
+        var tables = [];
+        if (!all) {
+            if (!self.checkCurrentTable) {
+                return;
+            }
+            if (!confirm("Do you really want to delete triples in table " + AIMappingModeler.currentTable.name)) {
+                return;
+            }
+
+            tables.push(AIMappingModeler.currentTable.name);
+        } else {
+            if (!confirm("Do you really want to delete  triples created with KGCreator in SLS source " + AIDataSourceManager.currentSlsvSource)) {
+                return;
+            }
+        }
+
+        var payload = {
+            source: AIDataSourceManager.currentSlsvSource,
+            tables: JSON.stringify(tables),
+        };
+        if (Config.clientSocketId) {
+            payload.options = JSON.stringify({ clientSocketId: Config.clientSocketId });
+        }
+        UI.message("deleting KGcreator  triples...");
+        $.ajax({
+            type: "DELETE",
+            url: `${Config.apiUrl}/kg/triples`,
+            data: payload,
+            dataType: "json",
+            success: function (result, _textStatus, _jqXHR) {
+                AIMappingModeler.clearSourceClasses(AIDataSourceManager.currentSlsvSource);
+                if (callback) {
+                    return callback();
+                } else {
+                    alert(result.result);
+                }
+                AIMappingModeler.socketMessage({
+                    operation: "finished",
+                });
+                UI.message(result.result);
+                self.refreshTabStat();
+
+                // JstreeWidget.loadJsTree(jstreeDiv, jstreeData, options, function () {
+                //     $("#MappingModeler_dataSourcesTab").css("margin-top", "0px");
+                // });
+            },
+            error: function (err) {
+                if (callback) {
+                    return callback(err);
+                } else {
+                    MainController.errorAlert(err);
+                }
+                UI.message(err.responseText);
+            },
+        });
+    };
+    self.refreshTabStat = function (callback) {
+        var tableStatsMap = {};
+
+        AIDataSourceManager.getTriplesStats(AIDataSourceManager.currentSlsvSource, function (err, result) {
+            tableStatsMap = result || {};
+            AIDataSourceManager.loaDataSourcesJstree(AIMappingModeler.jstreeDivId, tableStatsMap, function (err) {
+                return callback;
+            });
+        });
+    };
+
+    /**
+     * Creates triples for a given table using the selected mappings.
+     * Confirms with the user before creating triples, and sends a POST request to the API.
+     * @function
+     * @name createTriples
+     * @memberof module:AITripleFactory
+     * @param {boolean} sampleData - Indicates whether to create sample data triples or full triples.
+     * @param {string} table - The table for which to create triples.
+     * @param {Object} [options] - Options for creating triples, such as sample size and filter options.
+     * @param {boolean} [options.deleteOldGraph=false] - If true, deletes the existing graph before creating new triples.
+     * @param {number} [options.sampleSize=500] - The number of sample triples to create if `sampleData` is true.
+     * @param {string} [options.clientSocketId] - The client socket ID for real-time updates.
+     * @param {Object} [options.mappingsFilter] - Filters for selecting specific mappings.
+     * @param {Object} [options.filteredMappings] - Alternative mapping filter.
+     * @param {boolean} [options.deleteTriples=false] - If true, deletes existing triples before creation.
+     * @param {function} callback - A callback function to be executed after the triples creation process.
+     */
+    self.createTriples = function (sampleData, table, options, callback) {
+        if (!options) {
+            options = {};
+        }
+        if (!sampleData && !options.exportOnly && table !== "*") {
+            if (!confirm("create triples for " + AIDataSourceManager.currentConfig.currentDataSource.name + " " + table || "")) {
+                return;
+            }
+        }
+
+        if (sampleData) {
+            options.deleteOldGraph = false;
+            options.sampleSize = 500;
+        } else {
+            options.deleteOldGraph = false;
+        }
+
+        if (Config.clientSocketId) {
+            options.clientSocketId = Config.clientSocketId;
+        }
+        if (table === "*") {
+            options = {};
+            table = null;
+        }
+
+        if (options.filteredMappings) {
+            options.mappingsFilter = options.filteredMappings;
+        }
+        var payload = {
+            source: AIDataSourceManager.currentSlsvSource,
+            datasource: AIDataSourceManager.currentConfig.currentDataSource.id,
+            table: table,
+            options: JSON.stringify(options),
+        };
+
+        if (options.exportOnly && options.outputFormat == "nt") {
+            UI.message("exporting triples...");
+            submitNtExportForm(payload);
+            setTimeout(function () {
+                UI.message("", true);
+            }, 3000);
+            if (callback) {
+                return callback();
+            }
+            return;
+        }
+
+        var ajaxOptions = {
+            type: "POST",
+            url: `${Config.apiUrl}/kg/triples`,
+            data: payload,
+            success: function (result, _textStatus, _jqXHR) {
+                if (sampleData) {
+                    AIUIcontroller.activateRightPanel("generic");
+                    self.showTriplesInDataTable(result, "mappingModeler_genericPanel");
+                    UI.message("", true);
+                    var progressBar = document.getElementById("progressBar");
+                    if (progressBar) {
+                        progressBar.style.display = "none";
+                    }
+                } else {
+                    if (options.deleteTriples) {
+                        $("#KGcreator_infosDiv").val(result.result);
+                        UI.message(result.result, true);
+                    } else {
+                        var message = result.totalTriplesCount[AIMappingModeler.currentTable.name] + " triples created in graph " + AIDataSourceManager.currentConfig.graphUri;
+                        if (result.writeQuotaReached) {
+                            message += "\n\n" + result.writeQuotaMessage;
+                        }
+                        AITripleFactory.refreshTabStat();
+                        alert(message);
+                        //  UI.message(message, true);
+                    }
+                }
+                if (callback) {
+                    return callback(null, result);
+                }
+            },
+            error(err) {
+                if (callback) {
+                    return callback(err.responseText);
+                }
+                return MainController.errorAlert(err);
+            },
+        };
+        ajaxOptions.dataType = "json";
+
+        UI.message("creating triples...");
+        $.ajax(ajaxOptions);
+    };
+
+    function getCurrentSource() {
+        if (AIDataSourceManager && AIDataSourceManager.currentSlsvSource) {
+            return AIDataSourceManager.currentSlsvSource;
+        }
+        return null;
+    }
+
+    function getDbTables() {
+        try {
+            if (AIDataSourceManager && AIDataSourceManager.currentConfig && AIDataSourceManager.currentConfig.currentDataSource && AIDataSourceManager.currentConfig.currentDataSource.tables) {
+                return Object.keys(AIDataSourceManager.currentConfig.currentDataSource.tables);
+            }
+        } catch (e) {}
+        return [];
+    }
+
+    function getCsvTables() {
+        try {
+            if (AIDataSourceManager && AIDataSourceManager.currentConfig && AIDataSourceManager.currentConfig.csvSources) {
+                return Object.keys(AIDataSourceManager.currentConfig.csvSources);
+            }
+        } catch (e) {}
+        return [];
+    }
+
+    function getStatsMap() {
+        if (AIDataSourceManager && AIDataSourceManager.statsMap) {
+            return AIDataSourceManager.statsMap;
+        }
+        return {};
+    }
+
+    function buildOptions() {
+        var options = {};
+        if (typeof Config !== "undefined" && Config && Config.clientSocketId) {
+            options.clientSocketId = Config.clientSocketId;
+        }
+        return options;
+    }
+
+    function ajaxRecreate(payload, onSuccess, onError) {
+        $.ajax({
+            type: "POST",
+            url: "/api/v1/kg/mappings/recreateTriples",
+            data: JSON.stringify(payload),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                if (onSuccess) onSuccess(data);
+            },
+            error: function (xhr) {
+                var msg = "Internal Server Error";
+                try {
+                    if (xhr && xhr.responseJSON && xhr.responseJSON.error) {
+                        msg = xhr.responseJSON.error;
+                    } else if (xhr && xhr.responseText) {
+                        msg = xhr.responseText;
+                    }
+                } catch (e) {}
+                if (onError) onError(xhr, msg);
+            },
+        });
+    }
+
+    function attachRecreateDeleteProgressListener() {
+        if (!window.SocketManager || !SocketManager.socket) {
+            return null;
+        }
+
+        var handler = function (msg) {
+            // msg = {tableTotalRecords, operation:'deleteTriples', totalSize}
+            if (!msg || msg.operation !== "deleteTriples") {
+                return;
+            }
+
+            UI.message("Delete progress: " + msg.totalSize + " / " + msg.tableTotalRecords);
+        };
+
+        SocketManager.socket.on("KGbuilder", handler);
+
+        return function detach() {
+            try {
+                SocketManager.socket.off("KGbuilder", handler);
+            } catch (e) {
+                try {
+                    SocketManager.socket.removeListener("KGbuilder", handler);
+                } catch (e2) {}
+            }
+        };
+    }
+
+    self.recreateAllTablesTriples = function (source, optionsObj, tableCount) {
+        var payload = {
+            source: source,
+            options: JSON.stringify(optionsObj || {}),
+        };
+        AIMappingModeler.recreateSource = source;
+        AIMappingModeler.recreateTotalTables = tableCount || 1;
+        AIMappingModeler.recreateProcessedTables = 0;
+        AIMappingModeler.recreateTotalTriples = 0;
+        var detach = attachRecreateDeleteProgressListener();
+        ajaxRecreate(
+            payload,
+            function (data) {},
+            function (xhr, msg) {
+                console.error("Recreate ALL ERROR", xhr);
+                alert(msg);
+            },
+        );
+    };
+
+    self.recreateOneTableTriples = function (source, table, optionsObj, doneCb) {
+        var payload = {
+            source: source,
+            table: table,
+            options: JSON.stringify(optionsObj || {}),
+        };
+        var detach = attachRecreateDeleteProgressListener();
+        ajaxRecreate(
+            payload,
+            function (data) {
+                if (doneCb) doneCb(null, data);
+            },
+            function (xhr, msg) {
+                console.error("Recreate table ERROR:", table, xhr);
+                alert("Error recreating table " + table + "\n\n" + msg);
+                if (doneCb) doneCb(new Error(msg));
+            },
+        );
+    };
+
+    self.recreateSelectedTablesTriples = function (source, tables, optionsObj) {
+        if (!Array.isArray(tables) || tables.length === 0) {
+            return alert("No table selected");
+        }
+
+        AIMappingModeler.recreateSource = source;
+        AIMappingModeler.recreateTotalTables = tables.length;
+        AIMappingModeler.recreateProcessedTables = 0;
+        AIMappingModeler.recreateTotalTriples = 0;
+
+        var i = 0;
+
+        function next() {
+            if (i >= tables.length) {
+                console.log("Recreate selected finished");
+                return;
+            }
+
+            var t = tables[i];
+            i++;
+
+            self.recreateOneTableTriples(source, t, optionsObj, function (err) {
+                if (err) return;
+                next();
+            });
+        }
+
+        next();
+    };
+
+    /**
+     * Generates KGcreator triples for the entire datasource, deleting any previous triples before creating new ones.
+     * It proceeds with a series of steps: deleting old triples, creating new triples, and reindexing the graph.
+     *
+     * @function
+     * @name recreateGraphSelectTables
+     * @memberof module:AITripleFactory
+     */
+
+    function getCurrentSource() {
+        if (AIDataSourceManager && AIDataSourceManager.currentSlsvSource) {
+            return AIDataSourceManager.currentSlsvSource;
+        }
+        return null;
+    }
+
+    function getDbTables() {
+        try {
+            if (AIDataSourceManager && AIDataSourceManager.currentConfig && AIDataSourceManager.currentConfig.currentDataSource && AIDataSourceManager.currentConfig.currentDataSource.tables) {
+                return Object.keys(AIDataSourceManager.currentConfig.currentDataSource.tables);
+            }
+        } catch (e) {}
+        return [];
+    }
+
+    function getCsvTables() {
+        try {
+            if (AIDataSourceManager && AIDataSourceManager.currentConfig && AIDataSourceManager.currentConfig.csvSources) {
+                return Object.keys(AIDataSourceManager.currentConfig.csvSources);
+            }
+        } catch (e) {}
+        return [];
+    }
+
+    function getStatsMap() {
+        if (AIDataSourceManager && AIDataSourceManager.statsMap) {
+            return AIDataSourceManager.statsMap;
+        }
+        return {};
+    }
+
+    function buildOptions() {
+        var options = {};
+        if (typeof Config !== "undefined" && Config && Config.clientSocketId) {
+            options.clientSocketId = Config.clientSocketId;
+        }
+        return options;
+    }
+
+    function getTablesWithMappingsMap() {
+        var map = {};
+        try {
+            if (!AIMappingColumnsGraph || !AIMappingColumnsGraph.visjsGraph || !AIMappingColumnsGraph.visjsGraph.data || !AIMappingColumnsGraph.visjsGraph.data.nodes) {
+                return map;
+            }
+
+            var nodes = AIMappingColumnsGraph.visjsGraph.data.nodes.get();
+            if (!Array.isArray(nodes)) {
+                return map;
+            }
+
+            var allowedTypes = [];
+            if (AIMappingModeler && Array.isArray(AIMappingModeler.columnsMappingsObjects)) {
+                allowedTypes = AIMappingModeler.columnsMappingsObjects;
+            }
+
+            nodes.forEach(function (n) {
+                if (!n || !n.data) return;
+
+                if (allowedTypes.length > 0) {
+                    if (allowedTypes.indexOf(n.data.type) < 0) return;
+                }
+
+                if (n.data.dataTable) {
+                    map[n.data.dataTable] = true;
+                }
+            });
+        } catch (e) {}
+        return map;
+    }
+
+    function filterTablesHavingMappings(allTables) {
+        var tablesWithMappings = getTablesWithMappingsMap();
+        var out = [];
+
+        allTables.forEach(function (t) {
+            if (tablesWithMappings[t]) {
+                out.push(t);
+            }
+        });
+
+        return out;
+    }
+
+    self.recreateGraphSelectTables = function () {
+        try {
+            var source = getCurrentSource();
+            if (!source) {
+                return alert("Missing AIDataSourceManager.currentSlsvSource");
+            }
+
+            var dbTables = getDbTables();
+            var csvTables = getCsvTables();
+
+            var merged = mergeUniqueTables(dbTables, csvTables);
+            var allTables = merged.tables;
+
+            if (!allTables || allTables.length === 0) {
+                return alert("No tables found for this source");
+            }
+
+            var filteredTables = filterTablesHavingMappings(allTables);
+
+            if (!filteredTables || filteredTables.length === 0) {
+                return alert("Aucune table avec mappings trouvée (le graphe de mappings n'est peut-être pas chargé).");
+            }
+
+            var statsMap = getStatsMap();
+
+            var jstreeData = [];
+
+            // Root = source
+            jstreeData.push({
+                id: source,
+                parent: "#",
+                text: source,
+                type: "Source",
+            });
+
+            var tablesDisplayed = filteredTables.slice();
+
+            tablesDisplayed.forEach(function (t) {
+                var count = null;
+                if (statsMap && typeof statsMap === "object" && statsMap[t]) {
+                    count = statsMap[t];
+                }
+
+                var label = t;
+                if (count) {
+                    label = t + " " + count + " Triples";
+                }
+
+                var isCsv = csvTables.indexOf(t) > -1;
+
+                jstreeData.push({
+                    id: t,
+                    parent: source,
+                    text: label,
+                    type: isCsv ? "CSV" : "Table",
+                    data: {
+                        tableName: t,
+                        isCsv: isCsv,
+                    },
+                });
+            });
+
+            var optionsObj = buildOptions();
+
+            var options = {
+                withCheckboxes: true,
+                openAll: true,
+                selectDescendants: true,
+                tie_selection: false,
+
+                validateFn: function (selected) {
+                    try {
+                        var selectedIds = [];
+                        if (Array.isArray(selected)) {
+                            selected.forEach(function (node) {
+                                if (node && node.id) {
+                                    selectedIds.push(node.id);
+                                }
+                            });
+                        }
+
+                        selectedIds = selectedIds.filter(function (id) {
+                            return id !== source;
+                        });
+
+                        if (!selectedIds || selectedIds.length === 0) {
+                            return alert("Select at least one table");
+                        }
+
+                        // ask once, before the deletion/generation starts, whether to reindex the source graph at the end
+                        AIMappingModeler.recreateIndexAfter = confirm("Would you like to index the graph after the generation of triples ?");
+
+                        // all selected ?
+                        var allSelected = selectedIds.length === tablesDisplayed.length;
+
+                        if (allSelected) {
+                            return self.recreateAllTablesTriples(source, optionsObj, tablesDisplayed.length);
+                        } else {
+                            return self.recreateSelectedTablesTriples(source, selectedIds, optionsObj);
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        alert(e.message || String(e));
+                    }
+                },
+            };
+
+            JstreeWidget.loadJsTree(null, jstreeData, options, function () {
+                setTimeout(function () {
+                    try {
+                        $("#jstreeWidget_okButton").html("Recreate");
+                    } catch (e) {}
+                }, 50);
+            });
+        } catch (e) {
+            console.error(e);
+            alert(e.message || String(e));
+        }
+    };
+
+    function normalizeTableName(name) {
+        if (!name) return "";
+        return String(name).trim();
+    }
+
+    function mergeUniqueTables(dbTables, csvTables) {
+        var csvMap = {};
+        var dbMap = {};
+        var seen = {};
+        var out = [];
+
+        (csvTables || []).forEach(function (t) {
+            var n = normalizeTableName(t);
+            if (n) csvMap[n] = true;
+        });
+
+        (dbTables || []).forEach(function (t) {
+            var n = normalizeTableName(t);
+            if (n) dbMap[n] = true;
+        });
+
+        (dbTables || []).forEach(function (t) {
+            var n = normalizeTableName(t);
+            if (!n) return;
+            if (!seen[n]) {
+                seen[n] = true;
+                out.push(n);
+            }
+        });
+
+        (csvTables || []).forEach(function (t) {
+            var n = normalizeTableName(t);
+            if (!n) return;
+            if (!seen[n]) {
+                seen[n] = true;
+                out.push(n);
+            }
+        });
+
+        return {
+            tables: out,
+            isCsv: function (tableName) {
+                var n = normalizeTableName(tableName);
+                return !!csvMap[n];
+            },
+        };
+    }
+
+    /**
+     * Displays the triples data in a table format within the specified div element.
+     * The table includes columns for subject, predicate, and object, and the data is escaped to prevent HTML injection.
+     *
+     * @function
+     * @name showTriplesInDataTable
+     * @param {Array} data - The triples data to display, each item should contain 's', 'p', and 'o' properties.
+     * @param {string} div - The ID of the div element where the table should be displayed.
+     * @memberof module:AITripleFactory
+     */
+    self.showTriplesInDataTable = function (data, div) {
+        var escapeMarkup = function (str) {
+            if (!str) {
+                return "";
+            }
+            var str2 = str.replace(/</g, "&lt;");
+            var str2 = str2.replace(/>/g, "&gt;");
+            return str2;
+        };
+
+        var tableCols = [];
+        var hearders = ["subject", "predicate", "object"];
+        hearders.forEach(function (item) {
+            tableCols.push({ title: item, defaultContent: "", width: "30%" });
+        });
+
+        var tableData = [];
+        var regex = /<([^>]*)> <*([^ >]*)>* <*([^>]*)>*/;
+        data.sampleTriples.forEach(function (item, index) {
+            var array = regex.exec(item);
+            //tableData.push([array[1], array[2], array[3]]);
+            tableData.push([escapeMarkup(array[1]), escapeMarkup(array[2]), escapeMarkup(array[3])]);
+            //  tableData.push([escapeMarkup(item.s), escapeMarkup(item.p), escapeMarkup(item.o)]);
+        });
+        /*
+        var str = "<table><tr><td>subject</td><td>predicate</td><td>object</td></tr>";
+        data.sampleTriples.forEach(function (item, index) {
+            str += "<tr><td>" + escapeMarkup(item.s) + "</td><td>" + escapeMarkup(item.p) + "</td><td>" + escapeMarkup(item.o) + "</td></tr>";
+        });
+        str += "</table>";
+
+ */
+
+        /*  $("#KGcreator_triplesDataTableDiv").html(str)
+          return;*/
+        Export.showDataTable(div, tableCols, tableData, null, { paging: true, divId: div }, function (err, datatable) {});
+    };
+
+    // these mappings are materialized as blank nodes whose identifier is drawn randomly at each
+    // triples creation (see TriplesMaker.getColumnUri) : generating or deleting only a part of the
+    // triples attached to such a node desynchronizes them from the ones already in the store
+    self.blankNodeColumnTypes = ["RowIndex", "VirtualColumn"];
+    self.blankNodeUriTypes = ["blankNode", "randomIdentifier"];
+    self.isSynchronizingBlankNodeGroup = false;
+
+    self.isBlankNodeColumn = function (columnNodeData) {
+        if (!columnNodeData) {
+            return false;
+        }
+        if (self.blankNodeColumnTypes.indexOf(columnNodeData.type) > -1) {
+            return true;
+        }
+        return self.blankNodeUriTypes.indexOf(columnNodeData.uriType) > -1;
+    };
+
+    /**
+     * Builds the groups of tree entries that must always be selected together.
+     * Two blank node columns linked by a relation belong to the same group : regenerating one of them
+     * gives a new identifier to the blank node used on both sides of that relation, so the triples of
+     * the whole connected component have to be rebuilt at once.
+     */
+    self.buildBlankNodeGroups = function (blankNodeColumnIds, columnTreeEntryIds, relationTreeEntries) {
+        var linkedColumnIdsByColumnId = {};
+        Object.keys(blankNodeColumnIds).forEach(function (columnId) {
+            linkedColumnIdsByColumnId[columnId] = [];
+        });
+
+        relationTreeEntries.forEach(function (relationTreeEntry) {
+            var blankNodeEndpointIds = [];
+            relationTreeEntry.columnIds.forEach(function (columnId) {
+                if (blankNodeColumnIds[columnId] && blankNodeEndpointIds.indexOf(columnId) < 0) {
+                    blankNodeEndpointIds.push(columnId);
+                }
+            });
+            if (blankNodeEndpointIds.length < 2) {
+                return;
+            }
+            blankNodeEndpointIds.forEach(function (columnId) {
+                blankNodeEndpointIds.forEach(function (linkedColumnId) {
+                    if (columnId !== linkedColumnId) {
+                        linkedColumnIdsByColumnId[columnId].push(linkedColumnId);
+                    }
+                });
+            });
+        });
+
+        // connected components : walk the blank node columns tied by a relation
+        var groupIndexByColumnId = {};
+        var columnIdsByGroupIndex = [];
+        Object.keys(blankNodeColumnIds).forEach(function (startColumnId) {
+            if (groupIndexByColumnId[startColumnId] !== undefined) {
+                return;
+            }
+            var groupColumnIds = [];
+            var columnIdsToVisit = [startColumnId];
+            while (columnIdsToVisit.length > 0) {
+                var visitedColumnId = columnIdsToVisit.pop();
+                if (groupIndexByColumnId[visitedColumnId] !== undefined) {
+                    continue;
+                }
+                groupIndexByColumnId[visitedColumnId] = columnIdsByGroupIndex.length;
+                groupColumnIds.push(visitedColumnId);
+                linkedColumnIdsByColumnId[visitedColumnId].forEach(function (linkedColumnId) {
+                    if (groupIndexByColumnId[linkedColumnId] === undefined) {
+                        columnIdsToVisit.push(linkedColumnId);
+                    }
+                });
+            }
+            columnIdsByGroupIndex.push(groupColumnIds);
+        });
+
+        self.blankNodeGroups = [];
+        self.blankNodeGroupEntryIdsByEntryId = {};
+        columnIdsByGroupIndex.forEach(function (groupColumnIds) {
+            var groupEntryIds = [];
+            groupColumnIds.forEach(function (columnId) {
+                if (columnTreeEntryIds[columnId] && groupEntryIds.indexOf(columnId) < 0) {
+                    groupEntryIds.push(columnId);
+                }
+            });
+            relationTreeEntries.forEach(function (relationTreeEntry) {
+                var relationTouchesGroup = false;
+                relationTreeEntry.columnIds.forEach(function (columnId) {
+                    if (groupColumnIds.indexOf(columnId) > -1) {
+                        relationTouchesGroup = true;
+                    }
+                });
+                if (relationTouchesGroup && groupEntryIds.indexOf(relationTreeEntry.treeEntryId) < 0) {
+                    groupEntryIds.push(relationTreeEntry.treeEntryId);
+                }
+            });
+            if (groupEntryIds.length < 2) {
+                return;
+            }
+            self.blankNodeGroups.push(groupEntryIds);
+            groupEntryIds.forEach(function (treeEntryId) {
+                self.blankNodeGroupEntryIdsByEntryId[treeEntryId] = groupEntryIds;
+            });
+        });
+    };
+
+    /**
+     * Checks or unchecks in one go every tree entry sharing the same blank node,
+     * so that all the triples built on that blank node are always regenerated together.
+     */
+    self.synchronizeBlankNodeGroupSelection = function (divId, treeNode, mustBeChecked) {
+        if (self.isSynchronizingBlankNodeGroup || !treeNode || !self.blankNodeGroupEntryIdsByEntryId) {
+            return;
+        }
+        var groupEntryIds = self.blankNodeGroupEntryIdsByEntryId[treeNode.id];
+        if (!groupEntryIds) {
+            return;
+        }
+        var tree = $("#" + divId).jstree(true);
+        if (!tree) {
+            return;
+        }
+        self.isSynchronizingBlankNodeGroup = true;
+        groupEntryIds.forEach(function (groupEntryId) {
+            if (groupEntryId === treeNode.id) {
+                return;
+            }
+            if (mustBeChecked) {
+                tree.check_node(groupEntryId);
+            } else {
+                tree.uncheck_node(groupEntryId);
+            }
+        });
+        self.isSynchronizingBlankNodeGroup = false;
+        if (mustBeChecked) {
+            UI.message("blank node mappings selected together : their identifiers are regenerated at each run");
+        }
+    };
+
+    /**
+     * A blank node group is either fully selected or not selected at all : warns and returns false
+     * when the selection covers only a part of one of them.
+     */
+    self.checkBlankNodeGroupsAreComplete = function (divId, checkedNodes) {
+        if (!self.blankNodeGroups || self.blankNodeGroups.length === 0) {
+            return true;
+        }
+        var checkedEntryIds = {};
+        checkedNodes.forEach(function (checkedNode) {
+            checkedEntryIds[checkedNode.id] = true;
+        });
+        var tree = $("#" + divId).jstree(true);
+        var missingEntryLabels = [];
+        self.blankNodeGroups.forEach(function (groupEntryIds) {
+            var hasCheckedEntry = false;
+            var missingGroupEntryIds = [];
+            groupEntryIds.forEach(function (groupEntryId) {
+                if (checkedEntryIds[groupEntryId]) {
+                    hasCheckedEntry = true;
+                } else {
+                    missingGroupEntryIds.push(groupEntryId);
+                }
+            });
+            if (!hasCheckedEntry) {
+                return;
+            }
+            missingGroupEntryIds.forEach(function (missingGroupEntryId) {
+                var missingTreeNode = tree ? tree.get_node(missingGroupEntryId) : null;
+                missingEntryLabels.push(missingTreeNode ? missingTreeNode.text : missingGroupEntryId);
+            });
+        });
+        if (missingEntryLabels.length === 0) {
+            return true;
+        }
+        alert(
+            "Blank node mappings must be selected all together : their identifiers are regenerated at each run and partial selection would desynchronize the triples.\n\nMissing mappings :\n- " +
+                missingEntryLabels.join("\n- "),
+        );
+        return false;
+    };
+
+    self.showFilterMappingsDialog = function (divId, table) {
+        if (!divId) divId = "detailedMappings_filterMappingsTree";
+        if (!table) table = AIMappingModeler.currentTable.name;
+        var nodes = AIMappingColumnsGraph.visjsGraph.data.nodes.get();
+        var edges = AIMappingColumnsGraph.visjsGraph.data.edges.get();
+
+        var treeData = [
+            {
+                id: "root",
+                text: table,
+                parent: "#",
+            },
+            {
+                id: "Columns",
+                text: "Columns",
+                parent: "root",
+            },
+            {
+                id: "Relations",
+                text: "Relations",
+                parent: "root",
+            },
+        ];
+
+        self.columnsMap = {};
+        var classNodesMap = {};
+        var allColumnNodesById = {};
+        var classLabelByDataId = {};
+        nodes.forEach(function (classNode) {
+            if (classNode.data && classNode.data.type === "Class") {
+                classLabelByDataId[classNode.data.id] = classNode.label;
+            }
+        });
+        // tree entries whose triples are built on a column mapping, needed to group the blank node ones
+        var columnTreeEntryIds = {};
+        var relationTreeEntries = [];
+        nodes.forEach(function (node) {
+            if (node.data && node.data.type === "Class") {
+                classNodesMap[node.id] = node;
+            }
+            if (node.data && AIMappingModeler.columnsMappingsObjects.includes(node.data.type)) {
+                allColumnNodesById[node.id] = node;
+                if (node.data.dataTable == table) {
+                    self.columnsMap[node.id] = node;
+                    // add node to treeData only if node master or if he adding a new other predicate compared to the master node
+                    if (!node.data.definedInColumn || (node.data.otherPredicates && node.data.otherPredicates.length > 0)) {
+                        // suffix the column with its associated class label, e.g. "cfihos_unique_id (unit of dimension)"
+                        var columnText = node.label;
+                        var columnClassId = AIMappingColumnsGraph.getColumnClass(node);
+                        if (columnClassId && classLabelByDataId[columnClassId]) {
+                            var columnClassLabel = classLabelByDataId[columnClassId];
+                            // drop the source prefix, keep only the class name (e.g. "CFI:unit of dimension" -> "unit of dimension")
+                            var prefixSeparatorIndex = columnClassLabel.indexOf(":");
+                            if (prefixSeparatorIndex > -1) {
+                                columnClassLabel = columnClassLabel.substring(prefixSeparatorIndex + 1);
+                            }
+                            columnText = node.label + " (" + columnClassLabel + ")";
+                        }
+                        treeData.push({
+                            id: node.id,
+                            text: columnText,
+                            parent: "Columns",
+                            data: node.data,
+                        });
+                        columnTreeEntryIds[node.id] = true;
+                    }
+                }
+            }
+        });
+
+        var blankNodeColumnIds = {};
+        Object.keys(self.columnsMap).forEach(function (columnId) {
+            var columnNode = self.columnsMap[columnId];
+            var definingColumnNode = columnNode.data.definedInColumn ? allColumnNodesById[columnNode.data.definedInColumn] : null;
+            // uriType is inherited from the defining column at triples creation
+            if (self.isBlankNodeColumn(columnNode.data) || (definingColumnNode && self.isBlankNodeColumn(definingColumnNode.data))) {
+                blankNodeColumnIds[columnId] = true;
+            }
+        });
+
+        // otherPredicates leaves are lazily added when a column is clicked : a blank node column needs
+        // them upfront so that checking the column also checks all the predicates built on its blank node
+        Object.keys(blankNodeColumnIds).forEach(function (columnId) {
+            if (!columnTreeEntryIds[columnId]) {
+                return;
+            }
+            var otherPredicates = self.columnsMap[columnId].data.otherPredicates || [];
+            otherPredicates.forEach(function (otherPredicate) {
+                treeData.push({
+                    id: columnId + ">" + otherPredicate.property,
+                    text: otherPredicate.property,
+                    parent: columnId,
+                    data: { type: "otherPredicate" },
+                });
+            });
+            if (self.columnsMap[columnId].data.rdfsLabel) {
+                treeData.push({
+                    id: columnId + ">" + "rdfs:label",
+                    text: "rdfs:label",
+                    parent: columnId,
+                    data: { type: "rdfsLabel" },
+                });
+            }
+        });
+
+        edges.forEach(function (edge) {
+            var fromMappingNode = self.columnsMap[edge.from];
+            var toMappingNode = self.columnsMap[edge.to];
+            var toClassNode = classNodesMap[edge.to];
+            if (fromMappingNode && toMappingNode) {
+                var jstreeEdgeLabel = edge.label === "a" ? "rdf:type" : edge.label;
+                var label = fromMappingNode.label + "-" + jstreeEdgeLabel + "->" + toMappingNode.label;
+                treeData.push({
+                    id: edge.id,
+                    text: label,
+                    parent: "Relations",
+                });
+                relationTreeEntries.push({ treeEntryId: edge.id, columnIds: [edge.from, edge.to] });
+            } else if (fromMappingNode && toClassNode && edge.data && (edge.data.type === "rdfs:subClassOf" || edge.data.type === "rdf:type")) {
+                var targetClassLabel = toClassNode.label || edge.to;
+                var effectiveRdfType = fromMappingNode.data.rdfType;
+                if (!effectiveRdfType && fromMappingNode.data.definedInColumn) {
+                    var definingColumnNode = allColumnNodesById[fromMappingNode.data.definedInColumn];
+                    if (definingColumnNode) {
+                        effectiveRdfType = definingColumnNode.data.rdfType;
+                    }
+                }
+                var filterPredicate = effectiveRdfType === "owl:Class" ? "rdfs:subClassOf" : edge.data.type;
+                var rawEdgeLabel = edge.label === "a" ? "rdf:type" : edge.label;
+                var edgeDisplayLabel = rawEdgeLabel || filterPredicate;
+                var classRelationLabel = fromMappingNode.label + "-" + edgeDisplayLabel + "->" + targetClassLabel;
+                treeData.push({
+                    id: edge.id,
+                    text: classRelationLabel,
+                    parent: "Relations",
+                    data: {
+                        type: "classRelation",
+                        filterMappingId: edge.from + ">" + filterPredicate + ">" + toClassNode.data.id,
+                    },
+                });
+                relationTreeEntries.push({ treeEntryId: edge.id, columnIds: [edge.from] });
+            }
+        });
+
+        self.buildBlankNodeGroups(blankNodeColumnIds, columnTreeEntryIds, relationTreeEntries);
+
+        var options = {
+            withCheckboxes: true,
+            openAll: true,
+            onCheckNodeFn: function (event, obj) {
+                self.synchronizeBlankNodeGroupSelection(divId, obj ? obj.node : null, true);
+            },
+            onUncheckNodeFn: function (event, obj) {
+                self.synchronizeBlankNodeGroupSelection(divId, obj ? obj.node : null, false);
+            },
+            selectTreeNodeFn: function (event, obj) {
+                // add otherpredicates onclick
+                if (obj.node.parent == "Columns") {
+                    var jstreeData = [];
+                    var otherPredicates = obj.node.data.otherPredicates;
+                    if (otherPredicates) {
+                        otherPredicates.forEach(function (item) {
+                            jstreeData.push({
+                                id: obj.node.id + ">" + item.property,
+                                text: item.property,
+                                parent: obj.node.id,
+                                data: { type: "otherPredicate" },
+                            });
+                        });
+                    }
+                    if (obj.node.data.rdfsLabel) {
+                        //separate with > because he can't be used on uri
+                        jstreeData.push({
+                            id: obj.node.id + ">" + "rdfs:label",
+                            text: "rdfs:label",
+                            parent: obj.node.id,
+                            data: { type: "rdfsLabel" },
+                        });
+                    }
+                    JstreeWidget.addNodesToJstree(divId, obj.node.id, jstreeData);
+                }
+            },
+        };
+        JstreeWidget.loadJsTree(divId, treeData, options, function () {
+            $("#detailedMappings_treeContainer").css("overflow", "unset");
+        });
+    };
+
+    self.deleteSpecificTriples = function () {
+        self.initFilterMappingDialog(false, true);
+    };
+    self.runDeleteSpecificTriples = function (isSampleData, callback) {
+        var confirm = true;
+        if (!isSampleData) {
+            confirm = window.confirm("Are you sure you want to delete these triples?");
+        }
+        if (!confirm) {
+            return;
+        }
+        var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("detailedMappings_filterMappingsTree");
+        if (checkedNodes.length == 0) {
+            return alert(" no mappings selected");
+        }
+        if (!self.checkBlankNodeGroupsAreComplete("detailedMappings_filterMappingsTree", checkedNodes)) {
+            return;
+        }
+        var filterMappingIds = [];
+        //don't select parent node when datatype property is selected
+        var nodeIdsToFilter = {};
+        var mappingNodes = AIMappingColumnsGraph.getNodesMap();
+        checkedNodes.forEach(function (item) {
+            if (item.parent == "Relations") {
+                var edge = AIMappingColumnsGraph.getEdgesMap("id")[item.id];
+                if (!edge) {
+                    return;
+                }
+                edge = edge[0];
+                var fromMappingNode = mappingNodes[edge.from];
+                var toMappingNode = mappingNodes[edge.to];
+                if (
+                    fromMappingNode &&
+                    toMappingNode &&
+                    toMappingNode.data &&
+                    toMappingNode.data.type === "Class" &&
+                    edge.data &&
+                    (edge.data.type === "rdfs:subClassOf" || edge.data.type === "rdf:type")
+                ) {
+                    filterMappingIds.push({
+                        id: item.id,
+                        type: "ClassRelation",
+                        subjectRdfType: fromMappingNode.data.rdfType,
+                        targetClassUri: toMappingNode.data.id,
+                        propertyUri: edge.data.id || edge.data.type,
+                    });
+                    return;
+                }
+                // restriction edge: both endpoints are classes. A Class node carries the class URI in data.id;
+                // a column typed as owl:Class resolves its class via getColumnClass.
+                if (edge.data && edge.data.restrictionType && fromMappingNode && fromMappingNode.data && toMappingNode && toMappingNode.data) {
+                    var restrictionStartingClass = fromMappingNode.data.type === "Class" ? fromMappingNode.data.id : AIMappingColumnsGraph.getColumnClass(fromMappingNode);
+                    var restrictionEndingClass = toMappingNode.data.type === "Class" ? toMappingNode.data.id : AIMappingColumnsGraph.getColumnClass(toMappingNode);
+                    if (restrictionStartingClass && restrictionEndingClass) {
+                        filterMappingIds.push({
+                            id: item.id,
+                            type: "Restriction",
+                            startingClass: restrictionStartingClass,
+                            endingClass: restrictionEndingClass,
+                            propertyUri: edge.data.id,
+                        });
+                    }
+                    return;
+                }
+                var startingClass;
+                if (edge.from && mappingNodes[edge.from]) {
+                    startingClass = AIMappingColumnsGraph.getColumnClass(mappingNodes[edge.from]);
+                }
+                var endingClass;
+                if (edge.to && mappingNodes[edge.to]) {
+                    endingClass = AIMappingColumnsGraph.getColumnClass(mappingNodes[edge.to]);
+                }
+                if (startingClass && endingClass) {
+                    filterMappingIds.push({ id: item.id, type: "Relation", startingClass: startingClass, endingClass: endingClass, propertyUri: edge.data.id });
+                }
+            }
+
+            if (!item.data || !item.data.type) {
+                return;
+            }
+            if (item.data.type == "otherPredicate" || item.data.type == "rdfsLabel" || item.data.type == "rdfType") {
+                var parentNode = $("#detailedMappings_filterMappingsTree").jstree("get_node", item.parent);
+                var columnClassPredicate = AIMappingColumnsGraph.getColumnClass(parentNode);
+                if (columnClassPredicate) {
+                    // otherPredicate, rdfsLabel et rdfType ont un id composite "parentId>predicate" : on prend la partie après ">"
+                    var predicateId = item.id.split(">")[1];
+                    filterMappingIds.push({ id: predicateId, type: "otherPredicate", classUri: columnClassPredicate });
+                    nodeIdsToFilter[item.parent] = true;
+                }
+            }
+            if (AIMappingModeler.columnsMappingsObjects.includes(item.data.type)) {
+                var columnClass = AIMappingColumnsGraph.getColumnClass(item);
+                if (columnClass) {
+                    filterMappingIds.push({ id: item.id, type: "Class", classUri: columnClass });
+                }
+            }
+        });
+        var filterMappingsIds = filterMappingIds.filter(function (item) {
+            return !nodeIdsToFilter[item.id];
+        });
+        var options = { isSample: isSampleData, filterMappingIds: filterMappingsIds, clientSocketId: Config.clientSocketId };
+
+        var payload = {
+            options: JSON.stringify(options),
+            source: AIMappingModeler.currentSLSsource,
+            tables: JSON.stringify([AIMappingModeler.currentTable.name]),
+        };
+        $.ajax({
+            type: "DELETE",
+            url: `${Config.apiUrl}/kg/triples`,
+            data: payload,
+            dataType: "json",
+            success: function (result, _textStatus, _jqXHR) {
+                if (isSampleData) {
+                    AIUIcontroller.activateRightPanel("generic");
+                    self.showTriplesInDataTable(result, "mappingModeler_genericPanel");
+                    //   UI.message("", true);
+                } else {
+                    alert("triples deleted: " + result.triplesDeleted);
+                }
+            },
+            error: function (err) {
+                if (callback) {
+                    return callback(err);
+                } else {
+                    MainController.errorAlert(err);
+                }
+                UI.message(err.responseText);
+            },
+        });
+    };
+
+    /* self.showFilterMappingsDialog=function(){
+        AITripleFactory.initFilterMappingDialog()
+    }*/
+
+    return self;
+})();
+
+export default AITripleFactory;
+window.AITripleFactory = AITripleFactory;

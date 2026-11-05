@@ -23,6 +23,7 @@ export default defineConfig({
                 graph_management: path.resolve(__dirname, "src/graph-management.tsx"),
                 user_settings: path.resolve(__dirname, "src/user-settings.tsx"),
                 mappingModeler_upload_app: path.resolve(__dirname, "src/mappingModeler-upload-app.tsx"),
+                aiMappingModeler_upload_app: path.resolve(__dirname, "src/aiMappingModeler-upload-app.tsx"),
                 metadata_dialog: path.resolve(__dirname, "src/Component/MetadataModal.tsx"),
                 logs_table_modal: path.resolve(__dirname, "src/Component/LogsTableModal.tsx"),
             },

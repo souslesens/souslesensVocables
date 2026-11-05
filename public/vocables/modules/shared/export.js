@@ -532,6 +532,9 @@ fixedColumns: true*/
         if (visjsGraph == "MappingColumnsGraph.visjsGraph") {
             html += `<span class="popupMenuItem" onclick="MappingColumnsGraph.exportMappings();">JSON</span>`;
         }
+        if (visjsGraph == "AIMappingColumnsGraph.visjsGraph") {
+            html += `<span class="popupMenuItem" onclick="AIMappingColumnsGraph.exportMappings();">JSON</span>`;
+        }
         if (visjsGraph == "KGquery_graph.KGqueryGraph") {
             html += `<span class="popupMenuItem" onclick="KGquery_graph.exportVisjsGraph();">JSON</span>`;
         }

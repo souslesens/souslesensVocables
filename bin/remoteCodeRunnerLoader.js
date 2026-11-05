@@ -9,7 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "..");
 
 // Browser-only modules that should be stubbed in Node.js
-const BROWSER_ONLY_MODULES = ["kg_upload_app.js", "mappingModeler_upload_app.js"];
+const BROWSER_ONLY_MODULES = ["kg_upload_app.js", "mappingModeler_upload_app.js", "aiMappingModeler_upload_app.js"];
 
 // Stub module returned for browser-only imports
 const STUB_MODULE = { url: "data:text/javascript,export default {};", shortCircuit: true };

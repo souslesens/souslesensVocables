@@ -21,6 +21,7 @@ const NATIVE_TOOLS = [
     //{ name: "KGcreator", controller: "KGcreator", useSource: true, multiSources: false, toTools: {} , publicTool: false},
     { name: "KGquery", controller: "KGquery", useSource: true, multiSources: false, toTools: {}, publicTool: false },
     { name: "MappingModeler", controller: "MappingModeler", useSource: true, multiSources: false, toTools: {}, publicTool: false },
+    { name: "AIMappingModeler", label: "AI Mapping Modeler", controller: "AIMappingModeler", useSource: true, multiSources: false, toTools: {}, publicTool: false },
     //{ name: "KGconstraintsModeler", controller: "KGconstraintsModeler", useSource: true, multiSources: false, toTools: {}, publicTool: false },
     //{ name: "KGconstraints_editor", controller: "KGconstraints_editor", useSource: true, multiSources: false, toTools: {}, publicTool: false },
     { name: "SPARQL", label: "SPARQL endpoint", controller: "SPARQL_endpoint", useSource: false, multiSources: false, toTools: {}, resetURLParamsDiv: "mainDialogDiv", publicTool: false },

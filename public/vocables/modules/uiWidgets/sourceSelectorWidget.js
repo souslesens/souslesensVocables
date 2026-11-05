@@ -346,7 +346,7 @@ var SourceSelectorWidget = (function () {
      * @returns {boolean} true when the source was refused
      */
     self.refuseReadOnlySourceForMappingModeler = function (source, tool) {
-        if (tool != "MappingModeler" || !source) {
+        if ((tool != "MappingModeler" && tool != "AIMappingModeler") || !source) {
             return false;
         }
         if (Lineage_sources.isSourceEditableForUser(source)) {

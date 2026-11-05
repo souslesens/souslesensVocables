@@ -1,0 +1,12 @@
+<div style="height: 80vh; overflow: auto">
+    <div style="display: flex; flex-direction: row">
+        <div id="detailedMappings_filterMappingsTree" style="width: 800px; height: 600px; overflow: auto"></div>
+    </div>
+
+    <!-- <button class="w3-button slsv-button-3" onclick="AITripleFactory.runSlsFilteredMappings()">Make triples</button>-->
+
+    <button class="w3-button slsv-button-1" onclick="AITripleFactory.runSlsFilteredMappings(true)">show Sample</button>
+    <button class="w3-button slsv-button-1" onclick="AITripleFactory.runSlsFilteredMappings(false, { exportOnly: true, outputFormat: 'nt' })">Export NT</button>
+    <button class="w3-button slsv-button-1" onclick="AITripleFactory.runSlsFilteredMappings()" title="Save triples">Save in tripleStore</button>
+    <br /><input type="checkbox" id="MappingModeler_indexAutoCBX" />index Automatically &nbsp; offset<input id="mappingTripleFactory_offset" value="0" />
+</div>

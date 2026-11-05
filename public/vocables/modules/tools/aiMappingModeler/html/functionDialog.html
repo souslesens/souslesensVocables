@@ -1,0 +1,15 @@
+<b>Create functionDialog</b>function(row,mapping)
+<ul>
+    <li>row : dataset current row object</li>
+    <li>mapping : current mapping object</li>
+</ul>
+
+<b>Example</b>
+<textarea id="MappingModeler_fnBody" style="width: 600px; height: 200px">if(row['PredicateColumn']=='value'){return 'predicateURI1'}else{return 'predicateURI2'}</textarea>
+
+<div>
+    <span id="KGcreator_testFnResult"></span>
+    <button onclick="KGcreator_mappings.testFunction()">Test</button>
+    <button onclick="AIMappingModeler.addPredicateFunction()">Add</button>
+    <button onclick="$('#KGcreator_dialogDiv').dialog('close')">cancel</button>
+</div>

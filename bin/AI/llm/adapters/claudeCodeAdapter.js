@@ -161,10 +161,11 @@ function createClaudeCodeAdapter(claudeCodeConfig) {
                 unreadOutput += outputLine;
                 return;
             }
-            if (outputEvent.type == "result") {
+            // an exception here would reach no callback: a line of another shape is left aside
+            if (outputEvent?.type == "result") {
                 cliResult = outputEvent;
             }
-            const delta = outputEvent.type == "stream_event" ? outputEvent.event.delta : null;
+            const delta = outputEvent?.type == "stream_event" ? outputEvent.event?.delta : null;
             if (delta?.type == "text_delta") {
                 onTextDelta(delta.text);
             } else if (delta?.type == "thinking_delta" && delta.thinking && onReasoningDelta) {
@@ -188,10 +189,13 @@ function createClaudeCodeAdapter(claudeCodeConfig) {
         cliProcess.on("close", function (exitCode) {
             readOutputLine(pendingOutput);
             if (!cliResult) {
-                return settle(toCliError("claude -p exited with code " + exitCode + " without a JSON answer: " + (standardError || unreadOutput).slice(0, 500)));
+                const exitReason = standardError || unreadOutput || "it gave no reason, run claude -p by hand in the terminal of the server to see why";
+                return settle(toCliError("claude -p exited with code " + exitCode + " before finishing its answer: " + exitReason.slice(0, 500)));
             }
             if (cliResult.is_error) {
-                return settle(toCliError("claude -p failed: " + cliResult.result, cliResult.api_error_status));
+                // an error of the run itself lists its causes in errors, without any result
+                const failureReason = cliResult.result || (cliResult.errors ?? []).join(", ") || cliResult.subtype;
+                return settle(toCliError("claude -p failed: " + failureReason, cliResult.api_error_status));
             }
             const response = toAnthropicResponse(cliResult, isToolTurn, claudeCodeConfig.defaultModel);
             const answerText = response.content[0]?.text;

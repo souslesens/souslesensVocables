@@ -1,0 +1,302 @@
+import BotEngineClass from "./_botEngineClass.js";
+import CommonBotFunctions from "./_commonBotFunctions.js";
+import CreateResource_bot from "./createResource_bot.js";
+import AIMappingsDetails from "../tools/aiMappingModeler/aiMappingsDetails.js";
+
+var AIMappingModeler_bot = (function () {
+    var self = {};
+    self.myBotEngine = new BotEngineClass();
+
+    self.start = function (workflow, _params, callbackFn) {
+        self.title = _params.title || "Create Resource";
+        var startParams = self.myBotEngine.fillStartParams(arguments);
+        self.callbackFn = callbackFn;
+        if (!workflow) {
+            workflow = self.workflow;
+        }
+        self.myBotEngine.init(AIMappingModeler_bot, workflow, null, function () {
+            self.myBotEngine.startParams = startParams;
+            self.params = {};
+            if (_params) {
+                for (var key in _params) {
+                    self.params[key] = _params[key];
+                }
+            }
+            self.myBotEngine.nextStep();
+        });
+    };
+    self.workflowColumnmMappingOther = {
+        startFn: {
+            _OR: {
+                "add predicate": {
+                    listAllNonObjectPropertiesTreeFn: {
+                        listDatatypePropertyRangeFn: {
+                            choosedateTypeFn: {
+                                listTableColumnsFn: {},
+                            },
+                        },
+                    },
+                },
+                "add rdf:Type": {
+                    rdfTypeFn: {},
+                },
+                "add rdfs:subClassOf": {
+                    listVocabsFn: {
+                        listSuperClassesFn: {
+                            setSubClassOfFn: {},
+                        },
+                    },
+                },
+                "add owl:EquivalentClassColumn": {
+                    listTableColumnsFn: { setEquivalentClassFn: {} },
+                },
+                "add transform": {
+                    addTransformFn: {},
+                },
+
+                "set column as datatypeProperty": {
+                    listTableColumnsFn: { listDatatypePropertyRangeFn: { labelFn: {} } },
+                },
+                "create  datatypeProperty": {
+                    chooseDatatypeSourceFn: {
+                        createDatatypePropertyFn: {},
+                    },
+                },
+                "add LookUp": {
+                    addLookUpFn: {},
+                },
+
+                end: {},
+            },
+        },
+    };
+    self.workflowMappingDetail = {
+        startFn: {
+            rdfTypeFn: {
+                URItypeFn: {
+                    labelFn: {},
+                },
+            },
+        },
+    };
+    self.workflowCreateSpecificResource = {
+        startFn: {
+            rdfTypeFn: {
+                promptLabelFn: {},
+            },
+        },
+    };
+
+    self.functionTitles = {
+        _OR: "Select an option",
+        startFn: "choose mapping action",
+        URItypeFn: "select UriType for Node",
+        labelFn: "select a column for node label",
+        otherFn: "choose next operation",
+        rdfTypeFn: "select type to add",
+        listAllNonObjectPropertiesTreeFn: "Choose annotation property",
+        listNonObjectPropertiesVocabsFn: " Choose annnotation property vocabulary",
+        listNonObjectPropertiesFn: " Choose annnotation property ",
+        promptTargetColumnVocabularyFn: "Choose ontology for predicate column",
+        predicateObjectColumnClassFn: " Choose  class of  predicate column",
+        listLitteralFormatFn: "choose date format",
+        createSubPropertyFn: "Enter subProperty label",
+        listTableColumnsFn: "Choose a  a column for predicate object ",
+        listDatatypePropertyRangeFn: "Choose a datatype",
+        choosedateTypeFn: "Choose date format",
+        addTransformFn: "add Transformation Function",
+        setSubClassOfFn: "add rdfs:subClassOf predicate",
+        chooseDatatypeSourceFn: "Choose a source for creating datatypeProperty",
+        /*  listVocabsFn: "Choose a source",
+        listResourceTypesFn: "Choose a resource type",
+        listListDataSourceType: " Choose a data source type",
+        listDatabaseSourcesFn: "choose a database source",
+        listCSVsourcesFn: "choose a CSV source",*/
+    };
+
+    self.functions = {
+        startFn: function () {
+            self.myBotEngine.nextStep();
+        },
+        URItypeFn: function () {
+            var choices = ["fromLabel", "blankNode", "randomIdentifier"];
+            self.myBotEngine.showList(choices, "URItype");
+        },
+        rdfTypeFn: function () {
+            var choices = ["owl:NamedIndividual", "owl:Class"];
+            self.params.addingType = true;
+            self.myBotEngine.showList(choices, "rdfType");
+        },
+        addTransformFn: function () {
+            AIMappingsDetails.transform.showTansformDialog();
+            self.params.addingTransform = true;
+            self.myBotEngine.end();
+        },
+        labelFn: function () {
+            var choices = self.params.columns;
+            choices.splice(0, 0, "");
+            self.myBotEngine.showList(choices, "rdfsLabel");
+        },
+        promptLabelFn: function () {
+            self.myBotEngine.promptValue("enter resource label", "rdfsLabel");
+        },
+        listAllNonObjectPropertiesTreeFn: function () {
+            CommonBotFunctions.listVocabsFn(self.params.source, true, function (err, vocabs) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                if (vocabs.length == 0) {
+                    return self.myBotEngine.previousStep("no values found, try another option");
+                }
+                var treeData = [];
+                var vocabIds = [];
+                async.eachSeries(
+                    vocabs,
+                    function (vocab, callbackEach) {
+                        var vocabId = vocab.id || vocab;
+                        var vocabLabel = vocab.label || vocab;
+                        vocabIds.push(vocabId);
+                        treeData.push({ id: vocabId, text: vocabLabel, parent: "#", type: "Folder" });
+                        CommonBotFunctions.listNonObjectPropertiesFn([vocabId], null, function (_err, props) {
+                            if (!_err && props) {
+                                props.forEach(function (prop) {
+                                    treeData.push({ id: prop.id, text: prop.label, parent: vocabId });
+                                });
+                            }
+                            callbackEach();
+                        });
+                    },
+                    function () {
+                        self.myBotEngine.showTree(treeData, "nonObjectPropertyId", {
+                            parentNodeIds: vocabIds,
+                            openAll: false,
+                        });
+                    },
+                );
+            });
+        },
+        listNonObjectPropertiesVocabsFn: function () {
+            CommonBotFunctions.listVocabsFn(self.params.source, true, function (err, vocabs) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                if (vocabs.length == 0) {
+                    return self.myBotEngine.previousStep("no values found, try another option");
+                }
+                self.myBotEngine.showList(vocabs, "nonObjectPropertyVocab");
+            });
+        },
+        listNonObjectPropertiesFn: function () {
+            var columnRdfType = null;
+            CommonBotFunctions.listNonObjectPropertiesFn([self.params.nonObjectPropertyVocab], columnRdfType, function (err, props) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                if (props.length == 0) {
+                    return self.myBotEngine.previousStep("no values found, try another option");
+                }
+                self.myBotEngine.showList(props, "nonObjectPropertyId");
+            });
+        },
+        choosedateTypeFn: function () {
+            var datatypePropertyRange = self.myBotEngine.currentBot.params.datatypePropertyRange;
+            if (datatypePropertyRange != "xsd:dateTime") {
+                return self.myBotEngine.nextStep();
+            } else {
+                var choices = [
+                    { id: "FR", label: "FR : DD/MM/YYYY hh:mm:ss" },
+                    { id: "ISO", label: "ISO : YYYY-MM-DDThh:mm:ssZ" },
+                    { id: "USA", label: "USA : MM/DD/YYYY hh:mm:ss" },
+                    { id: "EUR", label: "EUR : DD.MM.YYYY hh:mm:ss" },
+                    { id: "ISO-time", label: "ISO-time : YYYY-MM-DD hh:mm:ss" },
+                    { id: "other", label: "other" },
+                ];
+                self.myBotEngine.showList(choices, "nonObjectPropertyDateFormat", null, false, function (result) {
+                    if (result == "other") {
+                        return self.myBotEngine.nextStep();
+                    }
+                    self.params.nonObjectPropertyDateFormat = result;
+                    self.myBotEngine.nextStep();
+                });
+            }
+        },
+
+        listTableColumnsFn: function () {
+            var choices = self.params.columns;
+            self.myBotEngine.showList(choices, "predicateObjectColumn");
+        },
+        createDatatypePropertyFn: function () {
+            var classId = self.params.columnClass;
+            if (!self.params.datatypePropertySource) {
+                return self.myBotEngine.previousStep("no source choosed for creating datatypeProperty");
+            }
+            CreateResource_bot.start(
+                CreateResource_bot.workFlowDatatypeProperty,
+                {
+                    source: self.params.datatypePropertySource,
+                    datatypePropertyDomain: classId,
+                },
+                function (err, result) {
+                    self.myBotEngine.nextStep();
+                },
+            );
+        },
+        listDatatypePropertyRangeFn: function () {
+            var choices = ["", "URI", "xsd:string", "xsd:int", "xsd:float", "xsd:dateTime"];
+            self.myBotEngine.showList(choices, "datatypePropertyRange");
+        },
+        listVocabsFn: function () {
+            if (self.params.filteredUris && self.params.filteredUris.length > 0) {
+                self.myBotEngine.nextStep();
+            } else {
+                CommonBotFunctions.listVocabsFn(self.params.source, false, function (err, vocabs) {
+                    if (err) {
+                        return self.myBotEngine.abort(err);
+                    }
+                    if (vocabs.length == 0) {
+                        return self.myBotEngine.previousStep("no values found, try another option");
+                    }
+                    self.myBotEngine.showList(vocabs, "currentVocab");
+                });
+            }
+        },
+        listSuperClassesFn: function () {
+            CommonBotFunctions.listVocabClasses(self.params.currentVocab, true, null, function (err, classes) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                CommonBotFunctions.showVocabClassesList(self.myBotEngine, self.params.currentVocab, classes, "superClassId");
+            });
+        },
+        setSubClassOfFn: function () {
+            self.params.addingSubClassOf = self.params.superClassId;
+            self.myBotEngine.nextStep();
+        },
+        addLookUpFn: function () {
+            AILookups_bot.start(AILookups_bot.lookUpWorkflow, {}, function (err, result) {
+                if (err) {
+                    return MainController.errorAlert(err);
+                }
+            });
+        },
+        chooseDatatypeSourceFn: function () {
+            CommonBotFunctions.listVocabsFn(self.params.source, false, function (err, vocabs) {
+                if (err) {
+                    return self.myBotEngine.abort(err);
+                }
+                if (vocabs.length == 0) {
+                    return self.myBotEngine.previousStep("no values found, try another option");
+                }
+                self.myBotEngine.showList(vocabs, "datatypePropertySource");
+            });
+        },
+        setEquivalentClassFn: function () {
+            self.params.predicate = "owl:equivalentClass";
+        },
+    };
+
+    return self;
+})();
+
+export default AIMappingModeler_bot;
+window.AIMappingModeler_bot = AIMappingModeler_bot;

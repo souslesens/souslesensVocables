@@ -1,5 +1,6 @@
 import KGcreator_run from "../tools/KGcreator/KGcreator_run.js";
 import MappingModeler from "../tools/mappingModeler/mappingModeler.js";
+import AIMappingModeler from "../tools/aiMappingModeler/aiMappingModeler.js";
 import Admin from "../tools/admin/admin.js";
 
 const socket = io();
@@ -14,6 +15,10 @@ socket.on("disconnect", () => {
 });
 
 socket.on("KGbuilder", function (message) {
+    if (MainController.currentTool == "AIMappingModeler") {
+        AIMappingModeler.socketMessage(message);
+        return;
+    }
     MappingModeler.socketMessage(message);
 });
 

@@ -327,9 +327,10 @@ var KGquery_filter_bot = (function () {
      * Only the clause shapes built by setSparqlQueryFilterFn are recognized.
      * @param {string} filter - "FILTER (...)" returned by the bot
      * @param {Object} expressionByVariable - variable name without "?" (e.g. "v_p0") to SQL column expression
+     * @param {boolean} [isDisplayedOnly] - the condition is shown, not run: a column stays without its ILIKE cast
      * @returns {string|null} the condition to add to a WHERE clause, null when the filter holds anything else
      */
-    self.sparqlFilterToSqlCondition = function (filter, expressionByVariable) {
+    self.sparqlFilterToSqlCondition = function (filter, expressionByVariable, isDisplayedOnly) {
         var regexClauseRegex = /(!?)regex\(\s*\?(\w+)\s*,\s*"([^"]*)"\s*,\s*"i"\)/g;
         // a value typed by the user is double quoted, a value picked in a list is single quoted and typed
         var comparisonClauseRegex = /\?(\w+)\s*(!=|<=|>=|=|<|>)\s*(?:"([^"]*)"|'([\s\S]*?)'(?=\^\^))(?:\^\^(?:xsd:\w+|<[^>]+>))?/g;
@@ -355,7 +356,7 @@ var KGquery_filter_bot = (function () {
             }
             var expression = expressionByVariable[variable];
             // ILIKE exists on text only: a uuid, a boolean or a date expression is matched on its text
-            if (isContainsClause && !textCastSuffixRegex.test(expression)) {
+            if (isContainsClause && !isDisplayedOnly && !textCastSuffixRegex.test(expression)) {
                 expression = "(" + expression + ")::text";
             }
             sqlClauses.push(expression + " " + sqlClause);

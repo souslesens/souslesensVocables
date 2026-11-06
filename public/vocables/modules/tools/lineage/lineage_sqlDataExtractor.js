@@ -49,14 +49,21 @@ var Lineage_sqlDataExtractor = (function () {
         });
     };
 
-    self.drawDatabaseMappedNodes = function (source) {
+    // mappingJson: a mapping not written to the MappingModeler file yet, as the virtual-db-creator plugin draws a version before validating it
+    self.drawDatabaseMappedNodes = function (source, mappingJson) {
         if (!source) {
             source = Lineage_sources.activeSource;
         }
         self.currentSource = source;
         // filters point at relation keys of the previous source
         self.sqlFilters = [];
-        MappingColumnsGraph.getSourceMappingsModel(source, null, function (err, json) {
+        var getMappingJson = function (callback) {
+            if (mappingJson) {
+                return callback(null, mappingJson);
+            }
+            MappingColumnsGraph.getSourceMappingsModel(source, null, callback);
+        };
+        getMappingJson(function (err, json) {
             var relationsMap = MappingsToSql.extractRelationMap(json);
             self.currentMappingJson = json;
 
@@ -291,7 +298,8 @@ var Lineage_sqlDataExtractor = (function () {
                 }
             }
             var orderByAliases = [...classIdAliases, ...dataPropertyAliases];
-            self.sortedSql = self.sql + "\nORDER BY " + orderByAliases.join(", ");
+            // sorted outside the joins: a LIMIT on the joins makes postgres pick nested loops, hours on tables without index
+            self.sortedSql = "SELECT * FROM (\n" + self.sql + "\n) extracted\nORDER BY " + orderByAliases.join(", ");
         }
 
         if (options.hideDialog) {
@@ -439,8 +447,6 @@ var Lineage_sqlDataExtractor = (function () {
     };
 
     self.addFilter = function (classNodeId, propertyKey) {
-        var classLabel = JstreeWidget.getjsTreeNodeObj("sqlDataExtractor_jstreeDiv", classNodeId).data.label;
-
         var keyByVariable = {};
         var nonObjectProperties = [];
         // the bot skips its property list when given one
@@ -482,20 +488,21 @@ var Lineage_sqlDataExtractor = (function () {
                 return MainController.errorAlert(err);
             }
             var usedKeyByVariable = {};
-            // the bot gives no readable text here: the filter itself, variables named after their property
-            var readableFilter = result.filter.replace(KGquery_filter_bot.filterWrapperRegex, "$1");
+            var columnByVariable = {};
             for (var variable in keyByVariable) {
                 // ?v_p1 must not match inside ?v_p10
-                var variableRegex = new RegExp("\\?" + variable + "\\b", "g");
-                if (result.filter.search(variableRegex) > -1) {
+                var variableRegex = new RegExp("\\?" + variable + "\\b");
+                if (variableRegex.test(result.filter)) {
                     usedKeyByVariable[variable] = keyByVariable[variable];
-                    readableFilter = readableFilter.replace(variableRegex, self.currentRelationsMap.get(keyByVariable[variable])[0].predicateLabel);
+                    var valueColumn = self.currentRelationsMap.get(keyByVariable[variable])[0].to;
+                    columnByVariable[variable] = valueColumn.dataTable + "." + valueColumn.id;
                 }
             }
+            var sqlCondition = KGquery_filter_bot.sparqlFilterToSqlCondition(result.filter, columnByVariable, true);
             self.sqlFilters.push({
                 filter: result.filter,
                 keyByVariable: usedKeyByVariable,
-                filterLabel: classLabel + " : " + readableFilter.trim(),
+                filterLabel: sqlCondition ? sqlCondition.trim() : result.filter,
             });
             var pathTree = $("#sqlDataExtractor_jstreeDiv").jstree(true);
             for (var usedVariable in usedKeyByVariable) {
@@ -564,7 +571,8 @@ var Lineage_sqlDataExtractor = (function () {
                     .addClass("slsv-invisible-button filterIcon")
                     .attr("title", filterLabelsByKey[key].join("\n") + "\n(click to remove)")
                     .attr("onclick", "event.stopPropagation();Lineage_sqlDataExtractor.removePropertyFilters(" + JSON.stringify(key) + ")");
-                propertyText += "&nbsp;" + removeFilterButton[0].outerHTML;
+                var filterText = $("<span>").css("font-size", "10px").text(filterLabelsByKey[key].join(" AND "));
+                propertyText += "&nbsp;" + removeFilterButton[0].outerHTML + "&nbsp;" + filterText[0].outerHTML;
             }
             pathTree.rename_node(key, propertyText);
         }

@@ -663,6 +663,8 @@ var Lineage_whiteboard = (function () {
                     Lineage_relations.whiteboardSourcesFromStatus = Lineage_sources.fromAllWhiteboardSources;
                     if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                         var whiteboardNodes = self.getSelectedOrAllWhiteboardNodes();
+                        // drawRelations takes no callback, it ends the action itself
+                        options.clearSelectionAtEnd = true;
                         // every source, drawRestrictions narrows to the active one, or to all with All
                         var classNodes = whiteboardNodes.filter(function (node) {
                             return node.data && !self.isSourceBoxNode(node) && node.data.type !== "Container";
@@ -671,9 +673,12 @@ var Lineage_whiteboard = (function () {
                             return node.id;
                         });
                     }
-                    // an empty id list sets no SPARQL filter and would draw every restriction of the source
+                    // an empty id list sets no SPARQL filter and would draw every restriction or datatype property of the source
                     if (options.data.length == 0) {
                         UI.message("No class node to draw relations from", true);
+                        return callbackSeries();
+                    }
+                    if (options.drawDataTypeProperties) {
                         return callbackSeries();
                     }
                     var direction = options.inverse ? "inverse" : "direct";
@@ -685,16 +690,17 @@ var Lineage_whiteboard = (function () {
                 },
 
                 function (callbackSeries) {
-                    if (!options.drawDataTypeProperties) {
+                    if (!options.drawDataTypeProperties || options.data.length == 0) {
                         return callbackSeries();
                     }
                     var datatypeOptions = {
                         notDrawDomain: options.notDrawDomain,
                     };
-                    self.drawDataTypeProperties(source, topConcepts, datatypeOptions, function (err, result) {
+                    self.drawDataTypeProperties(source, options.data, datatypeOptions, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
+                        self.lineageVisjsGraph.setSelectedNodes([]);
                         callbackSeries();
                     });
                 },
@@ -1199,7 +1205,7 @@ var Lineage_whiteboard = (function () {
     };
 
     /**
-     * Whiteboard nodes the Relations, Children and Parents buttons run on: the selection when the "selected nodes only" checkbox is checked, every node otherwise.
+     * Whiteboard nodes the Relations, Children and Parents buttons run on: the selection unless the "selected nodes only" checkbox is unchecked, every node when nothing is selected.
      * @function
      * @name getSelectedOrAllWhiteboardNodes
      * @memberof module:Lineage_whiteboard
@@ -1207,8 +1213,8 @@ var Lineage_whiteboard = (function () {
      */
     self.getSelectedOrAllWhiteboardNodes = function () {
         var selectedNodeIds = self.lineageVisjsGraph.network.getSelectedNodes();
-        // the checkbox exists only in the Lineage whiteboard tab, other tools reach every node
-        if (selectedNodeIds.length == 0 || !$("#lineage_selectedNodesOnlyCheckbox").prop("checked")) {
+        // the checkbox exists only in the Lineage whiteboard tab, other tools always run on the selection
+        if (selectedNodeIds.length == 0 || $("#lineage_selectedNodesOnlyCheckbox").prop("checked") === false) {
             return self.lineageVisjsGraph.data.nodes.get();
         }
         return self.lineageVisjsGraph.data.nodes.get(selectedNodeIds);
@@ -2001,6 +2007,9 @@ var Lineage_whiteboard = (function () {
                     }
                     return UI.message("No data found", true);
                 }
+                if (!nodeIds || nodeIds.length === 0) {
+                    self.lineageVisjsGraph.setSelectedNodes([]);
+                }
                 if (self.lineageVisjsGraph.network) {
                     self.lineageVisjsGraph.network.fit();
                 }
@@ -2129,6 +2138,9 @@ var Lineage_whiteboard = (function () {
             if (result.length == 0) {
                 $("#waitImg").css("display", "none");
                 UI.message("No data found", true);
+                if (!nodeIds) {
+                    self.lineageVisjsGraph.setSelectedNodes([]);
+                }
                 if (callback) {
                     return callback(null, { nodes: [], edges: [] });
                 }
@@ -2343,6 +2355,9 @@ var Lineage_whiteboard = (function () {
             Lineage_whiteboard.addVisDataToGraph(visjsData);
             // self.lineageVisjsGraph.data.edges.add(visjsData.edges);
             self.lineageVisjsGraph.network.fit();
+            if (!nodeIds) {
+                self.lineageVisjsGraph.setSelectedNodes([]);
+            }
 
             $("#waitImg").css("display", "none");
             if (callback) {
@@ -3593,7 +3608,7 @@ restrictionSource = Config.predicatesSource;
             html += `<span class="popupMenuItem" style="font-family: Courier" onclick="Lineage_nodeCentricGraph.showVisjsGraphTreeTextDialog();">tree text</span>`;
 
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listAllNodeRelations();">List All relations </span>';
-            html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawAxioms();">Draw xioms</span>';
+            html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawAxioms();">Draw Axioms</span>';
         }
 
         $("#popupMenuWidgetDiv").html(html);
@@ -4447,9 +4462,11 @@ self.zoomGraphOnNode(node.data[0].id, false);
             if (nodesSelected.length > 1) {
                 // `getSelectedNodes` answers with ids, not node objects: reading `.id` off them used
                 // to leave every connected edge behind.
-                return self.removeNodesFromWhiteboard(nodesSelected);
+                self.removeNodesFromWhiteboard(nodesSelected);
+            } else {
+                self.removeNodesFromWhiteboard([Lineage_whiteboard.currentGraphNode.id]);
             }
-            self.removeNodesFromWhiteboard([Lineage_whiteboard.currentGraphNode.id]);
+            self.lineageVisjsGraph.setSelectedNodes([]);
         },
 
         /**
@@ -4467,11 +4484,11 @@ self.zoomGraphOnNode(node.data[0].id, false);
             var nodesSelected = self.lineageVisjsGraph.network.getSelectedNodes();
             if (nodesSelected.length > 1) {
                 self.lineageVisjsGraph.removeOtherNodesFromGraph(nodesSelected);
-                Lineage_decoration.decorateByUpperOntologyByClass();
-                return;
+            } else {
+                self.lineageVisjsGraph.removeOtherNodesFromGraph(Lineage_whiteboard.currentGraphNode.id);
             }
-            self.lineageVisjsGraph.removeOtherNodesFromGraph(Lineage_whiteboard.currentGraphNode.id);
             Lineage_decoration.decorateByUpperOntologyByClass();
+            self.lineageVisjsGraph.setSelectedNodes([]);
         },
 
         showHierarchicalView: function () {
@@ -4695,6 +4712,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
          * @returns {void}
          */
         drawAxioms: function (nodes) {
+            var isFromSelection = !!nodes;
             if (!nodes) {
                 nodes = [self.currentGraphNode];
             }
@@ -4751,6 +4769,9 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 function (err) {
                     if (err) {
                         return MainController.errorAlert(err);
+                    }
+                    if (isFromSelection) {
+                        self.lineageVisjsGraph.setSelectedNodes([]);
                     }
                     if (axiomsVisjsDataByClass.length == 0) {
                         return UI.message("no axioms found", true);
@@ -5209,6 +5230,60 @@ attrs.color=self.getSourceColor(superClassValue)
         }
     };
     /**
+     * Binds the click and the right click menu of the Relations and Children buttons, wherever a tool lays them out.
+     * @function
+     * @name bindRelationsAndChildrenButtons
+     * @memberof module:Lineage_whiteboard
+     * @returns {void}
+     */
+    self.bindRelationsAndChildrenButtons = function () {
+        $("#lineageWhiteboard_modelBtn").bind("click", function (e) {
+            Lineage_whiteboard.drawModel(null, null, { all: true });
+        });
+        $("#lineageWhiteboard_modelBtn").bind("contextmenu", function (e) {
+            e.preventDefault();
+            var html = '<span class="popupMenuItem" onclick="Lineage_whiteboard.drawModel(null, null, { inverse: false });">Direct Restrictions</span>';
+            html += '<span class="popupMenuItem" onclick="Lineage_whiteboard.drawModel(null, null, { inverse: true });">Inverse Restrictions</span>';
+            html += '<span class="popupMenuItem" onclick="Lineage_whiteboard.drawModel(null, null, { all: true })">All Restrictions</span>';
+            html += '<span class="popupMenuItem" onclick="Lineage_whiteboard.drawModel(null, null, { drawDataTypeProperties:true,notDrawDomain:true })">Data type properties</span>';
+            PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
+        });
+        $("#lineageWhiteboard_childrenBtn").bind("click", function (e) {
+            Lineage_whiteboard.addChildrenToGraph();
+        });
+        $("#lineageWhiteboard_childrenBtn").bind("contextmenu", function (e) {
+            e.preventDefault();
+            var taxonomyPredicates = [];
+            if (Config.sources[Lineage_sources.activeSource].taxonomyPredicates) {
+                taxonomyPredicates = Config.sources[Lineage_sources.activeSource].taxonomyPredicates;
+            }
+            taxonomyPredicates = taxonomyPredicates.filter(function (predicate) {
+                return (
+                    predicate != "http://www.w3.org/2000/01/rdf-schema#subClassOf" &&
+                    predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" &&
+                    predicate != "rdfs:subClassOf" &&
+                    predicate != "rdf:type"
+                );
+            });
+
+            var html = '<span class="popupMenuItem" onclick="Lineage_whiteboard.addChildrenToGraph(null, null, { specificPredicates: \'all\' })">All</span>';
+            html += '<span class="popupMenuItem" onclick="Lineage_whiteboard.addChildrenToGraph(null,null,{specificPredicates: [\'http://www.w3.org/2000/01/rdf-schema#subClassOf\']})">Classes</span>';
+            html +=
+                '<span class="popupMenuItem" onclick="Lineage_whiteboard.addChildrenToGraph(null, null, { specificPredicates: [\'http://www.w3.org/1999/02/22-rdf-syntax-ns#type\'] })">Individuals</span>';
+
+            taxonomyPredicates.forEach(function (predicate) {
+                html +=
+                    '<span class="popupMenuItem" onclick="Lineage_whiteboard.addChildrenToGraph(null, null, { specificPredicates: \'' +
+                    predicate +
+                    "' })\">" +
+                    Sparql_common.getLabelFromURI(predicate) +
+                    "</span>";
+            });
+            html += "</span>";
+            PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
+        });
+    };
+    /**
      * @function
      * @name initWhiteboardTab
      * @memberof module:graphActions
@@ -5227,52 +5302,7 @@ attrs.color=self.getSourceColor(superClassValue)
                 /*if (window.location.href.indexOf("localhost") < 0) {
                     $("#lineage_actionDiv_newAxiom").css("display", "none");
                 }*/
-                $("#lineageWhiteboard_modelBtn").bind("click", function (e) {
-                    Lineage_whiteboard.drawModel(null, null, { all: true });
-                });
-                $("#lineageWhiteboard_modelBtn").bind("contextmenu", function (e) {
-                    e.preventDefault();
-                    var html = '<span class="popupMenuItem" onclick="Lineage_whiteboard.drawModel(null, null, { inverse: false });">Direct Restrictions</span>';
-                    html += '<span class="popupMenuItem" onclick="Lineage_whiteboard.drawModel(null, null, { inverse: true });">Inverse Restrictions</span>';
-                    html += '<span class="popupMenuItem" onclick="Lineage_whiteboard.drawModel(null, null, { all: true })">All Restrictions</span>';
-                    html += '<span class="popupMenuItem" onclick="Lineage_whiteboard.drawModel(null, null, { drawDataTypeProperties:true,notDrawDomain:true })">Data type properties</span>';
-                    PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
-                });
-                $("#lineageWhiteboard_childrenBtn").bind("click", function (e) {
-                    Lineage_whiteboard.addChildrenToGraph();
-                });
-                $("#lineageWhiteboard_childrenBtn").bind("contextmenu", function (e) {
-                    e.preventDefault();
-                    var taxonomyPredicates = [];
-                    if (Config.sources[Lineage_sources.activeSource].taxonomyPredicates) {
-                        taxonomyPredicates = Config.sources[Lineage_sources.activeSource].taxonomyPredicates;
-                    }
-                    taxonomyPredicates = taxonomyPredicates.filter(function (predicate) {
-                        return (
-                            predicate != "http://www.w3.org/2000/01/rdf-schema#subClassOf" &&
-                            predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" &&
-                            predicate != "rdfs:subClassOf" &&
-                            predicate != "rdf:type"
-                        );
-                    });
-
-                    var html = '<span class="popupMenuItem" onclick="Lineage_whiteboard.addChildrenToGraph(null, null, { specificPredicates: \'all\' })">All</span>';
-                    html +=
-                        '<span class="popupMenuItem" onclick="Lineage_whiteboard.addChildrenToGraph(null,null,{specificPredicates: [\'http://www.w3.org/2000/01/rdf-schema#subClassOf\']})">Classes</span>';
-                    html +=
-                        '<span class="popupMenuItem" onclick="Lineage_whiteboard.addChildrenToGraph(null, null, { specificPredicates: [\'http://www.w3.org/1999/02/22-rdf-syntax-ns#type\'] })">Individuals</span>';
-
-                    taxonomyPredicates.forEach(function (predicate) {
-                        html +=
-                            '<span class="popupMenuItem" onclick="Lineage_whiteboard.addChildrenToGraph(null, null, { specificPredicates: \'' +
-                            predicate +
-                            "' })\">" +
-                            Sparql_common.getLabelFromURI(predicate) +
-                            "</span>";
-                    });
-                    html += "</span>";
-                    PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
-                });
+                Lineage_whiteboard.bindRelationsAndChildrenButtons();
 
                 $("#lateralPanelDiv").resizable({
                     maxWidth: $(window).width() - 100,

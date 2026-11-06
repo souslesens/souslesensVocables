@@ -246,6 +246,9 @@ async function resolveUserFromRequest(req) {
     return req.user;
 }
 
+// admin/sources and admin/sources/{id} apply themselves the rules of a user allowed to create sources: only these routes let such a user in
+const sourceAdminRouteRegex = /^\/api\/v1\/admin\/sources(\/[^/]+)?$/;
+
 openapi.initialize({
     apiDoc: apiDoc,
     app: app,
@@ -336,7 +339,8 @@ openapi.initialize({
         restrictAdmin: async function (req, _scopes, _definition) {
             const currentUser = await userManager.getUser(req.user);
 
-            if (req.url.indexOf("/sources") > 0 && currentUser.allowSourceCreation) {
+            // the path, never the URL: a query string would let any route through
+            if (sourceAdminRouteRegex.test(req.path) && currentUser.allowSourceCreation) {
                 return Promise.resolve(true);
             }
 

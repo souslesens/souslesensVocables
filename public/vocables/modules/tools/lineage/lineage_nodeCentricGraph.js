@@ -133,19 +133,7 @@ var Lineage_nodeCentricGraph = (function () {
                         edges.forEach(function (edge) {
                             var isParent = edge.data && edge.data.type == "parent";
 
-                            var ok = false;
-                            if (isParent && options.parents) {
-                                ok = true;
-                            } else if (options.inverse) {
-                                //onGoing relations are already reversed
-                                if (!isParent) {
-                                    ok = true;
-                                }
-                            } else if (options.relations) {
-                                if (!isParent) {
-                                    ok = true;
-                                }
-                            }
+                            var ok = !isParent && (options.inverse || options.relations);
                             if (ok) {
                                 if (!existingNodes[edge.id]) {
                                     existingNodes[edge.id] = 1;
@@ -157,6 +145,22 @@ var Lineage_nodeCentricGraph = (function () {
                             }
                         });
                     }
+                }
+
+                // a subClassOf edge goes from the child to its parent, the view walks it down to the children
+                var incomingEdges = edgesToMap[nodeId];
+                if (incomingEdges && options.parents) {
+                    incomingEdges.forEach(function (edge) {
+                        var isParent = edge.data && edge.data.type == "parent";
+                        if (!isParent || existingNodes[edge.id]) {
+                            return;
+                        }
+                        existingNodes[edge.id] = 1;
+                        newEdges.push(edge);
+                        if (!options.stopPropagation) {
+                            recurse(edge.from, level + 1);
+                        }
+                    });
                 }
 
                 /*  else {

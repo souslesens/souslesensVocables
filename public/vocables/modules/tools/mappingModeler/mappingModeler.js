@@ -333,18 +333,22 @@ var MappingModeler = (function () {
                                 items.showSampleData = {
                                     label: "deleteClass",
                                     action: function (_e) {
+                                        // the class may come from an editable import, listed under its own source
+                                        var classSource = node.parent;
                                         NodeInfosWidget.currentNode = node;
                                         NodeInfosWidget.currentNodeId = node.id;
-                                        NodeInfosWidget.currentNode.data.source = MainController.currentSource;
-                                        NodeInfosWidget.currentSource = MainController.currentSource;
+                                        NodeInfosWidget.currentNode.data.source = classSource;
+                                        NodeInfosWidget.currentSource = classSource;
                                         NodeInfosWidget.deleteNode(function () {
                                             NodeInfosWidget.currentNode = null;
                                             NodeInfosWidget.currentNodeId = null;
                                             NodeInfosWidget.currentSource = null;
                                             $("#suggestionsSelectJstreeDiv").jstree("delete_node", node.id);
-                                            if (self.allClasses[node.id]) {
-                                                delete self.allClasses[node.id];
-                                            }
+                                            // the Classes tree is rebuilt from this list each time it opens
+                                            self.allClasses = self.allClasses.filter(function (ontologyClass) {
+                                                return ontologyClass.id != node.id;
+                                            });
+                                            delete self.allResourcesMap[node.id];
                                         });
                                     },
                                 };

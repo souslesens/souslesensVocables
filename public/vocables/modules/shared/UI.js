@@ -10,6 +10,7 @@ var UI = (function () {
 
     self.menuBarShowed = true;
     self.LateralPanelShowed = true;
+    self.collapsedLateralPanelContent = null;
     self.smartPhoneScreen = null;
 
     self.message = function (message, stopWaitImg, startWaitImg) {
@@ -559,7 +560,7 @@ var UI = (function () {
         self.checkSourcesPanelOverflow();
         var MenuBarHeight = $("#MenuBar").height();
         var LateralPanelWidth = $("#lateralPanelDiv").width();
-        var rightControlPanelWidth = $("#rightControlPanelDiv").width();
+        var rightControlPanelWidth = $("#rightControlPanelDiv").is(":visible") ? $("#rightControlPanelDiv").width() : 0;
         // Mobile format graph div reset
         if ($(window).width() <= 500) {
             $("#graphDiv").css("width", $(window).width());
@@ -780,7 +781,8 @@ var UI = (function () {
         }
         if (self.LateralPanelShowed) {
             $("#lineage-tab-buttons").hide();
-            $(button).parent().hide();
+            self.collapsedLateralPanelContent = $(button).parent();
+            self.collapsedLateralPanelContent.hide();
             $("#lateralPanelDiv").css("width", "21px");
             $("#lateralPanelDiv").removeClass("ui-resizable");
             UI.resetWindowSize();
@@ -796,10 +798,14 @@ var UI = (function () {
             $("#lateralPanelDiv").css("width", "435px");
             UI.resetWindowSize();
             self.LateralPanelShowed = true;
-            var currentTabId = $(".slsv-selectedTabDiv").attr("title").toLowerCase() + "Tab";
-            $("#" + currentTabId)
-                .children()
-                .show();
+            self.collapsedLateralPanelContent.show();
+            // a tool without the Lineage tabs has no selected tab
+            var selectedTabTitle = $(".slsv-selectedTabDiv").attr("title");
+            if (selectedTabTitle) {
+                $("#" + selectedTabTitle.toLowerCase() + "Tab")
+                    .children()
+                    .show();
+            }
 
             /*$(button).parent().show();
             //$(button).parent().find("#ArrowLateralPanel").attr("src", "./icons/CommonIcons/ArrowLateralPanel.png");*/

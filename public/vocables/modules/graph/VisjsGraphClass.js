@@ -136,6 +136,14 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.network = new vis.Network(container, self.data, options.visjsOptions);
         self.simulationOn = true;
         Lineage_selection.selectedNodes = [];
+        // on a click, vis.js replaces the selection by the clicked node before emitting "click"
+        self.network.canvas.frame.addEventListener(
+            "pointerdown",
+            function () {
+                self.selectionBeforeClick = self.network.getSelectedNodes();
+            },
+            true,
+        );
         self.network.on("afterDrawing", function (/** @type {any} */ _params) {
             self.drawingDone = true;
         });
@@ -227,6 +235,15 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             .on("click", function (/** @type {{ pointer: { DOM: { x: any; y: any; }; }; }} */ params) {
                 // eslint-disable-next-line no-console
                 //  console.log(self.network.getNodeAt(params.pointer.DOM.x, params.pointer.DOM.y));
+                // params.nodes is the whole selection once a shift click has restored it
+                var clickedNodeId = self.network.getNodeAt(params.pointer.DOM);
+                var isShiftOnlyClick = params.event.srcEvent.shiftKey && !params.event.srcEvent.ctrlKey && !params.event.srcEvent.altKey;
+                if (isShiftOnlyClick && self.selectionBeforeClick.indexOf(clickedNodeId) > -1) {
+                    var remainingSelection = self.selectionBeforeClick.filter(function (nodeId) {
+                        return nodeId !== clickedNodeId;
+                    });
+                    return self.setSelectedNodes(remainingSelection);
+                }
                 self.processClicks(params, _options);
             })
             .on("hoverNode", function (/** @type {{ node: any; pointer: { DOM: any; }; }} */ params) {

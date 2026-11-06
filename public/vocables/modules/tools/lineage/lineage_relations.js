@@ -651,6 +651,9 @@ var Lineage_relations = (function () {
 
             function (err) {
                 Lineage_sources.fromAllWhiteboardSources = self.whiteboardSourcesFromStatus;
+                if (options.clearSelectionAtEnd && !err) {
+                    Lineage_whiteboard.lineageVisjsGraph.setSelectedNodes([]);
+                }
                 if (allVisjsData.nodes.length == 0 && allVisjsData.edges.length == 0) {
                     return UI.message("no data found", true);
                 }

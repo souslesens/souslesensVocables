@@ -5267,8 +5267,7 @@ attrs.color=self.getSourceColor(superClassValue)
             });
 
             var html = '<span class="popupMenuItem" onclick="Lineage_whiteboard.addChildrenToGraph(null, null, { specificPredicates: \'all\' })">All</span>';
-            html +=
-                '<span class="popupMenuItem" onclick="Lineage_whiteboard.addChildrenToGraph(null,null,{specificPredicates: [\'http://www.w3.org/2000/01/rdf-schema#subClassOf\']})">Classes</span>';
+            html += '<span class="popupMenuItem" onclick="Lineage_whiteboard.addChildrenToGraph(null,null,{specificPredicates: [\'http://www.w3.org/2000/01/rdf-schema#subClassOf\']})">Classes</span>';
             html +=
                 '<span class="popupMenuItem" onclick="Lineage_whiteboard.addChildrenToGraph(null, null, { specificPredicates: [\'http://www.w3.org/1999/02/22-rdf-syntax-ns#type\'] })">Individuals</span>';
 

@@ -1053,8 +1053,11 @@ var MappingColumnsGraph = (function () {
                         return err;
                     }
                     if (result?.options?.config) {
+                        // the saved config has no current data source, and the tree still shows its tables after a reload
+                        var currentDataSource = DataSourceManager.currentConfig.currentDataSource;
                         DataSourceManager.rawConfig = result.options.config;
                         DataSourceManager.currentConfig = result.options.config;
+                        DataSourceManager.currentConfig.currentDataSource = currentDataSource;
                     }
                     MappingColumnsGraph.visjsGraph.data = result;
                     self.normalizeRdfTypeEdgesColor(MappingColumnsGraph.visjsGraph);

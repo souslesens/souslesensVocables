@@ -193,9 +193,7 @@ async function getValidatedOntologyModelText(tboxSource, termNamespace, termPref
         return null;
     }
     const typedPropertyIris = Object.keys(enrichedModel.propertyTypes);
-    const localAnnotationIris = typedPropertyIris.filter(
-        (propertyIri) => propertyIri.indexOf(termNamespace) == 0 && isPropertyOfType(enrichedModel, propertyIri, "AnnotationProperty"),
-    );
+    const localAnnotationIris = typedPropertyIris.filter((propertyIri) => propertyIri.indexOf(termNamespace) == 0 && isPropertyOfType(enrichedModel, propertyIri, "AnnotationProperty"));
     const valuesByAnnotationByTerm = await getLocalAnnotationValues(enrichedModel.graphUri, localAnnotationIris, userContext);
     const getAnnotationFields = function (termIri) {
         const annotationFields = Object.entries(valuesByAnnotationByTerm[termIri] || {});
@@ -236,11 +234,7 @@ async function getValidatedOntologyModelText(tboxSource, termNamespace, termPref
     for (const propertyIri of datatypePropertyIris.sort()) {
         const datatypeProperty = enrichedModel.nonObjectProperties[propertyIri];
         datatypePropertyEntries.push(
-            getTermEntry(propertyIri, datatypeProperty.label, [
-                ["Domain", bracketIri(datatypeProperty.domain)],
-                ["Range", bracketIri(datatypeProperty.range)],
-                ...getAnnotationFields(propertyIri),
-            ]),
+            getTermEntry(propertyIri, datatypeProperty.label, [["Domain", bracketIri(datatypeProperty.domain)], ["Range", bracketIri(datatypeProperty.range)], ...getAnnotationFields(propertyIri)]),
         );
     }
     const modelText =

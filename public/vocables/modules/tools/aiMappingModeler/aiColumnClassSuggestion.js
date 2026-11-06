@@ -397,7 +397,15 @@ var AIColumnClassSuggestion = (function () {
         });
         var explanationText = technicalKeySuggestion ? " " + technicalKeySuggestion.definition : "";
         var message =
-            "AI suggestion for " + columnNode.data.label + " (" + seconds + " s): " + readingTexts.join("; ") + "." + explanationText + " Click one in the graph to accept it, hover a class for its definition.";
+            "AI suggestion for " +
+            columnNode.data.label +
+            " (" +
+            seconds +
+            " s): " +
+            readingTexts.join("; ") +
+            "." +
+            explanationText +
+            " Click one in the graph to accept it, hover a class for its definition.";
         var isShownColumn = self.panelColumnId == columnNode.id;
         if (isShownColumn) {
             self.showMessage(message);

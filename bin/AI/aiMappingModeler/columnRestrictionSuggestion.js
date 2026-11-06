@@ -453,7 +453,10 @@ function getImplicitCandidates(sampleImplicitObjects) {
     const getLinksText = (implicitObject) => JSON.stringify(implicitObject.restrictions);
     const implicitCandidates = candidateColumns.map(function (candidateColumn) {
         const columnObjects = implicitObjectsByColumn[candidateColumn];
-        columnObjects.sort((implicitObject1, implicitObject2) => implicitObject2.restrictions.length - implicitObject1.restrictions.length || getLinksText(implicitObject1).localeCompare(getLinksText(implicitObject2)));
+        columnObjects.sort(
+            (implicitObject1, implicitObject2) =>
+                implicitObject2.restrictions.length - implicitObject1.restrictions.length || getLinksText(implicitObject1).localeCompare(getLinksText(implicitObject2)),
+        );
         const implicitCandidate = { implicitObject: columnObjects[0], sampleCount: columnObjects.length };
         return implicitCandidate;
     });
@@ -466,7 +469,8 @@ function getCandidateText(implicitCandidate, candidateNumber) {
     const newClassText = 'new class "' + classSuggestion.label + '" under <' + classSuggestion.parentId + '> "' + classSuggestion.parentLabel + '": ' + classSuggestion.definition;
     const classText = classSuggestion.columnKind == "existingClass" ? "class <" + classSuggestion.classId + '> "' + classSuggestion.label + '"' : newClassText;
     const restrictionLines = implicitObject.restrictions.map((restriction) => "    " + restriction.fromColumn + " " + restriction.property.label + " " + restriction.toColumn);
-    const candidateText = candidateNumber + ". virtual column " + implicitObject.column + ", " + classText + ", proposed by " + implicitCandidate.sampleCount + " answers\n" + restrictionLines.join("\n");
+    const candidateText =
+        candidateNumber + ". virtual column " + implicitObject.column + ", " + classText + ", proposed by " + implicitCandidate.sampleCount + " answers\n" + restrictionLines.join("\n");
     return candidateText;
 }
 

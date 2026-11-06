@@ -5,3 +5,5 @@ mainapp/static/mainapp.js.map
 # Vendored libraries
 public/YasGui/
 public/vocables/js/external
+# prompts sent to the models: markdown formatting would change the text they read
+bin/AI/**/prompts/

@@ -220,12 +220,4 @@ async function runAgentLoop({ system, conversation, tools, toolFunctionsByName, 
     throw new Error("the agent stopped after " + maxAgentTurns + " turns without answering");
 }
 
-export {
-    searchUpperOntologiesTool,
-    getUpperOntologyTermsTool,
-    describeDatabaseTablesTool,
-    getUpperOntologyReaders,
-    getDatabaseTablesDescriber,
-    getReadingToolOutcome,
-    runAgentLoop,
-};
+export { searchUpperOntologiesTool, getUpperOntologyTermsTool, describeDatabaseTablesTool, getUpperOntologyReaders, getDatabaseTablesDescriber, getReadingToolOutcome, runAgentLoop };

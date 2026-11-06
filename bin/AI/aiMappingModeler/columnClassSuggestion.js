@@ -47,7 +47,8 @@ function getColumnKeyRole(request, preparedSource) {
     // the primary key of a table taking the key it points at is the key of that kind, never a technical key
     const isHandedOutKeyReference = !isRowKey && tableKeys.referencedHandedOutKeys.length > 0;
     if (isBesideRowKey) {
-        const besideRowKeyText = "The primary key " + primaryKeyColumns[0] + " carries the object of the rows. When this column names or identifies the same rows, it is a value and the only candidate.";
+        const besideRowKeyText =
+            "The primary key " + primaryKeyColumns[0] + " carries the object of the rows. When this column names or identifies the same rows, it is a value and the only candidate.";
         return { roleText: besideRowKeyText, technicalKeyText: genericTechnicalKeyText };
     }
     if (!isHandedOutKey && !isHandedOutKeyReference) {
@@ -60,7 +61,9 @@ function getColumnKeyRole(request, preparedSource) {
     const adviceText = secondTypeText + " Leave it without a class and give it the URI prefix of " + subtypeKeyNames.join(", ") + ", so that its values and links land on these individuals.";
     if (isHandedOutKey) {
         const handedOutKeyText =
-            "The tables " + subtypeTablesText + " take this key as their own primary key and have every other column of this table: each holds a kind of its rows, and this table only hands out the key.";
+            "The tables " +
+            subtypeTablesText +
+            " take this key as their own primary key and have every other column of this table: each holds a kind of its rows, and this table only hands out the key.";
         const technicalKeyText = "The tables " + subtypeTablesText + " take this key as their own primary key and give each row its class. " + adviceText;
         return { roleText: handedOutKeyText, technicalKeyText: technicalKeyText };
     }
@@ -70,7 +73,8 @@ function getColumnKeyRole(request, preparedSource) {
         ", the key of a table that only hands it out to the tables " +
         subtypeTablesText +
         ", each taking it as its own primary key. This column does not carry the object of the rows of this table: it points at rows that these tables give their class.";
-    const technicalKeyText = "This column points at " + tableKeys.referencedKey + ", which the tables " + subtypeTablesText + " take as their own primary key, each giving the rows their class. " + adviceText;
+    const technicalKeyText =
+        "This column points at " + tableKeys.referencedKey + ", which the tables " + subtypeTablesText + " take as their own primary key, each giving the rows their class. " + adviceText;
     return { roleText: handedOutKeyReferenceText, technicalKeyText: technicalKeyText };
 }
 
@@ -441,4 +445,17 @@ async function suggestColumnClass(request, abortSignal, userInfo) {
     return { suggestions: suggestions, llmMilliseconds: llmMilliseconds };
 }
 
-export { suggestionModelId, suggestionReasoningEffort, suggestionMaxTokens, askSamples, markupCharacterRegex, noClassKinds, isFilledText, readJsonObject, readClassAnswer, getKnownClasses, getCorrectionParams, suggestColumnClass };
+export {
+    suggestionModelId,
+    suggestionReasoningEffort,
+    suggestionMaxTokens,
+    askSamples,
+    markupCharacterRegex,
+    noClassKinds,
+    isFilledText,
+    readJsonObject,
+    readClassAnswer,
+    getKnownClasses,
+    getCorrectionParams,
+    suggestColumnClass,
+};

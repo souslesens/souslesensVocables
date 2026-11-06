@@ -668,6 +668,14 @@ var MappingColumnsGraph = (function () {
             DataSourceManager.onDataSourcesJstreeSelect(undefined, obj, callback);
         }
     };
+
+    // a superclass drawn from a query carries no source; a resource the tool does not list is read through the current source
+    self.getResourceSource = function (resourceId) {
+        var resource = MappingModeler.allResourcesMap[resourceId];
+        var resourceSource = resource && resource.source ? resource.source : MappingModeler.currentSLSsource;
+        return resourceSource;
+    };
+
     /**
      * @function
      * @name showImplicitGraphPopupMenu
@@ -909,7 +917,8 @@ var MappingColumnsGraph = (function () {
                 /*  MappingsDetails.mappingColumnInfo.editColumnInfos();
                   MappingsDetails.mappingColumnInfo.columnClass = self.getColumnType(self.currentGraphNode.id);*/
             } else {
-                NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "smallDialogDiv");
+                var source = self.currentGraphNode.data.source || self.getResourceSource(self.currentGraphNode.data.id);
+                NodeInfosWidget.showNodeInfos(source, self.currentGraphNode, "smallDialogDiv");
             }
         },
 

@@ -3608,7 +3608,7 @@ restrictionSource = Config.predicatesSource;
             html += `<span class="popupMenuItem" style="font-family: Courier" onclick="Lineage_nodeCentricGraph.showVisjsGraphTreeTextDialog();">tree text</span>`;
 
             html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listAllNodeRelations();">List All relations </span>';
-            html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawAxioms();">Draw xioms</span>';
+            html += '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawAxioms();">Draw Axioms</span>';
         }
 
         $("#popupMenuWidgetDiv").html(html);

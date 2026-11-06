@@ -35,7 +35,7 @@ import { databaseModel } from "../../../../model/databases.js";
 import { sourceModel } from "../../../../model/sources.js";
 import { getUpperOntologyModelText } from "../../../../bin/AI/ontologyFromDb/upperOntologyModel.js";
 import { checkRunRestrictions } from "../../../../bin/AI/ontologyFromDb/ontology/restrictionCheck.js";
-import { describeDatabase } from "../../../../bin/AI/ontologyFromDb/databaseDescription.js";
+import { describeDatabase, getSampleTexts } from "../../../../bin/AI/ontologyFromDb/databaseDescription.js";
 import { readSchemaFile } from "../../../../bin/AI/ontologyFromDb/schemaFile.js";
 import { deleteVersionConversations } from "../../../../bin/AI/ontologyFromDb/revision/revisionConversations.js";
 
@@ -48,14 +48,10 @@ const schemaOnlyPromptPath = join(currentDirectory, "../../../../bin/AI/ontology
 const linkCandidatesModelId = "anthropic/claude-haiku-5.5";
 const linkCandidatesReasoningEffort = "medium";
 const sampleRowCount = 5;
-const sampleValueMaxLength = 100;
-// YYYY-MM-DD
-const dateTextLength = 10;
 // database checks run before the call, a few at once: 8 saturate a postgres server on the biggest tables
 const parallelCheckCount = 4;
 const maxMeasuredPairs = 150;
 
-const lineBreakRegex = /\s*[\r\n]+\s*/g;
 const maxPairsPlaceholderRegex = /\{maxPairs\}/g;
 const sqlFileExtensionRegex = /\.sql$/i;
 // the steps that read the data of a database, which a schema file does not hold
@@ -73,42 +69,6 @@ export default function () {
     let operations = {
         POST,
     };
-
-    // one line per sample row, values as the prompt shows them: saved as text, they read the same at every run
-    function getSampleTexts(rows, columns) {
-        const columnTypes = {};
-        columns.forEach(function (column) {
-            columnTypes[column.column_name] = column.data_type;
-        });
-        return rows.map(function (row) {
-            const values = Object.entries(row).map(function ([columnName, value]) {
-                if (value === null || value === undefined) {
-                    return "NULL";
-                }
-                if (Buffer.isBuffer(value)) {
-                    return "<binary>";
-                }
-                let valueText;
-                if (value instanceof Date) {
-                    // pg reads a stored date in the server time zone: its local fields are the stored value
-                    valueText = value.toLocaleString("sv-SE");
-                    if (columnTypes[columnName] == "date") {
-                        valueText = valueText.substring(0, dateTextLength);
-                    }
-                } else if (typeof value == "object") {
-                    valueText = JSON.stringify(value);
-                } else {
-                    valueText = String(value);
-                }
-                valueText = valueText.replace(lineBreakRegex, " ");
-                if (valueText.length > sampleValueMaxLength) {
-                    valueText = valueText.substring(0, sampleValueMaxLength) + "...";
-                }
-                return valueText;
-            });
-            return values.join(" | ");
-        });
-    }
 
     async function POST(req, res, _next) {
         const runStart = Date.now();
@@ -468,7 +428,8 @@ export default function () {
 
             const upperOntologiesStart = Date.now();
             sendProgress({ type: "stepStart", step: "upperOntologies", sources: upperOntologies });
-            const ontologiesText = await getUpperOntologyModelText(upperOntologies, { user: userInfo, userSources: userSources });
+            const ontologiesModel = await getUpperOntologyModelText(upperOntologies, { user: userInfo, userSources: userSources });
+            const ontologiesText = ontologiesModel.text;
             endStep("upperOntologies", upperOntologiesStart, {});
             if (stopSignal.aborted) {
                 return endStoppedPreparation();

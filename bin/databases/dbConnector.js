@@ -138,6 +138,17 @@ async function getColumnProfile(connection, clientDriver, tableName, columnNames
     return { rowCount: Number(counts.rowCount), columnsByName: columnsByName };
 }
 
+// rows where the column holds a value: NULL, an empty text and a text of spaces are empty, compared as text whatever the
+// type; a NULL compared to '' is never true
+async function getFilledSampleData(connection, clientDriver, tableName, columnName, limit) {
+    const filledRowsQuery = connection(getTableReference(tableName, clientDriver))
+        .select("*")
+        .whereRaw("LTRIM(RTRIM(CAST(?? AS " + getTextCastType(clientDriver) + "))) <> ''", [columnName])
+        .limit(limit);
+    const filledRows = await withDataCheckTimeout(filledRowsQuery, clientDriver);
+    return filledRows;
+}
+
 // compared as text, since a link without a declared key may join columns of different types
 function getColumnTextValues(connection, clientDriver, tableName, columnName) {
     return connection(getTableReference(tableName, clientDriver))
@@ -152,4 +163,4 @@ async function getSharedDistinctValueCount(connection, clientDriver, leftTable, 
     return Number(sharedCount.count);
 }
 
-export { getConnection, getData, getKGModel, getKGModelAsync, getSchemaDescription, getSampleData, getColumnProfile, getSharedDistinctValueCount, getTableSchema };
+export { getConnection, getData, getKGModel, getKGModelAsync, getSchemaDescription, getSampleData, getColumnProfile, getSharedDistinctValueCount, getTableSchema, getFilledSampleData };

@@ -668,6 +668,14 @@ var AIMappingColumnsGraph = (function () {
             AIDataSourceManager.onDataSourcesJstreeSelect(undefined, obj, callback);
         }
     };
+
+    // a superclass drawn from a query carries no source; a resource the tool does not list is read through the current source
+    self.getResourceSource = function (resourceId) {
+        var resource = AIMappingModeler.allResourcesMap[resourceId];
+        var resourceSource = resource && resource.source ? resource.source : AIMappingModeler.currentSLSsource;
+        return resourceSource;
+    };
+
     /**
      * @function
      * @name showImplicitGraphPopupMenu
@@ -733,6 +741,10 @@ var AIMappingColumnsGraph = (function () {
             if (node.data.type == "Class" || node.data.type == "superClass") {
                 html += '    <span class="popupMenuItem" onclick="AIMappingColumnsGraph.graphActions.showNodeInfos()">Node Infos</span>';
                 html += '    <span class="popupMenuItem" onclick="AIMappingColumnsGraph.graphActions.addSuperClassToGraph()">draw superClass</span>';
+            }
+            // a property edge has an id, the edges of a table or of an rdf:type have none
+            if (node.from && node.data.id) {
+                html += '    <span class="popupMenuItem" onclick="AIMappingColumnsGraph.graphActions.showNodeInfos()">Node Infos</span>';
             }
             if (node.data.type == "Column") {
                 html += '    <span class="popupMenuItem" onclick="AIMappingColumnsGraph.graphActions.showColumnDetails()">Detailed mappings</span>';
@@ -903,14 +915,13 @@ var AIMappingColumnsGraph = (function () {
          * @returns {void}
          */
         showNodeInfos: function () {
-            if (self.currentGraphNode.data.type == "URI") {
-            } else if (AIMappingModeler.columnsMappingsObjects.indexOf(self.currentGraphNode.data.type) > -1) {
+            var nodeType = self.currentGraphNode.data.type;
+            // a class is listed with the column mapping objects, but only a class is described in the ontology
+            if (nodeType != "Class" && AIMappingModeler.columnsMappingsObjects.indexOf(nodeType) > -1) {
                 return;
-                /*  AIMappingsDetails.mappingColumnInfo.editColumnInfos();
-                  AIMappingsDetails.mappingColumnInfo.columnClass = self.getColumnType(self.currentGraphNode.id);*/
-            } else {
-                NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "smallDialogDiv");
             }
+            var source = self.currentGraphNode.data.source || self.getResourceSource(self.currentGraphNode.data.id);
+            NodeInfosWidget.showNodeInfos(source, self.currentGraphNode, "smallDialogDiv");
         },
 
         /**
@@ -1044,8 +1055,11 @@ var AIMappingColumnsGraph = (function () {
                         return err;
                     }
                     if (result?.options?.config) {
+                        // the saved config has no current data source, and the tree still shows its tables after a reload
+                        var currentDataSource = AIDataSourceManager.currentConfig.currentDataSource;
                         AIDataSourceManager.rawConfig = result.options.config;
                         AIDataSourceManager.currentConfig = result.options.config;
+                        AIDataSourceManager.currentConfig.currentDataSource = currentDataSource;
                     }
                     AIMappingColumnsGraph.visjsGraph.data = result;
                     self.normalizeRdfTypeEdgesColor(AIMappingColumnsGraph.visjsGraph);
@@ -1475,7 +1489,7 @@ var AIMappingColumnsGraph = (function () {
      * @param table
      */
     self.zoomOnTable = function (table) {
-        AIMappingColumnsGraph.hideNodesFromOtherTables(table);
+        AIMappingColumnsGraph.hideNodesFromOtherTables([table]);
         self.visjsGraph.network.focus(table, {
             scale: 0.85,
             offset: { x: 10, y: 200 },
@@ -2058,7 +2072,7 @@ var AIMappingColumnsGraph = (function () {
         });
     };
 
-    self.hideNodesFromOtherTables = function (table) {
+    self.hideNodesFromOtherTables = function (shownTables) {
         var nodes = AIMappingColumnsGraph.visjsGraph.data.nodes.get();
         var edges = AIMappingColumnsGraph.visjsGraph.data.edges.get();
 
@@ -2071,7 +2085,7 @@ var AIMappingColumnsGraph = (function () {
         nodes.forEach(function (node) {
             var hidden = true;
             if (node.data && node.data.dataTable) {
-                if (node.data.dataTable == table) {
+                if (shownTables.indexOf(node.data.dataTable) > -1) {
                     tableNodes[node.id] = node;
                     hidden = false;
                 }
@@ -2095,6 +2109,30 @@ var AIMappingColumnsGraph = (function () {
             newNodes.push(newNodesMap[nodeId]);
         }
         AIMappingColumnsGraph.visjsGraph.data.nodes.update(newNodes);
+    };
+
+    // the tables come from their columns: a column records the id of its data source, a table node not always
+    self.showDataSourcesTables = function (dataSourceIds) {
+        var dataSourceNodes = self.visjsGraph.data.nodes.get({
+            filter: function (graphNode) {
+                return Boolean(graphNode.data) && dataSourceIds.indexOf(graphNode.data.datasource) > -1;
+            },
+        });
+        var dataSourceTables = dataSourceNodes.map(function (graphNode) {
+            return graphNode.data.dataTable;
+        });
+        self.hideNodesFromOtherTables(dataSourceTables);
+        self.visjsGraph.network.fit();
+    };
+
+    // as when the mappings load
+    self.showAllNodes = function () {
+        var nodeIds = self.visjsGraph.data.nodes.getIds();
+        var shownNodes = nodeIds.map(function (nodeId) {
+            return { id: nodeId, hidden: false };
+        });
+        self.visjsGraph.data.nodes.update(shownNodes);
+        self.visjsGraph.network.fit();
     };
 
     self.relationMessage = function (fromLabel, toLabel) {

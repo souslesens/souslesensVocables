@@ -6,6 +6,7 @@ import AIMappingModeler from "./aiMappingModeler.js";
 import UI from "../../shared/UI.js";
 import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
 var AIMappingModelerRelations = (function () {
+    var self = {};
     self.listPossibleRelations = function (callback) {
         var nodes = AIMappingColumnsGraph.visjsGraph.data.nodes.get();
         var edges = AIMappingColumnsGraph.visjsGraph.data.edges.get();

@@ -1,0 +1,4 @@
+Several answers to the request above proposed the implicit business objects listed below, each with the number of answers that proposed it. A single answer proposes an implicit object too easily: judge them now, taking the time to reason.
+Decide, with the conditions of section 7, whether one of them is a business object the mapping needs. Refuse them all when the relationship between the mapped columns is stated directly by an allowed property, when the object is one that a mapped column identifies under any class, or when it adds nothing to understand the business. When several are legitimate, choose the one whose class the upper ontologies support best and which links the most mapped columns.
+Write one JSON object and nothing else, no code fence: candidate is the number of the chosen object, 0 when none is legitimate; reason says to the user in one or two English sentences why the chosen object is needed.
+{"candidate":1,"reason":"..."}

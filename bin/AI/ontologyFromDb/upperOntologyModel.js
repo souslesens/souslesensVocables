@@ -59,32 +59,38 @@ function bracketIri(iri) {
     return iri ? ["<" + iri + ">"] : [];
 }
 
+// a term imported by several ontologies is written under the first
+function getUnwrittenClassEntries(enrichedModel, writtenTerms) {
+    const classEntries = [];
+    const sortedClassIris = Object.keys(enrichedModel.classes).sort();
+    for (const classIri of sortedClassIris) {
+        if (writtenTerms.has(classIri)) {
+            continue;
+        }
+        writtenTerms.add(classIri);
+        const ontologyClass = enrichedModel.classes[classIri];
+        classEntries.push(
+            getTermEntry(classIri, ontologyClass.label, [
+                ["Definition", ontologyClass.definitions],
+                ["Example", ontologyClass.examples],
+                ["SubClassOf", ontologyClass.axioms.subClassOf],
+                ["EquivalentTo", ontologyClass.axioms.equivalentTo],
+                ["DisjointWith", ontologyClass.axioms.disjointWith],
+                ["DisjointUnionOf", ontologyClass.axioms.disjointUnionOf],
+            ]),
+        );
+    }
+    return classEntries;
+}
+
 // the enriched model of each upper ontology, most abstract first, as compact text: IRIs as prefixed names,
-// a term imported by several of them written under the first
+// a term imported by several of them written under the first, with the prefixes it uses
 async function getUpperOntologyModelText(upperOntologies, userContext) {
     const writtenTerms = new Set();
     let modelText = "";
     for (const upperOntology of upperOntologies) {
         const enrichedModel = await getEnrichedOntologyModel(upperOntology, userContext);
-        const classEntries = [];
-        const sortedClassIris = Object.keys(enrichedModel.classes).sort();
-        for (const classIri of sortedClassIris) {
-            if (writtenTerms.has(classIri)) {
-                continue;
-            }
-            writtenTerms.add(classIri);
-            const ontologyClass = enrichedModel.classes[classIri];
-            classEntries.push(
-                getTermEntry(classIri, ontologyClass.label, [
-                    ["Definition", ontologyClass.definitions],
-                    ["Example", ontologyClass.examples],
-                    ["SubClassOf", ontologyClass.axioms.subClassOf],
-                    ["EquivalentTo", ontologyClass.axioms.equivalentTo],
-                    ["DisjointWith", ontologyClass.axioms.disjointWith],
-                    ["DisjointUnionOf", ontologyClass.axioms.disjointUnionOf],
-                ]),
-            );
-        }
+        const classEntries = getUnwrittenClassEntries(enrichedModel, writtenTerms);
         const propertyEntries = [];
         const sortedPropertyIris = Object.keys(enrichedModel.properties).sort();
         for (const propertyIri of sortedPropertyIris) {
@@ -108,7 +114,8 @@ async function getUpperOntologyModelText(upperOntologies, userContext) {
         modelText +=
             "\n## " + upperOntology + " (graph " + enrichedModel.graphUri + ")\n\n### Classes\n\n" + classEntries.join("\n") + "\n\n### Object properties\n\n" + propertyEntries.join("\n") + "\n";
     }
-    return getPrefixedModelText(modelText, {}).text;
+    const prefixedModel = getPrefixedModelText(modelText, {});
+    return prefixedModel;
 }
 
 // the bracketed IRIs of a model text as prefixed names, and the prefixes they use; a declared prefix named like a well-known one is not used
@@ -160,6 +167,23 @@ async function getLocalAnnotationValues(graphUri, localAnnotationIris, userConte
         Object.values(termValuesByAnnotation).forEach((annotationValues) => annotationValues.sort());
     }
     return valuesByAnnotationByTerm;
+}
+
+// the classes alone of each upper ontology, with what it takes to read back an answer naming one of them
+async function getUpperOntologyClassesText(upperOntologies, userContext) {
+    const writtenTerms = new Set();
+    const classLabelByIri = {};
+    let modelText = "";
+    for (const upperOntology of upperOntologies) {
+        const enrichedModel = await getEnrichedOntologyModel(upperOntology, userContext);
+        const classEntries = getUnwrittenClassEntries(enrichedModel, writtenTerms);
+        for (const [classIri, ontologyClass] of Object.entries(enrichedModel.classes)) {
+            classLabelByIri[classIri] = ontologyClass.label || classIri;
+        }
+        modelText += "\n## " + upperOntology + "\n\n" + classEntries.join("\n") + "\n";
+    }
+    const prefixedModel = getPrefixedModelText(modelText, {});
+    return { text: prefixedModel.text, prefixes: prefixedModel.prefixes, classLabelByIri: classLabelByIri };
 }
 
 // read from the graph, whatever answer format produced the version and whatever was edited in it since
@@ -239,4 +263,4 @@ async function getValidatedOntologyModelText(tboxSource, termNamespace, termPref
     return { text: prefixedModel.text, prefixes: prefixedModel.prefixes, classLabelByIri: classLabelByIri, datatypePropertyIris: datatypePropertyIris };
 }
 
-export { wellKnownPrefixes, getDatatypePropertyIris, getUpperOntologyModelText, getValidatedOntologyModelText };
+export { wellKnownPrefixes, getDatatypePropertyIris, getUpperOntologyModelText, getUpperOntologyClassesText, getValidatedOntologyModelText };

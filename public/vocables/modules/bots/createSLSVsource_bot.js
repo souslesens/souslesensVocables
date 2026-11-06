@@ -152,8 +152,12 @@ var CreateSLSVsource_bot = (function () {
 
         listImportsFn: function () {
             var sources = Object.keys(Config.sources);
-            sources.sort();
-            self.myBotEngine.showList(sources, "imports", null, false, null, { multiSelect: true, selectedValues: self.params.imports });
+            var notImportedSources = sources.filter(function (source) {
+                return self.params.imports.indexOf(source) < 0;
+            });
+            notImportedSources.sort();
+            // a click pushes the source into the imports array and moves on to the next step
+            self.myBotEngine.showList(notImportedSources, "imports");
         },
 
         afterImportFn: function () {

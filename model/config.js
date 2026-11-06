@@ -106,6 +106,7 @@ const MainConfigObject = z
                 claudeCode: z
                     .object({
                         defaultModel: z.string().default("opus"),
+                        cliPath: z.string().optional(),
                         maxTokens: z.number().positive().optional(),
                         rateLimitTPM: z.number().positive().default(10000000),
                     })

@@ -5,6 +5,7 @@ import { configDatabasesPath } from "./config.js";
 import { profileModel } from "./profiles.js";
 import KGbuilder_socket from "../bin/KGbuilder/KGbuilder_socket.js";
 import * as modelUtils from "./utils.js";
+import { getTableSchema } from "../bin/KG/dbConnector.js";
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount
@@ -370,8 +371,9 @@ class DatabaseModel {
         }
 
         let offset = startingOffset;
+        const tableSchema = getTableSchema(connection.client.config.client);
 
-        const columns = await connection(tableName).columnInfo();
+        const columns = await connection(tableName).withSchema(tableSchema).columnInfo();
         // ORDER BY all columns to ensure stable ordering for OFFSET/LIMIT pagination.
         // Known limitations:
         // - Non-sortable column types (JSON, BLOB, ARRAY, geometry...) may cause query errors
@@ -395,7 +397,7 @@ class DatabaseModel {
             orderByColumns = select.split(",").map((col) => col.trim());
         }
 
-        const resSize = await connection.count("*").from(tableName);
+        const resSize = await connection.count("*").withSchema(tableSchema).from(tableName);
         const size = parseInt(resSize[0].count);
 
         const onFailure = async (error) => {
@@ -408,7 +410,7 @@ class DatabaseModel {
             if (offset >= size) {
                 const result = await modelUtils.redoIfFailure(
                     async function () {
-                        return await connection.select(select).from(tableName).orderBy(orderByColumns).limit(batchSize).offset(offset);
+                        return await connection.select(select).withSchema(tableSchema).from(tableName).orderBy(orderByColumns).limit(batchSize).offset(offset);
                     },
                     5, // maxRedo: 5 tentatives
                     5, // sleepTime: 5 secondes entre les tentatives
@@ -419,7 +421,7 @@ class DatabaseModel {
 
             const result = await modelUtils.redoIfFailure(
                 async function () {
-                    return await connection.select(select).from(tableName).orderBy(orderByColumns).limit(batchSize).offset(offset);
+                    return await connection.select(select).withSchema(tableSchema).from(tableName).orderBy(orderByColumns).limit(batchSize).offset(offset);
                 },
                 5, // maxRedo: 5 tentatives
                 5, // sleepTime: 5 secondes entre les tentatives

@@ -93,8 +93,16 @@ async function getSchemaDescription(connection, driver) {
     return { columns, primaryKeys, foreignKeys, comments };
 }
 
+// the tables of a postgres database are read in public whatever the search_path of its connection
+function getTableSchema(clientDriver) {
+    const tableSchema = clientDriver === "pg" ? "public" : undefined;
+    return tableSchema;
+}
+
 function getTableReference(tableName, clientDriver) {
-    return clientDriver === "pg" ? "public." + tableName : tableName;
+    const tableSchema = getTableSchema(clientDriver);
+    const tableReference = tableSchema ? tableSchema + "." + tableName : tableName;
+    return tableReference;
 }
 
 async function getSampleData(connection, tableName, limit, clientDriver) {
@@ -144,4 +152,4 @@ async function getSharedDistinctValueCount(connection, clientDriver, leftTable, 
     return Number(sharedCount.count);
 }
 
-export { getConnection, getData, getKGModel, getKGModelAsync, getSchemaDescription, getSampleData, getColumnProfile, getSharedDistinctValueCount };
+export { getConnection, getData, getKGModel, getKGModelAsync, getSchemaDescription, getSampleData, getColumnProfile, getSharedDistinctValueCount, getTableSchema };

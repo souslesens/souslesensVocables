@@ -17,6 +17,7 @@ var AIDataSourceManager = (function () {
     self.statsMap = {};
     // in-memory cache of triple stats per source: instant paint on reopen, always refreshed in background
     self.statsMapBySource = {};
+    self.allDataSourcesNodeId = "allDataSources";
     var mappingsDir = "mappings";
     self.umountKGUploadApp = null;
 
@@ -125,7 +126,9 @@ var AIDataSourceManager = (function () {
             contextMenu: function (node, x) {
                 self.currentDataSourceTreeNode = node;
                 var items = {};
-                if (node.id == "databaseSources") {
+                if (node.id == self.allDataSourcesNodeId) {
+                    return items;
+                } else if (node.id == "databaseSources") {
                     items.addDatabaseSource = {
                         label: "addDatabaseSources",
                         action: function (_e) {
@@ -173,9 +176,17 @@ var AIDataSourceManager = (function () {
         self.dataSourcejstreeDivId = "mappingModeler_dataSourcesJstreeDiv";
         var jstreeData = [];
         jstreeData.push({
+            id: self.allDataSourcesNodeId,
+            text: "All data sources",
+            parent: "#",
+            data: {
+                type: self.allDataSourcesNodeId,
+            },
+        });
+        jstreeData.push({
             id: "databaseSources",
             text: "databaseSources",
-            parent: "#",
+            parent: self.allDataSourcesNodeId,
             type: "databaseSources",
             data: {
                 type: "sourceType",
@@ -184,7 +195,7 @@ var AIDataSourceManager = (function () {
         jstreeData.push({
             id: "csvSources",
             text: "csvSources",
-            parent: "#",
+            parent: self.allDataSourcesNodeId,
             type: "CSVS",
             data: {
                 type: "sourceType",
@@ -417,6 +428,26 @@ var AIDataSourceManager = (function () {
         });
     };
 
+    // "PK", "FK", "PK FK", or "" for a column outside every key, a csv column, or keys not read
+    self.getColumnKeyText = function (table, column) {
+        var tableKeys = self.currentConfig.currentDataSource ? self.currentConfig.currentDataSource.tableKeys : null;
+        if (!tableKeys) {
+            return "";
+        }
+        var isColumnKey = function (keyColumn) {
+            return keyColumn.table_name == table && keyColumn.column_name == column;
+        };
+        var keyKinds = [];
+        if (tableKeys.primaryKeys.some(isColumnKey)) {
+            keyKinds.push("PK");
+        }
+        if (tableKeys.foreignKeys.some(isColumnKey)) {
+            keyKinds.push("FK");
+        }
+        var columnKeyText = keyKinds.join(" ");
+        return columnKeyText;
+    };
+
     /**
      * Loads the tables of a database source into the current configuration and adds them to the Jstree.
      * @function
@@ -452,8 +483,22 @@ var AIDataSourceManager = (function () {
                     });
                 },
 
+                // the column tree shows the keys of each column; without them it lists the columns alone
                 function (callbackSeries) {
-                    callbackSeries();
+                    self.currentConfig.currentDataSource.tableKeys = null;
+                    $.ajax({
+                        type: "GET",
+                        url: Config.apiUrl + "/ai/aiMappingModeler/tableKeys?" + new URLSearchParams({ databaseId: dataSource }).toString(),
+                        dataType: "json",
+                        success: function (tableKeys) {
+                            self.currentConfig.currentDataSource.tableKeys = tableKeys;
+                            callbackSeries();
+                        },
+                        error: function (err) {
+                            UI.message("keys of the database not read: " + (err.responseJSON ? err.responseJSON.error : err.statusText));
+                            callbackSeries();
+                        },
+                    });
                 },
 
                 function (callbackSeries) {
@@ -610,15 +655,20 @@ var AIDataSourceManager = (function () {
             return;
         }
 
-        // "databaseSources" and "csvSources" group the tree, selecting one changes nothing
+        // above every data source: the current table stays the one columns are added to
+        if (obj.node.data.type == self.allDataSourcesNodeId) {
+            return AIMappingColumnsGraph.showAllNodes();
+        }
+        // "databaseSources" and "csvSources" group the data sources of the tree
         if (obj.node.data.type == "sourceType") {
-            return;
+            return AIMappingColumnsGraph.showDataSourcesTables(obj.node.children);
         }
 
         // the branches below reassign it, except a database source which has no table yet
         AIMappingModeler.currentTable = null;
 
         if (obj.node.data.type == "databaseSource") {
+            AIMappingColumnsGraph.showDataSourcesTables([obj.node.id]);
             AIDataSourceManager.initNewDataSource(obj.node.id, "databaseSource", obj.node.data.sqlType, obj.node.data.table);
 
             AIDataSourceManager.loadDataBaseSource(AIDataSourceManager.currentSlsvSource, obj.node.id, obj.node.data.sqlType, callback);

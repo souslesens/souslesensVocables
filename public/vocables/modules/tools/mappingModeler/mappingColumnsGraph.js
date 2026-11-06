@@ -911,15 +911,13 @@ var MappingColumnsGraph = (function () {
          * @returns {void}
          */
         showNodeInfos: function () {
-            if (self.currentGraphNode.data.type == "URI") {
-            } else if (MappingModeler.columnsMappingsObjects.indexOf(self.currentGraphNode.data.type) > -1) {
+            var nodeType = self.currentGraphNode.data.type;
+            // a class is listed with the column mapping objects, but only a class is described in the ontology
+            if (nodeType != "Class" && MappingModeler.columnsMappingsObjects.indexOf(nodeType) > -1) {
                 return;
-                /*  MappingsDetails.mappingColumnInfo.editColumnInfos();
-                  MappingsDetails.mappingColumnInfo.columnClass = self.getColumnType(self.currentGraphNode.id);*/
-            } else {
-                var source = self.currentGraphNode.data.source || self.getResourceSource(self.currentGraphNode.data.id);
-                NodeInfosWidget.showNodeInfos(source, self.currentGraphNode, "smallDialogDiv");
             }
+            var source = self.currentGraphNode.data.source || self.getResourceSource(self.currentGraphNode.data.id);
+            NodeInfosWidget.showNodeInfos(source, self.currentGraphNode, "smallDialogDiv");
         },
 
         /**

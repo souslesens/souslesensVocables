@@ -1,5 +1,6 @@
 import AIMappingsDetails from "./aiMappingsDetails.js";
 import AIDataSourceManager from "./aiDataSourcesManager.js";
+import AIColumnClassSuggestion from "./aiColumnClassSuggestion.js";
 
 /**
  * AIUIcontroller module manages the display of panels in the mapping modeler interface,
@@ -33,10 +34,15 @@ var AIUIcontroller = (function () {
             return alert("select a table");
         }
         if (tabId == "MappingModeler_columnsTab") {
+            AIColumnClassSuggestion.onColumnsListed();
             //$("#MappingModeler_currentDataSource").html(AIDataSourceManager.currentConfig.currentDataSource.name);
             $("#rightControlPanelDiv").load("./modules/tools/aiMappingModeler/html/mappingsGraphButtons.html", function (err) {
                 $("#mappingModeler_structuralPanel").css("display", "block");
                 AIMappingModeler.initActiveLegend(AIMappingModeler.legendGraphDivId, function () {
+                    // the legend can answer up to 30 s later, after the table was left for its data source
+                    if (!AIMappingModeler.currentTable) {
+                        return;
+                    }
                     AIMappingModeler.loadSuggestionSelectJstree(AIMappingModeler.currentTable.columns, "Columns", callback);
                 });
             });

@@ -25,6 +25,8 @@ import MainController from "../../shared/mainController.js";
 import aiDataSourcesManager from "./aiDataSourcesManager.js";
 import AIMappingColumnsGraph from "./aiMappingColumnsGraph.js";
 import authentication from "../../shared/authentification.js";
+import AIColumnClassSuggestion from "./aiColumnClassSuggestion.js";
+import AIColumnRestrictionSuggestion from "./aiColumnRestrictionSuggestion.js";
 
 /**
  * AIMappingModeler module.
@@ -239,6 +241,7 @@ var AIMappingModeler = (function () {
                     </div>`;
                     var topControlParent = $("#index_topContolPanel").parent();
                     $(datasourceDiv).insertAfter(topControlParent);
+                    AIColumnClassSuggestion.prepare();
                     return callbackSeries();
                 },
             ],
@@ -333,18 +336,22 @@ var AIMappingModeler = (function () {
                                 items.showSampleData = {
                                     label: "deleteClass",
                                     action: function (_e) {
+                                        // the class may come from an editable import, listed under its own source
+                                        var classSource = node.parent;
                                         NodeInfosWidget.currentNode = node;
                                         NodeInfosWidget.currentNodeId = node.id;
-                                        NodeInfosWidget.currentNode.data.source = MainController.currentSource;
-                                        NodeInfosWidget.currentSource = MainController.currentSource;
+                                        NodeInfosWidget.currentNode.data.source = classSource;
+                                        NodeInfosWidget.currentSource = classSource;
                                         NodeInfosWidget.deleteNode(function () {
                                             NodeInfosWidget.currentNode = null;
                                             NodeInfosWidget.currentNodeId = null;
                                             NodeInfosWidget.currentSource = null;
                                             $("#suggestionsSelectJstreeDiv").jstree("delete_node", node.id);
-                                            if (self.allClasses[node.id]) {
-                                                delete self.allClasses[node.id];
-                                            }
+                                            // the Classes tree is rebuilt from this list each time it opens
+                                            self.allClasses = self.allClasses.filter(function (ontologyClass) {
+                                                return ontologyClass.id != node.id;
+                                            });
+                                            delete self.allResourcesMap[node.id];
                                         });
                                     },
                                 };
@@ -453,10 +460,12 @@ var AIMappingModeler = (function () {
         } else {
             objects.forEach(function (item) {
                 if (item != "" && item != "#") {
+                    var columnKeyText = parentName == "Columns" ? AIDataSourceManager.getColumnKeyText(self.currentTable.name, item) : "";
+                    var keyText = columnKeyText ? " <span style='color:#888;font-size:10px;font-weight:bold'>" + columnKeyText + "</span>" : "";
                     jstreeData.push({
                         id: item,
                         parent: parentName,
-                        text: "<span  style='color:" + color + "'>" + item + "</span>",
+                        text: "<span  style='color:" + color + "'>" + item + "</span>" + keyText,
                         data: {
                             id: item,
                             label: item,
@@ -586,6 +595,7 @@ var AIMappingModeler = (function () {
                 };
                 AIMappingColumnsGraph.visjsGraph.data.edges.add(edge);
             });
+            AIColumnClassSuggestion.suggest(newResource);
 
             //  AIMappingColumnsGraph.graphActions. showColumnDetails(newResource)
             setTimeout(function () {
@@ -603,7 +613,7 @@ var AIMappingModeler = (function () {
             if (OntologyModels.isAboveMaxClasses(source)) {
                 return CommonBotFunctions.addSearchClassMatches("suggestionsSelectJstreeDiv", source, word, color, function (matchingClass) {
                     // same label as the classes listed by getAllClasses
-                    var prefixedLabel = source.substring(0, 3) + ":" + matchingClass.label;
+                    var prefixedLabel = self.getClassLabelInTool(source, matchingClass.label);
                     self.allResourcesMap[matchingClass.id] = { id: matchingClass.id, label: prefixedLabel, source: source, resourceType: "Class" };
                 });
             }
@@ -645,6 +655,8 @@ var AIMappingModeler = (function () {
 
             JstreeWidget.addNodesToJstree("suggestionsSelectJstreeDiv", source, jstreeData, { positionLast: true });
         } else if (self.currentResourceType == "Class") {
+            var classifiedNode = AIMappingColumnsGraph.currentGraphNode;
+            AIColumnClassSuggestion.clearColumn(classifiedNode.id);
             var resource = self.allResourcesMap[resourceUri];
             newResource = {
                 id: resourceUri,
@@ -660,6 +672,7 @@ var AIMappingModeler = (function () {
             };
 
             AIMappingColumnsGraph.drawResource(newResource);
+            AIColumnRestrictionSuggestion.suggest(classifiedNode);
 
             setTimeout(function () {
                 self.onLegendNodeClick({ id: "Column" });
@@ -852,6 +865,7 @@ var AIMappingModeler = (function () {
             });
         } else if (self.currentResourceType == "Column") {
             self.loadSuggestionSelectJstree(self.currentTable.columns, "Columns");
+            AIColumnClassSuggestion.onColumnsListed();
             //common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
         } else if (self.currentResourceType == "Class") {
             var newObject = { id: "createClass", label: "_Create new Class_" };
@@ -925,7 +939,7 @@ var AIMappingModeler = (function () {
                     if (!item.label) {
                         item.label = Sparql_common.getLabelFromURI(item.id);
                     }
-                    item.label = item.source.substring(0, 3) + ":" + item.label;
+                    item.label = self.getClassLabelInTool(item.source, item.label);
                 });
                 properties = common.array.sort(properties, "label");
                 //To add NewObjects only one time
@@ -1020,7 +1034,7 @@ var AIMappingModeler = (function () {
                 });
                 self.allClasses.forEach(function (item) {
                     if (item.source) {
-                        item.label = item.source.substring(0, 3) + ":" + item.label;
+                        item.label = self.getClassLabelInTool(item.source, item.label);
                     }
                 });
                 self.allClasses = common.array.sort(self.allClasses, "label");
@@ -1261,6 +1275,7 @@ var AIMappingModeler = (function () {
         if (!confirm("Are you sure")) {
             return;
         }
+        AIColumnClassSuggestion.clearAll();
         var visjsData = { nodes: [], edges: [] };
         AIMappingColumnsGraph.visjsGraph.data = visjsData;
         AIMappingColumnsGraph.saveVisjsGraph(function () {
@@ -1303,41 +1318,50 @@ var AIMappingModeler = (function () {
             if (err) {
                 return MainController.errorAlert(err);
             }
-            var previousLabel = CreateAxiomResource_bot.params.newObject.label;
-            CreateAxiomResource_bot.params.newObject.label = AIMappingModeler.currentSLSsource.substring(0, 3) + ":" + CreateAxiomResource_bot.params.newObject.label;
-            // update Axiom_manager
-            CreateAxiomResource_bot.params.newObject.source = AIMappingModeler.currentSLSsource;
-            if (resourceType == "Class") {
-                self.allClasses.push(CreateAxiomResource_bot.params.newObject);
-            } else if (resourceType == "ObjectProperty") {
-                self.allProperties.push(CreateAxiomResource_bot.params.newObject);
-            }
-            self.allResourcesMap[CreateAxiomResource_bot.params.newObject.id] = CreateAxiomResource_bot.params.newObject;
-            // update suggestion select jsTree
-            var jstreeData = Object.values($("#suggestionsSelectJstreeDiv").jstree()._model.data);
+            self.registerCreatedResource(resourceType, CreateAxiomResource_bot.params.newObject);
+        });
+    };
+
+    self.getClassLabelInTool = function (source, label) {
+        var classLabel = source.substring(0, 3) + ":" + label;
+        return classLabel;
+    };
+
+    self.registerCreatedResource = function (resourceType, newObject) {
+        var previousLabel = newObject.label;
+        newObject.label = self.getClassLabelInTool(AIMappingModeler.currentSLSsource, newObject.label);
+        // update Axiom_manager
+        newObject.source = AIMappingModeler.currentSLSsource;
+        if (resourceType == "Class") {
+            self.allClasses.push(newObject);
+        } else if (resourceType == "ObjectProperty") {
+            self.allProperties.push(newObject);
+        }
+        self.allResourcesMap[newObject.id] = newObject;
+        // update suggestion select jsTree
+        var jstreeData = Object.values($("#suggestionsSelectJstreeDiv").jstree()._model.data);
+        jstreeData.push({
+            id: newObject.id,
+            text: previousLabel,
+            parent: AIMappingModeler.currentSLSsource,
+            data: {
+                id: newObject.id,
+                text: newObject.label,
+                resourceType: "Class",
+            },
+        });
+        if (!$("#suggestionsSelectJstreeDiv").jstree().get_node(AIMappingModeler.currentSLSsource)) {
             jstreeData.push({
-                id: CreateAxiomResource_bot.params.newObject.id,
-                text: previousLabel,
-                parent: AIMappingModeler.currentSLSsource,
+                id: AIMappingModeler.currentSLSsource,
+                text: AIMappingModeler.currentSLSsource,
+                parent: resourceType == "Class" ? "Classes" : "Properties",
                 data: {
-                    id: CreateAxiomResource_bot.params.newObject.id,
-                    text: CreateAxiomResource_bot.params.newObject.label,
-                    resourceType: "Class",
-                },
-            });
-            if (!$("#suggestionsSelectJstreeDiv").jstree().get_node(AIMappingModeler.currentSLSsource)) {
-                jstreeData.push({
                     id: AIMappingModeler.currentSLSsource,
                     text: AIMappingModeler.currentSLSsource,
-                    parent: resourceType == "Class" ? "Classes" : "Properties",
-                    data: {
-                        id: AIMappingModeler.currentSLSsource,
-                        text: AIMappingModeler.currentSLSsource,
-                    },
-                });
-            }
-            JstreeWidget.updateJstree("suggestionsSelectJstreeDiv", jstreeData, { openAll: true });
-        });
+                },
+            });
+        }
+        JstreeWidget.updateJstree("suggestionsSelectJstreeDiv", jstreeData, { openAll: true });
     };
 
     /**
@@ -1676,11 +1700,20 @@ var AIMappingModeler = (function () {
             return;
         }
 
+        self.getTableSampleRows(dataSourceId, table, null, function (error, rows) {
+            if (error) {
+                return MainController.errorAlert(error);
+            }
+            showTable(rows);
+        });
+    };
+
+    self.getTableSampleRows = function (dataSourceId, table, rowLimit, callback) {
         if (AIDataSourceManager.currentConfig.csvSources[dataSourceId]) {
             var payload = {
                 fileName: table,
                 dir: "CSV/" + AIDataSourceManager.currentSlsvSource,
-                options: JSON.stringify({ lines: 100 }),
+                options: JSON.stringify({ lines: rowLimit || 100 }),
             };
             $.ajax({
                 type: "GET",
@@ -1688,10 +1721,10 @@ var AIMappingModeler = (function () {
                 data: payload,
                 dataType: "json",
                 success: function (result, _textStatus, _jqXHR) {
-                    showTable(result.data[0]);
+                    callback(null, result.data[0]);
                 },
                 error(err) {
-                    return MainController.errorAlert(err);
+                    callback(err);
                 },
             });
         } else {
@@ -1699,6 +1732,9 @@ var AIMappingModeler = (function () {
                 dbName: dataSourceId,
                 tableName: table,
             });
+            if (rowLimit) {
+                params.set("limit", rowLimit);
+            }
 
             $.ajax({
                 type: "GET",
@@ -1706,10 +1742,10 @@ var AIMappingModeler = (function () {
                 dataType: "json",
 
                 success: function (data, _textStatus, _jqXHR) {
-                    showTable(data.rows);
+                    callback(null, data.rows);
                 },
                 error(err) {
-                    return MainController.errorAlert(err);
+                    callback(err);
                 },
             });
         }

@@ -72,6 +72,22 @@ function getImportedOntologies(upperOntologies, userSources) {
     return importedOntologies;
 }
 
+// the properties getAllowedPropertiesBetweenNodes allows from one class to another, and among them, sorted, those whose domain or range fit
+async function getPairProperties(checkSource, fromClass, toClass, userContext) {
+    const allowed = await callVocablesFunction("OntologyModels", "getAllowedPropertiesBetweenNodes", [checkSource, [fromClass], [toClass], { keepSuperClasses: true }], userContext);
+    const allowedProperties = new Set();
+    const fittingProperties = [];
+    allowedPropertyBuckets.forEach(function (bucket) {
+        const bucketProperties = Object.keys(allowed.constraints[bucket] || {});
+        bucketProperties.forEach((propertyIri) => allowedProperties.add(propertyIri));
+        if (fittingPropertyBuckets.includes(bucket)) {
+            fittingProperties.push(...bucketProperties);
+        }
+    });
+    const pairProperties = { allowedProperties: allowedProperties, fittingProperties: fittingProperties.sort() };
+    return pairProperties;
+}
+
 // the status of each link { from, property, to } between two classes, read with getAllowedPropertiesBetweenNodes in checkSource
 // and its imports, whose models are given: allowed, notAllowed when the property has a named domain or range that does not fit,
 // unchecked when it has none, when the property or the target class is anonymous, or when an ontology is too big for
@@ -96,18 +112,9 @@ async function getLinkStatuses(checkSource, checkedOntologies, ontologyModels, l
             if (!link.property || !link.from || !link.to || allowedPropertiesByPair[pairKey]) {
                 continue;
             }
-            const allowed = await callVocablesFunction("OntologyModels", "getAllowedPropertiesBetweenNodes", [checkSource, [link.from], [link.to], { keepSuperClasses: true }], userContext);
-            const allowedProperties = new Set();
-            const fittingProperties = [];
-            allowedPropertyBuckets.forEach(function (bucket) {
-                const bucketProperties = Object.keys(allowed.constraints[bucket] || {});
-                bucketProperties.forEach((propertyIri) => allowedProperties.add(propertyIri));
-                if (fittingPropertyBuckets.includes(bucket)) {
-                    fittingProperties.push(...bucketProperties);
-                }
-            });
-            allowedPropertiesByPair[pairKey] = allowedProperties;
-            fittingPropertiesByPair[pairKey] = fittingProperties.sort();
+            const pairProperties = await getPairProperties(checkSource, link.from, link.to, userContext);
+            allowedPropertiesByPair[pairKey] = pairProperties.allowedProperties;
+            fittingPropertiesByPair[pairKey] = pairProperties.fittingProperties;
         }
     }
     return links.map(function (link) {
@@ -197,5 +204,6 @@ export {
     getNotAllowedRestrictionText,
     getImportedOntologies,
     getLinkStatuses,
+    getPairProperties,
     getModelLabel,
 };

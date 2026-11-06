@@ -130,7 +130,8 @@ function createClaudeCodeAdapter(claudeCodeConfig) {
         }
 
         // outside the repo, so that its CLAUDE.md stays out of the answer
-        const cliProcess = spawn("claude", cliArguments, { cwd: os.tmpdir(), env: cliEnvironment, stdio: ["pipe", "pipe", "pipe"], signal: abortSignal });
+        // an npm install on Windows leaves only claude.cmd on the PATH, which spawn cannot run: cliPath names the claude.exe
+        const cliProcess = spawn(claudeCodeConfig.cliPath ?? "claude", cliArguments, { cwd: os.tmpdir(), env: cliEnvironment, stdio: ["pipe", "pipe", "pipe"], signal: abortSignal });
         let pendingOutput = "";
         let unreadOutput = "";
         let standardError = "";

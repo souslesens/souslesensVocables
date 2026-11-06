@@ -299,14 +299,13 @@ var KGbuilder_main = {
                                     return callbackSeries();
                                 }
 
-                                var sql = 'select count(*) as count from "' + table + '";';
                                 databaseModel
                                     .getUserConnection(user, tableProcessingParams.tableInfos.dbID)
                                     .then((connection) => {
-                                        return databaseModel.query(connection, sql);
+                                        return connection(table).withSchema(dbConnector.getTableSchema(connection.client.config.client)).count("* as count");
                                     })
                                     .then((result) => {
-                                        tableProcessingParams.tableInfos.tableTotalRecords = parseInt(result.rows[0].count);
+                                        tableProcessingParams.tableInfos.tableTotalRecords = parseInt(result[0].count);
                                         callbackSeries();
                                     })
                                     .catch((err) => {

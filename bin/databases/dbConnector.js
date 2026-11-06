@@ -45,9 +45,16 @@ async function getKGModelAsync(connection, dbName, driver) {
     });
 }
 
+// the tables of a postgres database are read in public whatever the search_path of its connection
+function getTableSchema(clientDriver) {
+    const tableSchema = clientDriver === "pg" ? "public" : undefined;
+    return tableSchema;
+}
+
 async function getSampleData(connection, tableName, limit, driver) {
-    const tableRef = driver === "pg" ? "public." + tableName : tableName;
+    const tableSchema = getTableSchema(driver);
+    const tableRef = tableSchema ? tableSchema + "." + tableName : tableName;
     return connection(tableRef).select("*").limit(limit);
 }
 
-export { getConnection, getData, getKGModel, getKGModelAsync, getSampleData };
+export { getConnection, getData, getKGModel, getKGModelAsync, getSampleData, getTableSchema };

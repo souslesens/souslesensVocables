@@ -1,6 +1,7 @@
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import AIMappingColumnsGraph from "./aiMappingColumnsGraph.js";
 import AIDataSourceManager from "./aiDataSourcesManager.js";
+import AIMappingModeler from "./aiMappingModeler.js";
 
 /**
  * Schema of the selected database, drawn in place of the mapping graph and never saved with it.
@@ -11,15 +12,14 @@ var AIDatabaseSchemaGraph = (function () {
 
     self.graphDiv = "mappingModeler_schemaGraphDiv";
     self.visjsGraph = null;
-    // mapped in blue, as the mapped tables of the data sources tree; a hovered or selected table turns yellow
-    self.selectedTableColor = { background: "#fff6cc", border: "#e0a800" };
-    self.tableColor = { background: "#f4f4f4", border: "#9a9a9a", highlight: self.selectedTableColor, hover: self.selectedTableColor };
-    self.mappedTableColor = { background: "#e6ecff", border: "blue", highlight: self.selectedTableColor, hover: self.selectedTableColor };
-    self.tableNameColor = "#222";
+    self.tableColor = { background: "#eef3f8", border: "#8aa4c0" };
+    self.mappedTableColor = { background: "#e3f4e3", border: "#2e8b2e" };
+    self.tableNameColor = "#1f3b5c";
     self.columnNameColor = "#222";
     self.columnTypeColor = "#8a8a8a";
     self.columnKeyColor = "#b8860b";
-    self.mappedColumnColor = "blue";
+    self.mappedColumnColor = "#1b7a1b";
+    self.currentTableNode = null;
     self.foreignKeyColor = "#555";
     self.aiForeignKeyColor = "#b35c00";
     // a monospace font aligns the key, name and type of the columns in three columns
@@ -140,6 +140,7 @@ var AIDatabaseSchemaGraph = (function () {
             // the most linked tables stand out: thicker border, bigger name, more room around them
             var linkCount = linkCountByTable[table] || 0;
             var centrality = linkCount / maxLinkCount;
+            var tableColor = mappedColumns.length > 0 ? self.mappedTableColor : self.tableColor;
             nodes.push({
                 id: table,
                 label: "<code>" + table + "</code>\n" + columnsText,
@@ -148,7 +149,8 @@ var AIDatabaseSchemaGraph = (function () {
                 borderWidth: 1 + Math.round(4 * centrality),
                 shadow: centrality > 0.5,
                 mass: 1 + linkCount,
-                color: mappedColumns.length > 0 ? self.mappedTableColor : self.tableColor,
+                // vis.js colors a dragged or selected node otherwise, which reads as a change of mapping state
+                color: { background: tableColor.background, border: tableColor.border, highlight: tableColor, hover: tableColor },
                 font: {
                     multi: "html",
                     align: "left",
@@ -157,7 +159,7 @@ var AIDatabaseSchemaGraph = (function () {
                     color: self.columnNameColor,
                     mono: {
                         face: self.fontFace,
-                        color: mappedColumns.length > 0 ? self.mappedColumnColor : self.tableNameColor,
+                        color: self.tableNameColor,
                         size: self.tableNameFontSize + Math.round(6 * centrality),
                         mod: "bold",
                     },
@@ -181,6 +183,7 @@ var AIDatabaseSchemaGraph = (function () {
                 edges: { smooth: false, font: { size: 11, align: "middle" } },
             },
             onclickFn: self.onSchemaGraphClick,
+            onRightClickFn: self.showSchemaGraphPopupMenu,
         };
         var schemaGraph = new VisjsGraphClass(self.graphDiv, { nodes: nodes, edges: edges }, graphOptions);
         self.visjsGraph = schemaGraph;
@@ -202,6 +205,25 @@ var AIDatabaseSchemaGraph = (function () {
         var dataSourcesTree = $("#" + AIDataSourceManager.dataSourcejstreeDivId).jstree(true);
         dataSourcesTree.deselect_all(true);
         dataSourcesTree.select_node(node.id);
+    };
+
+    self.showSchemaGraphPopupMenu = function (node, point, event) {
+        // an edge or the blank canvas
+        if (!node || !node.data) {
+            return;
+        }
+        self.currentTableNode = node;
+        var html = '    <span class="popupMenuItem" onclick="AIDatabaseSchemaGraph.showSampleData()">show sample data</span>';
+        $("#popupMenuWidgetDiv").html(html);
+        point.x = event.x;
+        point.y = event.y;
+        PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
+    };
+
+    // shaped as a table node of the data sources tree, whose parent is the data source
+    self.showSampleData = function () {
+        var tableTreeNode = { parent: AIDataSourceManager.currentConfig.currentDataSource.id, data: self.currentTableNode.data };
+        AIMappingModeler.showSampleData(tableTreeNode);
     };
 
     return self;

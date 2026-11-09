@@ -409,9 +409,9 @@ var AIColumnRestrictionSuggestion = (function () {
     };
 
     self.onGraphClick = function (clickParams) {
-        // a real node takes the click, or a class suggestion drawn at the same place answers it; a real edge under a box does not
+        // a real node takes the click; a real edge under a box does not
         var canvasPoint = clickParams.pointer.canvas;
-        if (clickParams.nodes.length > 0 || AIColumnClassSuggestion.findSuggestionAt(canvasPoint)) {
+        if (clickParams.nodes.length > 0) {
             return;
         }
         // the implicit object is drawn with these restrictions and answers its own boxes
@@ -424,7 +424,7 @@ var AIColumnRestrictionSuggestion = (function () {
         }
     };
 
-    // the class suggestions own the pointer, and show the hand over these boxes too
+    // AIColumnClassSuggestion owns the pointer, and shows the hand over these boxes
     self.bindToGraph = function () {
         AIColumnClassSuggestion.bindToGraph();
         var network = AIMappingColumnsGraph.visjsGraph.network;

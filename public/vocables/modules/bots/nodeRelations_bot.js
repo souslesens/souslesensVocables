@@ -202,7 +202,7 @@ var NodeRelations_bot = (function () {
             if (self.params.currentProperty && self.params.currentProperty != "AnyProperty") {
                 options.filter = Sparql_common.setFilter("prop", self.params.currentProperty);
             }
-            Lineage_whiteboard.drawRestrictions(self.params.source, self.params.currentClass, null, null, {}, function (err, result) {});
+            Lineage_whiteboard.drawRestrictions(self.params.source, self.params.currentClass, null, null, options, function (err, result) {});
             self.myBotEngine.nextStep();
         },
         drawInverseRestrictions: function () {

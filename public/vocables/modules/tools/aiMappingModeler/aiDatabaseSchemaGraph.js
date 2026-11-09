@@ -2,6 +2,7 @@ import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import AIMappingColumnsGraph from "./aiMappingColumnsGraph.js";
 import AIDataSourceManager from "./aiDataSourcesManager.js";
 import AIMappingModeler from "./aiMappingModeler.js";
+import LegendOverlayWidget from "../../uiWidgets/legendOverlayWidget.js";
 
 /**
  * Schema of the selected database, drawn in place of the mapping graph and never saved with it.
@@ -21,10 +22,8 @@ var AIDatabaseSchemaGraph = (function () {
     self.mappedColumnColor = "#1b7a1b";
     self.currentTableNode = null;
     self.foreignKeyColor = "#555";
-    // a link found by the AI is faded, a declared one is solid
-    self.aiForeignKeyColor = "#b35c00";
-    self.aiForeignKeyOpacity = 0.3;
-    self.aiForeignKeyLabelColor = "rgba(179, 92, 0, 0.45)";
+    self.aiForeignKeyColor = "#8e44ad";
+    self.aiForeignKeyLabelBackground = "#f3e8fa";
     // a monospace font aligns the key, name and type of the columns in three columns
     self.fontFace = "monospace";
     self.columnFontSize = 13;
@@ -91,12 +90,13 @@ var AIDatabaseSchemaGraph = (function () {
                 id: "AI|" + aiForeignKey.table + "|" + aiForeignKey.column,
                 from: aiForeignKey.table,
                 to: aiForeignKey.referencedTable,
-                label: "AI " + aiForeignKey.column + " -> " + aiForeignKey.referencedColumn,
-                title: aiForeignKey.reason,
+                label: "AI proposal: " + aiForeignKey.column + " -> " + aiForeignKey.referencedColumn,
+                title: "Proposed by the AI: " + aiForeignKey.reason,
                 arrows: "to",
                 dashes: true,
-                color: { color: self.aiForeignKeyColor, opacity: self.aiForeignKeyOpacity },
-                font: { color: self.aiForeignKeyLabelColor },
+                width: 2,
+                color: self.aiForeignKeyColor,
+                font: { color: self.aiForeignKeyColor, background: self.aiForeignKeyLabelBackground, size: 12 },
             });
         });
 
@@ -202,6 +202,21 @@ var AIDatabaseSchemaGraph = (function () {
             // physics only places the tables, a dragged table then stays where it is dropped
             schemaGraph.network.setOptions({ physics: false });
             self.separateOverlappingTables(schemaGraph);
+            // after the canvas of vis.js, which would cover a legend added before it
+            LegendOverlayWidget.destroy(self.graphDiv);
+            LegendOverlayWidget.render(self.graphDiv, {
+                title: "🔍 Legend",
+                items: {
+                    nodes: [
+                        { type: "table", label: "Table", color: self.tableColor.background, swatch: "box" },
+                        { type: "mappedTable", label: "Mapped table, its mapped columns in green", color: self.mappedTableColor.background, swatch: "box" },
+                    ],
+                    edges: [
+                        { cat: "foreignKey", label: "Foreign key declared in the database", color: self.foreignKeyColor, swatch: "line" },
+                        { cat: "aiForeignKey", label: "Foreign key proposed by the AI", color: self.aiForeignKeyColor, swatch: "dashed" },
+                    ],
+                },
+            });
             if (centralTable) {
                 schemaGraph.network.focus(centralTable, { scale: self.readableScale });
             }

@@ -31,6 +31,9 @@ var AIDatabaseSchemaGraph = (function () {
     self.tableNameFontSize = 15;
     // the text of a table is readable at this scale without zooming
     self.readableScale = 0.85;
+    // free space kept between two tables, in canvas pixels
+    self.tableGap = 40;
+    self.maxSeparationPasses = 200;
     // the html labels of vis.js collapse a run of plain spaces
     self.paddingSpace = "\u00a0";
 
@@ -192,12 +195,77 @@ var AIDatabaseSchemaGraph = (function () {
         var schemaGraph = new VisjsGraphClass(self.graphDiv, { nodes: nodes, edges: edges }, graphOptions);
         self.visjsGraph = schemaGraph;
         schemaGraph.draw(function () {
+            // another database, or the AI keys, redrew the schema meanwhile and destroyed this network
+            if (self.visjsGraph != schemaGraph) {
+                return;
+            }
             // physics only places the tables, a dragged table then stays where it is dropped
             schemaGraph.network.setOptions({ physics: false });
+            self.separateOverlappingTables(schemaGraph);
             if (centralTable) {
                 schemaGraph.network.focus(centralTable, { scale: self.readableScale });
             }
         });
+    };
+
+    // barnesHut sees a box as a circle: tall tables still overlap once the physics is stopped
+    self.separateOverlappingTables = function (schemaGraph) {
+        var network = schemaGraph.network;
+        var tableIds = schemaGraph.data.nodes.getIds();
+        var positions = network.getPositions(tableIds);
+        var halfSizes = {};
+        tableIds.forEach(function (tableId) {
+            var boundingBox = network.getBoundingBox(tableId);
+            halfSizes[tableId] = {
+                width: (boundingBox.right - boundingBox.left + self.tableGap) / 2,
+                height: (boundingBox.bottom - boundingBox.top + self.tableGap) / 2,
+            };
+        });
+
+        for (var passIndex = 0; passIndex < self.maxSeparationPasses; passIndex++) {
+            // every shift of a pass is measured on the positions it started from, then applied
+            var shifts = {};
+            tableIds.forEach(function (tableId) {
+                shifts[tableId] = { x: 0, y: 0 };
+            });
+            var hasOverlap = false;
+            for (var firstTableIndex = 0; firstTableIndex < tableIds.length; firstTableIndex++) {
+                for (var secondTableIndex = firstTableIndex + 1; secondTableIndex < tableIds.length; secondTableIndex++) {
+                    var firstTable = tableIds[firstTableIndex];
+                    var secondTable = tableIds[secondTableIndex];
+                    var distanceX = positions[secondTable].x - positions[firstTable].x;
+                    var distanceY = positions[secondTable].y - positions[firstTable].y;
+                    var overlapX = halfSizes[firstTable].width + halfSizes[secondTable].width - Math.abs(distanceX);
+                    var overlapY = halfSizes[firstTable].height + halfSizes[secondTable].height - Math.abs(distanceY);
+                    if (overlapX <= 0 || overlapY <= 0) {
+                        continue;
+                    }
+                    hasOverlap = true;
+                    // the two tables part along the axis where they overlap least, each by half of it
+                    if (overlapX < overlapY) {
+                        var shiftX = ((distanceX < 0 ? -1 : 1) * overlapX) / 2;
+                        shifts[firstTable].x -= shiftX;
+                        shifts[secondTable].x += shiftX;
+                    } else {
+                        var shiftY = ((distanceY < 0 ? -1 : 1) * overlapY) / 2;
+                        shifts[firstTable].y -= shiftY;
+                        shifts[secondTable].y += shiftY;
+                    }
+                }
+            }
+            if (!hasOverlap) {
+                break;
+            }
+            tableIds.forEach(function (tableId) {
+                positions[tableId].x += shifts[tableId].x;
+                positions[tableId].y += shifts[tableId].y;
+            });
+        }
+
+        var movedTables = tableIds.map(function (tableId) {
+            return { id: tableId, x: positions[tableId].x, y: positions[tableId].y };
+        });
+        schemaGraph.data.nodes.update(movedTables);
     };
 
     // the tree selection opens the mapping of the table and brings the mapping graph back

@@ -21,7 +21,10 @@ var AIDatabaseSchemaGraph = (function () {
     self.mappedColumnColor = "#1b7a1b";
     self.currentTableNode = null;
     self.foreignKeyColor = "#555";
+    // a link found by the AI is faded, a declared one is solid
     self.aiForeignKeyColor = "#b35c00";
+    self.aiForeignKeyOpacity = 0.3;
+    self.aiForeignKeyLabelColor = "rgba(179, 92, 0, 0.45)";
     // a monospace font aligns the key, name and type of the columns in three columns
     self.fontFace = "monospace";
     self.columnFontSize = 13;
@@ -89,7 +92,8 @@ var AIDatabaseSchemaGraph = (function () {
                 title: aiForeignKey.reason,
                 arrows: "to",
                 dashes: true,
-                color: self.aiForeignKeyColor,
+                color: { color: self.aiForeignKeyColor, opacity: self.aiForeignKeyOpacity },
+                font: { color: self.aiForeignKeyLabelColor },
             });
         });
 

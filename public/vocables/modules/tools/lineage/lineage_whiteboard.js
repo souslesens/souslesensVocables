@@ -2862,8 +2862,8 @@ var Lineage_whiteboard = (function () {
                         }
                         if (result.length > self.showLimit) {
                             var resultNumber = result.length;
-                            data = result.slice(0, 3000);
-                            alert("Too many results (" + resultNumber + "), only 1000 showed");
+                            data = result.slice(0, self.showLimit);
+                            alert("Too many results (" + resultNumber + "), only " + self.showLimit + " showed");
                             return callbackSeries();
                         }
                         if (!Lineage_whiteboard.isResultAcceptable(result)) {

@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.18.0](https://github.com/souslesens/souslesensVocables/compare/3.17.0...3.18.0) (2026-11-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* **api:** `GET /api/v1/kg/model` is replaced by `GET /api/v1/databases/model`.
+
+### Features
+
+* **config-editor:** move plugin configuration into the repository modal ([083befe](https://github.com/souslesens/souslesensVocables/commit/083befe06296f18d3b4851f7e5881f52cebe70f0))
+* **graph:** a shift click on a selected node deselects it ([c0f4c35](https://github.com/souslesens/souslesensVocables/commit/c0f4c353fff0a7491e8d6a55c98dcb247eb6914e))
+* **lineage:** the selection is cleared at the end of the actions that use it ([11c29fe](https://github.com/souslesens/souslesensVocables/commit/11c29fecfdb9d6a5e5d4b9c9ad1b26b20ca68a4f))
+* **lineage:** the whiteboard buttons and the lateral panel work in tools other than Lineage ([5eff8fc](https://github.com/souslesens/souslesensVocables/commit/5eff8fccd7edc081f44dc6b7085991464ab08e84))
+* **plugins:** a plugin declares its tool params in its code, over pluginsConfig.json ([d38e6e3](https://github.com/souslesens/souslesensVocables/commit/d38e6e3821a9cdee25a9858f2275cda65911592a))
+* **plugins:** derive plugin names from a repository ([dc36b1d](https://github.com/souslesens/souslesensVocables/commit/dc36b1df3a965d9d78acba6e3e5d36a43005623d))
+* **source-selector:** a tool can offer a new source, created by the OntoCreator bot and opened in that tool ([452ba77](https://github.com/souslesens/souslesensVocables/commit/452ba77f02845a849fbe3f116e935a08494633f5))
+* **sql-extractor:** each filter shows its SQL condition on the real column next to its property ([9ecf708](https://github.com/souslesens/souslesensVocables/commit/9ecf70885dbd722c85dfbd6c0839b13ead9ea6d7))
+* **sql-extractor:** the classes of a mapping not written to the MappingModeler file can be drawn ([3c48d28](https://github.com/souslesens/souslesensVocables/commit/3c48d28897a1a4c3ded7d83a3f587c19fe0c174b))
+
+
+### Bug Fixes
+
+* **admin:** restrictAdmin lets a source creator in on the source routes only, read from the path ([305d8b6](https://github.com/souslesens/souslesensVocables/commit/305d8b6adab1d4e789115a8d5e155070f448f35a))
+* **ask:** repair the ask routes ([347c8e3](https://github.com/souslesens/souslesensVocables/commit/347c8e3933627e3e4d02a2d359e19ee6d6df4847))
+* **axioms:** anonymous inverse properties and restriction targets are resolved, the extraction runs server side ([ee27edf](https://github.com/souslesens/souslesensVocables/commit/ee27edfcc9c5830c935636331d6a94805dd9bd8b))
+* **databases:** the tables of a Postgres database are read in the public schema whatever its search_path ([a77c2a8](https://github.com/souslesens/souslesensVocables/commit/a77c2a8bcf75a594a5abec3a5e55f086715d7c39))
+* **lineage:** datatype properties are drawn for the selected class nodes, not the top concepts ([b824976](https://github.com/souslesens/souslesensVocables/commit/b824976735f632bd6c5835ade0df6a844cb0ee4c))
+* **lineage:** the Draw Axioms menu entry is spelled right ([17de2de](https://github.com/souslesens/souslesensVocables/commit/17de2de845ba28c101a936bdfbfeab34f4477a61))
+* **lineage:** the vertical and horizontal views walk subClassOf down to the children ([4f57caf](https://github.com/souslesens/souslesensVocables/commit/4f57caffa4ee8951e29ee35e3a6969d198c2db1d))
+* **mapping-modeler:** a deleted class is removed from its own source and from the Classes tree ([009da65](https://github.com/souslesens/souslesensVocables/commit/009da65b6acc16b3fea900cd818d8b72c1fe9a17))
+* **mapping-modeler:** reloading a mapping keeps the current data source ([336d5df](https://github.com/souslesens/souslesensVocables/commit/336d5df90c298d8ddb9190e24af9b642b0469b67))
+* **mapping-modeler:** the node infos of a superclass drawn from a query open on the current source ([b345a5d](https://github.com/souslesens/souslesensVocables/commit/b345a5df1152feca7cadf3da52616b7d50b069da))
+* **mappingModeler:** Node Infos opens on a class of the graph ([6125b1f](https://github.com/souslesens/souslesensVocables/commit/6125b1fd702028ffd981447054665428f20fb142))
+* **ui:** jsTree text, arrows and filter icons stay readable in a dark theme ([86f7d72](https://github.com/souslesens/souslesensVocables/commit/86f7d7260f85bed27022e9bda8472b5a8971344f))
+
+
+* **api:** move the KG database model route to the databases API ([ca4a134](https://github.com/souslesens/souslesensVocables/commit/ca4a1341b23e523d604c9c90d5f710b50a3ef077))
+
 ## [3.17.0](https://github.com/souslesens/souslesensVocables/compare/3.16.0...3.17.0) (2026-10-22)
 
 

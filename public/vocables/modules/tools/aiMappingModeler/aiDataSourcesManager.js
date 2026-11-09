@@ -2,6 +2,7 @@ import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import AIMappingModeler from "./aiMappingModeler.js";
 import AIUIcontroller from "./aiUiController.js";
 import AIMappingColumnsGraph from "./aiMappingColumnsGraph.js";
+import AIDatabaseSchemaGraph from "./aiDatabaseSchemaGraph.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 
 /**
@@ -465,16 +466,22 @@ var AIDataSourceManager = (function () {
                     const params = new URLSearchParams({
                         name: dataSource,
                         type: sqlType,
+                        withTypes: "true",
                     });
                     $.ajax({
                         type: "GET",
                         url: Config.apiUrl + "/kg/model?" + params.toString(),
                         dataType: "json",
-                        success: function (data, _textStatus, _jqXHR) {
-                            self.currentDataSourceModel = data;
+                        success: function (columnTypesByTable, _textStatus, _jqXHR) {
+                            var tables = {};
+                            for (var table in columnTypesByTable) {
+                                tables[table] = Object.keys(columnTypesByTable[table]);
+                            }
+                            self.currentDataSourceModel = tables;
                             self.currentSource = self.dataSource;
                             self.currentdabase = { type: sqlType, dbName: self.dataSource };
-                            self.currentConfig.currentDataSource.tables = data;
+                            self.currentConfig.currentDataSource.tables = tables;
+                            self.currentConfig.currentDataSource.columnTypes = columnTypesByTable;
                             callbackSeries();
                         },
                         error: function (err) {
@@ -654,6 +661,7 @@ var AIDataSourceManager = (function () {
         if (obj.event && obj.event.button == 2) {
             return;
         }
+        AIDatabaseSchemaGraph.showMappingGraph();
 
         // above every data source: the current table stays the one columns are added to
         if (obj.node.data.type == self.allDataSourcesNodeId) {
@@ -671,7 +679,12 @@ var AIDataSourceManager = (function () {
             AIMappingColumnsGraph.showDataSourcesTables([obj.node.id]);
             AIDataSourceManager.initNewDataSource(obj.node.id, "databaseSource", obj.node.data.sqlType, obj.node.data.table);
 
-            AIDataSourceManager.loadDataBaseSource(AIDataSourceManager.currentSlsvSource, obj.node.id, obj.node.data.sqlType, callback);
+            AIDataSourceManager.loadDataBaseSource(AIDataSourceManager.currentSlsvSource, obj.node.id, obj.node.data.sqlType, function () {
+                AIDatabaseSchemaGraph.drawDatabaseSchema();
+                if (callback) {
+                    callback();
+                }
+            });
         } else if (obj.node.data.type == "csvSource") {
             AIDataSourceManager.initNewDataSource(obj.node.id, "csvSource", obj.node.data.sqlType, obj.node.id);
             var fileName = AIDataSourceManager.currentSlsvSource;

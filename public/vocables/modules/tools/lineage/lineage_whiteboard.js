@@ -3201,6 +3201,10 @@ var Lineage_whiteboard = (function () {
                         return callback(null, result);
                     }
                 }
+                if (result.length > self.showLimit) {
+                    alert("Too many restrictions (" + result.length + "), only the first " + self.showLimit + " are drawn");
+                    result = result.slice(0, self.showLimit);
+                }
                 if (!Lineage_whiteboard.isResultAcceptable(result)) {
                     return callback("no data found");
                 }

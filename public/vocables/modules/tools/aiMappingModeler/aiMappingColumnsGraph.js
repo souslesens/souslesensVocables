@@ -10,6 +10,7 @@ import AIUIcontroller from "./aiUiController.js";
 import LegendOverlayWidget from "../../uiWidgets/legendOverlayWidget.js";
 import AIMapping_legendOverlay from "./aiMapping_legendOverlay.js";
 import AIImplicit_legendOverlay from "./aiImplicit_legendOverlay.js";
+import AIColumnClassSuggestion from "./aiColumnClassSuggestion.js";
 
 /**
  * AIMappingColumnsGraph module.
@@ -567,6 +568,8 @@ var AIMappingColumnsGraph = (function () {
             self.visjsGraph.network.openCluster(node.id);
         }
         self.currentGraphNode = node;
+        // the Classes tree maps to the current node
+        AIColumnClassSuggestion.showInTree();
 
         //add relation between columns
         if (options.ctrlKey) {

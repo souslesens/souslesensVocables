@@ -9,9 +9,9 @@ import AIImplicitObjectSuggestion from "./aiImplicitObjectSuggestion.js";
 /**
  * Suggests what a selected column maps to: a new class of the application ontology, a class that
  * already denotes its objects, a value that maps to no class, or a technical key, which maps to no class either.
- * A suggestion is drawn over the graph and is never one of its nodes: everything that reads the graph,
- * the saved mapping, the technical mappings and the triples first of all, stays unaware of it,
- * and the layout does not move when it comes and goes. Nothing is written before the user accepts it.
+ * The readings are listed at the top of the Classes tree and are never nodes of the graph: everything that reads the graph,
+ * the saved mapping, the technical mappings and the triples first of all, stays unaware of them.
+ * Nothing is written before the user accepts one.
  * @module AIColumnClassSuggestion
  */
 var AIColumnClassSuggestion = (function () {
@@ -27,16 +27,16 @@ var AIColumnClassSuggestion = (function () {
     self.boxHeight = 26;
     self.boxPaddingX = 8;
     self.boxRadius = 6;
-    // between two candidates of one column
-    self.candidateGap = 24;
     // the server brings the probabilities of the readings of a column back to this total
     self.fullProbability = 100;
-    // the readings that map the column to no class: the label of their box, and the text of the panel and of the confirmation
+    // the readings that map the column to no class: the label of their tree node, and the text of the panel and of the confirmation
     self.noClassKinds = {
         value: { label: "not a class", text: "a value, no class" },
         technicalKey: { label: "technical key, not a class", text: "a technical key, no class" },
     };
     self.valueColor = "#b0b0b0";
+    self.proposalTreeDivId = "suggestionsSelectJstreeDiv";
+    self.treeNodeId = "aiClassSuggestions";
     self.arrowSize = 8;
     self.linkWidth = 2;
     self.linkDash = [6, 6];
@@ -51,7 +51,7 @@ var AIColumnClassSuggestion = (function () {
     self.requestsByColumnId = {};
     self.suggestionsByColumnId = {};
     self.boundNetwork = null;
-    // { label, resourceId } or { label, newClassSuggestion } of the box right clicked last
+    // { label, resourceId } or { label, newClassSuggestion } of the box or the tree node right clicked last
     self.popupMenuResource = null;
     // the default class of an empty ontology says nothing about a column
     self.defaultClassId = "owl:Thing";
@@ -249,7 +249,7 @@ var AIColumnClassSuggestion = (function () {
             self.panelColumnId = null;
             $("#" + self.panelDivId).empty();
         }
-        self.redraw();
+        self.showInTree();
     };
 
     self.clearAll = function () {
@@ -299,7 +299,7 @@ var AIColumnClassSuggestion = (function () {
                 dataType: "json",
                 success: function (result) {
                     delete self.requestsByColumnId[columnNode.id];
-                    self.showSuggestion(columnNode, result.suggestions, result.llmMilliseconds);
+                    self.showSuggestion(columnNode, result.suggestions);
                 },
                 error: function (error) {
                     if (error.statusText == "abort") {
@@ -332,7 +332,7 @@ var AIColumnClassSuggestion = (function () {
     };
 
     // from the column upward: the class, then the superclass of a new class, which has no URI before it is written;
-    // a value is drawn as such, so that the other readings read as an alternative to it
+    // a value is listed as such, so that the other readings read as an alternative to it
     self.getDrawnClasses = function (suggestion) {
         var noClassKind = self.noClassKinds[suggestion.columnKind];
         if (noClassKind) {
@@ -382,36 +382,21 @@ var AIColumnClassSuggestion = (function () {
     };
 
     // suggestions: the readings of the column, most probable first, with the probability the model estimates
-    self.showSuggestion = function (columnNode, suggestions, llmMilliseconds) {
+    self.showSuggestion = function (columnNode, suggestions) {
         // deleted or mapped while the model answered
         if (!self.isColumnOpen(columnNode.id)) {
             self.clearColumn(columnNode.id);
             return;
         }
-        var seconds = (llmMilliseconds / 1000).toFixed(1);
-        var readingTexts = suggestions.map(function (suggestion) {
-            return self.getSuggestionText(suggestion);
-        });
-        var technicalKeySuggestion = suggestions.find(function (suggestion) {
-            return suggestion.columnKind == "technicalKey";
-        });
-        var explanationText = technicalKeySuggestion ? " " + technicalKeySuggestion.definition : "";
-        var message =
-            "AI suggestion for " + columnNode.data.label + " (" + seconds + " s): " + readingTexts.join("; ") + "." + explanationText + " Click one in the graph to accept it, hover a class for its definition.";
-        var isShownColumn = self.panelColumnId == columnNode.id;
-        if (isShownColumn) {
-            self.showMessage(message);
+        // the readings are chosen in the Classes tree
+        if (self.panelColumnId == columnNode.id) {
+            self.showMessage("");
         }
         var candidates = suggestions.map(function (suggestion) {
             return { suggestion: suggestion, drawnClasses: self.getDrawnClasses(suggestion) };
         });
-        var columnSuggestion = { columnNode: columnNode, candidates: candidates };
-        self.suggestionsByColumnId[columnNode.id] = columnSuggestion;
-        self.bindToGraph();
-        self.redraw();
-        if (isShownColumn) {
-            self.showInView(self.getBoxes(columnSuggestion));
-        }
+        self.suggestionsByColumnId[columnNode.id] = { columnNode: columnNode, candidates: candidates };
+        self.showInTree();
     };
 
     self.isColumnOpen = function (columnId) {
@@ -420,133 +405,103 @@ var AIColumnClassSuggestion = (function () {
         return isOpen;
     };
 
-    self.getDrawnSuggestions = function () {
-        var columnSuggestions = Object.values(self.suggestionsByColumnId);
-        var drawnSuggestions = columnSuggestions.filter(function (columnSuggestion) {
-            var columnId = columnSuggestion.columnNode.id;
-            return self.isColumnOpen(columnId) && !AIMappingColumnsGraph.visjsGraph.data.nodes.get(columnId).hidden;
-        });
-        return drawnSuggestions;
+    // a label of the model, never read as html, with its definition on hover
+    self.getTreeNodeText = function (label, color, definition) {
+        var nodeSpan = $("<span>")
+            .css("color", color)
+            .attr("title", definition || "")
+            .text(label);
+        var nodeText = nodeSpan[0].outerHTML;
+        return nodeText;
     };
 
-    // per candidate, side by side above the column, its class with its probability then its superclass;
-    // canvas coordinates recomputed from the column: a layout or a drag of the real nodes carries them along
+    // the readings of the column the Classes tree maps to, none when it has none: per reading its class with its probability,
+    // under it the superclasses of a new class, one per superclass the model hesitated between, each with its probability
+    self.getTreeNodes = function () {
+        var columnSuggestion = self.suggestionsByColumnId[AIMappingColumnsGraph.currentGraphNode.id];
+        if (!columnSuggestion || !self.isColumnOpen(columnSuggestion.columnNode.id)) {
+            return [];
+        }
+        var columnId = columnSuggestion.columnNode.id;
+        var classColor = AIMappingModeler.legendItems.Class.color;
+        var headerText = $("<span>")
+            .css({ "font-weight": "bold", color: classColor })
+            .text("AI proposal for " + columnSuggestion.columnNode.data.label);
+        var treeNodes = [{ id: self.treeNodeId, parent: "Classes", text: headerText[0].outerHTML, data: { resourceType: "aiClassSuggestion" } }];
+        columnSuggestion.candidates.forEach(function (candidate, candidateIndex) {
+            var suggestion = candidate.suggestion;
+            var drawnClass = candidate.drawnClasses[0];
+            var candidateNodeId = self.treeNodeId + "_" + candidateIndex;
+            var candidateColor = drawnClass.isNoClass ? self.valueColor : classColor;
+            treeNodes.push({
+                id: candidateNodeId,
+                parent: self.treeNodeId,
+                text: self.getTreeNodeText(drawnClass.label + self.getProbabilityText(suggestion), candidateColor, suggestion.definition),
+                data: { resourceType: "aiClassSuggestion", columnId: columnId, candidateIndex: candidateIndex, describedResource: drawnClass.isNoClass ? null : drawnClass },
+            });
+            var superclasses = [];
+            if (suggestion.parentOptions) {
+                superclasses = suggestion.parentOptions.map(function (parentOption) {
+                    var parentLabel = self.getExistingClassLabel(parentOption.parentId, parentOption.parentLabel);
+                    return { resource: { label: parentLabel, resourceId: parentOption.parentId }, text: parentLabel + self.getProbabilityText(parentOption), definition: parentOption.definition };
+                });
+            } else {
+                // a single superclass carries no probability of its own
+                var drawnParents = candidate.drawnClasses.slice(1);
+                superclasses = drawnParents.map(function (drawnParent) {
+                    return { resource: drawnParent, text: drawnParent.label, definition: suggestion.definition };
+                });
+            }
+            superclasses.forEach(function (superclass, parentIndex) {
+                treeNodes.push({
+                    id: candidateNodeId + "_" + parentIndex,
+                    parent: candidateNodeId,
+                    text: self.getTreeNodeText("subclass of " + superclass.text, classColor, superclass.definition),
+                    data: { resourceType: "aiClassSuggestion", columnId: columnId, candidateIndex: candidateIndex, parentIndex: parentIndex, describedResource: superclass.resource },
+                });
+            });
+        });
+        return treeNodes;
+    };
+
+    // the readings of the column the Classes tree maps to, above the classes of the sources
+    self.showInTree = function () {
+        var proposalTree = $("#" + self.proposalTreeDivId).jstree(true);
+        if (!proposalTree || !proposalTree.get_node("Classes")) {
+            return;
+        }
+        if (proposalTree.get_node(self.treeNodeId)) {
+            proposalTree.delete_node(self.treeNodeId);
+        }
+        self.getTreeNodes().forEach(function (treeNode) {
+            var position = treeNode.id == self.treeNodeId ? "first" : "last";
+            proposalTree.create_node(treeNode.parent, treeNode, position);
+        });
+        proposalTree.open_all(self.treeNodeId);
+    };
+
+    self.onTreeNodeSelect = function (treeNodeData) {
+        // a second click on the same node must answer too
+        $("#" + self.proposalTreeDivId)
+            .jstree(true)
+            .deselect_all(true);
+        var columnSuggestion = self.suggestionsByColumnId[treeNodeData.columnId];
+        // the title of the readings
+        if (!columnSuggestion) {
+            return;
+        }
+        // jstree keeps a copy of the node data: the objects of the suggestion are found again by their index
+        var candidate = columnSuggestion.candidates[treeNodeData.candidateIndex];
+        var parentOptions = candidate.suggestion.parentOptions || [];
+        // undefined on the node of the reading itself, and on the superclass of a new class without options
+        var clickedParent = parentOptions[treeNodeData.parentIndex];
+        self.onSuggestionClick(columnSuggestion, candidate, clickedParent);
+    };
+
     self.getBoxWidth = function (label) {
         self.measureContext.font = self.font;
         var boxWidth = self.measureContext.measureText(label).width + 2 * self.boxPaddingX;
         return boxWidth;
-    };
-
-    // the boxes of the superclasses of a new class, one per superclass the model hesitated between, each with its probability
-    self.getParentBoxes = function (candidate) {
-        var parentOptions = candidate.suggestion.parentOptions;
-        if (!parentOptions) {
-            var drawnParents = candidate.drawnClasses.slice(1);
-            return drawnParents.map(function (drawnParent) {
-                return { label: drawnParent.label, width: self.getBoxWidth(drawnParent.label), describedResource: drawnParent };
-            });
-        }
-        var parentBoxes = parentOptions.map(function (parentOption) {
-            var parentResource = { label: self.getExistingClassLabel(parentOption.parentId, parentOption.parentLabel), resourceId: parentOption.parentId };
-            var parentBoxLabel = parentResource.label + self.getProbabilityText(parentOption);
-            return { label: parentBoxLabel, width: self.getBoxWidth(parentBoxLabel), describedResource: parentResource, parentOption: parentOption };
-        });
-        return parentBoxes;
-    };
-
-    self.getRowWidth = function (boxWidths) {
-        var rowWidth = (boxWidths.length - 1) * self.candidateGap;
-        boxWidths.forEach(function (boxWidth) {
-            rowWidth += boxWidth;
-        });
-        return rowWidth;
-    };
-
-    // the left edges of boxes placed side by side and centered on centerX, in the order given
-    self.getRowLefts = function (boxWidths, centerX) {
-        var rowLefts = [];
-        var boxLeft = centerX - self.getRowWidth(boxWidths) / 2;
-        boxWidths.forEach(function (boxWidth) {
-            rowLefts.push(boxLeft);
-            boxLeft += boxWidth + self.candidateGap;
-        });
-        return rowLefts;
-    };
-
-    // the center of a row of boxes on the rows rowYs, moved right past every real node that would sit under it
-    self.getFreeCenterX = function (rowWidth, centerX, rowYs) {
-        var network = AIMappingColumnsGraph.visjsGraph.network;
-        var shownNodes = AIMappingColumnsGraph.visjsGraph.data.nodes.get({
-            filter: function (graphNode) {
-                return !graphNode.hidden;
-            },
-        });
-        var nodeBoxes = shownNodes.map(function (shownNode) {
-            return network.getBoundingBox(shownNode.id);
-        });
-        var rowNodeBoxes = nodeBoxes.filter(function (nodeBox) {
-            return rowYs.some(function (rowY) {
-                return nodeBox.top <= rowY + self.boxHeight / 2 && nodeBox.bottom >= rowY - self.boxHeight / 2;
-            });
-        });
-        var freeCenterX = centerX;
-        // each move may bring the row over the next node: as many tries as there are nodes on the rows
-        for (var nodeIndex = 0; nodeIndex < rowNodeBoxes.length; nodeIndex++) {
-            var rowLeft = freeCenterX - rowWidth / 2 - self.candidateGap;
-            var rowRight = freeCenterX + rowWidth / 2 + self.candidateGap;
-            var blockingBox = rowNodeBoxes.find(function (nodeBox) {
-                return nodeBox.left < rowRight && nodeBox.right > rowLeft;
-            });
-            if (!blockingBox) {
-                break;
-            }
-            freeCenterX = blockingBox.right + self.candidateGap + rowWidth / 2;
-        }
-        return freeCenterX;
-    };
-
-    // per candidate, side by side above the column: its class with its probability, then its superclasses side by side above it
-    self.getCandidateLayouts = function (columnSuggestion) {
-        var network = AIMappingColumnsGraph.visjsGraph.network;
-        var columnPosition = network.getPosition(columnSuggestion.columnNode.id);
-        var levelSeparation = AIMappingColumnsGraph.layoutHierarchical.levelSeparation;
-        var candidateLayouts = columnSuggestion.candidates.map(function (candidate) {
-            var drawnClass = candidate.drawnClasses[0];
-            var classBoxLabel = drawnClass.label + self.getProbabilityText(candidate.suggestion);
-            var classBox = { label: classBoxLabel, width: self.getBoxWidth(classBoxLabel), describedResource: drawnClass.isNoClass ? null : drawnClass };
-            var parentBoxes = self.getParentBoxes(candidate);
-            var parentWidths = parentBoxes.map(function (parentBox) {
-                return parentBox.width;
-            });
-            var candidateWidth = Math.max(classBox.width, self.getRowWidth(parentWidths));
-            return { candidate: candidate, columnPosition: columnPosition, classBox: classBox, parentBoxes: parentBoxes, parentWidths: parentWidths, width: candidateWidth };
-        });
-        var candidateWidths = candidateLayouts.map(function (candidateLayout) {
-            return candidateLayout.width;
-        });
-        var rowYs = [columnPosition.y - levelSeparation, columnPosition.y - 2 * levelSeparation];
-        var rowCenterX = self.getFreeCenterX(self.getRowWidth(candidateWidths), columnPosition.x, rowYs);
-        var candidateLefts = self.getRowLefts(candidateWidths, rowCenterX);
-        candidateLayouts.forEach(function (candidateLayout, candidateIndex) {
-            var candidateX = candidateLefts[candidateIndex] + candidateLayout.width / 2;
-            candidateLayout.classBox.x = candidateX;
-            candidateLayout.classBox.y = columnPosition.y - candidateLayout.candidate.drawnClasses[0].levelsAboveColumn * levelSeparation;
-            var parentLefts = self.getRowLefts(candidateLayout.parentWidths, candidateX);
-            candidateLayout.parentBoxes.forEach(function (parentBox, parentIndex) {
-                parentBox.x = parentLefts[parentIndex] + parentBox.width / 2;
-                parentBox.y = columnPosition.y - 2 * levelSeparation;
-            });
-            candidateLayout.boxes = [candidateLayout.classBox].concat(candidateLayout.parentBoxes);
-        });
-        return candidateLayouts;
-    };
-
-    self.getBoxes = function (columnSuggestion) {
-        var boxes = [];
-        self.getCandidateLayouts(columnSuggestion).forEach(function (candidateLayout) {
-            boxes = boxes.concat(candidateLayout.boxes);
-        });
-        return boxes;
     };
 
     self.drawLink = function (context, fromPoint, toPoint) {
@@ -585,46 +540,8 @@ var AIColumnClassSuggestion = (function () {
         context.fillText(box.label, box.x, box.y);
     };
 
-    self.draw = function (context) {
-        context.save();
-        self.getDrawnSuggestions().forEach(function (columnSuggestion) {
-            self.getCandidateLayouts(columnSuggestion).forEach(function (candidateLayout) {
-                // from the column to the class, from the class to each of its superclasses
-                var isNoClass = Boolean(candidateLayout.candidate.drawnClasses[0].isNoClass);
-                var boxColor = isNoClass ? self.valueColor : AIMappingModeler.legendItems.Class.color;
-                self.drawLink(context, candidateLayout.columnPosition, candidateLayout.classBox);
-                self.drawBox(context, candidateLayout.classBox, boxColor);
-                candidateLayout.parentBoxes.forEach(function (parentBox) {
-                    self.drawLink(context, candidateLayout.classBox, parentBox);
-                    self.drawBox(context, parentBox, boxColor);
-                });
-            });
-        });
-        context.restore();
-    };
-
-    // { columnSuggestion, candidate, box } under the point, null when none
-    self.findSuggestionAt = function (canvasPoint) {
-        var foundSuggestion = null;
-        self.getDrawnSuggestions().forEach(function (columnSuggestion) {
-            self.getCandidateLayouts(columnSuggestion).forEach(function (candidateLayout) {
-                var boxUnderPoint = candidateLayout.boxes.find(function (box) {
-                    return AIColumnRestrictionSuggestion.isPointInBox(canvasPoint, box);
-                });
-                if (boxUnderPoint) {
-                    foundSuggestion = { columnSuggestion: columnSuggestion, candidate: candidateLayout.candidate, box: boxUnderPoint };
-                }
-            });
-        });
-        return foundSuggestion;
-    };
-
-    // in the order the clicks follow: a class suggestion, the implicit object, a restriction
+    // in the order the clicks follow: the implicit object, a restriction
     self.findAnyBoxAt = function (canvasPoint) {
-        var classSuggestion = self.findSuggestionAt(canvasPoint);
-        if (classSuggestion) {
-            return classSuggestion.box;
-        }
         var implicitObjectBox = AIImplicitObjectSuggestion.findBoxAt(canvasPoint);
         if (implicitObjectBox) {
             return implicitObjectBox;
@@ -680,26 +597,10 @@ var AIColumnClassSuggestion = (function () {
         UI.openDialog("smallDialogDiv", { title: "Node infos : " + suggestion.label });
     };
 
-    self.onGraphClick = function (clickParams) {
-        // a real node takes the click; a real edge under a box does not, the box is drawn over it
-        if (clickParams.nodes.length > 0) {
-            return;
-        }
-        var clickedSuggestion = self.findSuggestionAt(clickParams.pointer.canvas);
-        if (clickedSuggestion) {
-            self.onSuggestionClick(clickedSuggestion);
-        }
-    };
-
     self.onGraphMouseMove = function (event) {
         var network = AIMappingColumnsGraph.visjsGraph.network;
         var canvasPoint = network.DOMtoCanvas({ x: event.offsetX, y: event.offsetY });
-        var hoveredSuggestion = self.findSuggestionAt(canvasPoint);
-        var hoveredRestriction = AIColumnRestrictionSuggestion.findSuggestionAt(canvasPoint);
-        var isOverImplicitObject = Boolean(AIImplicitObjectSuggestion.findBoxAt(canvasPoint));
-        event.target.style.cursor = hoveredSuggestion || hoveredRestriction || isOverImplicitObject ? "pointer" : "";
-        var hoveredOption = hoveredSuggestion ? hoveredSuggestion.box.parentOption || hoveredSuggestion.candidate.suggestion : null;
-        event.target.title = hoveredOption && hoveredOption.definition ? hoveredOption.definition : "";
+        event.target.style.cursor = self.findAnyBoxAt(canvasPoint) ? "pointer" : "";
     };
 
     // the tool draws a new network when its graph is cleared or a source opens
@@ -709,8 +610,6 @@ var AIColumnClassSuggestion = (function () {
             return;
         }
         self.boundNetwork = network;
-        network.on("afterDrawing", self.draw);
-        network.on("click", self.onGraphClick);
         network.on("oncontext", self.onGraphRightClick);
         $("#" + AIMappingColumnsGraph.graphDiv + " canvas")
             .off("mousemove.columnClassSuggestion")
@@ -791,7 +690,7 @@ var AIColumnClassSuggestion = (function () {
             if (error) {
                 // nothing else can ask again for this column
                 self.suggestionsByColumnId[columnNode.id] = columnSuggestion;
-                self.redraw();
+                self.showInTree();
                 return MainController.errorAlert(error);
             }
             self.mapColumnToClass(columnNode, createdClassId);
@@ -823,13 +722,11 @@ var AIColumnClassSuggestion = (function () {
     };
 
     // a refused candidate, or a refused superclass of a new class, goes alone: the others stay
-    self.onSuggestionClick = function (clickedSuggestion) {
-        var columnSuggestion = clickedSuggestion.columnSuggestion;
+    self.onSuggestionClick = function (columnSuggestion, clickedCandidate, clickedParent) {
         var columnNode = columnSuggestion.columnNode;
-        var candidateSuggestion = clickedSuggestion.candidate.suggestion;
+        var candidateSuggestion = clickedCandidate.suggestion;
         var parentOptions = candidateSuggestion.parentOptions;
-        var clickedParent = clickedSuggestion.box.parentOption;
-        // a superclass box chooses the superclass, the class box takes the most probable one
+        // a superclass node chooses the superclass, the class node takes the most probable one
         var chosenParent = clickedParent || (parentOptions ? parentOptions[0] : null);
         var suggestion = chosenParent ? self.getSuggestionUnderParent(candidateSuggestion, chosenParent) : candidateSuggestion;
         var isAccepted = confirm(self.getConfirmationText(columnNode, suggestion));
@@ -837,16 +734,16 @@ var AIColumnClassSuggestion = (function () {
             candidateSuggestion.parentOptions = parentOptions.filter(function (parentOption) {
                 return parentOption !== clickedParent;
             });
-            return self.redraw();
+            return self.showInTree();
         }
         if (!isAccepted) {
             columnSuggestion.candidates = columnSuggestion.candidates.filter(function (candidate) {
-                return candidate !== clickedSuggestion.candidate;
+                return candidate !== clickedCandidate;
             });
             if (columnSuggestion.candidates.length == 0) {
                 return self.clearColumn(columnNode.id);
             }
-            return self.redraw();
+            return self.showInTree();
         }
         // a reading without a class: the other readings go, nothing is written
         if (self.noClassKinds[suggestion.columnKind]) {

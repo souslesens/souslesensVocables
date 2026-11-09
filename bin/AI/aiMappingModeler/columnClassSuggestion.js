@@ -349,8 +349,71 @@ function mergeOptionLists(optionLists, getOptionKey) {
     return keptOptions;
 }
 
+// the named superclass the imported ontologies give a class, none for a class they do not hold, as a local class
+function getModelSuperClass(classIri, preparedSource) {
+    for (const ontology of preparedSource.checkedOntologies) {
+        const modelClass = preparedSource.ontologyModels[ontology]?.classes?.[classIri];
+        if (modelClass) {
+            return modelClass.superClass;
+        }
+    }
+    return null;
+}
+
+function getAncestorIris(classIri, preparedSource) {
+    const ancestorIris = [];
+    let parentClass = getModelSuperClass(classIri, preparedSource);
+    // stop on a loop
+    while (parentClass && parentClass != classIri && !ancestorIris.includes(parentClass)) {
+        ancestorIris.push(parentClass);
+        parentClass = getModelSuperClass(parentClass, preparedSource);
+    }
+    return ancestorIris;
+}
+
+// a superclass above another one proposed is no alternative to it, the deeper one already says it: its share goes to the
+// deepest proposed superclasses below it, never to another branch, in proportion to their probability over the samples
+function moveAncestorShares(parentOptionLists, preparedSource) {
+    const proposedParentOptions = parentOptionLists.flat();
+    const probabilityTotalByParentId = {};
+    const writingByParentId = {};
+    const ancestorIrisByParentId = {};
+    proposedParentOptions.forEach(function (parentOption) {
+        const parentId = parentOption.parentId;
+        probabilityTotalByParentId[parentId] = (probabilityTotalByParentId[parentId] || 0) + parentOption.probability;
+        // as in mergeOptionLists, the more probable writing gives the label and the definition
+        if (!writingByParentId[parentId] || parentOption.probability > writingByParentId[parentId].probability) {
+            writingByParentId[parentId] = parentOption;
+        }
+        ancestorIrisByParentId[parentId] = getAncestorIris(parentId, preparedSource);
+    });
+    const proposedParentIds = Object.keys(writingByParentId).sort();
+    // two classes on a subclass loop are each above the other: neither is an ancestor
+    const isAncestorOf = (ancestorId, classId) => ancestorIrisByParentId[classId].includes(ancestorId) && !ancestorIrisByParentId[ancestorId].includes(classId);
+    const deepestParentIds = proposedParentIds.filter((ancestorId) => !proposedParentIds.some((classId) => isAncestorOf(ancestorId, classId)));
+    const sharedOptionLists = parentOptionLists.map(function (parentOptions) {
+        const probabilityByParentId = {};
+        parentOptions.forEach(function (parentOption) {
+            const descendantIds = deepestParentIds.filter((classId) => isAncestorOf(parentOption.parentId, classId));
+            if (descendantIds.length == 0) {
+                probabilityByParentId[parentOption.parentId] = (probabilityByParentId[parentOption.parentId] || 0) + parentOption.probability;
+                return;
+            }
+            const descendantTotal = descendantIds.reduce((total, descendantId) => total + probabilityTotalByParentId[descendantId], 0);
+            descendantIds.forEach(function (descendantId) {
+                // descendants proposed at 0 share it equally
+                const descendantWeight = descendantTotal > 0 ? probabilityTotalByParentId[descendantId] / descendantTotal : 1 / descendantIds.length;
+                probabilityByParentId[descendantId] = (probabilityByParentId[descendantId] || 0) + parentOption.probability * descendantWeight;
+            });
+        });
+        const sharedOptions = Object.entries(probabilityByParentId).map(([parentId, probability]) => ({ ...writingByParentId[parentId], probability: probability }));
+        return sharedOptions;
+    });
+    return sharedOptionLists;
+}
+
 // the readings of the samples merged; the superclasses of a new class merged over the samples holding it
-function mergeSamples(sampleSuggestionLists) {
+function mergeSamples(sampleSuggestionLists, preparedSource) {
     const mergedSuggestions = mergeOptionLists(sampleSuggestionLists, getReadingKey);
     mergedSuggestions.forEach(function (mergedSuggestion) {
         if (mergedSuggestion.columnKind != "newClass") {
@@ -364,7 +427,8 @@ function mergeSamples(sampleSuggestionLists) {
                 parentOptionLists.push(sampleReading.parentOptions);
             }
         });
-        const mergedParentOptions = mergeOptionLists(parentOptionLists, (parentOption) => parentOption.parentId);
+        const sharedOptionLists = moveAncestorShares(parentOptionLists, preparedSource);
+        const mergedParentOptions = mergeOptionLists(sharedOptionLists, (parentOption) => parentOption.parentId);
         const mostProbableParent = mergedParentOptions[0];
         mergedSuggestion.parentId = mostProbableParent.parentId;
         mergedSuggestion.parentLabel = mostProbableParent.parentLabel;
@@ -430,7 +494,7 @@ async function suggestColumnClass(request, abortSignal, userInfo) {
         return askedSamples;
     }
     const sampleSuggestionLists = askedSamples.sampleAnswers.map((sampleAnswer) => sampleAnswer.suggestions);
-    const suggestions = mergeSamples(sampleSuggestionLists);
+    const suggestions = mergeSamples(sampleSuggestionLists, preparedSource);
     // without it the user reads a column left without a class as a failure of the tool
     suggestions.forEach(function (suggestion) {
         if (suggestion.columnKind == "technicalKey") {

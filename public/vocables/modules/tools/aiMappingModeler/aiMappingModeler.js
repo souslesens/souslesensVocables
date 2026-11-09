@@ -328,6 +328,20 @@ var AIMappingModeler = (function () {
                     };
                 }
 
+                if (node.data && node.data.resourceType == "aiClassSuggestion") {
+                    // the title of the readings and a value describe no resource
+                    if (node.data.describedResource) {
+                        items.nodeInfos = {
+                            label: "Node Infos",
+                            action: function (_e) {
+                                AIColumnClassSuggestion.popupMenuResource = node.data.describedResource;
+                                AIColumnClassSuggestion.showPopupMenuResourceInfos();
+                            },
+                        };
+                    }
+                    return items;
+                }
+
                 if (self.currentResourceType == "Class") {
                     if (node.data && node.data.resourceType != "searchClass") {
                         // only for classses
@@ -654,6 +668,8 @@ var AIMappingModeler = (function () {
             }
 
             JstreeWidget.addNodesToJstree("suggestionsSelectJstreeDiv", source, jstreeData, { positionLast: true });
+        } else if (obj.node.data && obj.node.data.resourceType == "aiClassSuggestion") {
+            AIColumnClassSuggestion.onTreeNodeSelect(obj.node.data);
         } else if (self.currentResourceType == "Class") {
             var classifiedNode = AIMappingColumnsGraph.currentGraphNode;
             AIColumnClassSuggestion.clearColumn(classifiedNode.id);
@@ -876,7 +892,7 @@ var AIMappingModeler = (function () {
 
                 var classesCopy = JSON.parse(JSON.stringify(classes));
                 classesCopy.unshift(newObject);
-                self.loadSuggestionSelectJstree(classesCopy, "Classes");
+                self.loadSuggestionSelectJstree(classesCopy, "Classes", AIColumnClassSuggestion.showInTree);
             });
         } else if (self.currentResourceType == "ObjectProperty") {
             var newObjects = [
@@ -1453,9 +1469,13 @@ var AIMappingModeler = (function () {
         }
         keyword = keyword.toLowerCase();
 
-        var newData = [];
+        // the AI readings change after the copy: taken as they are now, first under Classes
+        var newData = self.currentResourceType == "Class" ? AIColumnClassSuggestion.getTreeNodes() : [];
         Object.keys(self.filterSuggestionList).forEach(function (nodeId) {
             var node = self.filterSuggestionList[nodeId];
+            if (node.data && node.data.resourceType == "aiClassSuggestion") {
+                return;
+            }
             // We filter only last leafs of jstree
             if (node.children.length == 0) {
                 var node_text = node.text.toLowerCase();

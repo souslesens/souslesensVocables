@@ -18,6 +18,12 @@ var AIColumnClassSuggestion = (function () {
     var self = {};
 
     self.panelDivId = "aiMappingModeler_columnClassSuggestionDiv";
+    self.tableReadingDivId = "aiMappingModeler_tableReadingDiv";
+    // between two looks at a running reading of a table, which takes 7 to 22 s
+    self.tableReadingPollDelay = 5000;
+    self.tableReadingPollTimer = null;
+    // per table key: { status, reading, error }, as the tableReading route answers
+    self.tableReadingsByKey = {};
     // same number of rows as the ontology generation
     self.sampleRowCount = 5;
     // beyond this the classes of an ontology no longer fit a call answered while the user waits
@@ -127,6 +133,9 @@ var AIColumnClassSuggestion = (function () {
         self.clearAll();
         self.currentTableKey = null;
         self.sampleRowsByTable = {};
+        self.tableReadingsByKey = {};
+        clearTimeout(self.tableReadingPollTimer);
+        $("#" + self.tableReadingDivId).empty();
         self.leftOutOntologies = [];
         var source = AIMappingModeler.currentSLSsource;
         var upperOntologies = [];
@@ -187,7 +196,7 @@ var AIColumnClassSuggestion = (function () {
         });
     };
 
-    // its rows are read ahead
+    // its rows are read ahead, and the AI reads the table
     self.onColumnsListed = function () {
         var currentDataSource = AIDataSourceManager.currentConfig.currentDataSource;
         var tableName = AIMappingModeler.currentTable.name;
@@ -196,7 +205,125 @@ var AIColumnClassSuggestion = (function () {
             self.clearAll();
         }
         self.currentTableKey = tableKey;
-        self.getSampleRows(currentDataSource.id, tableName, function () {});
+        self.readTable(false);
+    };
+
+    // the reading of the current table, started on the server when it has none; the suggestions of its columns get it there
+    self.readTable = function (isReadAgain) {
+        var currentDataSource = AIDataSourceManager.currentConfig.currentDataSource;
+        var table = AIMappingModeler.currentTable.name;
+        var tableColumns = AIMappingModeler.currentTable.columns;
+        clearTimeout(self.tableReadingPollTimer);
+        self.showTableReading();
+        self.getSampleRows(currentDataSource.id, table, function (sampleRows) {
+            var payload = {
+                source: AIMappingModeler.currentSLSsource,
+                dataSourceName: currentDataSource.name,
+                table: table,
+                columns: tableColumns,
+                sampleRows: sampleRows,
+                isReadAgain: isReadAgain,
+            };
+            if (AIDataSourceManager.currentConfig.databaseSources[currentDataSource.id]) {
+                payload.databaseId = currentDataSource.id;
+            }
+            $.ajax({
+                type: "POST",
+                url: Config.apiUrl + "/ai/aiMappingModeler/tableReading",
+                data: JSON.stringify(payload),
+                contentType: "application/json",
+                dataType: "json",
+                success: function (tableReading) {
+                    self.onTableReading(currentDataSource.id, table, tableReading);
+                },
+                error: function (error) {
+                    self.onTableReading(currentDataSource.id, table, { status: "failed", reading: null, error: self.getErrorText(error) });
+                },
+            });
+        });
+    };
+
+    // tableReading: { status, reading, error }; a reading ending a run asks again the suggestions of the table, so that they get it
+    self.onTableReading = function (dataSourceId, table, tableReading) {
+        var tableKey = self.getTableKey(dataSourceId, table);
+        var previousReading = self.tableReadingsByKey[tableKey];
+        self.tableReadingsByKey[tableKey] = tableReading;
+        // the save of the mapping writes the config as the page holds it, whatever table is open
+        var rawConfig = AIDataSourceManager.rawConfig;
+        var rawDataSource = (rawConfig.databaseSources && rawConfig.databaseSources[dataSourceId]) || (rawConfig.csvSources && rawConfig.csvSources[dataSourceId]);
+        if (tableReading.status == "done" && rawDataSource) {
+            rawDataSource.tableReadings = rawDataSource.tableReadings || {};
+            rawDataSource.tableReadings[table] = tableReading.reading;
+        }
+        if (tableKey != self.currentTableKey) {
+            return;
+        }
+        self.showTableReading();
+        if (tableReading.status == "running") {
+            self.tableReadingPollTimer = setTimeout(function () {
+                // the open table may have changed without its columns being listed again
+                var currentTable = AIMappingModeler.currentTable;
+                var currentDataSource = AIDataSourceManager.currentConfig.currentDataSource;
+                if (currentTable && currentDataSource && self.getTableKey(currentDataSource.id, currentTable.name) == tableKey) {
+                    self.readTable(false);
+                }
+            }, self.tableReadingPollDelay);
+            return;
+        }
+        if (tableReading.status == "done" && previousReading && previousReading.status == "running") {
+            self.suggestTableAgain(table);
+        }
+    };
+
+    // the open suggestions of the table, shown or still asked
+    self.suggestTableAgain = function (table) {
+        var columnNodesById = {};
+        Object.values(self.suggestionsByColumnId).forEach(function (columnSuggestion) {
+            columnNodesById[columnSuggestion.columnNode.id] = columnSuggestion.columnNode;
+        });
+        Object.values(self.requestsByColumnId).forEach(function (pendingRequest) {
+            columnNodesById[pendingRequest.columnNode.id] = pendingRequest.columnNode;
+        });
+        Object.values(columnNodesById).forEach(function (columnNode) {
+            if (columnNode.data.dataTable != table || !self.isColumnOpen(columnNode.id)) {
+                return;
+            }
+            self.clearColumn(columnNode.id);
+            self.suggest(columnNode);
+        });
+    };
+
+    self.showTableReading = function () {
+        var readingDiv = $("#" + self.tableReadingDivId);
+        readingDiv.empty();
+        var tableReading = self.tableReadingsByKey[self.currentTableKey];
+        if (!tableReading) {
+            return;
+        }
+        if (tableReading.status == "running") {
+            readingDiv.append($("<i>").text("AI reading of the table..."));
+            return;
+        }
+        var readAgainLink = $("<a href='#'>")
+            .text("read again")
+            .on("click", function () {
+                self.readTable(true);
+                return false;
+            });
+        if (tableReading.status == "failed") {
+            readingDiv.append($("<span>").text("AI reading of the table failed: " + tableReading.error + " "), readAgainLink);
+            return;
+        }
+        // the text of the model, never read as html
+        var readingText = $("<div>").css({ "white-space": "pre-wrap", "font-size": "11px" }).text(tableReading.reading.text).hide();
+        var showLink = $("<a href='#'>")
+            .text("AI reading of the table")
+            .attr("title", "read by " + tableReading.reading.model + " on " + tableReading.reading.readAt + ", click to show it")
+            .on("click", function () {
+                readingText.toggle();
+                return false;
+            });
+        readingDiv.append(showLink, " (", readAgainLink, ")", readingText);
     };
 
     self.getLocalClasses = function () {
@@ -269,7 +396,7 @@ var AIColumnClassSuggestion = (function () {
         self.panelColumnId = columnNode.id;
         self.showMessage("AI suggestion for " + column + "...");
 
-        var pendingRequest = { xhr: null };
+        var pendingRequest = { xhr: null, columnNode: columnNode };
         self.requestsByColumnId[columnNode.id] = pendingRequest;
         var databaseSources = AIDataSourceManager.currentConfig.databaseSources;
         var dataSourceName = AIDataSourceManager.currentConfig.currentDataSource.name;

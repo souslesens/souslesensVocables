@@ -219,7 +219,12 @@ function readSuggestions(answerText, preparedSource, knownClasses) {
 // { suggestion } or { error }: a class the model names must exist and a new class must be whole, whatever it wrote
 function readClassAnswer(answer, preparedSource, knownClasses) {
     if (noClassKinds.includes(answer.columnKind)) {
-        return { suggestion: { columnKind: answer.columnKind } };
+        const noClassSuggestion = { columnKind: answer.columnKind };
+        // shown on hover, as the definition of a class
+        if (isFilledText(answer.reason)) {
+            noClassSuggestion.definition = answer.reason.trim();
+        }
+        return { suggestion: noClassSuggestion };
     }
     if (answer.columnKind == "existingClass") {
         const classId = readClassIri(answer.class, preparedSource.classPrefixes);

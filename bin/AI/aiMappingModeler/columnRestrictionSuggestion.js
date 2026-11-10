@@ -8,6 +8,7 @@ import { getPairProperties, getModelLabel } from "../ontologyFromDb/ontology/res
 import { getTermIri } from "../ontologyFromDb/mappings/mappingAnswer.js";
 import { callVocablesFunction, setRunnerSource } from "../../remoteCodeRunner.js";
 import { getPreparedSource, getTableDescription } from "./sourcePreparation.js";
+import { getKnownTableReading, getTableReadingText } from "./tableReading.js";
 import {
     suggestionModelId,
     suggestionReasoningEffort,
@@ -125,7 +126,7 @@ function getPropertyLabel(propertyIri, preparedSource) {
     return propertyLabel;
 }
 
-function getRestrictionPrompt(request, preparedSource, allowedPropertiesByDirection, descriptionByClass) {
+function getRestrictionPrompt(request, preparedSource, allowedPropertiesByDirection, descriptionByClass, tableReading) {
     const mappedColumns = [request.mappedColumn].concat(request.otherColumns);
     const classLines = mappedColumns.map(function (mappedColumn) {
         const classDescription = descriptionByClass[mappedColumn.classId];
@@ -149,6 +150,7 @@ function getRestrictionPrompt(request, preparedSource, allowedPropertiesByDirect
     const localClassesText = localClassLines.length > 0 ? localClassLines.join("\n") : "none yet";
     const restrictionPrompt =
         getTableDescription(request, preparedSource) +
+        getTableReadingText(tableReading) +
         "\n# Column just mapped\n\n" +
         classLines[0] +
         "\n\n# Other mapped columns of the table\n\n" +
@@ -332,12 +334,13 @@ async function suggestColumnRestrictions(request, abortSignal, userContext) {
     const mappedClassIris = [request.mappedColumn.classId].concat(request.otherColumns.map((otherColumn) => otherColumn.classId));
     const localClassIris = mappedClassIris.filter((classIri) => !preparedSource.classLabelByIri[classIri]);
     const descriptionByClass = await getLocalClassDescriptions(localClassIris, userContext.userSources[request.source].graphUri, userContext);
+    const tableReading = await getKnownTableReading(request);
     const systemPrompt = readFileSync(promptPath, "utf8") + "\n\n# Upper ontologies, most abstract first\n" + preparedSource.modelText;
     const llmStart = Date.now();
     const messageParams = {
         model: suggestionModelId,
         system: systemPrompt,
-        messages: [{ role: "user", content: getRestrictionPrompt(request, preparedSource, allowedPropertiesByDirection, descriptionByClass) }],
+        messages: [{ role: "user", content: getRestrictionPrompt(request, preparedSource, allowedPropertiesByDirection, descriptionByClass, tableReading) }],
         maxTokens: suggestionMaxTokens,
         reasoningEffort: suggestionReasoningEffort,
         isPromptCached: true,

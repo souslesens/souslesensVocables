@@ -5,6 +5,7 @@ import { fileURLToPath } from "url";
 import { createMessage, getAnswerText, getCutAnswerError } from "../ontologyFromDb/ontology/ontologyAnswer.js";
 import { getTermIri } from "../ontologyFromDb/mappings/mappingAnswer.js";
 import { getPreparedSource, getTableDescription, getTableKeys, readColumnSample } from "./sourcePreparation.js";
+import { getKnownTableReading, getTableReadingText } from "./tableReading.js";
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const promptPath = join(currentDirectory, "prompts/column_class_suggestion.md");
@@ -14,8 +15,10 @@ const suggestionModelId = "openai/gpt-5.6-luna";
 const suggestionReasoningEffort = "none";
 // the reasoning counts: reaching the ceiling makes claude -p call the model again, up to 4 times
 const suggestionMaxTokens = 1500;
-// one answer changes its options from one click to the next, the mean of several answers keeps them
+// one answer changes its options from one click to the next, the mean of several answers keeps them; once the table is read,
+// its reading holds the answers together and one is enough
 const suggestionSampleCount = 5;
+const readTableSampleCount = 1;
 const minMergedProbability = 10;
 const iriBracketsRegex = /^\s*<|>\s*$/g;
 const jsonObjectRegex = /\{[\s\S]*\}/;
@@ -75,7 +78,7 @@ function getColumnKeyRole(request, preparedSource) {
 }
 
 // columnNoteTexts: what the code knows of the selected column, one paragraph each
-function getColumnPrompt(request, preparedSource, columnNoteTexts) {
+function getColumnPrompt(request, preparedSource, columnNoteTexts, tableReading) {
     const localClassLines = request.localClasses.map((localClass) => "<" + localClass.id + '> "' + localClass.label + '"');
     const localClassesText = localClassLines.length > 0 ? localClassLines.join("\n") : "none yet";
     const mappedColumnLines = request.mappedColumns.map(function (mappedColumn) {
@@ -87,6 +90,7 @@ function getColumnPrompt(request, preparedSource, columnNoteTexts) {
     const columnNotesText = columnNoteParagraphs.join("");
     const columnPrompt =
         getTableDescription(request, preparedSource) +
+        getTableReadingText(tableReading) +
         "\n# Selected column\n\n" +
         request.column +
         columnNotesText +
@@ -440,9 +444,9 @@ function mergeSamples(sampleSuggestionLists, preparedSource) {
 
 // { sampleAnswers } of the samples that succeeded, or the HTTP error to answer when every sample fails; a failed or
 // cancelled call throws, as it did with a single sample
-async function askSamples(askOneSample) {
+async function askSamples(askOneSample, sampleCount = suggestionSampleCount) {
     const samplePromises = [];
-    for (let sampleIndex = 0; sampleIndex < suggestionSampleCount; sampleIndex++) {
+    for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
         samplePromises.push(askOneSample());
     }
     const sampleOutcomes = await Promise.allSettled(samplePromises);
@@ -470,6 +474,7 @@ async function suggestColumnClass(request, abortSignal, userInfo) {
     }
     // the first rows of a table may all leave the column empty
     const columnSample = await readColumnSample(request, userInfo);
+    const tableReading = await getKnownTableReading(request);
     // ended during the preparation or the read: no call to the model
     if (abortSignal.aborted) {
         return { status: 499, error: "the request was cancelled" };
@@ -483,13 +488,14 @@ async function suggestColumnClass(request, abortSignal, userInfo) {
     const messageParams = {
         model: suggestionModelId,
         system: systemPrompt,
-        messages: [{ role: "user", content: getColumnPrompt(sampledRequest, preparedSource, writtenNoteTexts) }],
+        messages: [{ role: "user", content: getColumnPrompt(sampledRequest, preparedSource, writtenNoteTexts, tableReading) }],
         maxTokens: suggestionMaxTokens,
         reasoningEffort: suggestionReasoningEffort,
         isPromptCached: true,
         abortSignal: abortSignal,
     };
-    const askedSamples = await askSamples(() => askSample(messageParams, request, preparedSource));
+    const sampleCount = tableReading ? readTableSampleCount : suggestionSampleCount;
+    const askedSamples = await askSamples(() => askSample(messageParams, request, preparedSource), sampleCount);
     if (askedSamples.error) {
         return askedSamples;
     }

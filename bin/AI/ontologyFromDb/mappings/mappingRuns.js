@@ -1,4 +1,4 @@
-import { mkdir, readdir, readFile, rm, writeFile } from "fs/promises";
+import { mkdir, readdir, readFile, rename, rm, writeFile } from "fs/promises";
 import { join, resolve as resolvePath } from "path";
 import { llmAnswersDirectory, nonNameCharacterRegex } from "../ontology/ontologyRuns.js";
 
@@ -83,15 +83,59 @@ async function writeMappingModelerFile(source, mappingName, mapping) {
     await writeFile(getMappingModelerPath(source), JSON.stringify(writtenMapping, null, 2));
 }
 
+// one change at a time: each rewrites the whole file, read right before
+let mappingModelerUpdates = Promise.resolve();
+
+// changeMapping(mapping) changes the mapping MappingModeler opens, read right before the write, and returns false to leave the
+// file as it is; the file is written whole at once, so a save of the page is never mixed with an older copy
+function updateMappingModelerFile(source, changeMapping) {
+    // a failed change was told to its caller, the next one still runs
+    const previousUpdates = mappingModelerUpdates.catch(function () {});
+    mappingModelerUpdates = previousUpdates.then(async function () {
+        const mapping = await readMappingModelerFile(source);
+        const isChanged = changeMapping(mapping);
+        if (!isChanged) {
+            return;
+        }
+        const mappingPath = getMappingModelerPath(source);
+        const writtenPath = mappingPath + ".update";
+        await writeFile(writtenPath, JSON.stringify(mapping, null, 2));
+        await rename(writtenPath, mappingPath);
+    });
+    return mappingModelerUpdates;
+}
+
 // what a mapping states, its layout and the editor display flags left out: an edit in MappingModeler changes it, a moved node does not
 function getMappingStatement(mapping) {
     // MappingModeler rewrites lastUpdate at every save, mappingVersion is ours
     const { lastUpdate: _lastUpdate, mappingVersion: _mappingVersion, ...statedConfig } = mapping.options?.config || {};
+    // the keys the AI found in a database and its readings of the tables are written by the server, never by an edit
+    const statedDatabaseSources = {};
+    for (const [databaseId, databaseSource] of Object.entries(statedConfig.databaseSources || {})) {
+        const { aiKeys: _aiKeys, tableReadings: _databaseTableReadings, ...statedDatabaseSource } = databaseSource;
+        statedDatabaseSources[databaseId] = statedDatabaseSource;
+    }
+    const statedCsvSources = {};
+    for (const [csvFileName, csvSource] of Object.entries(statedConfig.csvSources || {})) {
+        const { tableReadings: _csvTableReadings, ...statedCsvSource } = csvSource;
+        statedCsvSources[csvFileName] = statedCsvSource;
+    }
     const nodeStatements = (mapping.nodes || []).map((node) => JSON.stringify([node.id, node.data]));
     const edgeStatements = (mapping.edges || []).map((edge) => JSON.stringify([edge.from, edge.to, edge.data || null]));
     nodeStatements.sort();
     edgeStatements.sort();
-    return JSON.stringify([nodeStatements, edgeStatements, statedConfig]);
+    const mappingStatement = JSON.stringify([nodeStatements, edgeStatements, { ...statedConfig, databaseSources: statedDatabaseSources, csvSources: statedCsvSources }]);
+    return mappingStatement;
 }
 
-export { getMappingName, getMappingModelerPath, listSourceMappings, saveMappingVersion, deleteMappingVersion, readMappingModelerFile, writeMappingModelerFile, getMappingStatement };
+export {
+    getMappingName,
+    getMappingModelerPath,
+    listSourceMappings,
+    saveMappingVersion,
+    deleteMappingVersion,
+    readMappingModelerFile,
+    writeMappingModelerFile,
+    updateMappingModelerFile,
+    getMappingStatement,
+};

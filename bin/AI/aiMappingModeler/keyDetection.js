@@ -14,6 +14,12 @@ import { indexSchemaColumns, readTableSamples, getLinkCandidatesPrompt, measureL
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const keyDetectionPromptPath = join(currentDirectory, "prompts/key_detection_from_db.md");
 const repeatJudgementPromptPath = join(currentDirectory, "prompts/key_repeat_judgement.md");
+const tableGroupsPromptPath = join(currentDirectory, "prompts/table_groups.md");
+// the groups the tree shows apart from the main list of tables, named as in table_groups.md
+const tableGroupNames = ["definition", "computed"];
+const aiForeignKeyPrefix = "found_in_the_data_";
+// the detection reads the database to the end
+const neverStopped = new AbortController().signal;
 // per identifier whose values repeat, the values held by the most rows and the rows read for each
 const repeatedValueLimit = 3;
 const repeatedRowLimit = 5;
@@ -150,7 +156,12 @@ function readForeignKeys(keyDecisions, pairsToDecide, aiPrimaryKeys, schema, col
 // { answer } or { error }: the JSON answer of the model the detection relies on
 async function askKeyModel(prompt) {
     const messageParams = { messages: [{ role: "user", content: prompt }], model: keyDetectionModelId, maxTokens: modelMaxOutputTokens, reasoningEffort: keyDetectionReasoningEffort };
-    const completion = await createMessage(messageParams, { input_tokens: 0, output_tokens: 0 });
+    let completion;
+    try {
+        completion = await createMessage(messageParams, { input_tokens: 0, output_tokens: 0 });
+    } catch (callError) {
+        return { error: "the model could not be called: " + callError.message };
+    }
     const answerText = getAnswerText(completion);
     const cutAnswerError = getCutAnswerError(completion, answerText);
     if (cutAnswerError) {
@@ -170,7 +181,7 @@ async function askKeyModel(prompt) {
 async function readRepeatedIdentifiers(connection, clientDriver, primaryKeys, columnsByTable, tableInspections, tellStep) {
     const repeatTexts = [];
     for (const [primaryKeyIndex, primaryKey] of primaryKeys.entries()) {
-        tellStep("AI keys 3/4: checking the repeated values of the identifiers, table " + (primaryKeyIndex + 1) + "/" + primaryKeys.length);
+        tellStep("AI keys 3/5: checking the repeated values of the identifiers, table " + (primaryKeyIndex + 1) + "/" + primaryKeys.length);
         const identifierColumn = primaryKey.columns[0];
         const profile = tableInspections[primaryKey.table]?.profile;
         const columnProfile = profile?.columnsByName[identifierColumn];
@@ -232,28 +243,121 @@ function applyRepeatJudgements(identifiers, answer, judgedTables, columnsByQuali
     identifiers.primaryKeys = identifiers.primaryKeys.filter((primaryKey) => !tableNamesWithoutIdentifier.includes(primaryKey.table));
 }
 
-// { aiKeys } or { error }: the readings of the ontology generation, profiles, link candidates and overlaps, kept in the same
-// databaseChecks.json, then a model reasoning on them, without any ontology: the identifiers first, checked on the rows,
-// then the foreign keys referring to them; tellStep(text) tells each step to the pages waiting for the keys
-async function detectDatabaseKeys(databaseId, userInfo, tellStep) {
+// the schema with the keys the AI found beside the declared ones, and the AI keys kept: { schema, aiKeys }; keys found
+// before the schema declared them are left out
+function addAiKeysToSchema(schema, aiKeys) {
+    const declaredKeyTables = schema.primaryKeys.map((keyColumn) => keyColumn.table_name);
+    const declaredForeignKeyColumns = schema.foreignKeys.map((keyColumn) => keyColumn.table_name + "." + keyColumn.column_name);
+    const undeclaredPrimaryKeys = aiKeys.primaryKeys.filter((primaryKey) => !declaredKeyTables.includes(primaryKey.table));
+    const undeclaredForeignKeys = aiKeys.foreignKeys.filter((foreignKey) => !declaredForeignKeyColumns.includes(foreignKey.table + "." + foreignKey.column));
+    const aiPrimaryKeys = [];
+    undeclaredPrimaryKeys.forEach(function (primaryKey) {
+        primaryKey.columns.forEach((columnName) => aiPrimaryKeys.push({ table_name: primaryKey.table, column_name: columnName }));
+    });
+    // describeDatabase groups the columns of a foreign key by its constraint name
+    const aiForeignKeys = undeclaredForeignKeys.map((foreignKey) => ({
+        constraint_name: aiForeignKeyPrefix + foreignKey.column,
+        table_name: foreignKey.table,
+        column_name: foreignKey.column,
+        referenced_table: foreignKey.referencedTable,
+        referenced_column: foreignKey.referencedColumn,
+    }));
+    const schemaWithAiKeys = {
+        ...schema,
+        primaryKeys: schema.primaryKeys.concat(aiPrimaryKeys),
+        foreignKeys: schema.foreignKeys.concat(aiForeignKeys),
+    };
+    // keys detected before the tables without identifier were told apart hold none
+    const aiTablesWithoutIdentifier = aiKeys.tablesWithoutIdentifier || [];
+    const undeclaredTablesWithoutIdentifier = aiTablesWithoutIdentifier.filter((tableWithoutIdentifier) => !declaredKeyTables.includes(tableWithoutIdentifier.table));
+    const keptAiKeys = { primaryKeys: undeclaredPrimaryKeys, tablesWithoutIdentifier: undeclaredTablesWithoutIdentifier, foreignKeys: undeclaredForeignKeys };
+    const schemaAndAiKeys = { schema: schemaWithAiKeys, aiKeys: keptAiKeys };
+    return schemaAndAiKeys;
+}
+
+// the definition and computed tables the model names, [{ table, group, reason }], one per known table; null when the model
+// failed: the keys are kept without groups, asked again at the next server start
+async function suggestTableGroups(database, schema, columnsByTable, tableInspections, aiKeys, tellStep) {
+    const { schema: schemaWithAiKeys, aiKeys: keptAiKeys } = addAiKeysToSchema(schema, aiKeys);
+    const referencingTablesByTable = {};
+    schemaWithAiKeys.foreignKeys.forEach(function (keyColumn) {
+        if (keyColumn.table_name == keyColumn.referenced_table) {
+            return;
+        }
+        if (!referencingTablesByTable[keyColumn.referenced_table]) {
+            referencingTablesByTable[keyColumn.referenced_table] = new Set();
+        }
+        referencingTablesByTable[keyColumn.referenced_table].add(keyColumn.table_name);
+    });
+    const referencingLines = Object.entries(referencingTablesByTable).map(([table, referencingTables]) => table + ": " + [...referencingTables].join(", "));
+    const withoutIdentifierLines = keptAiKeys.tablesWithoutIdentifier.map((tableWithoutIdentifier) => tableWithoutIdentifier.table + ": " + tableWithoutIdentifier.reason);
+    const tableGroupsPrompt =
+        readFileSync(tableGroupsPromptPath, "utf8") +
+        "\n\n# Database\n\n" +
+        describeDatabase(database, schemaWithAiKeys, columnsByTable, tableInspections) +
+        "\n## Tables pointing at each table\n\n" +
+        (referencingLines.length > 0 ? referencingLines.join("\n") : "none") +
+        "\n\n## Tables where no column identifies the object\n\n" +
+        (withoutIdentifierLines.length > 0 ? withoutIdentifierLines.join("\n") : "none") +
+        "\n";
+    tellStep("AI keys 4/5: the model groups the " + Object.keys(columnsByTable).length + " tables, about a minute");
+    const groupsAnswer = await askKeyModel(tableGroupsPrompt);
+    if (groupsAnswer.error) {
+        console.warn("[aiMappingModeler/keyDetection] " + database.database + ": tables not grouped by the AI: " + groupsAnswer.error);
+        return null;
+    }
+    const answeredGroups = Array.isArray(groupsAnswer.answer?.tableGroups) ? groupsAnswer.answer.tableGroups : [];
+    const tableGroups = [];
+    answeredGroups.forEach(function (answeredGroup) {
+        const isValidGroup = answeredGroup && Object.hasOwn(columnsByTable, answeredGroup.table) && tableGroupNames.includes(answeredGroup.group);
+        const isGroupedAlready = tableGroups.some((tableGroup) => tableGroup.table == answeredGroup?.table);
+        if (!isValidGroup || isGroupedAlready) {
+            return;
+        }
+        tableGroups.push({ table: answeredGroup.table, group: answeredGroup.group, reason: String(answeredGroup.reason || "") });
+    });
+    return tableGroups;
+}
+
+// the database, its schema and the samples of its tables, those of earlier runs read from the saved database checks
+async function readDatabaseSamples(databaseId, userInfo, tellStep) {
     const database = await databaseModel.getDatabase(databaseId);
     const connection = await databaseModel.getUserConnection(userInfo.user, databaseId);
     const schema = await getSchemaDescription(connection, database.driver);
     const clientDriver = databaseModel.getClientDriver(database.driver);
     const databaseFolder = database.database.replace(nonNameCharacterRegex, "_");
     const databaseChecks = await readDatabaseChecks(databaseFolder);
-    const neverStopped = new AbortController().signal;
     const { columnsByTable, columnsByQualifiedName } = indexSchemaColumns(schema);
-    const tableCount = Object.keys(columnsByTable).length;
-    tellStep("AI keys 1/4: reading the samples of " + tableCount + " tables");
+    tellStep("AI keys 1/5: reading the samples of " + Object.keys(columnsByTable).length + " tables");
     const tableInspections = await readTableSamples(connection, clientDriver, columnsByTable, databaseChecks, false, neverStopped);
+    const databaseSamples = { database, connection, schema, clientDriver, databaseFolder, databaseChecks, columnsByTable, columnsByQualifiedName, tableInspections };
+    return databaseSamples;
+}
+
+// the groups of the tables for keys found before the groups existed
+async function suggestSavedKeysTableGroups(databaseId, userInfo, aiKeys, tellStep) {
+    const { database, schema, columnsByTable, tableInspections } = await readDatabaseSamples(databaseId, userInfo, tellStep);
+    const tableGroups = await suggestTableGroups(database, schema, columnsByTable, tableInspections, aiKeys, tellStep);
+    return tableGroups;
+}
+
+// { aiKeys } or { error }: the readings of the ontology generation, profiles, link candidates and overlaps, kept in the same
+// databaseChecks.json, then a model reasoning on them, without any ontology: the identifiers first, checked on the rows,
+// then the foreign keys referring to them; tellStep(text) tells each step to the pages waiting for the keys
+async function detectDatabaseKeys(databaseId, userInfo, tellStep) {
+    const { database, connection, schema, clientDriver, databaseFolder, databaseChecks, columnsByTable, columnsByQualifiedName, tableInspections } = await readDatabaseSamples(
+        databaseId,
+        userInfo,
+        tellStep,
+    );
+    const tableCount = Object.keys(columnsByTable).length;
     // the profiles, the links the model proposes and the measures of the pairs run at once
     const readingProgress = { profiledTableCount: 0, measuredPairCount: 0, proposedPairCount: 0, isModelProposingLinks: false };
     const tellReading = function () {
         const modelText = readingProgress.isModelProposingLinks ? ", the model proposes links" : "";
         const tablesText = readingProgress.profiledTableCount + "/" + tableCount + " tables profiled";
         const pairsText = readingProgress.measuredPairCount + "/" + readingProgress.proposedPairCount + " pairs measured";
-        const readingText = "AI keys 1/4: reading the database, " + tablesText + ", " + pairsText + modelText;
+        const readingText = "AI keys 1/5: reading the database, " + tablesText + ", " + pairsText + modelText;
         tellStep(readingText);
     };
     const tellReadingProgress = function (progressEvent) {
@@ -306,7 +410,7 @@ async function detectDatabaseKeys(databaseId, userInfo, tellStep) {
     const declaredKeyTables = schema.primaryKeys.map((keyColumn) => keyColumn.table_name);
     const allTables = Object.keys(columnsByTable);
     const tablesToDecide = allTables.filter((table) => !declaredKeyTables.includes(table));
-    tellStep("AI keys 2/4: the model decides the identifiers of " + tablesToDecide.length + " tables and " + pairsToDecide.length + " pairs, about a minute");
+    tellStep("AI keys 2/5: the model decides the identifiers of " + tablesToDecide.length + " tables and " + pairsToDecide.length + " pairs, about a minute");
     const keyAnswer = await askKeyModel(keyPrompt);
     if (keyAnswer.error) {
         return { error: keyAnswer.error };
@@ -327,7 +431,7 @@ async function detectDatabaseKeys(databaseId, userInfo, tellStep) {
             "\nPairs:\n" +
             (undecidedPairLines.length > 0 ? undecidedPairLines.join("\n") : "none") +
             "\n";
-        tellStep("AI keys 2/4: asking the model again for " + firstUndecidedTables.length + " tables and " + firstUndecidedPairs.length + " pairs left out");
+        tellStep("AI keys 2/5: asking the model again for " + firstUndecidedTables.length + " tables and " + firstUndecidedPairs.length + " pairs left out");
         const missingAnswer = await askKeyModel(missingDecisionsPrompt);
         missingDecisionsError = missingAnswer.error || null;
         keyDecisions = readKeyAnswers([keyAnswer.answer, missingAnswer.answer]);
@@ -337,7 +441,7 @@ async function detectDatabaseKeys(databaseId, userInfo, tellStep) {
     if (repeatTexts.length > 0) {
         const repeatTableTexts = repeatTexts.map((repeatText) => repeatText.text);
         const judgementPrompt = readFileSync(repeatJudgementPromptPath, "utf8") + "\n\n# Tables\n\n" + repeatTableTexts.join("\n");
-        tellStep("AI keys 3/4: the model judges the repeated values of " + repeatTexts.length + " identifiers");
+        tellStep("AI keys 3/5: the model judges the repeated values of " + repeatTexts.length + " identifiers");
         const judgementAnswer = await askKeyModel(judgementPrompt);
         if (judgementAnswer.error) {
             const judgementError = "repeated identifiers not judged: " + judgementAnswer.error;
@@ -356,23 +460,48 @@ async function detectDatabaseKeys(databaseId, userInfo, tellStep) {
         model: keyDetectionModelId,
         detectedAt: new Date().toISOString(),
     };
+    const tableGroups = await suggestTableGroups(database, schema, columnsByTable, tableInspections, aiKeys, tellStep);
+    if (tableGroups) {
+        aiKeys.tableGroups = tableGroups;
+    }
     return { aiKeys: aiKeys };
 }
 
-// { aiKeys } or { error }: the keys a mapping already holds, otherwise a detection whose keys go in the mapping
-async function findDatabaseKeys(source, databaseId, userInfo, tellStep) {
+// { aiKeys } or { error }: the keys a mapping already holds, grouped if they were found before the groups existed,
+// otherwise a detection whose keys go in the mapping
+async function findDatabaseKeys(source, databaseId, userInfo, tellStep, detection) {
     const savedAiKeys = await readSavedAiKeys(source, databaseId);
-    if (savedAiKeys) {
+    if (savedAiKeys && savedAiKeys.tableGroups) {
         return { aiKeys: savedAiKeys };
+    }
+    if (savedAiKeys) {
+        // the suggestions read the saved keys while the tables are grouped
+        detection.aiKeys = savedAiKeys;
+        let tableGroups = null;
+        try {
+            tableGroups = await suggestSavedKeysTableGroups(databaseId, userInfo, savedAiKeys, tellStep);
+        } catch (groupsError) {
+            console.warn("[aiMappingModeler/keyDetection] " + databaseId + ": tables not grouped by the AI: " + groupsError.message);
+        }
+        if (!tableGroups) {
+            tellStep("Tables not grouped by the AI");
+            return { aiKeys: savedAiKeys };
+        }
+        const groupedAiKeys = { ...savedAiKeys, tableGroups: tableGroups };
+        tellStep("AI keys 5/5: saving in the mapping");
+        await writeMappingAiKeys(source, databaseId, groupedAiKeys);
+        tellStep("Tables grouped by the AI: " + tableGroups.length + " definition or computed tables");
+        return { aiKeys: groupedAiKeys };
     }
     const detected = await detectDatabaseKeys(databaseId, userInfo, tellStep);
     if (!detected.aiKeys) {
         return detected;
     }
-    tellStep("AI keys 4/4: saving in the mapping");
+    tellStep("AI keys 5/5: saving in the mapping");
     await writeMappingAiKeys(source, databaseId, detected.aiKeys);
-    const { primaryKeys, tablesWithoutIdentifier, foreignKeys } = detected.aiKeys;
-    tellStep("AI keys found: " + primaryKeys.length + " PK, " + tablesWithoutIdentifier.length + " tables without identifier, " + foreignKeys.length + " FK");
+    const { primaryKeys, tablesWithoutIdentifier, foreignKeys, tableGroups } = detected.aiKeys;
+    const tableGroupsText = tableGroups ? tableGroups.length + " definition or computed tables" : "tables not grouped";
+    tellStep("AI keys found: " + primaryKeys.length + " PK, " + tablesWithoutIdentifier.length + " tables without identifier, " + foreignKeys.length + " FK, " + tableGroupsText);
     return detected;
 }
 
@@ -389,7 +518,7 @@ function startKeyDetection(source, databaseId, userInfo) {
         detection.lastStepText = stepText;
         detection.clientSocketIds.forEach((clientSocketId) => SocketManager.message(clientSocketId, keyDetectionChannel, { databaseId: databaseId, message: stepText }));
     };
-    findDatabaseKeys(source, databaseId, userInfo, tellStep)
+    findDatabaseKeys(source, databaseId, userInfo, tellStep, detection)
         .then(function (foundKeys) {
             detection.aiKeys = foundKeys.aiKeys || null;
             detection.error = foundKeys.error || null;
@@ -427,20 +556,27 @@ async function getKeyDetection(source, databaseId) {
         const mappingReadError = "the mapping of " + source + " could not be read: " + readError.message;
         return { status: "failed", aiKeys: null, error: mappingReadError };
     }
-    if (savedAiKeys) {
+    if (savedAiKeys && savedAiKeys.tableGroups) {
         return { status: "done", aiKeys: savedAiKeys };
     }
     const detection = detectionsByDatabaseId[databaseId];
+    // saved keys without groups: the groups were never asked, or are asked now, or failed
+    const savedKeysDetection = { status: "done", aiKeys: savedAiKeys };
     if (!detection) {
-        return { status: "none", aiKeys: null };
+        const notStartedDetection = savedAiKeys ? savedKeysDetection : { status: "none", aiKeys: null };
+        return notStartedDetection;
     }
     if (detection.isRunning) {
-        return { status: "running", aiKeys: null };
+        return { status: "running", aiKeys: savedAiKeys };
     }
     if (detection.error) {
-        return { status: "failed", aiKeys: null, error: detection.error };
+        const failedDetection = savedAiKeys ? savedKeysDetection : { status: "failed", aiKeys: null, error: detection.error };
+        return failedDetection;
     }
-    await writeMappingAiKeys(source, databaseId, detection.aiKeys);
+    // the same keys without groups are not written again at each reading
+    if (!savedAiKeys || detection.aiKeys.tableGroups) {
+        await writeMappingAiKeys(source, databaseId, detection.aiKeys);
+    }
     return { status: "done", aiKeys: detection.aiKeys };
 }
 
@@ -451,4 +587,4 @@ function getKnownAiKeys(databaseId) {
     return knownAiKeys;
 }
 
-export { startKeyDetection, followKeyDetection, getKeyDetection, getKnownAiKeys };
+export { startKeyDetection, followKeyDetection, getKeyDetection, getKnownAiKeys, addAiKeysToSchema };

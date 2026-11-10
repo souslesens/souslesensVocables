@@ -61,7 +61,7 @@ A new local class, with its superclasses:
 {"columnKind":"newClass","label":"...","parents":[{"class":"...","definition":"...","probability":70},{"class":"...","definition":"...","probability":30}],"probability":70}
 A local or imported class that already denotes the object:
 {"columnKind":"existingClass","class":"...","probability":20}
-A value, which maps to no class:
-{"columnKind":"value","probability":10}
+A value, which maps to no class, with the reason in one short English sentence naming the concept it describes:
+{"columnKind":"value","reason":"...","probability":10}
 A technical key, which carries the identity of rows that other tables give their class, and maps to no class:
 {"columnKind":"technicalKey","probability":10}

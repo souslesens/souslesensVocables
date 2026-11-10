@@ -48,7 +48,8 @@ export default function () {
             200: {
                 description:
                     "{ primaryKeys: [{ table_name, column_name }], foreignKeys: [{ constraint_name, table_name, column_name, referenced_table, referenced_column }], " +
-                    "aiKeys: { primaryKeys: [{ table, columns, reason }], foreignKeys: [{ table, column, referencedTable, referencedColumn, reason }] } or null, aiKeysStatus, aiKeysError }",
+                    "aiKeys: { primaryKeys: [{ table, columns, reason }], foreignKeys: [{ table, column, referencedTable, referencedColumn, reason }], " +
+                    "tableGroups: [{ table, group: definition | computed, reason }] } or null, aiKeysStatus, aiKeysError }",
             },
             403: { description: "The user may not read this database." },
             404: { description: "The source is unknown to the user." },

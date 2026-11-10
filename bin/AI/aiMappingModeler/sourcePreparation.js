@@ -7,14 +7,13 @@ import { getSchemaDescription, getFilledSampleData } from "../../KG/dbConnector.
 import { callVocablesFunction } from "../../remoteCodeRunner.js";
 import csvCrawler from "../../_csvCrawler.js";
 import { databaseModel } from "../../../model/databases.js";
-import { getKnownAiKeys } from "./keyDetection.js";
+import { getKnownAiKeys, addAiKeysToSchema } from "./keyDetection.js";
 
 // a csv file, or a database out of reach, describes its columns and its rows only
 const noSchema = { columns: [], primaryKeys: [], foreignKeys: [], comments: [] };
 // where the mapping tools store the csv files of a source, one directory per source
 const csvDirectory = join(dirname(fileURLToPath(import.meta.url)), "../../../data/CSV");
 const sampleRowCount = 5;
-const aiForeignKeyPrefix = "found_in_the_data_";
 
 // per source, as a promise: a suggestion asked during the preparation waits for its end
 const preparedSources = {};
@@ -94,33 +93,8 @@ function getSchemaWithAiKeys(request, preparedSource) {
     if (!databaseSchema || !aiKeys) {
         return databaseSchema || null;
     }
-    // keys found before the schema declared them are left out
-    const declaredKeyTables = databaseSchema.schema.primaryKeys.map((keyColumn) => keyColumn.table_name);
-    const declaredForeignKeyColumns = databaseSchema.schema.foreignKeys.map((keyColumn) => keyColumn.table_name + "." + keyColumn.column_name);
-    const undeclaredPrimaryKeys = aiKeys.primaryKeys.filter((primaryKey) => !declaredKeyTables.includes(primaryKey.table));
-    const undeclaredForeignKeys = aiKeys.foreignKeys.filter((foreignKey) => !declaredForeignKeyColumns.includes(foreignKey.table + "." + foreignKey.column));
-    const aiPrimaryKeys = [];
-    undeclaredPrimaryKeys.forEach(function (primaryKey) {
-        primaryKey.columns.forEach((columnName) => aiPrimaryKeys.push({ table_name: primaryKey.table, column_name: columnName }));
-    });
-    // describeDatabase groups the columns of a foreign key by its constraint name
-    const aiForeignKeys = undeclaredForeignKeys.map((foreignKey) => ({
-        constraint_name: aiForeignKeyPrefix + foreignKey.column,
-        table_name: foreignKey.table,
-        column_name: foreignKey.column,
-        referenced_table: foreignKey.referencedTable,
-        referenced_column: foreignKey.referencedColumn,
-    }));
-    const schemaWithAiKeys = {
-        ...databaseSchema.schema,
-        primaryKeys: databaseSchema.schema.primaryKeys.concat(aiPrimaryKeys),
-        foreignKeys: databaseSchema.schema.foreignKeys.concat(aiForeignKeys),
-    };
-    // keys detected before the tables without identifier were told apart hold none
-    const aiTablesWithoutIdentifier = aiKeys.tablesWithoutIdentifier || [];
-    const undeclaredTablesWithoutIdentifier = aiTablesWithoutIdentifier.filter((tableWithoutIdentifier) => !declaredKeyTables.includes(tableWithoutIdentifier.table));
-    const keptAiKeys = { primaryKeys: undeclaredPrimaryKeys, tablesWithoutIdentifier: undeclaredTablesWithoutIdentifier, foreignKeys: undeclaredForeignKeys };
-    const databaseSchemaWithAiKeys = { database: databaseSchema.database, schema: schemaWithAiKeys, aiKeys: keptAiKeys };
+    const schemaAndAiKeys = addAiKeysToSchema(databaseSchema.schema, aiKeys);
+    const databaseSchemaWithAiKeys = { database: databaseSchema.database, schema: schemaAndAiKeys.schema, aiKeys: schemaAndAiKeys.aiKeys };
     return databaseSchemaWithAiKeys;
 }
 

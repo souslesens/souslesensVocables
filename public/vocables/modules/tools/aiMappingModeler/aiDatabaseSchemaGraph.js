@@ -77,15 +77,7 @@ var AIDatabaseSchemaGraph = (function () {
         });
         var edges = Object.values(foreignKeyEdges);
 
-        // a declared foreign key wins over the one the AI found on the same column, as in the column tree
-        var aiForeignKeys = tableKeys.aiKeys ? tableKeys.aiKeys.foreignKeys : [];
-        aiForeignKeys.forEach(function (aiForeignKey) {
-            var isDeclared = tableKeys.foreignKeys.some(function (foreignKey) {
-                return foreignKey.table_name == aiForeignKey.table && foreignKey.column_name == aiForeignKey.column;
-            });
-            if (isDeclared) {
-                return;
-            }
+        AIDataSourceManager.getUndeclaredAiForeignKeys().forEach(function (aiForeignKey) {
             edges.push({
                 id: "AI|" + aiForeignKey.table + "|" + aiForeignKey.column,
                 from: aiForeignKey.table,
@@ -308,9 +300,9 @@ var AIDatabaseSchemaGraph = (function () {
         PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
     };
 
-    // shaped as a table node of the data sources tree, whose parent is the data source
+    // shaped as a table node of the data sources tree, which names its data source
     self.showSampleData = function () {
-        var tableTreeNode = { parent: AIDataSourceManager.currentConfig.currentDataSource.id, data: self.currentTableNode.data };
+        var tableTreeNode = { data: $.extend({}, self.currentTableNode.data, { datasource: AIDataSourceManager.currentConfig.currentDataSource.id }) };
         AIMappingModeler.showSampleData(tableTreeNode);
     };
 

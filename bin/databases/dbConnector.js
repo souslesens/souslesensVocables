@@ -117,18 +117,21 @@ function withDataCheckTimeout(query, clientDriver) {
     return query.timeout(dataCheckTimeoutMs, { cancel: clientDriver !== "mssql" });
 }
 
-function getTextCastType(clientDriver) {
+// a column read as text, its name given as the binding of ??
+function getTextCastSql(clientDriver) {
     // VARCHAR would turn the unicode characters of an nvarchar column into "?" on sqlserver
-    return clientDriver === "mssql" ? "NVARCHAR(4000)" : "VARCHAR(4000)";
+    const textType = clientDriver === "mssql" ? "NVARCHAR(4000)" : "VARCHAR(4000)";
+    const textCastSql = "CAST(?? AS " + textType + ")";
+    return textCastSql;
 }
 
 // rows of a table, and for each column its non null and distinct values, in one scan
 async function getColumnProfile(connection, clientDriver, tableName, columnNames) {
-    const textType = getTextCastType(clientDriver);
+    const textCastSql = getTextCastSql(clientDriver);
     const selections = [connection.raw("COUNT(*) AS ??", ["rowCount"])];
     columnNames.forEach(function (columnName, columnIndex) {
         selections.push(connection.raw("COUNT(??) AS ??", [columnName, "filled" + columnIndex]));
-        selections.push(connection.raw("COUNT(DISTINCT CAST(?? AS " + textType + ")) AS ??", [columnName, "distinct" + columnIndex]));
+        selections.push(connection.raw("COUNT(DISTINCT " + textCastSql + ") AS ??", [columnName, "distinct" + columnIndex]));
     });
     const [counts] = await withDataCheckTimeout(connection(getTableReference(tableName, clientDriver)).select(selections), clientDriver);
     const columnsByName = {};
@@ -143,7 +146,7 @@ async function getColumnProfile(connection, clientDriver, tableName, columnNames
 async function getFilledSampleData(connection, clientDriver, tableName, columnName, limit) {
     const filledRowsQuery = connection(getTableReference(tableName, clientDriver))
         .select("*")
-        .whereRaw("LTRIM(RTRIM(CAST(?? AS " + getTextCastType(clientDriver) + "))) <> ''", [columnName])
+        .whereRaw("LTRIM(RTRIM(" + getTextCastSql(clientDriver) + ")) <> ''", [columnName])
         .limit(limit);
     const filledRows = await withDataCheckTimeout(filledRowsQuery, clientDriver);
     return filledRows;
@@ -152,7 +155,7 @@ async function getFilledSampleData(connection, clientDriver, tableName, columnNa
 // compared as text, since a link without a declared key may join columns of different types
 function getColumnTextValues(connection, clientDriver, tableName, columnName) {
     return connection(getTableReference(tableName, clientDriver))
-        .select({ value: connection.raw("CAST(?? AS " + getTextCastType(clientDriver) + ")", [columnName]) })
+        .select({ value: connection.raw(getTextCastSql(clientDriver), [columnName]) })
         .whereNotNull(columnName);
 }
 
@@ -163,4 +166,40 @@ async function getSharedDistinctValueCount(connection, clientDriver, leftTable, 
     return Number(sharedCount.count);
 }
 
-export { getConnection, getData, getKGModel, getKGModelAsync, getSchemaDescription, getSampleData, getColumnProfile, getSharedDistinctValueCount, getTableSchema, getFilledSampleData };
+// the values of the column held by the most rows, with some of those rows: [{ value, rowCount, rows }]
+async function getRepeatedValueRows(connection, clientDriver, tableName, columnName, valueLimit, rowLimit) {
+    const castColumnSql = getTextCastSql(clientDriver);
+    const repeatedValuesQuery = connection(getTableReference(tableName, clientDriver))
+        .select({ value: connection.raw(castColumnSql, [columnName]) })
+        .count({ rowCount: "*" })
+        .whereNotNull(columnName)
+        .groupByRaw(castColumnSql, [columnName])
+        .havingRaw("COUNT(*) > 1")
+        .orderBy("rowCount", "desc")
+        .limit(valueLimit);
+    const repeatedValues = await withDataCheckTimeout(repeatedValuesQuery, clientDriver);
+    const repeatedValueRows = [];
+    for (const repeatedValue of repeatedValues) {
+        const rowsQuery = connection(getTableReference(tableName, clientDriver))
+            .select("*")
+            .whereRaw(castColumnSql + " = ?", [columnName, repeatedValue.value])
+            .limit(rowLimit);
+        const rows = await withDataCheckTimeout(rowsQuery, clientDriver);
+        repeatedValueRows.push({ value: repeatedValue.value, rowCount: Number(repeatedValue.rowCount), rows: rows });
+    }
+    return repeatedValueRows;
+}
+
+export {
+    getConnection,
+    getData,
+    getKGModel,
+    getKGModelAsync,
+    getSchemaDescription,
+    getSampleData,
+    getColumnProfile,
+    getSharedDistinctValueCount,
+    getTableSchema,
+    getFilledSampleData,
+    getRepeatedValueRows,
+};

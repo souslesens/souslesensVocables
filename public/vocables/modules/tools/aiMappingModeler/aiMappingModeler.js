@@ -297,6 +297,68 @@ var AIMappingModeler = (function () {
         }
     };
 
+    self.columnColor = "#cb9801";
+    self.keyTextColor = "#888";
+    self.aiWarningColor = "#c0392b";
+    self.aiRejectedColor = "#d35400";
+
+    // a column of the proposal tree with its keys, declared or found by the AI, the reason of an AI key on hover, and the
+    // foreign keys the AI rejected, their reasons on hover
+    self.getColumnNodeText = function (column) {
+        var columnKeyText = AIDataSourceManager.getColumnKeyText(self.currentTable.name, column);
+        var columnNodeText = $("<span>").css("color", self.columnColor).text(column)[0].outerHTML;
+        if (columnKeyText) {
+            var keySpan = $("<span>")
+                .css({ color: self.keyTextColor, "font-size": "10px", "font-weight": "bold" })
+                .attr("title", AIDataSourceManager.getColumnAiKeyReason(self.currentTable.name, column))
+                .text(columnKeyText);
+            columnNodeText += " " + keySpan[0].outerHTML;
+        }
+        var rejectedPairs = AIDataSourceManager.getColumnRejectedPairs(self.currentTable.name, column);
+        if (rejectedPairs.length > 0) {
+            var rejectedPairTexts = rejectedPairs.map(function (rejectedPair) {
+                return "-> " + rejectedPair.referencedTable + "." + rejectedPair.referencedColumn + ": " + rejectedPair.reason;
+            });
+            var rejectedSpan = $("<span>").css({ color: self.aiRejectedColor, "font-size": "10px", "font-weight": "bold" }).attr("title", rejectedPairTexts.join("\n")).text("AI FK rejected");
+            columnNodeText += " " + rejectedSpan[0].outerHTML;
+        }
+        return columnNodeText;
+    };
+
+    // the Columns title, followed by a warning when the AI found no column identifying the object of the table, its reason on
+    // hover, or gave no decision on the table
+    self.getColumnsNodeText = function () {
+        var titleText = "<span style='font-weight:bold;font-size:large;color:" + self.columnColor + "'>Columns</span>";
+        if (!self.currentTable) {
+            return titleText;
+        }
+        var tableWithoutIdentifier = AIDataSourceManager.getTableWithoutIdentifier(self.currentTable.name);
+        var warningSpan = $("<span>").css({ color: self.aiWarningColor, "font-size": "10px", "font-weight": "bold" });
+        if (tableWithoutIdentifier) {
+            var togetherText = tableWithoutIdentifier.columns.length > 0 ? ", " + tableWithoutIdentifier.columns.join(" + ") + " together" : "";
+            warningSpan.attr("title", tableWithoutIdentifier.reason).text("AI: no identifier column, create a virtual column" + togetherText);
+        } else if (AIDataSourceManager.isTableUndecided(self.currentTable.name)) {
+            warningSpan.text("AI: no decision on the identifier of this table");
+        } else {
+            return titleText;
+        }
+        var columnsNodeText = titleText + " " + warningSpan[0].outerHTML;
+        return columnsNodeText;
+    };
+
+    // the keys found by the AI arrive after the tree: the column nodes shown take them where they stand
+    self.updateColumnNodeTexts = function () {
+        var proposalTree = $("#suggestionsSelectJstreeDiv").jstree(true);
+        var columnsNode = proposalTree ? proposalTree.get_node("Columns") : null;
+        if (!columnsNode || !self.currentTable) {
+            return;
+        }
+        proposalTree.rename_node("Columns", self.getColumnsNodeText());
+        columnsNode.children.forEach(function (columnNodeId) {
+            proposalTree.rename_node(columnNodeId, self.getColumnNodeText(columnNodeId));
+        });
+    };
+
     /**
      * Loads and initializes a suggestion tree in the specified container.
      * @function
@@ -382,7 +444,7 @@ var AIMappingModeler = (function () {
         self.sourcesMap = {};
         var color = "#333";
         if (parentName == "Columns") {
-            color = "#cb9801";
+            color = self.columnColor;
         } else if (parentName == "Classes") {
             color = "#00afef";
         } else if (parentName == "Properties") {
@@ -391,7 +453,7 @@ var AIMappingModeler = (function () {
         jstreeData.push({
             id: parentName,
             parent: "#", // AIMappingModeler.currentTable,
-            text: "<span style='font-weight:bold;font-size:large;color:" + color + "'>" + parentName + "</span>",
+            text: parentName == "Columns" ? self.getColumnsNodeText() : "<span style='font-weight:bold;font-size:large;color:" + color + "'>" + parentName + "</span>",
             data: {
                 id: parentName,
                 label: parentName,
@@ -474,12 +536,11 @@ var AIMappingModeler = (function () {
         } else {
             objects.forEach(function (item) {
                 if (item != "" && item != "#") {
-                    var columnKeyText = parentName == "Columns" ? AIDataSourceManager.getColumnKeyText(self.currentTable.name, item) : "";
-                    var keyText = columnKeyText ? " <span style='color:#888;font-size:10px;font-weight:bold'>" + columnKeyText + "</span>" : "";
+                    var itemText = parentName == "Columns" ? self.getColumnNodeText(item) : "<span  style='color:" + color + "'>" + item + "</span>";
                     jstreeData.push({
                         id: item,
                         parent: parentName,
-                        text: "<span  style='color:" + color + "'>" + item + "</span>" + keyText,
+                        text: itemText,
                         data: {
                             id: item,
                             label: item,

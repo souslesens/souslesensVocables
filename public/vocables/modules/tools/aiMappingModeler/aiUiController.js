@@ -35,12 +35,20 @@ var AIUIcontroller = (function () {
         }
         if (tabId == "MappingModeler_columnsTab") {
             AIColumnClassSuggestion.onColumnsListed();
+            AIMappingModeler.currentResourceType = "Column";
             //$("#MappingModeler_currentDataSource").html(AIDataSourceManager.currentConfig.currentDataSource.name);
             $("#rightControlPanelDiv").load("./modules/tools/aiMappingModeler/html/mappingsGraphButtons.html", function (err) {
                 $("#mappingModeler_structuralPanel").css("display", "block");
                 AIMappingModeler.initActiveLegend(AIMappingModeler.legendGraphDivId, function () {
                     // the legend can answer up to 30 s later, after the table was left for its data source
                     if (!AIMappingModeler.currentTable) {
+                        return;
+                    }
+                    // opening a table draws the legend twice, the replaced one answers 30 s later: a list chosen meanwhile stays
+                    if (AIMappingModeler.currentResourceType != "Column") {
+                        if (callback) {
+                            callback();
+                        }
                         return;
                     }
                     AIMappingModeler.loadSuggestionSelectJstree(AIMappingModeler.currentTable.columns, "Columns", callback);

@@ -1,0 +1,136 @@
+<style>
+    .keyPropagation-dialog {
+        font-size: 14px;
+        max-width: 640px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .keyPropagation-question {
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 6px;
+    }
+    .keyPropagation-column {
+        color: #cb9801;
+    }
+    .keyPropagation-groupTitle {
+        font-weight: bold;
+        font-size: large;
+        color: #cb9801;
+    }
+    .keyPropagation-keyText {
+        color: #888;
+        font-size: 10px;
+        font-weight: bold;
+    }
+    .keyPropagation-strong {
+        color: #1e8449;
+        font-size: 10px;
+        font-weight: bold;
+    }
+    .keyPropagation-partial {
+        color: #e69500;
+        font-size: 10px;
+        font-weight: bold;
+    }
+    .keyPropagation-weak {
+        color: #c0392b;
+        font-size: 10px;
+        font-weight: bold;
+    }
+    .keyPropagation-compareLink {
+        color: #2f6fe4;
+        font-size: 11px;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    #keyPropagation_treeDiv .keyPropagation-noCheckbox > .jstree-checkbox {
+        display: none;
+    }
+    .keyPropagation-buttons {
+        display: flex;
+        gap: 8px;
+    }
+    .keyPropagation-compare {
+        font-size: 13px;
+        max-width: 760px;
+    }
+    .keyPropagation-signals {
+        margin: 6px 0 0;
+        padding-left: 18px;
+        font-size: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .keyPropagation-signal-strong {
+        color: #1e8449;
+    }
+    .keyPropagation-signal-partial {
+        color: #e69500;
+    }
+    .keyPropagation-signal-weak {
+        color: #c0392b;
+    }
+    .keyPropagation-shapes {
+        margin: 2px 0 0;
+        padding-left: 16px;
+        color: #222;
+        list-style: circle;
+    }
+    .keyPropagation-value {
+        color: #cb9801;
+        white-space: pre;
+    }
+    .keyPropagation-missingValue {
+        color: #c0392b;
+        font-weight: bold;
+        white-space: pre;
+    }
+    .keyPropagation-shape {
+        color: #6f6f6f;
+        font-family: monospace;
+        cursor: help;
+    }
+    .keyPropagation-sampleTitle {
+        font-weight: bold;
+        font-size: 12px;
+        margin-top: 10px;
+    }
+    .keyPropagation-sampleBox {
+        overflow-x: auto;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-top: 4px;
+    }
+    .keyPropagation-sample {
+        border-collapse: collapse;
+        font-size: 12px;
+    }
+    .keyPropagation-sample th {
+        text-align: left;
+        color: #888;
+    }
+    .keyPropagation-sample th,
+    .keyPropagation-sample td {
+        white-space: nowrap;
+        padding: 2px 10px;
+        border-bottom: 1px solid #eee;
+    }
+    .keyPropagation-aiReason {
+        color: #888;
+        font-size: 12px;
+        font-style: italic;
+        margin-top: 10px;
+    }
+</style>
+
+<div class="keyPropagation-dialog">
+    <div id="keyPropagation_introDiv"></div>
+    <div id="keyPropagation_treeDiv"></div>
+    <div class="keyPropagation-buttons">
+        <button class="slsv-button-1" id="keyPropagation_mapButton" onclick="AIKeyClassPropagation.applyCheckedProposals()">Map</button>
+        <button class="slsv-button-1" onclick="$('#mainDialogDiv').dialog('close')">Cancel</button>
+    </div>
+</div>

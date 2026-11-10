@@ -127,7 +127,7 @@ var AIDataSourceManager = (function () {
             contextMenu: function (node, x) {
                 self.currentDataSourceTreeNode = node;
                 var items = {};
-                if (node.id == self.allDataSourcesNodeId) {
+                if (node.id == self.allDataSourcesNodeId || node.data.type == "tableGroup") {
                     return items;
                 } else if (node.id == "databaseSources") {
                     items.addDatabaseSource = {
@@ -527,6 +527,159 @@ var AIDataSourceManager = (function () {
         return isUndecided;
     };
 
+    // a declared foreign key wins over the one the AI found on the same column, as in the column tree
+    self.getUndeclaredAiForeignKeys = function () {
+        var tableKeys = self.currentConfig.currentDataSource ? self.currentConfig.currentDataSource.tableKeys : null;
+        if (!tableKeys || !tableKeys.aiKeys) {
+            return [];
+        }
+        var undeclaredAiForeignKeys = tableKeys.aiKeys.foreignKeys.filter(function (aiForeignKey) {
+            var isDeclared = tableKeys.foreignKeys.some(function (foreignKey) {
+                return foreignKey.table_name == aiForeignKey.table && foreignKey.column_name == aiForeignKey.column;
+            });
+            return !isDeclared;
+        });
+        return undeclaredAiForeignKeys;
+    };
+
+    // the most linked tables first; on a tie the most referenced, since an association table points at others but no
+    // table points at it
+    self.getTablesByLinkCount = function () {
+        var tableKeys = self.currentConfig.currentDataSource.tableKeys;
+        var tableLinksByTable = {};
+        for (var table in self.currentConfig.currentDataSource.tables) {
+            tableLinksByTable[table] = { table: table, referencingTables: [], referencedTables: [] };
+        }
+        var declaredLinks = tableKeys
+            ? tableKeys.foreignKeys.map(function (foreignKey) {
+                  return { from: foreignKey.table_name, to: foreignKey.referenced_table };
+              })
+            : [];
+        var aiLinks = self.getUndeclaredAiForeignKeys().map(function (aiForeignKey) {
+            return { from: aiForeignKey.table, to: aiForeignKey.referencedTable };
+        });
+        var foreignKeyLinks = declaredLinks.concat(aiLinks);
+        // a composite key gives one row per column: a linked table counts once
+        foreignKeyLinks.forEach(function (foreignKeyLink) {
+            var fromTableLinks = tableLinksByTable[foreignKeyLink.from];
+            var toTableLinks = tableLinksByTable[foreignKeyLink.to];
+            if (foreignKeyLink.from == foreignKeyLink.to || !fromTableLinks || !toTableLinks) {
+                return;
+            }
+            if (toTableLinks.referencingTables.indexOf(foreignKeyLink.from) < 0) {
+                toTableLinks.referencingTables.push(foreignKeyLink.from);
+            }
+            if (fromTableLinks.referencedTables.indexOf(foreignKeyLink.to) < 0) {
+                fromTableLinks.referencedTables.push(foreignKeyLink.to);
+            }
+        });
+        var tablesByLinkCount = Object.values(tableLinksByTable);
+        tablesByLinkCount.sort(function (tableLinks, otherTableLinks) {
+            var linkCount = tableLinks.referencingTables.length + tableLinks.referencedTables.length;
+            var otherLinkCount = otherTableLinks.referencingTables.length + otherTableLinks.referencedTables.length;
+            if (linkCount != otherLinkCount) {
+                return otherLinkCount - linkCount;
+            }
+            var referencingDifference = otherTableLinks.referencingTables.length - tableLinks.referencingTables.length;
+            if (referencingDifference != 0) {
+                return referencingDifference;
+            }
+            var nameOrder = tableLinks.table.localeCompare(otherTableLinks.table);
+            return nameOrder;
+        });
+        return tablesByLinkCount;
+    };
+
+    // the groups of tables the AI suggests, named as in table_groups.md, shown in this order below the main list
+    self.tableGroupLabels = { definition: "Definition tables (AI suggestion)", computed: "Computed tables (AI suggestion)" };
+
+    // order, link count and triple count of the table nodes; the keys of the AI come minutes after the tree, the triple
+    // counts in the background, and each sets them again
+    self.refreshTableNodes = function () {
+        var dataSource = self.currentConfig.currentDataSource;
+        if (!dataSource || dataSource.type == "csvSource") {
+            return;
+        }
+        var dataSourceTree = $("#" + self.dataSourcejstreeDivId).jstree(true);
+        var dataSourceNode = dataSourceTree ? dataSourceTree.get_node(dataSource.id) : null;
+        if (!dataSourceNode) {
+            return;
+        }
+        var mappedTables = AIMappingColumnsGraph.getDatasourceTablesFromVisjsGraph();
+        var tablesByLinkCount = self.getTablesByLinkCount();
+        // ids are shared by the whole tree: a table named as another node was never created under its database
+        var tablesInTree = tablesByLinkCount.filter(function (tableLinks) {
+            var tableNode = dataSourceTree.get_node(tableLinks.table);
+            return tableNode && tableNode.data.datasource == dataSource.id;
+        });
+        var tableGroups = dataSource.tableKeys && dataSource.tableKeys.aiKeys ? dataSource.tableKeys.aiKeys.tableGroups || [] : [];
+        var groupNames = Object.keys(self.tableGroupLabels);
+        var tablesByParentId = {};
+        tablesByParentId[dataSource.id] = [];
+        groupNames.forEach(function (groupName) {
+            tablesByParentId[dataSource.id + "|" + groupName] = [];
+        });
+        tablesInTree.forEach(function (tableLinks) {
+            var tableNode = dataSourceTree.get_node(tableLinks.table);
+            var tableText = tableLinks.table;
+            if (mappedTables.includes(tableLinks.table)) {
+                var tripleCount = self.statsMap[tableLinks.table];
+                var tripleCountText = tripleCount ? "<b> " + tripleCount + " Triples</b>" : "";
+                tableText = "<span style='color:blue'>" + tableLinks.table + tripleCountText + "</span>";
+            }
+            // without the keys, every count is a 0 that says nothing
+            if (dataSource.tableKeys) {
+                tableText += " <i>(" + tableLinks.referencingTables.length + " in, " + tableLinks.referencedTables.length + " out)</i>";
+                tableNode.a_attr.title = "Referenced by: " + (tableLinks.referencingTables.join(", ") || "none") + "\nPoints at: " + (tableLinks.referencedTables.join(", ") || "none");
+            }
+            tableNode.text = tableText;
+            var tableGroup = tableGroups.find(function (aiTableGroup) {
+                return aiTableGroup.table == tableLinks.table;
+            });
+            var tableParentId = dataSource.id;
+            if (tableGroup) {
+                tableParentId = dataSource.id + "|" + tableGroup.group;
+                tableNode.a_attr.title = "AI suggestion: " + tableGroup.reason + "\n" + tableNode.a_attr.title;
+            }
+            tablesByParentId[tableParentId].push(tableLinks.table);
+        });
+
+        // a group exists before its tables move into it, and an emptied group goes once its tables left it
+        var groupNodeIds = [];
+        groupNames.forEach(function (groupName) {
+            var groupNodeId = dataSource.id + "|" + groupName;
+            if (tablesByParentId[groupNodeId].length == 0) {
+                return;
+            }
+            var groupText = self.tableGroupLabels[groupName] + " (" + tablesByParentId[groupNodeId].length + ")";
+            if (!dataSourceTree.get_node(groupNodeId)) {
+                dataSourceTree.create_node(dataSource.id, { id: groupNodeId, text: groupText, data: { type: "tableGroup" } }, "last");
+            }
+            dataSourceTree.get_node(groupNodeId).text = groupText;
+            groupNodeIds.push(groupNodeId);
+        });
+        for (var parentId in tablesByParentId) {
+            tablesByParentId[parentId].forEach(function (table) {
+                if (dataSourceTree.get_node(table).parent != parentId) {
+                    dataSourceTree.move_node(table, parentId, "last");
+                }
+            });
+        }
+        groupNames.forEach(function (groupName) {
+            var groupNodeId = dataSource.id + "|" + groupName;
+            if (tablesByParentId[groupNodeId].length == 0 && dataSourceTree.get_node(groupNodeId)) {
+                dataSourceTree.delete_node(groupNodeId);
+            }
+        });
+
+        // the moves leave each parent with its tables, only their order is set here
+        groupNodeIds.forEach(function (groupNodeId) {
+            dataSourceTree.get_node(groupNodeId).children = tablesByParentId[groupNodeId];
+        });
+        dataSourceNode.children = tablesByParentId[dataSource.id].concat(groupNodeIds);
+        dataSourceTree.redraw_node(dataSourceNode, true);
+    };
+
     // one reading of the keys waits at a time, whatever the data sources opened meanwhile
     self.aiKeysPollTimer = null;
 
@@ -576,9 +729,14 @@ var AIDataSourceManager = (function () {
             url: self.getTableKeysUrl(dataSource),
             dataType: "json",
             success: function (tableKeys) {
+                // another data source was opened while the keys were read
+                if (!self.currentConfig.currentDataSource || self.currentConfig.currentDataSource.id != dataSource) {
+                    return;
+                }
                 self.setTableKeys(dataSource, tableKeys);
                 if (tableKeys.aiKeysStatus == "done") {
                     AIMappingModeler.updateColumnNodeTexts();
+                    self.refreshTableNodes();
                     if ($("#" + AIDatabaseSchemaGraph.graphDiv).css("display") != "none") {
                         AIDatabaseSchemaGraph.drawDatabaseSchema();
                     }
@@ -651,33 +809,23 @@ var AIDataSourceManager = (function () {
 
                 function (callbackSeries) {
                     var jstreeData = [];
-                    var dataTables = AIMappingColumnsGraph.getDatasourceTablesFromVisjsGraph();
                     for (var table in self.currentConfig.currentDataSource.tables) {
-                        var label = table;
-                        var color = "blue";
-                        if (dataTables.includes(table)) {
-                            var nTriples = self.statsMap[table];
-                            var strStats = "";
-                            if (nTriples) {
-                                color = "green";
-                                strStats = "<b> " + nTriples + " Triples</b>";
-                            }
-
-                            label = "<span style='color:blue'>" + table + strStats + "</span>";
-                        }
                         jstreeData.push({
                             id: table,
-                            text: label,
+                            text: table,
                             type: "Table",
                             parent: self.currentConfig.dataSource,
                             data: {
                                 id: table,
                                 label: table,
                                 type: "table",
+                                // the table may sit in a group of tables, below its database
+                                datasource: self.currentConfig.currentDataSource.id,
                             },
                         });
                     }
                     JstreeWidget.addNodesToJstree(self.dataSourcejstreeDivId, self.currentConfig.currentDataSource.id, jstreeData);
+                    self.refreshTableNodes();
                     callbackSeries();
                 },
             ],
@@ -798,6 +946,10 @@ var AIDataSourceManager = (function () {
      * @returns {void}
      */
     self.onDataSourcesJstreeSelect = function (event, obj, callback) {
+        // a group of tables only folds them, the current node and the graph stay those of the last table
+        if (obj.node.data.type == "tableGroup") {
+            return;
+        }
         AIMappingModeler.currentTreeNode = obj.node;
         if (obj.event && obj.event.button == 2) {
             return;
@@ -862,7 +1014,7 @@ var AIDataSourceManager = (function () {
         if (obj.node.type == "Table") {
             var parentDataSourceName = $("#" + self.dataSourcejstreeDivId)
                 .jstree()
-                .get_node(obj.node.parent).text;
+                .get_node(obj.node.data.datasource).text;
             dataSourceLabel = parentDataSourceName + " : " + obj.node.data.id;
         }
         $("#MappingModeler_currentDataSource").html(dataSourceLabel);
@@ -1159,7 +1311,7 @@ var AIDataSourceManager = (function () {
 
     /**
      * Patches CSV datasource labels in the tree with fresh triple counts, without rebuilding the tree.
-     * Database table labels read self.statsMap lazily on expand, so they need no patching here.
+     * Database table labels also carry their link count, refreshTableNodes writes them.
      * @param {object} statsMap map: datasource/table name -> triples count
      */
     self.updateTreeStats = function (statsMap) {
@@ -1172,7 +1324,7 @@ var AIDataSourceManager = (function () {
         }
         for (var tableName in statsMap) {
             var node = tree.get_node(tableName);
-            if (!node) {
+            if (!node || node.type == "Table") {
                 continue;
             }
             var nTriples = statsMap[tableName];
@@ -1180,6 +1332,7 @@ var AIDataSourceManager = (function () {
             var label = "<span style='color:blue'>" + tableName + strStats + "</span>";
             tree.rename_node(node, label);
         }
+        self.refreshTableNodes();
     };
     return self;
 })();

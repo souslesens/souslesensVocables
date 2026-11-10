@@ -1726,7 +1726,7 @@ var AIMappingModeler = (function () {
             dataSourceId = node.id;
             table = node.id;
         } else if (node.data.type == "table") {
-            dataSourceId = node.parent;
+            dataSourceId = node.data.datasource;
             table = node.data.id;
         }
         if (!dataSourceId || !table) {

@@ -190,7 +190,56 @@ async function getRepeatedValueRows(connection, clientDriver, tableName, columnN
     return repeatedValueRows;
 }
 
+// the distinct values of the left column absent from the right one, compared as text; EXCEPT reads each table once where
+// NOT IN timed out on a big key table
+async function getMissingTextValues(connection, clientDriver, leftTable, leftColumn, rightTable, rightColumn, valueLimit) {
+    const missingValues = getColumnTextValues(connection, clientDriver, leftTable, leftColumn).except(getColumnTextValues(connection, clientDriver, rightTable, rightColumn));
+    const missingValuesQuery = connection.from(missingValues.as("missingValues")).select("value").limit(valueLimit);
+    const missingRows = await withDataCheckTimeout(missingValuesQuery, clientDriver);
+    const missingTextValues = missingRows.map((missingRow) => missingRow.value);
+    return missingTextValues;
+}
+
+// keeps the rows whose column, read as text, holds one of the values
+function whereTextValueIn(query, clientDriver, columnName, values) {
+    const valuePlaceholders = values.map(() => "?");
+    query.whereRaw(getTextCastSql(clientDriver) + " IN (" + valuePlaceholders.join(", ") + ")", [columnName, ...values]);
+}
+
+// the distinct values of the column read as text, only those among amongValues when given
+async function getDistinctTextValues(connection, clientDriver, tableName, columnName, valueLimit, amongValues) {
+    const textCastSql = getTextCastSql(clientDriver);
+    const distinctValuesQuery = connection(getTableReference(tableName, clientDriver))
+        .distinct({ value: connection.raw(textCastSql, [columnName]) })
+        .whereNotNull(columnName)
+        .orderBy("value")
+        .limit(valueLimit);
+    if (amongValues) {
+        if (amongValues.length == 0) {
+            return [];
+        }
+        whereTextValueIn(distinctValuesQuery, clientDriver, columnName, amongValues);
+    }
+    const distinctRows = await withDataCheckTimeout(distinctValuesQuery, clientDriver);
+    const distinctValues = distinctRows.map((distinctRow) => distinctRow.value);
+    return distinctValues;
+}
+
+// the rows whose column, read as text, holds one of the values
+async function getRowsHoldingTextValues(connection, clientDriver, tableName, columnName, values, rowLimit) {
+    if (values.length == 0) {
+        return [];
+    }
+    const rowsQuery = connection(getTableReference(tableName, clientDriver)).select("*").limit(rowLimit);
+    whereTextValueIn(rowsQuery, clientDriver, columnName, values);
+    const rows = await withDataCheckTimeout(rowsQuery, clientDriver);
+    return rows;
+}
+
 export {
+    getMissingTextValues,
+    getDistinctTextValues,
+    getRowsHoldingTextValues,
     getConnection,
     getData,
     getKGModel,

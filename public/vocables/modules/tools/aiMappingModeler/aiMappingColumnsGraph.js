@@ -166,6 +166,59 @@ var AIMappingColumnsGraph = (function () {
         };
     };
 
+    self.tableColumnEdgeColor = "#8f8a8c";
+
+    // a database column of the table, not drawn yet
+    self.getVisjsColumnNode = function (table, column) {
+        var columnLegendItem = AIMappingModeler.legendItems.Column;
+        var columnNode = {
+            id: common.getRandomHexaId(8),
+            label: column,
+            shape: columnLegendItem.shape,
+            color: columnLegendItem.color,
+            level: 0,
+            data: {
+                id: column,
+                label: column,
+                type: "Column",
+                dataTable: table,
+                datasource: AIDataSourceManager.currentConfig.currentDataSource.id,
+            },
+        };
+        return columnNode;
+    };
+
+    self.getTableColumnEdge = function (table, columnNodeId) {
+        var tableColumnEdge = { from: table, to: columnNodeId, color: self.tableColumnEdgeColor };
+        return tableColumnEdge;
+    };
+
+    // the database column drawn in the table, null when it is not drawn
+    self.findColumnNode = function (table, column) {
+        var columnNodes = self.visjsGraph.data.nodes.get({
+            filter: function (graphNode) {
+                return graphNode.data && graphNode.data.type == "Column" && graphNode.data.dataTable == table && graphNode.label == column;
+            },
+        });
+        var columnNode = columnNodes.length > 0 ? columnNodes[0] : null;
+        return columnNode;
+    };
+
+    // the edge giving a column its class, rdf:type, or a class its parent, rdfs:subClassOf
+    self.getClassEdge = function (fromId, classId, label, type) {
+        var classEdge = {
+            id: common.getRandomHexaId(5),
+            from: fromId,
+            label: label,
+            to: classId,
+            width: 3,
+            data: { type: type },
+            arrows: { to: { enabled: true, type: "arrow" } },
+            color: "#00afef",
+        };
+        return classEdge;
+    };
+
     /**
      * Draws a new resource node in the Vis.js graph.
      * Positions the node dynamically and links it with existing nodes if necessary.
@@ -181,13 +234,6 @@ var AIMappingColumnsGraph = (function () {
         }
         self.graphDivWidth = $("#mappingModeler_graphDiv").width();
         minX = -self.graphDivWidth / 2 + stepX;
-        var arrows = {
-            to: {
-                enabled: true,
-                type: "arrow",
-            },
-        };
-        var edgeColor = "#00afef";
 
         if (self.currentGraphNode && newResource.data.type == "Class") {
             newResource.level = 3;
@@ -238,17 +284,7 @@ var AIMappingColumnsGraph = (function () {
                         type = "rdf:type";
                     }
 
-                    var edgeId = common.getRandomHexaId(5);
-                    visjsData.edges.push({
-                        id: edgeId,
-                        from: self.currentGraphNode.id,
-                        label: label,
-                        to: newResource.id,
-                        width: 3,
-                        data: { type: type },
-                        arrows: arrows,
-                        color: edgeColor,
-                    });
+                    visjsData.edges.push(self.getClassEdge(self.currentGraphNode.id, newResource.id, label, type));
 
                     //  self.updateCurrentGraphNode(visjsNode);
                     if (options.noSave) {

@@ -27,6 +27,7 @@ import AIMappingColumnsGraph from "./aiMappingColumnsGraph.js";
 import authentication from "../../shared/authentification.js";
 import AIColumnClassSuggestion from "./aiColumnClassSuggestion.js";
 import AIColumnRestrictionSuggestion from "./aiColumnRestrictionSuggestion.js";
+import AIKeyClassPropagation from "./aiKeyClassPropagation.js";
 
 /**
  * AIMappingModeler module.
@@ -640,35 +641,12 @@ var AIMappingModeler = (function () {
         } else if (resourceUri == "valuesOfColumn") {
             return self.showValuesOfColumnPredicateDialog();
         } else if (self.currentResourceType == "Column") {
-            // Verify that he not already exists
-            var nodeInVisjsGraph = AIMappingColumnsGraph.visjsGraph.data.nodes.get().filter(function (node) {
-                return node.data.dataTable == self.currentTable.name && node.data.type == "Column" && resourceUri == node.label;
-            });
-            if (nodeInVisjsGraph.length > 0) {
+            if (AIMappingColumnsGraph.findColumnNode(self.currentTable.name, resourceUri)) {
                 return alert("Column already exists in the graph");
             }
-
-            newResource = {
-                id: id,
-                label: resourceUri,
-                shape: self.legendItems[self.currentResourceType].shape,
-                color: self.legendItems[self.currentResourceType].color,
-                level: 0,
-                data: {
-                    id: resourceUri,
-                    label: resourceUri,
-                    type: self.currentResourceType,
-                    dataTable: self.currentTable.name,
-                    datasource: AIDataSourceManager.currentConfig.currentDataSource.id,
-                },
-            };
+            newResource = AIMappingColumnsGraph.getVisjsColumnNode(self.currentTable.name, resourceUri);
             AIMappingColumnsGraph.drawResource(newResource, null, function () {
-                var edge = {
-                    to: id,
-                    from: self.currentTable.name,
-                    color: "#8f8a8c",
-                };
-                AIMappingColumnsGraph.visjsGraph.data.edges.add(edge);
+                AIMappingColumnsGraph.visjsGraph.data.edges.add(AIMappingColumnsGraph.getTableColumnEdge(self.currentTable.name, newResource.id));
             });
             AIColumnClassSuggestion.suggest(newResource);
 
@@ -750,6 +728,7 @@ var AIMappingModeler = (function () {
 
             AIMappingColumnsGraph.drawResource(newResource);
             AIColumnRestrictionSuggestion.suggest(classifiedNode);
+            AIKeyClassPropagation.proposeClassPropagation(classifiedNode, newResource);
 
             setTimeout(function () {
                 self.onLegendNodeClick({ id: "Column" });

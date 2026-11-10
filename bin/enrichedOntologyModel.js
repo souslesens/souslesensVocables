@@ -8,10 +8,13 @@ const axiomExtractorUrl = new URL("../public/vocables/modules/tools/axioms/axiom
 const rdfsNamespace = "http://www.w3.org/2000/01/rdf-schema#";
 const skosNamespace = "http://www.w3.org/2004/02/skos/core#";
 const iofAnnotationNamespace = "https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/";
+// the annotation vocabulary of the IOF releases of 2026
+const iofConstructAnnotationNamespace = "https://spec.industrialontologies.org/ontology/annotation/";
 // BFO defines with skos:definition, IOF with its own annotation vocabulary
 const textFieldByPredicate = {
     [skosNamespace + "definition"]: "definitions",
     [iofAnnotationNamespace + "naturalLanguageDefinition"]: "definitions",
+    [iofConstructAnnotationNamespace + "naturalLanguageDefinition"]: "definitions",
     [skosNamespace + "example"]: "examples",
 };
 const axiomFieldByManchesterKeyword = {

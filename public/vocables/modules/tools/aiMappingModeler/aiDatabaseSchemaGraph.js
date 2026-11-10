@@ -285,6 +285,7 @@ var AIDatabaseSchemaGraph = (function () {
 
     // the tree selection opens the mapping of the table and brings the mapping graph back
     self.onSchemaGraphClick = function (node) {
+        PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
         // an edge or the blank canvas
         if (!node || !node.data) {
             return;

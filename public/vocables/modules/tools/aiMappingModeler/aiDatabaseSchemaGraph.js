@@ -35,16 +35,16 @@ var AIDatabaseSchemaGraph = (function () {
     self.maxSeparationPasses = 200;
     // the html labels of vis.js collapse a run of plain spaces
     self.paddingSpace = "\u00a0";
+    self.detailsCellCss = { padding: "2px 8px" };
 
     self.showMappingGraph = function () {
         $("#" + self.graphDiv).css("display", "none");
         $("#" + AIMappingColumnsGraph.graphDiv).css("display", "block");
     };
 
-    self.drawDatabaseSchema = function () {
+    // the columns of the current database drawn in the mapping graph, per table
+    self.getMappedColumnsByTable = function () {
         var dataSource = AIDataSourceManager.currentConfig.currentDataSource;
-        var tableKeys = dataSource.tableKeys || { foreignKeys: [], aiKeys: null };
-
         var mappedColumnsByTable = {};
         AIMappingColumnsGraph.visjsGraph.data.nodes.forEach(function (graphNode) {
             var isDataSourceColumn = graphNode.data && graphNode.data.type == "Column" && graphNode.data.datasource == dataSource.id;
@@ -56,6 +56,30 @@ var AIDatabaseSchemaGraph = (function () {
             }
             mappedColumnsByTable[graphNode.data.dataTable].push(graphNode.data.label);
         });
+        return mappedColumnsByTable;
+    };
+
+    // the columns of a table of the current database, its primary key first: [{ name, type, keyText }]
+    self.getOrderedColumnRows = function (table) {
+        var dataSource = AIDataSourceManager.currentConfig.currentDataSource;
+        var columnTypes = dataSource.columnTypes[table];
+        var columnRows = dataSource.tables[table].map(function (column) {
+            return { name: column, type: columnTypes[column], keyText: AIDataSourceManager.getColumnKeyText(table, column) };
+        });
+        var primaryKeyRows = columnRows.filter(function (columnRow) {
+            return columnRow.keyText.indexOf("PK") > -1;
+        });
+        var otherRows = columnRows.filter(function (columnRow) {
+            return columnRow.keyText.indexOf("PK") < 0;
+        });
+        var orderedRows = primaryKeyRows.concat(otherRows);
+        return orderedRows;
+    };
+
+    self.drawDatabaseSchema = function () {
+        var dataSource = AIDataSourceManager.currentConfig.currentDataSource;
+        var tableKeys = dataSource.tableKeys || { foreignKeys: [], aiKeys: null };
+        var mappedColumnsByTable = self.getMappedColumnsByTable();
 
         // a composite foreign key is one edge carrying all its column pairs
         var foreignKeyEdges = {};
@@ -108,33 +132,27 @@ var AIDatabaseSchemaGraph = (function () {
         var nodes = [];
         for (var table in dataSource.tables) {
             var mappedColumns = mappedColumnsByTable[table] || [];
-            var columnTypes = dataSource.columnTypes[table];
-            var columnRows = dataSource.tables[table].map(function (column) {
-                return { name: column, type: columnTypes[column], keyText: AIDataSourceManager.getColumnKeyText(table, column) };
-            });
-            var primaryKeyRows = columnRows.filter(function (columnRow) {
+            // the other columns are in the table details of the context menu, the boxes stay small
+            var primaryKeyRows = self.getOrderedColumnRows(table).filter(function (columnRow) {
                 return columnRow.keyText.indexOf("PK") > -1;
             });
-            var otherRows = columnRows.filter(function (columnRow) {
-                return columnRow.keyText.indexOf("PK") < 0;
-            });
-            var orderedRows = primaryKeyRows.concat(otherRows);
-            var keyTextLengths = columnRows.map(function (columnRow) {
+            var keyTextLengths = primaryKeyRows.map(function (columnRow) {
                 return columnRow.keyText.length;
             });
-            var nameLengths = columnRows.map(function (columnRow) {
+            var nameLengths = primaryKeyRows.map(function (columnRow) {
                 return columnRow.name.length;
             });
             var keyWidth = Math.max.apply(null, keyTextLengths);
             var nameWidth = Math.max.apply(null, nameLengths);
             // fonts of the label: mono for the table name, boldital for a key, bold for a mapped column, ital for a type
-            var columnLines = orderedRows.map(function (columnRow) {
-                var keyCell = keyWidth > 0 ? "<b><i>" + columnRow.keyText.padEnd(keyWidth, self.paddingSpace) + "</i></b>" + self.paddingSpace : "";
+            var columnLines = primaryKeyRows.map(function (columnRow) {
+                var keyCell = "<b><i>" + columnRow.keyText.padEnd(keyWidth, self.paddingSpace) + "</i></b>" + self.paddingSpace;
                 var paddedName = columnRow.name.padEnd(nameWidth, self.paddingSpace);
                 var nameCell = mappedColumns.indexOf(columnRow.name) > -1 ? "<b>" + paddedName + "</b>" : paddedName;
                 return keyCell + nameCell + self.paddingSpace + self.paddingSpace + "<i>" + columnRow.type + "</i>";
             });
-            var columnsText = columnLines.join("\n");
+            var tableLabelLines = ["<code>" + table + "</code>"].concat(columnLines);
+            var tableLabel = tableLabelLines.join("\n");
 
             // the most linked tables stand out: thicker border, bigger name, more room around them
             var linkCount = linkCountByTable[table] || 0;
@@ -142,7 +160,7 @@ var AIDatabaseSchemaGraph = (function () {
             var tableColor = mappedColumns.length > 0 ? self.mappedTableColor : self.tableColor;
             nodes.push({
                 id: table,
-                label: "<code>" + table + "</code>\n" + columnsText,
+                label: tableLabel,
                 shape: "box",
                 margin: 10,
                 borderWidth: 1 + Math.round(4 * centrality),
@@ -178,7 +196,8 @@ var AIDatabaseSchemaGraph = (function () {
         $("#" + self.graphDiv).css("display", "block");
         var graphOptions = {
             visjsOptions: {
-                physics: { barnesHut: { gravitationalConstant: -40000, centralGravity: 0.3, springLength: 350, avoidOverlap: 1 }, stabilization: { iterations: 400 } },
+                // set for boxes holding only the primary key; the strong central gravity keeps the unlinked groups of tables near
+                physics: { barnesHut: { gravitationalConstant: -10000, centralGravity: 1, springLength: 150, avoidOverlap: 1 }, stabilization: { iterations: 400 } },
                 edges: { smooth: false, font: { size: 11, align: "middle" } },
             },
             onclickFn: self.onSchemaGraphClick,
@@ -293,11 +312,37 @@ var AIDatabaseSchemaGraph = (function () {
             return;
         }
         self.currentTableNode = node;
-        var html = '    <span class="popupMenuItem" onclick="AIDatabaseSchemaGraph.showSampleData()">show sample data</span>';
+        var html = '    <span class="popupMenuItem" onclick="AIDatabaseSchemaGraph.showTableDetails()">table details</span>';
+        html += '    <span class="popupMenuItem" onclick="AIDatabaseSchemaGraph.showSampleData()">show sample data</span>';
         $("#popupMenuWidgetDiv").html(html);
         point.x = event.x;
         point.y = event.y;
         PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
+    };
+
+    // every column of the table with its key, its type and whether it is mapped; the AI reason of a key on hover
+    self.showTableDetails = function () {
+        var table = self.currentTableNode.id;
+        var mappedColumns = self.getMappedColumnsByTable()[table] || [];
+        var columnsTable = $("<table style='border-collapse: collapse; font-family: " + self.fontFace + "'>");
+        var headerRow = $("<tr>");
+        ["Key", "Column", "Type", "Mapped"].forEach(function (headerText) {
+            headerRow.append($("<th>").css(self.detailsCellCss).css("text-align", "left").text(headerText));
+        });
+        columnsTable.append(headerRow);
+        self.getOrderedColumnRows(table).forEach(function (columnRow) {
+            var isMapped = mappedColumns.indexOf(columnRow.name) > -1;
+            var columnTableRow = $("<tr>").attr("title", AIDataSourceManager.getColumnAiKeyReason(table, columnRow.name));
+            columnTableRow.append($("<td>").css(self.detailsCellCss).css("color", self.columnKeyColor).text(columnRow.keyText));
+            columnTableRow.append($("<td>").css(self.detailsCellCss).css("color", isMapped ? self.mappedColumnColor : self.columnNameColor).text(columnRow.name));
+            columnTableRow.append($("<td>").css(self.detailsCellCss).css("color", self.columnTypeColor).text(columnRow.type));
+            columnTableRow.append($("<td>").css(self.detailsCellCss).text(isMapped ? "yes" : ""));
+            columnsTable.append(columnTableRow);
+        });
+        var dialogDiv = $("#smallDialogDiv");
+        dialogDiv.empty();
+        dialogDiv.append(columnsTable);
+        UI.openDialog("smallDialogDiv", { title: "Table " + table });
     };
 
     // shaped as a table node of the data sources tree, which names its data source

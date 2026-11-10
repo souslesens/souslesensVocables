@@ -11,6 +11,10 @@ const wholeAnswerTimeoutMs = 30 * millisecondsPerMinute;
 // would make the CLI bill the API instead of the subscription
 const apiBillingVariables = ["ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN"];
 const cliFailureStatus = 502;
+// the callers name OpenRouter ids, unknown to the CLI: the ones listed run on their Claude equivalent, the others on defaultModel
+const cliModelByOpenRouterId = { "openai/gpt-5.6-luna": "haiku", "openai/gpt-6.1-sol": "opus" };
+// the CLI knows no "none": it would fall back to its default effort, far above the lowest
+const cliEffortByReasoningEffort = { none: "low" };
 
 const backendSystemPrompt =
     "You are the model behind the completion endpoint of an application. The user message holds the application's instructions, its tools and the conversation so far. " +
@@ -103,11 +107,11 @@ function toCliError(message, status) {
 }
 
 function createClaudeCodeAdapter(claudeCodeConfig) {
-    // `model` is ignored: the callers name OpenRouter ids, which the CLI does not know
-    function createMessage({ system, messages, maxTokens, tools, reasoningEffort, onTextDelta, onReasoningDelta, abortSignal }, callback) {
+    function createMessage({ system, messages, model, maxTokens, tools, reasoningEffort, onTextDelta, onReasoningDelta, abortSignal }, callback) {
         const isToolTurn = Boolean(tools && tools.length > 0);
         const isStreamed = Boolean(onTextDelta) && !isToolTurn;
-        const cliArguments = ["-p", "--output-format", isStreamed ? "stream-json" : "json", "--model", claudeCodeConfig.defaultModel];
+        const cliModel = cliModelByOpenRouterId[model] ?? claudeCodeConfig.defaultModel;
+        const cliArguments = ["-p", "--output-format", isStreamed ? "stream-json" : "json", "--model", cliModel];
         if (isStreamed) {
             // --thinking-display is missing from claude --help; without it the reasoning arrives empty
             cliArguments.push("--verbose", "--include-partial-messages", "--thinking-display", "summarized");
@@ -116,7 +120,7 @@ function createClaudeCodeAdapter(claudeCodeConfig) {
         cliArguments.push("--tools", "", "--setting-sources", "", "--strict-mcp-config", "--disable-slash-commands", "--no-session-persistence");
         cliArguments.push("--system-prompt", backendSystemPrompt);
         if (reasoningEffort) {
-            cliArguments.push("--effort", reasoningEffort);
+            cliArguments.push("--effort", cliEffortByReasoningEffort[reasoningEffort] ?? reasoningEffort);
         }
         if (isToolTurn) {
             cliArguments.push("--json-schema", JSON.stringify(assistantTurnSchema));
@@ -198,7 +202,7 @@ function createClaudeCodeAdapter(claudeCodeConfig) {
                 const failureReason = cliResult.result || (cliResult.errors ?? []).join(", ") || cliResult.subtype;
                 return settle(toCliError("claude -p failed: " + failureReason, cliResult.api_error_status));
             }
-            const response = toAnthropicResponse(cliResult, isToolTurn, claudeCodeConfig.defaultModel);
+            const response = toAnthropicResponse(cliResult, isToolTurn, cliModel);
             const answerText = response.content[0]?.text;
             // a tool turn is not streamed: its text comes out of the structured output
             if (onTextDelta && answerText && !isStreamed) {

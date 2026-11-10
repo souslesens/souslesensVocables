@@ -7,12 +7,14 @@ import { getSchemaDescription, getFilledSampleData } from "../../KG/dbConnector.
 import { callVocablesFunction } from "../../remoteCodeRunner.js";
 import csvCrawler from "../../_csvCrawler.js";
 import { databaseModel } from "../../../model/databases.js";
+import { getKnownAiKeys } from "./keyDetection.js";
 
 // a csv file, or a database out of reach, describes its columns and its rows only
 const noSchema = { columns: [], primaryKeys: [], foreignKeys: [], comments: [] };
 // where the mapping tools store the csv files of a source, one directory per source
 const csvDirectory = join(dirname(fileURLToPath(import.meta.url)), "../../../data/CSV");
 const sampleRowCount = 5;
+const aiForeignKeyPrefix = "found_in_the_data_";
 
 // per source, as a promise: a suggestion asked during the preparation waits for its end
 const preparedSources = {};
@@ -85,10 +87,67 @@ function getDatabaseOverview(schema) {
     return databaseOverview;
 }
 
+// the database with the keys the AI found in its data beside the declared ones, null for a csv file or a database out of reach
+function getSchemaWithAiKeys(request, preparedSource) {
+    const databaseSchema = preparedSource.schemasByDatabaseId[request.databaseId];
+    const aiKeys = getKnownAiKeys(request.databaseId);
+    if (!databaseSchema || !aiKeys) {
+        return databaseSchema || null;
+    }
+    // keys found before the schema declared them are left out
+    const declaredKeyTables = databaseSchema.schema.primaryKeys.map((keyColumn) => keyColumn.table_name);
+    const declaredForeignKeyColumns = databaseSchema.schema.foreignKeys.map((keyColumn) => keyColumn.table_name + "." + keyColumn.column_name);
+    const undeclaredPrimaryKeys = aiKeys.primaryKeys.filter((primaryKey) => !declaredKeyTables.includes(primaryKey.table));
+    const undeclaredForeignKeys = aiKeys.foreignKeys.filter((foreignKey) => !declaredForeignKeyColumns.includes(foreignKey.table + "." + foreignKey.column));
+    const aiPrimaryKeys = [];
+    undeclaredPrimaryKeys.forEach(function (primaryKey) {
+        primaryKey.columns.forEach((columnName) => aiPrimaryKeys.push({ table_name: primaryKey.table, column_name: columnName }));
+    });
+    // describeDatabase groups the columns of a foreign key by its constraint name
+    const aiForeignKeys = undeclaredForeignKeys.map((foreignKey) => ({
+        constraint_name: aiForeignKeyPrefix + foreignKey.column,
+        table_name: foreignKey.table,
+        column_name: foreignKey.column,
+        referenced_table: foreignKey.referencedTable,
+        referenced_column: foreignKey.referencedColumn,
+    }));
+    const schemaWithAiKeys = {
+        ...databaseSchema.schema,
+        primaryKeys: databaseSchema.schema.primaryKeys.concat(aiPrimaryKeys),
+        foreignKeys: databaseSchema.schema.foreignKeys.concat(aiForeignKeys),
+    };
+    // keys detected before the tables without identifier were told apart hold none
+    const aiTablesWithoutIdentifier = aiKeys.tablesWithoutIdentifier || [];
+    const undeclaredTablesWithoutIdentifier = aiTablesWithoutIdentifier.filter((tableWithoutIdentifier) => !declaredKeyTables.includes(tableWithoutIdentifier.table));
+    const keptAiKeys = { primaryKeys: undeclaredPrimaryKeys, tablesWithoutIdentifier: undeclaredTablesWithoutIdentifier, foreignKeys: undeclaredForeignKeys };
+    const databaseSchemaWithAiKeys = { database: databaseSchema.database, schema: schemaWithAiKeys, aiKeys: keptAiKeys };
+    return databaseSchemaWithAiKeys;
+}
+
+// the keys of the table that the schema does not declare, so that the model weighs them as found in the data
+function getAiKeysText(table, aiKeys) {
+    if (!aiKeys) {
+        return "";
+    }
+    const tablePrimaryKey = aiKeys.primaryKeys.find((primaryKey) => primaryKey.table == table);
+    const tableForeignKeys = aiKeys.foreignKeys.filter((foreignKey) => foreignKey.table == table);
+    const keyTexts = tableForeignKeys.map((foreignKey) => "foreign key " + foreignKey.column + " -> " + foreignKey.referencedTable + "." + foreignKey.referencedColumn);
+    if (tablePrimaryKey) {
+        keyTexts.unshift("primary key (" + tablePrimaryKey.columns.join(", ") + ")");
+    }
+    const tableWithoutIdentifier = aiKeys.tablesWithoutIdentifier.find((aiTable) => aiTable.table == table);
+    let aiKeysText = keyTexts.length > 0 ? "Keys found in the data, which the schema does not declare: " + keyTexts.join("; ") + "\n" : "";
+    if (tableWithoutIdentifier) {
+        const togetherText = tableWithoutIdentifier.columns.length > 0 ? " (the columns " + tableWithoutIdentifier.columns.join(", ") + " identify its rows only together)" : "";
+        aiKeysText += "No column identifies the object of the table, which needs a virtual column" + togetherText + ": " + tableWithoutIdentifier.reason + "\n";
+    }
+    return aiKeysText;
+}
+
 // the tables of the database, then the table of the request with its keys, comments and sample rows
 function getTableDescription(request, preparedSource) {
     const noSchemaDescription = { database: { database: request.dataSourceName, driver: "no schema read" }, schema: noSchema };
-    const databaseSchema = preparedSource.schemasByDatabaseId[request.databaseId] || noSchemaDescription;
+    const databaseSchema = getSchemaWithAiKeys(request, preparedSource) || noSchemaDescription;
     const schemaColumns = databaseSchema.schema.columns.filter((column) => column.table_name == request.table);
     const nameOnlyColumns = request.columns.map((columnName) => ({ column_name: columnName, data_type: "text", is_nullable: "YES" }));
     const tableColumns = schemaColumns.length > 0 ? schemaColumns : nameOnlyColumns;
@@ -100,7 +159,7 @@ function getTableDescription(request, preparedSource) {
         return keyColumn.table_name + "." + keyColumn.column_name + " -> " + request.table + "." + keyColumn.referenced_column + sharedKeyText;
     });
     const referencingKeysText = referencingKeyLines.length > 0 ? "Foreign keys of other tables to this table:\n" + referencingKeyLines.join("\n") + "\n" : "";
-    const tableDescription = getDatabaseOverview(databaseSchema.schema) + "# Table of the column\n\n" + tableText + referencingKeysText;
+    const tableDescription = getDatabaseOverview(databaseSchema.schema) + "# Table of the column\n\n" + tableText + getAiKeysText(request.table, databaseSchema.aiKeys) + referencingKeysText;
     return tableDescription;
 }
 
@@ -129,7 +188,7 @@ function getHandedOutKeys(schema, table) {
 
 // none for a csv file or a database out of reach; the referenced key is the one the column points at, when it is a foreign key
 function getTableKeys(request, preparedSource) {
-    const databaseSchema = preparedSource.schemasByDatabaseId[request.databaseId];
+    const databaseSchema = getSchemaWithAiKeys(request, preparedSource);
     if (!databaseSchema) {
         return { primaryKeyColumns: [], foreignKeyColumns: [], handedOutKeys: [], referencedKey: null, referencedHandedOutKeys: [] };
     }

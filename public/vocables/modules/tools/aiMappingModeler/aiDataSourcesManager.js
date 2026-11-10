@@ -429,7 +429,27 @@ var AIDataSourceManager = (function () {
         });
     };
 
-    // "PK", "FK", "PK FK", or "" for a column outside every key, a csv column, or keys not read
+    // between two readings of the keys while the AI detects the ones the schema does not declare
+    self.aiKeysPollDelay = 15000;
+
+    // the keys the AI found in the data for this column: { primaryKey, foreignKey }, each null when it found none
+    self.getColumnAiKeys = function (table, column) {
+        var tableKeys = self.currentConfig.currentDataSource ? self.currentConfig.currentDataSource.tableKeys : null;
+        var aiKeys = tableKeys ? tableKeys.aiKeys : null;
+        if (!aiKeys) {
+            return { primaryKey: null, foreignKey: null };
+        }
+        var primaryKey = aiKeys.primaryKeys.find(function (aiPrimaryKey) {
+            return aiPrimaryKey.table == table && aiPrimaryKey.columns.indexOf(column) > -1;
+        });
+        var foreignKey = aiKeys.foreignKeys.find(function (aiForeignKey) {
+            return aiForeignKey.table == table && aiForeignKey.column == column;
+        });
+        var columnAiKeys = { primaryKey: primaryKey || null, foreignKey: foreignKey || null };
+        return columnAiKeys;
+    };
+
+    // "PK", "FK", "AI PK", "AI FK" and their combinations, or "" for a column outside every key, a csv column, or keys not read
     self.getColumnKeyText = function (table, column) {
         var tableKeys = self.currentConfig.currentDataSource ? self.currentConfig.currentDataSource.tableKeys : null;
         if (!tableKeys) {
@@ -438,15 +458,136 @@ var AIDataSourceManager = (function () {
         var isColumnKey = function (keyColumn) {
             return keyColumn.table_name == table && keyColumn.column_name == column;
         };
+        var columnAiKeys = self.getColumnAiKeys(table, column);
         var keyKinds = [];
         if (tableKeys.primaryKeys.some(isColumnKey)) {
             keyKinds.push("PK");
+        } else if (columnAiKeys.primaryKey) {
+            keyKinds.push("AI PK");
         }
         if (tableKeys.foreignKeys.some(isColumnKey)) {
             keyKinds.push("FK");
+        } else if (columnAiKeys.foreignKey) {
+            keyKinds.push("AI FK");
         }
         var columnKeyText = keyKinds.join(" ");
         return columnKeyText;
+    };
+
+    // why the AI holds the column a key, shown on hover; "" when it found no key on it
+    self.getColumnAiKeyReason = function (table, column) {
+        var columnAiKeys = self.getColumnAiKeys(table, column);
+        var reasonTexts = [];
+        if (columnAiKeys.primaryKey) {
+            reasonTexts.push("AI PK: " + columnAiKeys.primaryKey.reason);
+        }
+        if (columnAiKeys.foreignKey) {
+            reasonTexts.push("AI FK -> " + columnAiKeys.foreignKey.referencedTable + "." + columnAiKeys.foreignKey.referencedColumn + ": " + columnAiKeys.foreignKey.reason);
+        }
+        var columnAiKeyReason = reasonTexts.join("\n");
+        return columnAiKeyReason;
+    };
+
+    // the pairs the AI did not keep as a foreign key of the column, for a column holding no foreign key, declared or found by
+    // the AI; keys detected before the rejected pairs named their columns hold none
+    self.getColumnRejectedPairs = function (table, column) {
+        var tableKeys = self.currentConfig.currentDataSource ? self.currentConfig.currentDataSource.tableKeys : null;
+        if (!tableKeys || !tableKeys.aiKeys) {
+            return [];
+        }
+        var isDeclaredForeignKey = tableKeys.foreignKeys.some(function (keyColumn) {
+            return keyColumn.table_name == table && keyColumn.column_name == column;
+        });
+        if (isDeclaredForeignKey || self.getColumnAiKeys(table, column).foreignKey) {
+            return [];
+        }
+        var rejectedPairs = tableKeys.aiKeys.rejectedPairs || [];
+        var columnRejectedPairs = rejectedPairs.filter(function (rejectedPair) {
+            return rejectedPair.table == table && rejectedPair.column == column;
+        });
+        return columnRejectedPairs;
+    };
+
+    // { table, columns, reason } when the AI found no column identifying the object of the table, null otherwise; keys detected
+    // before the tables without identifier were told apart hold none
+    self.getTableWithoutIdentifier = function (table) {
+        var tableKeys = self.currentConfig.currentDataSource ? self.currentConfig.currentDataSource.tableKeys : null;
+        var tablesWithoutIdentifier = tableKeys && tableKeys.aiKeys ? tableKeys.aiKeys.tablesWithoutIdentifier || [] : [];
+        var tableWithoutIdentifier = tablesWithoutIdentifier.find(function (aiTable) {
+            return aiTable.table == table;
+        });
+        return tableWithoutIdentifier || null;
+    };
+
+    // a table declaring no primary key that the AI left without decision, even asked twice
+    self.isTableUndecided = function (table) {
+        var tableKeys = self.currentConfig.currentDataSource ? self.currentConfig.currentDataSource.tableKeys : null;
+        var undecidedTables = tableKeys && tableKeys.aiKeys ? tableKeys.aiKeys.undecidedTables || [] : [];
+        var isUndecided = undecidedTables.indexOf(table) > -1;
+        return isUndecided;
+    };
+
+    // one reading of the keys waits at a time, whatever the data sources opened meanwhile
+    self.aiKeysPollTimer = null;
+
+    // tableKeys: { primaryKeys, foreignKeys, aiKeys, aiKeysStatus, aiKeysError }; the AI keys go in the config the mapping save
+    // writes, so that the save keeps them
+    self.setTableKeys = function (dataSource, tableKeys) {
+        if (!self.currentConfig.currentDataSource || self.currentConfig.currentDataSource.id != dataSource) {
+            return;
+        }
+        self.currentConfig.currentDataSource.tableKeys = tableKeys;
+        if (tableKeys.aiKeys && self.rawConfig.databaseSources && self.rawConfig.databaseSources[dataSource]) {
+            self.rawConfig.databaseSources[dataSource].aiKeys = tableKeys.aiKeys;
+        }
+        if (tableKeys.aiKeysStatus == "failed") {
+            UI.message("keys of the database not found by the AI: " + tableKeys.aiKeysError);
+        }
+        clearTimeout(self.aiKeysPollTimer);
+        if (tableKeys.aiKeysStatus == "running") {
+            self.aiKeysPollTimer = setTimeout(function () {
+                self.readAiKeysAgain(dataSource);
+            }, self.aiKeysPollDelay);
+        }
+    };
+
+    // the socket of the page follows the steps of a running detection
+    self.getTableKeysUrl = function (dataSource) {
+        var tableKeysParams = new URLSearchParams({ databaseId: dataSource, source: AIMappingModeler.currentSLSsource, clientSocketId: Config.clientSocketId || "" });
+        var tableKeysUrl = Config.apiUrl + "/ai/aiMappingModeler/tableKeys?" + tableKeysParams.toString();
+        return tableKeysUrl;
+    };
+
+    // keyDetectionStep: { databaseId, message }
+    self.showKeyDetectionStep = function (keyDetectionStep) {
+        if (MainController.currentTool != "AIMappingModeler" || !self.currentConfig.currentDataSource || self.currentConfig.currentDataSource.id != keyDetectionStep.databaseId) {
+            return;
+        }
+        UI.message(keyDetectionStep.message);
+    };
+
+    // the column tree is updated where it stands, no page or tree is reloaded
+    self.readAiKeysAgain = function (dataSource) {
+        if (!self.currentConfig.currentDataSource || self.currentConfig.currentDataSource.id != dataSource) {
+            return;
+        }
+        $.ajax({
+            type: "GET",
+            url: self.getTableKeysUrl(dataSource),
+            dataType: "json",
+            success: function (tableKeys) {
+                self.setTableKeys(dataSource, tableKeys);
+                if (tableKeys.aiKeysStatus == "done") {
+                    AIMappingModeler.updateColumnNodeTexts();
+                    if ($("#" + AIDatabaseSchemaGraph.graphDiv).css("display") != "none") {
+                        AIDatabaseSchemaGraph.drawDatabaseSchema();
+                    }
+                }
+            },
+            error: function (err) {
+                UI.message("keys found by the AI not read: " + (err.responseJSON ? err.responseJSON.error : err.statusText));
+            },
+        });
     };
 
     /**
@@ -495,10 +636,10 @@ var AIDataSourceManager = (function () {
                     self.currentConfig.currentDataSource.tableKeys = null;
                     $.ajax({
                         type: "GET",
-                        url: Config.apiUrl + "/ai/aiMappingModeler/tableKeys?" + new URLSearchParams({ databaseId: dataSource }).toString(),
+                        url: self.getTableKeysUrl(dataSource),
                         dataType: "json",
                         success: function (tableKeys) {
-                            self.currentConfig.currentDataSource.tableKeys = tableKeys;
+                            self.setTableKeys(dataSource, tableKeys);
                             callbackSeries();
                         },
                         error: function (err) {

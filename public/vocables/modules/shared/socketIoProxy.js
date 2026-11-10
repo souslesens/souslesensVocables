@@ -1,6 +1,7 @@
 import KGcreator_run from "../tools/KGcreator/KGcreator_run.js";
 import MappingModeler from "../tools/mappingModeler/mappingModeler.js";
 import AIMappingModeler from "../tools/aiMappingModeler/aiMappingModeler.js";
+import AIDataSourceManager from "../tools/aiMappingModeler/aiDataSourcesManager.js";
 import Admin from "../tools/admin/admin.js";
 
 const socket = io();
@@ -20,6 +21,10 @@ socket.on("KGbuilder", function (message) {
         return;
     }
     MappingModeler.socketMessage(message);
+});
+
+socket.on("aiKeyDetection", function (keyDetectionStep) {
+    AIDataSourceManager.showKeyDetectionStep(keyDetectionStep);
 });
 
 socket.on("adminSnapshots", function (message) {

@@ -1,5 +1,6 @@
 import { findUserSource } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
 import { prepareSource } from "../../../../../bin/AI/aiMappingModeler/sourcePreparation.js";
+import { startKeyDetection, followKeyDetection } from "../../../../../bin/AI/aiMappingModeler/keyDetection.js";
 
 export default function () {
     let operations = {
@@ -19,6 +20,10 @@ export default function () {
             if (unknownSources.length > 0) {
                 return res.status(404).json({ error: "sources not found: " + unknownSources.join(", ") });
             }
+            databaseIds.forEach(function (databaseId) {
+                startKeyDetection(source, databaseId, found.userInfo);
+                followKeyDetection(databaseId, req.body.clientSocketId);
+            });
             const preparedSource = await prepareSource(source, upperOntologies, databaseIds, { user: found.userInfo, userSources: found.userSources });
             res.status(200).json({ databaseErrors: preparedSource.databaseErrors });
         } catch (error) {
@@ -32,7 +37,9 @@ export default function () {
         summary: "Prepare the column class suggestions of a source",
         description:
             "Reads the classes of the upper ontologies and the schemas of the databases once, when the AI Mapping Modeler opens, " +
-            "so that a suggestion pays only the call to the model. POST a source, its upper ontologies, most abstract first, and its database ids.",
+            "so that a suggestion pays only the call to the model. POST a source, its upper ontologies, most abstract first, and its database ids. " +
+            "For a database whose keys the mapping of the source holds no detection of yet, starts in the background, once, the detection of the primary and foreign keys its schema does not declare; " +
+            "tableKeys tells when it ends.",
         operationId: "prepareColumnClassSuggestion",
         parameters: [
             {
@@ -46,6 +53,7 @@ export default function () {
                         source: { type: "string" },
                         upperOntologies: { type: "array", items: { type: "string" } },
                         databaseIds: { type: "array", items: { type: "string" } },
+                        clientSocketId: { type: "string", description: "the socket of the page, told each step of the detection on the aiKeyDetection channel" },
                     },
                 },
             },

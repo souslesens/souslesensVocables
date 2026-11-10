@@ -145,6 +145,7 @@ var AIColumnClassSuggestion = (function () {
             source: source,
             upperOntologies: upperOntologies,
             databaseIds: Object.keys(AIDataSourceManager.currentConfig.databaseSources),
+            clientSocketId: Config.clientSocketId,
         };
         $.ajax({
             type: "POST",

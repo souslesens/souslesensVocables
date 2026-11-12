@@ -49,6 +49,7 @@ const normalizersByProvider = {
     // only the adapter sees the request.
     openrouter: normalizeAnthropicCompletion,
     claudeCode: normalizeAnthropicCompletion,
+    codex: normalizeAnthropicCompletion,
 };
 
 /**

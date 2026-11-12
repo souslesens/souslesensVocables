@@ -102,12 +102,20 @@ const MainConfigObject = z
             .strict(),
         llm: z
             .object({
-                provider: z.enum(["anthropic", "openrouter", "ollama", "claudeCode"]),
+                provider: z.enum(["anthropic", "openrouter", "ollama", "claudeCode", "codex"]),
                 claudeCode: z
                     .object({
                         defaultModel: z.string().default("opus"),
                         cliPath: z.string().optional(),
                         maxTokens: z.number().positive().optional(),
+                        rateLimitTPM: z.number().positive().default(10000000),
+                    })
+                    .strict()
+                    .optional(),
+                codex: z
+                    .object({
+                        defaultModel: z.string().default("gpt-6.1-sol"),
+                        cliPath: z.string().optional(),
                         rateLimitTPM: z.number().positive().default(10000000),
                     })
                     .strict()

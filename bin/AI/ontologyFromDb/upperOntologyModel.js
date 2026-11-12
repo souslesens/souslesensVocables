@@ -18,6 +18,8 @@ const bracketedIriRegex = /<((?:https?|nodeID):[^>\s]+)>/g;
 const indent = "    ";
 const lineBreakRegex = /\s*[\r\n]+\s*/g;
 const annotationLocalNameRegex = /[^/#]+$/;
+// the namespace of the markers Sparql_generic.getSourceTaxonomy puts above a class with several named superclasses or in a loop
+const taxonomyAnomalyNamespace = "http://souslesens.org/anomaly/";
 
 // the prefixed name of an IRI, its namespace getting a prefix the first time it is met
 function getPrefixedName(iri, prefixes, prefixesByNamespace, usedPrefixes) {
@@ -59,14 +61,50 @@ function bracketIri(iri) {
     return iri ? ["<" + iri + ">"] : [];
 }
 
+// depth first on the parents of the Lineage tree; the branches of an ontology hang under classes written for an ontology above it
+function getTreeOrderedClassIris(enrichedModel, writtenTerms) {
+    const modelClassIris = Object.keys(enrichedModel.classes);
+    const unwrittenClassIris = modelClassIris.filter((classIri) => !writtenTerms.has(classIri));
+    const writtenTermList = [...writtenTerms];
+    const getSortLabel = (classIri) => enrichedModel.classes[classIri].label || classIri;
+    const compareByLabel = (leftIri, rightIri) => getSortLabel(leftIri).localeCompare(getSortLabel(rightIri)) || leftIri.localeCompare(rightIri);
+
+    const childIrisByParent = {};
+    const branchRankByTop = {};
+    for (const classIri of unwrittenClassIris) {
+        const parents = enrichedModel.classes[classIri].parents;
+        // parents[0] is the source label
+        const directParent = parents.length > 1 ? parents[parents.length - 1] : null;
+        if (enrichedModel.classes[directParent] && !writtenTerms.has(directParent)) {
+            if (!childIrisByParent[directParent]) {
+                childIrisByParent[directParent] = [];
+            }
+            childIrisByParent[directParent].push(classIri);
+            continue;
+        }
+        const isUnderAnomaly = Boolean(directParent) && directParent.startsWith(taxonomyAnomalyNamespace);
+        // a root, or a class whose parent no ontology of the text holds, ranks -1, before every written class
+        branchRankByTop[classIri] = isUnderAnomaly ? writtenTermList.length : writtenTermList.indexOf(directParent);
+    }
+    const branchTopIris = Object.keys(branchRankByTop);
+    branchTopIris.sort((leftIri, rightIri) => branchRankByTop[leftIri] - branchRankByTop[rightIri] || compareByLabel(leftIri, rightIri));
+
+    const orderedClassIris = [];
+    const addBranch = function (classIri) {
+        orderedClassIris.push(classIri);
+        const childIris = childIrisByParent[classIri] || [];
+        childIris.sort(compareByLabel);
+        childIris.forEach(addBranch);
+    };
+    branchTopIris.forEach(addBranch);
+    return orderedClassIris;
+}
+
 // a term imported by several ontologies is written under the first
 function getUnwrittenClassEntries(enrichedModel, writtenTerms) {
     const classEntries = [];
-    const sortedClassIris = Object.keys(enrichedModel.classes).sort();
-    for (const classIri of sortedClassIris) {
-        if (writtenTerms.has(classIri)) {
-            continue;
-        }
+    const orderedClassIris = getTreeOrderedClassIris(enrichedModel, writtenTerms);
+    for (const classIri of orderedClassIris) {
         writtenTerms.add(classIri);
         const ontologyClass = enrichedModel.classes[classIri];
         classEntries.push(

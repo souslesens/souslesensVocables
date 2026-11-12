@@ -83,7 +83,23 @@ async function getEnrichedOntologyModel(source, userContext) {
         }
     }
 
+    // the parents the Lineage tree is indexed with, read like the index without the imports: [source, ..., direct parent],
+    // an anomaly marker as direct parent of a class with several named superclasses or in a loop
+    let taxonomyClassesMap = {};
+    // a model withheld for its size has no class to place
+    if (Object.keys(enrichedModel.classes).length > 0) {
+        try {
+            const taxonomy = await callVocablesFunction("Sparql_generic", "getSourceTaxonomy", [source, { withoutImports: true }], userContext);
+            taxonomyClassesMap = taxonomy.classesMap;
+        } catch (taxonomyError) {
+            console.warn("taxonomy of " + source + " not read, its classes are ordered by label only: " + taxonomyError.message);
+        }
+    }
+
     for (const [classIri, ontologyClass] of Object.entries(enrichedModel.classes)) {
+        const taxonomyClass = taxonomyClassesMap[classIri];
+        // a class without label is left out of the taxonomy
+        ontologyClass.parents = taxonomyClass ? taxonomyClass.parents : [source];
         ontologyClass.definitions = [];
         ontologyClass.examples = [];
         ontologyClass.axioms = { subClassOf: [], equivalentTo: [], disjointWith: [], disjointUnionOf: [] };

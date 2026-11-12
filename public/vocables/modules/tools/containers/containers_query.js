@@ -23,7 +23,8 @@ var Containers_query = (function () {
             "SELECT distinct ?member ?memberLabel " +
             fromStr +
             " where {" +
-            " ?member rdfs:member ?x.\n" + // remove filter type rdf:Bag
+            // a container created at the top has no member yet, only its rdf:Bag type
+            " { ?member rdfs:member ?x.} UNION { ?member rdf:type rdf:Bag.}\n" +
             "   OPTIONAL { ?member rdfs:label ?memberLabel}\n" +
             "    filter (not exists{?parent rdfs:member ?member.}) \n" +
             filterStr +
@@ -175,27 +176,27 @@ var Containers_query = (function () {
     };
 
     self.writeMovedNodeNewParent = function (movedNodeInfos) {
+        // a null uri is the root container, which has no triple
+        if (!movedNodeInfos.nodeId || (!movedNodeInfos.oldParent && !movedNodeInfos.newParent)) {
+            return;
+        }
+        var deleteClause = "";
+        if (movedNodeInfos.oldParent) {
+            deleteClause = " delete {<" + movedNodeInfos.oldParent + "> rdfs:member <" + movedNodeInfos.nodeId + ">}";
+        }
+        var insertClause = "";
+        if (movedNodeInfos.newParent) {
+            insertClause = " insert {<" + movedNodeInfos.newParent + "> rdfs:member <" + movedNodeInfos.nodeId + ">}";
+        }
+
         var graphUri = Config.sources[Lineage_sources.activeSource].graphUri;
-        var query =
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-            "with <" +
-            graphUri +
-            "> delete {<" +
-            movedNodeInfos.oldParent +
-            "> rdfs:member <" +
-            movedNodeInfos.nodeId +
-            ">}" +
-            "insert {<" +
-            movedNodeInfos.newParent +
-            "> rdfs:member <" +
-            movedNodeInfos.nodeId +
-            ">}";
+        var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + "with <" + graphUri + ">" + deleteClause + insertClause + " where {}";
 
         var url = Config.sources[Lineage_sources.activeSource].sparql_server.url + "?format=json&query=";
 
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Lineage_sources.activeSource }, function (err, result) {
             if (err) {
-                return callback(err);
+                return MainController.errorAlert(err.responseText || err);
             }
         });
     };

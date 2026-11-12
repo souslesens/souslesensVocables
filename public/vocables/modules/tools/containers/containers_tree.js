@@ -13,6 +13,21 @@ var Containers_tree = (function () {
     self.jstreeDivId = "lineage_containers_containersJstree";
     self.clickedContainers = {};
     self.idsMap = {};
+    self.rootContainerJstreeId = "rootContainer";
+
+    // tree node only, no triple in the graph
+    self.getRootContainerNode = function (source) {
+        var rootContainerNode = {
+            id: self.rootContainerJstreeId,
+            text: "root",
+            parent: "#",
+            type: "Container",
+            state: { opened: true },
+            data: { type: "rootContainer", source: source, id: null, label: "root" },
+        };
+        return rootContainerNode;
+    };
+
     self.search = function (jstreeDivId, source, options, callback) {
         if (jstreeDivId) {
             self.jstreeDivId = jstreeDivId;
@@ -51,8 +66,10 @@ var Containers_tree = (function () {
         var jstreeData = [];
         self.idsMap = {};
         var existingNodes = {};
-        self.rootContainer = Config.sources[source].graphUri + "container/root";
-        // set rootnodes
+        if (rootNode == "#") {
+            jstreeData.push(self.getRootContainerNode(source));
+            rootNode = self.rootContainerJstreeId;
+        }
         data.forEach(function (item) {
             var id = item.member.value;
             var jstreeId = common.getRandomHexaId(5);
@@ -124,7 +141,14 @@ var Containers_tree = (function () {
                         self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
                     },
                 },
-                dropAllowedFn: function () {
+                dropAllowedFn: function (operation, node, parent) {
+                    if (node.id == self.rootContainerJstreeId || parent.id == "#") {
+                        return false;
+                    }
+                    // under root a resource would lose its only membership and vanish from the tree
+                    if (parent.id == self.rootContainerJstreeId && node.type != "Container") {
+                        return false;
+                    }
                     var canMove = $("#Lineage_unlockMoveContainer_cbx").prop("checked");
                     return canMove;
                 },
@@ -141,6 +165,9 @@ var Containers_tree = (function () {
 
     self.onSelectedNodeTreeclick = function (event, obj) {
         self.currentContainer = obj.node;
+        if (obj.node.id == self.rootContainerJstreeId) {
+            return;
+        }
 
         if (obj.event.button != 2) {
             self.listContainerResources(self.currentContainer);
@@ -263,7 +290,7 @@ var Containers_tree = (function () {
                 labelsMap[item.child.value] = item.childLabel ? item.childLabel.value : Sparql_common.getLabelFromURI(item.child.value);
             });
 
-            var jstreeData = [];
+            var jstreeData = [self.getRootContainerNode(source)];
             var existingNodes = {};
 
             for (var key in childrenMap) {
@@ -292,7 +319,7 @@ var Containers_tree = (function () {
                     jstreeData.push({
                         id: parent,
                         text: labelsMap[parent],
-                        parent: childrenMap[parent] || "#",
+                        parent: childrenMap[parent] || self.rootContainerJstreeId,
                         type: "Container",
                         data: {
                             type: "Container",
@@ -339,7 +366,7 @@ var Containers_tree = (function () {
             function getjstreeIdUri(id) {
                 var node = $("#lineage_containers_containersJstree").jstree().get_node(id);
 
-                var uri = node && node.data ? node.data.id : self.rootContainer;
+                var uri = node && node.data ? node.data.id : null;
                 return uri;
             }
 
@@ -379,7 +406,7 @@ var Containers_tree = (function () {
             label: "Graph  parent container",
             action: function (_e) {
                 var rootContainer = null;
-                if (self.currentContainer.parent == "#") {
+                if (self.currentContainer.parent == self.rootContainerJstreeId) {
                     rootContainer = self.currentContainer.data.id;
                 } else {
                     rootContainer = self.currentContainer.parents[self.currentContainer.parents.length];
@@ -435,7 +462,13 @@ var Containers_tree = (function () {
             },
         };
 
-        return items;
+        var itemsForNode = function (node) {
+            if (node.id == self.rootContainerJstreeId) {
+                return false;
+            }
+            return items;
+        };
+        return itemsForNode;
     };
 
     self.menuActions.addContainer = function (source) {
@@ -452,7 +485,8 @@ var Containers_tree = (function () {
 
         var triples = [];
 
-        if (self.currentContainer) {
+        var isTopContainer = !self.currentContainer || self.currentContainer.id == self.rootContainerJstreeId;
+        if (!isTopContainer) {
             if (self.currentContainer.id == containerUri) {
                 return alert("wrong container label");
             }
@@ -461,25 +495,13 @@ var Containers_tree = (function () {
                 predicate: " rdfs:member",
                 object: "<" + containerUri + ">",
             });
-        } else {
-            //  var containerChildURI = containerUri + "/child";
-            /*triples.push({
-                subject: "<" + containerUri + ">",
-                predicate: " rdfs:member",
-                object: "<" + containerChildURI + ">",
-            });*/
-
-            triples.push({
-                subject: "<" + self.rootContainer + ">",
-                predicate: " rdfs:member",
-                object: "<" + containerUri + ">",
-            });
         }
-        /* triples.push({
-                subject: "<" + containerChildURI + ">",
-                predicate: " rdf:type",
-                object: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag>",
-            });*/
+        // a top container without member is found by its type only, see Containers_query.getTopContainer
+        triples.push({
+            subject: "<" + containerUri + ">",
+            predicate: " rdf:type",
+            object: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag>",
+        });
         triples.push({
             subject: containerUri,
             predicate: " rdfs:label",
@@ -490,7 +512,7 @@ var Containers_tree = (function () {
             if (err) {
                 return MainController.errorAlert(err.responseText);
             }
-            var parent = self.currentContainer || "#";
+            var parent = isTopContainer ? self.rootContainerJstreeId : self.currentContainer;
             var newNode = {
                 id: containerUri,
                 text: newContainerLabel,
@@ -665,7 +687,7 @@ var Containers_tree = (function () {
             Sparql_generic.deleteTriples(source, null, null, container.data.id, function (err) {
                 var node = $("#lineage_containers_containersJstree").jstree().get_node(container.id);
                 if (node.children.length > 0) {
-                    $("#lineage_containers_containersJstree").jstree().move_node(node.children, "#");
+                    $("#lineage_containers_containersJstree").jstree().move_node(node.children, self.rootContainerJstreeId);
                 }
                 $("#lineage_containers_containersJstree").jstree().delete_node(container.id);
             });

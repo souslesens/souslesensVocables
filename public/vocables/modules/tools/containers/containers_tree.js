@@ -275,88 +275,97 @@ var Containers_tree = (function () {
             if (err) {
                 return callback(err);
             }
+            // a top container has no parent triple, so the ascendants query never returns it
+            var topContainerFilter = Sparql_common.setFilter("member", null, term);
+            Containers_query.getTopContainer(source, { filter: topContainerFilter }, function (err, topContainersResult) {
+                var topContainers = topContainersResult.results.bindings;
+                if (result.length == 0 && topContainers.length == 0) {
+                    return UI.message("no result", true);
+                }
+                //identify top Node
+                var childrenMap = {};
+                var labelsMap = {};
+                result.forEach(function (item) {
+                    childrenMap[item.ancestor.value] = item.ancestorParent.value;
+                    childrenMap[item.child.value] = item.childParent.value;
+                    labelsMap[item.ancestor.value] = item.ancestorLabel ? item.ancestorLabel.value : Sparql_common.getLabelFromURI(item.ancestor.value);
+                    labelsMap[item.ancestorParent.value] = item.ancestorParentLabel ? item.ancestorParentLabel.value : Sparql_common.getLabelFromURI(item.ancestorParent.value);
+                    labelsMap[item.child.value] = item.childLabel ? item.childLabel.value : Sparql_common.getLabelFromURI(item.child.value);
+                });
+                topContainers.forEach(function (topContainer) {
+                    childrenMap[topContainer.member.value] = self.rootContainerJstreeId;
+                    labelsMap[topContainer.member.value] = topContainer.memberLabel ? topContainer.memberLabel.value : Sparql_common.getLabelFromURI(topContainer.member.value);
+                });
 
-            if (result.length == 0) {
-                return UI.message("no result", true);
-            }
-            //identify top Node
-            var childrenMap = {};
-            var labelsMap = {};
-            result.forEach(function (item) {
-                childrenMap[item.ancestor.value] = item.ancestorParent.value;
-                childrenMap[item.child.value] = item.childParent.value;
-                labelsMap[item.ancestor.value] = item.ancestorLabel ? item.ancestorLabel.value : Sparql_common.getLabelFromURI(item.ancestor.value);
-                labelsMap[item.ancestorParent.value] = item.ancestorParentLabel ? item.ancestorParentLabel.value : Sparql_common.getLabelFromURI(item.ancestorParent.value);
-                labelsMap[item.child.value] = item.childLabel ? item.childLabel.value : Sparql_common.getLabelFromURI(item.child.value);
-            });
+                var jstreeData = [self.getRootContainerNode(source)];
+                var existingNodes = {};
+                existingNodes[self.rootContainerJstreeId] = 1;
 
-            var jstreeData = [self.getRootContainerNode(source)];
-            var existingNodes = {};
-
-            for (var key in childrenMap) {
-                if (!existingNodes[key]) {
-                    existingNodes[key] = 1;
-                    var id = key;
-                    jstreeData.push({
-                        id: id,
-                        text: labelsMap[key],
-                        parent: childrenMap[key],
-                        type: "Container",
-                        data: {
-                            type: "Container",
-                            source: source,
+                for (var key in childrenMap) {
+                    if (!existingNodes[key]) {
+                        existingNodes[key] = 1;
+                        var id = key;
+                        jstreeData.push({
                             id: id,
-                            label: labelsMap[key],
+                            text: labelsMap[key],
                             parent: childrenMap[key],
-                            //tabId: options.tabId,
-                        },
-                    });
-                }
-                var parent = childrenMap[key];
-                if (!existingNodes[parent]) {
-                    existingNodes[parent] = 1;
-
-                    jstreeData.push({
-                        id: parent,
-                        text: labelsMap[parent],
-                        parent: childrenMap[parent] || self.rootContainerJstreeId,
-                        type: "Container",
-                        data: {
                             type: "Container",
-                            source: source,
-                            id: parent,
-                            label: labelsMap[parent],
-                            parent: childrenMap[parent],
-                        },
-                    });
-                }
-            }
+                            data: {
+                                type: "Container",
+                                source: source,
+                                id: id,
+                                label: labelsMap[key],
+                                parent: childrenMap[key],
+                                //tabId: options.tabId,
+                            },
+                        });
+                    }
+                    var parent = childrenMap[key];
+                    if (!existingNodes[parent]) {
+                        existingNodes[parent] = 1;
 
-            var jstreeOptions;
-            if (options.jstreeOptions) {
-                jstreeOptions = options.jstreeOptions;
-            } else {
-                jstreeOptions = {
-                    openAll: false,
-                    contextMenu: Containers_tree.getContextJstreeMenu(),
-                    selectTreeNodeFn: Containers_tree.onSelectedNodeTreeclick,
-                    dnd: {
-                        drag_stop: function (data, element, helper, event) {
-                            //  self.onMoveContainer(data, element, helper, event);
+                        jstreeData.push({
+                            id: parent,
+                            text: labelsMap[parent],
+                            parent: childrenMap[parent] || self.rootContainerJstreeId,
+                            type: "Container",
+                            data: {
+                                type: "Container",
+                                source: source,
+                                id: parent,
+                                label: labelsMap[parent],
+                                parent: childrenMap[parent],
+                            },
+                        });
+                    }
+                }
+
+                var jstreeOptions;
+                if (options.jstreeOptions) {
+                    jstreeOptions = options.jstreeOptions;
+                } else {
+                    jstreeOptions = {
+                        openAll: false,
+                        contextMenu: Containers_tree.getContextJstreeMenu(),
+                        selectTreeNodeFn: Containers_tree.onSelectedNodeTreeclick,
+                        dnd: {
+                            drag_stop: function (data, element, helper, event) {
+                                //  self.onMoveContainer(data, element, helper, event);
+                            },
+                            drag_start: function (data, element, helper, event) {
+                                var sourceNodeId = element.data.nodes[0];
+                                self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
+                            },
                         },
-                        drag_start: function (data, element, helper, event) {
-                            var sourceNodeId = element.data.nodes[0];
-                            self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
-                        },
-                    },
-                    noScroll: true,
-                };
-            }
-            JstreeWidget.loadJsTree(self.jstreeDivId, jstreeData, jstreeOptions, function () {
-                $("#" + self.jstreeDivId)
-                    .jstree()
-                    .open_all();
-                self.menuActions.bindMoveNode(self.jstreeDivId);
+                        noScroll: true,
+                    };
+                }
+                JstreeWidget.loadJsTree(self.jstreeDivId, jstreeData, jstreeOptions, function () {
+                    $("#" + self.jstreeDivId)
+                        .jstree()
+                        .open_all();
+                    self.menuActions.bindMoveNode(self.jstreeDivId);
+                });
             });
         });
     };

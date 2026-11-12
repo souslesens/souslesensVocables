@@ -1032,7 +1032,16 @@ var Lineage_sources = (function () {
             if (!source) {
                 source = Lineage_sources.activeSource;
             }
-            Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(source);
+            var whiteboardGraph = Lineage_whiteboard.lineageVisjsGraph;
+            whiteboardGraph.data.nodes.remove(source);
+            // vis.js keeps a removed node in its selection, Children and Parents would run on it
+            var selectedNodeIds = whiteboardGraph.network.getSelectedNodes();
+            if (selectedNodeIds.indexOf(source) > -1) {
+                var remainingSelectedNodeIds = selectedNodeIds.filter(function (nodeId) {
+                    return nodeId != source;
+                });
+                whiteboardGraph.setSelectedNodes(remainingSelectedNodeIds);
+            }
         },
         /**
          * Copies the graph URI of a source to the clipboard.

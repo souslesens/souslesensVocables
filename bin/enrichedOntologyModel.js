@@ -67,6 +67,21 @@ async function getEnrichedOntologyModel(source, userContext) {
     const { default: AxiomExtractor } = await import(axiomExtractorUrl);
     delete AxiomExtractor.basicAxioms[source];
     const basicAxioms = await callVocablesFunction("AxiomExtractor", "getBasicAxioms", [source], userContext);
+    // the axiom rows carry the labels of their terms, the imported ones included, which the model of the source lacks
+    const labelByTerm = {};
+    for (const axiomRows of Object.values(basicAxioms)) {
+        for (const axiomRow of axiomRows) {
+            if (axiomRow.sLabel) {
+                labelByTerm[axiomRow.s] = axiomRow.sLabel;
+            }
+            if (axiomRow.pLabel) {
+                labelByTerm[axiomRow.p] = axiomRow.pLabel;
+            }
+            if (axiomRow.oLabel) {
+                labelByTerm[axiomRow.o] = axiomRow.oLabel;
+            }
+        }
+    }
 
     for (const [classIri, ontologyClass] of Object.entries(enrichedModel.classes)) {
         ontologyClass.definitions = [];
@@ -107,9 +122,16 @@ async function getEnrichedOntologyModel(source, userContext) {
             continue;
         }
         const axiomTriples = await callVocablesFunction("AxiomExtractor", "getClassAxiomsTriples", [source, classIri], userContext);
+        // TriplesToManchester writes a term by the label its triple carries, by its IRI otherwise
+        const labelledAxiomTriples = axiomTriples.map((axiomTriple) => ({
+            ...axiomTriple,
+            sLabel: labelByTerm[axiomTriple.subject],
+            pLabel: labelByTerm[axiomTriple.predicate],
+            oLabel: labelByTerm[axiomTriple.object],
+        }));
         let axiomsBySubject = {};
         try {
-            axiomsBySubject = TriplesToManchester.getAxiomsBySubject(axiomTriples);
+            axiomsBySubject = TriplesToManchester.getAxiomsBySubject(labelledAxiomTriples);
         } catch (conversionError) {
             // a class whose axioms hold no subClassOf, equivalentClass nor disjointWith root
             continue;

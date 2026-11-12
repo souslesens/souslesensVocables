@@ -63,7 +63,7 @@ function qualifiedTable(tableName, driver, schema) {
 }
 
 // schemas of information_schema.columns that never hold user tables: system catalogs and postgres toast tables
-const systemSchemaRegex = /^(information_schema|pg_catalog|sys|pg_toast.*)$/i;
+const systemSchemaRegex = /^(information_schema|pg_catalog|sys|pg_toast.*)$/;
 
 function getSchemas(connection, driver, successCallback, errorCallback) {
     // sql server uses camelCase catalog names, unlike the postgres lower case convention
@@ -86,6 +86,7 @@ function getSchemas(connection, driver, successCallback, errorCallback) {
 }
 
 // the tables of a postgres database are read in public whatever the search_path of its connection
+// the KGbuilder pipeline is still pinned to this driver default until it forwards a schema
 function getTableSchema(clientDriver) {
     const tableSchema = clientDriver === "pg" ? "public" : undefined;
     return tableSchema;
@@ -97,4 +98,4 @@ async function getSampleData(connection, tableName, limit, driver, schema) {
         .limit(limit);
 }
 
-export { getConnection, getData, getDefaultSchema, getKGModel, getKGModelAsync, getSchemas, getSampleData, getTableSchema, qualifiedTable, quoteIdentifier, systemSchemaRegex };
+export { getConnection, getData, getDefaultSchema, getKGModel, getKGModelAsync, getSchemas, getSampleData, getTableSchema, qualifiedTable, quoteIdentifier };

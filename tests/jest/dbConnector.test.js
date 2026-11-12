@@ -1,4 +1,4 @@
-import { getDefaultSchema, getKGModel, getSampleData, getSchemas, qualifiedTable, quoteIdentifier, systemSchemaRegex } from "../../bin/databases/dbConnector.js";
+import { getDefaultSchema, getKGModel, getSampleData, getSchemas, qualifiedTable, quoteIdentifier } from "../../bin/databases/dbConnector.js";
 
 function createFakeConnection(result, error) {
     const calls = { distinct: [], from: [], where: [], orderBy: [] };
@@ -93,23 +93,6 @@ describe("qualifiedTable", () => {
     });
 });
 
-describe("systemSchemaRegex", () => {
-    test("rejects system schemas", () => {
-        expect(systemSchemaRegex.test("information_schema")).toBe(true);
-        expect(systemSchemaRegex.test("pg_catalog")).toBe(true);
-        expect(systemSchemaRegex.test("sys")).toBe(true);
-        expect(systemSchemaRegex.test("pg_toast")).toBe(true);
-        expect(systemSchemaRegex.test("pg_toast_temp_1")).toBe(true);
-    });
-
-    test("accepts user schemas", () => {
-        expect(systemSchemaRegex.test("public")).toBe(false);
-        expect(systemSchemaRegex.test("dbo")).toBe(false);
-        expect(systemSchemaRegex.test("staging")).toBe(false);
-        expect(systemSchemaRegex.test("pg_something")).toBe(false);
-    });
-});
-
 describe("getKGModel", () => {
     test("defaults the schema to public for a postgres driver", async () => {
         const { chain, calls } = createFakeConnection([]);
@@ -166,6 +149,27 @@ describe("getSchemas", () => {
         expect(calls.distinct).toStrictEqual([["table_schema"]]);
         expect(calls.from).toStrictEqual([["information_schema.columns"]]);
         expect(calls.orderBy).toStrictEqual([["table_schema"]]);
+    });
+
+    test("excludes only the exact system schema names, in any order", async () => {
+        const rows = [
+            { table_schema: "pg_toast_temp_1" },
+            { table_schema: "Sys" },
+            { table_schema: "pg_catalog" },
+            { table_schema: "public" },
+            { table_schema: "information_schema" },
+            { table_schema: "sys" },
+        ];
+        const { chain } = createFakeConnection(rows);
+        const schemas = await new Promise((resolve, reject) => {
+            getSchemas(
+                chain,
+                "pg",
+                (data) => resolve(data),
+                (error) => reject(error),
+            );
+        });
+        expect(schemas).toStrictEqual(["Sys", "public"]);
     });
 
     test("reads the camelCase catalog column on sql server", async () => {

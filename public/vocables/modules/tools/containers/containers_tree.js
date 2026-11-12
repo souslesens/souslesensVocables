@@ -19,11 +19,11 @@ var Containers_tree = (function () {
     self.getRootContainerNode = function (source) {
         var rootContainerNode = {
             id: self.rootContainerJstreeId,
-            text: "root",
+            text: "rootContainer",
             parent: "#",
             type: "Container",
             state: { opened: true },
-            data: { type: "rootContainer", source: source, id: null, label: "root" },
+            data: { type: "rootContainer", source: source, id: null, label: "rootContainer" },
         };
         return rootContainerNode;
     };

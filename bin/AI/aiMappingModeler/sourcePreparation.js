@@ -66,6 +66,17 @@ function prepareSource(source, upperOntologies, databaseIds, userContext) {
     return preparedSource;
 }
 
+// a preparation still running counts, without waiting for its end
+function isSourcePrepared(source) {
+    const isPrepared = Boolean(preparedSources[source]);
+    return isPrepared;
+}
+
+function getNotPreparedError(source) {
+    const notPreparedError = "the ontologies of " + source + " are not prepared, open the tool again";
+    return notPreparedError;
+}
+
 // null when the source was never prepared, or its preparation failed
 async function getPreparedSource(source) {
     const preparedSource = await preparedSources[source];
@@ -222,4 +233,4 @@ async function readColumnSample(request, userInfo) {
     }
 }
 
-export { prepareSource, getPreparedSource, getTableDescription, getTableKeys, readColumnSample };
+export { prepareSource, isSourcePrepared, getNotPreparedError, getPreparedSource, getTableDescription, getTableKeys, readColumnSample };

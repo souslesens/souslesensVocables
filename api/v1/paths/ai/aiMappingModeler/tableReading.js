@@ -1,5 +1,6 @@
 import { findUserSource } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
 import { getTableReading } from "../../../../../bin/AI/aiMappingModeler/tableReading.js";
+import { isSourcePrepared, getNotPreparedError } from "../../../../../bin/AI/aiMappingModeler/sourcePreparation.js";
 
 export default function () {
     let operations = {
@@ -11,6 +12,9 @@ export default function () {
             const found = await findUserSource(req, req.body.source);
             if (found.error) {
                 return res.status(found.status).json({ error: found.error });
+            }
+            if (!isSourcePrepared(req.body.source)) {
+                return res.status(409).json({ error: getNotPreparedError(req.body.source) });
             }
             const tableReading = await getTableReading(req.body, Boolean(req.body.isReadAgain));
             res.status(200).json(tableReading);
@@ -52,6 +56,7 @@ export default function () {
         responses: {
             200: { description: '{ status: "done" | "running" | "failed", reading: { text, model, readAt } or null, error }' },
             404: { description: "The source is unknown to the user." },
+            409: { description: "The source was not prepared." },
         },
         tags: ["AI"],
     };

@@ -206,41 +206,35 @@ var AIColumnRestrictionSuggestion = (function () {
             if (AIDataSourceManager.currentConfig.databaseSources[dataSourceId]) {
                 payload.databaseId = dataSourceId;
             }
-            pendingRequest.xhr = $.ajax({
-                type: "POST",
-                url: Config.apiUrl + "/ai/aiMappingModeler/columnRestrictionSuggestion",
-                data: JSON.stringify(payload),
-                contentType: "application/json",
-                dataType: "json",
-                success: function (result) {
-                    if (!self.isRequestCurrent(columnNode.id, pendingRequest)) {
-                        return;
-                    }
-                    var columnIdsByName = {};
-                    var linkedColumns = [mappedColumn].concat(otherColumns);
-                    linkedColumns.forEach(function (linkedColumn) {
-                        columnIdsByName[linkedColumn.column] = linkedColumn.columnId;
-                    });
-                    result.restrictions.forEach(function (restriction) {
-                        self.addSuggestion(columnNode.id, columnIdsByName[restriction.fromColumn], columnIdsByName[restriction.toColumn], restriction, self.modelOrigin);
-                    });
-                    var seconds = ((result.allowedMilliseconds + result.llmMilliseconds) / 1000).toFixed(1);
-                    var count = self.countColumnSuggestions(columnNode.id);
-                    var countText = count > 0 ? count + ", click one in the graph to add it." : "none.";
-                    var restrictionsText = "AI restrictions for " + mappedColumn.column + " (" + seconds + " s): " + countText;
-                    var thinkingText = result.implicitJudgementId ? " AI suggestion extra thinking on an implicit object..." : "";
-                    self.showMessage(restrictionsText + thinkingText);
-                    self.showSuggestions();
-                    if (result.implicitJudgementId) {
-                        self.askImplicitJudgement(columnNode, linkedColumns, columnIdsByName, result.implicitJudgementId, pendingRequest, restrictionsText);
-                    }
-                },
-                error: function (error) {
-                    if (error.statusText == "abort" || !self.isRequestCurrent(columnNode.id, pendingRequest)) {
-                        return;
-                    }
-                    self.showMessage("AI restrictions for " + mappedColumn.column + " failed: " + AIColumnClassSuggestion.getErrorText(error));
-                },
+            AIColumnClassSuggestion.postAiRequest("columnRestrictionSuggestion", payload, pendingRequest, function (error, result) {
+                if (error && error.statusText == "abort") {
+                    return;
+                }
+                if (!self.isRequestCurrent(columnNode.id, pendingRequest)) {
+                    return;
+                }
+                if (error) {
+                    var restrictionsFailureText = "AI restrictions for " + mappedColumn.column + " failed: " + AIColumnClassSuggestion.getErrorText(error);
+                    return AIColumnClassSuggestion.showFailure(restrictionsFailureText, !AIColumnClassSuggestion.panelColumnId);
+                }
+                var columnIdsByName = {};
+                var linkedColumns = [mappedColumn].concat(otherColumns);
+                linkedColumns.forEach(function (linkedColumn) {
+                    columnIdsByName[linkedColumn.column] = linkedColumn.columnId;
+                });
+                result.restrictions.forEach(function (restriction) {
+                    self.addSuggestion(columnNode.id, columnIdsByName[restriction.fromColumn], columnIdsByName[restriction.toColumn], restriction, self.modelOrigin);
+                });
+                var seconds = ((result.allowedMilliseconds + result.llmMilliseconds) / 1000).toFixed(1);
+                var count = self.countColumnSuggestions(columnNode.id);
+                var countText = count > 0 ? count + ", click one in the graph to add it." : "none.";
+                var restrictionsText = "AI restrictions for " + mappedColumn.column + " (" + seconds + " s): " + countText;
+                var thinkingText = result.implicitJudgementId ? " AI suggestion extra thinking on an implicit object..." : "";
+                self.showMessage(restrictionsText + thinkingText);
+                self.showSuggestions();
+                if (result.implicitJudgementId) {
+                    self.askImplicitJudgement(columnNode, linkedColumns, columnIdsByName, result.implicitJudgementId, pendingRequest, restrictionsText);
+                }
             });
         });
     };
@@ -248,41 +242,36 @@ var AIColumnRestrictionSuggestion = (function () {
     // the implicit object some samples proposed, shown once a longer reasoning holds it legitimate;
     // linkedColumns: the column just mapped, then the other mapped columns of its table, with the classes they were judged with
     self.askImplicitJudgement = function (columnNode, linkedColumns, columnIdsByName, judgementId, pendingRequest, restrictionsText) {
-        pendingRequest.xhr = $.ajax({
-            type: "POST",
-            url: Config.apiUrl + "/ai/aiMappingModeler/implicitObjectJudgement",
-            data: JSON.stringify({ source: AIMappingModeler.currentSLSsource, judgementId: judgementId }),
-            contentType: "application/json",
-            dataType: "json",
-            success: function (result) {
-                if (!self.isRequestCurrent(columnNode.id, pendingRequest)) {
-                    return;
-                }
-                // its restrictions were checked against the classes the columns had when it was asked
-                var hasKeptClasses = linkedColumns.every(function (linkedColumn) {
-                    return AIMappingColumnsGraph.getColumnClass(linkedColumn.columnId) == linkedColumn.classId;
-                });
-                if (result.implicitObject && hasKeptClasses) {
-                    AIImplicitObjectSuggestion.offer(linkedColumns[0].table, result.implicitObject, columnIdsByName);
-                }
-                var drawnSuggestion = AIImplicitObjectSuggestion.getDrawnSuggestion();
-                var isImplicitObjectShown = Boolean(result.implicitObject) && Boolean(drawnSuggestion) && drawnSuggestion.implicitObject === result.implicitObject;
-                var seconds = (result.judgementMilliseconds / 1000).toFixed(1);
-                var judgementText = "no implicit object kept.";
-                if (isImplicitObjectShown) {
-                    judgementText = "virtual column " + result.implicitObject.column + " proposed.";
-                } else if (result.implicitObject) {
-                    judgementText = "virtual column " + result.implicitObject.column + " kept but not shown: a column changed its class, or another virtual column is still proposed.";
-                }
-                self.showMessage(restrictionsText + " AI suggestion extra thinking (" + seconds + " s): " + judgementText);
-                self.showSuggestions();
-            },
-            error: function (error) {
-                if (error.statusText == "abort" || !self.isRequestCurrent(columnNode.id, pendingRequest)) {
-                    return;
-                }
-                self.showMessage(restrictionsText + " AI suggestion extra thinking failed: " + AIColumnClassSuggestion.getErrorText(error));
-            },
+        var payload = { source: AIMappingModeler.currentSLSsource, judgementId: judgementId };
+        AIColumnClassSuggestion.postAiRequest("implicitObjectJudgement", payload, pendingRequest, function (error, result) {
+            if (error && error.statusText == "abort") {
+                return;
+            }
+            if (!self.isRequestCurrent(columnNode.id, pendingRequest)) {
+                return;
+            }
+            if (error) {
+                var judgementFailureText = restrictionsText + " AI suggestion extra thinking failed: " + AIColumnClassSuggestion.getErrorText(error);
+                return AIColumnClassSuggestion.showFailure(judgementFailureText, !AIColumnClassSuggestion.panelColumnId);
+            }
+            // its restrictions were checked against the classes the columns had when it was asked
+            var hasKeptClasses = linkedColumns.every(function (linkedColumn) {
+                return AIMappingColumnsGraph.getColumnClass(linkedColumn.columnId) == linkedColumn.classId;
+            });
+            if (result.implicitObject && hasKeptClasses) {
+                AIImplicitObjectSuggestion.offer(linkedColumns[0].table, result.implicitObject, columnIdsByName);
+            }
+            var drawnSuggestion = AIImplicitObjectSuggestion.getDrawnSuggestion();
+            var isImplicitObjectShown = Boolean(result.implicitObject) && Boolean(drawnSuggestion) && drawnSuggestion.implicitObject === result.implicitObject;
+            var seconds = (result.judgementMilliseconds / 1000).toFixed(1);
+            var judgementText = "no implicit object kept.";
+            if (isImplicitObjectShown) {
+                judgementText = "virtual column " + result.implicitObject.column + " proposed.";
+            } else if (result.implicitObject) {
+                judgementText = "virtual column " + result.implicitObject.column + " kept but not shown: a column changed its class, or another virtual column is still proposed.";
+            }
+            self.showMessage(restrictionsText + " AI suggestion extra thinking (" + seconds + " s): " + judgementText);
+            self.showSuggestions();
         });
     };
 

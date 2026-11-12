@@ -1,4 +1,5 @@
 import Lineage_createResource from "../lineage/lineage_createResource.js";
+import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import AIMappingModeler from "./aiMappingModeler.js";
 import AIDataSourceManager from "./aiDataSourcesManager.js";
@@ -28,6 +29,12 @@ var AIColumnClassSuggestion = (function () {
     self.sampleRowCount = 5;
     // beyond this the classes of an ontology no longer fit a call answered while the user waits
     self.maxClassesPerOntology = 1000;
+    // the longest answer, the implicit object judgement, reasons at medium effort; the server stops the model when the page gives up
+    self.aiAnswerTimeout = 3 * 60 * 1000;
+    // the server answers it once it has forgotten the prepared ontologies, after a restart
+    self.sourceNotPreparedStatus = 409;
+    // { source, callbacks }: the requests that met a server restart together wait for one preparation; null when none runs
+    self.runningPreparation = null;
     self.boxOpacity = 0.35;
     self.textOpacity = 0.75;
     self.boxHeight = 26;
@@ -124,9 +131,20 @@ var AIColumnClassSuggestion = (function () {
         if (typeof error == "string") {
             return error;
         }
+        if (error.statusText == "timeout") {
+            var timeoutText = "no answer within " + self.aiAnswerTimeout / (60 * 1000) + " min";
+            return timeoutText;
+        }
         var serverMessage = error.responseJSON ? error.responseJSON.error || error.responseJSON.message : null;
         var errorText = serverMessage || error.responseText || error.statusText || "no answer from the server";
         return errorText;
+    };
+
+    self.showFailure = function (failureText, isShownInPanel) {
+        if (isShownInPanel) {
+            return self.showMessage(failureText);
+        }
+        UI.message(CommonBotFunctions.escapeHtml(failureText));
     };
 
     self.prepare = function () {
@@ -136,8 +154,31 @@ var AIColumnClassSuggestion = (function () {
         self.tableReadingsByKey = {};
         clearTimeout(self.tableReadingPollTimer);
         $("#" + self.tableReadingDivId).empty();
-        self.leftOutOntologies = [];
+        self.prepareSource(function (error) {
+            if (error) {
+                UI.message("AI suggestions are not ready: " + self.getErrorText(error));
+            }
+        });
+    };
+
+    self.prepareSource = function (callback) {
         var source = AIMappingModeler.currentSLSsource;
+        // the tool opened again on another source during a preparation does not get the ontologies of the previous one
+        if (self.runningPreparation && self.runningPreparation.source == source) {
+            self.runningPreparation.callbacks.push(callback);
+            return;
+        }
+        var preparation = { source: source, callbacks: [callback] };
+        self.runningPreparation = preparation;
+        var endPreparation = function (error) {
+            if (self.runningPreparation === preparation) {
+                self.runningPreparation = null;
+            }
+            preparation.callbacks.forEach(function (preparationCallback) {
+                preparationCallback(error);
+            });
+        };
+        self.leftOutOntologies = [];
         var upperOntologies = [];
         self.getImportsSortedByAbstraction(source).forEach(function (importSource) {
             if (!Config.sources[importSource]) {
@@ -162,16 +203,59 @@ var AIColumnClassSuggestion = (function () {
             data: JSON.stringify(payload),
             contentType: "application/json",
             dataType: "json",
+            timeout: self.aiAnswerTimeout,
             success: function (result) {
                 var unreachableDatabases = Object.keys(result.databaseErrors);
                 if (unreachableDatabases.length > 0) {
                     UI.message("AI suggestions read no schema for: " + unreachableDatabases.join(", "));
                 }
+                endPreparation(null);
             },
             error: function (error) {
-                UI.message("AI suggestions are not ready: " + self.getErrorText(error));
+                endPreparation(error);
             },
         });
+    };
+
+    // pendingRequest: { xhr }, kept so that its caller can abort it; the server forgets the prepared ontologies when it restarts,
+    // they are prepared again and the request sent again, once
+    self.postAiRequest = function (route, payload, pendingRequest, callback) {
+        var send = function (isPreparedAgain) {
+            pendingRequest.xhr = $.ajax({
+                type: "POST",
+                url: Config.apiUrl + "/ai/aiMappingModeler/" + route,
+                data: JSON.stringify(payload),
+                contentType: "application/json",
+                dataType: "json",
+                timeout: self.aiAnswerTimeout,
+                success: function (result) {
+                    callback(null, result);
+                },
+                error: function (error) {
+                    if (error.status != self.sourceNotPreparedStatus || isPreparedAgain) {
+                        return callback(error);
+                    }
+                    // aborted as an xhr would be, while no request is on the way
+                    var isCancelled = false;
+                    pendingRequest.xhr = {
+                        abort: function () {
+                            isCancelled = true;
+                            callback({ statusText: "abort" });
+                        },
+                    };
+                    self.prepareSource(function (preparationError) {
+                        if (isCancelled) {
+                            return;
+                        }
+                        if (preparationError) {
+                            return callback(preparationError);
+                        }
+                        send(true);
+                    });
+                },
+            });
+        };
+        send(false);
     };
 
     self.getTableKey = function (dataSourceId, table) {
@@ -227,18 +311,11 @@ var AIColumnClassSuggestion = (function () {
             if (AIDataSourceManager.currentConfig.databaseSources[currentDataSource.id]) {
                 payload.databaseId = currentDataSource.id;
             }
-            $.ajax({
-                type: "POST",
-                url: Config.apiUrl + "/ai/aiMappingModeler/tableReading",
-                data: JSON.stringify(payload),
-                contentType: "application/json",
-                dataType: "json",
-                success: function (tableReading) {
-                    self.onTableReading(currentDataSource.id, table, tableReading);
-                },
-                error: function (error) {
-                    self.onTableReading(currentDataSource.id, table, { status: "failed", reading: null, error: self.getErrorText(error) });
-                },
+            self.postAiRequest("tableReading", payload, { xhr: null }, function (error, tableReading) {
+                if (error) {
+                    return self.onTableReading(currentDataSource.id, table, { status: "failed", reading: null, error: self.getErrorText(error) });
+                }
+                self.onTableReading(currentDataSource.id, table, tableReading);
             });
         });
     };
@@ -419,25 +496,18 @@ var AIColumnClassSuggestion = (function () {
             if (databaseSources[dataSourceId]) {
                 payload.databaseId = dataSourceId;
             }
-            pendingRequest.xhr = $.ajax({
-                type: "POST",
-                url: Config.apiUrl + "/ai/aiMappingModeler/columnClassSuggestion",
-                data: JSON.stringify(payload),
-                contentType: "application/json",
-                dataType: "json",
-                success: function (result) {
-                    delete self.requestsByColumnId[columnNode.id];
-                    self.showSuggestion(columnNode, result.suggestions);
-                },
-                error: function (error) {
-                    if (error.statusText == "abort") {
-                        return;
-                    }
-                    delete self.requestsByColumnId[columnNode.id];
-                    if (self.panelColumnId == columnNode.id) {
-                        self.showMessage("AI suggestion for " + column + " failed: " + self.getErrorText(error));
-                    }
-                },
+            self.postAiRequest("columnClassSuggestion", payload, pendingRequest, function (error, result) {
+                if (error && error.statusText == "abort") {
+                    return;
+                }
+                if (self.requestsByColumnId[columnNode.id] !== pendingRequest) {
+                    return;
+                }
+                delete self.requestsByColumnId[columnNode.id];
+                if (error) {
+                    return self.showFailure("AI suggestion for " + column + " failed: " + self.getErrorText(error), self.panelColumnId == columnNode.id);
+                }
+                self.showSuggestion(columnNode, result.suggestions);
             });
         });
     };

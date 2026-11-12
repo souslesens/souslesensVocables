@@ -233,4 +233,16 @@ describe("getSampleData", () => {
         await getSampleData(createTableConnection(calls), "assets", 10, "mssql");
         expect(calls.tableRefs).toStrictEqual(['"dbo"."assets"']);
     });
+
+    test("quotes a caller-supplied table name as a single identifier", async () => {
+        const calls = { tableRefs: [], selects: [], limits: [] };
+        await getSampleData(createTableConnection(calls), 'x"; DROP TABLE t; --', 10, "pg");
+        expect(calls.tableRefs).toStrictEqual(['"public"."x""; DROP TABLE t; --"']);
+    });
+
+    test("doubles the double quote of a caller-supplied schema", async () => {
+        const calls = { tableRefs: [], selects: [], limits: [] };
+        await getSampleData(createTableConnection(calls), "assets", 10, "pg", 'sta"ging');
+        expect(calls.tableRefs).toStrictEqual(['"sta""ging"."assets"']);
+    });
 });

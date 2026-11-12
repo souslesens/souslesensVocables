@@ -521,7 +521,7 @@ var Containers_tree = (function () {
         triples.push({
             subject: containerUri,
             predicate: " rdfs:label",
-            object: newContainerLabel + " Child",
+            object: newContainerLabel,
         });
 
         Sparql_generic.insertTriples(source, triples, null, function (err, result) {
@@ -533,8 +533,9 @@ var Containers_tree = (function () {
                 id: containerUri,
                 text: newContainerLabel,
                 parent: parent,
+                type: "Container",
                 data: {
-                    type: "container",
+                    type: "Container",
                     source: source,
                     id: containerUri,
                     label: newContainerLabel,

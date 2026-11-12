@@ -1,17 +1,21 @@
 name: build-and-deploy-docs
 on:
-    - push
+    push:
+        branches: [master]
 
 # Serialize Pages deployments: concurrent runs (e.g. rapid merges to master) otherwise
 # collide on the github-pages environment and fail with "Deployment failed, try again later".
+# cancel-in-progress: a stuck run is superseded by the next push instead of blocking the queue.
 concurrency:
     group: "pages"
-    cancel-in-progress: false
+    cancel-in-progress: true
 
 jobs:
     build:
-        if: "github.ref == 'refs/heads/master'"
         runs-on: ubuntu-latest
+        # Without this, a hung step (network, uv resolving a toolchain) waits the 6h default
+        # and blocks every queued run of the same concurrency group.
+        timeout-minutes: 20
         permissions:
             pages: write
             id-token: write
@@ -26,18 +30,25 @@ jobs:
                   node-version: "20"
                   cache: "npm"
             - name: Install npm dependencies
+              timeout-minutes: 10
               run: npm ci
             - name: Generate jsdoc
+              timeout-minutes: 10
               run: npm run tools:jsdoc2md > docs/docs/developpement/codedoc/jsdoc.md
             - name: Setup uv
               uses: astral-sh/setup-uv@v4
+              with:
+                  enable-cache: true
+            - name: Install Python dependencies
+              timeout-minutes: 10
+              run: uv sync --directory docs --frozen --no-dev
             - name: Build docs with Sphinx
-              run: |
-                  cd docs
-                  uv run sphinx-build docs _build/html
+              timeout-minutes: 10
+              run: uv run --directory docs sphinx-build docs _build/html
             - name: Upload
               uses: actions/upload-pages-artifact@v3
               with:
                   path: docs/_build/html
             - name: Pages
+              id: deployment
               uses: actions/deploy-pages@v4

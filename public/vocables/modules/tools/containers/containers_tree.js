@@ -448,8 +448,15 @@ var Containers_tree = (function () {
         items["AddGraphNode"] = {
             label: "Add selected node to container",
             action: function (_e) {
-                var graphNodeData = Lineage_whiteboard.currentGraphNode.data;
-                Containers_tree.menuActions.addResourcesToContainer(self.currentSource, self.currentContainer, graphNodeData, false, function (result) {
+                var selectedNodeIds = Lineage_whiteboard.isWhiteboardDrawn() ? Lineage_whiteboard.lineageVisjsGraph.network.getSelectedNodes() : [];
+                if (selectedNodeIds.length == 0) {
+                    return UI.message("no node selected on the whiteboard", true);
+                }
+                var selectedNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(selectedNodeIds);
+                var selectedNodesData = selectedNodes.map(function (selectedNode) {
+                    return selectedNode.data;
+                });
+                Containers_tree.menuActions.addResourcesToContainer(self.currentSource, self.currentContainer, selectedNodesData, false, function (result) {
                     /*   if (err) {
                         return MainController.errorAlert(err.responseText || err);
                     }*/

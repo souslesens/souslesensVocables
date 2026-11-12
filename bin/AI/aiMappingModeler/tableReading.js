@@ -3,7 +3,7 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { readMappingModelerFile, updateMappingModelerFile } from "../ontologyFromDb/mappings/mappingRuns.js";
 import { createMessage, getAnswerText, getCutAnswerError } from "../ontologyFromDb/ontology/ontologyAnswer.js";
-import { getPreparedSource, getTableDescription } from "./sourcePreparation.js";
+import { getPreparedSource, getNotPreparedError, getTableDescription } from "./sourcePreparation.js";
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const promptPath = join(currentDirectory, "prompts/table_reading.md");
@@ -79,7 +79,7 @@ function runTableReading(request, tableReading) {
     getPreparedSource(request.source)
         .then(function (preparedSource) {
             if (!preparedSource) {
-                return { error: "the ontologies of " + request.source + " are not prepared, open the tool again" };
+                return { error: getNotPreparedError(request.source) };
             }
             return readTable(request, preparedSource);
         })

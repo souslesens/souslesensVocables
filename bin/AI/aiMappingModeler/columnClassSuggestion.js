@@ -28,6 +28,8 @@ const markupCharacterRegex = /[<>&]/;
 const maxCandidates = 3;
 const fullProbability = 100;
 const noClassKinds = ["value", "technicalKey"];
+// the last section of a prompt file, from its "<n>. Answer" heading to the end
+const answerSectionRegex = /^\d+\. Answer\r?$/m;
 const secondTypeText = "A class on this column would give the same individuals a second type.";
 // rows read again for the column: none when they cannot be, the page then gives the first rows of the table
 const sampleNoteTextByColumnState = {
@@ -99,6 +101,16 @@ function getColumnPrompt(request, preparedSource, columnNoteTexts, tableReading)
         "\n\n# Columns already mapped\n\n" +
         mappedColumnsText;
     return columnPrompt;
+}
+
+// the answer section of a prompt, given again after the inputs: the upper ontologies stand between it and the question
+function getAnswerReminder(promptText) {
+    const answerSectionStart = promptText.search(answerSectionRegex);
+    if (answerSectionStart == -1) {
+        return "";
+    }
+    const answerReminder = "\n\n" + promptText.slice(answerSectionStart);
+    return answerReminder;
 }
 
 function readClassIri(writtenClass, prefixes) {
@@ -485,7 +497,8 @@ async function suggestColumnClass(request, abortSignal, userInfo) {
         return { status: 499, error: "the request was cancelled" };
     }
     const sampledRequest = { ...request, sampleRows: columnSample.sampleRows };
-    const systemPrompt = readFileSync(promptPath, "utf8") + "\n\n# Upper ontologies, most abstract first\n" + preparedSource.classesText;
+    const promptText = readFileSync(promptPath, "utf8");
+    const systemPrompt = promptText + "\n\n# Upper ontologies, most abstract first\n" + preparedSource.classesText;
     const columnKeyRole = getColumnKeyRole(request, preparedSource);
     const columnNoteTexts = [sampleNoteTextByColumnState[columnSample.columnState], columnKeyRole.roleText];
     const writtenNoteTexts = columnNoteTexts.filter((noteText) => noteText);
@@ -493,7 +506,7 @@ async function suggestColumnClass(request, abortSignal, userInfo) {
     const messageParams = {
         model: suggestionModelId,
         system: systemPrompt,
-        messages: [{ role: "user", content: getColumnPrompt(sampledRequest, preparedSource, writtenNoteTexts, tableReading) }],
+        messages: [{ role: "user", content: getColumnPrompt(sampledRequest, preparedSource, writtenNoteTexts, tableReading) + getAnswerReminder(promptText) }],
         maxTokens: suggestionMaxTokens,
         reasoningEffort: suggestionReasoningEffort,
         isPromptCached: true,
@@ -516,4 +529,4 @@ async function suggestColumnClass(request, abortSignal, userInfo) {
     return { suggestions: suggestions, llmMilliseconds: llmMilliseconds };
 }
 
-export { suggestionModelId, suggestionReasoningEffort, suggestionMaxTokens, askSamples, markupCharacterRegex, noClassKinds, isFilledText, readJsonObject, readClassAnswer, getKnownClasses, getCorrectionParams, suggestColumnClass };
+export { suggestionModelId, suggestionReasoningEffort, suggestionMaxTokens, askSamples, getAnswerReminder, markupCharacterRegex, noClassKinds, isFilledText, readJsonObject, readClassAnswer, getKnownClasses, getCorrectionParams, suggestColumnClass };

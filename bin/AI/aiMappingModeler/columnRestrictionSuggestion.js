@@ -14,6 +14,7 @@ import {
     suggestionReasoningEffort,
     suggestionMaxTokens,
     askSamples,
+    getAnswerReminder,
     markupCharacterRegex,
     isFilledText,
     readJsonObject,
@@ -335,12 +336,13 @@ async function suggestColumnRestrictions(request, abortSignal, userContext) {
     const localClassIris = mappedClassIris.filter((classIri) => !preparedSource.classLabelByIri[classIri]);
     const descriptionByClass = await getLocalClassDescriptions(localClassIris, userContext.userSources[request.source].graphUri, userContext);
     const tableReading = await getKnownTableReading(request);
-    const systemPrompt = readFileSync(promptPath, "utf8") + "\n\n# Upper ontologies, most abstract first\n" + preparedSource.modelText;
+    const promptText = readFileSync(promptPath, "utf8");
+    const systemPrompt = promptText + "\n\n# Upper ontologies, most abstract first\n" + preparedSource.modelText;
     const llmStart = Date.now();
     const messageParams = {
         model: suggestionModelId,
         system: systemPrompt,
-        messages: [{ role: "user", content: getRestrictionPrompt(request, preparedSource, allowedPropertiesByDirection, descriptionByClass, tableReading) }],
+        messages: [{ role: "user", content: getRestrictionPrompt(request, preparedSource, allowedPropertiesByDirection, descriptionByClass, tableReading) + getAnswerReminder(promptText) }],
         maxTokens: suggestionMaxTokens,
         reasoningEffort: suggestionReasoningEffort,
         isPromptCached: true,

@@ -87,7 +87,7 @@ var Predicates_bot = (function () {
 
     var owlObjectPropertyUri = "http://www.w3.org/2002/07/owl#ObjectProperty";
     var owlDatatypePropertyUri = "http://www.w3.org/2002/07/owl#DatatypeProperty";
-    var owlAnnotationPropertyUri = "http://www.w3.org/2002/07/owl#AnnotationProperty";
+    var rdfsResourceUri = "http://www.w3.org/2000/01/rdf-schema#Resource";
 
     /**
      * @function classifyPropertyAsObject
@@ -95,8 +95,7 @@ var Predicates_bot = (function () {
      * @memberof Predicates_bot
      * Decides whether a property takes a resource (object picker) or a literal (text input) as
      * object. Uses the explicit rdf:type captured in `model.propertyTypes` first
-     * (owl:ObjectProperty / owl:DatatypeProperty / owl:AnnotationProperty), then falls back to the
-     * declared range, then defaults to object for untyped rangeless predicates.
+     * (owl:ObjectProperty / owl:DatatypeProperty), then the declared range.
      * @param {Object} model - A Config.ontologiesVocabularyModels entry.
      * @param {string} propertyId - Property URI.
      * @returns {boolean} `true` for an object property (resource), `false` for a datatype/annotation property (literal).
@@ -106,31 +105,19 @@ var Predicates_bot = (function () {
         var nonObjectEntry = model.nonObjectProperties ? model.nonObjectProperties[propertyId] : null;
         var range = nonObjectEntry ? nonObjectEntry.range : null;
 
-        if (types) {
-            if (types[owlObjectPropertyUri]) {
-                return true;
-            }
-            if (types[owlDatatypePropertyUri]) {
-                return false;
-            }
-            if (types[owlAnnotationPropertyUri]) {
-                if (range && !isLiteralRange(range)) {
-                    return true;
-                }
-                return false;
-            }
-        }
-
-        // No explicit OWL typing (e.g. plain rdf:Property like rdfs:subClassOf): rely on range.
-        if (range) {
-            if (isLiteralRange(range)) {
-                return false;
-            }
+        if (types && types[owlObjectPropertyUri]) {
             return true;
         }
-        // No range and no OWL typing: default to object. chooseObjectFn's name heuristic
-        // (isLiteralProperty) still routes label/comment-like predicates to a text input.
-        return true;
+        if (types && types[owlDatatypePropertyUri]) {
+            return false;
+        }
+        // rdfs:Resource or no range admits a literal as well as a resource: the text field takes both,
+        // formatObject saves an http value as a URI
+        if (!range || range === rdfsResourceUri) {
+            return false;
+        }
+        var isResourceRange = !isLiteralRange(range);
+        return isResourceRange;
     }
 
     var knownLiteralProperties = [

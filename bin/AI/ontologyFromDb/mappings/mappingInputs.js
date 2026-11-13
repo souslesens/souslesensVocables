@@ -5,7 +5,7 @@ import { getImportedOntologies } from "../ontology/restrictionCheck.js";
 import { getDatatypePropertyIris, getValidatedOntologyModelText } from "../upperOntologyModel.js";
 import { describeDatabase } from "../databaseDescription.js";
 import { callVocablesFunction } from "../../../remoteCodeRunner.js";
-import { getSchemaDescription } from "../../../KG/dbConnector.js";
+import { getSchemaDescription } from "../../../databases/dbConnector.js";
 import { databaseModel } from "../../../../model/databases.js";
 import { listSourceMappings } from "./mappingRuns.js";
 

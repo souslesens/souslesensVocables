@@ -3,7 +3,7 @@ import { describeDatabase } from "../databaseDescription.js";
 import { getTermIri } from "../mappings/mappingAnswer.js";
 import { getEnrichedOntologyModel } from "../../../enrichedOntologyModel.js";
 import { databaseModel } from "../../../../model/databases.js";
-import { getSchemaDescription } from "../../../KG/dbConnector.js";
+import { getSchemaDescription } from "../../../databases/dbConnector.js";
 
 // a loop that never stops is the failure that costs money: a few reads, a proposal, a fix, the answer
 const maxAgentTurns = 12;

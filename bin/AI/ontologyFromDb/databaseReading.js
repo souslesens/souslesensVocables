@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import async from "async";
-import * as dbConnector from "../../KG/dbConnector.js";
+import * as dbConnector from "../../databases/dbConnector.js";
 import { modelMaxOutputTokens, jsonBlockRegex, createMessage, getCutAnswerError, getAnswerText } from "./ontology/ontologyAnswer.js";
 import { saveDatabaseChecks } from "./ontology/ontologyRuns.js";
 import { describeDatabase, getSampleTexts } from "./databaseDescription.js";

@@ -1,4 +1,4 @@
-import { getColumnProfile, getDistinctTextValues, getMissingTextValues, getRowsHoldingTextValues, getSharedDistinctValueCount } from "../../KG/dbConnector.js";
+import { getColumnProfile, getDistinctTextValues, getMissingTextValues, getRowsHoldingTextValues, getSharedDistinctValueCount } from "../../databases/dbConnector.js";
 import { databaseModel } from "../../../model/databases.js";
 
 // the missing values whose shapes are described, and the key values the shapes are compared with

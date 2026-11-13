@@ -28,7 +28,7 @@ import {
     getAnswerTurtle,
 } from "../../../../bin/AI/ontologyFromDb/ontology/ontologyAnswer.js";
 import userManager from "../../../../bin/user.js";
-import * as dbConnector from "../../../../bin/KG/dbConnector.js";
+import * as dbConnector from "../../../../bin/databases/dbConnector.js";
 import { databaseModel } from "../../../../model/databases.js";
 import { sourceModel } from "../../../../model/sources.js";
 import { getUpperOntologyModelText } from "../../../../bin/AI/ontologyFromDb/upperOntologyModel.js";

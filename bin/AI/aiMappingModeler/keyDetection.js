@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import { rename, writeFile } from "fs/promises";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
-import { getSchemaDescription, getRepeatedValueRows } from "../../KG/dbConnector.js";
+import { getSchemaDescription, getRepeatedValueRows } from "../../databases/dbConnector.js";
 import { databaseModel } from "../../../model/databases.js";
 import SocketManager from "../../socketManager.js";
 import { nonNameCharacterRegex, readDatabaseChecks } from "../ontologyFromDb/ontology/ontologyRuns.js";

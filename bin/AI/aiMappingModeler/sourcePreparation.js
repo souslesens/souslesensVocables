@@ -3,7 +3,7 @@ import { describeDatabase, getSampleTexts } from "../ontologyFromDb/databaseDesc
 import { getImportedOntologies } from "../ontologyFromDb/ontology/restrictionCheck.js";
 import { basename, dirname, join } from "path";
 import { fileURLToPath } from "url";
-import { getSchemaDescription, getFilledSampleData } from "../../KG/dbConnector.js";
+import { getSchemaDescription, getFilledSampleData } from "../../databases/dbConnector.js";
 import { callVocablesFunction } from "../../remoteCodeRunner.js";
 import csvCrawler from "../../_csvCrawler.js";
 import { databaseModel } from "../../../model/databases.js";

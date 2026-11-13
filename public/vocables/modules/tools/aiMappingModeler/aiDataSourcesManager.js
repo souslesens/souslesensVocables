@@ -769,7 +769,7 @@ var AIDataSourceManager = (function () {
                     });
                     $.ajax({
                         type: "GET",
-                        url: Config.apiUrl + "/kg/model?" + params.toString(),
+                        url: Config.apiUrl + "/databases/model?" + params.toString(),
                         dataType: "json",
                         success: function (columnTypesByTable, _textStatus, _jqXHR) {
                             var tables = {};

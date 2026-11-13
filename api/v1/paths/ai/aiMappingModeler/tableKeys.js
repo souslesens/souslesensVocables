@@ -1,4 +1,4 @@
-import { getSchemaDescription } from "../../../../../bin/KG/dbConnector.js";
+import { getSchemaDescription } from "../../../../../bin/databases/dbConnector.js";
 import { databaseModel } from "../../../../../model/databases.js";
 import userManager from "../../../../../bin/user.js";
 import { followKeyDetection, getKeyDetection } from "../../../../../bin/AI/aiMappingModeler/keyDetection.js";

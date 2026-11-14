@@ -47,41 +47,9 @@ export default function () {
             }
 
             const graphUri = userSources[sourceName].graphUri;
-            const graphSize = await rdfDataModel.getTripleCount(graphUri, graphsImports);
-            const data = await rdfDataModel.getGraphPartNt(graphUri, limit, offset, graphsImports);
+            const page = await rdfDataModel.getGraphDownloadPage(graphUri, userSources[sourceName].owner, graphsImports, limit, offset);
 
-            let additionalTriples = "";
-            // add contributor and import triples only in offset 0
-            if (Number(offset) === 0) {
-                const owner = userSources[sourceName].owner;
-                const contributorTriple = rdfDataModel.genContributorTriple(graphUri, owner);
-                const checkContributorTriple = await rdfDataModel.ask(graphUri, contributorTriple);
-                const contributorTripleStr = checkContributorTriple ? "" : rdfDataModel.formatTripleToNt(...contributorTriple);
-
-                let importTriplesStrArray = [];
-                if (graphsImports.length > 0) {
-                    importTriples = rdfDataModel.genImportTriples(graphUri, graphsImports);
-                    importTriplesStrArray = await Promise.all(
-                        importTriples
-                            .map(async (t) => {
-                                const checkImportTriple = await rdfDataModel.ask(graphUri, t);
-                                return checkImportTriple ? null : rdfDataModel.formatTripleToNt(...t);
-                            })
-                            .filter((e) => e !== null),
-                    );
-                }
-                additionalTriples = `${contributorTripleStr}\n${importTriplesStrArray.join("\n")}\n`;
-            }
-            const dataWithAdditionalTriples = additionalTriples + data;
-
-            let nextOffset;
-            if (Number(offset) + Number(limit) >= graphSize) {
-                nextOffset = null;
-            } else {
-                nextOffset = Number(offset) + Number(limit);
-            }
-
-            const response = { graph_size: graphSize, next_offset: nextOffset, data: dataWithAdditionalTriples };
+            const response = { graph_size: page.graphSize, next_offset: page.nextOffset, data: page.graphPartNt };
 
             res.status(200).send(response);
         } catch (error) {

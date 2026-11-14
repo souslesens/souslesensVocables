@@ -16,6 +16,7 @@ import SearchWidget from "../../uiWidgets/searchWidget.js";
 import Authentification from "../../shared/authentification.js";
 import UI from "../../../modules/shared/UI.js";
 import IndexedPredicates_bot from "../../bots/indexedPredicates_bot.js";
+import GitVersioning_bot from "../../bots/gitVersioning_bot.js";
 
 /**
  * @module Lineage_sources
@@ -696,6 +697,12 @@ var Lineage_sources = (function () {
                 html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.clearOntologyModelCache();">Refresh ontology model</span>';
             }
             html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.downloadGraph();">Download</span>';
+            var sourceConfig = Config.sources[source];
+            // loadSources replaced "_default" by the URL of the platform's own triple store, the only one the versioning exports
+            var isInPlatformTripleStore = Boolean(sourceConfig.graphUri) && (!sourceConfig.sparql_server || sourceConfig.sparql_server.url === Config.sparql_server.url);
+            if (sourceConfig.accessControl === "readwrite" && isInPlatformTripleStore) {
+                html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.versionSource();">Version</span>';
+            }
         }
         PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
     };
@@ -1096,6 +1103,16 @@ var Lineage_sources = (function () {
         downloadGraph: function () {
             const apiUrl = Config.slsPyApi.enabled ? Config.slsPyApi.url.replace(/\/$/, "").concat("/") : "/";
             window.DownloadGraphModal.open(Lineage_sources.activeSource, apiUrl);
+        },
+        /**
+         * Opens the bot that versions the source in its git repository.
+         * @function
+         * @name versionSource
+         * @memberof module:Lineage_sources.menuActions
+         * @returns {void}
+         */
+        versionSource: function () {
+            GitVersioning_bot.start(Lineage_sources.activeSource);
         },
         /**
          * Opens the graph download modal.

@@ -206,6 +206,8 @@ export const ServerSourceSchema = z.object({
     imports: z.array(z.string()).default([]),
     taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
     accessControl: z.string().default(""),
+    // written by the Version bot of Lineage, kept so editing the source does not unlink it
+    gitRepository: z.object({ url: z.string() }).optional(),
 });
 
 const InputSourceSchemaBase = {

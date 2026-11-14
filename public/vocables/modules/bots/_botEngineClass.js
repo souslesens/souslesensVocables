@@ -17,6 +17,7 @@ class BotEngineClass {
         this.currentList = [];
         this.multiSelectedValues = [];
         this.divId = null;
+        this.secretValueMask = "••••••••";
     }
 
     init(botModule, initialWorkflow, options, callback) {
@@ -929,9 +930,15 @@ class BotEngineClass {
         }
         var savedContainerWidth = null;
         var savedDialogWidth = null;
+        var isSecret = Boolean(options && options.isSecret);
         $("#" + this.divId)
             .find("#bot_resourcesProposalSelect")
             .hide();
+        // the prompt is a textarea, which has no password type; no spellcheck, which may send the text to a service
+        $("#" + this.divId)
+            .find("#botPromptInput")
+            .css("-webkit-text-security", isSecret ? "disc" : "")
+            .attr("spellcheck", isSecret ? "false" : null);
 
         if (options && options.datePicker) {
             //DateWidget.unsetDatePickerOnInput("botPromptInput");
@@ -945,6 +952,10 @@ class BotEngineClass {
             });
         }
 
+        // a prompt left by the Previous button still listens: its answer would move the bot twice
+        $("#" + this.divId)
+            .find("#botPromptInput")
+            .off("keydown keyup");
         $("#" + this.divId)
             .find("#botPromptInput")
             .on("keydown", (evt) => {
@@ -976,10 +987,14 @@ class BotEngineClass {
                     if (!varToFill) {
                         return this.previousStep();
                     }
+                    var displayedValue = isSecret ? this.secretValueMask : value.trim();
+                    if (isSecret) {
+                        $(evt.currentTarget).val("");
+                    }
                     //Il faut attribuer l'objet aux bon numéro de currentObject
                     this.history.VarFilling[this.history.currentIndex] = {
                         VarFilled: varToFill,
-                        valueFilled: value.trim(),
+                        valueFilled: displayedValue,
                     };
 
                     this.currentBot.params[varToFill] = value.trim();
@@ -987,7 +1002,7 @@ class BotEngineClass {
                         $("#botContainerDiv").css("width", savedContainerWidth + "px");
                         $("#botPanel").dialog("option", "width", savedDialogWidth);
                     }
-                    this.insertBotMessage(value);
+                    this.insertBotMessage(displayedValue);
                     $("#" + this.divId)
                         .find("#botPromptInput")
                         .off();

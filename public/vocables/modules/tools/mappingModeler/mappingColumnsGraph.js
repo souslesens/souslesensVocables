@@ -556,6 +556,7 @@ var MappingColumnsGraph = (function () {
      * @returns {void}
      */
     self.onVisjsGraphClick = function (node, event, options) {
+        PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
         if (!node) {
             MappingModeler.currentRelation = null;
             self.relationMessage();
@@ -2418,6 +2419,7 @@ var MappingColumnsGraph = (function () {
                     var implicitOptions = {
                         visjsOptions: { autoResize: true, width: "100%", height: "100%" },
                         onclickFn: function (node, event, options) {
+                            PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
                             if (!node) {
                                 return;
                             }

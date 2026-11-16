@@ -140,6 +140,10 @@ var Lineage_selection = (function () {
                     if (MainController.currentTool == "KGquery") {
                         $("#selectionActionsDiv").children(":not(#classDecorateButton)").hide();
                     }
+                    if (MainController.currentTool == "lineage") {
+                        var whiteboardSelectedNodeIds = Lineage_whiteboard.lineageVisjsGraph.network.getSelectedNodes();
+                        JstreeWidget.setjsTreeCheckedNodes("lineage_selection_selectedNodesTreeDiv", whiteboardSelectedNodeIds);
+                    }
                 });
             } catch (e) {
                 var x = e;

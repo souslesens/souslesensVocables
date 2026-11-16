@@ -331,6 +331,8 @@ const VOCABLES_MODULE_PATHS = {
     Sparql_OWL: pathToFileURL(path.join(projectRoot, "public/vocables/modules/sparqlProxies/sparql_OWL.js")).href,
     Sparql_SKOS: pathToFileURL(path.join(projectRoot, "public/vocables/modules/sparqlProxies/sparql_SKOS.js")).href,
     Sparql_generic: pathToFileURL(path.join(projectRoot, "public/vocables/modules/sparqlProxies/sparql_generic.js")).href,
+    OntologyModels: pathToFileURL(path.join(projectRoot, "public/vocables/modules/shared/ontologyModels.js")).href,
+    AxiomExtractor: pathToFileURL(path.join(projectRoot, "public/vocables/modules/tools/axioms/axiomExtractor.js")).href,
 };
 
 const RemoteCodeRunner = {
@@ -453,4 +455,37 @@ const RemoteCodeRunner = {
     },
 };
 
+// a source added or changed in sources.json after the first call, as loadConfig would have read it: the runner reads the file once
+function setRunnerSource(sourceName, sourceConfig) {
+    if (!configLoaded) {
+        return;
+    }
+    const runnerSource = structuredClone(sourceConfig);
+    if (runnerSource.sparql_server && runnerSource.sparql_server.url === "_default") {
+        runnerSource.sparql_server.url = globalThis.Config.sparql_server.url;
+    }
+    const sourceWithSameController = Object.values(globalThis.Config.sources).find((loadedSource) => loadedSource.controllerName === sourceConfig.controller);
+    if (sourceWithSameController) {
+        runnerSource.controllerName = sourceConfig.controller;
+        runnerSource.controller = sourceWithSameController.controller;
+    }
+    globalThis.Config.sources[sourceName] = runnerSource;
+    if (runnerSource.graphUri) {
+        globalThis.Config.ontologiesVocabularyModels[sourceName] = { graphUri: runnerSource.graphUri };
+    }
+}
+
+// runVocablesFn as a promise, for the server code written with await
+function callVocablesFunction(moduleName, functionName, args, userContext) {
+    return new Promise(function (resolve, reject) {
+        RemoteCodeRunner.runVocablesFn({ moduleName, functionName, args }, userContext, function (error, result) {
+            if (error) {
+                return reject(error);
+            }
+            resolve(result);
+        });
+    });
+}
+
+export { callVocablesFunction, setRunnerSource };
 export default RemoteCodeRunner;

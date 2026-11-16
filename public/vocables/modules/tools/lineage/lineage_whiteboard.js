@@ -2862,8 +2862,8 @@ var Lineage_whiteboard = (function () {
                         }
                         if (result.length > self.showLimit) {
                             var resultNumber = result.length;
-                            data = result.slice(0, 3000);
-                            alert("Too many results (" + resultNumber + "), only 1000 showed");
+                            data = result.slice(0, self.showLimit);
+                            alert("Too many results (" + resultNumber + "), only " + self.showLimit + " showed");
                             return callbackSeries();
                         }
                         if (!Lineage_whiteboard.isResultAcceptable(result)) {
@@ -3200,6 +3200,10 @@ var Lineage_whiteboard = (function () {
                     if (callback) {
                         return callback(null, result);
                     }
+                }
+                if (result.length > self.showLimit) {
+                    alert("Too many restrictions (" + result.length + "), only the first " + self.showLimit + " are drawn");
+                    result = result.slice(0, self.showLimit);
                 }
                 if (!Lineage_whiteboard.isResultAcceptable(result)) {
                     return callback("no data found");

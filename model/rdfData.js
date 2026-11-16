@@ -305,6 +305,47 @@ class RdfDataModel {
     };
 
     /**
+     * One page of the N-Triples download of a source. The first page also carries the
+     * dc:contributor triple and the owl:imports triples the graph does not hold yet.
+     * @param {string} graphUri - the graph URI
+     * @param {string} owner - login written as dc:contributor
+     * @param {string[]} withImports - graphs read along with graphUri
+     * @param {number} limit - SPARQL LIMIT
+     * @param {number} offset - SPARQL OFFSET
+     * @returns {Promise<{graphSize: number, nextOffset: number|null, graphPartNt: string}>} the page, graphPartNt in N-Triples
+     */
+    getGraphDownloadPage = async (graphUri, owner, withImports, limit, offset) => {
+        const graphSize = await this.getTripleCount(graphUri, withImports);
+        const graphPartNt = await this.getGraphPartNt(graphUri, limit, offset, withImports);
+
+        let additionalTriples = "";
+        if (Number(offset) === 0) {
+            const contributorTriple = this.genContributorTriple(graphUri, owner);
+            const isContributorTripleStored = await this.ask(graphUri, contributorTriple);
+            const contributorTripleStr = isContributorTripleStored ? "" : this.formatTripleToNt(...contributorTriple);
+
+            const importTriples = this.genImportTriples(graphUri, withImports);
+            const missingImportLines = await Promise.all(
+                importTriples.map(async (importTriple) => {
+                    const isImportTripleStored = await this.ask(graphUri, importTriple);
+                    return isImportTripleStored ? null : this.formatTripleToNt(...importTriple);
+                }),
+            );
+            const importLines = missingImportLines.filter((importLine) => importLine !== null);
+            additionalTriples = `${contributorTripleStr}\n${importLines.join("\n")}\n`;
+        }
+
+        let nextOffset;
+        if (Number(offset) + Number(limit) >= graphSize) {
+            nextOffset = null;
+        } else {
+            nextOffset = Number(offset) + Number(limit);
+        }
+        const page = { graphSize: graphSize, nextOffset: nextOffset, graphPartNt: additionalTriples + graphPartNt };
+        return page;
+    };
+
+    /**
      * Moves all triples from sourceGraphUri to targetGraphUri, batch by batch, so a single
      * SPARQL Update statement never has to touch the whole graph at once (which times out on
      * large graphs).

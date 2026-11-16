@@ -13,6 +13,21 @@ var Containers_tree = (function () {
     self.jstreeDivId = "lineage_containers_containersJstree";
     self.clickedContainers = {};
     self.idsMap = {};
+    self.rootContainerJstreeId = "rootContainer";
+
+    // tree node only, no triple in the graph
+    self.getRootContainerNode = function (source) {
+        var rootContainerNode = {
+            id: self.rootContainerJstreeId,
+            text: "rootContainer",
+            parent: "#",
+            type: "Container",
+            state: { opened: true },
+            data: { type: "rootContainer", source: source, id: null, label: "rootContainer" },
+        };
+        return rootContainerNode;
+    };
+
     self.search = function (jstreeDivId, source, options, callback) {
         if (jstreeDivId) {
             self.jstreeDivId = jstreeDivId;
@@ -51,8 +66,10 @@ var Containers_tree = (function () {
         var jstreeData = [];
         self.idsMap = {};
         var existingNodes = {};
-        self.rootContainer = Config.sources[source].graphUri + "container/root";
-        // set rootnodes
+        if (rootNode == "#") {
+            jstreeData.push(self.getRootContainerNode(source));
+            rootNode = self.rootContainerJstreeId;
+        }
         data.forEach(function (item) {
             var id = item.member.value;
             var jstreeId = common.getRandomHexaId(5);
@@ -124,7 +141,14 @@ var Containers_tree = (function () {
                         self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
                     },
                 },
-                dropAllowedFn: function () {
+                dropAllowedFn: function (operation, node, parent) {
+                    if (node.id == self.rootContainerJstreeId || parent.id == "#") {
+                        return false;
+                    }
+                    // under root a resource would lose its only membership and vanish from the tree
+                    if (parent.id == self.rootContainerJstreeId && node.type != "Container") {
+                        return false;
+                    }
                     var canMove = $("#Lineage_unlockMoveContainer_cbx").prop("checked");
                     return canMove;
                 },
@@ -141,6 +165,9 @@ var Containers_tree = (function () {
 
     self.onSelectedNodeTreeclick = function (event, obj) {
         self.currentContainer = obj.node;
+        if (obj.node.id == self.rootContainerJstreeId) {
+            return;
+        }
 
         if (obj.event.button != 2) {
             self.listContainerResources(self.currentContainer);
@@ -248,88 +275,97 @@ var Containers_tree = (function () {
             if (err) {
                 return callback(err);
             }
+            // a top container has no parent triple, so the ascendants query never returns it
+            var topContainerFilter = Sparql_common.setFilter("member", null, term);
+            Containers_query.getTopContainer(source, { filter: topContainerFilter }, function (err, topContainersResult) {
+                var topContainers = topContainersResult.results.bindings;
+                if (result.length == 0 && topContainers.length == 0) {
+                    return UI.message("no result", true);
+                }
+                //identify top Node
+                var childrenMap = {};
+                var labelsMap = {};
+                result.forEach(function (item) {
+                    childrenMap[item.ancestor.value] = item.ancestorParent.value;
+                    childrenMap[item.child.value] = item.childParent.value;
+                    labelsMap[item.ancestor.value] = item.ancestorLabel ? item.ancestorLabel.value : Sparql_common.getLabelFromURI(item.ancestor.value);
+                    labelsMap[item.ancestorParent.value] = item.ancestorParentLabel ? item.ancestorParentLabel.value : Sparql_common.getLabelFromURI(item.ancestorParent.value);
+                    labelsMap[item.child.value] = item.childLabel ? item.childLabel.value : Sparql_common.getLabelFromURI(item.child.value);
+                });
+                topContainers.forEach(function (topContainer) {
+                    childrenMap[topContainer.member.value] = self.rootContainerJstreeId;
+                    labelsMap[topContainer.member.value] = topContainer.memberLabel ? topContainer.memberLabel.value : Sparql_common.getLabelFromURI(topContainer.member.value);
+                });
 
-            if (result.length == 0) {
-                return UI.message("no result", true);
-            }
-            //identify top Node
-            var childrenMap = {};
-            var labelsMap = {};
-            result.forEach(function (item) {
-                childrenMap[item.ancestor.value] = item.ancestorParent.value;
-                childrenMap[item.child.value] = item.childParent.value;
-                labelsMap[item.ancestor.value] = item.ancestorLabel ? item.ancestorLabel.value : Sparql_common.getLabelFromURI(item.ancestor.value);
-                labelsMap[item.ancestorParent.value] = item.ancestorParentLabel ? item.ancestorParentLabel.value : Sparql_common.getLabelFromURI(item.ancestorParent.value);
-                labelsMap[item.child.value] = item.childLabel ? item.childLabel.value : Sparql_common.getLabelFromURI(item.child.value);
-            });
+                var jstreeData = [self.getRootContainerNode(source)];
+                var existingNodes = {};
+                existingNodes[self.rootContainerJstreeId] = 1;
 
-            var jstreeData = [];
-            var existingNodes = {};
-
-            for (var key in childrenMap) {
-                if (!existingNodes[key]) {
-                    existingNodes[key] = 1;
-                    var id = key;
-                    jstreeData.push({
-                        id: id,
-                        text: labelsMap[key],
-                        parent: childrenMap[key],
-                        type: "Container",
-                        data: {
-                            type: "Container",
-                            source: source,
+                for (var key in childrenMap) {
+                    if (!existingNodes[key]) {
+                        existingNodes[key] = 1;
+                        var id = key;
+                        jstreeData.push({
                             id: id,
-                            label: labelsMap[key],
+                            text: labelsMap[key],
                             parent: childrenMap[key],
-                            //tabId: options.tabId,
-                        },
-                    });
-                }
-                var parent = childrenMap[key];
-                if (!existingNodes[parent]) {
-                    existingNodes[parent] = 1;
-
-                    jstreeData.push({
-                        id: parent,
-                        text: labelsMap[parent],
-                        parent: childrenMap[parent] || "#",
-                        type: "Container",
-                        data: {
                             type: "Container",
-                            source: source,
-                            id: parent,
-                            label: labelsMap[parent],
-                            parent: childrenMap[parent],
-                        },
-                    });
-                }
-            }
+                            data: {
+                                type: "Container",
+                                source: source,
+                                id: id,
+                                label: labelsMap[key],
+                                parent: childrenMap[key],
+                                //tabId: options.tabId,
+                            },
+                        });
+                    }
+                    var parent = childrenMap[key];
+                    if (!existingNodes[parent]) {
+                        existingNodes[parent] = 1;
 
-            var jstreeOptions;
-            if (options.jstreeOptions) {
-                jstreeOptions = options.jstreeOptions;
-            } else {
-                jstreeOptions = {
-                    openAll: false,
-                    contextMenu: Containers_tree.getContextJstreeMenu(),
-                    selectTreeNodeFn: Containers_tree.onSelectedNodeTreeclick,
-                    dnd: {
-                        drag_stop: function (data, element, helper, event) {
-                            //  self.onMoveContainer(data, element, helper, event);
+                        jstreeData.push({
+                            id: parent,
+                            text: labelsMap[parent],
+                            parent: childrenMap[parent] || self.rootContainerJstreeId,
+                            type: "Container",
+                            data: {
+                                type: "Container",
+                                source: source,
+                                id: parent,
+                                label: labelsMap[parent],
+                                parent: childrenMap[parent],
+                            },
+                        });
+                    }
+                }
+
+                var jstreeOptions;
+                if (options.jstreeOptions) {
+                    jstreeOptions = options.jstreeOptions;
+                } else {
+                    jstreeOptions = {
+                        openAll: false,
+                        contextMenu: Containers_tree.getContextJstreeMenu(),
+                        selectTreeNodeFn: Containers_tree.onSelectedNodeTreeclick,
+                        dnd: {
+                            drag_stop: function (data, element, helper, event) {
+                                //  self.onMoveContainer(data, element, helper, event);
+                            },
+                            drag_start: function (data, element, helper, event) {
+                                var sourceNodeId = element.data.nodes[0];
+                                self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
+                            },
                         },
-                        drag_start: function (data, element, helper, event) {
-                            var sourceNodeId = element.data.nodes[0];
-                            self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
-                        },
-                    },
-                    noScroll: true,
-                };
-            }
-            JstreeWidget.loadJsTree(self.jstreeDivId, jstreeData, jstreeOptions, function () {
-                $("#" + self.jstreeDivId)
-                    .jstree()
-                    .open_all();
-                self.menuActions.bindMoveNode(self.jstreeDivId);
+                        noScroll: true,
+                    };
+                }
+                JstreeWidget.loadJsTree(self.jstreeDivId, jstreeData, jstreeOptions, function () {
+                    $("#" + self.jstreeDivId)
+                        .jstree()
+                        .open_all();
+                    self.menuActions.bindMoveNode(self.jstreeDivId);
+                });
             });
         });
     };
@@ -339,7 +375,7 @@ var Containers_tree = (function () {
             function getjstreeIdUri(id) {
                 var node = $("#lineage_containers_containersJstree").jstree().get_node(id);
 
-                var uri = node && node.data ? node.data.id : self.rootContainer;
+                var uri = node && node.data ? node.data.id : null;
                 return uri;
             }
 
@@ -379,7 +415,7 @@ var Containers_tree = (function () {
             label: "Graph  parent container",
             action: function (_e) {
                 var rootContainer = null;
-                if (self.currentContainer.parent == "#") {
+                if (self.currentContainer.parent == self.rootContainerJstreeId) {
                     rootContainer = self.currentContainer.data.id;
                 } else {
                     rootContainer = self.currentContainer.parents[self.currentContainer.parents.length];
@@ -412,8 +448,15 @@ var Containers_tree = (function () {
         items["AddGraphNode"] = {
             label: "Add selected node to container",
             action: function (_e) {
-                var graphNodeData = Lineage_whiteboard.currentGraphNode.data;
-                Containers_tree.menuActions.addResourcesToContainer(self.currentSource, self.currentContainer, graphNodeData, false, function (result) {
+                var selectedNodeIds = Lineage_whiteboard.isWhiteboardDrawn() ? Lineage_whiteboard.lineageVisjsGraph.network.getSelectedNodes() : [];
+                if (selectedNodeIds.length == 0) {
+                    return UI.message("no node selected on the whiteboard", true);
+                }
+                var selectedNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(selectedNodeIds);
+                var selectedNodesData = selectedNodes.map(function (selectedNode) {
+                    return selectedNode.data;
+                });
+                Containers_tree.menuActions.addResourcesToContainer(self.currentSource, self.currentContainer, selectedNodesData, false, function (result) {
                     /*   if (err) {
                         return MainController.errorAlert(err.responseText || err);
                     }*/
@@ -435,7 +478,13 @@ var Containers_tree = (function () {
             },
         };
 
-        return items;
+        var itemsForNode = function (node) {
+            if (node.id == self.rootContainerJstreeId) {
+                return false;
+            }
+            return items;
+        };
+        return itemsForNode;
     };
 
     self.menuActions.addContainer = function (source) {
@@ -452,7 +501,8 @@ var Containers_tree = (function () {
 
         var triples = [];
 
-        if (self.currentContainer) {
+        var isTopContainer = !self.currentContainer || self.currentContainer.id == self.rootContainerJstreeId;
+        if (!isTopContainer) {
             if (self.currentContainer.id == containerUri) {
                 return alert("wrong container label");
             }
@@ -461,42 +511,31 @@ var Containers_tree = (function () {
                 predicate: " rdfs:member",
                 object: "<" + containerUri + ">",
             });
-        } else {
-            //  var containerChildURI = containerUri + "/child";
-            /*triples.push({
-                subject: "<" + containerUri + ">",
-                predicate: " rdfs:member",
-                object: "<" + containerChildURI + ">",
-            });*/
-
-            triples.push({
-                subject: "<" + self.rootContainer + ">",
-                predicate: " rdfs:member",
-                object: "<" + containerUri + ">",
-            });
         }
-        /* triples.push({
-                subject: "<" + containerChildURI + ">",
-                predicate: " rdf:type",
-                object: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag>",
-            });*/
+        // a top container without member is found by its type only, see Containers_query.getTopContainer
+        triples.push({
+            subject: "<" + containerUri + ">",
+            predicate: " rdf:type",
+            object: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag>",
+        });
         triples.push({
             subject: containerUri,
             predicate: " rdfs:label",
-            object: newContainerLabel + " Child",
+            object: newContainerLabel,
         });
 
         Sparql_generic.insertTriples(source, triples, null, function (err, result) {
             if (err) {
                 return MainController.errorAlert(err.responseText);
             }
-            var parent = self.currentContainer || "#";
+            var parent = isTopContainer ? self.rootContainerJstreeId : self.currentContainer;
             var newNode = {
                 id: containerUri,
                 text: newContainerLabel,
                 parent: parent,
+                type: "Container",
                 data: {
-                    type: "container",
+                    type: "Container",
                     source: source,
                     id: containerUri,
                     label: newContainerLabel,
@@ -665,7 +704,7 @@ var Containers_tree = (function () {
             Sparql_generic.deleteTriples(source, null, null, container.data.id, function (err) {
                 var node = $("#lineage_containers_containersJstree").jstree().get_node(container.id);
                 if (node.children.length > 0) {
-                    $("#lineage_containers_containersJstree").jstree().move_node(node.children, "#");
+                    $("#lineage_containers_containersJstree").jstree().move_node(node.children, self.rootContainerJstreeId);
                 }
                 $("#lineage_containers_containersJstree").jstree().delete_node(container.id);
             });

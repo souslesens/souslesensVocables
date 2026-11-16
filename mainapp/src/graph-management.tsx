@@ -231,7 +231,7 @@ export default function GraphManagement() {
                                                     <ButtonWithConfirmation
                                                         size="small"
                                                         buttonSx={{ padding: "5px" }}
-                                                        label="Delete"
+                                                        label="Clear"
                                                         disabled={source.accessControl != "readwrite"}
                                                         func={deleteGraph}
                                                         args={[source]}

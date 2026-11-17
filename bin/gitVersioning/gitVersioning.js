@@ -17,8 +17,8 @@ const versionCollator = new Intl.Collator("en", { numeric: true });
 const changelogFileName = "CHANGELOG.md";
 // the entries start at the first "## " heading, what comes before is the title
 const changelogEntriesRegex = /^## [\s\S]*/m;
-// "2026-11-17T14:32" in an ISO timestamp
-const isoMinutesLength = 16;
+// "2026-11-17" in an ISO timestamp
+const isoDateLength = 10;
 const gitSuffixRegex = /\.git$/;
 const numericIdentifierRegex = /^\d+$/;
 // semver.org 2.0.0, the regex given by the specification
@@ -208,24 +208,23 @@ function githubWebUrl(repositoryUrl) {
     return webUrl;
 }
 
-function buildChangelogLinks(repositoryUrl, tagName, previousTagName) {
+function buildChangelogUrls(repositoryUrl, tagName, previousTagName) {
     const webUrl = githubWebUrl(repositoryUrl);
-    const links = [];
-    if (webUrl) {
-        links.push("[Source at this version](" + webUrl + "/tree/" + encodeURI(tagName) + ")");
-        if (previousTagName) {
-            links.push("[Changes since the previous version](" + webUrl + "/compare/" + encodeURI(previousTagName) + "..." + encodeURI(tagName) + ")");
-        }
+    if (!webUrl) {
+        return { tagUrl: null, compareUrl: null };
     }
-    return links;
+    const tagUrl = webUrl + "/releases/tag/" + encodeURIComponent(tagName);
+    const compareUrl = previousTagName ? webUrl + "/compare/" + encodeURIComponent(previousTagName) + "..." + encodeURIComponent(tagName) : null;
+    return { tagUrl: tagUrl, compareUrl: compareUrl };
 }
 
 function buildChangelog(sourceName, changelogEntry, existingChangelog) {
     const previousEntriesMatch = existingChangelog.match(changelogEntriesRegex);
     const previousEntries = previousEntriesMatch ? previousEntriesMatch[0] : "";
     const notesParagraph = changelogEntry.notes ? changelogEntry.notes + "\n\n" : "";
-    const linksParagraph = changelogEntry.links.length > 0 ? changelogEntry.links.join(" · ") + "\n\n" : "";
-    const newEntry = "## " + changelogEntry.version + " - " + changelogEntry.publishedAt + "\n\n" + notesParagraph + linksParagraph;
+    const versionHeading = changelogEntry.tagUrl ? "[" + changelogEntry.version + "](" + changelogEntry.tagUrl + ")" : changelogEntry.version;
+    const compareParagraph = changelogEntry.compareUrl ? "[Changes since the previous version](" + changelogEntry.compareUrl + ")\n\n" : "";
+    const newEntry = "## " + versionHeading + " (" + changelogEntry.publishedDate + ")\n\n" + notesParagraph + compareParagraph;
     const changelog = "# " + sourceName + "\n\n" + newEntry + previousEntries;
     return changelog;
 }
@@ -395,16 +394,16 @@ async function publishVersion(user, sourceName, credentials, versionName, releas
     // GitHub shows the first line of the commit next to the folder
     const commitMessage = releaseNotes ? versionTitle + ": " + releaseNotes : versionTitle;
     const isoTimestamp = new Date().toISOString();
-    const publishedAt = isoTimestamp.slice(0, isoMinutesLength).replace("T", " ") + " UTC";
+    const publishedDate = isoTimestamp.slice(0, isoDateLength);
     const previousTagName = lastVersion ? sourceRefName(sourceName, lastVersion) : null;
-    const changelogLinks = buildChangelogLinks(repositoryState.repositoryUrl, tagName, previousTagName);
+    const changelogUrls = buildChangelogUrls(repositoryState.repositoryUrl, tagName, previousTagName);
     const commitId = await pushSourceFiles(context, {
         repositoryUrl: repositoryState.repositoryUrl,
         baseBranch: repositoryState.isMainBranchCreated ? repositoryState.mainBranch : null,
         pushBranch: repositoryState.mainBranch,
         commitMessage: commitMessage,
         tag: { name: tagName, notes: releaseNotes || versionTitle },
-        changelogEntry: { version: versionName, publishedAt: publishedAt, notes: releaseNotes, links: changelogLinks },
+        changelogEntry: { version: versionName, publishedDate: publishedDate, notes: releaseNotes, ...changelogUrls },
         isBranchUpdate: false,
         sourceFiles: buildSourceFiles(context, versionedTriples),
     });

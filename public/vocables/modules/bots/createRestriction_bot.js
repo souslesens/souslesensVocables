@@ -189,7 +189,8 @@ var CreateRestriction_bot = (function () {
     self.saveCardinalityRestriction = function (source, subClassUri, propertyUri, cardinalityType, value, callback) {
         var triples = [];
 
-        var restrictionId = "_:" + common.getRandomHexaId(10);
+        // the leading "ba" keeps the id off the digits-only form that Sparql_generic writes as a real blank node
+        var restrictionId = "_:ba" + common.getRandomHexaId(8);
         triples.push({
             subject: subClassUri,
             predicate: "rdfs:subClassOf",

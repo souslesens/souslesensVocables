@@ -15,335 +15,260 @@ sources or CSV data.
 ### Terms
 
 **Source**: The current source launched in the tool. It is displayed in
-the top panel.  
-**Data Source**: Refers to the original source of data — either a CSV
-file or a SQL database connection.  
-**Mappings**: Refers to the semantic model created from the data source.
-The semantic model consists of **nodes** and **edges** — where nodes
-represent ressources, and edges represent properties between them.
+the top panel. MappingModeler only opens a source that you can write to.
+
+**Data Source**: The original data, either a CSV file or a SQL database
+connection. A data source holds one or more **tables** (a CSV file is one table).
+
+**Mappings**: The semantic model built from a table. It is a graph of
+**nodes** and **edges**: nodes represent resources, edges represent properties
+between them. Mappings are saved automatically after every change.
 
 **Nodes**
 
-A node can be of four types:
+A node can be of five types, drawn by the legend of the Column Mappings tab:
 
-**Class** – Represents a class from an ontology model.
+**Column**: A column of the table.
 
-**Column** – Represents a column from the data source and appears in
-**orange** on the graph.  
-Typically, a column is linked to a class node via an rdf:type relation,
-which is the standard semantic link for defining types.
+**RowIndex**: Represents each row of the table, shown as a **#** node. It is
+useful when each row carries meaningful information and must be referenced
+explicitly. A table has at most one RowIndex node.
 
-**Virtual Column** – Used to model intermediate or implicit objects that are not explicitly described in the data source. 
-It often corresponds to a group of columns whose combination conveys additional information. 
-For example, defining a class for a job acquisition event that is implied but not present as a dedicated column.
+**VirtualColumn**: An intermediate or implicit object that is not
+explicitly described in the table. It often corresponds to a group of columns
+whose combination conveys additional information, for example a job
+acquisition event that is implied but has no column of its own.
 
-**Row Index** – Represents an individual row of the dataset. It is
-useful when each row carries meaningful information and must be
-referenced explicitly.
+**URI**: A resource with a fixed URI, the same for every row.
 
-Edges (or Properties)
+**Class**: A class of the ontology model of the source or of its imports.
 
-An edge can be of two types:
+**Edges (or Properties)**
 
-**Object Property** – A relationship between two classes or two
-individuals in the graph.  
-When creating a relation between two classes, MappingModeler
-automatically suggests all suitable properties based on the top
-ontology.
+**Object Property**: A relationship between two resources.
+When you link two columns, MappingModeler suggests the properties allowed by
+the ontology model.
 
-**Datatype Property** – An attribute that links a class (or individual)
-to a **literal** value (e.g., string, integer, date).  
-Datatype properties are not modeled as classes and are only visible in
-the *Technical Mappings* view, not in the *Column Mappings* view.
+**Datatype Property**: An attribute that links a resource to a **literal**
+value (string, integer, date...). Datatype properties are set in the
+*Technical Mappings* tab and do not appear on the Column Mappings graph.
 
-**Literal:**
+**URI syntax**
 
-Represents values such as strings, integers, dateTimes, etc.
+Each column gets the URI of its resources in one of three ways:
 
-**URI (Uniform Resource Identifier)**
-
-Each class uses a URI to uniquely identify its instances. A URI is often
-generated using a label column from the data source (e.g., an ID or
-name).  
-URIs can also be automatically generated (randomIdentifier).  
-Alternatively, **blank nodes** (nodes without a URI) are used for
-intermediate or auxiliary elements that don’t require a global
-identifier.
-
-**URI Type**
-
-Each class has a URI type:
-
-**fromLabel**: The URI is generated from a label column in the data
-source.
-
-**blankNode**: The ressource does not have a URI and is represented as a
-blank node.
-
-**random Identifier** : The resource has random generated URI
+- **fromLabel**: the URI is built from the value of the column (Base URI + value).
+- **blankNode**: the resources have no URI, they are blank nodes.
+- **randomIdentifier**: each resource gets a random URI (Base URI + random identifier).
 
 ### Global Overview
 
-![](images/media/mappingModeler/image2.png)
+![](images/media/mappingModeler/current/mm-global.png)
 
-**The Lineage UI** is structured around three main components:
+The MappingModeler UI is structured around three main components:
 
-- **Left Panel** **with four tabs** : *Data Sources*, *Column Mappings*,
-  *Technical Mappings*, and *Triples*.
+- **Left Panel with five tabs**: *Data Sources*, *Column Mappings*,
+  *Relations*, *Technical Mappings* and *Triples*. All tabs except Data
+  Sources need a table to be selected first, otherwise they answer
+  `select a table`.
 
-- **Whiteboard**: Provides a visual representation of the mappings and
-  allows users to interact with and modify them.
+- **Whiteboard**: the graph of the mappings of the current table.
 
-- **Right Panel**: Includes buttons related to the whiteboard, offering
-  common actions available across multiple tools.
+- **Right Panel**: buttons acting on the whole mappings.
 
-The **Top Panel** is shared across all tools in the application.
-However, its content adapts based on the currently selected tool. For
-more information, refer to the *Global Overview* section in the Lineage
-user documentation.
+The **Top Panel** is shared across all tools. It also shows the name of
+the current table. For more information, refer to the *Global Overview*
+section of the Lineage user documentation.
 
-### Left Panel : Data Sources Tab
+### Left Panel : Data Sources Tab
 
-![](images/media/mappingModeler/image3.png)
+![](images/media/mappingModeler/current/mm-datasources.png)
 
-**This panel** displays a tree view of the different data sources in
-your project. These sources are grouped by type (CSV files or
-databases).
+This tab is shown when MappingModeler opens. It lists the data sources of
+the source, grouped in **databaseSources** and **csvSources**. A table that
+already produced triples is shown in blue, with its number of triples.
 
-When the **MappingModeler** tool is launched, this tab is shown by
-default, allowing you to select a current data source by left-clicking
-on it. A current data source must be selected to perform any mapping
-actions.
+Click a table (or a CSV file) to make it the current table: MappingModeler
+then opens the Column Mappings tab on it.
 
-If no data sources are listed in the tree, you can add one by following
-the steps in the *Add a Data Source* tutorial section.
+Right-click menus:
 
-### Left Panel : Columns Mappings
+- on **databaseSources**: **addDatabaseSources**, to add a database,
+- on **csvSources**: **add Csv Sources**, to upload a CSV file,
+- on a table or a CSV file: **show SampleData** (a sample of the data) and
+  **delete tableMappings** (deletes the mappings of this table, after two
+  confirmations),
+- on a data source: **delete DataSource**. For a CSV file, the file is
+  deleted too.
 
-**This tab** allows you to perform **structural mappings** by defining
-which columns you want to map, their types, and how they are linked.
+See the *Add Data source* tutorial sections for the details.
 
-Once a resource node is mapped, Run Mappings will apply the mappings to
-each row of the currently selected data source. **For example**, if you
-map the ID column to the Employee column using the rdfs:label property,
-then for each row in the ID column:  
-- a node will be created using the ID value as its identifier,  
-- this node will have the corresponding value from the Employee column
-as its label.
+### Left Panel : Column Mappings
 
-![](images/media/mappingModeler/image4.png)
+This tab builds the **structure** of the mappings: which columns are mapped,
+to which classes, and how they are linked.
 
-1.  **Column button :** : Displays a list of all columns from the
-    selected data source in the Search Panel (7). Clicking on a column
-    will create a **Column node** on the Mapping whiteboard and display
-    the **Class button** (5), which allows you to link the column node
-    to a class node (see *Add Column Mappings* for more details).
-    Right-clicking opens a menu to view data related to that column.
+![](images/media/mappingModeler/current/mm-column-mappings.png)
 
-2.  **Row Index :** Creates a **\# node** representing a row on the
-    Mapping whiteboard and displays the **Class button** (5) to link it
-    to a class node.
+The legend at the top of the tab creates the nodes. Click an element of the
+legend:
 
-![](images/media/mappingModeler/image5.png)
+- **Column** lists the columns of the table. Click a column to add it to the
+  whiteboard: the list of classes opens at once, to give it a class.
+- **RowIndex** adds the **#** node of the table.
+- **VirtualColumn** asks for the **Virtual column name**, then adds the node.
+- **URI** starts a small assistant: choose the class (rdf:type) of the
+  resource, then **enter resource label**.
+- **Class** lists the classes of the source and of its imports, grouped by
+  source. The first entry, **_Create new Class_**, creates a new class. For a
+  large ontology, the **SEARCH...** entry asks for the beginning of the class
+  name (`*` or `%` search inside the name).
 
-1.  **Virtual Column :** Triggers a pop-up to choose a name for your
-    virtual column and creates a virtual column node with the chosen
-    name. It also displays the Class button (5), allowing you to link it
-    to a class node.
+Clicking a class links the current column to it with `rdf:type` (or with
+`rdfs:subClassOf` if the column holds classes).
 
-2.  **URI :** Triggers a bot that helps you create a resource column
-    with the chosen type in the mappings. When creating a triple
-    mapping, all URI columns will create a resource with the selected
-    URI.
+Under the legend:
 
-3.  **Class button :** Displays all classes of the source and its
-    imports. Clicking on a class will add it to the mappings. Clicking
-    on *Create New Class* will trigger a bot to help you create a new
-    class. Right-clicking on a class will present a menu with the option
-    to delete the class.
+- **Search bar**: filters the list.
+- **Refresh** (the circular arrow): reloads the ontology model of the source,
+  after classes or properties were changed outside MappingModeler.
 
-4.  **Search Bar :** Filter the search panel using your keyword.
+Right-click in the list:
 
-5.  **Search Panel :** List resources based on the clicked button:
-    Display all classes for the "Class" button (5) and all columns for
-    the "Column" button (1).
+- on a column: **showSampleData** shows the data of the table,
+- on a class of a source you can edit: **deleteClass**.
 
-### Left Panel : Technical Mappings
+**Linking two nodes**
 
-This panel is based on the mappings you’ve done in the **Column
-Mappings** tab. It is recommended to visit this tab after completing the
-structural mappings with the **Column Mappings** tab. The mapping
-whiteboard in this tab differs from the column mappings whiteboard, as
-it focuses on representing technical mappings. This tab allows you to
-enhance your mappings by adding technical details such as resource
-labels, types (Class or Individual), base URI, datatype properties, and
-more. For more details, see the tutorial section.
+Hold **Ctrl** and click two nodes of the whiteboard:
 
-![](images/media/mappingModeler/image6.png)
+- a column, then a class: the column gets this class (`rdf:type`),
+- a column, then another column: the list shows the properties allowed by
+  the ontology model between their classes. It starts with
+  **_Create new ObjectProperty_**, **function**, **values Of column**,
+  **_rdfs:member_**, **_rdf:type_** and **_rdfs:subClassOf_**. The properties
+  that match an existing restriction of the model are highlighted in yellow
+  and are reused as they are.
 
-1.  **Ressource nodes Tree:**
+Both columns must have a class first, and they must belong to the same table.
 
-All resource nodes defined in the **Column Mappings** (columns, URIs,
-virtual columns, and row index) are listed in this tree. For each node,
-its technical mappings are displayed below, including details such as
-whether they are Individuals or Classes, their labels, URI types, and
-datatype properties. By right-clicking a specific technical mapping, you
-can delete it.
+**Right-click on a whiteboard node**
 
-![](images/media/mappingModeler/image7.png)
+![](images/media/mappingModeler/current/mm-node-menu.png)
 
-1.  **Detailed Mapping panel** : This panel displays information about
-    the resource node clicked in the **Resource Nodes Tree** (8). It is
-    recommended to fill in all the inputs in this panel for each
-    resource node, as this will ensure the mappings are complete and the
-    knowledge graph can be effectively used by other tools. This panel
-    also displays new buttons, which are described below.
+- **Remove Node** / **Remove Edge**: removes the node or the edge from the
+  mappings.
+- On a column: **Detailed mappings** opens the technical mappings of the
+  column in a window, and **show sample data** shows the data of the table.
+- On a class: **Node Infos** (see the Node Infos section of the Lineage user
+  documentation) and **draw superClass**.
 
-2.  **Base URI :**
+### Left Panel : Relations
 
-The base URI used for URI construction of the resource. If the base URI
-is empty, the source graph URI will be used instead. See **URI Syntax**
-(11) for more details.
+![](images/media/mappingModeler/current/mm-relations.png)
 
-1.  **URI syntax :**
+This tab lists, under **Restrictions**, the relations that the ontology model
+allows between the columns of the table, grouped by source, in the form
+`column-property->column`, with their kind of restriction. The relations
+already drawn are greyed out.
 
-> **-fromLabel**: The URI for this resource node will be constructed
-> using the Base URI + the row value of the resource.
->
-> **-Blank node**: All resources will be assigned blank node URIs with
-> the format &lt;\_:b\[randomHexaId\]&gt;.
->
-> **-randomIdentifier**: All resources will have the following URI: Base
-> URI + randomHexaId.
+Tick the relations you want and click **apply selected relations**: they are
+added to the whiteboard, and MappingModeler returns to the Column Mappings
+tab. The circular arrow reloads the ontology model.
 
-1.  **Rdf:type :**
+### Left Panel : Technical Mappings
 
-Choose whether the resource created will be an **Individual** or a
-**Class**. It can also be left empty for specific use cases.
+This tab completes the mappings with technical details: how the URIs are
+built, the type and the label of the resources, datatype properties,
+transforms and lookups. Visit it after the structure is done in the Column
+Mappings tab.
 
-1.  **Rdfs:label :**
+![](images/media/mappingModeler/current/mm-technical-form.png)
 
-> **Columns values** are used to build the labels for this resource
-> node. This field can be left empty.
+The tree on the left lists the mapped nodes of the table. Under each node,
+its technical mappings are listed. Right-click a technical mapping to
+**edit transform**, **edit lookup** or **delete** it.
 
-1.  **More mappings button :**
+Click a node of the tree to open its form:
 
-A bot will appear to assist you in adding specific mappings, such as
-datatype properties, comments, transformations, and more. The tutorial
-provides a detailed explanation of the various possibilities available.
+- **URI syntax\***: **fromLabel**, **blankNode** or **randomIdentifier**
+  (see *Terms*).
+- **Base URI**, **URI prefix** and **URI suffix**: the parts of the URI, around
+  the value of the column. They are only shown for **fromLabel**. If the Base
+  URI is empty, the graph URI of the source is used.
+- **rdf:type\***: **owl:NamedIndividual** or **owl:Class**. It can also be
+  left empty for specific uses.
+- **rdfs:label column**: the column whose values give the labels of the
+  resources. It can be left empty.
+- **set as mainColumn**: only shown when the same column is also defined in
+  another table, to choose which table defines it.
+- **More mappings...**: saves the form, then opens an assistant to add
+  mappings: **add predicate** (an annotation or datatype property, with its
+  datatype and, for dates, their format), **add rdf:Type**,
+  **add rdfs:subClassOf**, **add owl:EquivalentClassColumn**, **add transform**,
+  **set column as datatypeProperty**, **create  datatypeProperty**,
+  **add LookUp**, **end**.
+- **Save**: saves the form.
 
-1.  **Save :** Save the values you’ve filled in for the resource nodes
+When a column of a class is first opened, its form is filled with the values
+of the other columns of the same class.
 
-### Left Panel : Triples
+### Left Panel : Triples
 
-This panel provides buttons to run and test the mappings, delete the
-triples created by the mappings, or index them so they can be referenced
-in other tools.
+![](images/media/mappingModeler/current/mm-generate-triples.png)
 
-![](images/media/mappingModeler/image8.png)
+This tab turns the mappings into triples, deletes them, and indexes them.
 
-1.  **View SLS mappings** : The SLS API uses a specific format to
-    execute mappings. This button displays the mappings that are sent to
-    the server when you run your mappings, based on the data you've
-    filled in the MappingModeler.
+- **view RML/R2RML mappings**: exports the mappings as a Turtle file in the
+  standard **RML (SQL + CSV)** or **R2RML (SQL only - Ontop)** format. R2RML is
+  not offered when all the data sources are CSV files.
+- **Generate triples**: opens, on the right, the list of the mappings of the
+  current table, as **Columns** and **Relations**. Tick what to run, then:
+    - **show Sample**: shows a sample of the triples (500 at most), without
+      writing anything,
+    - **Export NT**: downloads the triples as an N-Triples file,
+    - **Save in tripleStore**: writes the triples in the graph of the source.
 
-2.  **View R2ML mappings**: See mappings in R2ML format.
+  Options: **index Automatically** indexes the graph after writing, and
+  **offset** starts from a given row. The mappings that use blank nodes must
+  be ticked together.
+- **Metadata triples** (checked by default): also writes the creation date
+  (`dcterms:created`) of each resource.
+- **delete specific triples**: deletes the triples of the ticked mappings,
+  with **Show sample** to check them first and **Delete triples**.
+- **delete current file triples**: deletes the triples created from the
+  current table.
+- **delete ALL mapped triples**: deletes all the triples created by
+  MappingModeler for this source.
+- **Recreate graph**: choose the tables, then **Recreate**: their triples are
+  deleted and created again. MappingModeler asks whether to index the graph
+  at the end.
+- **Index graph**: indexes the triples of the source so that the other tools
+  can search them. It asks for confirmation, then lets you choose the
+  properties to index.
 
-3.  **Show sample triples** : Preview the triples that will be created
-    by running your mappings with the current data source.
+### Right Panel : Mappings buttons
 
-4.  **Create triples** :
+![](images/media/mappingModeler/current/mm-right-panel.png)
 
-Execute the mappings using your current data source.
+1. **Classes graph**: draws the classes of the source and their hierarchy.
+2. **Clear all Mappings**: deletes all the mappings, after two confirmations.
+3. **Import**: imports mappings from a JSON file exported by SousLeSens. The
+   data sources they use must exist in the source.
+4. **Export**: exports the mappings as a JSON file.
 
-1.  **Delete current file triples** : All created mappings will have a
-    metadata triple associated with the file name. This action will
-    delete all triples containing this metadata.  
-    **Warning**: If your resource is shared across multiple files, it
-    could be deleted with this button.
-
-2.  **Delete all mapped triples** : Triggers the deletion of all triples
-    generated by MappingModeler for current source.
-
-3.  **Recreate graph** : This action deletes all triples previously
-    generated by the MappingModeler (see button 21), then automatically
-    runs the mappings again for **each data source** defined in your
-    project.  
-    Useful to refresh the knowledge graph based on updated mappings or
-    modified source data.
-
-4.  **Index graph** : This action indexes all triples generated by the
-    MappingModeler so they can be referenced and used in search tools
-    across the platform. It ensures that your data is discoverable and
-    properly linked within other SousLeSens tools.
-
-### Right Panel : Mappings buttons
-
-![](images/media/mappingModeler/image9.png)
-
-1.  **Clear all mappings :** Clears all the mappings
-
-2.  **Save Mappings**: Saves mappings
-
-3.  **Load Mappings**: Load saved mappings.
-
-4.  **Display :** Opens a menu to modify the graph display parameters,
-    such as spatialization algorithms, node distance, etc.
-
-5.  **Export mappings**: Exports the current mappings whiteboard in
-    various formats (GraphML, SVG, CSV, PlantUML, JSON).
-
-6.  **Import mappings** : Allows you to import mappings from a JSON file
-    exported by SousLeSens. The file should follow the [vis.js network
-    format](https://visjs.github.io/vis-network/docs/network/) with an
-    added mappings property specific to SousLeSens. This enables you to
-    reload and reuse existing mapping configurations easily.
+There is no Save button: the mappings are saved automatically after every
+change.
 
 ### Shortcuts
 
-Right-clicking on a node opens a contextual menu with several actions
-depending on the node type:
-
-- **For all nodes**:
-
--Remove from mappings: Deletes the node from the current mappings.
-
-- **For column nodes**:
-
-> -Show sample data: Displays a preview of data from the associated
-> column.
->
-> \- Detailed mappings: Opens the detailed mapping configuration,
-> similar to the panel in the Technical Mappings tab.
-
-- **For class nodes**:
-
-> *-*Node Infos: Opens a window showing detailed information about the
-> class node (see Node Infos section in the Lineage user documentation
-> for more details).
-
-![](images/media/mappingModeler/image10.png)
-
-When you **Ctrl + click** on two nodes, the **Search Panel (7)**
-displays a list of properties that are authorized based on **domain and
-range** compatibility between the selected nodes.
-
-Clicking on one of these properties will **create a semantic link**
-between the two nodes using the selected property.
-
-When you right click on the **Detailed Mapping Tree**, you’ll get
-different options depending on the type of mapping selected:
-
-- **For all mappings**:  
-  – *Delete* a specific mapping.
-
-- **For specific mappings** such as *Transforms*, *Lookups*, or
-  *Functions*:  
-  – *Edit value* to modify the content or behavior of the mapping.
-
-![](images/media/mappingModeler/image11.png)
+When you right click the tree of the **Technical Mappings** tab, you get
+different options depending on the mapping: **delete** for all mappings,
+**edit transform** for a transform, **edit lookup** for a lookup.
 
 ## Tutorial
+
+The screenshots of this tutorial come from an earlier version of MappingModeler: some buttons have moved or changed name since. The text follows the current interface, described in the UI overview above.
 
 Let’s open the Mapping Modeler tool in SousLeSens, and select the source
 HR\_MODEL\_ACADEMIC\_TP source.
@@ -353,9 +278,8 @@ content may be incorrect.](images/media/mappingModeler/image13.png)
 
 Now, the **Mapping Modeler** tool opens.  
 Right-click on the **csvSources** section in the Data Sources tree, then
-add the following **CSV source**.  
-A file selection window will appear, select your CSV file to import them
-into your source.
+choose **add Csv Sources**. In the upload window, click **Select a file to
+upload…**, choose your CSV file, then click **Submit**.
 
 ![](images/media/mappingModeler/image14.emf)
 
@@ -380,7 +304,7 @@ Your mappings whiteboard should now appear as illustrated in the
 image.![](images/media/mappingModeler/image20.png)
 
 **Now, let’s create a virtual column node named gainOfCapability.**  
-Click on the **Virtual Column** button, then enter gainOfCapability in
+Click on **VirtualColumn** in the legend, then enter gainOfCapability in
 the popup that appears. A new node named **GainOfCapability** will be
 added to the mappings whiteboard.
 
@@ -398,7 +322,7 @@ added to the mappings whiteboard.
 **After creating the virtual column**, the search panel will list
 available classes to link it to. Since no class corresponds, we will
 create a new one.  
-Click on ***Create new Class***. A bot popup will appear.  
+Click on **_Create new Class_**. A bot popup will appear.  
 Fill in the **Label** field with GainOfCapability, and set it as a
 **subClass of** IDO:Activity..
 
@@ -414,8 +338,8 @@ Authorized properties based on ranges and domains to link both nodes
 will be displayed on search panel. We can see that "participantIn" is a
 semantic match, but we want to be more specific and use the property
 "gainsCapability" to link the nodes. To do this, we will add a new
-Object Property by clicking on "\_Create new
-ObjectProperty."![](images/media/mappingModeler/image30.png)
+Object Property by clicking on **\_Create new
+ObjectProperty\_**.![](images/media/mappingModeler/image30.png)
 
 Then, a bot will appear. Fill in the label with "gainsCapability" and
 set it as a subProperty of "IDO:participantIn."
@@ -445,7 +369,7 @@ To begin, click on *Employee*.
 
 ![](images/media/mappingModeler/image37.png)
 
-The detailed mapping panel (9) will appear. The URI syntax will be set
+The form of the column will appear. The URI syntax will be set
 to *fromLabel*, meaning that for each specific value in the Employee
 column, the URI created will be the baseURI (equivalent to graphURI if
 not filled) + the cell value.
@@ -519,16 +443,14 @@ done by creating a new **Datatype Property**.
 Click on the **gainOfCapability** virtual column in the detailled
 mappings tree to select it.
 
-After selecting the **gainOfCapability** virtual column, you should see
-the option **More Mappings**. Click on it. This will open additional
-options for detailed mappings.
-
-Once you click on **More Mappings**, you’ll be able to see more detailed
-configuration options to enrich your mapping process.
+After selecting the **gainOfCapability** virtual column, click on
+**More mappings...**. It saves the form, then opens an assistant with the
+additional mappings.
 
 ![](images/media/mappingModeler/image42.png)
 
-Click on **Create Datatype Property**
+Click on **create  datatypeProperty**. The assistant first asks for the
+source where the property is created: choose HR\_MODEL\_ACADEMIC\_TP.
 
 ![](images/media/mappingModeler/image43.png)
 
@@ -541,24 +463,25 @@ Select xsd:dateTime
 ![](images/media/mappingModeler/image45.png)
 
 Our datatype property is now created. We will associate it with our
-virtual column. Click again on ‘moreMappings
+virtual column. Click again on **More mappings...**
 
 ![](images/media/mappingModeler/image42.png)
 
-Then on add predicate.
+Then on **add predicate**.
 
 ![](images/media/mappingModeler/image46.png)
 
-Then select HR\_MODEL\_ACADEMIC\_TP
+In **Choose annotation property**, open the HR\_MODEL\_ACADEMIC\_TP
+source
 
 ![](images/media/mappingModeler/image47.png)
 
-And your new added datatype property
+and pick your new datatype property
 
 ![](images/media/mappingModeler/image48.png)
 
-Select it as a dateTime with the **FR format**, using the values from
-the **startDate** column.  
+In **Choose a datatype**, select **xsd:dateTime**, then the date format
+**FR : DD/MM/YYYY hh:mm:ss**, then the **startDate** column for the values.  
 *(Make sure to choose the correct format based on how dates appear in
 your data column.)*
 
@@ -569,8 +492,8 @@ mappings.![](images/media/mappingModeler/image52.png)
 
 Our mappings are now complete. You can preview the triples that will be
 generated.  
-To do this, go to the **Triples** tab and click on **Show Sample
-Triples**.
+To do this, go to the **Triples** tab and click on **Generate
+triples**.
 
 ![](images/media/mappingModeler/image53.png)
 
@@ -580,7 +503,7 @@ elements.
 
 ![](images/media/mappingModeler/image54.png)
 
-You can leave all items checked, then click on **Make Triples**.
+You can check all the items, then click on **show Sample**.
 
 ![](images/media/mappingModeler/image55.png)
 
@@ -596,8 +519,7 @@ We can see that the data describes *Yanis* as having three rows, each
 corresponding to a different competency he acquired, with distinct
 acquisition dates.
 
-To explore this further, search for *Yanis* in the **Show Sample
-Triples** table.
+To explore this further, search for *Yanis* in the sample table.
 
 ![](images/media/mappingModeler/image57.png)
 
@@ -644,9 +566,10 @@ We can also see the datatype property we added, linking the
 gainOfCapability event to the corresponding **startDate** value in the
 data.![](images/media/mappingModeler/image64.png)
 
-After verifying the mappings using the show sample triples preview, you
-can create the triples on the source by clicking the **Create triples**
-button in the **Triples** tab.
+After verifying the mappings with **show Sample**, you can write the
+triples in the source with the **Save in tripleStore** button, under the
+same list of the **Triples** tab. You can also download them with
+**Export NT**.
 
 ### Add Data source: Databases
 
@@ -657,12 +580,12 @@ Editor** tool.
 ![](images/media/mappingModeler/image65.png)
 
 Then, go to the **Mapping Modeler** tool, open the **Data Sources** tab,
-right-click on **Database Sources**, and select your New Database name.
+right-click on **databaseSources**, choose **addDatabaseSources**, then
+pick your database in **Select database**.
 
 ![](images/media/mappingModeler/image66.png)![](images/media/mappingModeler/image67.png)
 
-Once your database is added, it should appear in the **Database Source
-Tree**. Click on one of the database table to set it as the current data
+Once your database is added, it appears under **databaseSources**. Click on one of the database table to set it as the current data
 source for mapping.
 
 ### Import classes
@@ -679,8 +602,8 @@ both are classes.
 To do this, select the Column Mappings tab, then click on
 Asset.![](images/media/mappingModeler/image69.png)![](images/media/mappingModeler/image70.png)
 
-Do not select a class from the search panel. Instead, click again on the
-Column button, and then choose Element.
+Do not select a class from the list. Instead, click again on **Column**
+in the legend, and then choose Element.
 
 ![](images/media/mappingModeler/image71.png)
 
@@ -701,8 +624,8 @@ After filling out and saving both, here are the detailed mappings.
 
 ![](images/media/mappingModeler/image77.png)
 
-Preview the results by selecting the Triples tab and clicking on 'Show
-Sample Triples'.
+Preview the results by selecting the Triples tab, clicking on
+**Generate triples**, then **show Sample**.
 
 The class triples will be generated along with their
 hierarchy![](images/media/mappingModeler/image78.png)
@@ -717,27 +640,26 @@ add a prefix to the URI by adding 'employee-' before each label for
 better clarity.
 
 To do this, select the Technical Mappings tab, then choose Employee and
-click on 'More Mappings'.
+click on **More mappings...**.
 
 ![](images/media/mappingModeler/image79.png)
 
-A pop-up will appear. Click on 'Prefix URI' and fill the pop-up with
-'Employee:'.
+In the assistant, choose **add transform**. The **Transform for Employee**
+window opens: click on **prefix URI** and type 'Employee'.
 
 ![](images/media/mappingModeler/image80.png)![](images/media/mappingModeler/image81.png)
 ![](images/media/mappingModeler/image82.png)
 
 A JavaScript function will be auto-filled with instructions for
-prefixing the URI. If you click on 'Test,' you will see a sample of the
-triples produced with the added transform.![](images/media/mappingModeler/image83.png)
+prefixing the URI: the prefix is followed by '-'. If you click on **Test**,
+you will see a sample of the triples produced with the added transform.
+Click on **Save** to keep it.![](images/media/mappingModeler/image83.png)
 
 All Employee URIs are now prefixed with 'Employee-'. Transforms can
 handle multiple transformations using JavaScript. The JavaScript
 function will be applied to all SLS mappings related to the column. To
-view the SLS mappings, go to the Triples tab and click on 'View SLS
-Mappings.'
-
-![](images/media/mappingModeler/image84.png)
+check the result, use **Generate triples**, then **show Sample**, in the
+Triples tab.
 
 The SLS API for triple construction will apply the JavaScript function
 to each value in the column and for each mapping related to that column.
@@ -760,8 +682,8 @@ The parameters of this function will be as follows:
 
 - **Mapping**: The current SLS mapping.
 
-You can edit or delete a transform by right-clicking it in the detailed
-mapping tree.
+You can edit or delete a transform by right-clicking it in the tree of
+the Technical Mappings tab: **edit transform** or **delete**.
 
 ![](images/media/mappingModeler/image86.png)
 
@@ -791,25 +713,27 @@ used exclusively for the column acting as the subject, the column acting
 as the object, or both.
 
 To add a lookup, first select the column that will be replaced by the
-lookup in the Technical Mappings tab, then click on **more mappings**.
+lookup in the Technical Mappings tab, then click on **More mappings...**.
 
 ![](images/media/mappingModeler/image89.png)
 
-Then add Lookup
+Then **add LookUp**. The lookup is named after the table and the column.
 
 ![](images/media/mappingModeler/image90.png)
 
-Then choose file containing the common values with your column (in this
-example tagClassName)
+In **Select DataSource**, choose the data source that contains the common
+values with your column (in this example tagClassName). For a database,
+**Select DataTable** then asks for the table.
 
 ![](images/media/mappingModeler/image91.png)
 
-Choose the column containing the common values.
+In **Select Source Column for the LookUp**, choose the column containing
+the common values.
 
 ![](images/media/mappingModeler/image92.png)
 
-Choose the target column where the values of your column will be
-replaced by the values from this column.
+In **Select Target Column for the LookUp**, choose the column whose
+values will replace the values of your column.
 
 ![](images/media/mappingModeler/image93.png)
 
@@ -820,11 +744,12 @@ or both in the mapping.
 ![](images/media/mappingModeler/image94.png)
 
 The lookup is now saved. You can edit or remove it by right-clicking on
-it in the detailed mapping tree.
+it in the tree of the Technical Mappings tab: **edit lookup** or **delete**.
 
 ![](images/media/mappingModeler/image95.png)
 
-Here are the resulting triples for this lookup. (show sample triples).
+Here are the resulting triples for this lookup (**Generate triples**,
+then **show Sample**).
 
 ![](images/media/mappingModeler/image96.png)
 

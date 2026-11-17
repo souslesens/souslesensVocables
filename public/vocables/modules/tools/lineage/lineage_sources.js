@@ -1127,9 +1127,6 @@ var Lineage_sources = (function () {
 
         refreshIndexes: function () {
             var source = Lineage_sources.activeSource;
-            if (!confirm("Refresh index for " + source + " ?")) {
-                return;
-            }
             IndexedPredicates_bot.start(source, function (indexedPredicatesBySource) {
                 $("#waitImg").css("display", "block");
                 var indexationOptions = { indexProperties: 1, indexNamedIndividuals: 1 };

@@ -6,6 +6,7 @@ Learn how to use the SousLeSens tools.
 :maxdepth: 3
 getting-started.md
 lineage.md
+version.md
 graphmanagement.md
 mappingmodeler.md
 kgquery.md

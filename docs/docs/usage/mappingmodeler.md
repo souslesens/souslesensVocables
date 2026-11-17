@@ -268,8 +268,6 @@ different options depending on the mapping: **delete** for all mappings,
 
 ## Tutorial
 
-The screenshots of this tutorial come from an earlier version of MappingModeler: some buttons have moved or changed name since. The text follows the current interface, described in the UI overview above.
-
 Let’s open the Mapping Modeler tool in SousLeSens, and select the source
 HR\_MODEL\_ACADEMIC\_TP source.
 

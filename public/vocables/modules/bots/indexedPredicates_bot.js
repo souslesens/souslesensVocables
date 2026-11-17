@@ -1,5 +1,6 @@
 import BotEngineClass from "./_botEngineClass.js";
 import OntologyModels from "../shared/ontologyModels.js";
+import Sparql_common from "../sparqlProxies/sparql_common.js";
 
 /**
  * Pre-step of every manual indexation: first asks whether the default indexed predicates are enough
@@ -25,6 +26,7 @@ var IndexedPredicates_bot = (function () {
         promptPredicatesSelectionFn: "indexed predicates",
     };
 
+    self.dialogContentWidth = 600;
     var otherPredicatesNodeId = "__otherPredicates__";
     var indexDefaultPredicatesChoiceId = "defaultPredicates";
     var pickOtherPredicatesChoiceId = "otherPredicates";
@@ -47,6 +49,7 @@ var IndexedPredicates_bot = (function () {
                 indexedPredicatesBySource: {},
                 indexationCallback: indexationCallback,
             };
+            $("#botContainerDiv").css("width", self.dialogContentWidth + "px");
             self.myBotEngine.nextStep();
         });
     };
@@ -70,9 +73,10 @@ var IndexedPredicates_bot = (function () {
      */
     function promptIndexationMode() {
         var source = getCurrentSource();
+        var defaultPredicatesList = Sparql_common.defaultIndexedPredicateNames.join(", ");
         self.myBotEngine.insertBotMessage("Predicates to index for " + source, { isQuestion: true });
         var indexationModeChoices = [
-            { id: indexDefaultPredicatesChoiceId, label: "Default predicates" },
+            { id: indexDefaultPredicatesChoiceId, label: "Default predicates (" + defaultPredicatesList + ")" },
             { id: pickOtherPredicatesChoiceId, label: "Default predicates + other indexable predicates" },
         ];
         self.myBotEngine.showList(indexationModeChoices, null, null, false, function (selectedChoiceId) {
@@ -83,8 +87,7 @@ var IndexedPredicates_bot = (function () {
         });
     }
 
-    // the default indexed predicates are not shown: they are hard-coded in the indexation queries
-    // and indexed whatever the user does, the tree only offers the extra ones
+    // not offered in the tree: the indexation queries always index the default predicates
     function buildPredicatesJstreeData(indexablePredicates) {
         // a single folder whatever the declared property types: the user picks predicates by what
         // they contain, not by how the ontology declares them

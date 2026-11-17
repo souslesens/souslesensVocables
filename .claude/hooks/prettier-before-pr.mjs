@@ -41,6 +41,12 @@ try {
     if (changedFiles.length === 0) {
         process.exit(0);
     }
+    // prettier would be committed with the unrelated changes of the same file
+    const uncommittedText = runGit(repositoryRoot, ["diff", "HEAD", "--ignore-space-at-eol", "--name-only", "--", ...changedFiles]);
+    if (uncommittedText.length > 0) {
+        console.error("Commit these files first, then retry:\n" + uncommittedText);
+        process.exit(2);
+    }
     const prettierArguments = ["prettier", "--write", "--ignore-unknown", "--log-level", "silent", ...changedFiles];
     execFileSync("npx", prettierArguments, { cwd: repositoryRoot, shell: true });
     const reformattedText = runGit(repositoryRoot, ["diff", "--name-only", "--", ...changedFiles]);

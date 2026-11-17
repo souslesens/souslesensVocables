@@ -1,8 +1,8 @@
 // PreToolUse on Read, Grep and Bash: no file or variable that holds credentials reaches the model
 import { readFileSync } from "node:fs";
 
-// the config folder at the repository root, not public/vocables/config
-const configFolderPrefix = String.raw`(?<!vocables\/)(?<![\w.-])config\/`;
+// the config folder at the repository root, not public/vocables/config nor the fixtures of tests/data/config
+const configFolderPrefix = String.raw`(?<!vocables\/)(?<!data\/)(?<![\w.-])config\/`;
 const sensitivePathRegexes = [
     new RegExp(configFolderPrefix + String.raw`(mainConfig|sources|databases|plugins|wordpress)[\w.-]*`, "i"),
     new RegExp(configFolderPrefix + String.raw`users\/`, "i"),

@@ -604,11 +604,103 @@ Finally, choose how you would like to receive the output.
 
 ### Axioms and reasoner
 
-In the **IOF-Core** ontology, which contains many axioms, the **Axioms**
-tab displays a graphical representation of the axioms associated with a
-specific class, grouped by axiom type. The **Show Triples** option
-displays the triples corresponding to the displayed axiom.
+#### Axioms
 
-![](images/media/lineage/image41.png)
+An axiom is a logical statement about a class: it is a subclass of another one, it is equivalent to a combination of other classes and restrictions, or it is disjoint from another class. Lineage can draw these axioms as graphs, show them in Manchester syntax, and let you write new ones.
 
-Export buttons are also provided in SVG and GraphML.
+**Axioms button.** The **A** button of the Whiteboard tab opens a menu with three choices:
+
+![](images/media/axioms/axioms-1-menu.png)
+
+- **Logic axiom nodes** draws on the whiteboard one hexagon for each class of the source that has a logic axiom. A class that has an equivalent class axiom has a thicker border. At most 500 classes are drawn.
+- **SQL Database mapped nodes** is not about axioms: it draws the classes that are mapped to a SQL database.
+- **Draw axioms** draws the axioms of the nodes selected on the whiteboard, or of all of them if none is selected, and adds them to the whiteboard.
+
+![](images/media/axioms/axioms-2-logic-nodes.png)
+
+**Axioms of a class.** Right-click a class on the whiteboard and choose **Axioms** to open its axioms in a window (**Draw Axioms** draws them on the whiteboard instead). The same view is in the **Axioms** tab of the node infos window.
+
+![](images/media/axioms/axioms-3-class-axioms.png)
+
+The window shows:
+
+- the **graph of the axioms**. The class itself is the star. The links tell the kind of axiom: `≡` for an equivalent class, a subclass link, a disjoint link,
+- the axiom in **Manchester syntax**, below the graph, with the labels of the classes. It is written for you from the triples, it cannot be typed,
+- the buttons **New axiom** and **show triples**.
+
+How to read the graph:
+
+| Element | Meaning |
+| --- | --- |
+| Blue box | a class |
+| Star | the class whose axioms are shown |
+| Green circle with a symbol | a connective: union, intersection `⊓`, complement, or an enumeration of individuals |
+| Text between guillemets, like `hasTopping «some»` | a restriction on a property: `«some»` (existential), `«only»` (universal), `«value»`, or a cardinality (min, max, exactly) |
+
+Right-click a node of the graph to open its **Node Infos** or its own **Node Axioms**.
+
+**show triples** lists the RDF triples of the axiom as a tree, to see exactly what is stored.
+
+The Manchester text and the list of axioms come from the **JOWL server**. If it is disabled, the window answers `Jowl Server is disable`. See [JOWL configuration](../administration/jowl.md).
+
+**Writing a new axiom.** The **New axiom** button only appears if the source is editable by you.
+
+![](images/media/axioms/axioms-4-new-axiom.png)
+
+1. Choose the kind of axiom in the list at the top left: `subClassOf`, `equivalentClass` or `disjointWith`.
+2. Click an element of the legend (**Class**, **Restriction**, **Connective**), then pick the class, the property or the keyword in the list that appears. For a class or a property, `_Create new Class_` and `_Create new ObjectProperty_` create a new one. Restrictions offer `some`, `only`, `value`, `max`, `min` and `cardinality`. Connectives offer `UnionOf`, `IntersectionOf`, `ComplementOf` and `Enumeration`.
+3. Click a node of the graph to extend the axiom from it. Right-click a node to remove it.
+4. Click **save**. If new classes have no superclass, Lineage warns that they will be created as `owl:Class` under `owl:Thing`. The axiom is written in the graph of the source.
+
+The other buttons of the editor are **clear** (starts again), **copy triples** (copies the triples to the clipboard) and **delete triples**. **delete triples** removes from the source the triples that you ticked in the **show triples** tree, with no confirmation.
+
+To keep a picture of an axiom or of the whiteboard, use the **Export whiteboard** button of the right panel (GraphML, SVG, CSV, PlantUML, JSON).
+
+#### Reasoner
+
+The reasoner checks a source and infers new facts from it. It works on the graph of the source and on its imports, with rules written in SPARQL, and it **never changes the source**: nothing it finds is written back.
+
+Open it with **More Actions**, then **Reasoner** in the Whiteboard tab. Choose an **Operation type**:
+
+![](images/media/axioms/reasoner-1-dialog.png)
+
+**Consistency** checks that the data does not contradict itself. The result is a report: its `status` (for example `no-violations-detected`), then one entry per check, with `violationDetected` and, if there is a problem, examples. The checks are:
+
+- the same and the different individuals (`same-and-different`),
+- disjoint classes (`disjoint-classes`) and complement classes (`complement-classes`),
+- membership of `owl:Nothing` (`nothing-membership`),
+- negative assertions (`negative-assertion`),
+- irreflexive, asymmetric, disjoint, functional and inverse functional properties (`irreflexive-property`, `asymmetric-property`, `disjoint-properties`, `functional-object-property`, `inverse-functional-property`).
+
+![](images/media/axioms/reasoner-2-consistency.png)
+
+**Unsatisfiable** looks for properties that cannot have any value, for example a property declared both symmetric and asymmetric (`symmetric-and-asymmetric`), or whose domain or range is `owl:Nothing` or made of disjoint classes (`nothing-domain`, `disjoint-domains`, `nothing-object-range`, `disjoint-object-ranges`, `bottom-superproperty`, `disjoint-superproperties`). It does not check classes.
+
+**Inference** lists the inference rules, to tick:
+
+![](images/media/axioms/reasoner-3-inference-rules.png)
+
+| Rule | What it infers |
+| --- | --- |
+| `subclass-membership` | an individual of a class is also of its superclasses |
+| `subproperty-assertion` | a statement with a property also holds for its superproperties |
+| `inverse-property`, `symmetric-property`, `transitive-property` | the statements that follow from an inverse, symmetric or transitive property |
+| `property-domain`, `object-property-range` | the class of a subject or of an object, from the domain or the range of the property |
+| `same-as-closure`, `same-as-subject`, `same-as-object` | what follows from `owl:sameAs` |
+| `functional-object-equality`, `inverse-functional-equality` | individuals found identical by a functional or inverse functional property |
+| `has-value-restriction`, `all-values-from-restriction` | what follows from restrictions on a class |
+
+Tick the rules to apply and click **Execute**. The individuals for which something was inferred are listed in a tree.
+
+![](images/media/axioms/reasoner-4-inference-result.png)
+
+Tick the ones to show, choose the **Output**, then click **Display**:
+
+- **Graph** draws them on the whiteboard, with square nodes and red edges for what was inferred. Choose a **Color** for them first if you want.
+- **Table** shows the result as text.
+
+![](images/media/axioms/reasoner-5-inference-graph.png)
+
+The **Export** output is not available yet.
+
+**Limits.** Each rule stops after 60 seconds. A rule that fails is listed, and the status of the report tells that it is incomplete. A source that does not exist, or that you cannot read, is refused.

@@ -188,11 +188,11 @@ function buildSourceFiles(context, triples) {
     // the descriptor GET /sources sends, without the right of the user nor the credentials of the SPARQL server
     const { accessControl: _accessControl, ...archivedSource } = context.source;
     if (archivedSource.sparql_server) {
-        const { headers: _headers, ...sparqlServerWithoutHeaders } = archivedSource.sparql_server;
-        if (sparqlServerWithoutHeaders.url) {
-            sparqlServerWithoutHeaders.url = sparqlServerWithoutHeaders.url.replace(urlCredentialsRegex, "");
+        const { headers: _headers, user: _user, password: _password, ...sparqlServerWithoutCredentials } = archivedSource.sparql_server;
+        if (sparqlServerWithoutCredentials.url) {
+            sparqlServerWithoutCredentials.url = sparqlServerWithoutCredentials.url.replace(urlCredentialsRegex, "");
         }
-        archivedSource.sparql_server = sparqlServerWithoutHeaders;
+        archivedSource.sparql_server = sparqlServerWithoutCredentials;
     }
     const sourceFiles = {
         [context.sourceName + ".ttl"]: writeTurtle(triples, prefixesOfSource(context.source.graphUri)),

@@ -1245,7 +1245,8 @@ var Lineage_createRelation = (function () {
      */
     self.getRestrictionTriples = function (sourceNodeId, targetNodeId, constraint, cardinality, propId) {
         var restrictionsTriples = [];
-        var blankNode = "_:b" + common.getRandomHexaId(10);
+        // the leading "a" keeps the id off the digits-only form that Sparql_generic writes as a real blank node
+        var blankNode = "_:ba" + common.getRandomHexaId(9);
 
         restrictionsTriples.push({
             subject: sourceNodeId,

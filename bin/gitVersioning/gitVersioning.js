@@ -17,7 +17,9 @@ const versionCollator = new Intl.Collator("en", { numeric: true });
 const changelogFileName = "CHANGELOG.md";
 // the entries start at the first "## " heading, what comes before is the title
 const changelogEntriesRegex = /^## [\s\S]*/m;
-const isoDateLength = 10;
+// "2026-11-17T14:32" in an ISO timestamp
+const isoMinutesLength = 16;
+const gitSuffixRegex = /\.git$/;
 const numericIdentifierRegex = /^\d+$/;
 // semver.org 2.0.0, the regex given by the specification
 const semanticVersionRegex =
@@ -199,11 +201,31 @@ function buildSourceFiles(context, triples) {
     return sourceFiles;
 }
 
+// null outside github.com: the links of the changelog follow GitHub's URLs
+function githubWebUrl(repositoryUrl) {
+    const parsedUrl = new URL(repositoryUrl);
+    const webUrl = parsedUrl.hostname === "github.com" ? parsedUrl.origin + parsedUrl.pathname.replace(gitSuffixRegex, "") : null;
+    return webUrl;
+}
+
+function buildChangelogLinks(repositoryUrl, tagName, previousTagName) {
+    const webUrl = githubWebUrl(repositoryUrl);
+    const links = [];
+    if (webUrl) {
+        links.push("[Source at this version](" + webUrl + "/tree/" + encodeURI(tagName) + ")");
+        if (previousTagName) {
+            links.push("[Changes since the previous version](" + webUrl + "/compare/" + encodeURI(previousTagName) + "..." + encodeURI(tagName) + ")");
+        }
+    }
+    return links;
+}
+
 function buildChangelog(sourceName, changelogEntry, existingChangelog) {
     const previousEntriesMatch = existingChangelog.match(changelogEntriesRegex);
     const previousEntries = previousEntriesMatch ? previousEntriesMatch[0] : "";
     const notesParagraph = changelogEntry.notes ? changelogEntry.notes + "\n\n" : "";
-    const newEntry = "## " + changelogEntry.version + " (" + changelogEntry.date + ")\n\n" + notesParagraph;
+    const linksParagraph = changelogEntry.links.length > 0 ? changelogEntry.links.join(" · ") + "\n\n" : "";
+    const newEntry = "## " + changelogEntry.version + " - " + changelogEntry.publishedAt + "\n\n" + notesParagraph + linksParagraph;
     const changelog = "# " + sourceName + "\n\n" + newEntry + previousEntries;
     return changelog;
 }
@@ -372,14 +394,17 @@ async function publishVersion(user, sourceName, credentials, versionName, releas
     const versionTitle = sourceName + " " + versionName;
     // GitHub shows the first line of the commit next to the folder
     const commitMessage = releaseNotes ? versionTitle + ": " + releaseNotes : versionTitle;
-    const publicationDate = new Date().toISOString().slice(0, isoDateLength);
+    const isoTimestamp = new Date().toISOString();
+    const publishedAt = isoTimestamp.slice(0, isoMinutesLength).replace("T", " ") + " UTC";
+    const previousTagName = lastVersion ? sourceRefName(sourceName, lastVersion) : null;
+    const changelogLinks = buildChangelogLinks(repositoryState.repositoryUrl, tagName, previousTagName);
     const commitId = await pushSourceFiles(context, {
         repositoryUrl: repositoryState.repositoryUrl,
         baseBranch: repositoryState.isMainBranchCreated ? repositoryState.mainBranch : null,
         pushBranch: repositoryState.mainBranch,
         commitMessage: commitMessage,
         tag: { name: tagName, notes: releaseNotes || versionTitle },
-        changelogEntry: { version: versionName, date: publicationDate, notes: releaseNotes },
+        changelogEntry: { version: versionName, publishedAt: publishedAt, notes: releaseNotes, links: changelogLinks },
         isBranchUpdate: false,
         sourceFiles: buildSourceFiles(context, versionedTriples),
     });

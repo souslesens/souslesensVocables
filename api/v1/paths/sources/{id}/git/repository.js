@@ -22,7 +22,7 @@ export default function () {
             "Checks that `token` can read and write the repository (a dry-run push writes nothing), then lists what it holds of the source: " +
             "its main branch, the versions (tags `<source>/<version>`) and the branches (`<source>/<branch>`). " +
             "With `url`, the source is linked to that repository in `sources.json` once the check passes; without it, the repository already linked is read. " +
-            "The token is used for this request only and never stored. Requires `readwrite` access on the source.",
+            "The token is used for this request only and never stored. Requires `readwrite` access on the source, and to be an administrator or its owner.",
         security: [{ restrictLoggedUser: [] }],
         operationId: "openSourceGitRepository",
         parameters: [
@@ -56,7 +56,9 @@ export default function () {
                 },
             },
             400: { description: "No token, a source outside the platform's own triple store, no HTTPS URL, or a source not linked yet." },
-            403: { description: "The user does not have `readwrite` access to the source, or the git server refused the token or the user name given with it." },
+            403: {
+                description: "The user does not have `readwrite` access to the source, is neither an administrator nor its owner, or the git server refused the token or the user name given with it.",
+            },
             404: { description: "Source not found." },
             500: { description: "The git server refused the repository or the push, its message is returned." },
         },

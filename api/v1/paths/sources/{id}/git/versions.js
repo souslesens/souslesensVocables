@@ -21,7 +21,7 @@ export default function () {
         description:
             "Commits `<source>/<source>.ttl` (sorted Turtle) and `<source>/<source>.source.json` on the main branch, " +
             "tags the commit `<source>/<version>` with `notes` as the message of the annotated tag, then writes `version` " +
-            "as typed as `owl:versionInfo` of the graph. An existing version is refused. Requires `readwrite` access on the source.",
+            "as typed as `owl:versionInfo` of the graph. An existing version is refused. Requires `readwrite` access on the source, and to be an administrator or its owner.",
         security: [{ restrictLoggedUser: [], restrictVirtuosoLoad: [] }],
         operationId: "publishSourceGitVersion",
         parameters: [
@@ -55,7 +55,9 @@ export default function () {
                 },
             },
             400: { description: "No token, a source outside the platform's own triple store, an invalid version name, or the source is not linked to a repository." },
-            403: { description: "The user does not have `readwrite` access to the source, or the git server refused the token or the user name given with it." },
+            403: {
+                description: "The user does not have `readwrite` access to the source, is neither an administrator nor its owner, or the git server refused the token or the user name given with it.",
+            },
             404: { description: "Source not found." },
             409: { description: "The version already exists." },
             500: { description: "Export or git error, the git server message is returned." },

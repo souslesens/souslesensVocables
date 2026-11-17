@@ -188,6 +188,7 @@ const apiDoc = {
                     type: "array",
                     items: { type: "string" },
                 },
+                gitRepository: { type: "object", properties: { url: { type: "string" } }, required: ["url"] },
             },
             required: [
                 "_type",
@@ -231,6 +232,7 @@ const apiDoc = {
                 imports: { type: "array", items: { type: "string" } },
                 owner: { type: "string" },
                 published: { type: "boolean" },
+                gitRepository: { type: "object", properties: { url: { type: "string" } }, required: ["url"] },
             },
             required: ["name"],
             title: "Source Create Model",
@@ -255,6 +257,7 @@ const apiDoc = {
                 predicates: { $ref: "#/definitions/Predicates" },
                 group: { type: "string" },
                 imports: { type: "array", items: { type: "string" } },
+                gitRepository: { type: "object", properties: { url: { type: "string" } }, required: ["url"] },
             },
             required: ["name"],
             title: "Source Update Model",

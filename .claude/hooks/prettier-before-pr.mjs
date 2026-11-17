@@ -7,6 +7,8 @@ const commandRegex = /\b(gh\s+pr\s+create|git\s+push)\b/;
 const pullRequestCreationRegex = /\bgh\s+pr\s+create\b/;
 const baseBranches = ["origin/master", "origin/main"];
 const commitMessage = "style: prettier";
+const prettierCheckPathsRegex = /"prettier:check":\s*"prettier --check ([^"]*)"/;
+const leadingDotSlashRegex = /^\.\//;
 
 function runGit(workingDirectory, gitArguments) {
     return execFileSync("git", gitArguments, { cwd: workingDirectory, encoding: "utf8" }).trim();
@@ -37,9 +39,19 @@ try {
         process.exit(0);
     }
     const changedFilesText = runGit(repositoryRoot, ["diff", "--name-only", "--diff-filter=ACMR", baseBranch + "...HEAD"]);
-    const changedFiles = changedFilesText.split("\n").filter((file) => file.length > 0 && existsSync(join(repositoryRoot, file)));
+    // only what the CI checks: the paths of the prettier:check script
+    const checkScriptMatch = readFileSync(packageFile, "utf8").match(prettierCheckPathsRegex);
+    const checkedPaths = checkScriptMatch ? checkScriptMatch[1].split(" ").map((checkedPath) => checkedPath.replace(leadingDotSlashRegex, "")) : [];
+    const isChecked = (file) => checkedPaths.some((checkedPath) => file === checkedPath || file.startsWith(checkedPath + "/"));
+    const changedFiles = changedFilesText.split("\n").filter((file) => file.length > 0 && isChecked(file) && existsSync(join(repositoryRoot, file)));
     if (changedFiles.length === 0) {
         process.exit(0);
+    }
+    // prettier would be committed with the unrelated changes of the same file
+    const uncommittedText = runGit(repositoryRoot, ["diff", "HEAD", "--ignore-space-at-eol", "--name-only", "--", ...changedFiles]);
+    if (uncommittedText.length > 0) {
+        console.error("Commit these files first, then retry:\n" + uncommittedText);
+        process.exit(2);
     }
     const prettierArguments = ["prettier", "--write", "--ignore-unknown", "--log-level", "silent", ...changedFiles];
     execFileSync("npx", prettierArguments, { cwd: repositoryRoot, shell: true });

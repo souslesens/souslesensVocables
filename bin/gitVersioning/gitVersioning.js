@@ -14,6 +14,12 @@ const urlCredentialsRegex = /(?<=:\/\/)[^/@]+@/;
 const defaultMainBranch = "main";
 const previewLineCount = 20;
 const versionCollator = new Intl.Collator("en", { numeric: true });
+const changelogFileName = "CHANGELOG.md";
+// the entries start at the first "## " heading, what comes before is the title
+const changelogEntriesRegex = /^## [\s\S]*/m;
+// "2026-11-17" in an ISO timestamp
+const isoDateLength = 10;
+const gitSuffixRegex = /\.git$/;
 const numericIdentifierRegex = /^\d+$/;
 // semver.org 2.0.0, the regex given by the specification
 const semanticVersionRegex =
@@ -65,6 +71,10 @@ async function openSourceContext(user, sourceName, credentials) {
         throw requestError("Not authorized to version " + sourceName, 403);
     }
     const source = userSources[sourceName];
+    const isAdminOrOwner = sourceModel.isAdmin(user) || source.owner === user.login;
+    if (!isAdminOrOwner) {
+        throw requestError("Only an administrator or the owner of " + sourceName + " can version it", 403);
+    }
     const isInPlatformTripleStore = Boolean(source.graphUri) && endpointUrlForSource(source) === ConfigManager.config.sparql_server.url;
     if (!isInPlatformTripleStore) {
         throw requestError(sourceName + " is not stored in the platform's own triple store", 400);
@@ -182,11 +192,11 @@ function buildSourceFiles(context, triples) {
     // the descriptor GET /sources sends, without the right of the user nor the credentials of the SPARQL server
     const { accessControl: _accessControl, ...archivedSource } = context.source;
     if (archivedSource.sparql_server) {
-        const { headers: _headers, ...sparqlServerWithoutHeaders } = archivedSource.sparql_server;
-        if (sparqlServerWithoutHeaders.url) {
-            sparqlServerWithoutHeaders.url = sparqlServerWithoutHeaders.url.replace(urlCredentialsRegex, "");
+        const { headers: _headers, user: _user, password: _password, ...sparqlServerWithoutCredentials } = archivedSource.sparql_server;
+        if (sparqlServerWithoutCredentials.url) {
+            sparqlServerWithoutCredentials.url = sparqlServerWithoutCredentials.url.replace(urlCredentialsRegex, "");
         }
-        archivedSource.sparql_server = sparqlServerWithoutHeaders;
+        archivedSource.sparql_server = sparqlServerWithoutCredentials;
     }
     const sourceFiles = {
         [context.sourceName + ".ttl"]: writeTurtle(triples, prefixesOfSource(context.source.graphUri)),
@@ -195,9 +205,37 @@ function buildSourceFiles(context, triples) {
     return sourceFiles;
 }
 
+// null outside github.com: the links of the changelog follow GitHub's URLs
+function githubWebUrl(repositoryUrl) {
+    const parsedUrl = new URL(repositoryUrl);
+    const webUrl = parsedUrl.hostname === "github.com" ? parsedUrl.origin + parsedUrl.pathname.replace(gitSuffixRegex, "") : null;
+    return webUrl;
+}
+
+function buildChangelogUrls(repositoryUrl, tagName, previousTagName) {
+    const webUrl = githubWebUrl(repositoryUrl);
+    if (!webUrl) {
+        return { tagUrl: null, compareUrl: null };
+    }
+    const tagUrl = webUrl + "/releases/tag/" + encodeURIComponent(tagName);
+    const compareUrl = previousTagName ? webUrl + "/compare/" + encodeURIComponent(previousTagName) + "..." + encodeURIComponent(tagName) : null;
+    return { tagUrl: tagUrl, compareUrl: compareUrl };
+}
+
+function buildChangelog(sourceName, changelogEntry, existingChangelog) {
+    const previousEntriesMatch = existingChangelog.match(changelogEntriesRegex);
+    const previousEntries = previousEntriesMatch ? previousEntriesMatch[0] : "";
+    const notesParagraph = changelogEntry.notes ? changelogEntry.notes + "\n\n" : "";
+    const versionHeading = changelogEntry.tagUrl ? "[" + changelogEntry.version + "](" + changelogEntry.tagUrl + ")" : changelogEntry.version;
+    const compareParagraph = changelogEntry.compareUrl ? "[Changes since the previous version](" + changelogEntry.compareUrl + ")\n\n" : "";
+    const newEntry = "## " + versionHeading + " (" + changelogEntry.publishedDate + ")\n\n" + notesParagraph + compareParagraph;
+    const changelog = "# " + sourceName + "\n\n" + newEntry + previousEntries;
+    return changelog;
+}
+
 /**
  * @param {object} context - the context of the action
- * @param {object} commitToPush - repositoryUrl, baseBranch (null on an empty repository), pushBranch, commitMessage, tag ({name, notes} or null), isBranchUpdate, sourceFiles
+ * @param {object} commitToPush - repositoryUrl, baseBranch (null on an empty repository), pushBranch, commitMessage, tag ({name, notes} or null), changelogEntry ({version, date, notes} or null), isBranchUpdate, sourceFiles
  * @returns {Promise<string|null>} the pushed commit, null when a branch update finds nothing to commit
  */
 async function commitAndPushOnce(context, commitToPush) {
@@ -207,6 +245,11 @@ async function commitAndPushOnce(context, commitToPush) {
         await fs.promises.mkdir(sourceFolderPath, { recursive: true });
         for (const [fileName, fileContent] of Object.entries(commitToPush.sourceFiles)) {
             await fs.promises.writeFile(path.join(sourceFolderPath, fileName), fileContent);
+        }
+        if (commitToPush.changelogEntry) {
+            const changelogPath = path.join(sourceFolderPath, changelogFileName);
+            const existingChangelog = fs.existsSync(changelogPath) ? await fs.promises.readFile(changelogPath, "utf8") : "";
+            await fs.promises.writeFile(changelogPath, buildChangelog(context.sourceName, commitToPush.changelogEntry, existingChangelog));
         }
         await workTree.git.add(context.sourceName);
         const status = await workTree.git.status();
@@ -351,13 +394,20 @@ async function publishVersion(user, sourceName, credentials, versionName, releas
         throw requestError("Version " + versionName + " must be higher than " + lastVersion, 409);
     }
     const versionedTriples = await readCurrentTriples(context, versionName);
-    const commitMessage = sourceName + " " + versionName;
+    const versionTitle = sourceName + " " + versionName;
+    // GitHub shows the first line of the commit next to the folder
+    const commitMessage = releaseNotes ? versionTitle + ": " + releaseNotes : versionTitle;
+    const isoTimestamp = new Date().toISOString();
+    const publishedDate = isoTimestamp.slice(0, isoDateLength);
+    const previousTagName = lastVersion ? sourceRefName(sourceName, lastVersion) : null;
+    const changelogUrls = buildChangelogUrls(repositoryState.repositoryUrl, tagName, previousTagName);
     const commitId = await pushSourceFiles(context, {
         repositoryUrl: repositoryState.repositoryUrl,
         baseBranch: repositoryState.isMainBranchCreated ? repositoryState.mainBranch : null,
         pushBranch: repositoryState.mainBranch,
         commitMessage: commitMessage,
-        tag: { name: tagName, notes: releaseNotes || commitMessage },
+        tag: { name: tagName, notes: releaseNotes || versionTitle },
+        changelogEntry: { version: versionName, publishedDate: publishedDate, notes: releaseNotes, ...changelogUrls },
         isBranchUpdate: false,
         sourceFiles: buildSourceFiles(context, versionedTriples),
     });

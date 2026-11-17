@@ -46,14 +46,17 @@ export default function () {
 
     POST.apiDoc = {
         summary: "Create a git branch holding the source as SLS holds it",
-        description: "Creates `<source>/<branch>` from the main branch of the repository and commits the source files on it. An existing branch is refused. Requires `readwrite` access on the source.",
+        description:
+            "Creates `<source>/<branch>` from the main branch of the repository and commits the source files on it. An existing branch is refused. Requires `readwrite` access on the source, and to be an administrator or its owner.",
         security: [{ restrictLoggedUser: [], restrictVirtuosoLoad: [] }],
         operationId: "createSourceGitBranch",
         parameters: [{ in: "path", name: "id", type: "string", required: true, description: "Source name." }, branchBodyParameter],
         responses: {
             200: { description: "Branch pushed.", schema: branchResponseSchema },
             400: { description: "No token, a source outside the platform's own triple store, an invalid branch name, or the source is not linked to a repository." },
-            403: { description: "The user does not have `readwrite` access to the source, or the git server refused the token or the user name given with it." },
+            403: {
+                description: "The user does not have `readwrite` access to the source, is neither an administrator nor its owner, or the git server refused the token or the user name given with it.",
+            },
             404: { description: "Source not found." },
             409: { description: "The branch already exists." },
             500: { description: "Export or git error, the git server message is returned." },
@@ -65,14 +68,16 @@ export default function () {
         summary: "Commit the source as SLS holds it on an existing git branch",
         description:
             "Clones `<source>/<branch>` at request time and commits the source files on it. Nothing is pushed when the branch already holds them. " +
-            "A push refused because the branch moved meanwhile is retried once on a fresh clone. Requires `readwrite` access on the source.",
+            "A push refused because the branch moved meanwhile is retried once on a fresh clone. Requires `readwrite` access on the source, and to be an administrator or its owner.",
         security: [{ restrictLoggedUser: [], restrictVirtuosoLoad: [] }],
         operationId: "updateSourceGitBranch",
         parameters: [{ in: "path", name: "id", type: "string", required: true, description: "Source name." }, branchBodyParameter],
         responses: {
             200: { description: "Branch updated, or already up to date.", schema: branchResponseSchema },
             400: { description: "No token, a source outside the platform's own triple store, an invalid branch name, or the source is not linked to a repository." },
-            403: { description: "The user does not have `readwrite` access to the source, or the git server refused the token or the user name given with it." },
+            403: {
+                description: "The user does not have `readwrite` access to the source, is neither an administrator nor its owner, or the git server refused the token or the user name given with it.",
+            },
             404: { description: "Source not found, or the branch no longer exists." },
             500: { description: "Export or git error, the git server message is returned." },
         },

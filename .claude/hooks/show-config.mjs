@@ -1,4 +1,4 @@
-// node .claude/hooks/show-config.mjs <file>: the structure of a config file, credentials masked
+// node .claude/hooks/show-config.mjs <file> [--names]: the structure of a config file, credentials masked, or only its top-level keys
 import { existsSync, readFileSync } from "node:fs";
 import { basename } from "node:path";
 
@@ -44,6 +44,7 @@ if (envFileRegex.test(fileName)) {
     console.log(maskedLines.join("\n"));
 } else {
     const parsedFile = JSON.parse(fileText);
+    const shouldListNamesOnly = process.argv[3] === "--names";
     const maskedFile = maskNode(parsedFile, shouldMaskEveryValue);
-    console.log(JSON.stringify(maskedFile, null, 2));
+    console.log(shouldListNamesOnly ? Object.keys(parsedFile).join("\n") : JSON.stringify(maskedFile, null, 2));
 }

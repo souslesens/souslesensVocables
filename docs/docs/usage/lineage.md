@@ -70,16 +70,39 @@ using (e).
 Using (c) to change the source will clear the panel and reload it with
 the selected source and its imports.
 
-g.  **Source popup :** Clicking this button opens a popup with several
-    options for the source, such as adjusting node opacity, removing it
-    from the panel, grouping nodes belonging to the source, copying the
-    graph URI, or downloading it in a triple format (e.g., Turtle,
-    RDF).  
-    If you are the source owner (creator), you can also edit source
-    parameters such as child and parent properties, or the main class
-    query.
+g.  **Source popup :** Clicking the arrow next to the name of a source
+    opens a popup with the actions available for this source.
 
-> ![](images/media/lineage/image3.png)
+> ![](images/media/lineage/source-popup.png)
+
+The popup entries are:
+
+-   **Opacity**: sets the opacity of the nodes of the source.
+-   **Close**: removes the source from the panel and its nodes from
+    the whiteboard.
+-   **Hide** / **Show**: hides or shows the nodes of the source on the
+    whiteboard.
+-   **Group** / **Ungroup**: groups the nodes of the source under a
+    single node, or ungroups them.
+-   **copy graph URI**: copies the URI of the graph of the source.
+-   **MetaData**: shows and edits the metadata of the graph, such as
+    its label or its `owl:versionInfo`.
+-   **Download**: downloads the source in a triple format (e.g.
+    Turtle, RDF).
+-   **Version**: saves the source in a git repository, as numbered
+    versions and branches. It only appears for the owner of the
+    source or an administrator, when the source is stored in the
+    SousLeSens triple store. See
+    [Version](version.md).
+
+These entries only appear if you are an administrator, the owner of
+the source, or if the source is editable for you:
+
+-   **Edit**: edits the parameters of the source, such as child and
+    parent properties, or the main class query.
+-   **Refresh indexes**: rebuilds the search index of the source.
+-   **Refresh ontology model**: reloads the cached ontology model of
+    the source, after the source was changed outside SousLeSens.
 
 h.  **Add resource :** (Lineage only) Adds a new resource. Covered in a
     dedicated tutorial section

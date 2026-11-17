@@ -18,6 +18,15 @@ You need:
 - an **empty or existing git repository**, created on your git server,
 - an **access token** of your account on that server, with write access to the repository. See [Getting an access token](#getting-an-access-token).
 
+```{important}
+If the repository belongs to an **organization**, talk to an owner of the organization before you start. Being an administrator of the repository is not enough:
+
+- the organization may have disabled **fine-grained tokens**, or forbidden **classic tokens**. Only an owner can change it,
+- the organization may require an owner to **approve** each token. Until then the token stays *pending* and does not work.
+
+Without this, the tool answers `Write access to repository not granted` (error 403) even with a correct token.
+```
+
 ## Open the tool
 
 In Lineage, click the arrow next to the name of the source in the top panel, then **Version**.
@@ -129,7 +138,21 @@ The steps below are for **GitHub**. On another server, look for *personal access
 
 ### Option 1: fine-grained token (recommended)
 
-1. On GitHub, open **Settings**, then **Developer settings**, then **Personal access tokens**, then **Fine-grained tokens**, then **Generate new token**.
+1. On GitHub, click your picture at the top right, then **Settings**.
+
+   ![](images/media/version/token-0a-menu.png)
+
+   At the bottom of the menu on the left, open **Developer settings**.
+
+   ![](images/media/version/token-0b-developer-settings.png)
+
+   Open **Personal access tokens**, then **Fine-grained tokens**.
+
+   ![](images/media/version/token-0c-token-menu.png)
+
+   Click **Generate new token**.
+
+   ![](images/media/version/token-0d-fine-grained-list.png)
 2. **Resource owner**: choose the account or the **organization** that owns the repository. This choice is made when the token is created and cannot be changed afterwards. A token created for your own account cannot write to the repositories of an organization, even if you are an administrator of that repository.
    ![](images/media/version/token-1-form.png)
 

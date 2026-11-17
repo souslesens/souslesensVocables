@@ -131,8 +131,17 @@ The steps below are for **GitHub**. On another server, look for *personal access
 
 1. On GitHub, open **Settings**, then **Developer settings**, then **Personal access tokens**, then **Fine-grained tokens**, then **Generate new token**.
 2. **Resource owner**: choose the account or the **organization** that owns the repository. This choice is made when the token is created and cannot be changed afterwards. A token created for your own account cannot write to the repositories of an organization, even if you are an administrator of that repository.
+   ![](images/media/version/token-1-form.png)
+
+   The list of resource owners only contains the organizations where **fine-grained tokens are enabled**. If your organization is not in the list, its owners have not enabled them: use a [classic token](#option-2-classic-token) instead, or ask an owner to enable fine-grained tokens.
+
+   ![](images/media/version/token-2-resource-owner.png)
+
 3. **Repository access**: choose **Only select repositories** and pick the repository, or **All repositories**.
-4. **Permissions**, **Repository permissions**: set **Contents** to **Read and write**. **Metadata** is added automatically as read-only. Nothing else is needed.
+4. **Permissions**, **Repository permissions**: click **Add permissions**, pick **Contents**, and set it to **Read and write**. **Metadata** is added automatically as read-only. Nothing else is needed.
+
+   ![](images/media/version/token-3-permissions.png)
+
 5. Choose an expiration date, then **Generate token**. Copy the token now, GitHub shows it only once.
 
 If the repository belongs to an organization, the organization may require its owners to approve the token. The token then stays *pending* until an owner approves it. Only an organization owner can do it, a repository administrator cannot.
@@ -141,6 +150,9 @@ If the repository belongs to an organization, the organization may require its o
 
 1. **Settings**, **Developer settings**, **Personal access tokens**, **Tokens (classic)**, **Generate new token (classic)**.
 2. Tick only the **repo** scope.
+
+   ![](images/media/version/token-4-classic.png)
+
 3. If the organization uses single sign-on (SSO), click **Configure SSO** next to the token, then **Authorize** the organization.
 
 Some organizations forbid classic tokens. Use a fine-grained token in that case.

@@ -28,6 +28,9 @@ type Source = {
     taxonomyPredicates: string[];
     owner: string;
     published: boolean;
+    gitRepository?: {
+        url: string;
+    };
 };
 
 type SourceWithAccessControl = Source & {

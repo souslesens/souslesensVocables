@@ -68,15 +68,15 @@ To replace an existing graph:
 
 > **Warning**: Replacing a graph will delete all existing triples for that source.
 
-### Delete a Graph
+### Clear a Graph
 
-To delete a graph:
+To clear a graph:
 
-1. Select the source in GraphManagement
-2. Click **"Delete Graph"**
-3. Confirm deletion
+1. Find the source in the list of GraphManagement
+2. Click **"Clear"** on its row. The button is disabled if you do not have **readwrite** access to the source
+3. Confirm
 
-> **Warning**: This action cannot be undone. All graph data will be permanently deleted.
+> **Warning**: This action cannot be undone. All the triples of the graph are permanently deleted.
 
 ### Download a Graph
 

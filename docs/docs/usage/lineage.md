@@ -26,15 +26,14 @@ visualized and interactively manipulated.
 
 The Lineage UI is composed of three main elements:
 
--   **A left panel with 5 tabs**: Whiteboard, Classes, Properties,SPARQL
-    and Containers
--   **A left panel with 5 tabs**: Whiteboard, Classes, Properties,SPARQL
+-   **A left panel with 5 tabs**: Whiteboard, Classes, Properties, SPARQL
     and Containers
 
--   **A whiteboard** to show and manipulate graphs.
--   **A whiteboard** to show and manipulate graphs.
+-   **A whiteboard** to show and manipulate graphs. A **Legend** button at
+    its top right opens the legend of the colors and shapes of the
+    graph.
 
-- **A right Pannel with** buttons related to the whiteboard, providing basic
+-   **A right panel with** buttons related to the whiteboard, providing basic
   actions common to multiple tools
 
 The top panel is shared across all tools, but its content varies
@@ -107,8 +106,8 @@ the source, or if the source is editable for you:
 h.  **Add resource :** (Lineage only) Adds a new resource. Covered in a
     dedicated tutorial section
 
-i.  **Add Relation** : (Lineage only) Adds a new resource. Covered in a
-    dedicated tutorial section
+i.  **Add Relation** : (Lineage only) Adds a new relation between two
+    resources. Covered in a dedicated tutorial section
 
 j.  **Change Theme** : Changes the color theme of SousLeSens.
     Administrators can lock a specific theme, in which case this button
@@ -181,18 +180,22 @@ Displays on the whiteboard all nodes related to an axiom, grouped by
 axiom category (e.g., **subClassOf{0,5}*, **EquivalentClasses**, or
 **DisjointClasses**).
 
+6.  **Browse button (?)**: Opens the Browse dialog, to query the
+    content of the whiteboard.
+
 **Whiteboard section**
 
-6.  **Whiteboard search bar :** Searches for a node that is present on
+7.  **Whiteboard search bar :** Searches for a node that is present on
     the whiteboard.
 
-7.  **Clear all button** – Clears the whiteboard
-
-8.  **Clear last button** – Clears all nodes on the whiteboard, except
-    for those added by the most recent action.
+8.  **Clear last button**: Removes the nodes and edges added by the
+    most recent action from the whiteboard.
 
 9.  **Only last button** – Clears all nodes on the whiteboard, except
     for those added by the most recent action.
+
+To clear the whole whiteboard, use the **Clear all** button of the right
+panel (see below).
 
 10.  **Selection button :** Displays a menu with a tree of all classes on
     the whiteboard. This menu primarily handles node decoration and icon
@@ -211,8 +214,6 @@ axiom category (e.g., **subClassOf{0,5}*, **EquivalentClasses**, or
  *Extra features are revealed when the "More Actions" button is
  clicked*
 
- • **Implicit Model**: Draws the current source's implicit model on the
- whiteboard, which represents the knowledge graph facts.  
  • **Similars**: Displays a menu to show nodes on the whiteboard that
  have similar labels to the currently displayed nodes.  
  • **Paths**: Retrieves the shortest path between two nodes in the
@@ -225,7 +226,9 @@ axiom category (e.g., **subClassOf{0,5}*, **EquivalentClasses**, or
  results on the whiteboard.
 
 13.  **Query legend**: Explains the color codes used on the graph. Colors
-    are selected based on the top-level ontology.
+    are selected based on the top-level ontology. Once nodes are drawn,
+    the legend is shown by the **Legend** button at the top right of the
+    whiteboard.
 
 ### Left panel: Classes Tab
 
@@ -279,7 +282,10 @@ axiom category (e.g., **subClassOf{0,5}*, **EquivalentClasses**, or
 30. **Actions panel: Ranges and Domains -** Displays all ranges and
     domains for a source. See Ranges and Domains tutorial section
 
-31. **Search results panel**
+31. **Actions panel: DataType Properties -** Draws the datatype
+    properties of the source on the whiteboard.
+
+32. **Search results panel**
 
 ### Left panel : SPARQL
 
@@ -289,34 +295,46 @@ See SPARQL tutorial section
 
 ![](images/media/lineage/image12.png)
 
-32.  **Container search bar –** Search for rdfs:Container
+The containers of the source are shown in a tree. Its root node is
+**rootContainer**: the containers of the top level hang under it.
 
-33.  **Parent containers button :** Displays all parent containers on the
+33.  **Container search bar :** Search for rdfs:Container. The tree shows
+    the top containers that match the term.
+
+34.  **Parent containers button :** Displays all parent containers on the
     whiteboard
 
-34.  **Create container button**
+35.  **Create container button**
 
-35.  **Export containers button**
+36.  **Export containers button**
 
-36.  **Search results panel**
+37.  **Unlock checkbox :** When checked, containers and the resources they
+    hold can be moved in the tree by drag and drop. Nothing can be
+    dropped on the root node itself, and only a container can be dropped
+    directly under it.
+
+38.  **Containers tree :** The containers and their members. To add nodes
+    of the whiteboard to a container, select them on the whiteboard, then
+    right-click the container and choose **Add selected node to
+    container**: every selected node is added.
 
 ### Right Panel : whiteboard buttons
 
 ![](images/media/lineage/image13.png)
 
-37.  **Clear all button :** Clears the whiteboard
+39.  **Clear all button :** Clears the whiteboard
 
-38.  **Display :** Opens a menu to modify the graph display parameters,
+40.  **Display :** Opens a menu to modify the graph display parameters,
     such as spatialization algorithms, node distance, etc.
 
-39.  **Save whiteboard** : Saves the current whiteboard for later reuse.
+41.  **Save whiteboard** : Saves the current whiteboard for later reuse.
 
-40.  **Load saved graph** : Load a previously saved whiteboard.
+42.  **Load saved graph** : Load a previously saved whiteboard.
 
-41.  **Export whiteboard** : Exports the current whiteboard in various
+43.  **Export whiteboard** : Exports the current whiteboard in various
     formats (GraphML, SVG, CSV, PlantUML, JSON).
 
-42.  Import whiteboard : Imports and displays a whiteboard from a JSON
+44.  Import whiteboard : Imports and displays a whiteboard from a JSON
     file provided by the SousLeSens JSON export (supports JSON following
     vis.js network format:
     <https://visjs.github.io/vis-network/docs/network/>).

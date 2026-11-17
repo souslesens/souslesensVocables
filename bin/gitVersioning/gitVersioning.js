@@ -71,6 +71,10 @@ async function openSourceContext(user, sourceName, credentials) {
         throw requestError("Not authorized to version " + sourceName, 403);
     }
     const source = userSources[sourceName];
+    const isAdminOrOwner = sourceModel.isAdmin(user) || source.owner === user.login;
+    if (!isAdminOrOwner) {
+        throw requestError("Only an administrator or the owner of " + sourceName + " can version it", 403);
+    }
     const isInPlatformTripleStore = Boolean(source.graphUri) && endpointUrlForSource(source) === ConfigManager.config.sparql_server.url;
     if (!isInPlatformTripleStore) {
         throw requestError(sourceName + " is not stored in the platform's own triple store", 400);

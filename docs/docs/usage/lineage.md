@@ -90,8 +90,9 @@ The popup entries are:
 -   **Download**: downloads the source in a triple format (e.g.
     Turtle, RDF).
 -   **Version**: saves the source in a git repository, as numbered
-    versions and branches. It only appears for a source you can
-    write to that is stored in the SousLeSens triple store. See
+    versions and branches. It only appears for the owner of the
+    source or an administrator, when the source is stored in the
+    SousLeSens triple store. See
     [Version](version.md).
 
 These entries only appear if you are an administrator, the owner of

@@ -21,7 +21,7 @@ export default function () {
         description:
             "Exports the source as SLS holds it and compares its triples with the file `<source>/<source>.ttl` of `branch`, " +
             "or of the main branch when `branch` is absent. The branch is cloned at request time, so the comparison is against its latest state. " +
-            "Returns the counts and the first changed triples. Requires `readwrite` access on the source.",
+            "Returns the counts and the first changed triples. Requires `readwrite` access on the source, and to be an administrator or its owner.",
         security: [{ restrictLoggedUser: [], restrictVirtuosoLoad: [] }],
         operationId: "previewSourceGitChanges",
         parameters: [
@@ -56,7 +56,9 @@ export default function () {
                 },
             },
             400: { description: "No token, a source outside the platform's own triple store, or the source is not linked to a repository." },
-            403: { description: "The user does not have `readwrite` access to the source, or the git server refused the token or the user name given with it." },
+            403: {
+                description: "The user does not have `readwrite` access to the source, is neither an administrator nor its owner, or the git server refused the token or the user name given with it.",
+            },
             404: { description: "Source or branch not found." },
             500: { description: "Export or git error, its message is returned." },
         },

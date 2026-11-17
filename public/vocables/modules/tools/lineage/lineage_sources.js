@@ -700,7 +700,7 @@ var Lineage_sources = (function () {
             var sourceConfig = Config.sources[source];
             // loadSources replaced "_default" by the URL of the platform's own triple store, the only one the versioning exports
             var isInPlatformTripleStore = Boolean(sourceConfig.graphUri) && (!sourceConfig.sparql_server || sourceConfig.sparql_server.url === Config.sparql_server.url);
-            if (sourceConfig.accessControl === "readwrite" && isInPlatformTripleStore) {
+            if (sourceConfig.accessControl === "readwrite" && isInPlatformTripleStore && (isAdmin || self.isSourceOwnedByUser(source))) {
                 html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.versionSource();">Version</span>';
             }
         }

@@ -14,7 +14,7 @@ It works with any git server reachable over HTTPS (GitHub, GitLab, Gitea, Bitbuc
 
 You need:
 
-- a source that you can edit (**readwrite** access) and that is stored in the SousLeSens triple store,
+- a source that you **own**, or any source if you are an **administrator**, with **readwrite** access, stored in the SousLeSens triple store. Having **readwrite** access alone is not enough,
 - an **empty or existing git repository**, created on your git server,
 - an **access token** of your account on that server, with write access to the repository. See [Getting an access token](#getting-an-access-token).
 
@@ -24,7 +24,7 @@ In Lineage, click the arrow next to the name of the source in the top panel, the
 
 ![](images/media/lineage/source-popup.png)
 
-The **Version** entry only appears when the source is readwrite and stored in the SousLeSens triple store.
+The **Version** entry only appears for the owner of the source or an administrator, when the source is readwrite and stored in the SousLeSens triple store.
 
 ## Save a version
 
@@ -193,6 +193,7 @@ If the repository belongs to an organization, the token may stay *pending* until
 | --- | --- |
 | `Write access to repository not granted` or error 403 | The token cannot write to this repository. Check that your account has **write access** to the repository itself. For a classic token, check that it has the **repo** scope and that SSO is authorized for the organization. For a fine-grained token, check the resource owner, the selected repositories, **Contents** set to **Read and write**, and whether an owner has to approve the token. |
 | `The git server refused the token, or the user name given with it` | The token is wrong, expired or revoked. The tool also asks for your user name on the git server: enter it and try again. |
+| `Only an administrator or the owner of <source> can version it` | You have **readwrite** access but you are not the owner of the source. Ask its owner or an administrator. |
 | `... must be higher than ...` | The version is not higher than the last one. See [Version numbers](#version-numbers). |
 | `... is not a valid version` | The number does not follow `MAJOR.MINOR.PATCH`. |
-| **Version** is missing from the source popup | The source is not readwrite for you, or it is not stored in the SousLeSens triple store. |
+| **Version** is missing from the source popup | You are neither the owner of the source nor an administrator, the source is not readwrite for you, or it is not stored in the SousLeSens triple store. |

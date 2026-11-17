@@ -1294,13 +1294,9 @@ var Sparql_generic = (function () {
                             fromStr +
                             "WHERE {\n" +
                             "    ?subject rdfs:subClassOf ?firstParent .\n" +
-                            "    ?subject rdfs:label ?subjectLabel .\n" +
                             "  filter (  exists {?firstParent rdf:type owl:Class  } || not exists{?firstParent rdf:type ?t })\n" +
-                            " filter (?firstParent!=owl:Class)\n" +
-                            "    OPTIONAL {\n" +
-                            "      ?subject skos:prefLabel|skos:altLabel ?subjectAltLabel .\n" +
-                            "    }" +
-                            indexedPredicates.optionalClauses +
+                            " filter (?firstParent!=owl:Class)" +
+                            Sparql_common.getLabelClauses("subject", options) +
                             "\n  }";
                     } else {
                         query =
@@ -1377,7 +1373,7 @@ var Sparql_generic = (function () {
                     if (schemaType != "OWL" || allData.length == 0) {
                         return callbackSeries();
                     }
-                    var query = Sparql_OWL.getIntersectionSuperClassQuery(sourceLabel, options);
+                    var query = Sparql_OWL.getIntersectionSuperClassQuery(sourceLabel, options, true);
                     Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
                         // the taxonomy stays the one of the rows above
                         if (err) {
@@ -1391,11 +1387,13 @@ var Sparql_generic = (function () {
                             }
                         });
                         result.results.bindings.forEach(function (binding) {
-                            // the subClassOf rows above require a label too
-                            if (subjectsWithNamedParent[binding.sub.value] || !binding.subLabel) {
+                            if (subjectsWithNamedParent[binding.sub.value]) {
                                 return;
                             }
-                            allData.push({ subject: binding.sub, subjectLabel: binding.subLabel, firstParent: binding.superClass });
+                            binding.subject = binding.sub;
+                            binding.subjectLabel = binding.subLabel;
+                            binding.firstParent = binding.superClass;
+                            allData.push(binding);
                         });
                         callbackSeries();
                     });
@@ -1411,11 +1409,10 @@ var Sparql_generic = (function () {
                         " PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
                         " SELECT DISTINCT * " +
                         Sparql_common.getFromStr(sourceLabel, false, options.withoutImports) +
-                        " WHERE { ?subject rdf:type owl:Class. ?subject rdfs:label ?subjectLabel." +
+                        " WHERE { ?subject rdf:type owl:Class." +
                         Sparql_OWL.getNamedClassFilter("subject") +
                         " filter not exists {?subject rdfs:subClassOf ?anyParent}" +
-                        " OPTIONAL {?subject skos:prefLabel|skos:altLabel ?subjectAltLabel}" +
-                        indexedPredicates.optionalClauses +
+                        Sparql_common.getLabelClauses("subject", options) +
                         " }";
                     Sparql_proxy.querySPARQL_GET_proxy(url, rootClassesQuery, "", { source: sourceLabel }, function (err, result) {
                         if (err) {
@@ -1441,6 +1438,7 @@ var Sparql_generic = (function () {
                 function (callbackSeries) {
                     var skosLabelsMap = {};
                     var conceptLabel = null;
+                    var labelValueVariableNames = Sparql_common.skosLabelVariableNames.concat(indexedPredicates.variableNames);
 
                     function getConceptLabel(item) {
                         if (item.subjectLabel) {
@@ -1461,7 +1459,7 @@ var Sparql_generic = (function () {
                         }
                         // kept above the conceptLabel guard below: that guard always returns on this
                         // loop (conceptLabel is only assigned in the next one), which would drop the values
-                        Sparql_common.pushIndexedPredicateValues(item, indexedPredicates.variableNames, skosLabelsMap[item.subject.value]);
+                        Sparql_common.pushIndexedPredicateValues(item, labelValueVariableNames, skosLabelsMap[item.subject.value]);
 
                         if (!conceptLabel) {
                             return;
@@ -1475,11 +1473,6 @@ var Sparql_generic = (function () {
                             allLabels[item.subject.value] = conceptLabel;
                         }
 
-                        if (item.skosLabel) {
-                            if (skosLabelsMap[item.subject.value].indexOf(item.skosLabel.value) < 0) {
-                                skosLabelsMap[item.subject.value].push(item.skosLabel.value);
-                            }
-                        }
                         if (item.code) {
                             if (skosLabelsMap[item.subject.value].indexOf(item.code.value) < 0) {
                                 skosLabelsMap[item.subject.value].push(item.code.value);

@@ -52,14 +52,24 @@ var Sparql_OWL = (function () {
         return " filter (!isBlank(?" + variable + ") && !STRSTARTS(STR(?" + variable + "),'nodeID://') && !STRSTARTS(STR(?" + variable + "),'_:')).";
     };
     // a class subClass of or equivalent to an intersection holding a single named class is a subClass of that class
-    self.getIntersectionSuperClassQuery = function (sourceLabel, options) {
+    self.getIntersectionSuperClassQuery = function (sourceLabel, options, isForIndexation) {
         if (!options) {
             options = {};
         }
         var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports);
-        return (
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-            " select ?sub ?subLabel ?superClass ?superClassLabel " +
+        var prefixes = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX owl: <http://www.w3.org/2002/07/owl#>";
+        var selectedVariables = "?sub ?subLabel ?superClass ?superClassLabel";
+        var subLabelClauses = " OPTIONAL {?sub rdfs:label ?subLabel}";
+        if (isForIndexation) {
+            prefixes += " PREFIX skos: <http://www.w3.org/2004/02/skos/core#>";
+            selectedVariables = "*";
+            subLabelClauses = Sparql_common.getLabelClauses("sub", options);
+        }
+        var query =
+            prefixes +
+            " select " +
+            selectedVariables +
+            " " +
             fromStr +
             " where{" +
             " { select ?sub (sample(?intersectionClass) as ?superClass) where{" +
@@ -67,10 +77,10 @@ var Sparql_OWL = (function () {
             " ?intersectionList rdf:rest*/rdf:first ?intersectionClass." +
             self.getNamedClassFilter("intersectionClass") +
             " } group by ?sub having (count(distinct ?intersectionClass) = 1) }" +
-            " OPTIONAL {?sub rdfs:label ?subLabel}" +
+            subLabelClauses +
             " OPTIONAL {?superClass rdfs:label ?superClassLabel}" +
-            "}"
-        );
+            "}";
+        return query;
     };
 
     /**
@@ -1933,8 +1943,13 @@ var Sparql_OWL = (function () {
         if (options.skosPrefLabel) {
             skosPrefLabel = "OPTIONAL {?id skos:prefLabel ?skosPrefLabel}";
         }
+        // ?label keeps the rdfs:label value, the OPTIONALs below only fill it when it has none
+        var labelPredicates = Sparql_common.getLabelPredicates(options);
+        var fallbackLabelPredicates = labelPredicates.slice(1);
+        var fallbackLabelClauses = Sparql_common.getFirstLabelOptionalClauses("id", "label", fallbackLabelPredicates, langFilter);
 
-        query += "{ " + typeFilterStr + " " + optionalLabel + " {?id rdfs:label ?label " + langFilter + "}" + filter + " }" + skosPrefLabel + indexedPredicates.optionalClauses + "}";
+        query +=
+            "{ " + typeFilterStr + " " + optionalLabel + " {?id rdfs:label ?label " + langFilter + "}" + filter + " }" + fallbackLabelClauses + skosPrefLabel + indexedPredicates.optionalClauses + "}";
 
         var allData = [];
         var resultSize = 1;
@@ -3052,12 +3067,8 @@ var Sparql_OWL = (function () {
             fromStr +
             "WHERE {\n" +
             "    ?subject rdf:type owl:Class .\n" +
-            "    ?subject rdfs:label ?subjectLabel .\n" +
             filter +
-            "    OPTIONAL {\n" +
-            "        ?subject skos:prefLabel|skos:altLabel ?subjectAltLabel .\n" +
-            "    }" +
-            indexedPredicates.optionalClauses +
+            Sparql_common.getLabelClauses("subject", options) +
             "\n}";
 
         async.series(
@@ -3105,21 +3116,16 @@ var Sparql_OWL = (function () {
                 // format result
                 function (callbackSeries) {
                     var skosLabelsMap = {};
+                    var labelValueVariableNames = Sparql_common.skosLabelVariableNames.concat(indexedPredicates.variableNames);
                     allData.forEach(function (item) {
                         var subjectUri = item.subject.value;
                         if (!skosLabelsMap[subjectUri]) {
                             skosLabelsMap[subjectUri] = [];
                         }
-                        if (item.subjectAltLabel && skosLabelsMap[subjectUri].indexOf(item.subjectAltLabel.value) < 0) {
-                            skosLabelsMap[subjectUri].push(item.subjectAltLabel.value);
-                        }
-                        Sparql_common.pushIndexedPredicateValues(item, indexedPredicates.variableNames, skosLabelsMap[subjectUri]);
+                        Sparql_common.pushIndexedPredicateValues(item, labelValueVariableNames, skosLabelsMap[subjectUri]);
                     });
 
                     allData.forEach(function (item) {
-                        if (!item.subjectLabel) {
-                            return;
-                        }
                         var subjectUri = item.subject.value;
                         var conceptLabel = item.subjectLabel.value;
                         var decapitalizedLabel = common.decapitalizeLabel(conceptLabel);

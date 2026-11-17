@@ -133,7 +133,7 @@ o.  **GitHub link :** Opens the SousLeSens GitHub repository for
 
 Source section:
 
-1.  **Draw restrictions button** – Draws the main classes and their
+1.  **Relations button**: Draws the main classes and their
     associated restrictions on the whiteboard *if* the whiteboard is
     empty.  
     If the whiteboard already contains nodes, it will draw the
@@ -197,9 +197,9 @@ axiom category (e.g., **subClassOf{0,5}*, **EquivalentClasses**, or
 To clear the whole whiteboard, use the **Clear all** button of the right
 panel (see below).
 
-10.  **Selection button :** Displays a menu with a tree of all classes on
-    the whiteboard. This menu primarily handles node decoration and icon
-    management.
+10.  **Decorate button :** Opens the **Selection** window, which lists the
+    nodes of the whiteboard and the actions available on them (decorate,
+    export, filter). See [Selection](#selection).
 
 ![](images/media/lineage/image8.png)
 
@@ -339,29 +339,76 @@ The containers of the source are shown in a tree. Its root node is
     vis.js network format:
     <https://visjs.github.io/vis-network/docs/network/>).
 
+### Selection
+
+Many actions of the Whiteboard tab work on the nodes that you select on the whiteboard.
+
+**Select nodes**
+
+- **Click** a node to select it. A selected node is shown in bold.
+- **Shift + click** another node to add it to the selection. A **Shift + click** on a selected node removes it from the selection.
+- **Shift + drag** a zone of the whiteboard to select all the nodes inside it.
+- **Ctrl + Alt + click** a node adds it to the selection. Moving the mouse over nodes while holding **Ctrl + Alt** adds each of them, holding **Ctrl + Shift** removes them.
+- A click on an empty part of the whiteboard clears the selection.
+
+![](images/media/selection/selection-1-nodes.png)
+
+**Apply to the selected nodes.** As soon as nodes are selected, a checkbox appears under the buttons of the source, in the Whiteboard tab. Its label tells what the buttons will work on: **Apply to 3 selected nodes** when it is checked, **Apply to all whiteboard** when it is not. Without any selection, the buttons work on all the nodes of the whiteboard.
+
+These actions work on the selection:
+
+- the **Relations**, **Children**, **Parents** and **Axioms** buttons of the Whiteboard tab (the **Draw axioms** choice of the **A** button),
+- **Remove from whiteboard** and **Remove others** of the right-click menu of a node. If several nodes are selected, they act on all of them: **Remove from whiteboard** removes the selected nodes, **Remove others** keeps only the selected nodes,
+- **Add selected node to container** of the Containers tab.
+
+The selection is cleared when an action ends: **Relations**, **Children**, **Parents**, **Axioms**, **Remove from whiteboard** and **Remove others** all clear it. It is also cleared when a new graph is drawn or when you change the source. **Ungroup** of a source removes the group node from the selection.
+
+**Selection window.** The **Decorate** button of the Whiteboard section opens the **Selection** window. It lists the nodes of the whiteboard, grouped by source. **Only the nodes that are selected on the whiteboard are checked**: tick or untick others to change what the actions apply to.
+
+![](images/media/selection/selection-2-dialog.png)
+
+The **Selection Actions** are:
+
+- **Decorate**: changes the **Shape**, the **Size** and the **Color** of the checked nodes, then **Apply**. The change lasts for the session only.
+- **Export CSV**: exports all the nodes of the whiteboard, whatever is checked, to a tab-separated file.
+- **Sparql Filter**: shows a SPARQL filter for the checked nodes, to copy into a query.
+- **Select root nodes**: unchecks everything, then checks the top nodes of the list.
+- **Class Decoration**: gives the checked classes an **icon** (a PNG file, required), with a shape, a size and a color. **Apply** saves the decoration with the source, so it comes back next time. **Delete Decoration** removes it.
+
+Every action except **Select root nodes** needs at least one checked node, otherwise Lineage answers `check nodes to process`.
+
 ### Shortcuts
 
 Right-clicking on a node triggers a menu with several options.
-"NodeInfos" and "Axioms" are detailed in the tutorial below.  
-**Expand and Parents** – These options are equivalent to the
-children/parent buttons but apply only to the current node.  
-**Collapse** – Removes all child nodes of the current node from the
-whiteboard.![](images/media/lineage/image14.png)
+
+![](images/media/selection/selection-3-menu.png)
+
+- **Node infos** and **Axioms** are detailed in the tutorial below. **Draw Axioms** draws the axioms of the node on the whiteboard.
+- **Expand** and **Parents** are equivalent to the Children and Parents buttons, but apply only to the node that you clicked.
+- **Create SubClass** creates a subclass of the node. It only appears if the source is editable by you.
+- **Relations...** opens the relations assistant of the node.
+- **Hide/show others** hides or shows all the other nodes.
+- **Remove from whiteboard** and **Remove others** work on the selection if there is one, see [Selection](#selection).
+- **Horizontal view** and **Vertical view** arrange the whiteboard as a tree, from left to right or from top to bottom.
+- **tree text** shows the graph as a text tree.
+- **List All relations** lists all the relations of the node.
 
 Right-clicking on a search result triggers a popup menu with different
 options, depending on the current tab and the node that is clicked.
 
 ![](images/media/lineage/image15.png)
 
-**Ctrl + Alt + Click on a Whiteboard Node**  
-Draws all relations of the clicked node.
+**Click on a whiteboard node, with a key pressed**
 
-**Shift + Click on a Whiteboard Node**  
-Select a node of the whiteboard. Use it on multiple nodes on whiteboard to select them. 
-Remove from graph and remove others right click actions will performs on all of them. 
-The selection can be performed on a large zone with shift + click dragged on a whiteboard zone. 
+| Keys | Action |
+| --- | --- |
+| **Shift + click** | adds the node to the selection, see [Selection](#selection) |
+| **Ctrl + Alt + click** | adds the node to the selection |
+| **Ctrl + click** | opens the node infos |
+| **Ctrl + Shift + click** | draws all the relations of the node, without the literals |
+| **Alt + Shift + click** | draws all the relations of the node |
 
-**Ctrl + Shift + Click on Search Results Panel**  
+**Ctrl + Shift + Click on Search Results Panel**
 Allows you to select multiple nodes by clicking on them. The right-click
 action will be applied to all selected nodes.
 
@@ -625,7 +672,7 @@ An axiom is a logical statement about a class: it is a subclass of another one, 
 The window shows:
 
 - the **graph of the axioms**. The class itself is the star. The links tell the kind of axiom: `≡` for an equivalent class, a subclass link, a disjoint link,
-- the axiom in **Manchester syntax**, below the graph, with the labels of the classes. It is written for you from the triples, it cannot be typed,
+- the axiom in **Manchester syntax**, below the graph, with the labels of the classes. It is built from the triples of the axiom, it cannot be typed,
 - the buttons **New axiom** and **show triples**.
 
 How to read the graph:
@@ -641,7 +688,7 @@ Right-click a node of the graph to open its **Node Infos** or its own **Node Axi
 
 **show triples** lists the RDF triples of the axiom as a tree, to see exactly what is stored.
 
-The Manchester text and the list of axioms come from the **JOWL server**. If it is disabled, the window answers `Jowl Server is disable`. See [JOWL configuration](../administration/jowl.md).
+The Manchester text is built from the triples of the axiom, in your browser: no extra server is needed.
 
 **Writing a new axiom.** The **New axiom** button only appears if the source is editable by you.
 

@@ -5,7 +5,8 @@
       "name": "start",
       "runtimeExecutable": "cmd",
       "runtimeArgs": ["/c", "npm run start"],
-      "port": 3010
+      "port": 3100,
+      "autoPort": true
     },
    
     {

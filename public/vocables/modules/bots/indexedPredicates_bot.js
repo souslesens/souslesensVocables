@@ -5,9 +5,8 @@ import Sparql_common from "../sparqlProxies/sparql_common.js";
 /**
  * Pre-step of every manual indexation: first asks whether the default indexed predicates are enough
  * or extra ones should be picked. Only in the second case are the indexable predicates of the source
- * looked up (the lookup probes the data, too slow to impose on a user who only wants the defaults)
- * and shown in a tree, under a single "Other predicates" folder. The chosen values are indexed into
- * the `skoslabels` field.
+ * looked up and shown in a tree, under a single "Other predicates" folder. The chosen values are
+ * indexed into the `skoslabels` field.
  */
 var IndexedPredicates_bot = (function () {
     var self = {};
@@ -68,8 +67,8 @@ var IndexedPredicates_bot = (function () {
 
     /**
      * First step, once per source: default predicates only, or pick extra ones. The indexable
-     * predicates lookup probes the source data, so it only runs when the user asks for extra
-     * predicates; answering "default" starts the indexation without any predicate query.
+     * predicates lookup only runs when the user asks for extra predicates; answering "default"
+     * starts the indexation without any predicate query.
      */
     function promptIndexationMode() {
         var source = getCurrentSource();

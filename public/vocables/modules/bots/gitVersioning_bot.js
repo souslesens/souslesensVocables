@@ -9,6 +9,7 @@ var GitVersioning_bot = (function () {
     self.cancelChoiceId = "cancel";
     self.addedTripleColor = "#15803d";
     self.removedTripleColor = "#b91c1c";
+    self.versionNumbersRegex = /^(\d+)\.(\d+)\.(\d+)/;
 
     self.workflowActions = {
         _OR: {
@@ -210,7 +211,19 @@ var GitVersioning_bot = (function () {
         },
 
         askVersionNumberFn: function () {
-            self.myBotEngine.promptValue("Version name", "versionName", "", null);
+            var versions = self.params.repositoryState.versions;
+            var lastVersion = versions.length > 0 ? versions[versions.length - 1] : null;
+            var lastVersionParts = lastVersion === null ? null : lastVersion.match(self.versionNumbersRegex);
+            if (lastVersionParts === null) {
+                self.showMessage(lastVersion === null ? "No version yet, start with <b>1.0.0</b>" : "Format: <b>1.2.0</b>");
+            } else {
+                var major = Number(lastVersionParts[1]);
+                var minor = Number(lastVersionParts[2]);
+                var patch = Number(lastVersionParts[3]);
+                var nextVersions = [major + "." + minor + "." + (patch + 1), major + "." + (minor + 1) + ".0", major + 1 + ".0.0"];
+                self.showMessage("Current version <b>" + CommonBotFunctions.escapeHtml(lastVersion) + "</b>, next: " + nextVersions.join(", "));
+            }
+            self.myBotEngine.promptValue("Version number", "versionName", "", null);
         },
 
         askReleaseNotesFn: function () {
@@ -250,12 +263,11 @@ var GitVersioning_bot = (function () {
             }
             self.callGitApi("POST", "versions", { version: self.params.versionName, notes: self.params.releaseNotes }, function (error, publishedVersion, status) {
                 if (error) {
-                    self.showError(error);
-                    // a name git refuses or a version that exists: asked again
+                    // a name git refuses or a version that exists: asked again, the error after the question whose own message would hide it
                     if (status === 400 || status === 409) {
-                        return self.myBotEngine.backToStep("askVersionNumberFn");
+                        self.myBotEngine.backToStep("askVersionNumberFn");
                     }
-                    return;
+                    return self.showError(error);
                 }
                 var resultHtml =
                     "<b>" + CommonBotFunctions.escapeHtml(publishedVersion.tagName) + "</b> published, commit <code>" + CommonBotFunctions.escapeHtml(publishedVersion.commitId) + "</code>";

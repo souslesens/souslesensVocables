@@ -14,6 +14,9 @@ const urlCredentialsRegex = /(?<=:\/\/)[^/@]+@/;
 const defaultMainBranch = "main";
 const previewLineCount = 20;
 const versionCollator = new Intl.Collator("en", { numeric: true });
+const numericIdentifierRegex = /^\d+$/;
+// semver.org 2.0.0, the regex given by the specification
+const semanticVersionRegex = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
 
 function requestError(message, status) {
     const error = new Error(message);
@@ -71,11 +74,63 @@ async function openSourceContext(user, sourceName, credentials) {
     return context;
 }
 
-function namesUnderSourceFolder(refNames, sourceName) {
+// precedence of semver.org section 11, build metadata ignored: negative, zero or positive
+function compareSemanticVersions(versionName, otherVersionName) {
+    const versionParts = versionName.match(semanticVersionRegex);
+    const otherVersionParts = otherVersionName.match(semanticVersionRegex);
+    const numberPartCount = 3;
+    for (let partIndex = 1; partIndex <= numberPartCount; partIndex++) {
+        const numberDifference = Number(versionParts[partIndex]) - Number(otherVersionParts[partIndex]);
+        if (numberDifference !== 0) {
+            return numberDifference;
+        }
+    }
+    const prerelease = versionParts[4];
+    const otherPrerelease = otherVersionParts[4];
+    // a release is above its own pre-releases
+    if (!prerelease || !otherPrerelease) {
+        return (prerelease ? 0 : 1) - (otherPrerelease ? 0 : 1);
+    }
+    const identifiers = prerelease.split(".");
+    const otherIdentifiers = otherPrerelease.split(".");
+    const sharedLength = Math.min(identifiers.length, otherIdentifiers.length);
+    for (let identifierIndex = 0; identifierIndex < sharedLength; identifierIndex++) {
+        const identifier = identifiers[identifierIndex];
+        const otherIdentifier = otherIdentifiers[identifierIndex];
+        const isNumeric = numericIdentifierRegex.test(identifier);
+        const isOtherNumeric = numericIdentifierRegex.test(otherIdentifier);
+        if (isNumeric && isOtherNumeric && identifier !== otherIdentifier) {
+            return Number(identifier) - Number(otherIdentifier);
+        }
+        // a numeric identifier is below an alphanumeric one
+        if (isNumeric !== isOtherNumeric) {
+            return isNumeric ? -1 : 1;
+        }
+        if (identifier !== otherIdentifier) {
+            return identifier < otherIdentifier ? -1 : 1;
+        }
+    }
+    return identifiers.length - otherIdentifiers.length;
+}
+
+// tags made before the format was imposed come first, the highest version is always the last
+function compareVersionNames(versionName, otherVersionName) {
+    const isSemantic = semanticVersionRegex.test(versionName);
+    const isOtherSemantic = semanticVersionRegex.test(otherVersionName);
+    if (isSemantic && isOtherSemantic) {
+        return compareSemanticVersions(versionName, otherVersionName);
+    }
+    if (isSemantic !== isOtherSemantic) {
+        return isSemantic ? 1 : -1;
+    }
+    return versionCollator.compare(versionName, otherVersionName);
+}
+
+function namesUnderSourceFolder(refNames, sourceName, compareNames) {
     const sourceRefPrefix = sourceRefName(sourceName, "");
     const sourceRefNames = refNames.filter((refName) => refName.startsWith(sourceRefPrefix));
     const namesWithoutPrefix = sourceRefNames.map((refName) => refName.slice(sourceRefPrefix.length));
-    namesWithoutPrefix.sort(versionCollator.compare);
+    namesWithoutPrefix.sort(compareNames);
     return namesWithoutPrefix;
 }
 
@@ -107,8 +162,8 @@ async function readRepositoryState(context, newRepositoryUrl) {
         repositoryUrl: repositoryUrl,
         mainBranch: mainBranch,
         isMainBranchCreated: remoteRefs.branchNames.includes(mainBranch),
-        versions: namesUnderSourceFolder(remoteRefs.tagNames, context.sourceName),
-        branches: namesUnderSourceFolder(remoteRefs.branchNames, context.sourceName),
+        versions: namesUnderSourceFolder(remoteRefs.tagNames, context.sourceName, compareVersionNames),
+        branches: namesUnderSourceFolder(remoteRefs.branchNames, context.sourceName, versionCollator.compare),
     };
     return repositoryState;
 }
@@ -273,12 +328,15 @@ async function previewChanges(user, sourceName, credentials, branchName) {
  * @param {object} user - the logged user
  * @param {string} sourceName - the source name
  * @param {{userName: string, token: string}} credentials - the access token, with the user name some git servers require
- * @param {string} versionName - the version typed by the user, any name git accepts in a tag
+ * @param {string} versionName - the version typed by the user, a Semantic Versioning 2.0.0 number such as 1.2.0 or 2.0.0-rc.1
  * @param {string} releaseNotes - the message of the annotated tag
  * @returns {Promise<object>} the tag, the branch and the commit
  */
 async function publishVersion(user, sourceName, credentials, versionName, releaseNotes) {
     const context = await openSourceContext(user, sourceName, credentials);
+    if (!semanticVersionRegex.test(versionName)) {
+        throw requestError(versionName + " is not a valid version, use for example 1.2.0", 400);
+    }
     const tagName = sourceRefName(sourceName, versionName);
     if (!(await isValidRefName("refs/tags/" + tagName))) {
         throw requestError(tagName + " is not a valid git tag name", 400);
@@ -286,6 +344,10 @@ async function publishVersion(user, sourceName, credentials, versionName, releas
     const repositoryState = await readRepositoryState(context);
     if (repositoryState.versions.includes(versionName)) {
         throw requestError("Version " + versionName + " of " + sourceName + " already exists", 409);
+    }
+    const lastVersion = repositoryState.versions[repositoryState.versions.length - 1];
+    if (lastVersion && semanticVersionRegex.test(lastVersion) && compareSemanticVersions(versionName, lastVersion) <= 0) {
+        throw requestError("Version " + versionName + " must be higher than " + lastVersion, 409);
     }
     const versionedTriples = await readCurrentTriples(context, versionName);
     const commitMessage = sourceName + " " + versionName;

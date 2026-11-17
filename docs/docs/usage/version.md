@@ -18,15 +18,6 @@ You need:
 - an **empty or existing git repository**, created on your git server,
 - an **access token** of your account on that server, with write access to the repository. See [Getting an access token](#getting-an-access-token).
 
-```{important}
-If the repository belongs to an **organization**, talk to an owner of the organization before you start. Being an administrator of the repository is not enough:
-
-- the organization may have disabled **fine-grained tokens**, or forbidden **classic tokens**. Only an owner can change it,
-- the organization may require an owner to **approve** each token. Until then the token stays *pending* and does not work.
-
-Without this, the tool answers `Write access to repository not granted` (error 403) even with a correct token.
-```
-
 ## Open the tool
 
 In Lineage, click the arrow next to the name of the source in the top panel, then **Version**.
@@ -136,27 +127,48 @@ A token is a long password, created for one purpose. It lets SousLeSens write to
 
 The steps below are for **GitHub**. On another server, look for *personal access token* (or *access token*) in your account settings, and give it write access to the repository contents.
 
-### Option 1: fine-grained token (recommended)
+### Which token?
+
+- **The repository belongs to an organization: use a classic token** (option 1). It works as soon as your account has **write access to the repository**, and the organization authorizes it if it uses single sign-on (SSO).
+- **The repository belongs to your own account**: a fine-grained token (option 2) is possible. It is limited to the repositories you choose, which makes it safer. A classic token works too.
+
+A fine-grained token is **not advised for a repository of an organization**: the owners of the organization must have enabled fine-grained tokens, and they often have to approve each token, which only an owner can do. Until then the tool answers `Write access to repository not granted` (error 403), even with a correct token.
+
+### Open the token page
 
 1. On GitHub, click your picture at the top right, then **Settings**.
 
    ![](images/media/version/token-0a-menu.png)
 
-   At the bottom of the menu on the left, open **Developer settings**.
+2. At the bottom of the menu on the left, open **Developer settings**.
 
    ![](images/media/version/token-0b-developer-settings.png)
 
-   Open **Personal access tokens**, then **Fine-grained tokens**.
+3. Open **Personal access tokens**. It offers **Tokens (classic)** and **Fine-grained tokens**.
 
    ![](images/media/version/token-0c-token-menu.png)
 
-   Click **Generate new token**.
+### Option 1: classic token
+
+1. Click **Tokens (classic)**, then **Generate new token**, then **Generate new token (classic)**.
+2. Give it a name and an expiration date. Tick only the **repo** scope.
+
+   ![](images/media/version/token-4-classic.png)
+
+3. Click **Generate token**. Copy the token now, GitHub shows it only once.
+4. If the organization uses single sign-on (SSO), click **Configure SSO** next to the token, then **Authorize** the organization. Without this step the token cannot write to the repositories of the organization.
+
+Some organizations forbid classic tokens. An owner of the organization has to allow them, or to enable fine-grained tokens.
+
+### Option 2: fine-grained token
+
+1. Click **Fine-grained tokens**, then **Generate new token**.
 
    ![](images/media/version/token-0d-fine-grained-list.png)
-2. **Resource owner**: choose the account or the **organization** that owns the repository. This choice is made when the token is created and cannot be changed afterwards. A token created for your own account cannot write to the repositories of an organization, even if you are an administrator of that repository.
-   ![](images/media/version/token-1-form.png)
 
-   The list of resource owners only contains the organizations where **fine-grained tokens are enabled**. If your organization is not in the list, its owners have not enabled them: use a [classic token](#option-2-classic-token) instead, or ask an owner to enable fine-grained tokens.
+2. **Resource owner**: choose your account. This choice is made when the token is created and cannot be changed afterwards. The list only contains the organizations where fine-grained tokens are enabled, which is why an organization is often missing.
+
+   ![](images/media/version/token-1-form.png)
 
    ![](images/media/version/token-2-resource-owner.png)
 
@@ -167,18 +179,7 @@ The steps below are for **GitHub**. On another server, look for *personal access
 
 5. Choose an expiration date, then **Generate token**. Copy the token now, GitHub shows it only once.
 
-If the repository belongs to an organization, the organization may require its owners to approve the token. The token then stays *pending* until an owner approves it. Only an organization owner can do it, a repository administrator cannot.
-
-### Option 2: classic token
-
-1. **Settings**, **Developer settings**, **Personal access tokens**, **Tokens (classic)**, **Generate new token (classic)**.
-2. Tick only the **repo** scope.
-
-   ![](images/media/version/token-4-classic.png)
-
-3. If the organization uses single sign-on (SSO), click **Configure SSO** next to the token, then **Authorize** the organization.
-
-Some organizations forbid classic tokens. Use a fine-grained token in that case.
+If the repository belongs to an organization, the token may stay *pending* until an owner of the organization approves it. A repository administrator cannot approve it.
 
 ### Keep it safe
 
@@ -190,7 +191,7 @@ Some organizations forbid classic tokens. Use a fine-grained token in that case.
 
 | Message | What it usually means |
 | --- | --- |
-| `Write access to repository not granted` or error 403 | The token cannot write to this repository. Check the resource owner (the organization, not your own account), the selected repositories, the **Contents** permission set to **Read and write**, and whether an owner has to approve the token. |
+| `Write access to repository not granted` or error 403 | The token cannot write to this repository. Check that your account has **write access** to the repository itself. For a classic token, check that it has the **repo** scope and that SSO is authorized for the organization. For a fine-grained token, check the resource owner, the selected repositories, **Contents** set to **Read and write**, and whether an owner has to approve the token. |
 | `The git server refused the token, or the user name given with it` | The token is wrong, expired or revoked. The tool also asks for your user name on the git server: enter it and try again. |
 | `... must be higher than ...` | The version is not higher than the last one. See [Version numbers](#version-numbers). |
 | `... is not a valid version` | The number does not follow `MAJOR.MINOR.PATCH`. |

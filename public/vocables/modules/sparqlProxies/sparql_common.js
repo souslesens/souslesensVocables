@@ -33,6 +33,10 @@ var Sparql_common = (function () {
         owl: "http://www.w3.org/2002/07/owl#",
     };
 
+    // by priority: the first one having a value is the label of a subject
+    self.defaultIndexedPredicateNames = ["rdfs:label", "skos:prefLabel", "skos:altLabel"];
+    self.skosLabelVariableNames = ["skosLabel"];
+
     function getPrefixNamespaceUri(prefix) {
         var namespaceUri = Config.defaultSparqlPrefixes && Config.defaultSparqlPrefixes[prefix] ? Config.defaultSparqlPrefixes[prefix] : self.basicPrefixes[prefix];
         if (!namespaceUri) {
@@ -1291,8 +1295,7 @@ var Sparql_common = (function () {
      * @returns {Array} `[{id, label}]` where `id` is the full URI and `label` the prefixed name
      */
     self.getDefaultIndexedPredicates = function () {
-        var defaultIndexedPredicateNames = ["rdfs:label", "skos:prefLabel", "skos:altLabel"];
-        return defaultIndexedPredicateNames.map(function (prefixedName) {
+        return self.defaultIndexedPredicateNames.map(function (prefixedName) {
             return {
                 id: self.getUriFromPrefixedName(prefixedName),
                 label: prefixedName,
@@ -1351,6 +1354,73 @@ var Sparql_common = (function () {
             optionalClauses += "\n    OPTIONAL { ?" + subjectVariableName + " <" + predicateUri + "> ?" + variableName + ". }";
         });
         return { optionalClauses: optionalClauses, variableNames: variableNames, selectVariablesStr: selectVariablesStr };
+    };
+
+    /**
+     * The predicates tried for the label of a subject, by priority: the default indexed ones, then
+     * the extra ones of the indexation run.
+     * @function
+     * @name getLabelPredicates
+     * @memberof module:Sparql_common
+     * @param {Object} [options] - Indexation options
+     * @param {string[]} [options.indexedPredicates] - Extra predicate URIs
+     * @returns {string[]} Predicates as prefixed names or `<uri>`
+     */
+    self.getLabelPredicates = function (options) {
+        var indexedPredicateUris = options.indexedPredicates || [];
+        var extraPredicates = indexedPredicateUris.map(function (predicateUri) {
+            return "<" + predicateUri + ">";
+        });
+        var labelPredicates = self.defaultIndexedPredicateNames.concat(extraPredicates);
+        return labelPredicates;
+    };
+
+    /**
+     * One OPTIONAL per predicate, all binding the same label variable: a later predicate only binds it
+     * when the earlier ones left it unbound, so the first predicate having a value gives the label
+     * and the rows do not multiply.
+     * @function
+     * @name getFirstLabelOptionalClauses
+     * @memberof module:Sparql_common
+     * @param {string} subjectVariableName - SPARQL variable holding the subject
+     * @param {string} labelVariableName - SPARQL variable bound to the label
+     * @param {string[]} labelPredicates - Predicates by priority
+     * @param {string} [langFilter] - FILTER clause on the label variable
+     * @returns {string} SPARQL OPTIONAL clauses
+     */
+    self.getFirstLabelOptionalClauses = function (subjectVariableName, labelVariableName, labelPredicates, langFilter) {
+        var chainClauses = "";
+        // shared variable: the first predicate with a value binds it, the next ones only match that same value
+        labelPredicates.forEach(function (labelPredicate) {
+            chainClauses +=
+                "\n    OPTIONAL { ?" + subjectVariableName + " " + labelPredicate + " ?" + labelVariableName + ". FILTER(isLiteral(?" + labelVariableName + ")) " + (langFilter || "") + " }";
+        });
+        return chainClauses;
+    };
+
+    /**
+     * Binds `?<subject>Label` to the first value among the label predicates, leaves out a subject
+     * with none of them, and binds `?skosLabel` and the extra predicates values to feed `skoslabels`.
+     * @function
+     * @name getLabelClauses
+     * @memberof module:Sparql_common
+     * @param {string} subjectVariableName - SPARQL variable holding the indexed subject
+     * @param {Object} [options] - Indexation options
+     * @param {string[]} [options.indexedPredicates] - Extra predicates, tried after the default ones
+     * @returns {string} SPARQL clauses to append to the WHERE of the indexation query
+     */
+    self.getLabelClauses = function (subjectVariableName, options) {
+        var subjectLabelVariableName = subjectVariableName + "Label";
+        var labelPredicates = self.getLabelPredicates(options);
+        var chainClauses = self.getFirstLabelOptionalClauses(subjectVariableName, subjectLabelVariableName, labelPredicates);
+        var skosLabelPredicates = self.defaultIndexedPredicateNames.slice(1);
+        var skosLabelPath = skosLabelPredicates.join("|");
+        var skosLabelVariableName = self.skosLabelVariableNames[0];
+        var skosLabelClause = "\n    OPTIONAL { ?" + subjectVariableName + " " + skosLabelPath + " ?" + skosLabelVariableName + ". }";
+        var indexedPredicates = self.getIndexedPredicatesClauses(subjectVariableName, options);
+
+        var labelClauses = chainClauses + skosLabelClause + indexedPredicates.optionalClauses + "\n    FILTER(BOUND(?" + subjectLabelVariableName + "))";
+        return labelClauses;
     };
 
     /**

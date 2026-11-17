@@ -358,6 +358,20 @@ var paramTagRegex = /^@param/;
 
 Before adding a function, check it is not a two-line wrapper over one you just wrote, and that no existing module already does it. Merge helpers always called together. Prefer a loop inside the caller over a private helper used once.
 
+### No `Object.assign` in new code
+
+Never copy or merge objects with `Object.assign`. Pass a flag as its own parameter, or set the fields on the object being built.
+
+```javascript
+// WRONG
+var intersectionOptions = Object.assign({}, options, { isForIndexation: true });
+var intersectionRow = Object.assign({}, binding, { subject: binding.sub });
+
+// RIGHT
+Sparql_OWL.getIntersectionSuperClassQuery(sourceLabel, options, true);
+binding.subject = binding.sub;
+```
+
 ### No chained array/string methods
 
 Never chain `.split()`, `.map()`, `.filter()`, `.find()`, `.reduce()`. Each step gets its own named variable so the intermediate state is readable.

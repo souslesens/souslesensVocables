@@ -1296,6 +1296,7 @@ var Sparql_generic = (function () {
                             "    ?subject rdfs:subClassOf ?firstParent .\n" +
                             "  filter (  exists {?firstParent rdf:type owl:Class  } || not exists{?firstParent rdf:type ?t })\n" +
                             " filter (?firstParent!=owl:Class)" +
+                            Sparql_OWL.getNamedClassFilter("subject") +
                             Sparql_common.getLabelClauses("subject", options) +
                             "\n  }";
                     } else {

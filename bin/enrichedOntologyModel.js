@@ -155,7 +155,12 @@ async function getEnrichedOntologyModel(source, userContext) {
         }
         const manchesterAxioms = axiomsBySubject[classIri] || {};
         for (const [manchesterKeyword, expressions] of Object.entries(manchesterAxioms)) {
-            ontologyClass.axioms[axiomFieldByManchesterKeyword[manchesterKeyword]].push(...expressions);
+            const axiomField = axiomFieldByManchesterKeyword[manchesterKeyword];
+            // an IRI that is also an object property carries property keywords too
+            if (!axiomField) {
+                continue;
+            }
+            ontologyClass.axioms[axiomField].push(...expressions);
         }
     }
 

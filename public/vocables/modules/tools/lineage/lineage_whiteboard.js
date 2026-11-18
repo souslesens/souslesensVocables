@@ -3536,6 +3536,7 @@ restrictionSource = Config.predicatesSource;
         if (node && ((!node.from && node.data && node.data.type == "http://www.w3.org/2002/07/owl#ObjectProperty") || node.data.type == "DatatypeProperty")) {
             html =
                 '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showNodeInfos();"> Node infos</span>' +
+                ' <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showAxioms();"> Axioms</span>' +
                 '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from whiteboard</span>';
             $("#popupMenuWidgetDiv").html(html);
             return;
@@ -3555,12 +3556,14 @@ restrictionSource = Config.predicatesSource;
         } else if (node.from && node.data.bNodeId) {
             html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showPropertyInfos();"> restriction Infos</span>';
             html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showRestrictionPropertyNodeInfos();"> property Infos</span>';
+            html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showPropertyAxioms();"> property Axioms</span>';
             if (Lineage_sources.isSourceEditableForUser(node.data.source)) {
                 //   if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[node.data.source] && Config.sources[node.data.source].editable) {
                 html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.deleteRestriction();"> Delete relation</span>';
             }
         } else if (node.from && node.data.type == "ObjectProperty") {
             html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showPropertyInfos();"> Property Infos</span>';
+            html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showPropertyAxioms();"> Property Axioms</span>';
             if (Lineage_sources.isSourceEditableForUser(node.data.source)) {
                 html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.deleteObjectProperty();"> Delete relation</span>';
             }
@@ -4305,6 +4308,17 @@ self.zoomGraphOnNode(node.data[0].id, false);
 
                 NodeInfosAxioms.init(self.currentGraphNode.data.source, self.currentGraphNode, "smallDialogDiv");
             }
+        },
+
+        showPropertyAxioms: function () {
+            var edgeData = self.currentGraphEdge.data;
+            // restriction edges name the property propertyId, relation edges prop
+            var propertyId = edgeData.propertyId || edgeData.prop;
+            var propertyLabel = edgeData.propertyLabel || edgeData.propLabel || Sparql_common.getLabelFromURI(propertyId);
+            var source = edgeData.source || Lineage_sources.activeSource;
+            var propertyResource = { data: { id: propertyId, label: propertyLabel, source: source } };
+            UI.setDialogTitle("#smallDialogDiv", "Axioms of resource " + propertyLabel);
+            NodeInfosAxioms.init(source, propertyResource, "smallDialogDiv");
         },
 
         /**

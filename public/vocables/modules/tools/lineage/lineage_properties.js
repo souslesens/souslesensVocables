@@ -7,6 +7,7 @@ import GraphDisplayLegend from "../../graph/graphDisplayLegend.js";
 import Lineage_decoration from "./lineage_decoration.js";
 import Lineage_sources from "./lineage_sources.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
+import NodeInfosAxioms from "../axioms/nodeInfosAxioms.js";
 
 /* The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -85,6 +86,13 @@ var Lineage_properties = (function () {
                     NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv", { resetVisited: 1 }, function (_err, _result) {
                         // pass
                     });
+                },
+            },
+            axioms: {
+                label: "Node axioms",
+                action: function (_e) {
+                    UI.setDialogTitle("#smallDialogDiv", "Axioms of resource " + self.currentTreeNode.data.label);
+                    NodeInfosAxioms.init(self.currentTreeNode.data.source, self.currentTreeNode, "smallDialogDiv");
                 },
             },
         };

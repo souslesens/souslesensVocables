@@ -1399,8 +1399,9 @@ var Sparql_common = (function () {
     };
 
     /**
-     * Binds `?<subject>Label` to the first value among the label predicates, leaves out a subject
-     * with none of them, and binds `?skosLabel` and the extra predicates values to feed `skoslabels`.
+     * Binds `?<subject>Label` to the first value among the label predicates, and binds `?skosLabel`
+     * and the extra predicates values to feed `skoslabels`. A subject with none of the label
+     * predicates stays unbound: the caller names it with {@link getLabelFromURI}, as a last resort.
      * @function
      * @name getLabelClauses
      * @memberof module:Sparql_common
@@ -1419,7 +1420,7 @@ var Sparql_common = (function () {
         var skosLabelClause = "\n    OPTIONAL { ?" + subjectVariableName + " " + skosLabelPath + " ?" + skosLabelVariableName + ". }";
         var indexedPredicates = self.getIndexedPredicatesClauses(subjectVariableName, options);
 
-        var labelClauses = chainClauses + skosLabelClause + indexedPredicates.optionalClauses + "\n    FILTER(BOUND(?" + subjectLabelVariableName + "))";
+        var labelClauses = chainClauses + skosLabelClause + indexedPredicates.optionalClauses;
         return labelClauses;
     };
 

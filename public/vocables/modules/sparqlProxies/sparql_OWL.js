@@ -63,7 +63,7 @@ var Sparql_OWL = (function () {
         if (isForIndexation) {
             prefixes += " PREFIX skos: <http://www.w3.org/2004/02/skos/core#>";
             selectedVariables = "*";
-            subLabelClauses = Sparql_common.getLabelClauses("sub", options);
+            subLabelClauses = self.getNamedClassFilter("sub") + Sparql_common.getLabelClauses("sub", options);
         }
         var query =
             prefixes +
@@ -3067,6 +3067,7 @@ var Sparql_OWL = (function () {
             fromStr +
             "WHERE {\n" +
             "    ?subject rdf:type owl:Class .\n" +
+            self.getNamedClassFilter("subject") +
             filter +
             Sparql_common.getLabelClauses("subject", options) +
             "\n}";
@@ -3127,7 +3128,8 @@ var Sparql_OWL = (function () {
 
                     allData.forEach(function (item) {
                         var subjectUri = item.subject.value;
-                        var conceptLabel = item.subjectLabel.value;
+                        var conceptLabel = item.subjectLabel ? item.subjectLabel.value : Sparql_common.getLabelFromURI(subjectUri);
+                        var labelLang = item.subjectLabel ? item.subjectLabel["xml:lang"] || null : null;
                         var decapitalizedLabel = common.decapitalizeLabel(conceptLabel);
                         if (decapitalizedLabel != conceptLabel) {
                             if (skosLabelsMap[subjectUri].indexOf(conceptLabel) < 0) {
@@ -3142,14 +3144,13 @@ var Sparql_OWL = (function () {
                             allClassesMap[subjectUri] = {
                                 id: subjectUri,
                                 label: conceptLabel,
-                                lang: item.subjectLabel["xml:lang"] || null,
+                                lang: labelLang,
                                 skoslabels: skosLabelsMap[subjectUri],
                                 parents: [sourceLabel, owlThingUri],
                                 type: "owl:Class",
                             };
                         } else {
-                            var newLang = item.subjectLabel["xml:lang"] || null;
-                            if (newLang === "en" && allClassesMap[subjectUri].lang !== "en") {
+                            if (labelLang === "en" && allClassesMap[subjectUri].lang !== "en") {
                                 allClassesMap[subjectUri].label = conceptLabel;
                                 allClassesMap[subjectUri].lang = "en";
                             }

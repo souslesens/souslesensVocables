@@ -26,15 +26,14 @@ visualized and interactively manipulated.
 
 The Lineage UI is composed of three main elements:
 
--   **A left panel with 5 tabs**: Whiteboard, Classes, Properties,SPARQL
-    and Containers
--   **A left panel with 5 tabs**: Whiteboard, Classes, Properties,SPARQL
+-   **A left panel with 5 tabs**: Whiteboard, Classes, Properties, SPARQL
     and Containers
 
--   **A whiteboard** to show and manipulate graphs.
--   **A whiteboard** to show and manipulate graphs.
+-   **A whiteboard** to show and manipulate graphs. A **Legend** button at
+    its top right opens the legend of the colors and shapes of the
+    graph.
 
-- **A right Pannel with** buttons related to the whiteboard, providing basic
+-   **A right panel with** buttons related to the whiteboard, providing basic
   actions common to multiple tools
 
 The top panel is shared across all tools, but its content varies
@@ -107,8 +106,8 @@ the source, or if the source is editable for you:
 h.  **Add resource :** (Lineage only) Adds a new resource. Covered in a
     dedicated tutorial section
 
-i.  **Add Relation** : (Lineage only) Adds a new resource. Covered in a
-    dedicated tutorial section
+i.  **Add Relation** : (Lineage only) Adds a new relation between two
+    resources. Covered in a dedicated tutorial section
 
 j.  **Change Theme** : Changes the color theme of SousLeSens.
     Administrators can lock a specific theme, in which case this button
@@ -134,7 +133,7 @@ o.  **GitHub link :** Opens the SousLeSens GitHub repository for
 
 Source section:
 
-1.  **Draw restrictions button** – Draws the main classes and their
+1.  **Relations button**: Draws the main classes and their
     associated restrictions on the whiteboard *if* the whiteboard is
     empty.  
     If the whiteboard already contains nodes, it will draw the
@@ -181,22 +180,26 @@ Displays on the whiteboard all nodes related to an axiom, grouped by
 axiom category (e.g., **subClassOf{0,5}*, **EquivalentClasses**, or
 **DisjointClasses**).
 
+6.  **Browse button (?)**: Opens the Browse dialog, to query the
+    content of the whiteboard.
+
 **Whiteboard section**
 
-6.  **Whiteboard search bar :** Searches for a node that is present on
+7.  **Whiteboard search bar :** Searches for a node that is present on
     the whiteboard.
 
-7.  **Clear all button** – Clears the whiteboard
-
-8.  **Clear last button** – Clears all nodes on the whiteboard, except
-    for those added by the most recent action.
+8.  **Clear last button**: Removes the nodes and edges added by the
+    most recent action from the whiteboard.
 
 9.  **Only last button** – Clears all nodes on the whiteboard, except
     for those added by the most recent action.
 
-10.  **Selection button :** Displays a menu with a tree of all classes on
-    the whiteboard. This menu primarily handles node decoration and icon
-    management.
+To clear the whole whiteboard, use the **Clear all** button of the right
+panel (see below).
+
+10.  **Decorate button :** Opens the **Selection** window, which lists the
+    nodes of the whiteboard and the actions available on them (decorate,
+    export, filter). See [Selection](#selection).
 
 ![](images/media/lineage/image8.png)
 
@@ -211,8 +214,6 @@ axiom category (e.g., **subClassOf{0,5}*, **EquivalentClasses**, or
  *Extra features are revealed when the "More Actions" button is
  clicked*
 
- • **Implicit Model**: Draws the current source's implicit model on the
- whiteboard, which represents the knowledge graph facts.  
  • **Similars**: Displays a menu to show nodes on the whiteboard that
  have similar labels to the currently displayed nodes.  
  • **Paths**: Retrieves the shortest path between two nodes in the
@@ -225,7 +226,9 @@ axiom category (e.g., **subClassOf{0,5}*, **EquivalentClasses**, or
  results on the whiteboard.
 
 13.  **Query legend**: Explains the color codes used on the graph. Colors
-    are selected based on the top-level ontology.
+    are selected based on the top-level ontology. Once nodes are drawn,
+    the legend is shown by the **Legend** button at the top right of the
+    whiteboard.
 
 ### Left panel: Classes Tab
 
@@ -279,7 +282,10 @@ axiom category (e.g., **subClassOf{0,5}*, **EquivalentClasses**, or
 30. **Actions panel: Ranges and Domains -** Displays all ranges and
     domains for a source. See Ranges and Domains tutorial section
 
-31. **Search results panel**
+31. **Actions panel: DataType Properties -** Draws the datatype
+    properties of the source on the whiteboard.
+
+32. **Search results panel**
 
 ### Left panel : SPARQL
 
@@ -289,61 +295,120 @@ See SPARQL tutorial section
 
 ![](images/media/lineage/image12.png)
 
-32.  **Container search bar –** Search for rdfs:Container
+The containers of the source are shown in a tree. Its root node is
+**rootContainer**: the containers of the top level hang under it.
 
-33.  **Parent containers button :** Displays all parent containers on the
+33.  **Container search bar :** Search for rdfs:Container. The tree shows
+    the top containers that match the term.
+
+34.  **Parent containers button :** Displays all parent containers on the
     whiteboard
 
-34.  **Create container button**
+35.  **Create container button**
 
-35.  **Export containers button**
+36.  **Export containers button**
 
-36.  **Search results panel**
+37.  **Unlock checkbox :** When checked, containers and the resources they
+    hold can be moved in the tree by drag and drop. Nothing can be
+    dropped on the root node itself, and only a container can be dropped
+    directly under it.
+
+38.  **Containers tree :** The containers and their members. To add nodes
+    of the whiteboard to a container, select them on the whiteboard, then
+    right-click the container and choose **Add selected node to
+    container**: every selected node is added.
 
 ### Right Panel : whiteboard buttons
 
 ![](images/media/lineage/image13.png)
 
-37.  **Clear all button :** Clears the whiteboard
+39.  **Clear all button :** Clears the whiteboard
 
-38.  **Display :** Opens a menu to modify the graph display parameters,
+40.  **Display :** Opens a menu to modify the graph display parameters,
     such as spatialization algorithms, node distance, etc.
 
-39.  **Save whiteboard** : Saves the current whiteboard for later reuse.
+41.  **Save whiteboard** : Saves the current whiteboard for later reuse.
 
-40.  **Load saved graph** : Load a previously saved whiteboard.
+42.  **Load saved graph** : Load a previously saved whiteboard.
 
-41.  **Export whiteboard** : Exports the current whiteboard in various
+43.  **Export whiteboard** : Exports the current whiteboard in various
     formats (GraphML, SVG, CSV, PlantUML, JSON).
 
-42.  Import whiteboard : Imports and displays a whiteboard from a JSON
+44.  Import whiteboard : Imports and displays a whiteboard from a JSON
     file provided by the SousLeSens JSON export (supports JSON following
     vis.js network format:
     <https://visjs.github.io/vis-network/docs/network/>).
 
+### Selection
+
+Many actions of the Whiteboard tab work on the nodes that you select on the whiteboard.
+
+**Select nodes**
+
+- **Click** a node to select it. A selected node is shown in bold.
+- **Shift + click** another node to add it to the selection. A **Shift + click** on a selected node removes it from the selection.
+- **Shift + drag** a zone of the whiteboard to select all the nodes inside it.
+- **Ctrl + Alt + click** a node adds it to the selection. Moving the mouse over nodes while holding **Ctrl + Alt** adds each of them, holding **Ctrl + Shift** removes them.
+- A click on an empty part of the whiteboard clears the selection.
+
+![](images/media/selection/selection-1-nodes.png)
+
+**Apply to the selected nodes.** As soon as nodes are selected, a checkbox appears under the buttons of the source, in the Whiteboard tab. Its label tells what the buttons will work on: **Apply to 3 selected nodes** when it is checked, **Apply to all whiteboard** when it is not. Without any selection, the buttons work on all the nodes of the whiteboard.
+
+These actions work on the selection:
+
+- the **Relations**, **Children**, **Parents** and **Axioms** buttons of the Whiteboard tab (the **Draw axioms** choice of the **A** button),
+- **Remove from whiteboard** and **Remove others** of the right-click menu of a node. If several nodes are selected, they act on all of them: **Remove from whiteboard** removes the selected nodes, **Remove others** keeps only the selected nodes,
+- **Add selected node to container** of the Containers tab.
+
+The selection is cleared when an action ends: **Relations**, **Children**, **Parents**, **Axioms**, **Remove from whiteboard** and **Remove others** all clear it. It is also cleared when a new graph is drawn or when you change the source. **Ungroup** of a source removes the group node from the selection.
+
+**Selection window.** The **Decorate** button of the Whiteboard section opens the **Selection** window. It lists the nodes of the whiteboard, grouped by source. **Only the nodes that are selected on the whiteboard are checked**: tick or untick others to change what the actions apply to.
+
+![](images/media/selection/selection-2-dialog.png)
+
+The **Selection Actions** are:
+
+- **Decorate**: changes the **Shape**, the **Size** and the **Color** of the checked nodes, then **Apply**. The change lasts for the session only.
+- **Export CSV**: exports all the nodes of the whiteboard, whatever is checked, to a tab-separated file.
+- **Sparql Filter**: shows a SPARQL filter for the checked nodes, to copy into a query.
+- **Select root nodes**: unchecks everything, then checks the top nodes of the list.
+- **Class Decoration**: gives the checked classes an **icon** (a PNG file, required), with a shape, a size and a color. **Apply** saves the decoration with the source, so it comes back next time. **Delete Decoration** removes it.
+
+Every action except **Select root nodes** needs at least one checked node, otherwise Lineage answers `check nodes to process`.
+
 ### Shortcuts
 
 Right-clicking on a node triggers a menu with several options.
-"NodeInfos" and "Axioms" are detailed in the tutorial below.  
-**Expand and Parents** – These options are equivalent to the
-children/parent buttons but apply only to the current node.  
-**Collapse** – Removes all child nodes of the current node from the
-whiteboard.![](images/media/lineage/image14.png)
+
+![](images/media/selection/selection-3-menu.png)
+
+- **Node infos** and **Axioms** are detailed in the tutorial below. **Draw Axioms** draws the axioms of the node on the whiteboard.
+- **Expand** and **Parents** are equivalent to the Children and Parents buttons, but apply only to the node that you clicked.
+- **Create SubClass** creates a subclass of the node. It only appears if the source is editable by you.
+- **Relations...** opens the relations assistant of the node.
+- **Hide/show others** hides or shows all the other nodes.
+- **Remove from whiteboard** and **Remove others** work on the selection if there is one, see [Selection](#selection).
+- **Horizontal view** and **Vertical view** arrange the whiteboard as a tree, from left to right or from top to bottom.
+- **tree text** shows the graph as a text tree.
+- **List All relations** lists all the relations of the node.
 
 Right-clicking on a search result triggers a popup menu with different
 options, depending on the current tab and the node that is clicked.
 
 ![](images/media/lineage/image15.png)
 
-**Ctrl + Alt + Click on a Whiteboard Node**  
-Draws all relations of the clicked node.
+**Click on a whiteboard node, with a key pressed**
 
-**Shift + Click on a Whiteboard Node**  
-Select a node of the whiteboard. Use it on multiple nodes on whiteboard to select them. 
-Remove from graph and remove others right click actions will performs on all of them. 
-The selection can be performed on a large zone with shift + click dragged on a whiteboard zone. 
+| Keys | Action |
+| --- | --- |
+| **Shift + click** | adds the node to the selection, see [Selection](#selection) |
+| **Ctrl + Alt + click** | adds the node to the selection |
+| **Ctrl + click** | opens the node infos |
+| **Ctrl + Shift + click** | draws all the relations of the node, without the literals |
+| **Alt + Shift + click** | draws all the relations of the node |
 
-**Ctrl + Shift + Click on Search Results Panel**  
+**Ctrl + Shift + Click on Search Results Panel**
 Allows you to select multiple nodes by clicking on them. The right-click
 action will be applied to all selected nodes.
 
@@ -586,11 +651,103 @@ Finally, choose how you would like to receive the output.
 
 ### Axioms and reasoner
 
-In the **IOF-Core** ontology, which contains many axioms, the **Axioms**
-tab displays a graphical representation of the axioms associated with a
-specific class, grouped by axiom type. The **Show Triples** option
-displays the triples corresponding to the displayed axiom.
+#### Axioms
 
-![](images/media/lineage/image41.png)
+An axiom is a logical statement about a class: it is a subclass of another one, it is equivalent to a combination of other classes and restrictions, or it is disjoint from another class. Lineage can draw these axioms as graphs, show them in Manchester syntax, and let you write new ones.
 
-Export buttons are also provided in SVG and GraphML.
+**Axioms button.** The **A** button of the Whiteboard tab opens a menu with three choices:
+
+![](images/media/axioms/axioms-1-menu.png)
+
+- **Logic axiom nodes** draws on the whiteboard one hexagon for each class of the source that has a logic axiom. A class that has an equivalent class axiom has a thicker border. At most 500 classes are drawn.
+- **SQL Database mapped nodes** is not about axioms: it draws the classes that are mapped to a SQL database.
+- **Draw axioms** draws the axioms of the nodes selected on the whiteboard, or of all of them if none is selected, and adds them to the whiteboard.
+
+![](images/media/axioms/axioms-2-logic-nodes.png)
+
+**Axioms of a class.** Right-click a class on the whiteboard and choose **Axioms** to open its axioms in a window (**Draw Axioms** draws them on the whiteboard instead). The same view is in the **Axioms** tab of the node infos window.
+
+![](images/media/axioms/axioms-3-class-axioms.png)
+
+The window shows:
+
+- the **graph of the axioms**. The class itself is the star. The links tell the kind of axiom: `≡` for an equivalent class, a subclass link, a disjoint link,
+- the axiom in **Manchester syntax**, below the graph, with the labels of the classes. It is built from the triples of the axiom, it cannot be typed,
+- the buttons **New axiom** and **show triples**.
+
+How to read the graph:
+
+| Element | Meaning |
+| --- | --- |
+| Blue box | a class |
+| Star | the class whose axioms are shown |
+| Green circle with a symbol | a connective: union, intersection `⊓`, complement, or an enumeration of individuals |
+| Text between guillemets, like `hasTopping «some»` | a restriction on a property: `«some»` (existential), `«only»` (universal), `«value»`, or a cardinality (min, max, exactly) |
+
+Right-click a node of the graph to open its **Node Infos** or its own **Node Axioms**.
+
+**show triples** lists the RDF triples of the axiom as a tree, to see exactly what is stored.
+
+The Manchester text is built from the triples of the axiom, in your browser: no extra server is needed.
+
+**Writing a new axiom.** The **New axiom** button only appears if the source is editable by you.
+
+![](images/media/axioms/axioms-4-new-axiom.png)
+
+1. Choose the kind of axiom in the list at the top left: `subClassOf`, `equivalentClass` or `disjointWith`.
+2. Click an element of the legend (**Class**, **Restriction**, **Connective**), then pick the class, the property or the keyword in the list that appears. For a class or a property, `_Create new Class_` and `_Create new ObjectProperty_` create a new one. Restrictions offer `some`, `only`, `value`, `max`, `min` and `cardinality`. Connectives offer `UnionOf`, `IntersectionOf`, `ComplementOf` and `Enumeration`.
+3. Click a node of the graph to extend the axiom from it. Right-click a node to remove it.
+4. Click **save**. If new classes have no superclass, Lineage warns that they will be created as `owl:Class` under `owl:Thing`. The axiom is written in the graph of the source.
+
+The other buttons of the editor are **clear** (starts again), **copy triples** (copies the triples to the clipboard) and **delete triples**. **delete triples** removes from the source the triples that you ticked in the **show triples** tree, with no confirmation.
+
+To keep a picture of an axiom or of the whiteboard, use the **Export whiteboard** button of the right panel (GraphML, SVG, CSV, PlantUML, JSON).
+
+#### Reasoner
+
+The reasoner checks a source and infers new facts from it. It works on the graph of the source and on its imports, with rules written in SPARQL, and it **never changes the source**: nothing it finds is written back.
+
+Open it with **More Actions**, then **Reasoner** in the Whiteboard tab. Choose an **Operation type**:
+
+![](images/media/axioms/reasoner-1-dialog.png)
+
+**Consistency** checks that the data does not contradict itself. The result is a report: its `status` (for example `no-violations-detected`), then one entry per check, with `violationDetected` and, if there is a problem, examples. The checks are:
+
+- the same and the different individuals (`same-and-different`),
+- disjoint classes (`disjoint-classes`) and complement classes (`complement-classes`),
+- membership of `owl:Nothing` (`nothing-membership`),
+- negative assertions (`negative-assertion`),
+- irreflexive, asymmetric, disjoint, functional and inverse functional properties (`irreflexive-property`, `asymmetric-property`, `disjoint-properties`, `functional-object-property`, `inverse-functional-property`).
+
+![](images/media/axioms/reasoner-2-consistency.png)
+
+**Unsatisfiable** looks for properties that cannot have any value, for example a property declared both symmetric and asymmetric (`symmetric-and-asymmetric`), or whose domain or range is `owl:Nothing` or made of disjoint classes (`nothing-domain`, `disjoint-domains`, `nothing-object-range`, `disjoint-object-ranges`, `bottom-superproperty`, `disjoint-superproperties`). It does not check classes.
+
+**Inference** lists the inference rules, to tick:
+
+![](images/media/axioms/reasoner-3-inference-rules.png)
+
+| Rule | What it infers |
+| --- | --- |
+| `subclass-membership` | an individual of a class is also of its superclasses |
+| `subproperty-assertion` | a statement with a property also holds for its superproperties |
+| `inverse-property`, `symmetric-property`, `transitive-property` | the statements that follow from an inverse, symmetric or transitive property |
+| `property-domain`, `object-property-range` | the class of a subject or of an object, from the domain or the range of the property |
+| `same-as-closure`, `same-as-subject`, `same-as-object` | what follows from `owl:sameAs` |
+| `functional-object-equality`, `inverse-functional-equality` | individuals found identical by a functional or inverse functional property |
+| `has-value-restriction`, `all-values-from-restriction` | what follows from restrictions on a class |
+
+Tick the rules to apply and click **Execute**. The individuals for which something was inferred are listed in a tree.
+
+![](images/media/axioms/reasoner-4-inference-result.png)
+
+Tick the ones to show, choose the **Output**, then click **Display**:
+
+- **Graph** draws them on the whiteboard, with square nodes and red edges for what was inferred. Choose a **Color** for them first if you want.
+- **Table** shows the result as text.
+
+![](images/media/axioms/reasoner-5-inference-graph.png)
+
+The **Export** output is not available yet.
+
+**Limits.** Each rule stops after 60 seconds. A rule that fails is listed, and the status of the report tells that it is incomplete. A source that does not exist, or that you cannot read, is refused.

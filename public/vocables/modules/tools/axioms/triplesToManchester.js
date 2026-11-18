@@ -11,6 +11,26 @@ var TriplesToManchester = (function () {
     AXIOM_KEYWORDS[OWL + "disjointWith"] = "DisjointWith:";
     AXIOM_KEYWORDS[OWL + "disjointUnionOf"] = "DisjointUnionOf:";
 
+    self.objectPropertyAxiomKeywords = {};
+    self.objectPropertyAxiomKeywords[RDFS + "subPropertyOf"] = "SubPropertyOf:";
+    self.objectPropertyAxiomKeywords[OWL + "equivalentProperty"] = "EquivalentTo:";
+    self.objectPropertyAxiomKeywords[OWL + "propertyDisjointWith"] = "DisjointWith:";
+    self.objectPropertyAxiomKeywords[OWL + "inverseOf"] = "InverseOf:";
+    self.objectPropertyAxiomKeywords[OWL + "propertyChainAxiom"] = "SubPropertyChain:";
+    self.objectPropertyAxiomKeywords[RDFS + "domain"] = "Domain:";
+    self.objectPropertyAxiomKeywords[RDFS + "range"] = "Range:";
+    // a characteristic is a rdf:type triple, told apart from a typing by its object
+    self.objectPropertyAxiomKeywords[RDF + "type"] = "Characteristics:";
+
+    self.objectPropertyCharacteristicLabels = {};
+    self.objectPropertyCharacteristicLabels[OWL + "FunctionalProperty"] = "Functional";
+    self.objectPropertyCharacteristicLabels[OWL + "InverseFunctionalProperty"] = "InverseFunctional";
+    self.objectPropertyCharacteristicLabels[OWL + "TransitiveProperty"] = "Transitive";
+    self.objectPropertyCharacteristicLabels[OWL + "SymmetricProperty"] = "Symmetric";
+    self.objectPropertyCharacteristicLabels[OWL + "AsymmetricProperty"] = "Asymmetric";
+    self.objectPropertyCharacteristicLabels[OWL + "ReflexiveProperty"] = "Reflexive";
+    self.objectPropertyCharacteristicLabels[OWL + "IrreflexiveProperty"] = "Irreflexive";
+
     var RESTRICTION_KEYWORDS = {};
     RESTRICTION_KEYWORDS[OWL + "someValuesFrom"] = "some";
     RESTRICTION_KEYWORDS[OWL + "allValuesFrom"] = "only";
@@ -35,16 +55,33 @@ var TriplesToManchester = (function () {
         }
 
         var bySubject = {};
+        self._objectPropertySubjects = {};
         rootAxioms.forEach(function (axiom) {
             if (!bySubject[axiom.uri]) {
                 bySubject[axiom.uri] = {};
             }
-            var keyword = AXIOM_KEYWORDS[axiom.axiomPredicate] || "SubClassOf:";
+            var objectPropertyKeyword = self.objectPropertyAxiomKeywords[axiom.axiomPredicate];
+            if (objectPropertyKeyword) {
+                self._objectPropertySubjects[axiom.uri] = true;
+            }
+            var keyword = objectPropertyKeyword || AXIOM_KEYWORDS[axiom.axiomPredicate] || "SubClassOf:";
             if (!bySubject[axiom.uri][keyword]) {
                 bySubject[axiom.uri][keyword] = [];
             }
-            var expression = self._resolveNode(axiom.targetNode, subjectIndex, new Set());
-            bySubject[axiom.uri][keyword].push(self._renderExpression(expression));
+            var renderedAxiom = null;
+            if (keyword == "Characteristics:") {
+                renderedAxiom = self.objectPropertyCharacteristicLabels[axiom.targetNode];
+            } else if (keyword == "SubPropertyChain:") {
+                var chainProperties = self._resolveList(axiom.targetNode, subjectIndex, new Set());
+                var renderedChainProperties = chainProperties.map(function (chainProperty) {
+                    return self._renderExpression(chainProperty);
+                });
+                renderedAxiom = renderedChainProperties.join(" o ");
+            } else {
+                var expression = self._resolveNode(axiom.targetNode, subjectIndex, new Set());
+                renderedAxiom = self._renderExpression(expression);
+            }
+            bySubject[axiom.uri][keyword].push(renderedAxiom);
         });
         return bySubject;
     };
@@ -58,8 +95,9 @@ var TriplesToManchester = (function () {
         var labelsMap = self._labelsMap;
         var lines = [];
         for (var uri in bySubject) {
-            var classLabel = labelsMap[uri] || "<" + uri + ">";
-            lines.push("Class: " + classLabel);
+            var subjectLabel = labelsMap[uri] || "<" + uri + ">";
+            var frameKeyword = self._objectPropertySubjects[uri] ? "ObjectProperty: " : "Class: ";
+            lines.push(frameKeyword + subjectLabel);
             var sections = bySubject[uri];
             for (var keyword in sections) {
                 lines.push("    " + keyword);
@@ -102,7 +140,8 @@ var TriplesToManchester = (function () {
     };
 
     self._findAllRootAxioms = function (subjectIndex) {
-        var axiomPredicates = Object.keys(AXIOM_KEYWORDS);
+        var classAxiomPredicates = Object.keys(AXIOM_KEYWORDS);
+        var objectPropertyAxiomPredicates = Object.keys(self.objectPropertyAxiomKeywords);
         var results = [];
 
         for (var [subjectId, predicates] of subjectIndex) {
@@ -110,7 +149,12 @@ var TriplesToManchester = (function () {
                 continue;
             }
             for (var i = 0; i < predicates.length; i++) {
-                if (axiomPredicates.indexOf(predicates[i].predicate) > -1) {
+                var predicateEntry = predicates[i];
+                var isTyping = predicateEntry.predicate === RDF + "type" && !self.objectPropertyCharacteristicLabels[predicateEntry.object];
+                // an anonymous inverse inside a restriction has a blank subject, under several spellings
+                var isNamedObjectPropertyAxiom = objectPropertyAxiomPredicates.indexOf(predicateEntry.predicate) > -1 && subjectId.indexOf("http") === 0;
+                var isAxiomPredicate = classAxiomPredicates.indexOf(predicateEntry.predicate) > -1 || isNamedObjectPropertyAxiom;
+                if (isAxiomPredicate && !isTyping) {
                     results.push({
                         uri: subjectId,
                         axiomPredicate: predicates[i].predicate,
@@ -178,7 +222,8 @@ var TriplesToManchester = (function () {
         var inverseOf = predicates.find(function (p) {
             return p.predicate === OWL + "inverseOf";
         });
-        if (inverseOf) {
+        // a named property with its own inverseOf axiom is not an inverse expression
+        if (inverseOf && nodeId.indexOf("http") !== 0) {
             return { type: "inverseOf", operand: { type: "namedClass", uri: inverseOf.object } };
         }
 

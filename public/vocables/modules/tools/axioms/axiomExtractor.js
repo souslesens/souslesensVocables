@@ -1,11 +1,22 @@
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import sparql_common from "../../sparqlProxies/sparql_common.js";
+import TriplesToManchester from "./triplesToManchester.js";
 
 var AxiomExtractor = (function () {
     var self = {};
     self.basicAxioms = {};
     self.prefixes = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" + " PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + "  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
+
+    // a named object of these predicates is a property, not a class
+    self.objectPropertyAxiomPredicates = [
+        "http://www.w3.org/2000/01/rdf-schema#subPropertyOf",
+        "http://www.w3.org/2002/07/owl#equivalentProperty",
+        "http://www.w3.org/2002/07/owl#propertyDisjointWith",
+        "http://www.w3.org/2002/07/owl#inverseOf",
+        "http://www.w3.org/2002/07/owl#propertyChainAxiom",
+    ];
+    self.domainAndRangePredicates = ["http://www.w3.org/2000/01/rdf-schema#domain", "http://www.w3.org/2000/01/rdf-schema#range"];
 
     self.getFromStr = function (source) {
         return Sparql_common.getFromStr(source);
@@ -96,6 +107,42 @@ var AxiomExtractor = (function () {
         },
         function getInverses(source, callback) {
             var query = self.prefixes + "SELECT distinct *  " + self.getFromStr(source) + "\n" + "WHERE { ?s  owl:inverseOf  ?o bind( owl:inverseOf as ?p)} ";
+            self.execQuery(query, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, result);
+            });
+        },
+
+        function getObjectPropertyAxioms(source, callback) {
+            var query =
+                self.prefixes +
+                "SELECT distinct *  " +
+                self.getFromStr(source) +
+                "\n" +
+                "WHERE { ?s ?p ?o  VALUES ?p { owl:equivalentProperty owl:propertyDisjointWith owl:propertyChainAxiom rdfs:domain rdfs:range } ?s rdf:type owl:ObjectProperty }";
+            self.execQuery(query, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, result);
+            });
+        },
+        function getObjectPropertyCharacteristics(source, callback) {
+            var characteristicUris = Object.keys(TriplesToManchester.objectPropertyCharacteristicLabels);
+            var characteristicIris = characteristicUris.map(function (characteristicUri) {
+                return "<" + characteristicUri + ">";
+            });
+            var characteristicsValues = characteristicIris.join(" ");
+            var query =
+                self.prefixes +
+                "SELECT distinct *  " +
+                self.getFromStr(source) +
+                "\n" +
+                "WHERE { ?s rdf:type ?o  VALUES ?o { " +
+                characteristicsValues +
+                " } ?s rdf:type owl:ObjectProperty bind( rdf:type as ?p) }";
             self.execQuery(query, function (err, result) {
                 if (err) {
                     return callback(err);
@@ -321,8 +368,12 @@ var AxiomExtractor = (function () {
 
             var triples = [];
             var distinctNodes = {};
+            var rdfTypeUri = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+            var owlClassUri = "http://www.w3.org/2002/07/owl#Class";
+            var owlObjectPropertyUri = "http://www.w3.org/2002/07/owl#ObjectProperty";
 
-            function recurse(subject, level) {
+            // a list cell gives no hint of its members' type, it is inherited from the axiom holding the list
+            function recurse(subject, level, namedNodeType) {
                 var children = sourceBasicAxioms[subject];
 
                 if (!children || !Array.isArray(children)) {
@@ -376,11 +427,11 @@ var AxiomExtractor = (function () {
                             });
                             // an anonymous property, inverse of a named one
                             if (child.p.indexOf("http") < 0) {
-                                recurse(child.p, level + 1);
+                                recurse(child.p, level + 1, owlClassUri);
                             }
                         }
                         if (!distinctNodes[child.o] && child.o.indexOf("http") < 0) {
-                            recurse(child.o, level + 1);
+                            recurse(child.o, level + 1, owlClassUri);
                         }
                     } else {
                         triples.push({
@@ -388,6 +439,14 @@ var AxiomExtractor = (function () {
                             predicate: child.p,
                             object: child.o,
                         });
+                        // a characteristic: its object is a vocabulary class, not a node of the axiom
+                        if (child.p == rdfTypeUri) {
+                            return;
+                        }
+                        var childNamedNodeType = self.objectPropertyAxiomPredicates.indexOf(child.p) > -1 ? owlObjectPropertyUri : namedNodeType;
+                        // a domain or a range ties a property to a class expression
+                        var isDomainOrRange = self.domainAndRangePredicates.indexOf(child.p) > -1;
+                        var subjectNamedNodeType = isDomainOrRange ? owlObjectPropertyUri : childNamedNodeType;
 
                         // Axiom properties are assumed to be owl:ObjectProperty since axioms
                         // typically operate on object properties. Standard vocabulary properties
@@ -412,20 +471,20 @@ var AxiomExtractor = (function () {
                                 //on recurse pas les classes de l'ontologie
                             } else {
                                 // on ne recurse que les blanknodes
-                                recurse(child.o, level + 1);
+                                recurse(child.o, level + 1, childNamedNodeType);
                             }
                             if (child.o.indexOf("http") == 0) {
                                 triples.push({
                                     subject: child.o,
-                                    predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                                    object: "http://www.w3.org/2002/07/owl#Class",
+                                    predicate: rdfTypeUri,
+                                    object: childNamedNodeType,
                                 });
                             }
                             if (child.s.indexOf("http") == 0) {
                                 triples.push({
                                     subject: child.s,
-                                    predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                                    object: "http://www.w3.org/2002/07/owl#Class",
+                                    predicate: rdfTypeUri,
+                                    object: subjectNamedNodeType,
                                 });
                             }
                         }
@@ -433,7 +492,7 @@ var AxiomExtractor = (function () {
                 });
             }
 
-            recurse(classUri);
+            recurse(classUri, 0, owlClassUri);
             callback(null, triples);
         });
     };

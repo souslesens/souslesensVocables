@@ -1,5 +1,6 @@
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import Axiom_activeLegend from "./axiom_activeLegend.js";
+import TriplesToManchester from "./triplesToManchester.js";
 
 var Axioms_graph = (function () {
     var self = {};
@@ -56,6 +57,12 @@ var Axioms_graph = (function () {
 
         if (!label && node.id.startsWith("http")) {
             label = Sparql_common.getLabelFromURI(node.id);
+        }
+        if (node.characteristics) {
+            var characteristicTags = node.characteristics.map(function (characteristic) {
+                return "«" + characteristic + "»";
+            });
+            label += "\n" + characteristicTags.join(" ");
         }
 
         var visjsNode = {
@@ -138,7 +145,13 @@ var Axioms_graph = (function () {
                                 }
                             }
                         }
-                        if (p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" && !nodesMap[s].type) {
+                        var characteristicLabel = isTypePredicate ? TriplesToManchester.objectPropertyCharacteristicLabels[o] : null;
+                        if (characteristicLabel) {
+                            if (!nodesMap[s].characteristics) {
+                                nodesMap[s].characteristics = [];
+                            }
+                            nodesMap[s].characteristics.push(characteristicLabel);
+                        } else if (isTypePredicate && !nodesMap[s].type) {
                             nodesMap[s].type = o;
                         } else if (p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" && o == "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil") {
                             return;
@@ -165,9 +178,13 @@ var Axioms_graph = (function () {
                         } else if (p == "http://www.w3.org/2002/07/owl#complementOf") {
                             nodesMap[s].type = "complementOf";
                             nodesMap[s].symbol = "┓";
-                        } else if (p == "http://www.w3.org/2002/07/owl#inverseOf") {
+                        } else if (p == "http://www.w3.org/2002/07/owl#inverseOf" && s.indexOf("http") != 0) {
+                            // an anonymous inverse, merged with its property; a named one stays an edge
                             nodesMap[s].type = "inverseOf";
                             nodesMap[s].symbol = "^";
+                        } else if (p == "http://www.w3.org/2002/07/owl#propertyChainAxiom") {
+                            nodesMap[o].type = "propertyChain";
+                            nodesMap[o].symbol = "∘";
                         } else if (p == "http://www.w3.org/2002/07/owl#members") {
                             nodesMap[s].type = "AllDisjointClasses";
                             nodesMap[s].symbol = "⊑ ┓";
@@ -251,8 +268,10 @@ var Axioms_graph = (function () {
                         // children
                         var skipNode = false;
 
-                        if (node.predicates) {
-                            node.predicates.forEach(function (predicate) {
+                        // a property with characteristics only has no predicate but is still drawn
+                        if (node.predicates || node.characteristics) {
+                            var nodePredicates = node.predicates || [];
+                            nodePredicates.forEach(function (predicate) {
                                 var childNode = nodesMap[predicate.o];
                                 if (!childNode) {
                                     return;
@@ -269,21 +288,29 @@ var Axioms_graph = (function () {
                                     skipNode = true;
                                 }
                                 var edgeLabel = null;
+                                // a node already drawn by another axiom still gets the label of this edge
+                                if (rootNodeId == node.id) {
+                                    var edgeid = options.axiomType || predicate.pLabel || Sparql_common.getLabelFromURI(predicate.p);
+                                    edgeid = edgeid.toLowerCase();
+                                    if (edgeid.indexOf("subclassof") > -1 || edgeid.indexOf("subpropertyof") > -1) {
+                                        edgeLabel = "⊑";
+                                    } else if (edgeid.indexOf("propertychain") > -1) {
+                                        // the chain is the sub property
+                                        edgeLabel = "⊒";
+                                    } else if (edgeid.indexOf("inverseof") > -1) {
+                                        edgeLabel = "^";
+                                    } else if (edgeid == "domain" || edgeid == "range") {
+                                        edgeLabel = edgeid;
+                                    } else if (edgeid.indexOf("equivalent") > -1) {
+                                        edgeLabel = "≡";
+                                    } else if (edgeid.indexOf("disjoint") > -1) {
+                                        edgeLabel = "⊑ ┓";
+                                    }
+                                }
                                 if (!existingNodes[childNode.id]) {
                                     existingNodes[childNode.id] = 1;
 
                                     var visjsNode = self.getVisjsNode(childNode, level + 1);
-                                    if (rootNodeId == node.id) {
-                                        var edgeid = options.axiomType || predicate.pLabel || Sparql_common.getLabelFromURI(predicate.p);
-                                        edgeid = edgeid.toLowerCase();
-                                        if (edgeid.indexOf("subclassof") > -1) {
-                                            edgeLabel = "⊑";
-                                        } else if (edgeid.indexOf("equivalent") > -1) {
-                                            edgeLabel = "≡";
-                                        } else if (edgeid.indexOf("disjoint") > -1) {
-                                            edgeLabel = "⊑ ┓";
-                                        }
-                                    }
                                     visjsNode.data.axiomId = childNode.axiomId;
 
                                     visjsData.nodes.push(visjsNode);

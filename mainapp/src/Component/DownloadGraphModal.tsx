@@ -14,6 +14,7 @@ import {
     FormControl,
     FormControlLabel,
     InputLabel,
+    Link,
     MenuItem,
     Select,
 } from "@mui/material";
@@ -272,7 +273,18 @@ export function DownloadGraphModal({ apiUrl, onClose, open, sourceName }: Downlo
                             <FormControlLabel
                                 id={`include-imports-switch-${sourceName}`}
                                 control={<Checkbox checked={includeImports} disabled={transferPercent > 0} onChange={toggleAddImports} />}
-                                label="Add imports in this download"
+                                label={
+                                    <>
+                                        Add imports in this download
+                                        <Typography color="text.secondary" display="block" variant="body2">
+                                            Check this box to open the downloaded graph in{" "}
+                                            <Link href="https://protege.stanford.edu/" rel="noopener noreferrer" target="_blank">
+                                                Protégé
+                                            </Link>
+                                            .
+                                        </Typography>
+                                    </>
+                                }
                             />
                         </FormControl>
                     </Stack>

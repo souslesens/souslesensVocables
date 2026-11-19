@@ -17,6 +17,7 @@ const maxExitReasonLength = 500;
 // the callers name OpenRouter ids, unknown to the CLI: the ones listed run on their Codex equivalent, the others on defaultModel
 const cliModelByOpenRouterId = {
     "openai/gpt-6.1-sol": "gpt-6.1-sol",
+    "openai/gpt-6.1-terra": "gpt-6.1-terra",
     "openai/gpt-5.6-luna": "gpt-5.6-luna",
     "anthropic/claude-haiku-5.5": "gpt-6-luna",
     "anthropic/claude-opus-5.5": "gpt-6.1-sol",

@@ -12,7 +12,7 @@ const wholeAnswerTimeoutMs = 30 * millisecondsPerMinute;
 const apiBillingVariables = ["ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN"];
 const cliFailureStatus = 502;
 // the callers name OpenRouter ids, unknown to the CLI: the ones listed run on their Claude equivalent, the others on defaultModel
-const cliModelByOpenRouterId = { "openai/gpt-5.6-luna": "haiku", "openai/gpt-6.1-sol": "opus" };
+const cliModelByOpenRouterId = { "openai/gpt-5.6-luna": "haiku", "openai/gpt-6.1-terra": "sonnet", "openai/gpt-6.1-sol": "opus" };
 // the CLI knows no "none": it would fall back to its default effort, far above the lowest
 const cliEffortByReasoningEffort = { none: "low" };
 

@@ -224,32 +224,103 @@ async function getUpperOntologyClassesText(upperOntologies, userContext) {
     return { text: prefixedModel.text, prefixes: prefixedModel.prefixes, classLabelByIri: classLabelByIri };
 }
 
-// read from the graph, whatever answer format produced the version and whatever was edited in it since
-async function getValidatedOntologyModelText(tboxSource, termNamespace, termPrefix, userContext) {
+// an expression the Manchester conversion left as an anonymous node
+const anonymousNodeRegex = /<(?:_:|nodeID:)/;
+const restrictionPartsRegex = /^([^()]+? (?:some|only|value|min \d+|max \d+|exactly \d+)) (.+)$/;
+// a conjunction or a disjunction before the quantifier, whose fillers cannot be listed apart
+const compoundRestrictionRegex = / and | or /;
+const groupedFillersMaxCount = 10;
+const sentenceEndRegex = /\.\s/;
+
+function getReadableExpressions(expressions, compaction) {
+    const readableExpressions = compaction.withoutAnonymousNodes ? expressions.filter((expression) => !anonymousNodeRegex.test(expression)) : expressions;
+    return readableExpressions;
+}
+
+// each listed filler is a restriction of its own; sorted, the endpoint returns the axioms in no stable order
+function getCompactedSubClassOf(subClassOfExpressions, compaction) {
+    const readableExpressions = getReadableExpressions(subClassOfExpressions, compaction);
+    if (!compaction.groupRestrictions) {
+        return readableExpressions;
+    }
+    const fillersByRestriction = {};
+    const compactedExpressions = [];
+    for (const expression of readableExpressions) {
+        const restrictionParts = expression.match(restrictionPartsRegex);
+        if (!restrictionParts || compoundRestrictionRegex.test(restrictionParts[1])) {
+            compactedExpressions.push(expression);
+            continue;
+        }
+        const [, propertyAndQuantifier, filler] = restrictionParts;
+        if (!fillersByRestriction[propertyAndQuantifier]) {
+            fillersByRestriction[propertyAndQuantifier] = [];
+        }
+        fillersByRestriction[propertyAndQuantifier].push(filler);
+    }
+    for (const [propertyAndQuantifier, fillers] of Object.entries(fillersByRestriction)) {
+        fillers.sort();
+        const listedFillers = fillers.slice(0, groupedFillersMaxCount);
+        const unlistedCount = fillers.length - listedFillers.length;
+        const unlistedText = unlistedCount > 0 ? ", and " + unlistedCount + " more" : "";
+        compactedExpressions.push(propertyAndQuantifier + " " + listedFillers.join(", ") + unlistedText);
+    }
+    return compactedExpressions;
+}
+
+function getCompactedDefinitions(definitions, compaction) {
+    if (!compaction.definitionMaxLength) {
+        return definitions;
+    }
+    const compactedDefinitions = definitions.map((definition) => {
+        const sentenceEnd = definition.search(sentenceEndRegex);
+        const firstSentence = sentenceEnd > -1 ? definition.slice(0, sentenceEnd + 1) : definition;
+        const keptText = firstSentence.slice(0, compaction.definitionMaxLength);
+        const compactedDefinition = keptText.length < definition.length ? keptText + "..." : keptText;
+        return compactedDefinition;
+    });
+    return compactedDefinitions;
+}
+
+// read from the graph, whatever answer format produced the version and whatever was edited in it since; each compaction option is off by default
+async function getValidatedOntologyModelText(tboxSource, termNamespace, termPrefix, userContext, compaction = {}) {
     const enrichedModel = await getEnrichedOntologyModel(tboxSource, userContext);
     if (!enrichedModel) {
         return null;
     }
     const typedPropertyIris = Object.keys(enrichedModel.propertyTypes);
-    const localAnnotationIris = typedPropertyIris.filter(
-        (propertyIri) => propertyIri.indexOf(termNamespace) == 0 && isPropertyOfType(enrichedModel, propertyIri, "AnnotationProperty"),
-    );
+    const localAnnotationIris = typedPropertyIris.filter((propertyIri) => propertyIri.indexOf(termNamespace) == 0 && isPropertyOfType(enrichedModel, propertyIri, "AnnotationProperty"));
     const valuesByAnnotationByTerm = await getLocalAnnotationValues(enrichedModel.graphUri, localAnnotationIris, userContext);
     const getAnnotationFields = function (termIri) {
         const annotationFields = Object.entries(valuesByAnnotationByTerm[termIri] || {});
         return annotationFields.sort(([annotationName1], [annotationName2]) => annotationName1.localeCompare(annotationName2));
     };
 
+    // the depth of a class counts its ancestors in the source, a class under an imported one is at depth 1
+    const getClassDepth = (classIri) => {
+        const sourceAncestors = enrichedModel.classes[classIri].parents.filter((parentIri) => enrichedModel.classes[parentIri]);
+        return sourceAncestors.length + 1;
+    };
+    const allClassIris = Object.keys(enrichedModel.classes).sort();
+    const writtenClassIris = compaction.maxDepth ? allClassIris.filter((classIri) => getClassDepth(classIri) <= compaction.maxDepth) : allClassIris;
+    const unwrittenClassIris = compaction.maxDepth ? allClassIris.filter((classIri) => getClassDepth(classIri) > compaction.maxDepth) : [];
+    const unwrittenDescendantCountByClass = {};
+    for (const classIri of unwrittenClassIris) {
+        const deepestWrittenAncestor = enrichedModel.classes[classIri].parents.find((parentIri) => enrichedModel.classes[parentIri] && getClassDepth(parentIri) == compaction.maxDepth);
+        unwrittenDescendantCountByClass[deepestWrittenAncestor] = (unwrittenDescendantCountByClass[deepestWrittenAncestor] || 0) + 1;
+    }
+
     const classEntries = [];
-    for (const classIri of Object.keys(enrichedModel.classes).sort()) {
+    for (const classIri of writtenClassIris) {
         const ontologyClass = enrichedModel.classes[classIri];
+        const unwrittenDescendantCount = unwrittenDescendantCountByClass[classIri];
         classEntries.push(
             getTermEntry(classIri, ontologyClass.label, [
-                ["Definition", ontologyClass.definitions],
-                ["SubClassOf", ontologyClass.axioms.subClassOf],
-                ["EquivalentTo", ontologyClass.axioms.equivalentTo],
-                ["DisjointWith", ontologyClass.axioms.disjointWith],
-                ["DisjointUnionOf", ontologyClass.axioms.disjointUnionOf],
+                ["Definition", getCompactedDefinitions(ontologyClass.definitions, compaction)],
+                ["SubClassOf", getCompactedSubClassOf(ontologyClass.axioms.subClassOf, compaction)],
+                ["Descendants not listed", unwrittenDescendantCount ? [String(unwrittenDescendantCount)] : []],
+                ["EquivalentTo", getReadableExpressions(ontologyClass.axioms.equivalentTo, compaction)],
+                ["DisjointWith", getReadableExpressions(ontologyClass.axioms.disjointWith, compaction)],
+                ["DisjointUnionOf", getReadableExpressions(ontologyClass.axioms.disjointUnionOf, compaction)],
                 ...getAnnotationFields(classIri),
             ]),
         );
@@ -274,11 +345,7 @@ async function getValidatedOntologyModelText(tboxSource, termNamespace, termPref
     for (const propertyIri of datatypePropertyIris.sort()) {
         const datatypeProperty = enrichedModel.nonObjectProperties[propertyIri];
         datatypePropertyEntries.push(
-            getTermEntry(propertyIri, datatypeProperty.label, [
-                ["Domain", bracketIri(datatypeProperty.domain)],
-                ["Range", bracketIri(datatypeProperty.range)],
-                ...getAnnotationFields(propertyIri),
-            ]),
+            getTermEntry(propertyIri, datatypeProperty.label, [["Domain", bracketIri(datatypeProperty.domain)], ["Range", bracketIri(datatypeProperty.range)], ...getAnnotationFields(propertyIri)]),
         );
     }
     const modelText =

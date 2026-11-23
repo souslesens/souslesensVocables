@@ -1,4 +1,4 @@
-import { Alert, Autocomplete, Button, Chip, Dialog, DialogContent, DialogTitle, Paper, Stack, TextField, Tooltip } from "@mui/material";
+import { Alert, Autocomplete, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, LinearProgress, Paper, Stack, TextField, Tooltip } from "@mui/material";
 import { DataGrid, GridActionsCellItem, GridColDef, GridEventListener, GridRowEditStopReasons, GridRowId, GridRowModes, GridRowModesModel, GridToolbarContainer } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
@@ -6,6 +6,7 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { createRoot } from "react-dom/client";
 
 declare module "@mui/x-data-grid" {
@@ -16,6 +17,8 @@ declare module "@mui/x-data-grid" {
         loading: boolean;
         onSave: () => Promise<void>;
         canSave: boolean;
+        canGenerateDescription: boolean;
+        onGenerateDescription: () => Promise<void>;
     }
 }
 
@@ -49,7 +52,12 @@ interface MetadataTableProps {
     metadata: Metadata[];
     prefixes: Record<string, string>;
     onSubmit: (newMetadata: Metadata[], addedData: Metadata[], removedData: Metadata[]) => Promise<void>;
+    canGenerateDescription: boolean;
+    onGenerateDescription: () => Promise<void>;
 }
+
+// the description sls_ontology_summary reads first
+const descriptionUri = "http://purl.org/dc/terms/description";
 
 const AVAILABLE_URI_LIST = [
     "http://purl.org/dc/elements/1.1/contributor",
@@ -57,6 +65,7 @@ const AVAILABLE_URI_LIST = [
     "http://purl.org/dc/elements/1.1/description",
     "http://purl.org/dc/elements/1.1/license",
     "http://purl.org/dc/elements/1.1/title",
+    descriptionUri,
     "http://purl.org/dc/terms/provenance",
     "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
     "http://www.w3.org/2000/01/rdf-schema#comment",
@@ -122,8 +131,10 @@ function EditMetadataToolbar(props: {
     setRows: (newRows: (oldRows: MetadataRow[]) => MetadataRow[]) => void;
     setRowModesModel: (newModel: (oldModel: GridRowModesModel) => GridRowModesModel) => void;
     onSave: () => void;
+    canGenerateDescription: boolean;
+    onGenerateDescription: () => Promise<void>;
 }) {
-    const { setRows, setRowModesModel, rowNumber, loading, onSave, canSave } = props;
+    const { setRows, setRowModesModel, rowNumber, loading, onSave, canSave, canGenerateDescription, onGenerateDescription } = props;
 
     const handleClick = () => {
         const id = rowNumber;
@@ -142,11 +153,16 @@ function EditMetadataToolbar(props: {
             <Button color="primary" startIcon={<AddIcon />} onClick={handleClick} disabled={loading}>
                 Add Metadata
             </Button>
+            {canGenerateDescription ? (
+                <Button color="primary" startIcon={<AutoAwesomeIcon />} onClick={onGenerateDescription} disabled={loading}>
+                    Generate description (AI)
+                </Button>
+            ) : null}
         </GridToolbarContainer>
     );
 }
 
-function MetadataTable({ metadata, prefixes, onSubmit, loading, isReadOnly }: MetadataTableProps) {
+function MetadataTable({ metadata, prefixes, onSubmit, canGenerateDescription, onGenerateDescription, loading, isReadOnly }: MetadataTableProps) {
     const [rows, setRows] = useState<MetadataRow[]>([]);
     const [paginationModel, setPaginationModel] = useState({
         pageSize: 10,
@@ -332,7 +348,18 @@ function MetadataTable({ metadata, prefixes, onSubmit, loading, isReadOnly }: Me
                 processRowUpdate={isReadOnly ? undefined : processRowUpdate}
                 slots={{ toolbar: isReadOnly ? undefined : EditMetadataToolbar }}
                 slotProps={{
-                    toolbar: isReadOnly ? undefined : { setRows, setRowModesModel, rowNumber: rows.length, loading, onSave: handleSave, canSave },
+                    toolbar: isReadOnly
+                        ? undefined
+                        : {
+                              setRows,
+                              setRowModesModel,
+                              rowNumber: rows.length,
+                              loading,
+                              onSave: handleSave,
+                              canSave,
+                              canGenerateDescription,
+                              onGenerateDescription,
+                          },
                 }}
                 paginationModel={paginationModel}
                 onPaginationModelChange={setPaginationModel}
@@ -348,6 +375,11 @@ export function MetadataModal({ onClose, open, sourceName, isReadOnly = false }:
     const [error, setError] = useState<string | null>(null);
     const [metadata, setMetadata] = useState<Metadata[]>([]);
     const [prefixes, setPrefixes] = useState<Record<string, string>>({});
+    // null while the description dialog is closed
+    const [descriptionDraft, setDescriptionDraft] = useState<string | null>(null);
+    const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
+    const [descriptionError, setDescriptionError] = useState<string | null>(null);
+    const canGenerateDescription = !metadata.some((savedMetadata) => savedMetadata.metadata === descriptionUri);
 
     useEffect(() => {
         const fetchMetadata = async () => {
@@ -391,6 +423,30 @@ export function MetadataModal({ onClose, open, sourceName, isReadOnly = false }:
         setLoading(false);
     }
 
+    async function generateDescription() {
+        setDescriptionDraft((currentDraft) => currentDraft ?? "");
+        setIsGeneratingDescription(true);
+        setDescriptionError(null);
+        try {
+            const response = await fetch(`/api/v1/ai/sourceDescription?source=${sourceName ?? ""}&lang=en`, { method: "POST" });
+            const json = (await response.json()) as { description?: string; error?: string };
+            if (response.ok && json.description) {
+                setDescriptionDraft(json.description);
+            } else {
+                setDescriptionError(json.error ?? "Error generating the description");
+            }
+        } catch (error) {
+            setDescriptionError((error as Error).message);
+        }
+        setIsGeneratingDescription(false);
+    }
+
+    async function saveDescription() {
+        const descriptionMetadata: Metadata = { metadata: descriptionUri, value: descriptionDraft ?? "", shortType: "en" };
+        setDescriptionDraft(null);
+        await onSubmit([descriptionMetadata, ...metadata], [descriptionMetadata], []);
+    }
+
     return (
         <Dialog
             fullWidth={true}
@@ -407,9 +463,46 @@ export function MetadataModal({ onClose, open, sourceName, isReadOnly = false }:
             <DialogContent sx={{ mt: 1 }}>
                 <Stack spacing={1}>
                     {error ? <Alert severity="error">{error}</Alert> : null}
-                    <MetadataTable metadata={metadata} prefixes={prefixes} onSubmit={onSubmit} loading={loading} isReadOnly={isReadOnly} />
+                    <MetadataTable
+                        metadata={metadata}
+                        prefixes={prefixes}
+                        onSubmit={onSubmit}
+                        canGenerateDescription={canGenerateDescription}
+                        onGenerateDescription={generateDescription}
+                        loading={loading}
+                        isReadOnly={isReadOnly}
+                    />
                 </Stack>
             </DialogContent>
+            <Dialog fullWidth={true} maxWidth="md" open={descriptionDraft !== null}>
+                <DialogTitle>Description of {sourceName}</DialogTitle>
+                <DialogContent>
+                    <Stack spacing={1} sx={{ mt: 1 }}>
+                        {descriptionError ? <Alert severity="error">{descriptionError}</Alert> : null}
+                        {isGeneratingDescription ? <LinearProgress /> : null}
+                        <TextField
+                            multiline={true}
+                            minRows={8}
+                            fullWidth={true}
+                            value={descriptionDraft ?? ""}
+                            onChange={(event) => setDescriptionDraft(event.target.value)}
+                            disabled={isGeneratingDescription}
+                            placeholder="Writing the description..."
+                        />
+                    </Stack>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDescriptionDraft(null)} disabled={isGeneratingDescription}>
+                        Cancel
+                    </Button>
+                    <Button startIcon={<AutoAwesomeIcon />} onClick={generateDescription} disabled={isGeneratingDescription}>
+                        Regenerate
+                    </Button>
+                    <Button variant="contained" startIcon={<SaveIcon />} onClick={saveDescription} disabled={isGeneratingDescription || !descriptionDraft}>
+                        Save
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Dialog>
     );
 }

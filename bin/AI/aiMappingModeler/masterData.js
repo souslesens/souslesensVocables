@@ -723,6 +723,23 @@ function changeGuessEntry(preparedSource, guess, source, changeName, changeInput
             changedTexts.push("definition changed");
         }
         summary = "class of " + guessEntry.label + ": " + changedTexts.join(", ");
+    } else if (changeName == "undo_decision" && guessEntry.splitFrom) {
+        // a class born of a split goes back into the proposal of the class it came from
+        const splitClassKey = guessEntry.readings[0].classKey;
+        const splitParentOption = guess.classificationByClass[splitClassKey]?.parentOptions?.[0];
+        const originEntry = findByLabel(getGuessEntries(guess), guessEntry.splitFrom);
+        const originClassification = originEntry ? guess.classificationByClass[originEntry.readings[0].classKey] : null;
+        if (originClassification && originClassification.classKind == "newClass" && splitParentOption) {
+            // a split made before the option was kept gives back the proposal only
+            if (guessEntry.movedParentOption && !findParentOption(originClassification.parentOptions, guessEntry.movedParentOption.parentId)) {
+                originClassification.parentOptions.push(guessEntry.movedParentOption);
+            }
+            originClassification.split = { newLabel: guessEntry.label, definition: guessEntry.definition, reason: guessEntry.reason, parentOption: splitParentOption };
+        }
+        const guessEntries = getGuessEntries(guess);
+        guessEntries.splice(guessEntries.indexOf(guessEntry), 1);
+        delete guess.classificationByClass[splitClassKey];
+        summary = "split of " + guessEntry.splitFrom + " undone: " + guessEntry.label + " removed";
     } else if (changeName == "undo_decision") {
         const replacedReadings = guessEntry.readings.filter((reading) => reading.replacedClassification);
         if (!guessEntry.decision && replacedReadings.length == 0) {
@@ -784,6 +801,8 @@ function changeGuessEntry(preparedSource, guess, source, changeName, changeInput
         const movedParent = findParentOption(parentOptions, split.parentOption.parentId);
         if (movedParent && parentOptions.length > 1) {
             parentOptions.splice(parentOptions.indexOf(movedParent), 1);
+            // given back to the first class when the split is undone
+            splitEntry.movedParentOption = movedParent;
         }
         delete classification.split;
         summary = guessEntry.label + " split: " + split.newLabel + " added over the same rows, subClassOf " + split.parentOption.parentLabel;

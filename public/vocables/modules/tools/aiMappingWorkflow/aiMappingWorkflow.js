@@ -1261,8 +1261,9 @@ var AIMappingWorkflow = (function () {
         }
         // back to the options of the AI, the upper class taken as the class included
         var isClassReplaced = card.readings.some((reading) => reading.replacedClassification);
-        var undoButton = $("<button type='button' class='masterData-applyButton'>").text("Undo the choice");
-        undoButton.prop("disabled", !entry.decision && !isClassReplaced);
+        // on a class born of a split, the undo gives the split back to the class it came from
+        var undoButton = $("<button type='button' class='masterData-applyButton'>").text(entry.splitFrom ? "Undo the split" : "Undo the choice");
+        undoButton.prop("disabled", !entry.decision && !isClassReplaced && !entry.splitFrom);
         undoButton.on("click", function () {
             self.changeGuessByHand("undo_decision", { entry: entry.label });
         });

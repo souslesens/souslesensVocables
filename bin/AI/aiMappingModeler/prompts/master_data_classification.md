@@ -15,6 +15,10 @@ A new local class may hesitate between superclasses: the deepest class that fits
 These superclasses are alternatives: sibling classes, or classes of different branches. Never give a class together with one of its ancestors: the deeper class already says the other.
 Each superclass comes with the definition of the new class under it, which reads "A <label> is a <superclass label> that ..." and holds for that superclass alone, and with its impact: one short English sentence saying what choosing it does to the ontology, from the axioms of that superclass and of its ancestors as the upper ontologies write them: the branch the class joins, what its instances inherit, what it rules out. The impacts of the alternatives of one class are written so that the user sees how they differ.
 
+Readings of what a row denotes
+A class may list readings: what one row of its table denotes, each with what the data show. They are not alternatives the user picks first: the superclass the user chooses settles what a row denotes. Classify the class itself, one list of superclasses for the whole table: each reading the data support may bring its own superclass, and several readings may lead to the same one. Weigh each superclass by what the data show about all the rows, the probabilities adding up to 100 over the list. Each superclass names in readings the labels of the readings it rests on, exactly as given.
+Two readings may both hold, each for part of the rows or for the same rows seen two ways, and lead to superclasses the upper ontologies make disjoint: one individual cannot be both. Then propose, beside the list, a second local class over the same rows and the same identifier: its newLabel, its superclass written as the upper ontologies write it, its definition reading "A <newLabel> is a <superclass label> that ...", and the reason, citing the data and the disjoint branches. Propose it only when the data support both readings and the branches are disjoint; the user decides.
+
 Answer
 Write one JSON object and nothing else, no code fence. One entry per class given, its label exactly as given. A class is written exactly as the upper ontologies write it, never constructed. A class that they do not write does not exist: when none denotes the object, declare a new local class under the deepest written class that fits.
 {"classes":[entry, ...]}
@@ -22,4 +26,6 @@ Each entry is one of these:
 An imported class that already denotes the object:
 {"label":"...","classKind":"existingClass","class":"..."}
 A new local class, with its superclasses:
-{"label":"...","classKind":"newClass","newLabel":"...","parents":[{"class":"...","definition":"...","probability":70,"impact":"..."},{"class":"...","definition":"...","probability":30,"impact":"..."}]}
+{"label":"...","classKind":"newClass","newLabel":"...","parents":[{"class":"...","definition":"...","probability":70,"impact":"...","readings":["..."]},{"class":"...","definition":"...","probability":30,"impact":"...","readings":["..."]}]}
+readings is left out for a class given without readings. A new local class whose readings call for a second class adds:
+"split":{"newLabel":"...","class":"...","definition":"...","impact":"...","reason":"..."}

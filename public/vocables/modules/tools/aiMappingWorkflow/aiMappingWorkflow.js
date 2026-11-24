@@ -1096,22 +1096,44 @@ var AIMappingWorkflow = (function () {
         cardDiv.append(headerPanel);
 
         var stepNumber = 1;
-        if (card.readings.length > 1) {
+        var evidence = entry.evidence;
+        var evidenceDiv = null;
+        if (evidence && evidence.rows) {
+            var evidenceTable = $("<table class='masterData-evidenceTable'>");
+            var headerCells = evidence.columns.map((column) => $("<th>").text(column));
+            evidenceTable.append($("<tr>").append(headerCells));
+            evidence.rows.forEach(function (evidenceRow) {
+                var valueCells = evidenceRow.map((value) => $("<td>").text(value));
+                evidenceTable.append($("<tr>").append(valueCells));
+            });
+            evidenceDiv = $("<div>").append($("<div>").text(evidence.purpose), $("<div class='masterData-evidence'>").append(evidenceTable));
+        }
+        // a guess saved before the readings shared the class of the entry: each reading has its own class, picked first
+        var readingClassKeys = new Set(card.readings.map((reading) => reading.classKey));
+        var isReadingPickedFirst = readingClassKeys.size > 1;
+        if (card.readings.length > 1 && !isReadingPickedFirst) {
+            var rowsDiv = $("<div class='masterData-stepContent'>");
+            rowsDiv.append($("<div class='masterData-step'>").text("What one row of " + entry.label + " may denote"), evidenceDiv);
+            card.readings.forEach(function (reading) {
+                rowsDiv.append(
+                    $("<div class='masterData-panel'>").append(
+                        $("<b>").text(reading.label),
+                        getFieldsTable([
+                            ["A row is", reading.rowIs],
+                            ["In the data", reading.inData],
+                            ["Ask the business", reading.askBusiness],
+                        ]),
+                    ),
+                );
+            });
+            rowsDiv.append($("<div class='masterData-note'>").text("The superclass chosen below settles what a row denotes."));
+            cardDiv.append(rowsDiv);
+        }
+        if (isReadingPickedFirst) {
             var readingsDiv = $("<div class='masterData-stepContent'>");
             readingsDiv.append(getStepTitle(stepNumber, "What does one row of " + entry.label + " denote?"));
             stepNumber++;
-            var evidence = entry.evidence;
-            if (evidence && evidence.rows) {
-                readingsDiv.append($("<div>").text(evidence.purpose));
-                var evidenceTable = $("<table class='masterData-evidenceTable'>");
-                var headerCells = evidence.columns.map((column) => $("<th>").text(column));
-                evidenceTable.append($("<tr>").append(headerCells));
-                evidence.rows.forEach(function (evidenceRow) {
-                    var valueCells = evidenceRow.map((value) => $("<td>").text(value));
-                    evidenceTable.append($("<tr>").append(valueCells));
-                });
-                readingsDiv.append($("<div class='masterData-evidence'>").append(evidenceTable));
-            }
+            readingsDiv.append(evidenceDiv);
             readingsDiv.append($("<div class='masterData-note'>").text("The data cannot settle it: ask the business, the answer decides the superclass below."));
             card.readings.forEach(function (reading, readingIndex) {
                 var titleElements = [$("<span>").text(reading.label)];
@@ -1165,6 +1187,7 @@ var AIMappingWorkflow = (function () {
                 var superClassFields = [
                     ["Definition", parentOption.definition],
                     ["Impact", parentOption.impact],
+                    ["Rests on", parentOption.readings ? parentOption.readings.join(", ") : null],
                     ["Local class under", localClass ? localClass.superClassLabel : null],
                 ];
                 superClassDiv.append(getOptionButton(isSelected, [$("<span class='masterData-class'>").text(parentLabel), probability], superClassFields, pickSuperClass));
@@ -1172,11 +1195,40 @@ var AIMappingWorkflow = (function () {
         }
         cardDiv.append(superClassDiv);
 
+        var split = classification.split;
+        if (split && !entry.decision) {
+            var splitParentLabel = self.getClassLabel(split.parentOption.parentSource, split.parentOption.parentLabel);
+            var splitButton = $("<button type='button' class='masterData-applyButton'>").text("Split into two classes");
+            splitButton.on("click", function () {
+                self.changeGuessByHand("split_entry", { entry: entry.label });
+            });
+            cardDiv.append(
+                $("<div class='masterData-stepContent'>").append(
+                    $("<div class='masterData-step'>").text("Two meanings at once?"),
+                    getFieldsTable([
+                        ["Second class", split.newLabel + " subClassOf " + splitParentLabel + ", same rows and identifier"],
+                        ["Why", split.reason],
+                        ["Definition", split.definition],
+                    ]),
+                    splitButton,
+                ),
+            );
+        }
+
         var applyButton = $("<button type='button' class='masterData-applyButton'>").text("Apply");
         applyButton.prop("disabled", isChoiceOpen && !card.superClassId);
         applyButton.on("click", function () {
             self.applyDecision(entry, { readingIndex: card.readingIndex, superClassId: card.superClassId });
         });
+        // nothing written yet: every superclass goes on to the links, which settle it
+        var leaveOpenButton = $("<button type='button' class='masterData-applyButton'>").text("Leave open until the links");
+        leaveOpenButton.prop("disabled", !isChoiceOpen || Boolean(entry.decision));
+        leaveOpenButton.on("click", function () {
+            self.applyDecision(entry, { readingIndex: card.readingIndex, superClassId: null, isLeftToLinks: true });
+        });
+        if (entry.decision && entry.decision.isLeftToLinks) {
+            writtenText = "nothing yet, the links settle the superclass";
+        }
         // back to the options of the AI, the upper class taken as the class included
         var isClassReplaced = card.readings.some((reading) => reading.replacedClassification);
         var undoButton = $("<button type='button' class='masterData-applyButton'>").text("Undo the choice");
@@ -1185,7 +1237,7 @@ var AIMappingWorkflow = (function () {
             self.changeGuessByHand("undo_decision", { entry: entry.label });
         });
         var footer = $("<div class='masterData-footer'>");
-        footer.append($("<div>").append($("<span class='masterData-writtenLabel'>").text("Will be written"), $("<span>").text(writtenText)), $("<div class='masterData-footerButtons'>").append(undoButton, applyButton));
+        footer.append($("<div>").append($("<span class='masterData-writtenLabel'>").text("Will be written"), $("<span>").text(writtenText)), $("<div class='masterData-footerButtons'>").append(undoButton, leaveOpenButton, applyButton));
         cardDiv.append(footer);
     };
 
@@ -1508,7 +1560,7 @@ var AIMappingWorkflow = (function () {
             savedGuess.changeLog.push({
                 change: "apply_decision",
                 entry: savedEntry.label,
-                summary: "decided on the card",
+                summary: decision.isLeftToLinks ? "left open until the links" : "decided on the card",
                 userRequest: null,
                 rationale: null,
                 queries: [],

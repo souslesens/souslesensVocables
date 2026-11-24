@@ -17,7 +17,7 @@ const columnClassPromptPath = join(currentDirectory, "prompts/column_class_sugge
 const newClassSectionRegex = /^3\. (Otherwise declare a new local class[\s\S]*?)^4\. Answer/m;
 const answerHeadingRegex = /^Answer\r?$/m;
 const masterDataClassKinds = ["existingClass", "newClass"];
-const entryChangeNames = ["add_reading", "undo_decision", "remove_entry"];
+const entryChangeNames = ["add_reading", "undo_decision", "remove_entry", "split_entry"];
 // an evidence query is one statement reading the data, whatever the model writes
 const readingStatementStartRegex = /^\s*(select|with)\b/i;
 const statementSeparatorRegex = /;/;
@@ -83,8 +83,15 @@ function getDefaultReading(masterDataEntry) {
     return defaultReading;
 }
 
-// at most maxReadings readings of one answered entry, null when none holds a definition; with several readings each class is
-// keyed by the reading, its classification depending on what a row denotes
+// a guess saved before the readings shared the class of their entry gives each reading its own class
+function hasClassPerReading(readings) {
+    const classKeys = readings.map((reading) => reading.classKey);
+    const isClassPerReading = new Set(classKeys).size > 1;
+    return isClassPerReading;
+}
+
+// at most maxReadings readings of one answered entry, null when none holds a definition; the readings share the class of
+// the entry: the superclass chosen settles what a row denotes
 function readReadings(answeredEntry, masterDataEntry) {
     const answeredReadings = Array.isArray(answeredEntry?.readings) ? answeredEntry.readings : [];
     const definedReadings = answeredReadings.filter((answeredReading) => answeredReading && readText(answeredReading.label) && readText(answeredReading.definition));
@@ -94,14 +101,13 @@ function readReadings(answeredEntry, masterDataEntry) {
     }
     const readings = keptReadings.map(function (answeredReading) {
         const readingLabel = readText(answeredReading.label);
-        const classKey = keptReadings.length > 1 ? masterDataEntry.label + ", read as " + readingLabel.toLowerCase() : masterDataEntry.label;
         return {
             label: readingLabel,
             rowIs: readText(answeredReading.rowIs),
             inData: readText(answeredReading.inData),
             askBusiness: readText(answeredReading.askBusiness),
             definition: readText(answeredReading.definition),
-            classKey: classKey,
+            classKey: masterDataEntry.label,
         };
     });
     return readings;
@@ -163,7 +169,29 @@ function readClassClassification(answeredEntry, preparedSource, declaredClasses,
     }
     const parentOptions = suggestion.parentOptions.map((parentOption) => ({ ...parentOption, parentSource: getClassSource(parentOption.parentId, preparedSource) || source }));
     const newClassification = { classKind: "newClass", classLabel: suggestion.label, parentOptions: parentOptions };
+    const split = readSplit(answeredEntry.split, preparedSource, source, declaredClasses);
+    if (split) {
+        newClassification.split = split;
+    }
     return { classification: newClassification };
+}
+
+// { newLabel, definition, reason, parentOption } of the second class the answer proposes over the same rows, when two
+// readings hold at once under disjoint superclasses; null when none is proposed or its superclass is not written
+function readSplit(answeredSplit, preparedSource, source, declaredClasses) {
+    const newLabel = readText(answeredSplit?.newLabel);
+    if (!newLabel) {
+        return null;
+    }
+    const certainProbability = 100;
+    const splitParentAnswer = { class: answeredSplit.class, definition: answeredSplit.definition, probability: certainProbability, impact: answeredSplit.impact };
+    const splitClassification = readClassClassification({ classKind: "newClass", newLabel: newLabel, parents: [splitParentAnswer] }, preparedSource, declaredClasses, source);
+    if (splitClassification.error || splitClassification.classification.classKind != "newClass") {
+        return null;
+    }
+    const splitParent = splitClassification.classification.parentOptions[0];
+    const split = { newLabel: newLabel, definition: readText(answeredSplit.definition), reason: readText(answeredSplit.reason), parentOption: splitParent };
+    return split;
 }
 
 // { classificationByLabel, refusalByLabel } of the labels still to classify, read in one answer of the model
@@ -215,8 +243,16 @@ async function classifyClasses(source, domain, guessEntries, decidedClasses, pre
     if (answerSectionStart == -1) {
         return { error: "the Answer section is missing from master_data_classification.md" };
     }
-    const classesToClassify = [];
-    guessEntries.forEach((guessEntry) => guessEntry.readings.forEach((reading) => classesToClassify.push({ label: reading.classKey, definition: reading.definition })));
+    const classesToClassify = guessEntries.map(function (guessEntry) {
+        const readingTexts = guessEntry.readings.map(function (reading) {
+            const rowText = reading.rowIs ? " a row is " + reading.rowIs : "";
+            const dataText = reading.inData ? " In the data: " + reading.inData : "";
+            const readingText = "\n  - reading " + reading.label + ":" + rowText + dataText;
+            return readingText;
+        });
+        const readingsText = guessEntry.readings.length > 1 ? readingTexts.join("") : "";
+        return { label: guessEntry.readings[0].classKey, definition: guessEntry.definition + readingsText };
+    });
     const classLines = classesToClassify.map((classToClassify) => "- " + classToClassify.label + ": " + classToClassify.definition);
     const decidedClassLines = decidedClasses.map((decidedClass) => "- " + decidedClass.label + ": " + decidedClass.definition);
     const decidedClassesText = decidedClassLines.length > 0 ? "\n\n# Classes already decided\n\n" + decidedClassLines.join("\n") : "";
@@ -349,20 +385,24 @@ function getGuessEntries(guess) {
 // them all as alternatives
 function describeUndecidedEntry(guess, masterDataEntry) {
     const readings = masterDataEntry.readings || [getDefaultReading(masterDataEntry)];
-    const readingTexts = readings.map(function (reading) {
-        const classification = guess.classificationByClass?.[reading.classKey] || masterDataEntry.classification || { classKind: "unclassified" };
-        const rowText = reading.rowIs ? "a row is " + reading.rowIs + ", " : "";
+    const readingClassKeys = readings.map((reading) => reading.classKey);
+    const classKeys = [...new Set(readingClassKeys)];
+    const classTexts = classKeys.map(function (classKey) {
+        const classification = guess.classificationByClass?.[classKey] || masterDataEntry.classification || { classKind: "unclassified" };
+        let classText = "not classified";
         if (classification.classKind == "existingClass") {
-            return rowText + "the upper class " + classification.classLabel;
+            classText = "the upper class " + classification.classLabel;
+        } else if (classification.classKind == "newClass") {
+            const optionTexts = classification.parentOptions.map((parentOption) => parentOption.parentLabel + " " + parentOption.probability + "%");
+            classText = "class " + classification.classLabel + (optionTexts.length > 0 ? ", subClassOf one of " + optionTexts.join(", ") : "");
         }
-        if (classification.classKind != "newClass") {
-            return rowText + "not classified";
-        }
-        const optionTexts = classification.parentOptions.map((parentOption) => parentOption.parentLabel + " " + parentOption.probability + "%");
-        const readingText = rowText + "class " + classification.classLabel + (optionTexts.length > 0 ? ", subClassOf one of " + optionTexts.join(", ") : "");
-        return readingText;
+        // the rows each class reads: all of them when the readings share the class
+        const classReadings = readings.filter((reading) => reading.classKey == classKey && reading.rowIs);
+        const rowTexts = classReadings.map((reading) => reading.rowIs);
+        const rowsText = rowTexts.length > 0 ? " (a row is " + rowTexts.join(" Or ") + ")" : "";
+        return classText + rowsText;
     });
-    const undecidedLine = "- " + masterDataEntry.label + ": not decided yet, alternatives: " + readingTexts.join("; or ") + ". " + (readings[0].definition || "");
+    const undecidedLine = "- " + masterDataEntry.label + ": not decided yet, " + classTexts.join("; or ") + ". " + (masterDataEntry.definition || readings[0].definition || "");
     return undecidedLine;
 }
 
@@ -372,12 +412,17 @@ function describeDecidedMasterData(guess) {
     const decidedLines = [];
     const decidedClasses = [];
     getGuessEntries(guess).forEach(function (masterDataEntry) {
-        if (!masterDataEntry.decision) {
+        // left open by the user: the links settle its superclass
+        if (!masterDataEntry.decision || masterDataEntry.decision.isLeftToLinks) {
             decidedLines.push(describeUndecidedEntry(guess, masterDataEntry));
             return;
         }
-        const reading = (masterDataEntry.readings || [getDefaultReading(masterDataEntry)])[masterDataEntry.decision.readingIndex];
+        const readings = masterDataEntry.readings || [getDefaultReading(masterDataEntry)];
+        const reading = readings[masterDataEntry.decision.readingIndex];
         const classification = guess.classificationByClass?.[reading.classKey] || masterDataEntry.classification || { classKind: "unclassified" };
+        // the meaning of the class: the reading picked on an older guess, else the definition under the superclass chosen
+        const isClassPerReading = hasClassPerReading(readings);
+        let definition = isClassPerReading ? reading.definition : masterDataEntry.definition || reading.definition;
         // a decided entry while unclassified has no class yet
         let classText = "not classified";
         if (classification.classKind == "existingClass") {
@@ -385,10 +430,13 @@ function describeDecidedMasterData(guess) {
         } else if (classification.classKind == "newClass") {
             const chosenParent = findParentOption(classification.parentOptions, masterDataEntry.decision.superClassId);
             classText = "class " + classification.classLabel + (chosenParent ? ", subClassOf " + chosenParent.parentLabel : "");
-            decidedClasses.push({ label: classification.classLabel, definition: reading.definition });
+            if (chosenParent && !isClassPerReading) {
+                definition = chosenParent.definition;
+            }
+            decidedClasses.push({ label: classification.classLabel, definition: definition });
         }
-        const rowText = reading.rowIs ? " A row is " + reading.rowIs : "";
-        decidedLines.push("- " + masterDataEntry.label + ": " + classText + ". " + reading.definition + rowText);
+        const rowText = isClassPerReading && reading.rowIs ? " A row is " + reading.rowIs : "";
+        decidedLines.push("- " + masterDataEntry.label + ": " + classText + ". " + definition + rowText);
     });
     (guess.localClasses || []).forEach(function (localClass) {
         decidedClasses.push({ label: localClass.label, definition: localClass.definition });
@@ -484,7 +532,7 @@ function findGuessReading(guess, entryLabel, readingLabel) {
     let readingIndex = 0;
     if (readingLabel) {
         readingIndex = readingLabels.findIndex((label) => label.toLowerCase() == String(readingLabel).toLowerCase());
-    } else if (guessEntry.readings.length > 1) {
+    } else if (hasClassPerReading(guessEntry.readings)) {
         readingIndex = -1;
     }
     if (readingIndex < 0) {
@@ -609,7 +657,8 @@ function changeGuessEntry(preparedSource, guess, source, changeName, changeInput
             }
             newParentOptions.push(optionParent.parentOption);
         }
-        const classKey = guessEntry.label + ", read as " + readingLabel.toLowerCase();
+        const isClassPerReading = hasClassPerReading(guessEntry.readings);
+        const classKey = isClassPerReading ? guessEntry.label + ", read as " + readingLabel.toLowerCase() : guessEntry.readings[0].classKey;
         guessEntry.readings.push({
             label: readingLabel,
             rowIs: readText(changeInput.rowIs),
@@ -618,7 +667,13 @@ function changeGuessEntry(preparedSource, guess, source, changeName, changeInput
             definition: readText(changeInput.definition),
             classKey: classKey,
         });
-        guess.classificationByClass[classKey] = { classKind: "newClass", classLabel: guessEntry.label, parentOptions: newParentOptions };
+        if (isClassPerReading || classification.classKind != "newClass") {
+            guess.classificationByClass[classKey] = { classKind: "newClass", classLabel: guessEntry.label, parentOptions: newParentOptions };
+        } else {
+            // the reading brings its superclasses to the class it shares
+            const addedParentOptions = newParentOptions.filter((newParentOption) => !findParentOption(parentOptions, newParentOption.parentId));
+            parentOptions.push(...addedParentOptions);
+        }
         summary = "reading " + readingLabel + " added to " + guessEntry.label;
     } else if (changeName == "update_class") {
         const reading = guessEntry.readings[readingIndex];
@@ -684,7 +739,10 @@ function changeGuessEntry(preparedSource, guess, source, changeName, changeInput
             return { error: guessEntry.label + " has a single reading, remove the entry itself" };
         }
         const [removedReading] = guessEntry.readings.splice(readingIndex, 1);
-        delete guess.classificationByClass[removedReading.classKey];
+        // the readings share the class of the entry
+        if (!guessEntry.readings.some((reading) => reading.classKey == removedReading.classKey)) {
+            delete guess.classificationByClass[removedReading.classKey];
+        }
         // the decision points to its reading by index
         const decidedReadingIndex = guessEntry.decision?.readingIndex;
         if (decidedReadingIndex == readingIndex) {
@@ -698,6 +756,37 @@ function changeGuessEntry(preparedSource, guess, source, changeName, changeInput
         guessEntries.splice(guessEntries.indexOf(guessEntry), 1);
         guessEntry.readings.forEach((reading) => delete guess.classificationByClass[reading.classKey]);
         summary = guessEntry.label + " removed from the guess";
+    } else if (changeName == "split_entry") {
+        const split = classification?.split;
+        if (!split) {
+            return { error: "no second class is proposed for " + guessEntry.label };
+        }
+        if (guessEntry.decision) {
+            return { error: guessEntry.label + " is decided, undo the decision before splitting it" };
+        }
+        if (findByLabel(getGuessEntries(guess), split.newLabel)) {
+            return { error: split.newLabel + " is already an entry" };
+        }
+        // the second class reads the same rows, decided under the superclass proposed for it
+        const splitEntry = {
+            label: split.newLabel,
+            definition: split.definition,
+            reason: split.reason,
+            evidence: guessEntry.evidence,
+            splitFrom: guessEntry.label,
+            readings: [getDefaultReading({ label: split.newLabel, definition: split.definition })],
+            decision: { readingIndex: 0, superClassId: split.parentOption.parentId },
+        };
+        guess.classificationByClass[split.newLabel] = { classKind: "newClass", classLabel: split.newLabel, parentOptions: [split.parentOption] };
+        const guessEntries = getGuessEntries(guess);
+        guessEntries.splice(guessEntries.indexOf(guessEntry) + 1, 0, splitEntry);
+        // the superclass now taken by the second class leaves the options of the first, which keeps at least one
+        const movedParent = findParentOption(parentOptions, split.parentOption.parentId);
+        if (movedParent && parentOptions.length > 1) {
+            parentOptions.splice(parentOptions.indexOf(movedParent), 1);
+        }
+        delete classification.split;
+        summary = guessEntry.label + " split: " + split.newLabel + " added over the same rows, subClassOf " + split.parentOption.parentLabel;
     } else {
         return { error: "unknown change " + changeName };
     }

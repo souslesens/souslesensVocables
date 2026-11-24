@@ -328,7 +328,13 @@ function readClassAnswer(answer, preparedSource, knownClasses, declaredClasses) 
         }
         // the impact of a superclass on the ontology, asked by the master data classification only
         const impact = isFilledText(parentAnswer.impact) ? parentAnswer.impact.trim() : "";
-        parentOptions.push({ parentId: parentId, parentLabel: parentLabel, definition: parentAnswer.definition.trim(), probability: readProbability(parentAnswer.probability), impact: impact });
+        const parentOption = { parentId: parentId, parentLabel: parentLabel, definition: parentAnswer.definition.trim(), probability: readProbability(parentAnswer.probability), impact: impact };
+        // the readings of what a row denotes this superclass rests on, asked by the master data classification only
+        if (Array.isArray(parentAnswer.readings)) {
+            const readingLabels = parentAnswer.readings.filter(isFilledText);
+            parentOption.readings = readingLabels.map((readingLabel) => readingLabel.trim());
+        }
+        parentOptions.push(parentOption);
     });
     if (parentOptions.length == 0) {
         return { error: parentRefusals[0] || "the model gave a new class without a superclass" };

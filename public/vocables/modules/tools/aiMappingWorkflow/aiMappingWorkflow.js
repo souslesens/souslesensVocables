@@ -83,6 +83,7 @@ var AIMappingWorkflow = (function () {
             AIMappingWorkflowChat.mount(self.getChatContext, self.replaceGuess);
             $("#lateralPanelDiv").load("./modules/tools/aiMappingWorkflow/html/aiMappingWorkflowLeftPanel.html", function () {
                 $("#aiMappingWorkflow_changeDatabaseButton").on("click", self.showDatabaseList);
+                $("#aiMappingWorkflow_deleteAllButton").on("click", self.deleteAllAiKeys);
                 self.readMappingDatabases(function (error) {
                     if (error) {
                         return self.showExplanation("Mapping of " + self.currentSource + " not read: " + AIColumnClassSuggestion.getErrorText(error));
@@ -329,6 +330,35 @@ var AIMappingWorkflow = (function () {
         AIMappingWorkflowChat.hide();
         self.prepareSource(databaseId);
         self.readTableKeys(databaseId);
+    };
+
+    // the keys, the guesses with their decisions and the chat of the database go, then the AI reads it again from scratch
+    self.deleteAllAiKeys = function () {
+        var databaseId = self.currentDatabaseId;
+        if (!databaseId) {
+            return;
+        }
+        var databaseName = self.databaseSources[databaseId].name || databaseId;
+        var confirmationText =
+            "Delete everything the AI found and decided on " +
+            databaseName +
+            ": its keys, master data, important classes, events, links, every decision taken and the chat?\nThe AI starts again from scratch, which takes several minutes.";
+        if (!confirm(confirmationText)) {
+            return;
+        }
+        var deleteParams = new URLSearchParams({ databaseId: databaseId, source: self.currentSource });
+        $.ajax({
+            type: "DELETE",
+            url: Config.apiUrl + "/ai/aiMappingModeler/tableKeys?" + deleteParams.toString(),
+            dataType: "json",
+            success: function () {
+                UI.message(CommonBotFunctions.escapeHtml("Everything deleted on " + databaseName + ", the AI starts again"));
+                self.openDatabase(databaseId);
+            },
+            error: function (error) {
+                MainController.errorAlert(AIColumnClassSuggestion.getErrorText(error));
+            },
+        });
     };
 
     // starts the key detection and the master data guess of a database whose mapping holds none yet, and prepares the upper

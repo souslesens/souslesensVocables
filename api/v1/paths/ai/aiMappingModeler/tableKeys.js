@@ -1,12 +1,14 @@
 import { getSchemaDescription } from "../../../../../bin/databases/dbConnector.js";
 import { databaseModel } from "../../../../../model/databases.js";
 import userManager from "../../../../../bin/user.js";
-import { followKeyDetection, getKeyDetection } from "../../../../../bin/AI/aiMappingModeler/keyDetection.js";
+import { followKeyDetection, getKeyDetection, clearKeyDetection } from "../../../../../bin/AI/aiMappingModeler/keyDetection.js";
+import { deleteVersionConversations } from "../../../../../bin/AI/ontologyFromDb/revision/revisionConversations.js";
 import { findUserSource } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
 
 export default function () {
     let operations = {
         GET,
+        DELETE,
     };
 
     async function GET(req, res, _next) {
@@ -55,6 +57,44 @@ export default function () {
             },
             403: { description: "The user may not read this database." },
             404: { description: "The source is unknown to the user." },
+        },
+        tags: ["AI"],
+    };
+
+    // the AI Mapping Workflow started again from scratch: the keys, the guesses and the chat about them
+    async function DELETE(req, res, _next) {
+        try {
+            const found = await findUserSource(req, req.query.source);
+            if (found.error) {
+                return res.status(found.status).json({ error: found.error });
+            }
+            const cleared = await clearKeyDetection(req.query.source, req.query.databaseId);
+            if (cleared.error) {
+                return res.status(409).json({ error: cleared.error });
+            }
+            await deleteVersionConversations(req.query.source, "masterData", req.query.databaseId);
+            res.status(200).json({ done: true });
+        } catch (error) {
+            console.error(error);
+            res.status(error.status || 500).json({ error: error.message });
+        }
+    }
+
+    DELETE.apiDoc = {
+        security: [{ restrictLoggedUser: [] }],
+        summary: "Delete the keys detected by the AI for a database, and every step of the AI Mapping Workflow on them",
+        description:
+            "Removes aiKeys from the mapping of the source (keys, table groups, master data, important classes, events and links with their decisions) and the chat conversations of the workflow on the database. " +
+            "The next opening of the database in the workflow detects them again from scratch.",
+        operationId: "deleteAiMappingModelerTableKeys",
+        parameters: [
+            { name: "databaseId", in: "query", type: "string", required: true },
+            { name: "source", in: "query", type: "string", required: true, description: "the source whose mapping holds the detected keys" },
+        ],
+        responses: {
+            200: { description: "{ done: true }" },
+            404: { description: "The source is unknown to the user." },
+            409: { description: "The AI is still reading the database." },
         },
         tags: ["AI"],
     };

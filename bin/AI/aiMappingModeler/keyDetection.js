@@ -630,6 +630,18 @@ async function getKeyDetection(source, databaseId) {
     return { status: "done", aiKeys: detection.aiKeys };
 }
 
+// { error } while the keys are being detected; otherwise the keys and every AI step on them leave the mapping and the
+// server, so that the next opening of the database detects them again from scratch
+async function clearKeyDetection(source, databaseId) {
+    const detection = detectionsByDatabaseId[databaseId];
+    if (detection && detection.isRunning) {
+        return { error: "the AI is reading this database, delete when it is done" };
+    }
+    delete detectionsByDatabaseId[databaseId];
+    await writeMappingAiKeys(source, databaseId, undefined);
+    return {};
+}
+
 // null before the detection of the database ends
 function getKnownAiKeys(databaseId) {
     const detection = detectionsByDatabaseId[databaseId];
@@ -637,4 +649,4 @@ function getKnownAiKeys(databaseId) {
     return knownAiKeys;
 }
 
-export { startKeyDetection, followKeyDetection, getKeyDetection, getKnownAiKeys, addAiKeysToSchema, askKeyModel, describeKeyedDatabase, keyDetectionModelId, writeMappingAiKeys, readDatabaseSchema, keyDetectionChannel, aiForeignKeyPrefix };
+export { startKeyDetection, followKeyDetection, getKeyDetection, clearKeyDetection, getKnownAiKeys, addAiKeysToSchema, askKeyModel, describeKeyedDatabase, keyDetectionModelId, writeMappingAiKeys, readDatabaseSchema, keyDetectionChannel, aiForeignKeyPrefix };

@@ -4,6 +4,7 @@ import AIUIcontroller from "./aiUiController.js";
 import AIMappingColumnsGraph from "./aiMappingColumnsGraph.js";
 import AIDatabaseSchemaGraph from "./aiDatabaseSchemaGraph.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
+import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
 
 /**
  * AIDataSourceManager module
@@ -716,7 +717,7 @@ var AIDataSourceManager = (function () {
         if (MainController.currentTool != "AIMappingModeler" || !self.currentConfig.currentDataSource || self.currentConfig.currentDataSource.id != keyDetectionStep.databaseId) {
             return;
         }
-        UI.message(keyDetectionStep.message);
+        UI.message(CommonBotFunctions.escapeHtml(keyDetectionStep.message));
     };
 
     // the column tree is updated where it stands, no page or tree is reloaded

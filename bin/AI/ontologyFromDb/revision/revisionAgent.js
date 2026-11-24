@@ -158,7 +158,7 @@ function getReadingToolOutcome(toolName, toolResult) {
 
 // the model calls tools until it answers in text; null when the page closed meanwhile, no turn is paid for nobody.
 // The text of every turn is streamed as textDelta events, a turn calling tools included: the page decides what it shows
-async function runAgentLoop({ system, conversation, tools, toolFunctionsByName, getToolOutcome, usage, sendProgress, isRequestClosed }) {
+async function runAgentLoop({ system, conversation, tools, toolFunctionsByName, getToolOutcome, usage, sendProgress, isRequestClosed, abortSignal, model }) {
     const messages = conversation.map((message) => ({ role: message.role, content: String(message.content) }));
     for (let agentTurn = 0; agentTurn < maxAgentTurns; agentTurn++) {
         if (isRequestClosed()) {
@@ -179,10 +179,12 @@ async function runAgentLoop({ system, conversation, tools, toolFunctionsByName, 
                 messages: messages,
                 tools: tools,
                 maxTokens: agentTurnMaxOutputTokens,
-                model: ontologyModelId,
+                model: model || ontologyModelId,
                 reasoningEffort: ontologyReasoningEffort,
                 // the system prompt is sent again unchanged at every turn
                 isPromptCached: true,
+                // a closed page stops the turn under way, not only the next one
+                abortSignal: abortSignal,
                 onTextDelta: function (textDelta) {
                     unsentText += textDelta;
                     if (Date.now() - lastFlushMs >= writingFlushIntervalMs) {
@@ -220,12 +222,4 @@ async function runAgentLoop({ system, conversation, tools, toolFunctionsByName, 
     throw new Error("the agent stopped after " + maxAgentTurns + " turns without answering");
 }
 
-export {
-    searchUpperOntologiesTool,
-    getUpperOntologyTermsTool,
-    describeDatabaseTablesTool,
-    getUpperOntologyReaders,
-    getDatabaseTablesDescriber,
-    getReadingToolOutcome,
-    runAgentLoop,
-};
+export { searchUpperOntologiesTool, getUpperOntologyTermsTool, describeDatabaseTablesTool, getUpperOntologyReaders, getDatabaseTablesDescriber, getReadingToolOutcome, runAgentLoop };

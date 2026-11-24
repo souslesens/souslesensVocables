@@ -49,7 +49,9 @@ export default function () {
                 description:
                     "{ primaryKeys: [{ table_name, column_name }], foreignKeys: [{ constraint_name, table_name, column_name, referenced_table, referenced_column }], " +
                     "aiKeys: { primaryKeys: [{ table, columns, reason }], foreignKeys: [{ table, column, referencedTable, referencedColumn, reason }], " +
-                    "tableGroups: [{ table, group: definition | computed, reason }] } or null, aiKeysStatus, aiKeysError }",
+                    "tableGroups: [{ table, group: definition | computed, reason }], " +
+                    "masterDataGuess: { domain, masterData: [{ label, definition, reason, classification: { classKind: existingClass | newClass | unclassified, classId, classLabel, classSource, parentOptions: [{ parentId, parentLabel, parentSource, definition, probability, impact }], reason }, evidence: { purpose, sql, columns, rows, error } ?, readings: [{ label, rowIs, inData, askBusiness, definition, classKey }], decision: { readingIndex, superClassId } ? }], classificationByClass (by classKey), model, guessedAt }, importantClassesGuess: step 2 of the AI Mapping Workflow, the same entries under importantClasses with aboutMasterData, and decisionsByMasterData } " +
+                    "or null, aiKeysStatus, aiKeysError }",
             },
             403: { description: "The user may not read this database." },
             404: { description: "The source is unknown to the user." },

@@ -51,6 +51,11 @@
     background-repeat: no-repeat;
     height: 30px;
 }
+.AIMappingWorkflow-logo {
+    background-image: url(@AIMappingWorkflow-logo);
+    background-repeat: no-repeat;
+    height: 30px;
+}
 .SPARQL-logo {
     background-image: url(@SPARQL-logo);
     background-repeat: no-repeat;

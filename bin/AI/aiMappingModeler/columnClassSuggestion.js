@@ -229,7 +229,40 @@ function readSuggestions(answerText, preparedSource, knownClasses) {
 }
 
 // { suggestion } or { error }: a class the model names must exist and a new class must be whole, whatever it wrote
-function readClassAnswer(answer, preparedSource, knownClasses) {
+// the class the same answer declares, a new local class of the source, matched by its label whatever case is written
+function findDeclaredClass(writtenClass, declaredClasses) {
+    if (!Array.isArray(declaredClasses)) {
+        return null;
+    }
+    const writtenLabel = String(writtenClass || "").trim().toLowerCase();
+    if (!writtenLabel) {
+        return null;
+    }
+    const declaredClass = declaredClasses.find((candidateClass) => candidateClass.label.toLowerCase() == writtenLabel);
+    return declaredClass || null;
+}
+
+// the imported class written by its label alone, whatever case, when no prefix or IRI was written; null for a label
+// none of the upper ontologies holds
+function findImportedClassByLabel(writtenClass, preparedSource) {
+    const writtenLabel = String(writtenClass || "").trim().toLowerCase();
+    if (!writtenLabel) {
+        return null;
+    }
+    const sortedImportedIris = Object.keys(preparedSource.classLabelByIri).sort();
+    const matchedIri = sortedImportedIris.find((classIri) => preparedSource.classLabelByIri[classIri].toLowerCase() == writtenLabel);
+    if (!matchedIri) {
+        return null;
+    }
+    return { id: matchedIri, label: preparedSource.classLabelByIri[matchedIri] };
+}
+
+// the class an answer names, read as a declared local class first, then as an imported one by its label
+function findWrittenClass(writtenClass, preparedSource, declaredClasses) {
+    return findDeclaredClass(writtenClass, declaredClasses) ?? findImportedClassByLabel(writtenClass, preparedSource);
+}
+
+function readClassAnswer(answer, preparedSource, knownClasses, declaredClasses) {
     if (noClassKinds.includes(answer.columnKind)) {
         const noClassSuggestion = { columnKind: answer.columnKind };
         // shown on hover, as the definition of a class
@@ -240,8 +273,12 @@ function readClassAnswer(answer, preparedSource, knownClasses) {
     }
     if (answer.columnKind == "existingClass") {
         const classId = readClassIri(answer.class, preparedSource.classPrefixes);
-        const classLabel = getClassLabel(classId, preparedSource, knownClasses);
+        let classLabel = getClassLabel(classId, preparedSource, knownClasses);
         if (classLabel === undefined) {
+            const writtenClass = findWrittenClass(answer.class, preparedSource, declaredClasses);
+            if (writtenClass) {
+                return { suggestion: { columnKind: "existingClass", classId: writtenClass.id, label: writtenClass.label } };
+            }
             return { error: "the model named a class that does not exist: " + JSON.stringify(answer.class) };
         }
         return { suggestion: { columnKind: "existingClass", classId: classId, label: classLabel } };
@@ -259,18 +296,25 @@ function readClassAnswer(answer, preparedSource, knownClasses) {
         return { suggestion: { columnKind: "existingClass", classId: sameLabelClass.id, label: sameLabelClass.label } };
     }
     // a local class with the label of an imported class only renames it
-    const sortedImportedIris = Object.keys(preparedSource.classLabelByIri).sort();
-    const sameLabelImportedIri = sortedImportedIris.find((classIri) => preparedSource.classLabelByIri[classIri].toLowerCase() == newLabel.toLowerCase());
-    if (sameLabelImportedIri) {
-        return { suggestion: { columnKind: "existingClass", classId: sameLabelImportedIri, label: preparedSource.classLabelByIri[sameLabelImportedIri] } };
+    const sameLabelImported = findImportedClassByLabel(newLabel, preparedSource);
+    if (sameLabelImported) {
+        return { suggestion: { columnKind: "existingClass", classId: sameLabelImported.id, label: sameLabelImported.label } };
     }
     // one superclass, or the ones the model hesitates between, each with the definition that names it
     const parentAnswers = Array.isArray(answer.parents) ? answer.parents : [{ class: answer.parent, definition: answer.definition }];
     const parentOptions = [];
     const parentRefusals = [];
     parentAnswers.forEach(function (parentAnswer) {
-        const parentId = readClassIri(parentAnswer.class, preparedSource.classPrefixes);
-        const parentLabel = getClassLabel(parentId, preparedSource, knownClasses);
+        let parentId = readClassIri(parentAnswer.class, preparedSource.classPrefixes);
+        let parentLabel = getClassLabel(parentId, preparedSource, knownClasses);
+        if (parentLabel === undefined) {
+            // the model may name a superclass by its label alone, or one the same answer declares
+            const writtenParent = findWrittenClass(parentAnswer.class, preparedSource, declaredClasses);
+            if (writtenParent) {
+                parentId = writtenParent.id;
+                parentLabel = writtenParent.label;
+            }
+        }
         if (parentLabel === undefined) {
             parentRefusals.push("the model named a superclass that does not exist: " + JSON.stringify(parentAnswer.class));
             return;
@@ -282,7 +326,9 @@ function readClassAnswer(answer, preparedSource, knownClasses) {
         if (parentOptions.some((parentOption) => parentOption.parentId == parentId)) {
             return;
         }
-        parentOptions.push({ parentId: parentId, parentLabel: parentLabel, definition: parentAnswer.definition.trim(), probability: readProbability(parentAnswer.probability) });
+        // the impact of a superclass on the ontology, asked by the master data classification only
+        const impact = isFilledText(parentAnswer.impact) ? parentAnswer.impact.trim() : "";
+        parentOptions.push({ parentId: parentId, parentLabel: parentLabel, definition: parentAnswer.definition.trim(), probability: readProbability(parentAnswer.probability), impact: impact });
     });
     if (parentOptions.length == 0) {
         return { error: parentRefusals[0] || "the model gave a new class without a superclass" };

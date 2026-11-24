@@ -3,6 +3,7 @@ import MappingModeler from "../tools/mappingModeler/mappingModeler.js";
 import AIMappingModeler from "../tools/aiMappingModeler/aiMappingModeler.js";
 import AIDataSourceManager from "../tools/aiMappingModeler/aiDataSourcesManager.js";
 import Admin from "../tools/admin/admin.js";
+import AIMappingWorkflow from "../tools/aiMappingWorkflow/aiMappingWorkflow.js";
 
 const socket = io();
 // client-side
@@ -24,6 +25,10 @@ socket.on("KGbuilder", function (message) {
 });
 
 socket.on("aiKeyDetection", function (keyDetectionStep) {
+    if (MainController.currentTool == "AIMappingWorkflow") {
+        AIMappingWorkflow.showKeyDetectionStep(keyDetectionStep);
+        return;
+    }
     AIDataSourceManager.showKeyDetectionStep(keyDetectionStep);
 });
 

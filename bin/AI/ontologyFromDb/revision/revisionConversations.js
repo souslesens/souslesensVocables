@@ -6,7 +6,8 @@ import { llmAnswersDirectory, nonNameCharacterRegex } from "../ontology/ontology
 const conversationsDirectory = join(llmAnswersDirectory, "conversations");
 // chosen by the page that started it, the only part of a request that reaches a file name
 const conversationIdRegex = /^[a-z0-9-]{8,64}$/;
-const conversationKinds = ["ontology", "mapping"];
+// masterData: the conversations of the AI Mapping Workflow about the master data guess of a database, its id as version name
+const conversationKinds = ["ontology", "mapping", "masterData"];
 
 function getSourceConversationsDirectory(source) {
     return join(conversationsDirectory, source.replace(nonNameCharacterRegex, "_"));

@@ -102,53 +102,52 @@ var AIMappingModeler = (function () {
         }
 
         var tableStatsMap = {};
-        async.series(
-            [
-                function (callbackSeries) {
-                    //reinitialize config (Change Source and reload after modification)
-                    AIDataSourceManager.currentConfig = {};
-                    AIDataSourceManager.rawConfig = {};
-                    self.currentTable = null;
+        var loadingSteps = [
+            function (callbackSeries) {
+                //reinitialize config (Change Source and reload after modification)
+                AIDataSourceManager.currentConfig = {};
+                AIDataSourceManager.rawConfig = {};
+                self.currentTable = null;
+                return callbackSeries();
+            },
+            function (callbackSeries) {
+                AIMappingModeler.currentSLSsource = MainController.currentSource;
+                Lineage_sources.loadedSources = {};
+                UI.initMenuBar(function () {
+                    self.loadSource(function () {
+                        self.initResourcesMap(AIMappingModeler.currentSLSsource);
+                        return callbackSeries();
+                    });
+                });
+            },
+
+            function (callbackSeries) {
+                $("#graphDiv").load("./modules/tools/aiMappingModeler/html/aiMappingModeler_graphDiv.html", function (err) {
+                    //$("#mainDialogDiv").dialog("open");
                     return callbackSeries();
-                },
-                function (callbackSeries) {
-                    AIMappingModeler.currentSLSsource = MainController.currentSource;
-                    Lineage_sources.loadedSources = {};
-                    UI.initMenuBar(function () {
-                        self.loadSource(function () {
-                            self.initResourcesMap(AIMappingModeler.currentSLSsource);
-                            return callbackSeries();
-                        });
-                    });
-                },
+                });
+            },
+            //init visjsGraph
+            function (callbackSeries) {
+                var visjsData = { nodes: [], edges: [] };
+                AIMappingColumnsGraph.drawGraphCanvas(AIMappingColumnsGraph.graphDiv, visjsData, function () {
+                    callbackSeries();
+                });
+            },
+            //load visjs mapping graph
 
-                function (callbackSeries) {
-                    $("#graphDiv").load("./modules/tools/aiMappingModeler/html/aiMappingModeler_graphDiv.html", function (err) {
-                        //$("#mainDialogDiv").dialog("open");
+            function (callbackSeries) {
+                AIMappingColumnsGraph.loadVisjsGraph(function (err) {
+                    if (err) {
                         return callbackSeries();
-                    });
-                },
-                //init visjsGraph
-                function (callbackSeries) {
-                    var visjsData = { nodes: [], edges: [] };
-                    AIMappingColumnsGraph.drawGraphCanvas(AIMappingColumnsGraph.graphDiv, visjsData, function () {
-                        callbackSeries();
-                    });
-                },
-                //load visjs mapping graph
-
-                function (callbackSeries) {
-                    AIMappingColumnsGraph.loadVisjsGraph(function (err) {
-                        if (err) {
-                            return callbackSeries();
-                        }
-                        return callbackSeries();
-                    });
-                },
-                // refuse access if another lastUpdate.user is too recent on mappingFile
-                // concurencial access
-                function (callbackSeries) {
-                    /*
+                    }
+                    return callbackSeries();
+                });
+            },
+            // refuse access if another lastUpdate.user is too recent on mappingFile
+            // concurencial access
+            function (callbackSeries) {
+                /*
                     if (aiDataSourcesManager?.currentConfig?.lastUpdate && authentication?.currentUser?.identifiant) {
                         if (aiDataSourcesManager.currentConfig.lastUpdate.user != authentication?.currentUser?.identifiant) {
                             var currentTime = new Date();
@@ -163,95 +162,103 @@ var AIMappingModeler = (function () {
                             }
                         }
                     }*/
+                return callbackSeries();
+            },
+            //load visjs mapping graph
+            function (callbackSeries) {
+                $("#rightControlPanelDiv").load("./modules/tools/aiMappingModeler/html/mappingsGraphButtons.html", function (err) {
                     return callbackSeries();
-                },
-                //load visjs mapping graph
-                function (callbackSeries) {
-                    $("#rightControlPanelDiv").load("./modules/tools/aiMappingModeler/html/mappingsGraphButtons.html", function (err) {
-                        return callbackSeries();
-                    });
-                },
-                function (callbackSeries) {
-                    AIDataSourceManager.currentSlsvSource = AIMappingModeler.currentSLSsource;
-                    AIDataSourceManager.getSlsvSourceConfig(AIMappingModeler.currentSLSsource, function (err, result) {
-                        if (err) {
-                            return callbackSeries(err);
-                        }
-
-                        return callbackSeries();
-                    });
-                },
-                function (callbackSeries) {
-                    return callbackSeries();
-                    AIMappingColumnsGraph.drawClassesGraph();
-                    return callbackSeries();
-                },
-                function (callbackSeries) {
-                    // Non-blocking stats: paint tree instantly from in-memory cache, refresh in background after tree loads.
-                    if (self.skipStats) {
-                        return callbackSeries();
+                });
+            },
+            function (callbackSeries) {
+                AIDataSourceManager.currentSlsvSource = AIMappingModeler.currentSLSsource;
+                AIDataSourceManager.getSlsvSourceConfig(AIMappingModeler.currentSLSsource, function (err, result) {
+                    if (err) {
+                        return callbackSeries(err);
                     }
-                    var cachedStats = AIDataSourceManager.statsMapBySource[AIDataSourceManager.currentSlsvSource];
-                    if (cachedStats) {
-                        tableStatsMap = cachedStats;
-                        AIDataSourceManager.statsMap = cachedStats;
-                    }
-                    return callbackSeries();
-                },
-                function (callbackSeries) {
-                    $("#lateralPanelDiv").load("./modules/tools/aiMappingModeler/html/aiMappingModelerLeftPanel.html", function (err) {
-                        $("#MappingModeler_leftTabs").tabs({
-                            activate: function (event, ui) {
-                                var tabId = $(ui.newPanel).attr("id");
-                                AIUIcontroller.onActivateLeftPanelTab(tabId);
-                                //  AIUIcontroller.activateRightPanel($(ui.newTab).text());
-                            },
-                        });
-                        $($("#MappingModeler_leftTabs").children()[0]).css("border-radius", "0px");
 
-                        /*
+                    return callbackSeries();
+                });
+            },
+            function (callbackSeries) {
+                return callbackSeries();
+                AIMappingColumnsGraph.drawClassesGraph();
+                return callbackSeries();
+            },
+            function (callbackSeries) {
+                // Non-blocking stats: paint tree instantly from in-memory cache, refresh in background after tree loads.
+                if (self.skipStats) {
+                    return callbackSeries();
+                }
+                var cachedStats = AIDataSourceManager.statsMapBySource[AIDataSourceManager.currentSlsvSource];
+                if (cachedStats) {
+                    tableStatsMap = cachedStats;
+                    AIDataSourceManager.statsMap = cachedStats;
+                }
+                return callbackSeries();
+            },
+            function (callbackSeries) {
+                $("#lateralPanelDiv").load("./modules/tools/aiMappingModeler/html/aiMappingModelerLeftPanel.html", function (err) {
+                    $("#MappingModeler_leftTabs").tabs({
+                        activate: function (event, ui) {
+                            var tabId = $(ui.newPanel).attr("id");
+                            AIUIcontroller.onActivateLeftPanelTab(tabId);
+                            //  AIUIcontroller.activateRightPanel($(ui.newTab).text());
+                        },
+                    });
+                    $($("#MappingModeler_leftTabs").children()[0]).css("border-radius", "0px");
+
+                    /*
                         $($('#MappingModeler_leftTabs').children()[0]).find("*").removeAttr("class");
                         
                        
                         $($('#MappingModeler_leftTabs').children()[0]).find("li").addClass('lineage-tabDiv');
                         $($('#MappingModeler_leftTabs').children()[0]).find("a").css('text-decoration','none');*/
-                        AIDataSourceManager.loaDataSourcesJstree(self.jstreeDivId, tableStatsMap, function (err) {
-                            // Background stats refresh (non-blocking): self-heals from any change source (mapping modeler, SPARQL, other tools).
-                            if (!self.skipStats) {
-                                AIDataSourceManager.getTriplesStats(AIDataSourceManager.currentSlsvSource, function (statsErr, freshStats) {
-                                    if (statsErr) {
-                                        return;
-                                    }
-                                    AIDataSourceManager.updateTreeStats(freshStats);
-                                    UI.message("Triple stats loaded");
-                                });
-                            }
-                            return callbackSeries();
-                        });
-                        /*  $('#rightControlPanelDiv').load("./modules/tools/lineage/html/whiteBoardButtons.html", function () {
+                    AIDataSourceManager.loaDataSourcesJstree(self.jstreeDivId, tableStatsMap, function (err) {
+                        // Background stats refresh (non-blocking): self-heals from any change source (mapping modeler, SPARQL, other tools).
+                        if (!self.skipStats) {
+                            AIDataSourceManager.getTriplesStats(AIDataSourceManager.currentSlsvSource, function (statsErr, freshStats) {
+                                if (statsErr) {
+                                    return;
+                                }
+                                AIDataSourceManager.updateTreeStats(freshStats);
+                                UI.message("Triple stats loaded");
+                            });
+                        }
+                        return callbackSeries();
+                    });
+                    /*  $('#rightControlPanelDiv').load("./modules/tools/lineage/html/whiteBoardButtons.html", function () {
                             UI.resetWindowSize();
                         });*/
-                    });
-                },
-                // add the MappingModeler_currentDataSource div to set table message in topBar
-                function (callbackSeries) {
-                    $("#MappingModeler_currentDataSourceDiv").remove();
-                    var datasourceDiv = `
+                });
+            },
+            // add the MappingModeler_currentDataSource div to set table message in topBar
+            function (callbackSeries) {
+                $("#MappingModeler_currentDataSourceDiv").remove();
+                var datasourceDiv = `
                     <div class='w3-bar-item' style='display:flex' id="MappingModeler_currentDataSourceDiv">
                     <span style="font-weight: bold; font-size: 13px;margin-top:15px" id="MappingModeler_currentDataSource"></span>&nbsp;
                     </div>`;
-                    var topControlParent = $("#index_topContolPanel").parent();
-                    $(datasourceDiv).insertAfter(topControlParent);
-                    AIColumnClassSuggestion.prepare();
-                    return callbackSeries();
-                },
-            ],
-            function (err) {
-                if (err) {
-                    return err;
-                }
+                var topControlParent = $("#index_topContolPanel").parent();
+                $(datasourceDiv).insertAfter(topControlParent);
+                AIColumnClassSuggestion.prepare();
+                return callbackSeries();
             },
-        );
+        ];
+        // a tool opened while this one still loads shares the same panels: the remaining steps would draw over it
+        var stepsStoppedOnToolChange = loadingSteps.map(function (loadingStep) {
+            return function (callbackSeries) {
+                if (MainController.currentTool != "AIMappingModeler") {
+                    return callbackSeries("AIMappingModeler left while loading");
+                }
+                loadingStep(callbackSeries);
+            };
+        });
+        async.series(stepsStoppedOnToolChange, function (err) {
+            if (err) {
+                return err;
+            }
+        });
     };
     self.activateRightPanel = function (PanelLabel) {
         $(".mappingModeler_rightPanel").css("display", "none");

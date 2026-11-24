@@ -102,7 +102,16 @@ const MainConfigObject = z
             .strict(),
         llm: z
             .object({
-                provider: z.enum(["anthropic", "openrouter", "ollama", "claudeCode", "codex"]),
+                provider: z.enum(["anthropic", "openrouter", "ollama", "claudeCode", "codex", "openCode"]),
+                openCode: z
+                    .object({
+                        defaultModel: z.string().default("opencode-go/qwen4-max"),
+                        cliPath: z.string().optional(),
+                        agentName: z.string().default("slsBackend"),
+                        rateLimitTPM: z.number().positive().default(10000000),
+                    })
+                    .strict()
+                    .optional(),
                 claudeCode: z
                     .object({
                         defaultModel: z.string().default("opus"),

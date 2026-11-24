@@ -33,6 +33,32 @@ const assistantTurnSchema = {
     required: ["text", "toolCalls"],
 };
 
+// a tool turn streams its structured output as JSON: its text is shown while written when the output opens on it
+const textFieldStartRegex = /^\s*(?:```(?:json)?\s*)?\{\s*"text"\s*:\s*"/;
+// the closing quote of a JSON string, not escaped
+const jsonStringEndRegex = /(?:^|[^\\])(?:\\\\)*"/;
+const jsonFenceRegex = /^\s*```(?:json)?\s*([\s\S]*?)\s*```\s*$/;
+// an escape cut by the end of the JSON streamed so far, waiting for its next characters
+const unfinishedEscapeRegex = /\\(u[0-9a-fA-F]{0,3})?$/;
+
+// the text field of a structured output still being written, decoded as far as it goes; null before the field opens
+function readStreamedTextField(partialJson) {
+    const textFieldStart = partialJson.match(textFieldStartRegex);
+    if (!textFieldStart) {
+        return null;
+    }
+    const writtenValue = partialJson.slice(textFieldStart[0].length);
+    const stringEnd = writtenValue.match(jsonStringEndRegex);
+    const rawValue = stringEnd ? writtenValue.slice(0, stringEnd.index + stringEnd[0].length - 1) : writtenValue.replace(unfinishedEscapeRegex, "");
+    // a stream event handler reaches no callback: an unreadable value waits for the next characters
+    try {
+        const decodedText = JSON.parse('"' + rawValue + '"');
+        return decodedText;
+    } catch {
+        return null;
+    }
+}
+
 function estimateTokens({ system, messages, tools }) {
     const serializedRequest = JSON.stringify({ system, messages, tools });
     return Math.ceil(serializedRequest.length / averageCharsPerToken);
@@ -69,11 +95,26 @@ function toCliPrompt(system, messages, tools) {
     return promptParts.join("\n\n");
 }
 
+// the model sometimes writes the structured output as its text instead of returning it, with or without a json fence: its
+// tool calls would be lost; a text of another shape is the answer itself
+function readAssistantTurnText(resultText) {
+    const fencedJson = resultText.match(jsonFenceRegex);
+    try {
+        const parsedTurn = JSON.parse(fencedJson ? fencedJson[1] : resultText);
+        if (typeof parsedTurn?.text == "string" && Array.isArray(parsedTurn.toolCalls)) {
+            return parsedTurn;
+        }
+    } catch {
+        // prose, not a structured output
+    }
+    return { text: resultText, toolCalls: [] };
+}
+
 function toAnthropicResponse(cliResult, isToolTurn, model) {
     const contentBlocks = [];
     let stopReason = cliResult.stop_reason;
     if (isToolTurn) {
-        const assistantTurn = cliResult.structured_output ?? { text: cliResult.result ?? "", toolCalls: [] };
+        const assistantTurn = cliResult.structured_output ?? readAssistantTurnText(cliResult.result ?? "");
         const toolCalls = assistantTurn.toolCalls ?? [];
         if (assistantTurn.text || toolCalls.length == 0) {
             contentBlocks.push({ type: "text", text: assistantTurn.text ?? "" });
@@ -109,7 +150,7 @@ function toCliError(message, status) {
 function createClaudeCodeAdapter(claudeCodeConfig) {
     function createMessage({ system, messages, model, maxTokens, tools, reasoningEffort, onTextDelta, onReasoningDelta, abortSignal }, callback) {
         const isToolTurn = Boolean(tools && tools.length > 0);
-        const isStreamed = Boolean(onTextDelta) && !isToolTurn;
+        const isStreamed = Boolean(onTextDelta);
         const cliModel = cliModelByOpenRouterId[model] ?? claudeCodeConfig.defaultModel;
         const cliArguments = ["-p", "--output-format", isStreamed ? "stream-json" : "json", "--model", cliModel];
         if (isStreamed) {
@@ -141,6 +182,10 @@ function createClaudeCodeAdapter(claudeCodeConfig) {
         let standardError = "";
         let cliResult = null;
         let isSettled = false;
+        // a tool turn: its structured output so far, and the length of its text already sent
+        let structuredOutputJson = "";
+        let writtenOutputJson = "";
+        let streamedTextLength = 0;
         const settle = function (error, response) {
             if (isSettled) {
                 return;
@@ -171,8 +216,20 @@ function createClaudeCodeAdapter(claudeCodeConfig) {
                 cliResult = outputEvent;
             }
             const delta = outputEvent?.type == "stream_event" ? outputEvent.event?.delta : null;
-            if (delta?.type == "text_delta") {
+            if (delta?.type == "text_delta" && !isToolTurn) {
                 onTextDelta(delta.text);
+            } else if ((delta?.type == "input_json_delta" || delta?.type == "text_delta") && isToolTurn) {
+                // the structured output comes as tool input, or as text when the model writes it there
+                if (delta.type == "input_json_delta") {
+                    structuredOutputJson += delta.partial_json;
+                } else {
+                    writtenOutputJson += delta.text;
+                }
+                const streamedText = readStreamedTextField(structuredOutputJson) ?? readStreamedTextField(writtenOutputJson);
+                if (streamedText && streamedText.length > streamedTextLength) {
+                    onTextDelta(streamedText.slice(streamedTextLength));
+                    streamedTextLength = streamedText.length;
+                }
             } else if (delta?.type == "thinking_delta" && delta.thinking && onReasoningDelta) {
                 onReasoningDelta(delta.thinking);
             }
@@ -204,8 +261,8 @@ function createClaudeCodeAdapter(claudeCodeConfig) {
             }
             const response = toAnthropicResponse(cliResult, isToolTurn, cliModel);
             const answerText = response.content[0]?.text;
-            // a tool turn is not streamed: its text comes out of the structured output
-            if (onTextDelta && answerText && !isStreamed) {
+            // a tool turn whose structured output did not open on its text sends it whole
+            if (isToolTurn && onTextDelta && answerText && streamedTextLength == 0) {
                 onTextDelta(answerText);
             }
             settle(null, response);

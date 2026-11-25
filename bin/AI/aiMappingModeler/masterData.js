@@ -315,13 +315,17 @@ function describeGuessedDatabase(database, schema, columnsByTable, aiKeys) {
 }
 
 // the entries the model answered, one per label, with the data of their evidence query read
-async function readGuessedEntries(answeredEntries, connection, clientDriver, tellStep) {
+// the tables of an entry are those the model named that exist, exactly as the description names them
+async function readGuessedEntries(answeredEntries, connection, clientDriver, columnsByTable, tellStep) {
     const guessEntries = [];
     for (const answeredEntry of answeredEntries) {
         if (!answeredEntry || !readText(answeredEntry.label) || findByLabel(guessEntries, answeredEntry.label)) {
             continue;
         }
-        const guessEntry = { label: readText(answeredEntry.label), definition: readText(answeredEntry.definition), reason: readText(answeredEntry.reason) };
+        const answeredTables = Array.isArray(answeredEntry.tables) ? answeredEntry.tables : [];
+        const trimmedTables = answeredTables.map(readText);
+        const tables = trimmedTables.filter((tableName) => Object.hasOwn(columnsByTable, tableName));
+        const guessEntry = { label: readText(answeredEntry.label), definition: readText(answeredEntry.definition), reason: readText(answeredEntry.reason), tables: tables };
         // an important class names the master data it is about
         if (answeredEntry.aboutMasterData) {
             guessEntry.aboutMasterData = readText(answeredEntry.aboutMasterData);
@@ -359,7 +363,7 @@ async function guessMasterData(source, database, connection, schema, columnsByTa
     }
     const answer = masterDataAnswer.answer || {};
     const answeredMasterData = Array.isArray(answer.masterData) ? answer.masterData : [];
-    const masterData = await readGuessedEntries(answeredMasterData, connection, databaseModel.getClientDriver(database.driver), tellGuessStep);
+    const masterData = await readGuessedEntries(answeredMasterData, connection, databaseModel.getClientDriver(database.driver), columnsByTable, tellGuessStep);
     const masterDataGuess = { domain: readText(answer.domain), masterData: masterData, model: keyDetectionModelId, guessedAt: new Date().toISOString() };
     if (masterData.length == 0) {
         return masterDataGuess;
@@ -375,7 +379,7 @@ async function guessMasterData(source, database, connection, schema, columnsByTa
     return masterDataGuess;
 }
 
-// the entries of a guess: the master data of step 1, the important classes of step 2, the event classes of step 3
+// the entries of a guess: the master data of step 1, the important classes of step 2, the event, process and association classes of step 3
 function getGuessEntries(guess) {
     const guessEntries = guess.masterData || guess.importantClasses || guess.eventClasses;
     return guessEntries;
@@ -454,6 +458,14 @@ function describeDecidedMasterData(guess) {
     return { decidedLines, decidedClasses, changeLogLines };
 }
 
+// the step function of one phase of a guess of steps 2 and 3, out of its phases: the model answer, the data read, the
+// readings, the classes; the page draws its progress bar from "phase/phases"
+const guessPhaseCount = 4;
+function getGuessPhaseStep(tellStep, phaseNumber) {
+    const tellPhaseStep = (stepText) => tellStep(phaseNumber + "/" + guessPhaseCount + " " + stepText);
+    return tellPhaseStep;
+}
+
 // { importantClassesGuess } or { error }: step 2 of the workflow, run once every master data is decided; the important
 // classes around the decided master data, guessed from the schema, read and classified as the master data are, written in
 // the mapping with the decisions it was built from
@@ -479,13 +491,13 @@ async function guessImportantClasses(source, databaseId, userInfo, tellStep) {
         (decidedMasterData.changeLogLines.length > 0 ? decidedMasterData.changeLogLines.join("\n") : "decided on the cards, no discussion") +
         "\n\n# Database\n\n" +
         describeGuessedDatabase(database, schema, columnsByTable, aiKeys);
-    tellStep("the model guesses the important classes around the master data, about a minute");
+    getGuessPhaseStep(tellStep, 1)("the model guesses the important classes around the master data, about a minute");
     const importantClassesAnswer = await askKeyModel(importantClassesPrompt);
     if (importantClassesAnswer.error) {
         return { error: importantClassesAnswer.error };
     }
     const answeredClasses = Array.isArray(importantClassesAnswer.answer?.importantClasses) ? importantClassesAnswer.answer.importantClasses : [];
-    const importantClasses = await readGuessedEntries(answeredClasses, connection, databaseModel.getClientDriver(database.driver), tellStep);
+    const importantClasses = await readGuessedEntries(answeredClasses, connection, databaseModel.getClientDriver(database.driver), columnsByTable, getGuessPhaseStep(tellStep, 2));
     const decisionsByMasterData = {};
     masterDataGuess.masterData.forEach((masterDataEntry) => (decisionsByMasterData[masterDataEntry.label] = masterDataEntry.decision));
     const importantClassesGuess = {
@@ -496,8 +508,8 @@ async function guessImportantClasses(source, databaseId, userInfo, tellStep) {
         guessedAt: new Date().toISOString(),
     };
     if (importantClasses.length > 0) {
-        await layOutReadings(importantClasses, masterDataGuess.domain, tellStep);
-        const classified = await classifyClasses(source, masterDataGuess.domain, importantClasses, decidedMasterData.decidedClasses, preparedSource, tellStep);
+        await layOutReadings(importantClasses, masterDataGuess.domain, getGuessPhaseStep(tellStep, 3));
+        const classified = await classifyClasses(source, masterDataGuess.domain, importantClasses, decidedMasterData.decidedClasses, preparedSource, getGuessPhaseStep(tellStep, 4));
         if (classified.error) {
             return { error: classified.error };
         }
@@ -812,8 +824,8 @@ function changeGuessEntry(preparedSource, guess, source, changeName, changeInput
     return { summary, entryLabel: guessEntry.label };
 }
 
-// the links changes of the chat on the guess of step 3, and the names of their inputs; an error names the link to act on
-const guessKeyByStep = { masterData: "masterDataGuess", importantClasses: "importantClassesGuess", links: "linksGuess" };
+// the links changes of the chat on the guess of step 4, and the names of their inputs; an error names the link to act on
+const guessKeyByStep = { masterData: "masterDataGuess", importantClasses: "importantClassesGuess", events: "eventsGuess", links: "linksGuess" };
 const linkChangeNames = ["apply_link_decision", "undo_link_decision", "add_link_property_option", "remove_link_property_option", "remove_link"];
 
 // { link } or { error }, of one link of a links guess by its id
@@ -870,7 +882,7 @@ function changeGuessLink(preparedSource, guess, changeName, changeInput) {
             propertyLabel: preparedSource.ontologyModels[propertySource].properties[propertyIri].label,
             propertySource: propertySource,
             definition: readText(changeInput.definition),
-            probability: Number(changeInput.probability) || 0,
+            probability: Math.min(100, Math.max(0, Number(changeInput.probability) || 0)),
             inverse: Boolean(changeInput.inverse),
         });
         summary = "property added to the link " + link.id;
@@ -900,7 +912,15 @@ async function changeGuess(source, databaseId, changeName, changeInput, chatEvid
         return { error: "give the rationale of the change" };
     }
     const keyDetection = await getKeyDetection(source, databaseId);
-    const guessKey = guessKeyByStep[changeInput.step] || "masterDataGuess";
+    const guessKey = guessKeyByStep[changeInput.step];
+    if (!guessKey) {
+        return { error: "name the step of the guess to change, one of " + Object.keys(guessKeyByStep).join(", ") };
+    }
+    // the links guess holds links, the others entries
+    const isLinkChange = linkChangeNames.includes(changeName);
+    if (isLinkChange != (guessKey == "linksGuess")) {
+        return { error: changeName + " changes " + (isLinkChange ? "the links of step 4" : "the entries of steps 1 to 3") + ", not the " + guessKey };
+    }
     const guess = keyDetection.aiKeys?.[guessKey];
     if (!guess) {
         return { error: "no " + guessKey + " for this database yet" };
@@ -910,7 +930,7 @@ async function changeGuess(source, databaseId, changeName, changeInput, chatEvid
         return { error: getNotPreparedError(source) };
     }
     let changed = null;
-    if (linkChangeNames.includes(changeName)) {
+    if (isLinkChange) {
         changed = changeGuessLink(preparedSource, guess, changeName, changeInput);
     } else {
         // a local class belongs to the ontology, to no entry of the guess
@@ -919,9 +939,10 @@ async function changeGuess(source, databaseId, changeName, changeInput, chatEvid
     if (changed.error) {
         return { error: changed.error };
     }
-    if (guessKey == "linksGuess" && changeName == "remove_entry" && changed.entryLabel) {
+    const linksGuess = keyDetection.aiKeys.linksGuess;
+    if (guessKey == "eventsGuess" && changeName == "remove_entry" && linksGuess) {
         // removing an event takes its links with it
-        guess.links = (guess.links || []).filter((link) => link.viaEvent != changed.entryLabel && link.fromClass != changed.entryLabel && link.toClass != changed.entryLabel);
+        linksGuess.links = linksGuess.links.filter((link) => link.viaEvent != changed.entryLabel);
     }
     if (!guess.changeLog) {
         guess.changeLog = [];
@@ -939,4 +960,4 @@ async function changeGuess(source, databaseId, changeName, changeInput, chatEvid
     return { summary: changed.summary, guessKey, guess };
 }
 
-export { guessMasterData, guessImportantClasses, runEvidenceQuery, changeGuess, linkChangeNames, describeDecidedMasterData, describeGuessedDatabase, layOutReadings, readGuessedEntries, classifyClasses, findByLabel, findParentOption, getPropertySource, getGuessEntries };
+export { guessMasterData, guessImportantClasses, getGuessPhaseStep, runEvidenceQuery, changeGuess, linkChangeNames, describeDecidedMasterData, describeGuessedDatabase, layOutReadings, readGuessedEntries, classifyClasses, findByLabel, findParentOption, getPropertySource, getGuessEntries };

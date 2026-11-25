@@ -19,6 +19,12 @@ var AIMappingWorkflow = (function () {
     // between two readings of the keys while the AI detects them and guesses the master data
     self.tableKeysPollDelay = 5000;
     self.tableKeysPollTimer = null;
+    // the operation under way, told beside the message line: its last step, its start, the timer of its elapsed time
+    self.progressStepText = "";
+    self.progressStartTime = null;
+    self.progressTimer = null;
+    // "AI keys 5/6: ..." or "Events: 2/4 ...": the step reached out of the steps of the operation
+    self.stepNumbersRegex = /(\d+)\/(\d+)/;
     // the trees of the graph, one per entry, in canvas pixels: one superclass slot per option, wider than the longest
     // superclass label
     self.superClassSpacing = 280;
@@ -39,32 +45,76 @@ var AIMappingWorkflow = (function () {
     self.entryByNodeId = {};
     // the decisions on the entry whose card is shown: { entry, readings, readingIndex, superClassId }
     self.entryCard = null;
-    // the steps of the workflow, in their order, each one reached once every entry of the one before is decided; the next
-    // one is shown by its number only. chatStep names the guess for the change_guess tool of the chat
+    // the steps of the workflow, in their order, each one reached once the one before is guessed, decided or not; the next
+    // one is shown by its number only. chatStep names the guess for the change_guess tool of the chat, guessRoute the
+    // route guessing it, runText what the run button tells
     self.workflowSteps = [
         { label: "Master data", guessKey: "masterDataGuess", chatStep: "masterData", entryLegend: "Master data", entryNoun: "master data", reasonLabel: "Why master data" },
         {
             label: "Important classes",
             guessKey: "importantClassesGuess",
             chatStep: "importantClasses",
+            guessRoute: "importantClasses",
+            runText: "The AI now guesses the important classes of the business around the master data, reads what their rows denote and classifies them: a few minutes.",
             entryLegend: "Important class",
             entryNoun: "important classes",
             reasonLabel: "Why important",
         },
         {
+            label: "Associations",
+            guessKey: "eventsGuess",
+            chatStep: "events",
+            guessRoute: "events",
+            runText:
+                "The AI now guesses the associations of the business joining the classes of steps 1 and 2 (orders, notifications, assignments, contracts), held by tables or implicit in columns, and classifies them: a few minutes.",
+            entryLegend: "Association class",
+            entryNoun: "association classes",
+            reasonLabel: "Why",
+        },
+        {
             label: "Links",
             guessKey: "linksGuess",
             chatStep: "links",
+            guessRoute: "links",
+            runText: "The AI now proposes the properties of the upper ontologies for the links between the classes of steps 1 to 3, for each alternative of a class still undecided: a few minutes.",
             entryLegend: "Class",
-            entryNoun: "event classes and links",
-            reasonLabel: "Why an event",
+            entryNoun: "links",
+            reasonLabel: "Why",
         },
     ];
     self.currentStepIndex = 0;
-    // step 3: the link open on the card, and the link each edge of the links graph draws
+    // step 4: the link open on the card, and the links each edge of the links graph draws
     self.currentLinkCard = null;
-    self.linkByEdgeId = {};
+    self.linksByEdgeId = {};
     self.linkNodeIdByLabel = {};
+    // the arrows of the links graph with their full label, the class node each node of a tree belongs to, and the class
+    // whose links are shown
+    self.linkArrows = [];
+    self.linkClassNodeIdByNodeId = {};
+    self.highlightedLinkClassNodeId = null;
+    // the links graph, in canvas pixels: the distance between two rings of class trees around the center, the trees a
+    // ring holds per ring of distance, the height of a superclass above its class, and the line of a link by its key
+    self.linkRingSpacing = 500;
+    self.linkRingCapacityStep = 6;
+    self.linkSuperClassRise = 200;
+    self.linkKeyDashes = { declared: false, ai: [8, 6], row: [2, 5] };
+    self.linkKeyLegendStyles = { declared: "solid", ai: "dashed", row: "dotted" };
+    // an arrow joining links on several kinds of key is drawn with the first kind of this order among them
+    self.linkKeyKindOrder = ["declared", "ai", "row"];
+    self.linkArrowStyle = { color: "#409304", fadedColor: "#b9d6a4", decidedWidth: 3, proposedWidth: 1.5, oppositeRoundness: 0.2, labelBackground: "rgba(255,255,255,0.9)" };
+    self.linkFocusAnimation = { duration: 400 };
+    // a clicked class gathers the trees its links reach on a circle around it, at least this far, back to their ring after
+    self.linkFocusRadius = 400;
+    // in radians, canvas y downward: from upper right clockwise to upper left
+    self.linkFocusFreeSector = { start: -Math.PI / 4, span: (3 * Math.PI) / 2 };
+    self.linkRingPositionByNodeId = {};
+    // in screen pixels, how far from the line or the label of a shown link a click still takes it
+    self.linkClickTolerance = 12;
+    // the associations join the other classes: they sit at the center, the master data around them, the important classes
+    // outside
+    self.linkRingOrder = ["eventsGuess", "masterDataGuess", "importantClassesGuess"];
+    // the superclass decided for each class drawn on the links graph, by class label: the options assuming another one drop out
+    self.decidedSuperClassByClass = {};
 
     self.onLoaded = function () {
         self.currentSource = MainController.currentSource;
@@ -107,7 +157,7 @@ var AIMappingWorkflow = (function () {
         return guessEntries;
     };
 
-    // a step is reached once every entry of the step before it is decided
+    // a step is reached once the step before it is guessed: an undecided class goes on with its alternatives
     self.isStepReached = function (stepIndex) {
         // the keys of the database are still read
         if (!self.currentAiKeys) {
@@ -116,8 +166,7 @@ var AIMappingWorkflow = (function () {
         if (stepIndex == 0) {
             return true;
         }
-        var previousGuess = self.currentAiKeys[self.workflowSteps[stepIndex - 1].guessKey];
-        var isReached = Boolean(previousGuess) && self.getGuessEntries(previousGuess).every((guessEntry) => guessEntry.decision);
+        var isReached = Boolean(self.currentAiKeys[self.workflowSteps[stepIndex - 1].guessKey]);
         return isReached;
     };
 
@@ -129,7 +178,7 @@ var AIMappingWorkflow = (function () {
             var stepTab = $("<button type='button' class='aiMappingWorkflow-tab'>").text(stepIndex + 1 + " " + workflowStep.label);
             stepTab.toggleClass("aiMappingWorkflow-selectedTab", stepIndex == self.currentStepIndex);
             if (!self.isStepReached(stepIndex)) {
-                stepTab.prop("disabled", true).attr("title", "Decide every entry of step " + stepIndex + " first");
+                stepTab.prop("disabled", true).attr("title", "Guess step " + stepIndex + " first");
             }
             stepTab.on("click", function () {
                 self.showStep(stepIndex);
@@ -143,6 +192,7 @@ var AIMappingWorkflow = (function () {
 
     self.unload = function () {
         clearTimeout(self.tableKeysPollTimer);
+        self.endProgress("");
         self.currentDatabaseId = null;
         AIMappingWorkflowChat.unmount();
     };
@@ -316,12 +366,12 @@ var AIMappingWorkflow = (function () {
         self.currentGuess = null;
         self.entryCard = null;
         self.currentLinkCard = null;
-        self.linkByEdgeId = {};
+        self.linksByEdgeId = {};
         self.linkNodeIdByLabel = {};
         self.currentStepIndex = 0;
         self.drawWorkflowTabs();
         $("#aiMappingWorkflow_databaseName").text(self.databaseSources[databaseId].name || databaseId);
-        $("#aiMappingWorkflow_progress").empty();
+        self.endProgress("");
         $("#aiMappingWorkflow_card").empty();
         self.showExplanation("The AI reads the database: its keys, then its master data and their classes in the upper ontologies.");
         if (self.guessGraph && self.guessGraph.network) {
@@ -342,7 +392,7 @@ var AIMappingWorkflow = (function () {
         var confirmationText =
             "Delete everything the AI found and decided on " +
             databaseName +
-            ": its keys, master data, important classes, events, links, every decision taken and the chat?\nThe AI starts again from scratch, which takes several minutes.";
+            ": its keys, master data, important classes, associations, links, every decision taken and the chat?\nThe AI starts again from scratch, which takes several minutes.";
         if (!confirm(confirmationText)) {
             return;
         }
@@ -352,8 +402,8 @@ var AIMappingWorkflow = (function () {
             url: Config.apiUrl + "/ai/aiMappingModeler/tableKeys?" + deleteParams.toString(),
             dataType: "json",
             success: function () {
-                UI.message(CommonBotFunctions.escapeHtml("Everything deleted on " + databaseName + ", the AI starts again"));
                 self.openDatabase(databaseId);
+                self.showProgressStep("Everything deleted on " + databaseName + ", the AI starts again");
             },
             error: function (error) {
                 MainController.errorAlert(AIColumnClassSuggestion.getErrorText(error));
@@ -373,11 +423,11 @@ var AIMappingWorkflow = (function () {
             dataType: "json",
             success: function (result) {
                 if (result.databaseErrors[databaseId]) {
-                    self.showProgressStep("Schema not read: " + result.databaseErrors[databaseId]);
+                    self.endProgress("Schema not read: " + result.databaseErrors[databaseId]);
                 }
             },
             error: function (error) {
-                self.showProgressStep("Preparation failed: " + AIColumnClassSuggestion.getErrorText(error));
+                self.endProgress("Preparation failed: " + AIColumnClassSuggestion.getErrorText(error));
             },
         });
     };
@@ -394,6 +444,7 @@ var AIMappingWorkflow = (function () {
                     return;
                 }
                 if (tableKeys.aiKeysStatus == "failed") {
+                    self.endProgress("");
                     return self.showExplanation("The AI found no keys in this database: " + tableKeys.aiKeysError);
                 }
                 var masterDataGuess = tableKeys.aiKeys ? tableKeys.aiKeys.masterDataGuess : null;
@@ -402,6 +453,7 @@ var AIMappingWorkflow = (function () {
                     return self.showStep(0);
                 }
                 if (tableKeys.aiKeysStatus == "done") {
+                    self.endProgress("");
                     return self.showExplanation("The AI found the keys of this database but guessed no master data: open it again to retry the guess.");
                 }
                 // running, or not started yet while the preparation is on its way
@@ -423,8 +475,32 @@ var AIMappingWorkflow = (function () {
         self.showProgressStep(keyDetectionStep.message);
     };
 
+    // the step drawn as the KG builder draws its triples: a bar beside the message line, full in the share of the steps
+    // done when the step tells its number, running otherwise, with the elapsed time
     self.showProgressStep = function (stepText) {
-        $("#aiMappingWorkflow_progress").append($("<div>").text(stepText));
+        if (!self.progressStartTime) {
+            self.progressStartTime = Date.now();
+            self.progressTimer = setInterval(self.showProgressMessage, 1000);
+        }
+        self.progressStepText = stepText;
+        var stepNumbers = stepText.match(self.stepNumbersRegex);
+        var percent = stepNumbers ? Math.round(((stepNumbers[1] - 1) / stepNumbers[2]) * 100) : null;
+        UI.showProgressBar(percent);
+        self.showProgressMessage();
+    };
+
+    self.showProgressMessage = function () {
+        var elapsedTime = AIMappingModeler.formatDuration(Date.now() - self.progressStartTime);
+        UI.message(CommonBotFunctions.escapeHtml(self.progressStepText + ", elapsed time " + elapsedTime));
+    };
+
+    // the bar goes, the message line tells how the operation ended
+    self.endProgress = function (endText) {
+        clearInterval(self.progressTimer);
+        self.progressTimer = null;
+        self.progressStartTime = null;
+        UI.hideProgressBar();
+        UI.message(CommonBotFunctions.escapeHtml(endText), true);
     };
 
     // texts of the model or of the server, never read as html
@@ -477,7 +553,8 @@ var AIMappingWorkflow = (function () {
         self.currentLinkCard = null;
         $("#aiMappingWorkflow_card").empty();
         self.drawWorkflowTabs();
-        var guess = self.currentAiKeys[self.workflowSteps[stepIndex].guessKey];
+        var workflowStep = self.workflowSteps[stepIndex];
+        var guess = self.currentAiKeys[workflowStep.guessKey];
         if (guess) {
             return self.showGuess(guess);
         }
@@ -485,41 +562,29 @@ var AIMappingWorkflow = (function () {
             self.guessGraph.network.destroy();
         }
         var runPanel = $("<div class='masterData-panel'>");
-        if (stepIndex == 1) {
-            runPanel.append(
-                $("<div>").text("Every master data is decided. The AI now guesses the important classes of the business around them, reads what their rows denote and classifies them: a few minutes."),
-                self.getStepRunButton("Guess the important classes", self.guessImportantClasses),
-            );
-        } else if (stepIndex == 2) {
-            runPanel.append(
-                $("<div>").text("Every important class is decided. The AI now guesses the event classes of the business around them and the links between the classes: a few minutes."),
-                self.getStepRunButton("Guess the links", self.guessLinks),
-            );
-        }
+        runPanel.append($("<div>").text(workflowStep.runText), self.getStepRunButton("Guess the " + workflowStep.entryNoun, stepIndex));
         $("#aiMappingWorkflow_explanation").empty().append(runPanel);
     };
 
-    // a step runs on the user's request; step 1 may still be reviewed before
-    self.getStepRunButton = function (buttonText, onClick) {
+    // a step runs on the user's request; the steps before may still be reviewed
+    self.getStepRunButton = function (buttonText, stepIndex) {
         var runButton = $("<button type='button' class='slsv-button-1'>").text(buttonText);
         runButton.on("click", function () {
             runButton.prop("disabled", true);
-            onClick();
+            self.guessStep(stepIndex);
         });
         return runButton;
     };
 
-    self.getImportantClassesRunButton = function (buttonText) {
-        return self.getStepRunButton(buttonText, self.guessImportantClasses);
-    };
-
-    self.guessImportantClasses = function () {
+    self.guessStep = function (stepIndex) {
+        var workflowStep = self.workflowSteps[stepIndex];
         var databaseId = self.currentDatabaseId;
-        $("#aiMappingWorkflow_progress").empty();
+        self.endProgress("");
+        self.showProgressStep("Guessing the " + workflowStep.entryNoun);
         var payload = { source: self.currentSource, databaseId: databaseId, clientSocketId: Config.clientSocketId };
         $.ajax({
             type: "POST",
-            url: Config.apiUrl + "/ai/aiMappingWorkflow/importantClasses",
+            url: Config.apiUrl + "/ai/aiMappingWorkflow/" + workflowStep.guessRoute,
             data: JSON.stringify(payload),
             contentType: "application/json",
             dataType: "json",
@@ -527,122 +592,127 @@ var AIMappingWorkflow = (function () {
                 if (self.currentDatabaseId != databaseId) {
                     return;
                 }
-                self.currentAiKeys.importantClassesGuess = result.importantClassesGuess;
-                self.showStep(1);
+                self.currentAiKeys[workflowStep.guessKey] = result[workflowStep.guessKey];
+                self.showStep(stepIndex);
             },
             error: function (error) {
-                self.showExplanation("Important classes not guessed: " + AIColumnClassSuggestion.getErrorText(error));
+                self.endProgress("");
+                self.showExplanation("The " + workflowStep.entryNoun + " are not guessed: " + AIColumnClassSuggestion.getErrorText(error));
             },
         });
     };
 
-    // the master data decisions changed since the important classes were guessed from them
-    self.isImportantClassesGuessOutdated = function () {
-        var guessedDecisions = self.currentAiKeys.importantClassesGuess.decisionsByMasterData;
-        var masterData = self.currentAiKeys.masterDataGuess.masterData;
-        if (masterData.length != Object.keys(guessedDecisions).length) {
-            return true;
-        }
-        var isOutdated = masterData.some(function (masterDataEntry) {
-            var guessedDecision = guessedDecisions[masterDataEntry.label];
-            var isChanged =
-                !guessedDecision ||
-                !masterDataEntry.decision ||
-                guessedDecision.readingIndex != masterDataEntry.decision.readingIndex ||
-                guessedDecision.superClassId != masterDataEntry.decision.superClassId;
-            return isChanged;
-        });
-        return isOutdated;
-    };
-
-    self.guessLinks = function () {
-        var databaseId = self.currentDatabaseId;
-        $("#aiMappingWorkflow_progress").empty();
-        var payload = { source: self.currentSource, databaseId: databaseId, clientSocketId: Config.clientSocketId };
-        $.ajax({
-            type: "POST",
-            url: Config.apiUrl + "/ai/aiMappingWorkflow/links",
-            data: JSON.stringify(payload),
-            contentType: "application/json",
-            dataType: "json",
-            success: function (result) {
-                if (self.currentDatabaseId != databaseId) {
+    // the entries of the steps before changed since this step was guessed from them: an entry added, removed or renamed,
+    // or its decision changed. A guess saved before entriesGuessedFrom kept the decisions only, in decisionsByClass or
+    // decisionsByMasterData
+    self.isStepGuessOutdated = function (stepIndex) {
+        var guess = self.currentAiKeys[self.workflowSteps[stepIndex].guessKey];
+        var isLegacyGuess = !guess.entriesGuessedFrom;
+        var guessedEntries = guess.entriesGuessedFrom || guess.decisionsByClass || guess.decisionsByMasterData || {};
+        var currentEntries = {};
+        self.workflowSteps.slice(0, stepIndex).forEach(function (previousStep) {
+            var previousGuess = self.currentAiKeys[previousStep.guessKey];
+            if (!previousGuess) {
+                return;
+            }
+            self.getGuessEntries(previousGuess).forEach(function (guessEntry) {
+                // a legacy guess kept the decided entries only
+                if (isLegacyGuess && !guessEntry.decision) {
                     return;
                 }
-                self.currentAiKeys.linksGuess = result.linksGuess;
-                self.showStep(2);
-            },
-            error: function (error) {
-                self.showExplanation("Links not guessed: " + AIColumnClassSuggestion.getErrorText(error));
-            },
-        });
-    };
-
-    // the master data or the important classes decisions changed since the links were guessed from them
-    self.isLinksGuessOutdated = function () {
-        var guessedDecisions = self.currentAiKeys.linksGuess.decisionsByClass;
-        var currentDecisions = {};
-        [self.currentAiKeys.masterDataGuess, self.currentAiKeys.importantClassesGuess].forEach(function (guess) {
-            self.getGuessEntries(guess).forEach(function (guessEntry) {
-                currentDecisions[guessEntry.label] = guessEntry.decision || null;
+                var decision = guessEntry.decision || {};
+                var currentEntry = { classLabel: self.getDecidedClassLabel(guessEntry, previousGuess), readingIndex: decision.readingIndex ?? null, superClassId: decision.superClassId ?? null };
+                currentEntries[guessEntry.label] = currentEntry;
             });
         });
-        var isOutdated = Object.keys(guessedDecisions).some(function (label) {
-            var isChanged = !currentDecisions[label] || guessedDecisions[label].readingIndex != currentDecisions[label].readingIndex || guessedDecisions[label].superClassId != currentDecisions[label].superClassId;
+        var isEntryChanged = function (label) {
+            var guessedEntry = guessedEntries[label];
+            var currentEntry = currentEntries[label];
+            if (!guessedEntry || !currentEntry) {
+                return true;
+            }
+            var isClassRenamed = !isLegacyGuess && guessedEntry.classLabel != currentEntry.classLabel;
+            var isChanged = isClassRenamed || guessedEntry.readingIndex != currentEntry.readingIndex || guessedEntry.superClassId != currentEntry.superClassId;
             return isChanged;
-        });
-        return isOutdated || Object.keys(currentDecisions).some((label) => !Object.hasOwn(guessedDecisions, label) && currentDecisions[label]);
+        };
+        var labels = Object.keys(guessedEntries).concat(Object.keys(currentEntries));
+        var isOutdated = labels.some(isEntryChanged);
+        return isOutdated;
     };
 
     // guess: { masterData | importantClasses | eventClasses: [{ label, definition, reason, readings, decision, evidence }], classificationByClass }
     self.showGuess = function (guess) {
         var workflowStep = self.workflowSteps[self.currentStepIndex];
         self.currentGuess = guess;
-        $("#aiMappingWorkflow_progress").empty();
-        var explanation = $("<div class='masterData-panel'>");
-        if (workflowStep.guessKey == "importantClassesGuess" && self.isImportantClassesGuessOutdated()) {
-            explanation.append(
-                $("<div class='masterData-note'>").text("The master data decisions changed since these classes were guessed."),
-                self.getImportantClassesRunButton("Guess them again, their decisions are lost"),
-            );
+        // a guess drawn at the end of an operation, not on a change of step
+        if (self.progressStartTime) {
+            var totalDuration = AIMappingModeler.formatDuration(Date.now() - self.progressStartTime);
+            self.endProgress(workflowStep.label + " guessed in " + totalDuration);
         }
-        if (workflowStep.guessKey == "linksGuess" && self.isLinksGuessOutdated()) {
+        var explanation = $("<div class='masterData-panel'>");
+        if (self.currentStepIndex > 0 && self.isStepGuessOutdated(self.currentStepIndex)) {
             explanation.append(
-                $("<div class='masterData-note'>").text("The master data or the important classes decisions changed since these links were guessed."),
-                self.getStepRunButton("Guess them again, their decisions are lost", self.guessLinks),
+                $("<div class='masterData-note'>").text("Decisions of the steps before changed since these " + workflowStep.entryNoun + " were guessed."),
+                self.getStepRunButton("Guess them again, their decisions are lost", self.currentStepIndex),
             );
         }
         if (workflowStep.guessKey == "linksGuess") {
-            return self.showLinksExplanation(explanation, guess);
+            return self.showLinksExplanation(explanation);
         }
         explanation.append(
             $("<div>").append($("<b>").text("Domain: "), $("<span>").text(self.currentAiKeys.masterDataGuess.domain)),
             $("<div>").text("The AI guessed " + self.getGuessEntries(guess).length + " " + workflowStep.entryNoun + " in this database. Each tree of the graph is one of them:"),
             $("<div class='masterData-legendLine'>").append(
                 $("<span class='masterData-column'>").css("background", self.getLegendItem("Column").color).text(workflowStep.entryLegend),
-                $("<span>").text("as the data hold it, at the bottom"),
+                $("<span>").text("its tables in the database, at the bottom"),
             ),
             $("<div class='masterData-legendLine'>").append($("<span class='masterData-class'>").text("Class"), $("<span>").text("its class, a thick frame when an upper ontology already has it")),
             $("<div class='masterData-legendLine'>").append($("<span class='masterData-dashed'>"), $("<span>").text("a possible superclass, with its probability")),
-            $("<div>").text("Click an entry or its class to decide what its rows denote and its superclass. Right click it to choose another class, rename it or remove it."),
+            $("<div>").text(
+                "Click an entry or its class to decide what its rows denote and its superclass, now or later: an undecided class goes on to the next steps with its alternatives. Right click it to choose another class, rename it or remove it.",
+            ),
         );
         $("#aiMappingWorkflow_explanation").empty().append(explanation);
         self.drawGuessGraph();
         AIMappingWorkflowChat.show();
     };
 
-    // the explanation panel of the links step: the classes of steps 1 and 2 as nodes, the events and the links between them
-    self.showLinksExplanation = function (explanation, guess) {
+    // the explanation panel of the links step: the classes of steps 1 to 3 with their superclasses, the links between them
+    self.showLinksExplanation = function (explanation) {
+        // the line of a link by the key it rests on, as drawLinksGraph draws it
+        var getKeyLegendLine = function (keyKind, text) {
+            var keyLine = $("<span class='masterData-dashed'>").css({ borderTopColor: self.linkArrowStyle.color, borderTopStyle: self.linkKeyLegendStyles[keyKind] });
+            var legendLine = $("<div class='masterData-legendLine'>").append(keyLine, $("<span>").text(text));
+            return legendLine;
+        };
         explanation.append(
             $("<div>").append($("<b>").text("Domain: "), $("<span>").text(self.currentAiKeys.masterDataGuess.domain)),
-            $("<div>").text("The graph holds the classes of steps 1 and 2, the event classes of the business and the links between them. A link is drawn along the foreign keys of the database."),
-            $("<div class='masterData-legendLine'>").append($("<span class='masterData-class'>").text("Event class"), $("<span>").text("the class of the business, a class of its own")),
-            $("<div class='masterData-legendLine'>").append($("<span class='masterData-dashed'>"), $("<span>").text("a proposed link, with its properties of the upper ontologies")),
-            $("<div>").text("Click a class or an undecided link: on the card, decide the event, or the property of the link. Right click it to choose another class or property, or to remove it."),
+            $("<div>").text(
+                "The graph holds the classes of steps 1 to 3, each under its superclass or the superclasses it may still take: the associations at the center, the master data around them, the important classes outside. One arrow joins two classes, whatever the number of their links. Click a class to see it alone with its links, labelled with the best property proposed and the number of links, and the classes they reach; click outside to see them all again. A link proposed for a superclass of an undecided class starts from or ends on that superclass.",
+            ),
+            $("<div class='masterData-legendLine'>").append($("<span class='masterData-class'>").text("Class"), $("<span>").text("a thick frame for an association, a dashed one while its class is undecided")),
+            getKeyLegendLine("declared", "a link on a foreign key declared in the database, thick once the properties of its links are chosen"),
+            getKeyLegendLine("ai", "a link on a foreign key the AI found in the data, not declared"),
+            getKeyLegendLine("row", "a link inside one row: two classes of a table, or an implicit association and its row"),
+            $("<div>").text(
+                "An arrow joining links on several keys takes the line of the first of this list. Click a link: its card shows its keys, the properties of the upper ontologies proposed, and for a class still undecided what each of its superclasses gives. Right click it to choose another property or to remove it.",
+            ),
         );
+        var classesWithoutTables = (self.currentAiKeys.eventsGuess || {}).classesWithoutTables || [];
+        if (classesWithoutTables.length > 0) {
+            explanation.append($("<div class='masterData-note'>").text("No table of the database was found for " + classesWithoutTables.join(", ") + ": no link reaches them."));
+        }
         $("#aiMappingWorkflow_explanation").empty().append(explanation);
         self.drawGuessGraph();
         AIMappingWorkflowChat.show();
+    };
+
+    // the data mapped on the class, its tables or the columns of an implicit event, the main one first as the model names
+    // them; a guess saved without tables takes those step 3 found for its class, else the entry label
+    self.getEntryDataNames = function (guessEntry) {
+        var stepThreeTables = ((self.currentAiKeys.eventsGuess || {}).classTables || {})[self.getDecidedClassLabel(guessEntry, self.currentGuess)];
+        var dataNames = [guessEntry.tables, guessEntry.columns, stepThreeTables].find((names) => names && names.length > 0);
+        return dataNames || [guessEntry.label];
     };
 
     // drawn as the mapping graph draws a mapped column: the entry at the bottom, its class above it, and for a new class
@@ -682,9 +752,10 @@ var AIMappingWorkflow = (function () {
             treeX += treeWidth;
             var entryNodeId = "entry|" + guessEntry.label;
             self.entryByNodeId[entryNodeId] = guessEntry;
+            var entryDataNames = self.getEntryDataNames(guessEntry);
             nodes.push({
                 id: entryNodeId,
-                label: guessEntry.label,
+                label: entryDataNames[0],
                 shape: columnLegendItem.shape,
                 color: columnLegendItem.color,
                 x: treeCenterX,
@@ -692,7 +763,7 @@ var AIMappingWorkflow = (function () {
                 // an entry the model could not classify is no class yet
                 shapeProperties: { borderDashes: isUnclassified ? [4, 4] : false },
                 data: { id: entryNodeId, label: guessEntry.label, type: "Column" },
-                title: getTooltip([guessEntry.definition, guessEntry.reason]),
+                title: getTooltip([guessEntry.label, guessEntry.definition, guessEntry.reason, "Data: " + entryDataNames.join(", ")]),
             });
             if (isUnclassified) {
                 return;
@@ -778,7 +849,7 @@ var AIMappingWorkflow = (function () {
         });
     };
 
-    // the classification decided for one step 1 or 2 entry, read in its own guess: the links graph shows the guess of step 3
+    // the classification decided for one entry of steps 1 to 3, read in its own guess: the links graph shows the guess of step 4
     self.getDecidedClassification = function (guessEntry, guess) {
         var decision = guessEntry.decision || { readingIndex: 0 };
         var reading = guessEntry.readings ? guessEntry.readings[decision.readingIndex] : null;
@@ -790,187 +861,504 @@ var AIMappingWorkflow = (function () {
         return classification;
     };
 
-    // drawn as the mapping graph draws a network: the classes of steps 1 and 2 as nodes, the event classes of the
-    // guess as class nodes, the links of the guess as arrows along the foreign keys, the undecided ones dashed
+    // the label the links of the server name the class of an entry by: its class, or the entry itself while unclassified
+    self.getDecidedClassLabel = function (guessEntry, guess) {
+        var classification = self.getDecidedClassification(guessEntry, guess);
+        var isClassNamed = classification.classKind == "newClass" || classification.classKind == "existingClass";
+        var classLabel = isClassNamed ? classification.classLabel : guessEntry.label;
+        return classLabel;
+    };
+
+    // drawn as the class steps draw an entry: one tree per class of steps 1 to 3, keyed by the class label the links of the
+    // server name, its superclass above it, or each superclass it may still take with its %, on rings around the center
+    // (placeLinkClasses). The links between two nodes are one arrow, shown with its label when its class is clicked
+    // (highlightLinkClass); one proposed under an assumed superclass starts from or ends on that superclass. Its line tells its key
     self.drawLinksGraph = function () {
         var classLegendItem = self.getLegendItem("Class");
-        var nodes = [];
-        var edges = [];
+        var linkClasses = [];
         self.linkNodeIdByLabel = {};
-        self.linkByEdgeId = {};
+        self.linksByEdgeId = {};
         self.entryByNodeId = {};
-        var guess = self.currentGuess;
-        // the classes of steps 1 and 2, keyed by the label the links of the server name, one node per class even when
-        // several entries are taken as the same class
-        ["masterDataGuess", "importantClassesGuess"].forEach(function (guessKey) {
+        self.decidedSuperClassByClass = {};
+        ["masterDataGuess", "importantClassesGuess", "eventsGuess"].forEach(function (guessKey) {
             var stepGuess = self.currentAiKeys[guessKey];
             if (!stepGuess) {
                 return;
             }
             self.getGuessEntries(stepGuess).forEach(function (guessEntry) {
                 var classification = self.getDecidedClassification(guessEntry, stepGuess);
-                var isClassNamed = classification.classKind == "newClass" || classification.classKind == "existingClass";
-                var classLabel = isClassNamed ? classification.classLabel : guessEntry.label;
+                var classLabel = self.getDecidedClassLabel(guessEntry, stepGuess);
+                // several entries may be taken as the same class: one tree
                 if (self.linkNodeIdByLabel[classLabel]) {
                     return;
                 }
-                var nodeId = "class|" + classLabel;
-                self.linkNodeIdByLabel[classLabel] = nodeId;
-                var nodeLabel = self.getClassLabel(classification.classKind == "existingClass" ? classification.classSource : self.currentSource, classLabel);
-                nodes.push({
-                    id: nodeId,
-                    label: nodeLabel,
-                    shape: classLegendItem.shape,
-                    color: classLegendItem.color,
-                    data: { id: nodeId, label: nodeLabel, type: "Class" },
-                    title: guessEntry.definition,
+                self.linkNodeIdByLabel[classLabel] = "class|" + classLabel;
+                var parentOptions = classification.parentOptions || [];
+                var decidedParent = guessEntry.decision ? parentOptions.find((parentOption) => parentOption.parentId == guessEntry.decision.superClassId) : null;
+                if (decidedParent) {
+                    self.decidedSuperClassByClass[classLabel] = decidedParent.parentLabel;
+                }
+                linkClasses.push({
+                    label: classLabel,
+                    nodeLabel: self.getClassLabel(classification.classKind == "existingClass" ? classification.classSource : self.currentSource, classLabel),
+                    isEvent: guessKey == "eventsGuess",
+                    ringRank: self.linkRingOrder.indexOf(guessKey),
+                    // an entry left open until the links is undecided
+                    isDecided: Boolean(guessEntry.decision) && !guessEntry.decision.isLeftToLinks,
+                    superClassOptions: decidedParent ? [decidedParent] : parentOptions,
+                    isSuperClassDecided: Boolean(decidedParent),
+                    definition: guessEntry.definition,
                 });
             });
         });
-        // the event classes, dashed while undecided
-        (guess.eventClasses || []).forEach(function (eventClass) {
-            var classification = self.getClassification(eventClass, eventClass.decision ? eventClass.decision.readingIndex : 0);
-            var eventClassLabel = classification && classification.classLabel ? self.getClassLabel(classification.classSource || self.currentSource, classification.classLabel) : eventClass.label;
-            var nodeId = "event|" + eventClass.label;
-            self.linkNodeIdByLabel[eventClass.label] = nodeId;
-            self.entryByNodeId[nodeId] = eventClass;
+        var links = (self.currentGuess.links || []).filter((link) => self.linkNodeIdByLabel[link.fromClass] && self.linkNodeIdByLabel[link.toClass]);
+        var positionByClass = self.placeLinkClasses(linkClasses, links);
+
+        var nodes = [];
+        var edges = [];
+        var superClassNodeIdByAssumption = {};
+        self.linkClassNodeIdByNodeId = {};
+        linkClasses.forEach(function (linkClass) {
+            var classNodeId = self.linkNodeIdByLabel[linkClass.label];
+            self.linkClassNodeIdByNodeId[classNodeId] = classNodeId;
+            var classPosition = positionByClass[linkClass.label];
             nodes.push({
-                id: nodeId,
-                label: eventClassLabel,
+                id: classNodeId,
+                label: linkClass.nodeLabel,
                 shape: classLegendItem.shape,
                 color: classLegendItem.color,
-                borderWidth: 3,
-                shapeProperties: { borderDashes: !eventClass.decision ? [4, 4] : false },
-                data: { id: nodeId, label: eventClassLabel, type: "Event class" },
-                title: [eventClass.definition, eventClass.reason, (eventClass.tables || []).join(", ")].filter(Boolean).join("\n"),
+                x: classPosition.x,
+                y: classPosition.y,
+                borderWidth: linkClass.isEvent ? 3 : 1,
+                shapeProperties: { borderDashes: linkClass.isDecided ? false : [4, 4] },
+                data: { id: classNodeId, label: linkClass.nodeLabel, type: "Class" },
+                title: linkClass.definition,
+            });
+            linkClass.superClassOptions.forEach(function (parentOption, parentIndex) {
+                var superClassNodeId = classNodeId + "|" + parentOption.parentId;
+                superClassNodeIdByAssumption[linkClass.label + "|" + parentOption.parentLabel] = superClassNodeId;
+                self.linkClassNodeIdByNodeId[superClassNodeId] = classNodeId;
+                var superClassLabel = self.getClassLabel(parentOption.parentSource, parentOption.parentLabel);
+                nodes.push({
+                    id: superClassNodeId,
+                    label: superClassLabel,
+                    shape: classLegendItem.shape,
+                    color: classLegendItem.color,
+                    x: classPosition.x + (parentIndex - (linkClass.superClassOptions.length - 1) / 2) * self.superClassSpacing,
+                    y: classPosition.y - self.linkSuperClassRise,
+                    data: { id: parentOption.parentId, label: superClassLabel, type: "Class" },
+                });
+                var superClassEdge = AIMappingColumnsGraph.getClassEdge(classNodeId, superClassNodeId, linkClass.isSuperClassDecided ? "" : parentOption.probability + "%", "rdfs:subClassOf");
+                superClassEdge.dashes = !linkClass.isSuperClassDecided;
+                // a curved edge bends around a support point the focus of a class does not move
+                superClassEdge.smooth = false;
+                edges.push(superClassEdge);
             });
         });
-        // the links: decided as solid arrows with the chosen property, proposed as dashed, the clicked ones land on the card
-        (guess.links || []).forEach(function (link) {
-            var fromNodeId = self.linkNodeIdByLabel[link.fromClass];
-            var toNodeId = self.linkNodeIdByLabel[link.toClass];
-            if (!fromNodeId || !toNodeId) {
-                return;
+
+        self.linkRingPositionByNodeId = {};
+        nodes.forEach((node) => (self.linkRingPositionByNodeId[node.id] = { x: node.x, y: node.y }));
+
+        // the links between the same two nodes make one arrow, labelled with its best option and the number of its links
+        var getEndNodeId = function (classLabel, assumption) {
+            var superClassNodeId = assumption && assumption.class == classLabel ? superClassNodeIdByAssumption[classLabel + "|" + assumption.superClass] : null;
+            var endNodeId = superClassNodeId || self.linkNodeIdByLabel[classLabel];
+            return endNodeId;
+        };
+        var linkArrowById = {};
+        var addToArrow = function (link, fromNodeId, toNodeId, option, isDecided) {
+            var arrowId = fromNodeId + ">" + toNodeId;
+            if (!linkArrowById[arrowId]) {
+                linkArrowById[arrowId] = { id: arrowId, from: fromNodeId, to: toNodeId, keyKinds: [], decidedOption: null, bestOption: null, isEveryLinkDecided: true };
+                self.linksByEdgeId[arrowId] = [];
             }
-            self.linkByEdgeId[link.id] = link;
-            var getTooltip = function (lines) {
-                var tooltip = $("<div style='max-width: 400px; white-space: normal'>");
-                lines.forEach(function (line) {
-                    tooltip.append($("<div>").text(line));
-                });
-                return tooltip[0];
-            };
-            var fkLines = link.foreignKey.columns.map(function (column, columnIndex) {
-                return link.foreignKey.table + "." + column + " -> " + link.foreignKey.referencedTable + "." + link.foreignKey.referencedColumns[columnIndex];
+            var linkArrow = linkArrowById[arrowId];
+            if (self.linksByEdgeId[arrowId].indexOf(link) < 0) {
+                self.linksByEdgeId[arrowId].push(link);
+                linkArrow.keyKinds.push(self.getLinkKeyKind(link));
+            }
+            if (!isDecided) {
+                linkArrow.isEveryLinkDecided = false;
+            }
+            if (option && isDecided) {
+                linkArrow.decidedOption = option;
+            }
+            if (option && !isDecided && (!linkArrow.bestOption || option.probability > linkArrow.bestOption.probability)) {
+                linkArrow.bestOption = option;
+            }
+        };
+        links.forEach(function (link) {
+            var decidedOption = link.decision ? (link.propertyOptions || []).find((option) => option.propertyIri == link.decision.propertyIri) : null;
+            var drawnOptions = decidedOption ? [decidedOption] : self.getVisibleLinkOptions(link);
+            if (drawnOptions.length == 0) {
+                addToArrow(link, getEndNodeId(link.fromClass, null), getEndNodeId(link.toClass, null), null, false);
+            }
+            drawnOptions.forEach(function (option) {
+                addToArrow(link, getEndNodeId(link.fromClass, option.assumes), getEndNodeId(link.toClass, option.assumes), option, Boolean(decidedOption));
             });
-            var optionLines = (link.propertyOptions || []).map(function (option) {
-                return option.propertyLabel + (option.inverse ? " (inverse)" : "") + ": " + option.probability + "%";
-            });
-            var linkEdge = {
-                id: link.id,
-                from: fromNodeId,
-                to: toNodeId,
+        });
+        self.linkArrows = Object.values(linkArrowById);
+        self.linkArrows.forEach(function (linkArrow) {
+            var arrowLinkCount = self.linksByEdgeId[linkArrow.id].length;
+            var labelOption = linkArrow.decidedOption || linkArrow.bestOption;
+            var probabilityText = labelOption && !linkArrow.decidedOption ? " " + labelOption.probability + "%" : "";
+            var propertyText = labelOption ? labelOption.propertyLabel + (labelOption.inverse ? " (inverse)" : "") + probabilityText : "no proposal";
+            linkArrow.label = propertyText + (arrowLinkCount > 1 ? ", " + arrowLinkCount + " links" : "");
+            var keyKind = self.linkKeyKindOrder.find((orderedKeyKind) => linkArrow.keyKinds.indexOf(orderedKeyKind) > -1);
+            edges.push({
+                id: linkArrow.id,
+                from: linkArrow.from,
+                to: linkArrow.to,
                 label: "",
-                dashes: !link.decision,
-                color: "#00afef",
+                dashes: self.linkKeyDashes[keyKind],
+                width: linkArrow.isEveryLinkDecided ? self.linkArrowStyle.decidedWidth : self.linkArrowStyle.proposedWidth,
+                color: self.linkArrowStyle.fadedColor,
                 arrows: { to: { enabled: true, type: "arrow" } },
-                data: { id: link.id },
-                title: getTooltip([fkLines.join("; "), link.viaEvent ? "Event: " + link.viaEvent : "", optionLines.join("; ")].filter(Boolean)),
-            };
-            if (link.decision) {
-                var decisionOption = link.propertyOptions.find((option) => option.propertyIri == link.decision.propertyIri);
-                linkEdge.label = decisionOption ? decisionOption.propertyLabel : "";
-            }
-            edges.push(linkEdge);
+                // two opposite arrows bend apart
+                smooth: linkArrowById[linkArrow.to + ">" + linkArrow.from] ? { type: "curvedCW", roundness: self.linkArrowStyle.oppositeRoundness } : false,
+                font: { color: self.linkArrowStyle.color, background: self.linkArrowStyle.labelBackground },
+                data: { id: linkArrow.id },
+            });
         });
         if (self.guessGraph && self.guessGraph.network) {
             self.guessGraph.network.destroy();
         }
         var graphOptions = {
-            visjsOptions: { physics: { enabled: true }, edges: { smooth: true }, interaction: { hover: true } },
+            visjsOptions: { physics: { enabled: false }, interaction: { hover: true } },
             onclickFn: self.showLinksCard,
             onRightClickFn: self.showGraphPopupMenu,
         };
         var guessGraph = new VisjsGraphClass(self.graphDivId, { nodes: nodes, edges: edges }, graphOptions);
         self.guessGraph = guessGraph;
-        guessGraph.draw();
+        guessGraph.draw(function () {
+            if (self.guessGraph != guessGraph) {
+                return;
+            }
+            // a redraw after a choice keeps the links of the class shown
+            var classNodeId = self.linkClassNodeIdByNodeId[self.highlightedLinkClassNodeId] || null;
+            self.highlightLinkClass(classNodeId);
+        });
     };
 
-    // an event opens the card of its class as steps 1 and 2 do, a link the card of its property; a class of steps 1
-    // and 2 is decided in its own step
-    self.showLinksCard = function (nodeOrEdge) {
-        PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
-        if (nodeOrEdge && self.entryByNodeId[nodeOrEdge.id]) {
-            return self.showEntryCard(nodeOrEdge);
+    // the center of each class tree, by class label: the most linked association at the center, then rings outward, a new
+    // ring for each kind of linkRingOrder; each class at the mean angle of its neighbours placed on the rings before, the
+    // ring spread evenly in that order
+    self.placeLinkClasses = function (linkClasses, links) {
+        var neighboursByClass = {};
+        linkClasses.forEach((linkClass) => (neighboursByClass[linkClass.label] = []));
+        links.forEach(function (link) {
+            if (link.fromClass == link.toClass) {
+                return;
+            }
+            // a shared key gives several links between the same two classes: one neighbour
+            if (neighboursByClass[link.fromClass].indexOf(link.toClass) > -1) {
+                return;
+            }
+            neighboursByClass[link.fromClass].push(link.toClass);
+            neighboursByClass[link.toClass].push(link.fromClass);
+        });
+        var ringRankByClass = {};
+        linkClasses.forEach((linkClass) => (ringRankByClass[linkClass.label] = linkClass.ringRank));
+        var classesInRingOrder = Object.keys(neighboursByClass);
+        classesInRingOrder.sort(
+            (classA, classB) => ringRankByClass[classA] - ringRankByClass[classB] || neighboursByClass[classB].length - neighboursByClass[classA].length || classA.localeCompare(classB),
+        );
+        // a ring closes when full or when the kind changes
+        var classRings = [];
+        classesInRingOrder.forEach(function (classLabel) {
+            var lastRing = classRings[classRings.length - 1];
+            var ringCapacity = Math.max(1, (classRings.length - 1) * self.linkRingCapacityStep);
+            var isNewRing = !lastRing || lastRing.length >= ringCapacity || ringRankByClass[lastRing[0]] != ringRankByClass[classLabel];
+            if (isNewRing) {
+                classRings.push([classLabel]);
+                return;
+            }
+            lastRing.push(classLabel);
+        });
+        var angleByClass = {};
+        var positionByClass = {};
+        classRings.forEach(function (ringClasses, ringIndex) {
+            var ringRadius = ringIndex * self.linkRingSpacing;
+            var preferredAngleByClass = {};
+            ringClasses.forEach(function (classLabel, classIndex) {
+                var placedNeighbours = neighboursByClass[classLabel].filter((neighbour) => angleByClass[neighbour] != null);
+                var neighbourAngles = placedNeighbours.map((neighbour) => angleByClass[neighbour]);
+                var sumX = neighbourAngles.reduce((sum, angle) => sum + Math.cos(angle), 0);
+                var sumY = neighbourAngles.reduce((sum, angle) => sum + Math.sin(angle), 0);
+                preferredAngleByClass[classLabel] = neighbourAngles.length > 0 ? Math.atan2(sumY, sumX) : (2 * Math.PI * classIndex) / ringClasses.length;
+            });
+            ringClasses.sort((classA, classB) => preferredAngleByClass[classA] - preferredAngleByClass[classB]);
+            ringClasses.forEach(function (classLabel, classIndex) {
+                var angle = preferredAngleByClass[ringClasses[0]] + (2 * Math.PI * classIndex) / ringClasses.length;
+                // the center holds no angle: its neighbours on the first ring keep their own order
+                if (ringRadius > 0) {
+                    angleByClass[classLabel] = angle;
+                }
+                positionByClass[classLabel] = { x: ringRadius * Math.cos(angle), y: ringRadius * Math.sin(angle) };
+            });
+        });
+        return positionByClass;
+    };
+
+    // one class alone with its arrows, labelled, and the trees of the classes they reach, zoomed on; no class shows every
+    // arrow faded and unlabelled
+    self.highlightLinkClass = function (classNodeId) {
+        self.highlightedLinkClassNodeId = classNodeId;
+        var shownClassNodeIds = classNodeId ? [classNodeId] : null;
+        var arrowUpdates = self.linkArrows.map(function (linkArrow) {
+            var fromClassNodeId = self.linkClassNodeIdByNodeId[linkArrow.from];
+            var toClassNodeId = self.linkClassNodeIdByNodeId[linkArrow.to];
+            var isOfClass = Boolean(classNodeId) && (fromClassNodeId == classNodeId || toClassNodeId == classNodeId);
+            if (isOfClass) {
+                shownClassNodeIds.push(fromClassNodeId, toClassNodeId);
+            }
+            var arrowUpdate = {
+                id: linkArrow.id,
+                hidden: Boolean(classNodeId) && !isOfClass,
+                label: isOfClass ? linkArrow.label : "",
+                color: isOfClass ? self.linkArrowStyle.color : self.linkArrowStyle.fadedColor,
+            };
+            return arrowUpdate;
+        });
+        // the trees reached, by their angle on the rings, spread evenly on the circle of the class
+        var classCenter = classNodeId ? self.linkRingPositionByNodeId[classNodeId] : null;
+        var reachedClassNodeIds = shownClassNodeIds ? shownClassNodeIds.filter((shownClassNodeId, shownIndex) => shownClassNodeId != classNodeId && shownClassNodeIds.indexOf(shownClassNodeId) == shownIndex) : [];
+        var getRingAngle = function (reachedClassNodeId) {
+            var ringPosition = self.linkRingPositionByNodeId[reachedClassNodeId];
+            var ringAngle = Math.atan2(ringPosition.y - classCenter.y, ringPosition.x - classCenter.x);
+            return ringAngle;
+        };
+        reachedClassNodeIds.sort((classNodeIdA, classNodeIdB) => getRingAngle(classNodeIdA) - getRingAngle(classNodeIdB));
+        // a circle long enough for the trees side by side, one superClassSpacing each
+        var focusRadius = Math.max(self.linkFocusRadius, (reachedClassNodeIds.length * self.superClassSpacing) / Math.PI);
+        var treeShiftByClassNodeId = {};
+        reachedClassNodeIds.forEach(function (reachedClassNodeId, reachedIndex) {
+            var ringPosition = self.linkRingPositionByNodeId[reachedClassNodeId];
+            // the sector above the class is left to its superclasses
+            var angle = self.linkFocusFreeSector.start + (self.linkFocusFreeSector.span * (reachedIndex + 0.5)) / reachedClassNodeIds.length;
+            treeShiftByClassNodeId[reachedClassNodeId] = {
+                x: classCenter.x + focusRadius * Math.cos(angle) - ringPosition.x,
+                y: classCenter.y + focusRadius * Math.sin(angle) - ringPosition.y,
+            };
+        });
+        var treeNodeIds = Object.keys(self.linkClassNodeIdByNodeId);
+        var shownNodeIds = shownClassNodeIds ? treeNodeIds.filter((treeNodeId) => shownClassNodeIds.indexOf(self.linkClassNodeIdByNodeId[treeNodeId]) > -1) : treeNodeIds;
+        var nodeUpdates = treeNodeIds.map(function (treeNodeId) {
+            var ringPosition = self.linkRingPositionByNodeId[treeNodeId];
+            var treeShift = treeShiftByClassNodeId[self.linkClassNodeIdByNodeId[treeNodeId]] || { x: 0, y: 0 };
+            var nodeUpdate = { id: treeNodeId, hidden: shownNodeIds.indexOf(treeNodeId) < 0, x: ringPosition.x + treeShift.x, y: ringPosition.y + treeShift.y };
+            return nodeUpdate;
+        });
+        // vis draws the edges of a hidden node: the superclass edges of the trees left out are hidden as well
+        var graphEdges = self.guessGraph.data.edges.get();
+        var superClassEdges = graphEdges.filter((edge) => !self.linksByEdgeId[edge.id]);
+        var superClassEdgeUpdates = superClassEdges.map((edge) => ({ id: edge.id, hidden: shownNodeIds.indexOf(edge.from) < 0 }));
+        self.guessGraph.data.nodes.update(nodeUpdates);
+        self.guessGraph.data.edges.update(arrowUpdates.concat(superClassEdgeUpdates));
+        self.guessGraph.network.fit({ nodes: shownNodeIds, animation: self.linkFocusAnimation });
+        // a node left selected is deselected by the next click, and VisjsGraphClass then clears the whole selection: the
+        // link clicked would read as a click outside
+        self.guessGraph.network.unselectAll();
+    };
+
+    // the options of a link still possible: an option assuming a superclass the user did not decide for its class drops out
+    self.getVisibleLinkOptions = function (link) {
+        var visibleOptions = (link.propertyOptions || []).filter(function (option) {
+            var decidedSuperClass = option.assumes ? self.decidedSuperClassByClass[option.assumes.class] : null;
+            var isPossible = !decidedSuperClass || decidedSuperClass == option.assumes.superClass;
+            return isPossible;
+        });
+        return visibleOptions;
+    };
+
+    // the key a link rests on: a foreign key declared in the database, one the AI found in the data, or the row holding both
+    // classes, an implicit event in its columns included
+    self.getLinkKeyKind = function (link) {
+        if (!link.foreignKey) {
+            return "row";
         }
-        var link = nodeOrEdge && self.linkByEdgeId[nodeOrEdge.id];
-        if (!link) {
+        var keyKind = link.foreignKey.foundInData ? "ai" : "declared";
+        return keyKind;
+    };
+
+    self.getAssumptionText = function (option) {
+        var assumptionText = option.assumes ? "if " + option.assumes.class + " is a " + option.assumes.superClass + ": " : "";
+        return assumptionText;
+    };
+
+    // what carries a link in the database: a foreign key, the row holding both classes, or the columns of the row carrying
+    // an implicit association
+    self.getLinkEvidenceText = function (link) {
+        if (link.sameRowTable) {
+            return "both in one row of " + link.sameRowTable;
+        }
+        if (link.rowColumns) {
+            return "columns " + link.rowColumns.join(", ") + " of the row of " + link.toClass;
+        }
+        var foreignKey = link.foreignKey;
+        var columnMatches = foreignKey.columns.map((column, columnIndex) => foreignKey.table + "." + column + " matches " + foreignKey.referencedTable + "." + foreignKey.referencedColumns[columnIndex]);
+        var evidenceText = columnMatches.join(", ") + (foreignKey.foundInData ? " (found in the data)" : " (declared foreign key)");
+        return evidenceText;
+    };
+
+    // the link read as a sentence, with its chosen property or the most likely one
+    self.getLinkSentence = function (link) {
+        var visibleOptions = self.getVisibleLinkOptions(link);
+        var decidedOption = link.decision ? visibleOptions.find((option) => option.propertyIri == link.decision.propertyIri) : null;
+        var sentenceOption = decidedOption || visibleOptions[0];
+        if (!sentenceOption) {
+            return link.fromClass + " -> " + link.toClass + ": no property proposed";
+        }
+        var linkSentence = self.getAssumptionText(sentenceOption) + link.fromClass + " " + sentenceOption.propertyLabel + (sentenceOption.inverse ? " (inverse)" : "") + " " + link.toClass;
+        return linkSentence;
+    };
+
+    // how many objects of each class the other holds, read both ways
+    self.getLinkCardinalityText = function (link) {
+        var cardinalityParts = [];
+        if (link.cardinality) {
+            cardinalityParts.push(link.cardinality + " " + link.toClass + " per " + link.fromClass);
+        }
+        if (link.inverseCardinality) {
+            cardinalityParts.push(link.inverseCardinality + " " + link.fromClass + " per " + link.toClass);
+        }
+        var cardinalityText = cardinalityParts.join(", ");
+        return cardinalityText;
+    };
+
+    // the named fields of a card, the empty ones left out; texts of the model or of the server, never read as html
+    self.getFieldsTable = function (fields) {
+        var fieldsTable = $("<table class='masterData-fields'>");
+        fields.forEach(function ([fieldName, fieldValue]) {
+            if (!fieldValue) {
+                return;
+            }
+            fieldsTable.append($("<tr>").append($("<td class='masterData-fieldName'>").text(fieldName), $("<td>").text(fieldValue)));
+        });
+        return fieldsTable;
+    };
+
+    // a class shows its links, a click outside them all; a link opens the card of its property, the first of the
+    // links its arrow draws; a class is decided in its own step
+    self.showLinksCard = function (nodeOrEdge, clickPoint) {
+        PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+        // vis takes a link only within a few pixels of its line, never on its label
+        var clickedNodeOrEdgeId = nodeOrEdge ? nodeOrEdge.id : self.getShownLinkArrowAt(clickPoint);
+        if (!clickedNodeOrEdgeId) {
+            self.highlightLinkClass(null);
+            return;
+        }
+        var clickedClassNodeId = self.linkClassNodeIdByNodeId[clickedNodeOrEdgeId];
+        // a superclass node is a proposal of its class, not the class
+        if (clickedClassNodeId && clickedClassNodeId != clickedNodeOrEdgeId) {
+            return;
+        }
+        if (clickedClassNodeId) {
+            self.highlightLinkClass(clickedClassNodeId);
+            return;
+        }
+        var edgeLinks = self.linksByEdgeId[clickedNodeOrEdgeId];
+        if (!edgeLinks) {
             return;
         }
         self.entryCard = null;
-        self.currentLinkCard = { link: link };
+        self.currentLinkCard = { link: edgeLinks[0], edgeLinks: edgeLinks };
         self.renderLinkCard();
     };
 
-    // the card of one link: the foreign key that evidences it, the property options of the upper ontologies and the
-    // cardinality the AI wrote
+    // the labelled arrow of the class shown closest to a click, on its label or near its line; none outside a focus
+    self.getShownLinkArrowAt = function (clickPoint) {
+        if (!self.highlightedLinkClassNodeId || !clickPoint) {
+            return null;
+        }
+        var network = self.guessGraph.network;
+        var canvasPoint = network.DOMtoCanvas(clickPoint);
+        var canvasTolerance = self.linkClickTolerance / network.getScale();
+        var closestArrowId = null;
+        var closestDistance = canvasTolerance;
+        self.linkArrows.forEach(function (linkArrow) {
+            var arrowEdge = network.body.edges[linkArrow.id];
+            if (!arrowEdge || arrowEdge.options.hidden || !arrowEdge.connected) {
+                return;
+            }
+            var labelBox = arrowEdge.labelModule.size;
+            var isOnLabel =
+                canvasPoint.x >= labelBox.left - canvasTolerance &&
+                canvasPoint.x <= labelBox.left + labelBox.width + canvasTolerance &&
+                canvasPoint.y >= labelBox.top - canvasTolerance &&
+                canvasPoint.y <= labelBox.top + labelBox.height + canvasTolerance;
+            var lineDistance = arrowEdge.edgeType.getDistanceToEdge(arrowEdge.from.x, arrowEdge.from.y, arrowEdge.to.x, arrowEdge.to.y, canvasPoint.x, canvasPoint.y);
+            var arrowDistance = isOnLabel ? 0 : lineDistance;
+            if (arrowDistance < closestDistance) {
+                closestDistance = arrowDistance;
+                closestArrowId = linkArrow.id;
+            }
+        });
+        return closestArrowId;
+    };
+
+    // the card of one link: the link as a sentence, its cardinality both ways, what carries it in the database, and the
+    // property options of the upper ontologies, under each superclass of a class still undecided
     self.renderLinkCard = function () {
         var link = self.currentLinkCard.link;
-        // texts of the model or of the server, never read as html
-        var getFieldsTable = function (fields) {
-            var fieldsTable = $("<table class='masterData-fields'>");
-            fields.forEach(function ([fieldName, fieldValue]) {
-                if (!fieldValue) {
-                    return;
-                }
-                fieldsTable.append($("<tr>").append($("<td class='masterData-fieldName'>").text(fieldName), $("<td>").text(fieldValue)));
-            });
-            return fieldsTable;
-        };
-        var fkText = link.foreignKey.columns.map(function (column, columnIndex) {
-            return link.foreignKey.table + "." + column + " -> " + link.foreignKey.referencedTable + "." + link.foreignKey.referencedColumns[columnIndex];
-        });
         var cardDiv = $("#aiMappingWorkflow_card");
         cardDiv.empty();
         var headerPanel = $("<div class='masterData-panel'>");
         headerPanel.append(
-            $("<span class='masterData-class'>").text(link.fromClass),
-            $("<span>").text(" -> "),
-            $("<span class='masterData-class'>").text(link.toClass),
-            getFieldsTable([
-                ["Foreign key", fkText.join("; ")],
-                ["From the data", link.foreignKey.foundInData ? "found in the data, not declared" : "declared"],
-                ["Cardinality", link.cardinality || null],
-                ["Participation of", link.viaEvent || null],
+            $("<div class='masterData-optionTitle'>").text(self.getLinkSentence(link)),
+            self.getFieldsTable([
+                ["How many", self.getLinkCardinalityText(link) || null],
+                ["Participation in", link.viaEvent || null],
             ]),
         );
+        // an arrow drawing several links, one per key: each has its own card
+        var edgeLinks = self.currentLinkCard.edgeLinks || [link];
+        var keysDiv = $("<div class='masterData-stepContent'>").append($("<div class='masterData-step'>").text("Where it comes from:"));
+        if (edgeLinks.length == 1) {
+            keysDiv.append($("<div>").text(self.getLinkEvidenceText(link)));
+        } else {
+            edgeLinks.forEach(function (edgeLink) {
+                var keyButton = $("<button type='button' class='masterData-option'>").toggleClass("masterData-selected", edgeLink == link).text(self.getLinkEvidenceText(edgeLink));
+                keyButton.on("click", function () {
+                    self.currentLinkCard = { link: edgeLink, edgeLinks: edgeLinks };
+                    self.renderLinkCard();
+                });
+                keysDiv.append(keyButton);
+            });
+        }
+        headerPanel.append(keysDiv);
         cardDiv.append(headerPanel);
         var optionsDiv = $("<div class='masterData-stepContent'>");
         optionsDiv.append($("<div class='masterData-step'>").text("Property of the upper ontologies:"));
-        (link.propertyOptions || []).forEach(function (option) {
+        var visibleOptions = self.getVisibleLinkOptions(link);
+        visibleOptions.forEach(function (option) {
             var isSelected = Boolean(link.decision) && option.propertyIri == link.decision.propertyIri;
             var probabilityFill = $("<div class='masterData-probabilityFill'>").css("width", option.probability + "%");
             var probability = $("<div class='masterData-probability'>").append(
                 $("<div class='masterData-probabilityBar'>").append(probabilityFill),
                 $("<span>").text(option.probability + "%"),
             );
+            var optionTitle = self.getAssumptionText(option) + self.getClassLabel(option.propertySource, option.propertyLabel) + (option.inverse ? " (inverse)" : "");
             var optionButton = $("<button type='button' class='masterData-option'>").toggleClass("masterData-selected", isSelected);
-            optionButton.append($("<div class='masterData-optionTitle'>").append($("<span>").text(self.getClassLabel(option.propertySource, option.propertyLabel)), probability), getFieldsTable([
+            optionButton.append(
+                $("<div class='masterData-optionTitle'>").append($("<span>").text(optionTitle), probability),
+                self.getFieldsTable([
                     ["Reason", option.reason],
                     ["Definition", option.definition],
-                ]));
+                ]),
+            );
             optionButton.on("click", function () {
                 link.decision = { propertyIri: option.propertyIri };
                 self.applyLinkDecision(link, { propertyIri: option.propertyIri });
             });
             optionsDiv.append(optionButton);
         });
-        if (!link.propertyOptions || link.propertyOptions.length == 0) {
+        if (visibleOptions.length == 0) {
             optionsDiv.append($("<div class='masterData-note'>").text("No property of the upper ontologies was proposed: right click the link to choose one, or ask the chat."));
         }
         cardDiv.append(optionsDiv);
         var footer = $("<div class='masterData-footer'>");
-        var decidedOption = link.decision ? (link.propertyOptions || []).find((option) => option.propertyIri == link.decision.propertyIri) : null;
+        var decidedOption = link.decision ? visibleOptions.find((option) => option.propertyIri == link.decision.propertyIri) : null;
         var writtenText = decidedOption ? link.fromClass + " " + decidedOption.propertyLabel + (decidedOption.inverse ? " (inverse)" : "") + " " + link.toClass : "nothing chosen yet";
         var undoButton = $("<button type='button' class='masterData-applyButton'>").text("Undo the choice");
         undoButton.prop("disabled", !link.decision);
@@ -1017,7 +1405,9 @@ var AIMappingWorkflow = (function () {
                     link.decision = decision;
                     self.currentAiKeys.linksGuess = savedLinksGuess;
                     self.drawLinksGraph();
-                    self.currentLinkCard = { link: link };
+                    // the arrow is drawn again from the saved links: the card takes them, the keys of the arrow with it
+                    var arrowLinks = Object.values(self.linksByEdgeId).find((edgeLinks) => edgeLinks.indexOf(savedLink) > -1);
+                    self.currentLinkCard = { link: savedLink, edgeLinks: arrowLinks };
                     self.renderLinkCard();
                     self.drawWorkflowTabs();
                     UI.message(CommonBotFunctions.escapeHtml("Choice saved for the link"));
@@ -1052,7 +1442,8 @@ var AIMappingWorkflow = (function () {
             if (!savedLink) {
                 return $("#aiMappingWorkflow_card").empty();
             }
-            self.currentLinkCard = { link: savedLink };
+            var arrowLinks = Object.values(self.linksByEdgeId).find((edgeLinks) => edgeLinks.indexOf(savedLink) > -1);
+            self.currentLinkCard = { link: savedLink, edgeLinks: arrowLinks };
             return self.renderLinkCard();
         }
         var card = self.entryCard;
@@ -1088,24 +1479,13 @@ var AIMappingWorkflow = (function () {
     self.renderEntryCard = function () {
         var card = self.entryCard;
         var entry = card.entry;
-        // texts of the model, never read as html
-        var getFieldsTable = function (fields) {
-            var fieldsTable = $("<table class='masterData-fields'>");
-            fields.forEach(function ([fieldName, fieldValue]) {
-                if (!fieldValue) {
-                    return;
-                }
-                fieldsTable.append($("<tr>").append($("<td class='masterData-fieldName'>").text(fieldName), $("<td>").text(fieldValue)));
-            });
-            return fieldsTable;
-        };
         var getStepTitle = function (stepNumber, title) {
             var stepTitle = $("<div class='masterData-step'>").append($("<span class='masterData-stepNumber'>").text(stepNumber), $("<span>").text(title));
             return stepTitle;
         };
         var getOptionButton = function (isSelected, titleElements, fields, onPick) {
             var optionButton = $("<button type='button' class='masterData-option'>").toggleClass("masterData-selected", isSelected);
-            optionButton.append($("<div class='masterData-optionTitle'>").append($("<span class='masterData-radio'>"), titleElements), getFieldsTable(fields));
+            optionButton.append($("<div class='masterData-optionTitle'>").append($("<span class='masterData-radio'>"), titleElements), self.getFieldsTable(fields));
             optionButton.on("click", onPick);
             return optionButton;
         };
@@ -1117,10 +1497,15 @@ var AIMappingWorkflow = (function () {
         var headerPanel = $("<div class='masterData-panel'>");
         headerPanel.append(
             $("<span class='masterData-class'>").text(classLabel),
-            getFieldsTable([
+            self.getFieldsTable([
                 ["Definition", entry.definition],
                 [self.workflowSteps[self.currentStepIndex].reasonLabel, entry.reason],
                 ["About", entry.aboutMasterData],
+                ["Joins", (entry.joins || []).join(", ")],
+                ["Tables", (entry.tables || []).join(", ")],
+                ["Implicit in", (entry.columns || []).join(", ")],
+                ["Claimed by other associations too", (entry.contestedTables || []).join(", ")],
+                ["Data", entry.hasNoData ? "no table or column of the database carries it: it takes part in no link" : null],
             ]),
         );
         cardDiv.append(headerPanel);
@@ -1148,7 +1533,7 @@ var AIMappingWorkflow = (function () {
                 rowsDiv.append(
                     $("<div class='masterData-panel'>").append(
                         $("<b>").text(reading.label),
-                        getFieldsTable([
+                        self.getFieldsTable([
                             ["A row is", reading.rowIs],
                             ["In the data", reading.inData],
                             ["Ask the business", reading.askBusiness],
@@ -1235,7 +1620,7 @@ var AIMappingWorkflow = (function () {
             cardDiv.append(
                 $("<div class='masterData-stepContent'>").append(
                     $("<div class='masterData-step'>").text("Two meanings at once?"),
-                    getFieldsTable([
+                    self.getFieldsTable([
                         ["Second class", split.newLabel + " subClassOf " + splitParentLabel + ", same rows and identifier"],
                         ["Why", split.reason],
                         ["Definition", split.definition],
@@ -1304,10 +1689,13 @@ var AIMappingWorkflow = (function () {
         });
     };
 
-    // the right click on an entry of the graph, or on a link of step 3: the changes the user makes by hand
+    // the right click on an entry of the graph, or on a link of step 4: the changes the user makes by hand
     self.showGraphPopupMenu = function (nodeOrEdge, point, event) {
         self.popupMenuEntry = nodeOrEdge ? self.entryByNodeId[nodeOrEdge.id] || null : null;
-        self.popupMenuLink = nodeOrEdge ? self.linkByEdgeId[nodeOrEdge.id] || null : null;
+        // on an arrow drawing several links, the one open on the card, else the first
+        var edgeLinks = nodeOrEdge ? self.linksByEdgeId[nodeOrEdge.id] || [] : [];
+        var cardLink = self.currentLinkCard ? self.currentLinkCard.link : null;
+        self.popupMenuLink = edgeLinks.indexOf(cardLink) > -1 ? cardLink : edgeLinks[0] || null;
         var html = "";
         if (self.popupMenuEntry) {
             html += '    <span class="popupMenuItem" onclick="AIMappingWorkflow.showClassChoiceDialog()">Choose the class</span>';
@@ -1520,8 +1908,8 @@ var AIMappingWorkflow = (function () {
         PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
         var link = self.popupMenuLink;
         var propertyColor = AIMappingModeler.propertyColor;
-        var proposalNodes = link.propertyOptions.map(function (option, optionIndex) {
-            var optionText = self.getClassLabel(option.propertySource, option.propertyLabel) + (option.inverse ? " (inverse)" : "") + AIColumnClassSuggestion.getProbabilityText(option);
+        var proposalNodes = self.getVisibleLinkOptions(link).map(function (option, optionIndex) {
+            var optionText = self.getAssumptionText(option) + self.getClassLabel(option.propertySource, option.propertyLabel) + (option.inverse ? " (inverse)" : "") + AIColumnClassSuggestion.getProbabilityText(option);
             var proposalNode = { id: "aiProposal|" + optionIndex, parent: "aiProposal", text: AIColumnClassSuggestion.getTreeNodeText(optionText, propertyColor, option.reason), data: { propertyIri: option.propertyIri } };
             return proposalNode;
         });

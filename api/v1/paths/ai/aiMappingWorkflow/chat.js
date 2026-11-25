@@ -35,7 +35,7 @@ const superClassOptionInputs = {
 const changeGuessTool = {
     name: "change_guess",
     description:
-        "Change a guess of the workflow as the user asks: the master data of step 1, the important classes of step 2 or the links of step 3. Saved in the mapping and drawn at once. The change names what to do:\n" +
+        "Change a guess of the workflow as the user asks: the master data of step 1, the important classes of step 2, the association classes of step 3 or the links of step 4. Saved in the mapping and drawn at once. The change names what to do:\n" +
         "- apply_decision: decide an entry, the reading chosen and, for a new class, the superclass chosen among its options (superClass).\n" +
         "- undo_decision: its reading and superclass become open again, and an upper class taken as the class gives back the classes proposed before.\n" +
         "- add_superclass_option: add a class of the upper ontologies, or a local class, as superclass option of the class (superClassIri, definition, probability, impact).\n" +
@@ -47,7 +47,7 @@ const changeGuessTool = {
         "- add_reading: add a reading of what one row denotes (newLabel, rowIs, inData, askBusiness, definition of its class, superClassOptions).\n" +
         "- remove_reading: remove a reading with its class; a decision on it is undone.\n" +
         "- remove_entry: remove the entry with its readings and classes.\n" +
-        "On step 3 every change names its link by its id:\n" +
+        "On step 4 every change names its link by its id:\n" +
         "- apply_link_decision: decide the link (link), choosing one of its propertyOptions (property = its propertyIri); the decision shows on the link in the graph.\n" +
         "- undo_link_decision: an undecided link (link).\n" +
         "- add_link_property_option: add a property of the upper ontologies to the options of the link (link, propertyIri, definition, probability, inverse), after searching them.\n" +
@@ -64,12 +64,12 @@ const changeGuessTool = {
                 type: "string",
                 description: "Why this change, in one or two sentences: what the user asked and the facts that support it, citing the numbers read in the data. Logged with the change for the next steps.",
             },
-            step: { type: "string", enum: ["masterData", "importantClasses", "links"], description: "The guess changed, the step the user has open when left out." },
-            entry: { type: "string", description: "Label of the master data, of the important class or, on step 3, of the link, as in the guess; every change but add_local_class names one." },
-            link: { type: "string", description: "The id of the link the change acts on, on step 3. Copy it from the linksGuess the user sees." },
-            property: { type: "string", description: "On step 3, the propertyIri or the label of the option of the link the change acts on." },
-            propertyIri: { type: "string", description: "On step 3, the IRI of the property added to the link, found with search_upper_ontologies." },
-            inverse: { type: "boolean", description: "On step 3, when the property holds from the other class to the link's one." },
+            step: { type: "string", enum: ["masterData", "importantClasses", "events", "links"], description: "The guess changed, the step the user has open when left out." },
+            entry: { type: "string", description: "Label of the master data, of the important class, of the association class or, on step 4, of the link, as in the guess; every change but add_local_class names one." },
+            link: { type: "string", description: "The id of the link the change acts on, on step 4. Copy it from the linksGuess the user sees." },
+            property: { type: "string", description: "On step 4, the propertyIri or the label of the option of the link the change acts on." },
+            propertyIri: { type: "string", description: "On step 4, the IRI of the property added to the link, found with search_upper_ontologies." },
+            inverse: { type: "boolean", description: "On step 4, when the property holds from the other class to the link's one." },
             reading: { type: "string", description: "Label of one of its readings; leave it out when it has a single one." },
             superClass: { type: "string", description: "Label or IRI of one of the superclass options." },
             ...superClassOptionInputs,
@@ -148,7 +148,9 @@ export default function () {
                 JSON.stringify(keyDetection.aiKeys.masterDataGuess) +
                 "\n\n# Important classes guess, step 2\n\n" +
                 JSON.stringify(keyDetection.aiKeys.importantClassesGuess || "not guessed yet") +
-                "\n\n# Links guess, step 3\n\n" +
+                "\n\n# Association classes guess, step 3\n\n" +
+                JSON.stringify(keyDetection.aiKeys.eventsGuess || "not guessed yet") +
+                "\n\n# Links guess, step 4\n\n" +
                 JSON.stringify(keyDetection.aiKeys.linksGuess || "not guessed yet") +
                 "\n\n# What the user has open\n\n" +
                 JSON.stringify(screen || {}) +

@@ -32,9 +32,9 @@ export default function () {
 
     POST.apiDoc = {
         security: [{ restrictQuota: [], restrictLoggedUser: [] }],
-        summary: "Guess the important classes of the business around the decided master data of a database, step 2 of the AI Mapping Workflow",
+        summary: "Guess the important classes of the business around the master data of a database, step 2 of the AI Mapping Workflow",
         description:
-            "Runs once every master data of the database is decided. The model reads the schema and the decided master data, keeps the classes the business revolves around, " +
+            "The model reads the schema and the master data, an undecided one with its alternatives, keeps the classes the business revolves around, " +
             "reads what one of their rows denotes and classifies them under the upper ontologies, as step 1 does for the master data. Written in the mapping as aiKeys.importantClassesGuess.",
         operationId: "aiMappingWorkflowImportantClasses",
         parameters: [
@@ -59,7 +59,7 @@ export default function () {
                     "{ importantClassesGuess: { importantClasses: [{ label, definition, reason, aboutMasterData, evidence, readings }], classificationByClass, decisionsByMasterData, model, guessedAt } }",
             },
             404: { description: "The source is unknown to the user." },
-            409: { description: "A master data is still to decide, the ontologies are not prepared, or the model failed." },
+            409: { description: "The master data are not guessed, the ontologies are not prepared, or the model failed." },
         },
         tags: ["AI"],
     };

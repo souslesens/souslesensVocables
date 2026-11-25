@@ -32,10 +32,10 @@ export default function () {
 
     POST.apiDoc = {
         security: [{ restrictQuota: [], restrictLoggedUser: [] }],
-        summary: "Guess the event classes and the links between the decided classes of a database, step 3 of the AI Mapping Workflow",
+        summary: "Guess the links between the classes of a database, step 4 of the AI Mapping Workflow",
         description:
-            "Runs once every class of steps 1 and 2 is decided. The model names the tables holding each class, guesses the event classes of the business " +
-            "around them, then the object properties of the upper ontologies carrying every foreign key between their classes. Written in the mapping as aiKeys.linksGuess.",
+            "One link per foreign key between the tables of the classes of steps 1 to 3, and per row carrying an implicit event, each with the object properties " +
+            "of the upper ontologies proposed for it; a link touching an undecided class gets options per superclass it may take. Written in the mapping as aiKeys.linksGuess.",
         operationId: "aiMappingWorkflowLinks",
         parameters: [
             {
@@ -56,10 +56,10 @@ export default function () {
         responses: {
             200: {
                 description:
-                    "{ linksGuess: { eventClasses: [{ label, definition, reason, tables, readings }], classTables: { class: [tables] }, links: [{ id, fromClass, toClass, viaEvent, foreignKey, propertyOptions, cardinality, decision }], decisionsByClass, model, guessedAt } }",
+                    "{ linksGuess: { links: [{ id, fromClass, toClass, viaEvent, foreignKey, rowColumns, sameRowTable, propertyOptions: [{ propertyIri, propertyLabel, probability, inverse, reason, assumes }], cardinality, inverseCardinality, decision }], decisionsByClass, model, guessedAt } }",
             },
             404: { description: "The source is unknown to the user." },
-            409: { description: "The master data or the important classes are still to decide, the ontologies are not prepared, or the model failed." },
+            409: { description: "The classes of steps 1 to 3 are not guessed, the ontologies are not prepared, or the model failed." },
         },
         tags: ["AI"],
     };

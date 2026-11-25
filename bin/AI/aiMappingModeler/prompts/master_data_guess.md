@@ -21,6 +21,7 @@ Master data
     • An object that only describes another master data, as its design, its instructions or its documents, is not a master data: it is information about the object it describes.
     • A definition the business applies to its transactions, as a discount or a price list, is reference data: it is a rule the transactions use, not an object they transact with.
     • One entry per master data object, even when several tables describe it. Label it as a class, by the business, in the singular: Equipment, not EQUI_TABLE.
+    • tables names the table or tables whose rows hold its objects, exactly as the description names them; a table may hold several of them.
 
 Evidence query
     • What one row of a master data table denotes is often not what its name says: a physical object, a kind of object as a catalog lists it with fixed characteristics, a design or a specification, an account or a role a person or a company holds, a version or a period of an object. It decides how the ontology classifies the master data, and the schema rarely settles it.
@@ -31,5 +32,5 @@ Evidence query
 
 Answer
 Write one JSON object and nothing else, no code fence. Reason in one short English sentence, citing the names, comments or keys it rests on.
-{"domain":"...","masterData":[{"label":"...","definition":"...","reason":"...","evidenceQuery":{"purpose":"...","sql":"SELECT ..."}}]}
+{"domain":"...","masterData":[{"label":"...","definition":"...","reason":"...","tables":["..."],"evidenceQuery":{"purpose":"...","sql":"SELECT ..."}}]}
 The evidenceQuery field only when the schema leaves open what a row denotes.

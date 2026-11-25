@@ -982,7 +982,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             self.simulationOn = !self.simulationOn;
             // graphController.hideNodePopover();
             if (_options.onclickFn) {
-                _options.onclickFn(null, point, {});
+                _options.onclickFn(null, params.pointer.DOM, {});
             }
         }
 

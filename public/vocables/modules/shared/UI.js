@@ -33,6 +33,34 @@ var UI = (function () {
         }
     };
 
+    // the bar of a long operation beside the message line, where the KG builder draws the one of its triples; a null
+    // percent is an operation whose share done is not known
+    self.showProgressBar = function (percent) {
+        var progressBar = $("#progressBar");
+        if (progressBar.length == 0) {
+            var messageDiv = $("#messageDiv");
+            if (messageDiv.length == 0) {
+                return;
+            }
+            if ($("#progressWrapper").length == 0) {
+                messageDiv.wrap('<div id="progressWrapper" style="display:inline-flex; align-items:center; gap:8px;"></div>');
+            }
+            progressBar = $('<progress id="progressBar" max="100" style="width:200px;"></progress>').prependTo($("#progressWrapper"));
+        }
+        // a progress element without value is drawn as running, with no share done
+        if (percent === null) {
+            progressBar.removeAttr("value");
+        } else {
+            progressBar.prop("value", percent);
+        }
+        progressBar.css("display", "block");
+        $("#waitImg").css("display", "none");
+    };
+
+    self.hideProgressBar = function () {
+        $("#progressBar").css("display", "none");
+    };
+
     self.setCredits = function () {
         var gif = $(`<img src="images/souslesensVocables.gif">`).on("load", function () {
             if (pendingCreditsGif !== gif) return;

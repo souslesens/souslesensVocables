@@ -35,7 +35,7 @@ const superClassOptionInputs = {
 const changeGuessTool = {
     name: "change_guess",
     description:
-        "Change a guess of the workflow as the user asks: the master data of step 1, the important classes of step 2, the association classes of step 3 or the links of step 4. Saved in the mapping and drawn at once. The change names what to do:\n" +
+        "Change a guess of the workflow as the user asks: the master data of step 1, the important classes of step 2, the association classes of step 3, the links of step 4 or the class mappings of step 5. Saved in the mapping and drawn at once. The change names what to do:\n" +
         "- apply_decision: decide an entry, the reading chosen and, for a new class, the superclass chosen among its options (superClass).\n" +
         "- undo_decision: its reading and superclass become open again, and an upper class taken as the class gives back the classes proposed before.\n" +
         "- add_superclass_option: add a class of the upper ontologies, or a local class, as superclass option of the class (superClassIri, definition, probability, impact).\n" +
@@ -52,24 +52,38 @@ const changeGuessTool = {
         "- undo_link_decision: an undecided link (link).\n" +
         "- add_link_property_option: add a property of the upper ontologies to the options of the link (link, propertyIri, definition, probability, inverse), after searching them.\n" +
         "- remove_link_property_option: remove one of its options (link, property); the decision on it, if any, is undone.\n" +
-        "- remove_link: remove the link from the guess (link).",
+        "- remove_link: remove the link from the guess (link).\n" +
+        "On step 5 every change names its class by classLabel, as in the mappingGuess:\n" +
+        "- apply_class_mapping: apply the mapping of the class: its instance (identifierColumns, uriType, prefixURI, labelColumn) and, per column entry, the option chosen (columnChoices).\n" +
+        "- undo_class_mapping: the mapping of the class and the choices of its columns are open again.",
     input_schema: {
         type: "object",
         properties: {
             change: {
                 type: "string",
-                enum: ["apply_decision", "undo_decision", "add_superclass_option", "remove_superclass_option", "update_class", "add_reading", "remove_reading", "remove_entry", "add_local_class", "apply_link_decision", "undo_link_decision", "add_link_property_option", "remove_link_property_option", "remove_link"],
+                enum: ["apply_decision", "undo_decision", "add_superclass_option", "remove_superclass_option", "update_class", "add_reading", "remove_reading", "remove_entry", "add_local_class", "apply_link_decision", "undo_link_decision", "add_link_property_option", "remove_link_property_option", "remove_link", "apply_class_mapping", "undo_class_mapping"],
             },
             rationale: {
                 type: "string",
                 description: "Why this change, in one or two sentences: what the user asked and the facts that support it, citing the numbers read in the data. Logged with the change for the next steps.",
             },
-            step: { type: "string", enum: ["masterData", "importantClasses", "events", "links"], description: "The guess changed, the step the user has open when left out." },
+            step: { type: "string", enum: ["masterData", "importantClasses", "events", "links", "mapping"], description: "The guess changed, the step the user has open when left out." },
             entry: { type: "string", description: "Label of the master data, of the important class, of the association class or, on step 4, of the link, as in the guess; every change but add_local_class names one." },
             link: { type: "string", description: "The id of the link the change acts on, on step 4. Copy it from the linksGuess the user sees." },
             property: { type: "string", description: "On step 4, the propertyIri or the label of the option of the link the change acts on." },
             propertyIri: { type: "string", description: "On step 4, the IRI of the property added to the link, found with search_upper_ontologies." },
             inverse: { type: "boolean", description: "On step 4, when the property holds from the other class to the link's one." },
+            classLabel: { type: "string", description: "On step 5, the class whose mapping changes, as in the mappingGuess." },
+            instance: {
+                type: "object",
+                description: "On step 5, how one row gives one instance; the one of the guess when left out.",
+                properties: { identifierColumns: { type: "array", items: { type: "string" } }, uriType: { type: "string", enum: ["fromLabel", "blankNode", "randomIdentifier"] }, prefixURI: { type: "string" }, labelColumn: { type: "string" } },
+            },
+            columnChoices: {
+                type: "array",
+                description: "On step 5, the option chosen per column entry: columns as the entry joins them with a comma and a space, optionIndex its index in options.",
+                items: { type: "object", properties: { columns: { type: "string" }, optionIndex: { type: "integer" } }, required: ["columns", "optionIndex"] },
+            },
             reading: { type: "string", description: "Label of one of its readings; leave it out when it has a single one." },
             superClass: { type: "string", description: "Label or IRI of one of the superclass options." },
             ...superClassOptionInputs,
@@ -152,6 +166,8 @@ export default function () {
                 JSON.stringify(keyDetection.aiKeys.eventsGuess || "not guessed yet") +
                 "\n\n# Links guess, step 4\n\n" +
                 JSON.stringify(keyDetection.aiKeys.linksGuess || "not guessed yet") +
+                "\n\n# Mapping guess, step 5\n\n" +
+                JSON.stringify(keyDetection.aiKeys.mappingGuess || "not guessed yet") +
                 "\n\n# What the user has open\n\n" +
                 JSON.stringify(screen || {}) +
                 "\n\n# Database\n\n" +

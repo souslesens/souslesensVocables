@@ -6,6 +6,7 @@ import { askKeyModel, describeKeyedDatabase, keyDetectionModelId, getKeyDetectio
 import { getTermIri } from "../ontologyFromDb/mappings/mappingAnswer.js";
 import { readClassAnswer } from "./columnClassSuggestion.js";
 import { getPreparedSource, getNotPreparedError } from "./sourcePreparation.js";
+import { changeGuessMapping, mappingChangeNames } from "./mappingGuess.js";
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const masterDataGuessPromptPath = join(currentDirectory, "prompts/master_data_guess.md");
@@ -461,8 +462,8 @@ function describeDecidedMasterData(guess) {
 // the step function of one phase of a guess of steps 2 and 3, out of its phases: the model answer, the data read, the
 // readings, the classes; the page draws its progress bar from "phase/phases"
 const guessPhaseCount = 4;
-function getGuessPhaseStep(tellStep, phaseNumber) {
-    const tellPhaseStep = (stepText) => tellStep(phaseNumber + "/" + guessPhaseCount + " " + stepText);
+function getGuessPhaseStep(tellStep, phaseNumber, phaseCount = guessPhaseCount) {
+    const tellPhaseStep = (stepText) => tellStep(phaseNumber + "/" + phaseCount + " " + stepText);
     return tellPhaseStep;
 }
 
@@ -825,7 +826,7 @@ function changeGuessEntry(preparedSource, guess, source, changeName, changeInput
 }
 
 // the links changes of the chat on the guess of step 4, and the names of their inputs; an error names the link to act on
-const guessKeyByStep = { masterData: "masterDataGuess", importantClasses: "importantClassesGuess", events: "eventsGuess", links: "linksGuess" };
+const guessKeyByStep = { masterData: "masterDataGuess", importantClasses: "importantClassesGuess", events: "eventsGuess", links: "linksGuess", mapping: "mappingGuess" };
 const linkChangeNames = ["apply_link_decision", "undo_link_decision", "add_link_property_option", "remove_link_property_option", "remove_link"];
 
 // { link } or { error }, of one link of a links guess by its id
@@ -916,10 +917,19 @@ async function changeGuess(source, databaseId, changeName, changeInput, chatEvid
     if (!guessKey) {
         return { error: "name the step of the guess to change, one of " + Object.keys(guessKeyByStep).join(", ") };
     }
-    // the links guess holds links, the others entries
-    const isLinkChange = linkChangeNames.includes(changeName);
-    if (isLinkChange != (guessKey == "linksGuess")) {
-        return { error: changeName + " changes " + (isLinkChange ? "the links of step 4" : "the entries of steps 1 to 3") + ", not the " + guessKey };
+    // the links guess holds links, the mapping guess class mappings, the others entries
+    let changedGuessKey = "entries";
+    if (linkChangeNames.includes(changeName)) {
+        changedGuessKey = "linksGuess";
+    }
+    if (mappingChangeNames.includes(changeName)) {
+        changedGuessKey = "mappingGuess";
+    }
+    const stepGuessKey = guessKey == "linksGuess" || guessKey == "mappingGuess" ? guessKey : "entries";
+    if (changedGuessKey != stepGuessKey) {
+        const changedTexts = { entries: "the entries of steps 1 to 3", linksGuess: "the links of step 4", mappingGuess: "the class mappings of step 5" };
+        const wrongStepError = changeName + " changes " + changedTexts[changedGuessKey] + ", not the " + guessKey;
+        return { error: wrongStepError };
     }
     const guess = keyDetection.aiKeys?.[guessKey];
     if (!guess) {
@@ -930,8 +940,10 @@ async function changeGuess(source, databaseId, changeName, changeInput, chatEvid
         return { error: getNotPreparedError(source) };
     }
     let changed = null;
-    if (isLinkChange) {
+    if (changedGuessKey == "linksGuess") {
         changed = changeGuessLink(preparedSource, guess, changeName, changeInput);
+    } else if (changedGuessKey == "mappingGuess") {
+        changed = changeGuessMapping(guess, changeName, changeInput);
     } else {
         // a local class belongs to the ontology, to no entry of the guess
         changed = changeName == "add_local_class" ? addLocalClass(preparedSource, guess, source, changeInput) : changeGuessEntry(preparedSource, guess, source, changeName, changeInput);

@@ -560,4 +560,4 @@ async function guessLinks(source, databaseId, userInfo, tellStep) {
     return { linksGuess };
 }
 
-export { guessEvents, guessLinks };
+export { guessEvents, guessLinks, getDecidedClassLabel, getEntriesGuessedFrom, getClassGuesses, describeClassAnchors };

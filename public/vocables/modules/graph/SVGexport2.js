@@ -46,79 +46,75 @@ var SVGexport2 = (function () {
     self.generateSVGFromGraph = function (ctx, network) {
         var svgNS = "http://www.w3.org/2000/svg";
         var svg = document.createElementNS(svgNS, "svg");
-
-        var scale = network.getScale();
-
-        svg.setAttribute("width", ctx.canvas.width);
-        svg.setAttribute("height", ctx.canvas.height);
         svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
 
         Object.values(network.body.nodes).forEach((node) => {
-            if (node.options.id.includes("edge")) return;
+            if (!node.options || String(node.options.id).includes("edge")) return;
+            if (node.x === undefined || node.y === undefined) return;
 
-            var position = network.canvasToDOM({ x: node.x, y: node.y });
+            // Use canvas coordinates directly for viewport-independent export
+            var position = { x: node.x, y: node.y };
             var shape = node.options.shape || "circle";
-            var size = (node.options.size || 10) * scale;
-            var fillColor = node.options.color.background || "blue";
+            var size = node.options.size || 10;
+            var fillColor = (node.options.color && node.options.color.background) || "#97C2FC";
+            var borderColor = (node.options.color && node.options.color.border) || "#2B7CE9";
 
-            var scaledNode = {};
-            scaledNode.options = {};
-            scaledNode.options.id = node.options.id;
-            scaledNode.options.shape = node.options.shape;
-            scaledNode.options.size = size;
+            var nodeForDrawing = {
+                options: {
+                    id: node.options.id,
+                    shape: shape,
+                    size: size,
+                },
+            };
 
-            // Add shape properties if they exist
             if (node.shape) {
-                scaledNode.shape = {};
-                if (node.shape.width) {
-                    scaledNode.shape.width = node.shape.width * scale;
-                }
-                if (node.shape.height) {
-                    scaledNode.shape.height = node.shape.height * scale;
-                }
+                nodeForDrawing.shape = {};
+                if (node.shape.width) nodeForDrawing.shape.width = node.shape.width;
+                if (node.shape.height) nodeForDrawing.shape.height = node.shape.height;
             }
 
-            var element = SVGdrawing.drawShape(svgNS, position, scaledNode);
+            var element = SVGdrawing.drawShape(svgNS, position, nodeForDrawing);
             element.setAttribute("fill", fillColor);
+            element.setAttribute("stroke", borderColor);
+            element.setAttribute("stroke-width", "1");
             svg.appendChild(element);
 
             if (node.options.label) {
-                if (shape == "circle") {
-                    position.y += 10 * scale;
-                }
                 var fontSize;
                 if (node.options.font && node.options.font.size) {
-                    fontSize = parseInt(node.options.font.size) * scale + "px";
+                    fontSize = parseInt(node.options.font.size) + "px";
                 } else {
-                    fontSize = 12 * scale + "px";
+                    fontSize = "12px";
                 }
-
-                var text = SVGdrawing.drawText(svgNS, position, node.options.label, fontSize);
+                // For shapes where text renders outside (dot/circle), put label below
+                var textPos = { x: position.x, y: position.y };
+                if (shape !== "box" && shape !== "ellipse") {
+                    textPos = { x: position.x, y: position.y + size + 5 };
+                }
+                var text = SVGdrawing.drawText(svgNS, textPos, node.options.label, fontSize);
                 svg.appendChild(text);
             }
         });
 
-        Object.values(network.body.edges).forEach((edge, index) => {
+        Object.values(network.body.edges).forEach((edge) => {
             var fromNode = network.body.nodes[edge.fromId];
             var toNode = network.body.nodes[edge.toId];
+            if (!fromNode || !toNode) return;
+            if (fromNode.x === undefined || toNode.x === undefined) return;
 
-            var fromPos = network.canvasToDOM({ x: fromNode.x, y: fromNode.y });
-            var toPos = network.canvasToDOM({ x: toNode.x, y: toNode.y });
+            var fromPos = { x: fromNode.x, y: fromNode.y };
+            var toPos = { x: toNode.x, y: toNode.y };
 
-            // Apply scale to edge properties
-            var fromRadius = (fromNode?.options?.size || 12) * scale;
-            var toRadius = (toNode?.options?.size || 12) * scale;
+            // Use box half-width as radius for box-shaped nodes, otherwise use size
+            var fromRadius = fromNode.shape && fromNode.shape.width ? fromNode.shape.width / 2 : fromNode?.options?.size || 12;
+            var toRadius = toNode.shape && toNode.shape.width ? toNode.shape.width / 2 : toNode?.options?.size || 12;
+
             var dashes = edge?.options?.dashes;
-            var color = edge?.options?.color?.color;
-            var width = (edge?.options?.width || 1) * scale;
-
-            if (Object.keys(edge.options.smooth).length > 0) {
-                var curvature = edge?.options?.smooth?.roundness;
-            } else {
-                var curvature = 0;
-            }
+            var color = edge?.options?.color?.color || edge?.options?.color?.inherit || "black";
+            var width = edge?.options?.width || 1;
+            var curvature = edge?.options?.smooth && Object.keys(edge.options.smooth).length > 0 ? edge?.options?.smooth?.roundness || 0 : 0;
             var label = edge?.options?.label;
-            var fontSize = edge?.options?.font?.size ? parseInt(edge?.options?.font?.size) * scale + "px" : 12 * scale + "px";
+            var fontSize = edge?.options?.font?.size ? parseInt(edge?.options?.font?.size) + "px" : "12px";
 
             SVGdrawing.drawEdgeBetweenNodes(svgNS, svg, fromPos, toPos, fromRadius, toRadius, edge?.id, dashes, color, width, curvature, label, fontSize);
         });
@@ -132,7 +128,6 @@ var SVGexport2 = (function () {
         link.href = URL.createObjectURL(blob);
         link.download = "graph.svg";
         link.click();
-        //document.body.removeChild(link);
         document.body.removeChild(svg);
     };
     /**
@@ -171,26 +166,67 @@ var SVGexport2 = (function () {
             maxX = -Infinity,
             maxY = -Infinity;
 
+        function expand(x, y, padX, padY) {
+            padX = padX || 0;
+            padY = padY !== undefined ? padY : padX;
+            if (isNaN(x) || isNaN(y)) return;
+            minX = Math.min(minX, x - padX);
+            minY = Math.min(minY, y - padY);
+            maxX = Math.max(maxX, x + padX);
+            maxY = Math.max(maxY, y + padY);
+        }
+
         svg.childNodes.forEach((el) => {
-            if (el.tagName === "circle" || el.tagName === "text") {
-                let cx = parseFloat(el.getAttribute("cx") || el.getAttribute("x"));
-                let cy = parseFloat(el.getAttribute("cy") || el.getAttribute("y"));
-                let r = parseFloat(el.getAttribute("r") || 0);
-                minX = Math.min(minX, cx - r);
-                minY = Math.min(minY, cy - r);
-                maxX = Math.max(maxX, cx + r);
-                maxY = Math.max(maxY, cy + r);
-            } else if (el.tagName === "line") {
-                let x1 = parseFloat(el.getAttribute("x1"));
-                let y1 = parseFloat(el.getAttribute("y1"));
-                let x2 = parseFloat(el.getAttribute("x2"));
-                let y2 = parseFloat(el.getAttribute("y2"));
-                minX = Math.min(minX, x1, x2);
-                minY = Math.min(minY, y1, y2);
-                maxX = Math.max(maxX, x1, x2);
-                maxY = Math.max(maxY, y1, y2);
+            switch (el.tagName) {
+                case "circle": {
+                    let r = parseFloat(el.getAttribute("r") || 0);
+                    expand(parseFloat(el.getAttribute("cx")), parseFloat(el.getAttribute("cy")), r);
+                    break;
+                }
+                case "ellipse": {
+                    let cx = parseFloat(el.getAttribute("cx"));
+                    let cy = parseFloat(el.getAttribute("cy"));
+                    let rx = parseFloat(el.getAttribute("rx") || 0);
+                    let ry = parseFloat(el.getAttribute("ry") || 0);
+                    expand(cx - rx, cy - ry);
+                    expand(cx + rx, cy + ry);
+                    break;
+                }
+                case "rect": {
+                    let x = parseFloat(el.getAttribute("x"));
+                    let y = parseFloat(el.getAttribute("y"));
+                    let w = parseFloat(el.getAttribute("width") || 0);
+                    let h = parseFloat(el.getAttribute("height") || 0);
+                    expand(x, y);
+                    expand(x + w, y + h);
+                    break;
+                }
+                case "polygon": {
+                    let pts = (el.getAttribute("points") || "").trim().split(/\s+/);
+                    pts.forEach((p) => {
+                        let parts = p.split(",");
+                        if (parts.length === 2) expand(parseFloat(parts[0]), parseFloat(parts[1]));
+                    });
+                    break;
+                }
+                case "text": {
+                    expand(parseFloat(el.getAttribute("x")), parseFloat(el.getAttribute("y")), 5, 12);
+                    break;
+                }
+                case "path": {
+                    let d = el.getAttribute("d") || "";
+                    let nums = d.match(/-?\d+\.?\d*/g);
+                    if (nums) {
+                        for (let i = 0; i + 1 < nums.length; i += 2) {
+                            expand(parseFloat(nums[i]), parseFloat(nums[i + 1]));
+                        }
+                    }
+                    break;
+                }
             }
         });
+
+        if (minX === Infinity) return;
 
         let margin = 20;
         minX -= margin;

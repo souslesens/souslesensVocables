@@ -7,6 +7,8 @@ Repo + worktrees = trusted local env. No confirmation for editing files or apply
 
 Git: see `# Claude Permissions`, local ops only.
 
+Local server port: 3010 in the main checkout. In a worktree, `PORT=3100 node ./bin/www` (next free port from 3100) and never start, stop or restart anything on 3010, which is Karim's. `.claude/launch.json` is read only by preview_start, `bin/www` falls back to 3010.
+
 
 # Claude Permissions
 

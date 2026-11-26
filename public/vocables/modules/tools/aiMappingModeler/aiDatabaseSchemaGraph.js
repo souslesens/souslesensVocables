@@ -334,9 +334,18 @@ var AIDatabaseSchemaGraph = (function () {
             var isMapped = mappedColumns.indexOf(columnRow.name) > -1;
             var columnTableRow = $("<tr>").attr("title", AIDataSourceManager.getColumnAiKeyReason(table, columnRow.name));
             columnTableRow.append($("<td>").css(self.detailsCellCss).css("color", self.columnKeyColor).text(columnRow.keyText));
-            columnTableRow.append($("<td>").css(self.detailsCellCss).css("color", isMapped ? self.mappedColumnColor : self.columnNameColor).text(columnRow.name));
+            columnTableRow.append(
+                $("<td>")
+                    .css(self.detailsCellCss)
+                    .css("color", isMapped ? self.mappedColumnColor : self.columnNameColor)
+                    .text(columnRow.name),
+            );
             columnTableRow.append($("<td>").css(self.detailsCellCss).css("color", self.columnTypeColor).text(columnRow.type));
-            columnTableRow.append($("<td>").css(self.detailsCellCss).text(isMapped ? "yes" : ""));
+            columnTableRow.append(
+                $("<td>")
+                    .css(self.detailsCellCss)
+                    .text(isMapped ? "yes" : ""),
+            );
             columnsTable.append(columnTableRow);
         });
         var dialogDiv = $("#smallDialogDiv");

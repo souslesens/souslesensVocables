@@ -346,7 +346,10 @@ export default function () {
             "Lists the mapping versions saved under `data/semanticVirtualDB/<database>/mappings/`, newest first: generations, revisions, and MappingModeler files kept before " +
             "another version replaced them. The active version is the validated one, written to `data/graphs/mappings_<source>_ALL.json`, which MappingModeler opens.",
         operationId: "getOntologyFromDbMappings",
-        parameters: [sourceParameter, { name: "mappingName", in: "query", type: "string", required: false, description: "A version to read, its MappingModeler document included, instead of the list." }],
+        parameters: [
+            sourceParameter,
+            { name: "mappingName", in: "query", type: "string", required: false, description: "A version to read, its MappingModeler document included, instead of the list." },
+        ],
         responses: {
             200: {
                 description:

@@ -78,7 +78,8 @@ var AIMappingWorkflow = (function () {
             guessKey: "linksGuess",
             chatStep: "links",
             guessRoute: "links",
-            runText: "The AI now proposes the properties of the upper ontologies for the relations between the classes of steps 1 to 3, for each alternative of a class still undecided: a few minutes.",
+            runText:
+                "The AI now proposes the properties of the upper ontologies for the relations between the classes of steps 1 to 3, for each alternative of a class still undecided: a few minutes.",
             entryLegend: "Class",
             entryNoun: "relations",
             reasonLabel: "Why",
@@ -115,7 +116,19 @@ var AIMappingWorkflow = (function () {
     self.mappingUriTypeLabels = { fromLabel: "from the Id", blankNode: "blank node", randomIdentifier: "random" };
     // the class graph in levels: the class, the Id of each table, every value column on one line, the groups below
     // the column line in three staggered rows, so a long label never meets its neighbour of the same row
-    self.mappingGraphLayout = { classY: -330, keyY: -180, columnY: 0, columnRowCount: 3, columnRowOffset: 45, groupY: 220, columnSpacing: 75, groupGap: 70, tableGap: 120, labelCharWidth: 7, columnMargin: 20 };
+    self.mappingGraphLayout = {
+        classY: -330,
+        keyY: -180,
+        columnY: 0,
+        columnRowCount: 3,
+        columnRowOffset: 45,
+        groupY: 220,
+        columnSpacing: 75,
+        groupGap: 70,
+        tableGap: 120,
+        labelCharWidth: 7,
+        columnMargin: 20,
+    };
     self.mappingValueColumnColor = "#dddddd";
     self.mappingGroupEdgeColor = "#b9b9b9";
     // the columns of a class grouped by the kind of value they give, in this order, the columns of another class and the
@@ -805,7 +818,8 @@ var AIMappingWorkflow = (function () {
             // steps 2 and 3 carry to the next ones, the relations and the mapping carry to none
             var isCarriedToNextSteps = workflowStep.guessKey == "importantClassesGuess" || workflowStep.guessKey == "eventsGuess";
             if (isCarriedToNextSteps) {
-                confirmationText += "\nThe next steps are kept: a class gone leaves them, a new class gets its relations if its tables are named, without property yet. The mapping of step 5 is not updated.";
+                confirmationText +=
+                    "\nThe next steps are kept: a class gone leaves them, a new class gets its relations if its tables are named, without property yet. The mapping of step 5 is not updated.";
             }
             explanation.append(self.getStepRunButton("Guess them again, their decisions are lost", self.currentStepIndex, confirmationText));
         }
@@ -1291,7 +1305,9 @@ var AIMappingWorkflow = (function () {
         });
         // the trees reached, by their angle on the rings, spread evenly on the circle of the class
         var classCenter = classNodeId ? self.linkRingPositionByNodeId[classNodeId] : null;
-        var reachedClassNodeIds = shownClassNodeIds ? shownClassNodeIds.filter((shownClassNodeId, shownIndex) => shownClassNodeId != classNodeId && shownClassNodeIds.indexOf(shownClassNodeId) == shownIndex) : [];
+        var reachedClassNodeIds = shownClassNodeIds
+            ? shownClassNodeIds.filter((shownClassNodeId, shownIndex) => shownClassNodeId != classNodeId && shownClassNodeIds.indexOf(shownClassNodeId) == shownIndex)
+            : [];
         var getRingAngle = function (reachedClassNodeId) {
             var ringPosition = self.linkRingPositionByNodeId[reachedClassNodeId];
             var ringAngle = Math.atan2(ringPosition.y - classCenter.y, ringPosition.x - classCenter.x);
@@ -1491,7 +1507,9 @@ var AIMappingWorkflow = (function () {
                 keysDiv.append($("<div>").text(self.getLinkKeyText(edgeLink)));
                 return;
             }
-            var keyButton = $("<button type='button' class='masterData-option'>").toggleClass("masterData-selected", edgeLink == link).text(self.getLinkKeyText(edgeLink));
+            var keyButton = $("<button type='button' class='masterData-option'>")
+                .toggleClass("masterData-selected", edgeLink == link)
+                .text(self.getLinkKeyText(edgeLink));
             keyButton.on("click", function () {
                 self.currentLinkCard = { link: edgeLink, edgeLinks: edgeLinks, assumption: self.currentLinkCard.assumption };
                 self.renderLinkCard();
@@ -1510,10 +1528,7 @@ var AIMappingWorkflow = (function () {
         visibleOptions.forEach(function (option) {
             var isSelected = Boolean(link.decision) && option.propertyIri == link.decision.propertyIri;
             var probabilityFill = $("<div class='masterData-probabilityFill'>").css("width", option.probability + "%");
-            var probability = $("<div class='masterData-probability'>").append(
-                $("<div class='masterData-probabilityBar'>").append(probabilityFill),
-                $("<span>").text(option.probability + "%"),
-            );
+            var probability = $("<div class='masterData-probability'>").append($("<div class='masterData-probabilityBar'>").append(probabilityFill), $("<span>").text(option.probability + "%"));
             var optionTitle = self.getClassLabel(option.propertySource, option.propertyLabel) + (option.inverse ? " (inverse)" : "");
             var optionButton = $("<button type='button' class='masterData-option'>").toggleClass("masterData-selected", isSelected);
             optionButton.append($("<div class='masterData-optionTitle'>").append($("<span>").text(optionTitle), probability));
@@ -1629,7 +1644,9 @@ var AIMappingWorkflow = (function () {
         self.guessGraph = null;
         // the class with the most columns to choose first
         var sortedMappings = self.currentGuess.classMappings.slice();
-        sortedMappings.sort((firstMapping, secondMapping) => secondMapping.columnMappings.length - firstMapping.columnMappings.length || firstMapping.classLabel.localeCompare(secondMapping.classLabel));
+        sortedMappings.sort(
+            (firstMapping, secondMapping) => secondMapping.columnMappings.length - firstMapping.columnMappings.length || firstMapping.classLabel.localeCompare(secondMapping.classLabel),
+        );
         var headerCells = ["Class", "Columns to choose", "Table", "Mapping"].map((headerText) => $("<th>").text(headerText));
         var listTable = $("<table class='masterData-mappingList'>").append($("<tr>").append(headerCells));
         sortedMappings.forEach(function (classMapping) {
@@ -1793,7 +1810,15 @@ var AIMappingWorkflow = (function () {
             tableView.groups.forEach(function (group) {
                 var groupNodeId = "group|" + tableView.table + "|" + group.groupKey;
                 if (group.groupKey == "implicit") {
-                    nodes.push({ id: groupNodeId, label: group.title + ", " + group.mappingColumns.length, shape: "ellipse", color: self.mappingValueColumnColor, shadow: true, x: nextX + layout.groupGap, y: layout.groupY });
+                    nodes.push({
+                        id: groupNodeId,
+                        label: group.title + ", " + group.mappingColumns.length,
+                        shape: "ellipse",
+                        color: self.mappingValueColumnColor,
+                        shadow: true,
+                        x: nextX + layout.groupGap,
+                        y: layout.groupY,
+                    });
                     tableEndX = nextX + layout.groupGap;
                     edges.push({ from: keyNodeId, to: groupNodeId, dashes: [2, 4], color: classEdgeColor });
                     legendKeys.add("valueGroup");
@@ -1842,7 +1867,15 @@ var AIMappingWorkflow = (function () {
                 if (groupColumnXs.length == 0) {
                     return;
                 }
-                nodes.push({ id: groupNodeId, label: group.title, shape: "ellipse", color: self.mappingValueColumnColor, shadow: true, x: (groupColumnXs[0] + groupColumnXs[groupColumnXs.length - 1]) / 2, y: layout.groupY });
+                nodes.push({
+                    id: groupNodeId,
+                    label: group.title,
+                    shape: "ellipse",
+                    color: self.mappingValueColumnColor,
+                    shadow: true,
+                    x: (groupColumnXs[0] + groupColumnXs[groupColumnXs.length - 1]) / 2,
+                    y: layout.groupY,
+                });
                 nextX += layout.groupGap;
                 legendKeys.add("valueColumn");
                 legendKeys.add("valueGroup");
@@ -1870,7 +1903,14 @@ var AIMappingWorkflow = (function () {
             nextX += layout.tableGap;
         });
         var classX = (keyNodes[0].x + keyNodes[keyNodes.length - 1].x) / 2;
-        nodes.push({ id: classNodeId, label: self.getClassLabel(self.currentSource, classMapping.classLabel), shape: self.getLegendItem("Class").shape, color: self.getClassKindColor(classMapping.classLabel), x: classX, y: layout.classY });
+        nodes.push({
+            id: classNodeId,
+            label: self.getClassLabel(self.currentSource, classMapping.classLabel),
+            shape: self.getLegendItem("Class").shape,
+            color: self.getClassKindColor(classMapping.classLabel),
+            x: classX,
+            y: layout.classY,
+        });
         if (self.guessGraph && self.guessGraph.network) {
             self.guessGraph.network.destroy();
         }
@@ -2031,7 +2071,10 @@ var AIMappingWorkflow = (function () {
         });
         var writtenText = classMapping.decision ? "applied, " + classMapping.columnMappings.length + " columns chosen" : "nothing applied yet";
         var footer = $("<div class='masterData-footer'>");
-        footer.append($("<div>").append($("<span class='masterData-writtenLabel'>").text("Mapping"), $("<span>").text(writtenText)), $("<div class='masterData-footerButtons'>").append(undoButton, applyButton));
+        footer.append(
+            $("<div>").append($("<span class='masterData-writtenLabel'>").text("Mapping"), $("<span>").text(writtenText)),
+            $("<div class='masterData-footerButtons'>").append(undoButton, applyButton),
+        );
         var mappingView = self.getMappingTableViews(cardState);
         cardDiv.append(headerPanel, self.getMappingInstanceDiv(cardState), self.getMappingColumnsDiv(cardState, mappingView), footer);
         self.drawMappingClassGraph(mappingView);
@@ -2043,7 +2086,12 @@ var AIMappingWorkflow = (function () {
         var classMapping = cardState.classMapping;
         var instance = cardState.instance;
         var instanceDiv = $("<div class='masterData-stepContent'>").append(
-            $("<div class='masterData-step'>").append($("<span>").text("Instance "), $("<span class='masterData-help'>").text("?").attr("title", instance.reason || "")),
+            $("<div class='masterData-step'>").append(
+                $("<span>").text("Instance "),
+                $("<span class='masterData-help'>")
+                    .text("?")
+                    .attr("title", instance.reason || ""),
+            ),
         );
         if (classMapping.isImplicit) {
             instanceDiv.append($("<div>").text(instance.reason));
@@ -2072,10 +2120,15 @@ var AIMappingWorkflow = (function () {
         var graphUri = Config.sources[self.currentSource].graphUri;
         var graphUriSegments = graphUri.split("/");
         var graphUriLastSegments = graphUriSegments.filter((uriSegment) => uriSegment);
-        var uriBase = $("<span class='masterData-uriBase'>").text(".../" + graphUriLastSegments[graphUriLastSegments.length - 1] + "/").attr("title", graphUri);
+        var uriBase = $("<span class='masterData-uriBase'>")
+            .text(".../" + graphUriLastSegments[graphUriLastSegments.length - 1] + "/")
+            .attr("title", graphUri);
         var prefixInput = $("<input type='text' size='10' placeholder='prefix'>").val(instance.prefixURI);
         var prefixSeparator = $("<span class='masterData-uriBase'>");
-        var uriValue = $("<span class='masterData-uriValue'>").css("background", self.getLegendItem("Column").color).text(self.getUriSampleValue(instance, identifierEvidence)).attr("title", "value of " + identifierText);
+        var uriValue = $("<span class='masterData-uriValue'>")
+            .css("background", self.getLegendItem("Column").color)
+            .text(self.getUriSampleValue(instance, identifierEvidence))
+            .attr("title", "value of " + identifierText);
         var suffixInput = $("<input type='text' size='6' placeholder='suffix'>").val(instance.suffixURI || "");
         var uriBuilder = $("<div class='masterData-uriBuilder'>").append(uriBase, prefixInput, prefixSeparator, uriValue, suffixInput);
         var otherUriText = $("<div class='masterData-uriExample'>");
@@ -2137,7 +2190,9 @@ var AIMappingWorkflow = (function () {
                 columnsDiv.append($("<div class='masterData-tableTitle'>").text("table " + tableView.table + keyText));
             }
             tableView.groups.forEach(function (group) {
-                var groupDiv = $("<div class='masterData-group'>").append($("<div class='masterData-groupTitle'>").append($("<span>").text(group.title), $("<span>").text(group.mappingColumns.length)));
+                var groupDiv = $("<div class='masterData-group'>").append(
+                    $("<div class='masterData-groupTitle'>").append($("<span>").text(group.title), $("<span>").text(group.mappingColumns.length)),
+                );
                 if (group.groupKey == "implicit") {
                     groupDiv.append(self.getImplicitColumnChips(cardState, group));
                     columnsDiv.append(groupDiv);
@@ -2145,7 +2200,9 @@ var AIMappingWorkflow = (function () {
                 }
                 var groupTable = $("<table class='masterData-fields'>");
                 group.mappingColumns.forEach(function (mappingColumn) {
-                    var columnRows = mappingColumn.ownerClassLabel ? self.getForeignColumnRow(cardState, mappingColumn) : self.getMappingColumnRows(cardState, mappingColumn.columnsKey, mappingColumn.columnMapping);
+                    var columnRows = mappingColumn.ownerClassLabel
+                        ? self.getForeignColumnRow(cardState, mappingColumn)
+                        : self.getMappingColumnRows(cardState, mappingColumn.columnsKey, mappingColumn.columnMapping);
                     groupTable.append(columnRows);
                 });
                 columnsDiv.append(groupDiv.append(groupTable));
@@ -2283,7 +2340,9 @@ var AIMappingWorkflow = (function () {
             var probabilityParts = [];
             if (option.probability !== null && option.probability !== undefined) {
                 var probabilityFill = $("<div class='masterData-probabilityFill'>").css("width", option.probability + "%");
-                probabilityParts.push($("<div class='masterData-probability'>").append($("<div class='masterData-probabilityBar'>").append(probabilityFill), $("<span>").text(option.probability + "%")));
+                probabilityParts.push(
+                    $("<div class='masterData-probability'>").append($("<div class='masterData-probabilityBar'>").append(probabilityFill), $("<span>").text(option.probability + "%")),
+                );
             }
             var onClassText = option.onClass != classMapping.classLabel ? ", on " + option.onClass : "";
             optionButton.append(
@@ -2591,7 +2650,10 @@ var AIMappingWorkflow = (function () {
             var rowsDiv = $("<div class='masterData-stepContent'>");
             rowsDiv.append($("<div class='masterData-step'>").text("One row is"));
             card.readings.forEach(function (reading) {
-                var readingBox = $("<div class='masterData-readingBox'>").append($("<div>").append($("<b>").text(reading.label + ": "), $("<span>").text(self.getRowIsText(reading))), getReadingEvidence(reading));
+                var readingBox = $("<div class='masterData-readingBox'>").append(
+                    $("<div>").append($("<b>").text(reading.label + ": "), $("<span>").text(self.getRowIsText(reading))),
+                    getReadingEvidence(reading),
+                );
                 rowsDiv.append(readingBox);
             });
             cardDiv.append(rowsDiv);
@@ -2611,7 +2673,10 @@ var AIMappingWorkflow = (function () {
                     card.superClassId = null;
                     self.renderEntryCard();
                 };
-                var readingBox = $("<div class='masterData-readingBox'>").append(getOptionButton(readingIndex == card.readingIndex, titleElements, [["", self.getRowIsText(reading)]], pickReading), getReadingEvidence(reading));
+                var readingBox = $("<div class='masterData-readingBox'>").append(
+                    getOptionButton(readingIndex == card.readingIndex, titleElements, [["", self.getRowIsText(reading)]], pickReading),
+                    getReadingEvidence(reading),
+                );
                 readingsDiv.append(readingBox);
             });
             cardDiv.append(readingsDiv);
@@ -2697,7 +2762,10 @@ var AIMappingWorkflow = (function () {
             self.changeGuessByHand("undo_decision", { entry: entry.label });
         });
         var footer = $("<div class='masterData-footer'>");
-        footer.append($("<div>").append($("<span class='masterData-writtenLabel'>").text("Will be written"), $("<span>").text(writtenText)), $("<div class='masterData-footerButtons'>").append(undoButton, leaveOpenButton, applyButton));
+        footer.append(
+            $("<div>").append($("<span class='masterData-writtenLabel'>").text("Will be written"), $("<span>").text(writtenText)),
+            $("<div class='masterData-footerButtons'>").append(undoButton, leaveOpenButton, applyButton),
+        );
         cardDiv.append(footer);
     };
 
@@ -2945,7 +3013,9 @@ var AIMappingWorkflow = (function () {
                 return MainController.errorAlert(error);
             }
             var currentTables = self.getEntryDataNames(guessEntry).filter((dataName) => Object.hasOwn(columnsByTable, dataName));
-            var fields = [{ name: "tables", label: "Tables holding the rows of " + guessEntry.label + ", the main one first", kind: "tables", value: currentTables, options: Object.keys(columnsByTable).sort() }];
+            var fields = [
+                { name: "tables", label: "Tables holding the rows of " + guessEntry.label + ", the main one first", kind: "tables", value: currentTables, options: Object.keys(columnsByTable).sort() },
+            ];
             self.showFormDialog("Tables of " + guessEntry.label, fields, function (values) {
                 self.changeGuessByHand("set_entry_tables", { entry: guessEntry.label, tables: values.tables }, self.closeChoiceDialog);
             });
@@ -3213,8 +3283,17 @@ var AIMappingWorkflow = (function () {
         var link = self.popupMenuLink;
         var propertyColor = AIMappingModeler.propertyColor;
         var proposalNodes = self.getVisibleLinkOptions(link).map(function (option, optionIndex) {
-            var optionText = self.getAssumptionText(option) + self.getClassLabel(option.propertySource, option.propertyLabel) + (option.inverse ? " (inverse)" : "") + AIColumnClassSuggestion.getProbabilityText(option);
-            var proposalNode = { id: "aiProposal|" + optionIndex, parent: "aiProposal", text: AIColumnClassSuggestion.getTreeNodeText(optionText, propertyColor, option.reason), data: { propertyIri: option.propertyIri } };
+            var optionText =
+                self.getAssumptionText(option) +
+                self.getClassLabel(option.propertySource, option.propertyLabel) +
+                (option.inverse ? " (inverse)" : "") +
+                AIColumnClassSuggestion.getProbabilityText(option);
+            var proposalNode = {
+                id: "aiProposal|" + optionIndex,
+                parent: "aiProposal",
+                text: AIColumnClassSuggestion.getTreeNodeText(optionText, propertyColor, option.reason),
+                data: { propertyIri: option.propertyIri },
+            };
             return proposalNode;
         });
         var decide = function (propertyIri) {

@@ -54,14 +54,39 @@ const changeGuessTool = {
         properties: {
             change: {
                 type: "string",
-                enum: ["apply_decision", "undo_decision", "add_superclass_option", "remove_superclass_option", "update_class", "add_reading", "remove_reading", "remove_entry", "add_local_class", "apply_link_decision", "undo_link_decision", "add_link_property_option", "remove_link_property_option", "remove_link", "add_entry", "set_entry_tables", "add_link", "apply_class_mapping", "undo_class_mapping"],
+                enum: [
+                    "apply_decision",
+                    "undo_decision",
+                    "add_superclass_option",
+                    "remove_superclass_option",
+                    "update_class",
+                    "add_reading",
+                    "remove_reading",
+                    "remove_entry",
+                    "add_local_class",
+                    "apply_link_decision",
+                    "undo_link_decision",
+                    "add_link_property_option",
+                    "remove_link_property_option",
+                    "remove_link",
+                    "add_entry",
+                    "set_entry_tables",
+                    "add_link",
+                    "apply_class_mapping",
+                    "undo_class_mapping",
+                ],
             },
             rationale: {
                 type: "string",
-                description: "Why this change, in one or two sentences: what the user asked and the facts that support it, citing the numbers read in the data. Logged with the change for the next steps.",
+                description:
+                    "Why this change, in one or two sentences: what the user asked and the facts that support it, citing the numbers read in the data. Logged with the change for the next steps.",
             },
             step: { type: "string", enum: ["masterData", "importantClasses", "events", "links", "mapping"], description: "The guess changed, the step the user has open when left out." },
-            entry: { type: "string", description: "Label of the master data, of the important class, of the association class or, on step 4, of the link, as in the guess; every change but add_local_class, add_entry and add_link names one." },
+            entry: {
+                type: "string",
+                description:
+                    "Label of the master data, of the important class, of the association class or, on step 4, of the link, as in the guess; every change but add_local_class, add_entry and add_link names one.",
+            },
             link: { type: "string", description: "The id of the link the change acts on, on step 4. Copy it from the linksGuess the user sees." },
             property: { type: "string", description: "On step 4, the propertyIri or the label of the option of the link the change acts on." },
             propertyIri: { type: "string", description: "On step 4, the IRI of the property added to the link, found with search_upper_ontologies." },
@@ -78,7 +103,12 @@ const changeGuessTool = {
             instance: {
                 type: "object",
                 description: "On step 5, how one row gives one instance; the one of the guess when left out.",
-                properties: { identifierColumns: { type: "array", items: { type: "string" } }, uriType: { type: "string", enum: ["fromLabel", "blankNode", "randomIdentifier"] }, prefixURI: { type: "string" }, labelColumn: { type: "string" } },
+                properties: {
+                    identifierColumns: { type: "array", items: { type: "string" } },
+                    uriType: { type: "string", enum: ["fromLabel", "blankNode", "randomIdentifier"] },
+                    prefixURI: { type: "string" },
+                    labelColumn: { type: "string" },
+                },
             },
             columnChoices: {
                 type: "array",
@@ -190,7 +220,14 @@ export default function () {
             const userRequest = userMessages.length > 0 ? userMessages[userMessages.length - 1].content : "";
             const runGuessChange = async function (toolInput) {
                 toolInput.step = toolInput.step || screen?.step;
-                const changed = await changeGuess(source, databaseId, toolInput.change, toolInput, { userRequest: userRequest, queries: answerQueries.slice() }, { user: found.userInfo, userSources: found.userSources });
+                const changed = await changeGuess(
+                    source,
+                    databaseId,
+                    toolInput.change,
+                    toolInput,
+                    { userRequest: userRequest, queries: answerQueries.slice() },
+                    { user: found.userInfo, userSources: found.userSources },
+                );
                 if (changed.error) {
                     return { error: changed.error };
                 }

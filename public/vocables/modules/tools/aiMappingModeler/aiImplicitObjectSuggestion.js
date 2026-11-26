@@ -162,9 +162,7 @@ var AIImplicitObjectSuggestion = (function () {
     self.getConfirmationText = function (implicitObject) {
         var classSuggestion = implicitObject.classSuggestion;
         var classText =
-            classSuggestion.columnKind == "existingClass"
-                ? 'class "' + classSuggestion.label + '"'
-                : 'new class "' + classSuggestion.label + '", subclass of "' + classSuggestion.parentLabel + '"';
+            classSuggestion.columnKind == "existingClass" ? 'class "' + classSuggestion.label + '"' : 'new class "' + classSuggestion.label + '", subclass of "' + classSuggestion.parentLabel + '"';
         var restrictionLines = implicitObject.restrictions.map(function (restriction) {
             return "    " + restriction.fromColumn + " " + AIColumnRestrictionSuggestion.getRestrictionText(restriction) + " " + restriction.toColumn;
         });
@@ -179,7 +177,9 @@ var AIImplicitObjectSuggestion = (function () {
             restrictionLines.join("\n") +
             definitionText +
             reasonText +
-            "\n\nThe class and the restrictions are written in the ontology of " + AIMappingModeler.currentSLSsource + ".";
+            "\n\nThe class and the restrictions are written in the ontology of " +
+            AIMappingModeler.currentSLSsource +
+            ".";
         return confirmationText;
     };
 

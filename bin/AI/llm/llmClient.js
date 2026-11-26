@@ -7,7 +7,14 @@ import createCodexAdapter from "./adapters/codexAdapter.js";
 import createOpenCodeAdapter from "./adapters/openCodeAdapter.js";
 import { decryptSecret } from "./secret.js";
 
-const ADAPTERS = { anthropic: createAnthropicAdapter, openrouter: createOpenRouterAdapter, ollama: createOllamaAdapter, claudeCode: createClaudeCodeAdapter, codex: createCodexAdapter, openCode: createOpenCodeAdapter };
+const ADAPTERS = {
+    anthropic: createAnthropicAdapter,
+    openrouter: createOpenRouterAdapter,
+    ollama: createOllamaAdapter,
+    claudeCode: createClaudeCodeAdapter,
+    codex: createCodexAdapter,
+    openCode: createOpenCodeAdapter,
+};
 
 // ── Rate limiter (module-level singleton — shared across all callers) ───────
 const oneMinuteMs = 60000;

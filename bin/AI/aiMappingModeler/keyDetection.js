@@ -655,4 +655,19 @@ function getKnownAiKeys(databaseId) {
     return knownAiKeys;
 }
 
-export { startKeyDetection, followKeyDetection, getKeyDetection, clearKeyDetection, getKnownAiKeys, addAiKeysToSchema, askKeyModel, readJsonAnswer, describeKeyedDatabase, keyDetectionModelId, writeMappingAiKeys, readDatabaseSchema, keyDetectionChannel, aiForeignKeyPrefix };
+export {
+    startKeyDetection,
+    followKeyDetection,
+    getKeyDetection,
+    clearKeyDetection,
+    getKnownAiKeys,
+    addAiKeysToSchema,
+    askKeyModel,
+    readJsonAnswer,
+    describeKeyedDatabase,
+    keyDetectionModelId,
+    writeMappingAiKeys,
+    readDatabaseSchema,
+    keyDetectionChannel,
+    aiForeignKeyPrefix,
+};

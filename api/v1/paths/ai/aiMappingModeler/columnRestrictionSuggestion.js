@@ -66,7 +66,9 @@ export default function () {
             },
         ],
         responses: {
-            200: { description: "{ restrictions: [{ fromColumn, toColumn, property: { id, label }, restrictionType, cardinality }], implicitJudgementId or null, allowedMilliseconds, llmMilliseconds }" },
+            200: {
+                description: "{ restrictions: [{ fromColumn, toColumn, property: { id, label }, restrictionType, cardinality }], implicitJudgementId or null, allowedMilliseconds, llmMilliseconds }",
+            },
             404: { description: "The source is unknown to the user." },
             409: { description: "The source was not prepared." },
             502: { description: "The model failed." },

@@ -310,7 +310,9 @@ var AIKeyClassPropagation = (function () {
     };
 
     self.getCheckedProposals = function () {
-        var checkedNodeIds = $("#" + self.treeDivId).jstree(true).get_checked();
+        var checkedNodeIds = $("#" + self.treeDivId)
+            .jstree(true)
+            .get_checked();
         var checkedProposals = self.currentPropagation.proposals.filter(function (proposal) {
             return checkedNodeIds.indexOf(proposal.proposalId) > -1 && !proposal.conflictText;
         });
@@ -319,7 +321,9 @@ var AIKeyClassPropagation = (function () {
 
     self.showCheckedCount = function () {
         var checkedCount = self.getCheckedProposals().length;
-        $("#keyPropagation_mapButton").text("Map " + checkedCount + " columns").prop("disabled", checkedCount == 0);
+        $("#keyPropagation_mapButton")
+            .text("Map " + checkedCount + " columns")
+            .prop("disabled", checkedCount == 0);
     };
 
     // each AI foreign key gets what decides it, read in the database; the row shows its color once read
@@ -521,7 +525,15 @@ var AIKeyClassPropagation = (function () {
         var evidence = proposal.evidence;
         var keyTableHtml = CommonBotFunctions.escapeHtml(referencedKey.table);
         var measureHtml =
-            "<span class='keyPropagation-" + self.getMeasureLevel(evidence) + "'>" + evidence.foundCount + "/" + evidence.readCount + "</span> <span class='keyPropagation-keyText'>values found in " + keyTableHtml + "</span>";
+            "<span class='keyPropagation-" +
+            self.getMeasureLevel(evidence) +
+            "'>" +
+            evidence.foundCount +
+            "/" +
+            evidence.readCount +
+            "</span> <span class='keyPropagation-keyText'>values found in " +
+            keyTableHtml +
+            "</span>";
         var signals = self.getKeySignals(proposal);
         var signalLines = signals.map(function (signal) {
             var signalLine = "<li class='keyPropagation-signal-" + signal.level + "'>" + signal.html + "</li>";

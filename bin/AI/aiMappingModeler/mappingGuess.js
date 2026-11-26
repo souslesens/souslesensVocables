@@ -346,7 +346,9 @@ async function guessMapping(source, databaseId, userInfo, userSources, tellStep)
     const tellPropertiesStep = getGuessPhaseStep(tellStep, 1, mappingPhaseCount);
     tellPropertiesStep("reading the properties of the ontologies and of the vocabularies of base");
     const propertyByIri = await readAvailableProperties(preparedSource, { user: userInfo, userSources: userSources });
-    const propertyLines = Object.entries(propertyByIri).map(([propertyIri, property]) => "- <" + propertyIri + "> " + property.label + (property.range ? ", range " + property.range : "") + ", in " + property.source);
+    const propertyLines = Object.entries(propertyByIri).map(
+        ([propertyIri, property]) => "- <" + propertyIri + "> " + property.label + (property.range ? ", range " + property.range : "") + ", in " + property.source,
+    );
     const propertiesText = propertyLines.join("\n");
     const tellColumnsStep = getGuessPhaseStep(tellStep, 2, mappingPhaseCount);
     const columnEvidencesByTable = {};
@@ -367,7 +369,14 @@ async function guessMapping(source, databaseId, userInfo, userSources, tellStep)
     let answeredCount = 0;
     tellModelStep("the model maps the columns of " + modelledMappings.length + " classes, about a minute each, three at a time");
     await async.eachLimit(modelledMappings, parallelModelCallCount, async function (classMapping) {
-        await guessClassMapping(classMapping, classAnchors.anchorTexts[classMapping.classLabel], classGuesses.masterDataGuess.domain, columnEvidencesByTable[classMapping.table], propertiesText, propertyByIri);
+        await guessClassMapping(
+            classMapping,
+            classAnchors.anchorTexts[classMapping.classLabel],
+            classGuesses.masterDataGuess.domain,
+            columnEvidencesByTable[classMapping.table],
+            propertiesText,
+            propertyByIri,
+        );
         answeredCount++;
         tellModelStep("the model mapped " + answeredCount + "/" + modelledMappings.length + " classes, the last " + classMapping.classLabel);
     });

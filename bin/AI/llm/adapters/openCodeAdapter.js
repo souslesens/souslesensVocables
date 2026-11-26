@@ -20,7 +20,7 @@ const backendSystemPrompt =
     "You are the model behind the completion endpoint of an application. The user message holds the application's instructions, its tools and the conversation so far. " +
     "Write only the next assistant turn, following those instructions. You have no tool of your own.";
 const toolProtocol =
-    "Answer with one JSON object and nothing else: {\"text\":\"...\",\"toolCalls\":[{\"name\":\"...\",\"input\":{...}}]}. To call tools, list them in toolCalls, with any text for the user in text. To give your final answer, leave toolCalls empty and put the whole answer in text.";
+    'Answer with one JSON object and nothing else: {"text":"...","toolCalls":[{"name":"...","input":{...}}]}. To call tools, list them in toolCalls, with any text for the user in text. To give your final answer, leave toolCalls empty and put the whole answer in text.';
 const assistantTurnSchema = {
     type: "object",
     properties: {
@@ -59,7 +59,9 @@ function toCliPrompt(system, messages, tools) {
         promptParts.push("<application_instructions>\n" + system + "\n</application_instructions>");
     }
     if (tools && tools.length > 0) {
-        promptParts.push("<available_tools>\n" + JSON.stringify(tools) + "\n</available_tools>\n" + toolProtocol + "\nThe JSON object to answer is of this shape: " + JSON.stringify(assistantTurnSchema));
+        promptParts.push(
+            "<available_tools>\n" + JSON.stringify(tools) + "\n</available_tools>\n" + toolProtocol + "\nThe JSON object to answer is of this shape: " + JSON.stringify(assistantTurnSchema),
+        );
     }
     (messages ?? []).forEach(function (message) {
         const contentBlocks = typeof message.content == "string" ? [{ type: "text", text: message.content }] : (message.content ?? []);

@@ -193,7 +193,9 @@ export default function () {
                 "\n\n" +
                 (baseAnswer
                     ? "```json\n" + JSON.stringify(baseAnswer) + "\n```"
-                    : "No compact answer, " + noAnswerReason + ": the version can be questioned but not revised. Its MappingModeler document:\n\n```json\n" +
+                    : "No compact answer, " +
+                      noAnswerReason +
+                      ": the version can be questioned but not revised. Its MappingModeler document:\n\n```json\n" +
                       JSON.stringify({ nodes: baseSavedMapping.mapping?.nodes ?? [], edges: baseSavedMapping.mapping?.edges ?? [] }) +
                       "\n```") +
                 "\n\n# Checks of the version\n\n" +

@@ -56,7 +56,14 @@ async function fixNotAllowedRestrictions(ontologyAnswer, notAllowedChecks, abort
         };
     });
     const prompt = readFileSync(restrictionFixPromptPath, "utf8") + "\n\n" + toJsonBlock(restrictionFixInput);
-    const restrictionFixMessage = { messages: [{ role: "user", content: prompt }], maxTokens: modelMaxOutputTokens, model: ontologyModelId, reasoningEffort: ontologyReasoningEffort, abortSignal: abortSignal, onTextDelta: function () {} };
+    const restrictionFixMessage = {
+        messages: [{ role: "user", content: prompt }],
+        maxTokens: modelMaxOutputTokens,
+        model: ontologyModelId,
+        reasoningEffort: ontologyReasoningEffort,
+        abortSignal: abortSignal,
+        onTextDelta: function () {},
+    };
     let completion = null;
     try {
         completion = await createMessage(restrictionFixMessage, restrictionFix.usage);

@@ -3,7 +3,19 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { databaseModel } from "../../../model/databases.js";
 import { askKeyModel, keyDetectionModelId, getKeyDetection, writeMappingAiKeys, readDatabaseSchema, addAiKeysToSchema, aiForeignKeyPrefix } from "./keyDetection.js";
-import { getGuessPhaseStep, carryStepGuessedAgain, describeDecidedMasterData, describeGuessedDatabase, layOutReadings, readGuessedEntries, classifyClasses, findByLabel, findParentOption, getPropertySource, getGuessEntries } from "./masterData.js";
+import {
+    getGuessPhaseStep,
+    carryStepGuessedAgain,
+    describeDecidedMasterData,
+    describeGuessedDatabase,
+    layOutReadings,
+    readGuessedEntries,
+    classifyClasses,
+    findByLabel,
+    findParentOption,
+    getPropertySource,
+    getGuessEntries,
+} from "./masterData.js";
 import { getPreparedSource, getNotPreparedError } from "./sourcePreparation.js";
 import { getTermIri } from "../ontologyFromDb/mappings/mappingAnswer.js";
 import { readFittingPropertiesByClassPair } from "./columnRestrictionSuggestion.js";
@@ -155,7 +167,21 @@ function getForeignKeyGroups(schema, aiKeys) {
 }
 
 function getNewLink(linkId, fromClass, toClass, viaEvent) {
-    const link = { id: linkId, fromClass: fromClass, toClass: toClass, viaEvent: viaEvent, foreignKey: null, rowColumns: null, sameRowTable: null, propertyOptions: [], hasNoAllowedProperty: false, cardinality: "", inverseCardinality: "", reason: "", decision: null };
+    const link = {
+        id: linkId,
+        fromClass: fromClass,
+        toClass: toClass,
+        viaEvent: viaEvent,
+        foreignKey: null,
+        rowColumns: null,
+        sameRowTable: null,
+        propertyOptions: [],
+        hasNoAllowedProperty: false,
+        cardinality: "",
+        inverseCardinality: "",
+        reason: "",
+        decision: null,
+    };
     return link;
 }
 
@@ -546,10 +572,19 @@ async function guessLinkProperties(links, classAnchors, domain, preparedSource, 
     links.forEach(function (link, linkIndex) {
         const allowedAlternatives = Object.values(allowedByLink[linkIndex]);
         const hasBothUpperClasses = Boolean(classAnchors.upperClassesByClass[link.fromClass]) && Boolean(classAnchors.upperClassesByClass[link.toClass]);
-        link.hasNoAllowedProperty = hasBothUpperClasses && allowedAlternatives.every((allowedProperties) => allowedProperties.forwardProperties.size == 0 && allowedProperties.inverseProperties.size == 0);
+        link.hasNoAllowedProperty =
+            hasBothUpperClasses && allowedAlternatives.every((allowedProperties) => allowedProperties.forwardProperties.size == 0 && allowedProperties.inverseProperties.size == 0);
     });
     const propertiesText = getObjectPropertiesText(preparedSource.modelText);
-    const linkPropertiesPrompt = readFileSync(linkPropertiesPromptPath, "utf8") + "\n\n# Upper ontologies, most abstract first\n\n" + propertiesText + "\n\n# Domain\n\n" + domain + "\n\n# Links\n\n" + linkLines.join("\n\n") + "\n";
+    const linkPropertiesPrompt =
+        readFileSync(linkPropertiesPromptPath, "utf8") +
+        "\n\n# Upper ontologies, most abstract first\n\n" +
+        propertiesText +
+        "\n\n# Domain\n\n" +
+        domain +
+        "\n\n# Links\n\n" +
+        linkLines.join("\n\n") +
+        "\n";
     tellStep("the model proposes the properties of the upper ontologies for the links, about a minute");
     const answer = await askKeyModel(linkPropertiesPrompt);
     if (answer.error) {

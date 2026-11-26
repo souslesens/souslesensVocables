@@ -45,7 +45,10 @@ export default function () {
                         source: { type: "string" },
                         databaseId: { type: "string" },
                         change: { type: "string", description: "a change name of the change_guess tool: remove_entry, update_class, undo_decision, add_superclass_option, undo_link_decision..." },
-                        changeInput: { type: "object", description: "the inputs of the change_guess tool, step included: entry, reading, newLabel, existingClassIri, superClassIri, link, propertyIri..." },
+                        changeInput: {
+                            type: "object",
+                            description: "the inputs of the change_guess tool, step included: entry, reading, newLabel, existingClassIri, superClassIri, link, propertyIri...",
+                        },
                     },
                 },
             },

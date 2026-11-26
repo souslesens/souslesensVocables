@@ -714,7 +714,12 @@ function changeGuessEntry(preparedSource, guess, source, changeName, changeInput
         if (classification.classKind == "newClass" && !chosenParent) {
             const parentLabels = parentOptions.map((parentOption) => parentOption.parentLabel);
             return {
-                error: "name one superclass option of " + guessEntry.label + ": " + parentLabels.join(", ") + "; another class of the upper ontologies, or a local class, is added first with add_superclass_option",
+                error:
+                    "name one superclass option of " +
+                    guessEntry.label +
+                    ": " +
+                    parentLabels.join(", ") +
+                    "; another class of the upper ontologies, or a local class, is added first with add_superclass_option",
             };
         }
         guessEntry.decision = { readingIndex: readingIndex, superClassId: chosenParent ? chosenParent.parentId : null };
@@ -1271,7 +1276,9 @@ function carryStepGuessedAgain(aiKeys, guessKey, guessBefore, schema) {
             }
         });
         const classLabels = [];
-        [aiKeys.masterDataGuess, aiKeys.importantClassesGuess].forEach((classGuess) => getGuessEntries(classGuess).forEach((guessEntry) => classLabels.push(getDecidedClassLabel(guessEntry, classGuess))));
+        [aiKeys.masterDataGuess, aiKeys.importantClassesGuess].forEach((classGuess) =>
+            getGuessEntries(classGuess).forEach((guessEntry) => classLabels.push(getDecidedClassLabel(guessEntry, classGuess))),
+        );
         eventsGuess.classesWithoutTables = classLabels.filter((classLabel) => !eventsGuess.classTables[classLabel]);
     }
     if (aiKeys.linksGuess && eventsGuess) {
@@ -1482,4 +1489,22 @@ async function changeGuess(source, databaseId, changeName, changeInput, chatEvid
     return { summary: changed.summary, guessKey, guess, nextGuesses };
 }
 
-export { runSqlTool, guessMasterData, guessImportantClasses, carryStepGuessedAgain, getGuessPhaseStep, runEvidenceQuery, changeGuess, linkChangeNames, describeDecidedMasterData, describeGuessedDatabase, layOutReadings, readGuessedEntries, classifyClasses, findByLabel, findParentOption, getPropertySource, getGuessEntries };
+export {
+    runSqlTool,
+    guessMasterData,
+    guessImportantClasses,
+    carryStepGuessedAgain,
+    getGuessPhaseStep,
+    runEvidenceQuery,
+    changeGuess,
+    linkChangeNames,
+    describeDecidedMasterData,
+    describeGuessedDatabase,
+    layOutReadings,
+    readGuessedEntries,
+    classifyClasses,
+    findByLabel,
+    findParentOption,
+    getPropertySource,
+    getGuessEntries,
+};

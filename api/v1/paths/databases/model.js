@@ -44,6 +44,7 @@ export default function () {
                     });
                 },
                 withTypes,
+                req.query.schema,
             );
         } catch (error) {
             console.error(error);
@@ -70,6 +71,13 @@ export default function () {
                 description:
                     "If `true`, answer a table → { column → data_type } map instead, `data_type` as information_schema.columns gives it, " +
                     'e.g. `{ "assets": { "asset_id": "integer", "install_date": "date" } }`.',
+            },
+            {
+                name: "schema",
+                in: "query",
+                type: "string",
+                required: false,
+                description: "Schema to introspect; when absent, the driver default (`public` for postgres, `dbo` for sqlserver).",
             },
         ],
         responses: {

@@ -17,7 +17,7 @@ export default function () {
                 const database = await databaseModel.getDatabase(req.query.dbName);
                 const driver = databaseModel.getClientDriver(database.driver);
                 const limit = parseInt(req.query.limit) || 200;
-                const rows = await dbConnector.getSampleData(connection, req.query.tableName, limit, driver);
+                const rows = await dbConnector.getSampleData(connection, req.query.tableName, limit, driver, req.query.schema);
                 res.status(200).json({ rows });
             } else {
                 const sqlQuery = req.query.sqlQuery;
@@ -67,6 +67,13 @@ export default function () {
             { in: "query", name: "dbName", type: "string", required: true, description: "Database id from `databases.json`." },
             { in: "query", name: "tableName", type: "string", required: false, description: "Sample-mode: table to read." },
             { in: "query", name: "limit", type: "string", required: false, description: "Max rows in sample mode (default 200)." },
+            {
+                in: "query",
+                name: "schema",
+                type: "string",
+                required: false,
+                description: "Sample-mode: schema to read `tableName` from; when absent, the driver default (`public` for postgres, `dbo` for sqlserver).",
+            },
             { in: "query", name: "sqlQuery", type: "string", required: false, description: "Query-mode: full `SELECT` statement." },
         ],
         responses: {

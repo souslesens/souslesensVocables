@@ -5,25 +5,12 @@ import { getSchemaDescription } from "../../../../../bin/databases/dbConnector.j
 import { databaseModel } from "../../../../../model/databases.js";
 import { findUserSource } from "../../../../../bin/AI/ontologyFromDb/ontology/ontologyRuns.js";
 import { getKeyDetection, describeKeyedDatabase, keyDetectionModelId } from "../../../../../bin/AI/aiMappingModeler/keyDetection.js";
-import { runEvidenceQuery, changeGuess } from "../../../../../bin/AI/aiMappingModeler/masterData.js";
+import { runEvidenceQuery, changeGuess, runSqlTool } from "../../../../../bin/AI/aiMappingModeler/masterData.js";
 import { getPreparedSource } from "../../../../../bin/AI/aiMappingModeler/sourcePreparation.js";
 import { runAgentLoop, searchUpperOntologiesTool, getUpperOntologyTermsTool, getUpperOntologyReaders, getReadingToolOutcome } from "../../../../../bin/AI/ontologyFromDb/revision/revisionAgent.js";
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const workflowChatPromptPath = join(currentDirectory, "../../../../../bin/AI/aiMappingModeler/prompts/workflow_chat.md");
-
-const runSqlTool = {
-    name: "run_sql",
-    description: "Run one read-only SELECT on the database the user opened. At most 20 rows come back, the user sees them as a table under the answer.",
-    input_schema: {
-        type: "object",
-        properties: {
-            purpose: { type: "string", description: "What the rows show, in one short sentence, written above the table." },
-            sql: { type: "string", description: "One SELECT or WITH statement, table names without schema prefix." },
-        },
-        required: ["purpose", "sql"],
-    },
-};
 
 const superClassOptionInputs = {
     superClassIri: { type: "string", description: "IRI of a class of the upper ontologies, found with search_upper_ontologies, or label of a local class added with add_local_class." },
@@ -47,12 +34,18 @@ const changeGuessTool = {
         "- add_reading: add a reading of what one row denotes (newLabel, rowIs, inData, askBusiness, definition of its class, superClassOptions).\n" +
         "- remove_reading: remove a reading with its class; a decision on it is undone.\n" +
         "- remove_entry: remove the entry with its readings and classes.\n" +
+        "- add_entry: add a class (steps 1 and 2) or an association (step 3) the AI missed (newLabel, definition, tables holding its rows, the main one first, superClassOptions), " +
+        "after reading the tables in the data; it is decided as any entry.\n" +
+        "- set_entry_tables: change the tables holding the rows of an entry (entry, tables, the main one first); a table whose rows are other things, only naming the class in a column, is not one of them; " +
+        "the links of step 4 are computed again from the tables.\n" +
         "On step 4 every change names its link by its id:\n" +
         "- apply_link_decision: decide the link (link), choosing one of its propertyOptions (property = its propertyIri); the decision shows on the link in the graph.\n" +
         "- undo_link_decision: an undecided link (link).\n" +
         "- add_link_property_option: add a property of the upper ontologies to the options of the link (link, propertyIri, definition, probability, inverse), after searching them.\n" +
         "- remove_link_property_option: remove one of its options (link, property); the decision on it, if any, is undone.\n" +
         "- remove_link: remove the link from the guess (link).\n" +
+        "- add_link: add a link between two classes of steps 1 to 3 (fromClass, toClass), on a foreign key (table, columns, referencedTable, referencedColumns) whose values are checked in the data, " +
+        "or on a row of a table holding both classes (sameRowTable); then add its property with add_link_property_option.\n" +
         "On step 5 every change names its class by classLabel, as in the mappingGuess:\n" +
         "- apply_class_mapping: apply the mapping of the class: its instance (identifierColumns, uriType, prefixURI, labelColumn) and, per column entry, the option chosen (columnChoices).\n" +
         "- undo_class_mapping: the mapping of the class and the choices of its columns are open again.",
@@ -61,18 +54,26 @@ const changeGuessTool = {
         properties: {
             change: {
                 type: "string",
-                enum: ["apply_decision", "undo_decision", "add_superclass_option", "remove_superclass_option", "update_class", "add_reading", "remove_reading", "remove_entry", "add_local_class", "apply_link_decision", "undo_link_decision", "add_link_property_option", "remove_link_property_option", "remove_link", "apply_class_mapping", "undo_class_mapping"],
+                enum: ["apply_decision", "undo_decision", "add_superclass_option", "remove_superclass_option", "update_class", "add_reading", "remove_reading", "remove_entry", "add_local_class", "apply_link_decision", "undo_link_decision", "add_link_property_option", "remove_link_property_option", "remove_link", "add_entry", "set_entry_tables", "add_link", "apply_class_mapping", "undo_class_mapping"],
             },
             rationale: {
                 type: "string",
                 description: "Why this change, in one or two sentences: what the user asked and the facts that support it, citing the numbers read in the data. Logged with the change for the next steps.",
             },
             step: { type: "string", enum: ["masterData", "importantClasses", "events", "links", "mapping"], description: "The guess changed, the step the user has open when left out." },
-            entry: { type: "string", description: "Label of the master data, of the important class, of the association class or, on step 4, of the link, as in the guess; every change but add_local_class names one." },
+            entry: { type: "string", description: "Label of the master data, of the important class, of the association class or, on step 4, of the link, as in the guess; every change but add_local_class, add_entry and add_link names one." },
             link: { type: "string", description: "The id of the link the change acts on, on step 4. Copy it from the linksGuess the user sees." },
             property: { type: "string", description: "On step 4, the propertyIri or the label of the option of the link the change acts on." },
             propertyIri: { type: "string", description: "On step 4, the IRI of the property added to the link, found with search_upper_ontologies." },
             inverse: { type: "boolean", description: "On step 4, when the property holds from the other class to the link's one." },
+            tables: { type: "array", items: { type: "string" }, description: "On steps 1 to 3, the tables holding the rows of the entry, as the database names them, the main one first." },
+            fromClass: { type: "string", description: "On step 4, add_link: the class the link goes from, as the links name it." },
+            toClass: { type: "string", description: "On step 4, add_link: the class the link goes to." },
+            table: { type: "string", description: "On step 4, add_link: the table of the foreign key columns." },
+            columns: { type: "array", items: { type: "string" }, description: "On step 4, add_link: the foreign key columns of table." },
+            referencedTable: { type: "string", description: "On step 4, add_link: the table the key points at." },
+            referencedColumns: { type: "array", items: { type: "string" }, description: "On step 4, add_link: the columns of referencedTable the key points at, in the order of columns." },
+            sameRowTable: { type: "string", description: "On step 4, add_link: the table whose rows hold both classes, instead of a foreign key." },
             classLabel: { type: "string", description: "On step 5, the class whose mapping changes, as in the mappingGuess." },
             instance: {
                 type: "object",
@@ -189,11 +190,11 @@ export default function () {
             const userRequest = userMessages.length > 0 ? userMessages[userMessages.length - 1].content : "";
             const runGuessChange = async function (toolInput) {
                 toolInput.step = toolInput.step || screen?.step;
-                const changed = await changeGuess(source, databaseId, toolInput.change, toolInput, { userRequest: userRequest, queries: answerQueries.slice() });
+                const changed = await changeGuess(source, databaseId, toolInput.change, toolInput, { userRequest: userRequest, queries: answerQueries.slice() }, { user: found.userInfo, userSources: found.userSources });
                 if (changed.error) {
                     return { error: changed.error };
                 }
-                sendProgress({ type: "guessChange", summary: changed.summary, guessKey: changed.guessKey, guess: changed.guess });
+                sendProgress({ type: "guessChange", summary: changed.summary, guessKey: changed.guessKey, guess: changed.guess, nextGuesses: changed.nextGuesses });
                 return { summary: changed.summary };
             };
             const toolFunctionsByName = { run_sql: runSql, change_guess: runGuessChange };
@@ -241,7 +242,7 @@ export default function () {
         description:
             "POST the source, the database opened, what the user has open on the screen and the conversation. The model sees the master data and important classes guesses of the database, " +
             "the screen and the schema with its keys, and reads the data with read-only SELECTs. Answers one JSON event per line: " +
-            "textDelta, toolCall, toolResult, table { purpose, sql, columns, rows } for each query read, guessChange { summary, guessKey, guess } for each change of the guess the user asked for, " +
+            "textDelta, toolCall, toolResult, table { purpose, sql, columns, rows } for each query read, guessChange { summary, guessKey, guess, nextGuesses } for each change of the guess the user asked for, " +
             "then answer { text } or error { error }.",
         operationId: "aiMappingWorkflowChat",
         parameters: [

@@ -23,7 +23,7 @@ export default function () {
             if (guessed.error) {
                 return res.status(409).json({ error: guessed.error });
             }
-            res.status(200).json({ importantClassesGuess: guessed.importantClassesGuess });
+            res.status(200).json({ importantClassesGuess: guessed.importantClassesGuess, nextGuesses: guessed.nextGuesses });
         } catch (error) {
             console.error("aiMappingWorkflow/importantClasses route error:", error);
             res.status(error.status || 500).json({ error: error.message });
@@ -56,7 +56,7 @@ export default function () {
         responses: {
             200: {
                 description:
-                    "{ importantClassesGuess: { importantClasses: [{ label, definition, reason, aboutMasterData, evidence, readings }], classificationByClass, decisionsByMasterData, model, guessedAt } }",
+                    "{ importantClassesGuess: { importantClasses: [{ label, definition, reason, aboutMasterData, evidence, readings }], classificationByClass, decisionsByMasterData, model, guessedAt }, nextGuesses: the guesses of the next steps by key, kept up with a guess done again }",
             },
             404: { description: "The source is unknown to the user." },
             409: { description: "The master data are not guessed, the ontologies are not prepared, or the model failed." },

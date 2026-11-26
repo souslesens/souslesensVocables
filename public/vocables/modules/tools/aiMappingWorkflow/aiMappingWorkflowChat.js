@@ -266,7 +266,7 @@ var AIMappingWorkflowChat = (function () {
             self.setWorking(true, "Thinking");
         } else if (progressEvent.type == "guessChange") {
             self.appendEntry($("<div class='vdbChat-version-event'>").text(progressEvent.summary));
-            self.onGuessChange(progressEvent.guessKey, progressEvent.guess);
+            self.onGuessChange(progressEvent.guessKey, progressEvent.guess, progressEvent.nextGuesses);
         } else if (progressEvent.type == "table") {
             self.appendEntry(self.getTableEntry(progressEvent));
         } else if (progressEvent.type == "answer") {

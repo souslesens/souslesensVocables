@@ -5,6 +5,8 @@ import AIMappingModeler from "../aiMappingModeler/aiMappingModeler.js";
 import AIMappingColumnsGraph from "../aiMappingModeler/aiMappingColumnsGraph.js";
 import AIColumnClassSuggestion from "../aiMappingModeler/aiColumnClassSuggestion.js";
 import AIMappingWorkflowChat from "./aiMappingWorkflowChat.js";
+import LegendOverlayWidget from "../../uiWidgets/legendOverlayWidget.js";
+import AIMappingBuild from "./aiMappingBuild.js";
 
 /**
  * AIMappingWorkflow module.
@@ -72,13 +74,13 @@ var AIMappingWorkflow = (function () {
             reasonLabel: "Why",
         },
         {
-            label: "Links",
+            label: "Semantic relations",
             guessKey: "linksGuess",
             chatStep: "links",
             guessRoute: "links",
-            runText: "The AI now proposes the properties of the upper ontologies for the links between the classes of steps 1 to 3, for each alternative of a class still undecided: a few minutes.",
+            runText: "The AI now proposes the properties of the upper ontologies for the relations between the classes of steps 1 to 3, for each alternative of a class still undecided: a few minutes.",
             entryLegend: "Class",
-            entryNoun: "links",
+            entryNoun: "relations",
             reasonLabel: "Why",
         },
         {
@@ -92,6 +94,8 @@ var AIMappingWorkflow = (function () {
             entryNoun: "class mappings",
             reasonLabel: "Why",
         },
+        // no guess of its own: it writes the mapping of MappingModeler from the steps before
+        { label: "Build", chatStep: "mapping", isBuildStep: true },
     ];
     // step 5: the class whose mapping is open on the card, with the instance and the options picked on it, not applied yet
     self.currentMappingCard = null;
@@ -108,7 +112,48 @@ var AIMappingWorkflow = (function () {
         unmapped: "left unmapped",
         other: "other",
     };
-    self.mappingUriTypes = ["fromLabel", "blankNode", "randomIdentifier"];
+    self.mappingUriTypeLabels = { fromLabel: "from the Id", blankNode: "blank node", randomIdentifier: "random" };
+    // the class graph in levels: the class, the Id of each table, every value column on one line, the groups below
+    // the column line in three staggered rows, so a long label never meets its neighbour of the same row
+    self.mappingGraphLayout = { classY: -330, keyY: -180, columnY: 0, columnRowCount: 3, columnRowOffset: 45, groupY: 220, columnSpacing: 75, groupGap: 70, tableGap: 120, labelCharWidth: 7, columnMargin: 20 };
+    self.mappingValueColumnColor = "#dddddd";
+    self.mappingGroupEdgeColor = "#b9b9b9";
+    // the columns of a class grouped by the kind of value they give, in this order, the columns of another class and the
+    // implicit classes last
+    self.mappingGroupTitles = { text: "Text", dates: "Dates", numbers: "Numbers", booleans: "Yes / no", urls: "URLs", implicit: "Implicit classes" };
+    self.mappingGroupOrder = ["text", "dates", "numbers", "booleans", "urls"];
+    self.mappingGroupKeysByRange = {
+        "xsd:date": "dates",
+        "xsd:dateTime": "dates",
+        "xsd:integer": "numbers",
+        "xsd:int": "numbers",
+        "xsd:decimal": "numbers",
+        "xsd:float": "numbers",
+        "xsd:double": "numbers",
+        "xsd:boolean": "booleans",
+        "xsd:anyURI": "urls",
+    };
+    // what Other offers beside the properties, the kinds of mapping_guess.md that need no property; individualPerValue
+    // left out, it gives what implicitClass gives, one node per distinct value
+    self.mappingOtherKinds = ["implicitClass", "subclassPerValue", "splitValue", "identifierClass"];
+    self.mappingOtherKindLabels = { implicitClass: "one node per value", subclassPerValue: "one subclass per value", splitValue: "one node per code", identifierClass: "an identifier node" };
+    // what rows give for each choice of Other
+    self.mappingKindExamples = {
+        existingProperty: 'order 4000123 has description "Replace pump seal"',
+        implicitClass: 'planner "SMITH" on 40 orders: one node SMITH, the 40 orders point to it',
+        subclassPerValue: 'type "PM02" on 500 orders: a class PM02 under the class, the 500 orders are PM02',
+        splitValue: '"PM01, PM02" in one cell: two nodes PM01 and PM02, the order points to both',
+        identifierClass: 'order 4000123 points to a node "tag 4000123", which has data of its own',
+        unmapped: "nothing written",
+    };
+    self.exampleValueMaxLength = 30;
+    self.mappingRanges = ["xsd:string", "xsd:integer", "xsd:decimal", "xsd:boolean", "xsd:date", "xsd:dateTime"];
+    // the date formats util.getDateFromSLSformat reads
+    self.mappingDateFormats = ["FR", "ISO", "USA", "EUR", "ISO-time"];
+    // the separators after which util.hasURISeparator adds no "-" to the prefix
+    self.uriSeparators = ["/", "-", "_", "#", ":"];
+    self.propertySearchResultCount = 8;
+    self.shownSampleValueCount = 3;
     self.currentStepIndex = 0;
     // step 4: the link open on the card, and the links each edge of the links graph draws
     self.currentLinkCard = null;
@@ -119,13 +164,18 @@ var AIMappingWorkflow = (function () {
     self.linkArrows = [];
     self.linkClassNodeIdByNodeId = {};
     self.highlightedLinkClassNodeId = null;
+    // the legend keys of each node of the links graph, for a legend of what is shown
+    self.linkLegendKeysByNodeId = {};
+    // the assumption { class, superClass } each superclass node of the links graph stands for
+    self.linkAssumptionByNodeId = {};
+    // { databaseId, columnsByTable } of the database open, read by the forms of the changes made by hand
+    self.databaseColumns = null;
     // the links graph, in canvas pixels: the distance between two rings of class trees around the center, the trees a
     // ring holds per ring of distance, the height of a superclass above its class, and the line of a link by its key
     self.linkRingSpacing = 500;
     self.linkRingCapacityStep = 6;
     self.linkSuperClassRise = 200;
     self.linkKeyDashes = { declared: false, ai: [8, 6], row: [2, 5] };
-    self.linkKeyLegendStyles = { declared: "solid", ai: "dashed", row: "dotted" };
     // an arrow joining links on several kinds of key is drawn with the first kind of this order among them
     self.linkKeyKindOrder = ["declared", "ai", "row"];
     self.linkArrowStyle = { color: "#409304", fadedColor: "#b9d6a4", decidedWidth: 3, proposedWidth: 1.5, oppositeRoundness: 0.2, labelBackground: "rgba(255,255,255,0.9)" };
@@ -137,6 +187,8 @@ var AIMappingWorkflow = (function () {
     self.linkRingPositionByNodeId = {};
     // in screen pixels, how far from the line or the label of a shown link a click still takes it
     self.linkClickTolerance = 12;
+    // the start a reading of the model repeats, which the card already writes
+    self.rowIsPrefixRegex = /^one row is\s+/i;
     // the associations join the other classes: they sit at the center, the master data around them, the important classes
     // outside
     self.linkRingOrder = ["eventsGuess", "masterDataGuess", "importantClassesGuess"];
@@ -147,7 +199,15 @@ var AIMappingWorkflow = (function () {
         self.currentSource = MainController.currentSource;
         self.currentDatabaseId = null;
         self.currentGuess = null;
+        Lineage_sources.loadedSources = {};
         UI.initMenuBar(function () {
+            // the source beside Change source, as in MappingModeler
+            Lineage_sources.loadSources(self.currentSource, function (error) {
+                if (error) {
+                    return MainController.errorAlert(error);
+                }
+                $("#Lineage_graphEditionButtons").hide();
+            });
             // the graph takes the width the tool buttons of the other tools take
             $("#rightControlPanelDiv").empty().hide();
             $("#graphDiv").html(
@@ -256,6 +316,7 @@ var AIMappingWorkflow = (function () {
                 classMapping: self.currentMappingCard.classMapping.classLabel,
                 instancePicked: self.currentMappingCard.instance,
                 optionIndexPickedByColumns: self.currentMappingCard.optionIndexByColumns,
+                userOptionPickedByColumns: self.currentMappingCard.userOptionByColumns,
                 applied: Boolean(self.currentMappingCard.classMapping.decision),
             };
         }
@@ -409,9 +470,7 @@ var AIMappingWorkflow = (function () {
         self.endProgress("");
         $("#aiMappingWorkflow_card").empty();
         self.showExplanation("The AI reads the database: its keys, then its master data and their classes in the upper ontologies.");
-        if (self.guessGraph && self.guessGraph.network) {
-            self.guessGraph.network.destroy();
-        }
+        self.clearGuessGraph();
         AIMappingWorkflowChat.hide();
         self.prepareSource(databaseId);
         self.readTableKeys(databaseId);
@@ -427,7 +486,7 @@ var AIMappingWorkflow = (function () {
         var confirmationText =
             "Delete everything the AI found and decided on " +
             databaseName +
-            ": its keys, master data, important classes, associations, links, every decision taken and the chat?\nThe AI starts again from scratch, which takes several minutes.";
+            ": its keys, master data, important classes, associations, relations, every decision taken and the chat?\nThe AI starts again from scratch, which takes several minutes.";
         if (!confirm(confirmationText)) {
             return;
         }
@@ -550,6 +609,84 @@ var AIMappingWorkflow = (function () {
         return classLabel;
     };
 
+    // the color of a class by the step it comes from, the same in every graph; a class of the upper ontologies, proposed as
+    // a superclass, is blue
+    self.classKindColors = { masterDataGuess: "#2a9d8f", importantClassesGuess: "#e05780", eventsGuess: "#9b5de5", upperClass: "#00afef" };
+    self.classKindLabels = { masterDataGuess: "Master data", importantClassesGuess: "Important class", eventsGuess: "Association", upperClass: "Class of the upper ontologies" };
+
+    // the color of a class of steps 1 to 3 by its label, blue for any other class
+    self.getClassKindColor = function (classLabel) {
+        var classKindColor = self.classKindColors[self.getClassKind(classLabel)];
+        return classKindColor;
+    };
+
+    // the key of classKindColors of a class by its label
+    self.getClassKind = function (classLabel) {
+        var classGuessKey = ["masterDataGuess", "importantClassesGuess", "eventsGuess"].find(function (guessKey) {
+            var guess = self.currentAiKeys[guessKey];
+            return guess && self.getGuessEntries(guess).some((guessEntry) => self.getDecidedClassLabel(guessEntry, guess) == classLabel);
+        });
+        var classKind = classGuessKey || "upperClass";
+        return classKind;
+    };
+
+    // every node and edge the graphs of the steps may draw, by legend key, in the order of the legend
+    self.getStepLegendItems = function () {
+        var workflowStep = self.workflowSteps[self.currentStepIndex];
+        var columnColor = self.getLegendItem("Column").color;
+        var classEdgeColor = AIMappingColumnsGraph.getClassEdge("", "", "", "").color;
+        var stepLegendItems = {
+            entry: { section: "nodes", label: "Tables", color: columnColor, swatch: "box" },
+            unclassifiedEntry: { section: "nodes", label: "Not classified", color: columnColor, swatch: "dashedFrame" },
+            newClass: { section: "nodes", label: "Proposed class", color: self.classKindColors[workflowStep.guessKey], swatch: "box" },
+            importedClass: { section: "nodes", label: "Existing class", color: self.classKindColors[workflowStep.guessKey], swatch: "frame" },
+            table: { section: "nodes", label: "Table", color: AIMappingColumnsGraph.getVisjsTableNode("").color, swatch: "box" },
+            mappingColumn: { section: "nodes", label: "Column", color: columnColor, swatch: "box" },
+            rowIndex: { section: "nodes", label: "Row", color: self.getLegendItem("RowIndex").color, swatch: "triangle" },
+            masterDataGuess: { section: "nodes", label: self.classKindLabels.masterDataGuess, color: self.classKindColors.masterDataGuess, swatch: "box" },
+            importantClassesGuess: { section: "nodes", label: self.classKindLabels.importantClassesGuess, color: self.classKindColors.importantClassesGuess, swatch: "box" },
+            eventsGuess: { section: "nodes", label: "Association", color: self.classKindColors.eventsGuess, swatch: "box" },
+            associationClass: { section: "nodes", label: "Association", color: self.classKindColors.eventsGuess, swatch: "frame" },
+            undecidedClass: { section: "nodes", label: "Undecided class", color: "#ffffff", swatch: "dashedFrame" },
+            upperClass: { section: "nodes", label: "Upper class", color: self.classKindColors.upperClass, swatch: "box" },
+            columnTarget: { section: "nodes", label: "Value class", color: self.getLegendItem("Class").color, swatch: "box" },
+            valueColumn: { section: "nodes", label: "Value column", color: self.mappingValueColumnColor, swatch: "box" },
+            valueGroup: { section: "nodes", label: "Group of values", color: self.mappingValueColumnColor, swatch: "ellipse" },
+            rdfType: { section: "edges", label: "rdf:type", color: classEdgeColor, swatch: "line" },
+            datatypeProperty: { section: "edges", label: "Datatype property", color: LegendOverlayWidget.defaultColors.edge.DatatypeProperty, swatch: "dashed" },
+            implicitClasses: { section: "edges", label: "Implicit classes, decided later", color: classEdgeColor, swatch: "dotted" },
+            subClassOf: { section: "edges", label: "Superclass", color: classEdgeColor, swatch: "line" },
+            possibleSuperClass: { section: "edges", label: "Possible superclass", color: classEdgeColor, swatch: "dashed" },
+            declared: { section: "edges", label: "Declared key", color: self.linkArrowStyle.color, swatch: "line" },
+            ai: { section: "edges", label: "AI key", color: self.linkArrowStyle.color, swatch: "dashed" },
+            row: { section: "edges", label: "Same row", color: self.linkArrowStyle.color, swatch: "dotted" },
+        };
+        return stepLegendItems;
+    };
+
+    // after the canvas of vis.js, which would cover a legend added before it
+    self.renderStepLegend = function (legendKeys) {
+        var legendItems = { nodes: [], edges: [] };
+        var stepLegendItemEntries = Object.entries(self.getStepLegendItems());
+        stepLegendItemEntries.forEach(function ([legendKey, stepLegendItem]) {
+            if (!legendKeys.has(legendKey)) {
+                return;
+            }
+            var legendItem = { label: stepLegendItem.label, color: stepLegendItem.color, swatch: stepLegendItem.swatch };
+            if (stepLegendItem.section == "nodes") {
+                legendItem.type = legendKey;
+            } else {
+                legendItem.cat = legendKey;
+            }
+            legendItems[stepLegendItem.section].push(legendItem);
+        });
+        // drawn again on each click of a class: a legend the user closed stays closed
+        var shownLegend = LegendOverlayWidget.instances[self.graphDivId];
+        var isLegendExpanded = shownLegend ? shownLegend.expanded : true;
+        LegendOverlayWidget.destroy(self.graphDivId);
+        LegendOverlayWidget.render(self.graphDivId, { title: "🔍 Legend", items: legendItems, initiallyExpanded: isLegendExpanded });
+    };
+
     // the nodes look as the mapping graph draws a column and a class
     self.getLegendItem = function (label) {
         var legendItem = AIMappingModeler.legendItemsArray.find((legendItemOfMapping) => legendItemOfMapping.label == label);
@@ -590,22 +727,34 @@ var AIMappingWorkflow = (function () {
         $("#aiMappingWorkflow_card").empty();
         self.drawWorkflowTabs();
         var workflowStep = self.workflowSteps[stepIndex];
+        if (workflowStep.isBuildStep) {
+            return AIMappingBuild.showBuildPanel();
+        }
         var guess = self.currentAiKeys[workflowStep.guessKey];
         if (guess) {
             return self.showGuess(guess);
         }
-        if (self.guessGraph && self.guessGraph.network) {
-            self.guessGraph.network.destroy();
-        }
+        self.clearGuessGraph();
         var runPanel = $("<div class='masterData-panel'>");
         runPanel.append($("<div>").text(workflowStep.runText), self.getStepRunButton("Guess the " + workflowStep.entryNoun, stepIndex));
         $("#aiMappingWorkflow_explanation").empty().append(runPanel);
     };
 
+    self.clearGuessGraph = function () {
+        if (self.guessGraph && self.guessGraph.network) {
+            self.guessGraph.network.destroy();
+        }
+        self.guessGraph = null;
+        LegendOverlayWidget.destroy(self.graphDivId);
+    };
+
     // a step runs on the user's request; the steps before may still be reviewed
-    self.getStepRunButton = function (buttonText, stepIndex) {
+    self.getStepRunButton = function (buttonText, stepIndex, confirmationText) {
         var runButton = $("<button type='button' class='slsv-button-1'>").text(buttonText);
         runButton.on("click", function () {
+            if (confirmationText && !confirm(confirmationText)) {
+                return;
+            }
             runButton.prop("disabled", true);
             self.guessStep(stepIndex);
         });
@@ -629,6 +778,8 @@ var AIMappingWorkflow = (function () {
                     return;
                 }
                 self.currentAiKeys[workflowStep.guessKey] = result[workflowStep.guessKey];
+                // the next steps the server kept up with a step guessed again
+                Object.entries(result.nextGuesses || {}).forEach(([nextGuessKey, nextGuess]) => (self.currentAiKeys[nextGuessKey] = nextGuess));
                 self.showStep(stepIndex);
             },
             error: function (error) {
@@ -636,45 +787,6 @@ var AIMappingWorkflow = (function () {
                 self.showExplanation("The " + workflowStep.entryNoun + " are not guessed: " + AIColumnClassSuggestion.getErrorText(error));
             },
         });
-    };
-
-    // the entries of the steps before changed since this step was guessed from them: an entry added, removed or renamed,
-    // or its decision changed. A guess saved before entriesGuessedFrom kept the decisions only, in decisionsByClass or
-    // decisionsByMasterData
-    self.isStepGuessOutdated = function (stepIndex) {
-        var guess = self.currentAiKeys[self.workflowSteps[stepIndex].guessKey];
-        var isLegacyGuess = !guess.entriesGuessedFrom;
-        var guessedEntries = guess.entriesGuessedFrom || guess.decisionsByClass || guess.decisionsByMasterData || {};
-        var currentEntries = {};
-        self.workflowSteps.slice(0, stepIndex).forEach(function (previousStep) {
-            var previousGuess = self.currentAiKeys[previousStep.guessKey];
-            // the links guess holds no entry
-            if (!previousGuess || !self.getGuessEntries(previousGuess)) {
-                return;
-            }
-            self.getGuessEntries(previousGuess).forEach(function (guessEntry) {
-                // a legacy guess kept the decided entries only
-                if (isLegacyGuess && !guessEntry.decision) {
-                    return;
-                }
-                var decision = guessEntry.decision || {};
-                var currentEntry = { classLabel: self.getDecidedClassLabel(guessEntry, previousGuess), readingIndex: decision.readingIndex ?? null, superClassId: decision.superClassId ?? null };
-                currentEntries[guessEntry.label] = currentEntry;
-            });
-        });
-        var isEntryChanged = function (label) {
-            var guessedEntry = guessedEntries[label];
-            var currentEntry = currentEntries[label];
-            if (!guessedEntry || !currentEntry) {
-                return true;
-            }
-            var isClassRenamed = !isLegacyGuess && guessedEntry.classLabel != currentEntry.classLabel;
-            var isChanged = isClassRenamed || guessedEntry.readingIndex != currentEntry.readingIndex || guessedEntry.superClassId != currentEntry.superClassId;
-            return isChanged;
-        };
-        var labels = Object.keys(guessedEntries).concat(Object.keys(currentEntries));
-        var isOutdated = labels.some(isEntryChanged);
-        return isOutdated;
     };
 
     // guess: { masterData | importantClasses | eventClasses: [{ label, definition, reason, readings, decision, evidence }], classificationByClass }
@@ -687,11 +799,15 @@ var AIMappingWorkflow = (function () {
             self.endProgress(workflowStep.label + " guessed in " + totalDuration);
         }
         var explanation = $("<div class='masterData-panel'>");
-        if (self.currentStepIndex > 0 && self.isStepGuessOutdated(self.currentStepIndex)) {
-            explanation.append(
-                $("<div class='masterData-note'>").text("Decisions of the steps before changed since these " + workflowStep.entryNoun + " were guessed."),
-                self.getStepRunButton("Guess them again, their decisions are lost", self.currentStepIndex),
-            );
+        // step 1 has no route of its own: the master data come with the key detection, run again by the reset
+        if (self.currentStepIndex > 0) {
+            var confirmationText = "Guess the " + workflowStep.entryNoun + " again? Every decision of this step is lost.";
+            // steps 2 and 3 carry to the next ones, the relations and the mapping carry to none
+            var isCarriedToNextSteps = workflowStep.guessKey == "importantClassesGuess" || workflowStep.guessKey == "eventsGuess";
+            if (isCarriedToNextSteps) {
+                confirmationText += "\nThe next steps are kept: a class gone leaves them, a new class gets its relations if its tables are named, without property yet. The mapping of step 5 is not updated.";
+            }
+            explanation.append(self.getStepRunButton("Guess them again, their decisions are lost", self.currentStepIndex, confirmationText));
         }
         if (workflowStep.guessKey == "linksGuess") {
             return self.showLinksExplanation(explanation);
@@ -699,19 +815,14 @@ var AIMappingWorkflow = (function () {
         if (workflowStep.guessKey == "mappingGuess") {
             return self.showMappingExplanation(explanation);
         }
-        explanation.append(
-            $("<div>").append($("<b>").text("Domain: "), $("<span>").text(self.currentAiKeys.masterDataGuess.domain)),
-            $("<div>").text("The AI guessed " + self.getGuessEntries(guess).length + " " + workflowStep.entryNoun + " in this database. Each tree of the graph is one of them:"),
-            $("<div class='masterData-legendLine'>").append(
-                $("<span class='masterData-column'>").css("background", self.getLegendItem("Column").color).text(workflowStep.entryLegend),
-                $("<span>").text("its tables in the database, at the bottom"),
-            ),
-            $("<div class='masterData-legendLine'>").append($("<span class='masterData-class'>").text("Class"), $("<span>").text("its class, a thick frame when an upper ontology already has it")),
-            $("<div class='masterData-legendLine'>").append($("<span class='masterData-dashed'>"), $("<span>").text("a possible superclass, with its probability")),
-            $("<div>").text(
-                "Click an entry or its class to decide what its rows denote and its superclass, now or later: an undecided class goes on to the next steps with its alternatives. Right click it to choose another class, rename it or remove it.",
+        explanation.prepend(
+            $("<div class='masterData-note'>").append(
+                $("<div>").text("- Click: decide the class"),
+                $("<div>").text("- Right click: change, rename, remove"),
+                $("<div>").text("- Undecided: kept for later"),
             ),
         );
+        explanation.append($("<div>").append($("<b>").text("Domain: "), $("<span>").text(self.currentAiKeys.masterDataGuess.domain)));
         $("#aiMappingWorkflow_explanation").empty().append(explanation);
         self.drawGuessGraph();
         AIMappingWorkflowChat.show();
@@ -719,28 +830,19 @@ var AIMappingWorkflow = (function () {
 
     // the explanation panel of the links step: the classes of steps 1 to 3 with their superclasses, the links between them
     self.showLinksExplanation = function (explanation) {
-        // the line of a link by the key it rests on, as drawLinksGraph draws it
-        var getKeyLegendLine = function (keyKind, text) {
-            var keyLine = $("<span class='masterData-dashed'>").css({ borderTopColor: self.linkArrowStyle.color, borderTopStyle: self.linkKeyLegendStyles[keyKind] });
-            var legendLine = $("<div class='masterData-legendLine'>").append(keyLine, $("<span>").text(text));
-            return legendLine;
-        };
-        explanation.append(
-            $("<div>").append($("<b>").text("Domain: "), $("<span>").text(self.currentAiKeys.masterDataGuess.domain)),
-            $("<div>").text(
-                "The graph holds the classes of steps 1 to 3, each under its superclass or the superclasses it may still take: the associations at the center, the master data around them, the important classes outside. One arrow joins two classes, whatever the number of their links. Click a class to see it alone with its links, labelled with the best property proposed and the number of links, and the classes they reach; click outside to see them all again. A link proposed for a superclass of an undecided class starts from or ends on that superclass.",
-            ),
-            $("<div class='masterData-legendLine'>").append($("<span class='masterData-class'>").text("Class"), $("<span>").text("a thick frame for an association, a dashed one while its class is undecided")),
-            getKeyLegendLine("declared", "a link on a foreign key declared in the database, thick once the properties of its links are chosen"),
-            getKeyLegendLine("ai", "a link on a foreign key the AI found in the data, not declared"),
-            getKeyLegendLine("row", "a link inside one row: two classes of a table, or an implicit association and its row"),
-            $("<div>").text(
-                "An arrow joining links on several keys takes the line of the first of this list. Click a link: its card shows its keys, the properties of the upper ontologies proposed, and for a class still undecided what each of its superclasses gives. Right click it to choose another property or to remove it.",
+        explanation.prepend(
+            $("<div class='masterData-note'>").append(
+                $("<div>").text("- Click a class: it alone with its relations"),
+                $("<div>").text("- Click outside: all classes again"),
+                $("<div>").text("- Click a relation: its card"),
+                $("<div>").text("- Right click a relation: change its property, remove it"),
+                $("<div>").text("- Thick arrow: property chosen"),
             ),
         );
+        explanation.append($("<div>").append($("<b>").text("Domain: "), $("<span>").text(self.currentAiKeys.masterDataGuess.domain)));
         var classesWithoutTables = (self.currentAiKeys.eventsGuess || {}).classesWithoutTables || [];
         if (classesWithoutTables.length > 0) {
-            explanation.append($("<div class='masterData-note'>").text("No table of the database was found for " + classesWithoutTables.join(", ") + ": no link reaches them."));
+            explanation.append($("<div class='masterData-note'>").text("No table of the database was found for " + classesWithoutTables.join(", ") + ": no relation reaches them."));
         }
         $("#aiMappingWorkflow_explanation").empty().append(explanation);
         self.drawGuessGraph();
@@ -758,6 +860,9 @@ var AIMappingWorkflow = (function () {
     // drawn as the mapping graph draws a mapped column: the entry at the bottom, its class above it, and for a new class
     // its possible superclasses above the class, dashed until one is applied, one tree per entry
     self.drawGuessGraph = function () {
+        // only the mapping step has its legend, its list and its back button over the graph
+        LegendOverlayWidget.destroy(self.graphDivId);
+        $("#aiMappingWorkflow_mappingList, #aiMappingWorkflow_mappingBack").remove();
         if (self.workflowSteps[self.currentStepIndex].guessKey == "linksGuess") {
             return self.drawLinksGraph();
         }
@@ -776,6 +881,7 @@ var AIMappingWorkflow = (function () {
         };
         var nodes = [];
         var edges = [];
+        var legendKeys = new Set(["entry"]);
         // the left edge of the next tree
         var treeX = 0;
         self.entryByNodeId = {};
@@ -809,8 +915,11 @@ var AIMappingWorkflow = (function () {
                 title: getTooltip([guessEntry.label, guessEntry.definition, guessEntry.reason, "Data: " + entryDataNames.join(", ")]),
             });
             if (isUnclassified) {
+                legendKeys.add("unclassifiedEntry");
                 return;
             }
+            legendKeys.add(isImportedClass ? "importedClass" : "newClass");
+            legendKeys.add("rdfType");
             var classLabel = isImportedClass
                 ? self.getClassLabel(classification.classSource, classification.classLabel)
                 : self.getClassLabel(self.currentSource, classification.classLabel || guessEntry.label);
@@ -820,7 +929,7 @@ var AIMappingWorkflow = (function () {
                 id: classNodeId,
                 label: classLabel,
                 shape: classLegendItem.shape,
-                color: classLegendItem.color,
+                color: self.classKindColors[self.workflowSteps[self.currentStepIndex].guessKey],
                 x: treeCenterX,
                 y: 0,
                 borderWidth: isImportedClass ? 3 : 1,
@@ -836,12 +945,14 @@ var AIMappingWorkflow = (function () {
                     id: parentNodeId,
                     label: parentLabel,
                     shape: classLegendItem.shape,
-                    color: classLegendItem.color,
+                    color: self.classKindColors.upperClass,
                     x: parentX,
                     y: -200,
                     data: { id: parentOption.parentId, label: parentLabel, type: "Class" },
                 });
                 var isApplied = decision.superClassId == parentOption.parentId;
+                legendKeys.add("upperClass");
+                legendKeys.add(isApplied ? "subClassOf" : "possibleSuperClass");
                 var optionEdge = AIMappingColumnsGraph.getClassEdge(classNodeId, parentNodeId, isApplied ? "" : parentOption.probability + "%", "rdfs:subClassOf");
                 optionEdge.dashes = !isApplied;
                 optionEdge.title = getTooltip([parentOption.definition, parentOption.impact]);
@@ -857,7 +968,7 @@ var AIMappingWorkflow = (function () {
                     id: localSuperClassNodeId,
                     label: localSuperClassLabel,
                     shape: classLegendItem.shape,
-                    color: classLegendItem.color,
+                    color: self.classKindColors.upperClass,
                     x: parentX,
                     y: -400,
                     data: { id: localClass.superClassId, label: localSuperClassLabel, type: "Class" },
@@ -877,6 +988,9 @@ var AIMappingWorkflow = (function () {
         var guessGraph = new VisjsGraphClass(self.graphDivId, { nodes: nodes, edges: edges }, graphOptions);
         self.guessGraph = guessGraph;
         guessGraph.draw(function () {
+            if (self.guessGraph == guessGraph) {
+                self.renderStepLegend(legendKeys);
+            }
             // the network fits its whole extent several times after its opening, too far out to read: the view is set on the
             // first trees, at a readable scale, again after each of those fits for a moment, then it belongs to the user
             var startViewTime = Date.now();
@@ -945,6 +1059,7 @@ var AIMappingWorkflow = (function () {
                     label: classLabel,
                     nodeLabel: self.getClassLabel(classification.classKind == "existingClass" ? classification.classSource : self.currentSource, classLabel),
                     isEvent: guessKey == "eventsGuess",
+                    guessKey: guessKey,
                     ringRank: self.linkRingOrder.indexOf(guessKey),
                     // an entry left open until the links is undecided
                     isDecided: Boolean(guessEntry.decision) && !guessEntry.decision.isLeftToLinks,
@@ -961,15 +1076,19 @@ var AIMappingWorkflow = (function () {
         var edges = [];
         var superClassNodeIdByAssumption = {};
         self.linkClassNodeIdByNodeId = {};
+        self.linkLegendKeysByNodeId = {};
+        self.linkAssumptionByNodeId = {};
         linkClasses.forEach(function (linkClass) {
             var classNodeId = self.linkNodeIdByLabel[linkClass.label];
             self.linkClassNodeIdByNodeId[classNodeId] = classNodeId;
+            var classKindKey = linkClass.isEvent ? "associationClass" : linkClass.guessKey;
+            self.linkLegendKeysByNodeId[classNodeId] = linkClass.isDecided ? [classKindKey] : [classKindKey, "undecidedClass"];
             var classPosition = positionByClass[linkClass.label];
             nodes.push({
                 id: classNodeId,
                 label: linkClass.nodeLabel,
                 shape: classLegendItem.shape,
-                color: classLegendItem.color,
+                color: self.classKindColors[linkClass.guessKey],
                 x: classPosition.x,
                 y: classPosition.y,
                 borderWidth: linkClass.isEvent ? 3 : 1,
@@ -980,13 +1099,15 @@ var AIMappingWorkflow = (function () {
             linkClass.superClassOptions.forEach(function (parentOption, parentIndex) {
                 var superClassNodeId = classNodeId + "|" + parentOption.parentId;
                 superClassNodeIdByAssumption[linkClass.label + "|" + parentOption.parentLabel] = superClassNodeId;
+                self.linkAssumptionByNodeId[superClassNodeId] = { class: linkClass.label, superClass: parentOption.parentLabel };
                 self.linkClassNodeIdByNodeId[superClassNodeId] = classNodeId;
+                self.linkLegendKeysByNodeId[superClassNodeId] = ["upperClass", linkClass.isSuperClassDecided ? "subClassOf" : "possibleSuperClass"];
                 var superClassLabel = self.getClassLabel(parentOption.parentSource, parentOption.parentLabel);
                 nodes.push({
                     id: superClassNodeId,
                     label: superClassLabel,
                     shape: classLegendItem.shape,
-                    color: classLegendItem.color,
+                    color: self.classKindColors.upperClass,
                     x: classPosition.x + (parentIndex - (linkClass.superClassOptions.length - 1) / 2) * self.superClassSpacing,
                     y: classPosition.y - self.linkSuperClassRise,
                     data: { id: parentOption.parentId, label: superClassLabel, type: "Class" },
@@ -1046,8 +1167,9 @@ var AIMappingWorkflow = (function () {
             var labelOption = linkArrow.decidedOption || linkArrow.bestOption;
             var probabilityText = labelOption && !linkArrow.decidedOption ? " " + labelOption.probability + "%" : "";
             var propertyText = labelOption ? labelOption.propertyLabel + (labelOption.inverse ? " (inverse)" : "") + probabilityText : "no proposal";
-            linkArrow.label = propertyText + (arrowLinkCount > 1 ? ", " + arrowLinkCount + " links" : "");
+            linkArrow.label = propertyText + (arrowLinkCount > 1 ? ", " + arrowLinkCount + " relations" : "");
             var keyKind = self.linkKeyKindOrder.find((orderedKeyKind) => linkArrow.keyKinds.indexOf(orderedKeyKind) > -1);
+            linkArrow.keyKind = keyKind;
             edges.push({
                 id: linkArrow.id,
                 from: linkArrow.from,
@@ -1148,12 +1270,16 @@ var AIMappingWorkflow = (function () {
     self.highlightLinkClass = function (classNodeId) {
         self.highlightedLinkClassNodeId = classNodeId;
         var shownClassNodeIds = classNodeId ? [classNodeId] : null;
+        var legendKeys = new Set();
         var arrowUpdates = self.linkArrows.map(function (linkArrow) {
             var fromClassNodeId = self.linkClassNodeIdByNodeId[linkArrow.from];
             var toClassNodeId = self.linkClassNodeIdByNodeId[linkArrow.to];
             var isOfClass = Boolean(classNodeId) && (fromClassNodeId == classNodeId || toClassNodeId == classNodeId);
             if (isOfClass) {
                 shownClassNodeIds.push(fromClassNodeId, toClassNodeId);
+            }
+            if (!classNodeId || isOfClass) {
+                legendKeys.add(linkArrow.keyKind);
             }
             var arrowUpdate = {
                 id: linkArrow.id,
@@ -1199,6 +1325,8 @@ var AIMappingWorkflow = (function () {
         self.guessGraph.data.nodes.update(nodeUpdates);
         self.guessGraph.data.edges.update(arrowUpdates.concat(superClassEdgeUpdates));
         self.guessGraph.network.fit({ nodes: shownNodeIds, animation: self.linkFocusAnimation });
+        shownNodeIds.forEach((shownNodeId) => self.linkLegendKeysByNodeId[shownNodeId].forEach((legendKey) => legendKeys.add(legendKey)));
+        self.renderStepLegend(legendKeys);
         // a node left selected is deselected by the next click, and VisjsGraphClass then clears the whole selection: the
         // link clicked would read as a click outside
         self.guessGraph.network.unselectAll();
@@ -1229,44 +1357,31 @@ var AIMappingWorkflow = (function () {
         return assumptionText;
     };
 
-    // what carries a link in the database: a foreign key, the row holding both classes, or the columns of the row carrying
-    // an implicit association
-    self.getLinkEvidenceText = function (link) {
+    // what carries a link in the database, in one line: the join of a foreign key with whether the AI found its keys,
+    // the row holding both classes, or the columns of the row carrying an implicit association
+    self.getLinkKeyText = function (link) {
         if (link.sameRowTable) {
-            return "both in one row of " + link.sameRowTable;
+            return "same row of " + link.sameRowTable;
         }
         if (link.rowColumns) {
             return "columns " + link.rowColumns.join(", ") + " of the row of " + link.toClass;
         }
         var foreignKey = link.foreignKey;
-        var columnMatches = foreignKey.columns.map((column, columnIndex) => foreignKey.table + "." + column + " matches " + foreignKey.referencedTable + "." + foreignKey.referencedColumns[columnIndex]);
-        var evidenceText = columnMatches.join(", ") + (foreignKey.foundInData ? " (found in the data)" : " (declared foreign key)");
-        return evidenceText;
-    };
-
-    // the link read as a sentence, with its chosen property or the most likely one
-    self.getLinkSentence = function (link) {
-        var visibleOptions = self.getVisibleLinkOptions(link);
-        var decidedOption = link.decision ? visibleOptions.find((option) => option.propertyIri == link.decision.propertyIri) : null;
-        var sentenceOption = decidedOption || visibleOptions[0];
-        if (!sentenceOption) {
-            return link.fromClass + " -> " + link.toClass + ": no property proposed";
-        }
-        var linkSentence = self.getAssumptionText(sentenceOption) + link.fromClass + " " + sentenceOption.propertyLabel + (sentenceOption.inverse ? " (inverse)" : "") + " " + link.toClass;
-        return linkSentence;
+        var columnMatches = foreignKey.columns.map((column, columnIndex) => foreignKey.table + "." + column + " = " + foreignKey.referencedTable + "." + foreignKey.referencedColumns[columnIndex]);
+        var aiPrimaryKeys = (self.currentAiKeys && self.currentAiKeys.primaryKeys) || [];
+        var isAiPrimaryKey = aiPrimaryKeys.some((primaryKey) => primaryKey.table == foreignKey.referencedTable && primaryKey.columns.join(",") == foreignKey.referencedColumns.join(","));
+        var keyNature = (isAiPrimaryKey ? "AI PK" : "PK") + " / " + (foreignKey.foundInData ? "AI FK" : "FK");
+        var keyText = columnMatches.join(", ") + " (" + keyNature + ")";
+        return keyText;
     };
 
     // how many objects of each class the other holds, read both ways
-    self.getLinkCardinalityText = function (link) {
-        var cardinalityParts = [];
-        if (link.cardinality) {
-            cardinalityParts.push(link.cardinality + " " + link.toClass + " per " + link.fromClass);
-        }
-        if (link.inverseCardinality) {
-            cardinalityParts.push(link.inverseCardinality + " " + link.fromClass + " per " + link.toClass);
-        }
-        var cardinalityText = cardinalityParts.join(", ");
-        return cardinalityText;
+    self.getLinkCardinalityFields = function (link) {
+        var cardinalityFields = [
+            ["Per " + link.fromClass, link.cardinality ? link.cardinality + " " + link.toClass : null],
+            ["Per " + link.toClass, link.inverseCardinality ? link.inverseCardinality + " " + link.fromClass : null],
+        ];
+        return cardinalityFields;
     };
 
     // the named fields of a card, the empty ones left out; texts of the model or of the server, never read as html
@@ -1304,9 +1419,24 @@ var AIMappingWorkflow = (function () {
         if (!edgeLinks) {
             return;
         }
+        var clickedArrow = self.linkArrows.find((linkArrow) => linkArrow.id == clickedNodeOrEdgeId);
+        var arrowAssumption = self.linkAssumptionByNodeId[clickedArrow.from] || self.linkAssumptionByNodeId[clickedArrow.to] || null;
         self.entryCard = null;
-        self.currentLinkCard = { link: edgeLinks[0], edgeLinks: edgeLinks };
+        self.currentLinkCard = { link: edgeLinks[0], edgeLinks: edgeLinks, assumption: arrowAssumption };
         self.renderLinkCard();
+    };
+
+    // the options of a link its arrow draws: those assuming the superclass the arrow starts from or ends on, or none
+    self.getArrowLinkOptions = function (link, arrowAssumption) {
+        var visibleOptions = self.getVisibleLinkOptions(link);
+        var arrowOptions = visibleOptions.filter(function (option) {
+            if (!arrowAssumption || !option.assumes) {
+                return !arrowAssumption && !option.assumes;
+            }
+            var isArrowAssumption = option.assumes.class == arrowAssumption.class && option.assumes.superClass == arrowAssumption.superClass;
+            return isArrowAssumption;
+        });
+        return arrowOptions;
     };
 
     // the labelled arrow of the class shown closest to a click, on its label or near its line; none outside a focus
@@ -1344,36 +1474,39 @@ var AIMappingWorkflow = (function () {
     // property options of the upper ontologies, under each superclass of a class still undecided
     self.renderLinkCard = function () {
         var link = self.currentLinkCard.link;
+        var arrowAssumption = self.currentLinkCard.assumption;
         var cardDiv = $("#aiMappingWorkflow_card");
         cardDiv.empty();
         var headerPanel = $("<div class='masterData-panel'>");
-        headerPanel.append(
-            $("<div class='masterData-optionTitle'>").text(self.getLinkSentence(link)),
-            self.getFieldsTable([
-                ["How many", self.getLinkCardinalityText(link) || null],
-                ["Participation in", link.viaEvent || null],
-            ]),
-        );
+        var getClassChip = function (classLabel) {
+            var isAssumedClass = arrowAssumption && arrowAssumption.class == classLabel;
+            var classChip = $("<span class='masterData-class'>").text(classLabel + (isAssumedClass ? " as " + arrowAssumption.superClass : ""));
+            return classChip;
+        };
         // an arrow drawing several links, one per key: each has its own card
         var edgeLinks = self.currentLinkCard.edgeLinks || [link];
-        var keysDiv = $("<div class='masterData-stepContent'>").append($("<div class='masterData-step'>").text("Where it comes from:"));
-        if (edgeLinks.length == 1) {
-            keysDiv.append($("<div>").text(self.getLinkEvidenceText(link)));
-        } else {
-            edgeLinks.forEach(function (edgeLink) {
-                var keyButton = $("<button type='button' class='masterData-option'>").toggleClass("masterData-selected", edgeLink == link).text(self.getLinkEvidenceText(edgeLink));
-                keyButton.on("click", function () {
-                    self.currentLinkCard = { link: edgeLink, edgeLinks: edgeLinks };
-                    self.renderLinkCard();
-                });
-                keysDiv.append(keyButton);
+        var keysDiv = $("<div>");
+        edgeLinks.forEach(function (edgeLink) {
+            if (edgeLinks.length == 1) {
+                keysDiv.append($("<div>").text(self.getLinkKeyText(edgeLink)));
+                return;
+            }
+            var keyButton = $("<button type='button' class='masterData-option'>").toggleClass("masterData-selected", edgeLink == link).text(self.getLinkKeyText(edgeLink));
+            keyButton.on("click", function () {
+                self.currentLinkCard = { link: edgeLink, edgeLinks: edgeLinks, assumption: self.currentLinkCard.assumption };
+                self.renderLinkCard();
             });
-        }
-        headerPanel.append(keysDiv);
+            keysDiv.append(keyButton);
+        });
+        headerPanel.append(
+            $("<div class='masterData-optionTitle'>").append(getClassChip(link.fromClass), $("<span>").text("→"), getClassChip(link.toClass)),
+            keysDiv,
+            self.getFieldsTable(self.getLinkCardinalityFields(link).concat([["Participation in", link.viaEvent || null]])),
+        );
         cardDiv.append(headerPanel);
         var optionsDiv = $("<div class='masterData-stepContent'>");
-        optionsDiv.append($("<div class='masterData-step'>").text("Property of the upper ontologies:"));
-        var visibleOptions = self.getVisibleLinkOptions(link);
+        optionsDiv.append($("<div class='masterData-step'>").text("Property"));
+        var visibleOptions = self.getArrowLinkOptions(link, arrowAssumption);
         visibleOptions.forEach(function (option) {
             var isSelected = Boolean(link.decision) && option.propertyIri == link.decision.propertyIri;
             var probabilityFill = $("<div class='masterData-probabilityFill'>").css("width", option.probability + "%");
@@ -1381,27 +1514,32 @@ var AIMappingWorkflow = (function () {
                 $("<div class='masterData-probabilityBar'>").append(probabilityFill),
                 $("<span>").text(option.probability + "%"),
             );
-            var optionTitle = self.getAssumptionText(option) + self.getClassLabel(option.propertySource, option.propertyLabel) + (option.inverse ? " (inverse)" : "");
+            var optionTitle = self.getClassLabel(option.propertySource, option.propertyLabel) + (option.inverse ? " (inverse)" : "");
             var optionButton = $("<button type='button' class='masterData-option'>").toggleClass("masterData-selected", isSelected);
-            optionButton.append(
-                $("<div class='masterData-optionTitle'>").append($("<span>").text(optionTitle), probability),
+            optionButton.append($("<div class='masterData-optionTitle'>").append($("<span>").text(optionTitle), probability));
+            optionButton.on("click", function () {
+                link.decision = { propertyIri: option.propertyIri };
+                self.applyLinkDecision(link, { propertyIri: option.propertyIri });
+            });
+            var moreDetails = $("<details>").append(
+                $("<summary>").text("More details"),
                 self.getFieldsTable([
                     ["Reason", option.reason],
                     ["Definition", option.definition],
                 ]),
             );
-            optionButton.on("click", function () {
-                link.decision = { propertyIri: option.propertyIri };
-                self.applyLinkDecision(link, { propertyIri: option.propertyIri });
-            });
-            optionsDiv.append(optionButton);
+            optionsDiv.append($("<div class='masterData-readingBox'>").append(optionButton, moreDetails));
         });
         if (visibleOptions.length == 0) {
-            optionsDiv.append($("<div class='masterData-note'>").text("No property of the upper ontologies was proposed: right click the link to choose one, or ask the chat."));
+            var noOptionText = link.hasNoAllowedProperty
+                ? "No property of the upper ontologies has a domain and a range fitting these two classes: the superclass of one of them is likely wrong."
+                : "No property of the upper ontologies was proposed: right click the relation to choose one, or ask the chat.";
+            optionsDiv.append($("<div class='masterData-note'>").text(noOptionText));
         }
         cardDiv.append(optionsDiv);
         var footer = $("<div class='masterData-footer'>");
-        var decidedOption = link.decision ? visibleOptions.find((option) => option.propertyIri == link.decision.propertyIri) : null;
+        // the choice may be an option of another arrow of the link, under another superclass
+        var decidedOption = link.decision ? self.getVisibleLinkOptions(link).find((option) => option.propertyIri == link.decision.propertyIri) : null;
         var writtenText = decidedOption ? link.fromClass + " " + decidedOption.propertyLabel + (decidedOption.inverse ? " (inverse)" : "") + " " + link.toClass : "nothing chosen yet";
         var undoButton = $("<button type='button' class='masterData-applyButton'>").text("Undo the choice");
         undoButton.prop("disabled", !link.decision);
@@ -1424,7 +1562,7 @@ var AIMappingWorkflow = (function () {
             var savedLinksGuess = databaseSource && databaseSource.aiKeys ? databaseSource.aiKeys.linksGuess : null;
             var savedLink = savedLinksGuess && (savedLinksGuess.links || []).find((savedLinkOfLinks) => savedLinkOfLinks.id == link.id);
             if (!savedLink) {
-                return MainController.errorAlert("The links guess of " + databaseId + " is no longer in the mapping: open the database again.");
+                return MainController.errorAlert("The relations guess of " + databaseId + " is no longer in the mapping: open the database again.");
             }
             savedLink.decision = decision;
             if (!savedLinksGuess.changeLog) {
@@ -1450,10 +1588,10 @@ var AIMappingWorkflow = (function () {
                     self.drawLinksGraph();
                     // the arrow is drawn again from the saved links: the card takes them, the keys of the arrow with it
                     var arrowLinks = Object.values(self.linksByEdgeId).find((edgeLinks) => edgeLinks.indexOf(savedLink) > -1);
-                    self.currentLinkCard = { link: savedLink, edgeLinks: arrowLinks };
+                    self.currentLinkCard = { link: savedLink, edgeLinks: arrowLinks, assumption: self.currentLinkCard.assumption };
                     self.renderLinkCard();
                     self.drawWorkflowTabs();
-                    UI.message(CommonBotFunctions.escapeHtml("Choice saved for the link"));
+                    UI.message(CommonBotFunctions.escapeHtml("Choice saved for the relation"));
                 },
                 error: function (saveError) {
                     MainController.errorAlert(saveError);
@@ -1464,13 +1602,14 @@ var AIMappingWorkflow = (function () {
 
     self.showMappingExplanation = function (explanation) {
         var mappingGuess = self.currentGuess;
-        explanation.append(
-            $("<div>").append($("<b>").text("Domain: "), $("<span>").text(self.currentAiKeys.masterDataGuess.domain)),
-            $("<div>").text(
-                "Each class of steps 1 to 3 gets its mapping: how one row of its table gives one instance, then what each column becomes, with what the data shows of the column, measured in the database. Click a class to check its mapping, change what you disagree with, then apply.",
+        explanation.prepend(
+            $("<div class='masterData-note'>").append(
+                $("<div>").text("- Click a class: check its mapping, then apply"),
+                $("<div>").text("- Hover a column: what the data shows"),
+                $("<div>").text("- Hover its ?: why the AI chose it"),
             ),
-            $("<div class='masterData-legendLine'>").append($("<span class='masterData-class'>").text("Class"), $("<span>").text("a thick frame once its mapping is applied, a dashed one before")),
         );
+        explanation.append($("<div>").append($("<b>").text("Domain: "), $("<span>").text(self.currentAiKeys.masterDataGuess.domain)));
         if (mappingGuess.classesWithoutTables.length > 0) {
             explanation.append($("<div class='masterData-note'>").text("No table of the database was found for " + mappingGuess.classesWithoutTables.join(", ") + ": they have no mapping."));
         }
@@ -1479,49 +1618,280 @@ var AIMappingWorkflow = (function () {
         AIMappingWorkflowChat.show();
     };
 
-    // the classes mapped, joined as the links of step 4 join them
+    // the list of the classes while none is open, the mapping of the class open otherwise
     self.drawMappingGraph = function () {
-        var classLegendItem = self.getLegendItem("Class");
-        var nodes = [];
-        var edges = [];
-        var nodeIdByClassLabel = {};
-        self.currentGuess.classMappings.forEach(function (classMapping) {
-            var nodeId = "mapping|" + classMapping.classLabel;
-            nodeIdByClassLabel[classMapping.classLabel] = nodeId;
-            var chosenCount = classMapping.columnMappings.filter((columnMapping) => columnMapping.decision).length;
-            var countText = classMapping.isImplicit ? "one per row of " + classMapping.table : chosenCount + "/" + classMapping.columnMappings.length + " columns chosen";
-            nodes.push({
-                id: nodeId,
-                label: self.getClassLabel(self.currentSource, classMapping.classLabel) + "\n" + countText,
-                shape: classLegendItem.shape,
-                color: classLegendItem.color,
-                borderWidth: classMapping.decision ? 3 : 1,
-                shapeProperties: { borderDashes: classMapping.decision ? false : [4, 4] },
-                data: { id: nodeId, label: classMapping.classLabel, type: "Class" },
-            });
-        });
-        var drawnPairs = {};
-        ((self.currentAiKeys.linksGuess || {}).links || []).forEach(function (link) {
-            var fromNodeId = nodeIdByClassLabel[link.fromClass];
-            var toNodeId = nodeIdByClassLabel[link.toClass];
-            var sortedPair = [link.fromClass, link.toClass].sort();
-            var pairKey = sortedPair.join("|");
-            if (!fromNodeId || !toNodeId || fromNodeId == toNodeId || drawnPairs[pairKey]) {
-                return;
-            }
-            drawnPairs[pairKey] = true;
-            edges.push({ id: "mapping|" + pairKey, from: fromNodeId, to: toNodeId, color: self.linkArrowStyle.fadedColor });
-        });
+        if (self.currentMappingCard) {
+            return self.drawMappingClassGraph();
+        }
         if (self.guessGraph && self.guessGraph.network) {
             self.guessGraph.network.destroy();
         }
-        var graphOptions = {
-            visjsOptions: { physics: { enabled: true }, interaction: { hover: true } },
-            onclickFn: self.showMappingCard,
+        self.guessGraph = null;
+        // the class with the most columns to choose first
+        var sortedMappings = self.currentGuess.classMappings.slice();
+        sortedMappings.sort((firstMapping, secondMapping) => secondMapping.columnMappings.length - firstMapping.columnMappings.length || firstMapping.classLabel.localeCompare(secondMapping.classLabel));
+        var headerCells = ["Class", "Columns to choose", "Table", "Mapping"].map((headerText) => $("<th>").text(headerText));
+        var listTable = $("<table class='masterData-mappingList'>").append($("<tr>").append(headerCells));
+        sortedMappings.forEach(function (classMapping) {
+            var classRow = $("<tr>").append(
+                $("<td>").append($("<span class='masterData-class'>").text(self.getClassLabel(self.currentSource, classMapping.classLabel))),
+                $("<td>").text(classMapping.isImplicit ? "one per row" : classMapping.columnMappings.length),
+                $("<td>").text(classMapping.table),
+                $("<td>").text(classMapping.decision ? "applied" : "not applied"),
+            );
+            classRow.on("click", function () {
+                self.showMappingCard({ data: { type: "Class", label: classMapping.classLabel } });
+            });
+            listTable.append(classRow);
+        });
+        $("#" + self.graphDivId).append($("<div id='aiMappingWorkflow_mappingList'>").append(listTable));
+    };
+
+    // the label of an option, its property or else its kind
+    self.getMappingOptionName = function (option) {
+        var propertyText = { existingProperty: self.getClassLabel(option.propertySource, option.propertyLabel), newProperty: option.newPropertyName }[option.kind];
+        var optionName = propertyText || self.mappingKindLabels[option.kind];
+        return optionName;
+    };
+
+    // the columns the card and the graph show, by table then by group: the columns of the class's own table, then the
+    // columns another class maps onto it, read only there; the columns left out listed apart, the ones of kind other only
+    // counted, the links of step 4 being among them
+    self.getMappingTableViews = function (cardState) {
+        var classMapping = cardState.classMapping;
+        var tableViewByTable = {};
+        var tableViews = [];
+        var getTableView = function (table) {
+            if (!tableViewByTable[table]) {
+                tableViewByTable[table] = { table: table, keyColumns: [], groupByKey: {}, groups: [] };
+                tableViews.push(tableViewByTable[table]);
+            }
+            return tableViewByTable[table];
         };
+        var addMappingColumn = function (tableView, mappingColumn) {
+            var groupKey = self.getMappingGroupKey(mappingColumn.option, classMapping.classLabel);
+            if (!tableView.groupByKey[groupKey]) {
+                var isOnOtherClass = groupKey.indexOf("on|") == 0;
+                var groupTitle = isOnOtherClass ? "On " + self.getClassLabel(self.currentSource, mappingColumn.option.onClass) : self.mappingGroupTitles[groupKey];
+                tableView.groupByKey[groupKey] = { groupKey: groupKey, title: groupTitle, mappingColumns: [] };
+                tableView.groups.push(tableView.groupByKey[groupKey]);
+            }
+            var group = tableView.groupByKey[groupKey];
+            // several classes of one table may map the same column the same way
+            var optionName = self.getMappingOptionName(mappingColumn.option);
+            var isShownAlready = group.mappingColumns.some((shownColumn) => shownColumn.columnsKey == mappingColumn.columnsKey && self.getMappingOptionName(shownColumn.option) == optionName);
+            if (!isShownAlready) {
+                group.mappingColumns.push(mappingColumn);
+            }
+        };
+        var ownTableView = getTableView(classMapping.table);
+        ownTableView.keyColumns = cardState.instance.identifierColumns;
+        var otherKindCount = 0;
+        var leftOutColumnsKeys = [];
+        var mappedColumnsKeys = classMapping.columnMappings.map((columnMapping) => columnMapping.columns.join(", "));
+        var userColumnsKeys = Object.keys(cardState.userOptionByColumns);
+        var userOnlyColumnsKeys = userColumnsKeys.filter((columnsKey) => mappedColumnsKeys.indexOf(columnsKey) < 0);
+        var cardColumnsKeys = mappedColumnsKeys.concat(userOnlyColumnsKeys);
+        cardColumnsKeys.forEach(function (columnsKey) {
+            var columnMapping = classMapping.columnMappings.find((candidateMapping) => candidateMapping.columns.join(", ") == columnsKey);
+            var option = self.getPickedMappingOption(cardState, columnsKey, columnMapping);
+            if (option.kind == "unmapped") {
+                leftOutColumnsKeys.push(columnsKey);
+                return;
+            }
+            if (option.kind == "other") {
+                otherKindCount += 1;
+                return;
+            }
+            addMappingColumn(ownTableView, { columnsKey: columnsKey, columnMapping: columnMapping, option: option, ownerClassLabel: null });
+        });
+        classMapping.unmappedColumns.forEach(function (unmappedColumn) {
+            if (!cardState.userOptionByColumns[unmappedColumn.column]) {
+                leftOutColumnsKeys.push(unmappedColumn.column);
+            }
+        });
+        self.addForeignMappingColumns(classMapping.classLabel, getTableView, addMappingColumn);
+        var getGroupRank = function (group) {
+            var groupRank = self.mappingGroupOrder.indexOf(group.groupKey);
+            if (groupRank > -1) {
+                return groupRank;
+            }
+            var lastRank = group.groupKey == "implicit" ? self.mappingGroupOrder.length + 1 : self.mappingGroupOrder.length;
+            return lastRank;
+        };
+        var shownTableViews = tableViews.filter((tableView) => tableView.groups.length > 0 || tableView == ownTableView);
+        shownTableViews.forEach((tableView) => tableView.groups.sort((firstGroup, secondGroup) => getGroupRank(firstGroup) - getGroupRank(secondGroup)));
+        var mappingView = { tableViews: shownTableViews, otherKindCount: otherKindCount, leftOutColumnsKeys: leftOutColumnsKeys };
+        return mappingView;
+    };
+
+    // the columns other classes map onto this one, under their table, as their card picks them; a column of kind other
+    // pointing to this class is how the rows of its table reach it, every such column kept, sorted
+    self.addForeignMappingColumns = function (classLabel, getTableView, addMappingColumn) {
+        self.currentGuess.classMappings.forEach(function (otherMapping) {
+            if (otherMapping.classLabel == classLabel) {
+                return;
+            }
+            otherMapping.columnMappings.forEach(function (columnMapping) {
+                var option = columnMapping.options[columnMapping.decision ? columnMapping.decision.optionIndex : 0];
+                if (!option || option.onClass != classLabel || option.kind == "unmapped") {
+                    return;
+                }
+                var otherTableView = getTableView(otherMapping.table);
+                if (option.kind != "other") {
+                    addMappingColumn(otherTableView, { columnsKey: columnMapping.columns.join(", "), columnMapping: columnMapping, option: option, ownerClassLabel: otherMapping.classLabel });
+                    return;
+                }
+                columnMapping.columns.forEach(function (column) {
+                    if (otherTableView.keyColumns.indexOf(column) < 0) {
+                        otherTableView.keyColumns.push(column);
+                        otherTableView.keyColumns.sort();
+                    }
+                });
+            });
+        });
+    };
+
+    // the group of a column by the value it gives: its range for a property, implicit classes for a column becoming a thing
+    self.getMappingGroupKey = function (option, classLabel) {
+        var isProperty = option.kind == "existingProperty" || option.kind == "newProperty";
+        if (!isProperty) {
+            return "implicit";
+        }
+        if (option.onClass && option.onClass != classLabel) {
+            return "on|" + option.onClass;
+        }
+        var groupKey = self.mappingGroupKeysByRange[option.range] || "text";
+        return groupKey;
+    };
+
+    // the class open in levels, as the card groups it: the class, the Id of each table typed by it, every value column on
+    // one line joined to its Id by its property, the groups of each table below; implicit classes are one node, decided later
+    self.drawMappingClassGraph = function (cardMappingView) {
+        var cardState = self.currentMappingCard;
+        var classMapping = cardState.classMapping;
+        var mappingView = cardMappingView || self.getMappingTableViews(cardState);
+        var layout = self.mappingGraphLayout;
+        var propertyColor = LegendOverlayWidget.defaultColors.edge.DatatypeProperty;
+        var columnLegendItem = self.getLegendItem("Column");
+        var rowIndexLegendItem = self.getLegendItem("RowIndex");
+        var classEdgeColor = AIMappingColumnsGraph.getClassEdge("", "", "", "").color;
+        var identifierColumnsKey = cardState.instance.identifierColumns.join(", ");
+        var nodes = [];
+        var edges = [];
+        var keyNodes = [];
+        var legendKeys = new Set(["rdfType", self.getClassKind(classMapping.classLabel)]);
+        var classNodeId = "class|" + classMapping.classLabel;
+        var nextX = 0;
+        var columnIndex = 0;
+        // the right edge of the last node of each row, a long label pushing the next node of its row further
+        var rowRightXs = [];
+        mappingView.tableViews.forEach(function (tableView) {
+            var tableStartX = nextX;
+            var tableEndX = nextX;
+            var keyNodeId = "key|" + tableView.table;
+            tableView.groups.forEach(function (group) {
+                var groupNodeId = "group|" + tableView.table + "|" + group.groupKey;
+                if (group.groupKey == "implicit") {
+                    nodes.push({ id: groupNodeId, label: group.title + ", " + group.mappingColumns.length, shape: "ellipse", color: self.mappingValueColumnColor, shadow: true, x: nextX + layout.groupGap, y: layout.groupY });
+                    tableEndX = nextX + layout.groupGap;
+                    edges.push({ from: keyNodeId, to: groupNodeId, dashes: [2, 4], color: classEdgeColor });
+                    legendKeys.add("valueGroup");
+                    legendKeys.add("implicitClasses");
+                    nextX += layout.columnSpacing + 2 * layout.groupGap;
+                    return;
+                }
+                var groupColumnXs = [];
+                group.mappingColumns.forEach(function (mappingColumn) {
+                    var propertyName = self.getMappingOptionName(mappingColumn.option);
+                    var propertyEdge = { from: keyNodeId, dashes: true, color: propertyColor, font: { color: propertyColor }, arrows: { to: { enabled: true, type: "arrow" } } };
+                    // the Id column giving a property of its own instance
+                    if (!mappingColumn.ownerClassLabel && mappingColumn.columnsKey == identifierColumnsKey) {
+                        propertyEdge.to = keyNodeId;
+                        propertyEdge.label = propertyName;
+                        edges.push(propertyEdge);
+                        legendKeys.add("datatypeProperty");
+                        return;
+                    }
+                    // two classes may map one column of a table with two properties: one node each
+                    var columnNodeId = "column|" + tableView.table + "|" + mappingColumn.columnsKey + "|" + columnIndex;
+                    var columnTitle = mappingColumn.ownerClassLabel ? "chosen on the " + mappingColumn.ownerClassLabel + " card" : "";
+                    var columnRow = columnIndex % layout.columnRowCount;
+                    var columnHalfWidth = (Math.max(mappingColumn.columnsKey.length, propertyName.length) * layout.labelCharWidth) / 2;
+                    var rowRightX = rowRightXs[columnRow] === undefined ? nextX : rowRightXs[columnRow] + columnHalfWidth + layout.columnMargin;
+                    var columnX = Math.max(nextX, rowRightX);
+                    rowRightXs[columnRow] = columnX + columnHalfWidth;
+                    nodes.push({
+                        id: columnNodeId,
+                        label: mappingColumn.columnsKey + "\n<i>" + propertyName + "</i>",
+                        title: columnTitle,
+                        shape: "box",
+                        color: self.mappingValueColumnColor,
+                        font: { multi: "html", ital: { color: propertyColor } },
+                        x: columnX,
+                        y: layout.columnY + columnRow * layout.columnRowOffset,
+                    });
+                    propertyEdge.to = columnNodeId;
+                    edges.push(propertyEdge);
+                    edges.push({ from: columnNodeId, to: groupNodeId, color: self.mappingGroupEdgeColor });
+                    groupColumnXs.push(columnX);
+                    tableEndX = columnX;
+                    columnIndex += 1;
+                    nextX = columnX + layout.columnSpacing;
+                });
+                if (groupColumnXs.length == 0) {
+                    return;
+                }
+                nodes.push({ id: groupNodeId, label: group.title, shape: "ellipse", color: self.mappingValueColumnColor, shadow: true, x: (groupColumnXs[0] + groupColumnXs[groupColumnXs.length - 1]) / 2, y: layout.groupY });
+                nextX += layout.groupGap;
+                legendKeys.add("valueColumn");
+                legendKeys.add("valueGroup");
+                legendKeys.add("datatypeProperty");
+            });
+            // a table whose rows have no Id column gives one instance per row
+            var hasKeyColumns = tableView.keyColumns.length > 0;
+            var isOwnTable = tableView.table == classMapping.table;
+            var keyText = hasKeyColumns ? tableView.keyColumns.join(", ") : isOwnTable ? "row" : "no column found";
+            var keyLegendItem = hasKeyColumns || !isOwnTable ? columnLegendItem : rowIndexLegendItem;
+            var keyNode = {
+                id: keyNodeId,
+                label: "<i>table " + tableView.table + "</i>\n<b>" + keyText + "</b>",
+                title: isOwnTable ? self.getUriExample(cardState.instance, null) : "",
+                shape: keyLegendItem.shape,
+                color: keyLegendItem.color,
+                font: { multi: "html" },
+                x: (tableStartX + tableEndX) / 2,
+                y: layout.keyY,
+            };
+            nodes.push(keyNode);
+            keyNodes.push(keyNode);
+            legendKeys.add(hasKeyColumns || !isOwnTable ? "mappingColumn" : "rowIndex");
+            edges.push(AIMappingColumnsGraph.getClassEdge(keyNodeId, classNodeId, "", "rdf:type"));
+            nextX += layout.tableGap;
+        });
+        var classX = (keyNodes[0].x + keyNodes[keyNodes.length - 1].x) / 2;
+        nodes.push({ id: classNodeId, label: self.getClassLabel(self.currentSource, classMapping.classLabel), shape: self.getLegendItem("Class").shape, color: self.getClassKindColor(classMapping.classLabel), x: classX, y: layout.classY });
+        if (self.guessGraph && self.guessGraph.network) {
+            self.guessGraph.network.destroy();
+        }
+        $("#aiMappingWorkflow_mappingList").remove();
+        var graphOptions = { visjsOptions: { physics: { enabled: false }, interaction: { hover: true } } };
         var guessGraph = new VisjsGraphClass(self.graphDivId, { nodes: nodes, edges: edges }, graphOptions);
         self.guessGraph = guessGraph;
-        guessGraph.draw();
+        guessGraph.draw(function () {
+            if (self.guessGraph != guessGraph) {
+                return;
+            }
+            var backButton = $("<button type='button' id='aiMappingWorkflow_mappingBack' class='masterData-applyButton'>").text("Back to the classes");
+            backButton.on("click", function () {
+                self.currentMappingCard = null;
+                $("#aiMappingWorkflow_card").empty();
+                self.drawGuessGraph();
+            });
+            $("#aiMappingWorkflow_mappingBack").remove();
+            $("#" + self.graphDivId).append(backButton);
+            self.renderStepLegend(legendKeys);
+        });
     };
 
     self.showMappingCard = function (node) {
@@ -1533,17 +1903,34 @@ var AIMappingWorkflow = (function () {
         self.renderMappingCard();
     };
 
-    // what the card shows picked: the applied mapping, else the proposal of the AI, its first option per column
+    // what the card shows picked: the applied mapping, else the proposal of the AI, its first option per column. An option
+    // the user makes in Other waits in userOptionByColumns until Apply
     self.getMappingCardState = function (classMapping) {
         // a class the model failed on has no instance yet
-        var emptyInstance = { identifierColumns: [], uriType: "fromLabel", prefixURI: "", labelColumn: null, reason: "" };
+        var emptyInstance = { identifierColumns: [], uriType: "fromLabel", prefixURI: "", suffixURI: "", labelColumn: null, reason: "" };
         var appliedInstance = classMapping.decision ? classMapping.decision.instance : classMapping.instance || emptyInstance;
         var optionIndexByColumns = {};
         classMapping.columnMappings.forEach(function (columnMapping) {
             optionIndexByColumns[columnMapping.columns.join(", ")] = columnMapping.decision ? columnMapping.decision.optionIndex : 0;
         });
-        var cardState = { classMapping: classMapping, instance: JSON.parse(JSON.stringify(appliedInstance)), optionIndexByColumns: optionIndexByColumns };
+        var cardState = {
+            classMapping: classMapping,
+            instance: JSON.parse(JSON.stringify(appliedInstance)),
+            optionIndexByColumns: optionIndexByColumns,
+            userOptionByColumns: {},
+            openedColumnsKey: null,
+        };
         return cardState;
+    };
+
+    // the option a column takes on the card: the one the user made, else the AI option picked
+    self.getPickedMappingOption = function (cardState, columnsKey, columnMapping) {
+        var userOption = cardState.userOptionByColumns[columnsKey];
+        if (userOption) {
+            return userOption;
+        }
+        var pickedOption = columnMapping ? columnMapping.options[cardState.optionIndexByColumns[columnsKey]] : null;
+        return pickedOption;
     };
 
     // what the data shows of a column, as the server measured it
@@ -1552,7 +1939,7 @@ var AIMappingWorkflow = (function () {
             return "";
         }
         var frequentTexts = evidence.frequentValues.map((frequentValue) => frequentValue.value + " (" + frequentValue.rowCount + ")");
-        var shownSampleValues = evidence.sampleValues.slice(0, 3);
+        var shownSampleValues = evidence.sampleValues.slice(0, self.shownSampleValueCount);
         var evidenceText =
             evidence.type +
             ", " +
@@ -1573,14 +1960,44 @@ var AIMappingWorkflow = (function () {
         if (hasNoneOption) {
             columnSelect.append($("<option>").val("").text("none"));
         }
-        tableColumns.forEach(function (tableColumn) {
-            columnSelect.append($("<option>").val(tableColumn).text(tableColumn));
-        });
+        tableColumns.forEach((tableColumn) => columnSelect.append($("<option>").val(tableColumn).text(tableColumn)));
         columnSelect.val(selectedColumn || "");
         return columnSelect;
     };
 
-    // the card of one class: 1 how one row gives one instance, 2 what each column becomes, the columns left out folded
+    // the URI one row gives, built as triplesMaker builds it: the graph, the prefix with a "-" when it ends with no
+    // separator, the identifier value, the suffix
+    self.getUriExample = function (instance, identifierEvidence) {
+        if (instance.uriType == "blankNode") {
+            return "_:b1";
+        }
+        var graphUri = Config.sources[self.currentSource].graphUri;
+        var baseUri = graphUri.endsWith("/") ? graphUri : graphUri + "/";
+        // its randomIdentifier branch returns an undefined blank node before building any URI
+        if (instance.uriType == "randomIdentifier") {
+            return "no URI: triplesMaker.js builds none for randomIdentifier today";
+        }
+        var uriExample = baseUri + self.getUriPrefixText(instance.prefixURI) + self.getUriSampleValue(instance, identifierEvidence) + (instance.suffixURI || "");
+        return uriExample;
+    };
+
+    // the prefix of a URI with a "-" when it ends with no separator
+    self.getUriPrefixText = function (prefixUri) {
+        var prefix = prefixUri || "";
+        var hasNoSeparator = prefix && self.uriSeparators.indexOf(prefix.slice(-1)) < 0;
+        var prefixText = hasNoSeparator ? prefix + "-" : prefix;
+        return prefixText;
+    };
+
+    // the value one row gives the URI, its Id columns named when the data shows no sample
+    self.getUriSampleValue = function (instance, identifierEvidence) {
+        var hasSample = identifierEvidence && identifierEvidence.sampleValues.length > 0;
+        var sampleValue = hasSample ? common.formatStringForTriple(String(identifierEvidence.sampleValues[0]), true) : "{" + instance.identifierColumns.join(", ") + "}";
+        return sampleValue;
+    };
+
+    // the card of one class: how one row gives one instance, then one line per column, the columns left out folded; what the
+    // data shows and the reasons of the AI on hover
     self.renderMappingCard = function () {
         var cardState = self.currentMappingCard;
         var classMapping = cardState.classMapping;
@@ -1589,14 +2006,22 @@ var AIMappingWorkflow = (function () {
         var headerPanel = $("<div class='masterData-panel'>");
         headerPanel.append(
             $("<div class='masterData-optionTitle'>").text(self.getClassLabel(self.currentSource, classMapping.classLabel)),
-            $("<div>").text("Read in the table " + classMapping.table + (classMapping.otherTables.length > 0 ? ", also in " + classMapping.otherTables.join(", ") : "")),
+            $("<div>").text("Table " + classMapping.table + (classMapping.otherTables.length > 0 ? ", also " + classMapping.otherTables.join(", ") : "")),
         );
         if (classMapping.error) {
             headerPanel.append($("<div class='masterData-note'>").text("The model gave no mapping for this class: " + classMapping.error));
         }
         var applyButton = $("<button type='button' class='masterData-applyButton'>").text("Apply");
         applyButton.on("click", function () {
-            var columnChoices = Object.entries(cardState.optionIndexByColumns).map(([columnsKey, optionIndex]) => ({ columns: columnsKey, optionIndex: optionIndex }));
+            var columnChoices = [];
+            for (const [columnsKey, optionIndex] of Object.entries(cardState.optionIndexByColumns)) {
+                if (!cardState.userOptionByColumns[columnsKey]) {
+                    columnChoices.push({ columns: columnsKey, optionIndex: optionIndex });
+                }
+            }
+            for (const [columnsKey, userOption] of Object.entries(cardState.userOptionByColumns)) {
+                columnChoices.push({ columns: columnsKey, option: userOption });
+            }
             self.changeGuessByHand("apply_class_mapping", { classLabel: classMapping.classLabel, instance: cardState.instance, columnChoices: columnChoices });
         });
         var undoButton = $("<button type='button' class='masterData-applyButton'>").text("Undo the choice");
@@ -1607,16 +2032,18 @@ var AIMappingWorkflow = (function () {
         var writtenText = classMapping.decision ? "applied, " + classMapping.columnMappings.length + " columns chosen" : "nothing applied yet";
         var footer = $("<div class='masterData-footer'>");
         footer.append($("<div>").append($("<span class='masterData-writtenLabel'>").text("Mapping"), $("<span>").text(writtenText)), $("<div class='masterData-footerButtons'>").append(undoButton, applyButton));
-        cardDiv.append(headerPanel, self.getMappingInstanceDiv(cardState), self.getMappingColumnsDiv(cardState), footer);
+        var mappingView = self.getMappingTableViews(cardState);
+        cardDiv.append(headerPanel, self.getMappingInstanceDiv(cardState), self.getMappingColumnsDiv(cardState, mappingView), footer);
+        self.drawMappingClassGraph(mappingView);
     };
 
-    // the identifier, the URI and the label of the instance, each changeable before Apply, with what the data shows of
-    // the column chosen
+    // the identifier, the URI and the label of the instance, each changeable before Apply; the URI reads as the row gives
+    // it: the graph, the prefix typed, the value of the Id, the suffix
     self.getMappingInstanceDiv = function (cardState) {
         var classMapping = cardState.classMapping;
         var instance = cardState.instance;
         var instanceDiv = $("<div class='masterData-stepContent'>").append(
-            $("<div class='masterData-step'>").append($("<span class='masterData-stepNumber'>").text("1"), $("<span>").text("How one instance is built")),
+            $("<div class='masterData-step'>").append($("<span>").text("Instance "), $("<span class='masterData-help'>").text("?").attr("title", instance.reason || "")),
         );
         if (classMapping.isImplicit) {
             instanceDiv.append($("<div>").text(instance.reason));
@@ -1635,103 +2062,416 @@ var AIMappingWorkflow = (function () {
             identifierSelect.append($("<option>").val(identifierText).text(identifierText));
             identifierSelect.val(identifierText);
         }
+        var identifierEvidence = evidenceByColumn[instance.identifierColumns[0]];
+        identifierSelect.attr("title", self.getColumnEvidenceText(identifierEvidence));
         identifierSelect.on("change", function () {
             var selectedIdentifier = identifierSelect.val();
             instance.identifierColumns = selectedIdentifier ? selectedIdentifier.split(", ") : [];
+            self.renderMappingCard();
         });
-        var uriTypeSelect = $("<select>");
-        self.mappingUriTypes.forEach((uriType) => uriTypeSelect.append($("<option>").val(uriType).text(uriType)));
-        uriTypeSelect.val(instance.uriType).on("change", function () {
-            instance.uriType = uriTypeSelect.val();
+        var graphUri = Config.sources[self.currentSource].graphUri;
+        var graphUriSegments = graphUri.split("/");
+        var graphUriLastSegments = graphUriSegments.filter((uriSegment) => uriSegment);
+        var uriBase = $("<span class='masterData-uriBase'>").text(".../" + graphUriLastSegments[graphUriLastSegments.length - 1] + "/").attr("title", graphUri);
+        var prefixInput = $("<input type='text' size='10' placeholder='prefix'>").val(instance.prefixURI);
+        var prefixSeparator = $("<span class='masterData-uriBase'>");
+        var uriValue = $("<span class='masterData-uriValue'>").css("background", self.getLegendItem("Column").color).text(self.getUriSampleValue(instance, identifierEvidence)).attr("title", "value of " + identifierText);
+        var suffixInput = $("<input type='text' size='6' placeholder='suffix'>").val(instance.suffixURI || "");
+        var uriBuilder = $("<div class='masterData-uriBuilder'>").append(uriBase, prefixInput, prefixSeparator, uriValue, suffixInput);
+        var otherUriText = $("<div class='masterData-uriExample'>");
+        var uriTypeButtons = $("<div>");
+        var showUri = function () {
+            var isFromLabel = instance.uriType == "fromLabel";
+            uriBuilder.toggle(isFromLabel);
+            otherUriText.toggle(!isFromLabel).text(self.getUriExample(instance, identifierEvidence));
+            var prefixText = self.getUriPrefixText(instance.prefixURI);
+            prefixSeparator.text(prefixText.slice((instance.prefixURI || "").length));
+            uriTypeButtons.children().each(function () {
+                $(this).toggleClass("masterData-optionChipOpened", $(this).data("uriType") == instance.uriType);
+            });
+        };
+        Object.keys(self.mappingUriTypeLabels).forEach(function (uriType) {
+            var uriTypeButton = $("<button type='button' class='masterData-optionChip'>").text(self.mappingUriTypeLabels[uriType]).data("uriType", uriType);
+            uriTypeButton.on("click", function () {
+                instance.uriType = uriType;
+                showUri();
+            });
+            uriTypeButtons.append(uriTypeButton);
         });
-        var prefixInput = $("<input type='text' size='16'>").val(instance.prefixURI);
-        prefixInput.on("change", function () {
+        prefixInput.on("input", function () {
             instance.prefixURI = prefixInput.val().trim();
+            showUri();
         });
+        suffixInput.on("input", function () {
+            instance.suffixURI = suffixInput.val().trim();
+            showUri();
+        });
+        showUri();
         var labelSelect = self.getColumnSelect(tableColumns, instance.labelColumn, true);
+        labelSelect.attr("title", self.getColumnEvidenceText(evidenceByColumn[instance.labelColumn]));
         labelSelect.on("change", function () {
             instance.labelColumn = labelSelect.val() || null;
+            self.renderMappingCard();
         });
         var instanceTable = $("<table class='masterData-fields'>");
         [
-            ["Identified by", identifierSelect, self.getColumnEvidenceText(evidenceByColumn[instance.identifierColumns[0]])],
-            ["URI", $("<span>").append(uriTypeSelect, " prefix ", prefixInput), ""],
-            ["Label", labelSelect, self.getColumnEvidenceText(evidenceByColumn[instance.labelColumn])],
-        ].forEach(function ([fieldName, fieldControl, evidenceText]) {
-            var valueCell = $("<td>").append(fieldControl);
-            if (evidenceText) {
-                valueCell.append($("<div class='masterData-evidenceText'>").text(evidenceText));
-            }
-            instanceTable.append($("<tr>").append($("<td class='masterData-fieldName'>").text(fieldName), valueCell));
+            ["Id", identifierSelect],
+            ["Label", labelSelect],
+            ["URI", $("<div>").append(uriBuilder, otherUriText, uriTypeButtons)],
+        ].forEach(function ([fieldName, fieldControl]) {
+            instanceTable.append($("<tr>").append($("<td class='masterData-fieldName'>").text(fieldName), $("<td>").append(fieldControl)));
         });
-        instanceDiv.append(instanceTable, $("<div>").text(instance.reason || ""));
+        instanceDiv.append(instanceTable);
         return instanceDiv;
     };
 
-    // one block per column entry, its options picked by a click, then the columns left out folded with their reason
-    self.getMappingColumnsDiv = function (cardState) {
-        var classMapping = cardState.classMapping;
-        var columnsDiv = $("<div class='masterData-stepContent'>").append(
-            $("<div class='masterData-step'>").append($("<span class='masterData-stepNumber'>").text("2"), $("<span>").text("What each column becomes")),
-        );
-        var columnLegendColor = self.getLegendItem("Column").color;
-        classMapping.columnMappings.forEach(function (columnMapping) {
-            var columnsKey = columnMapping.columns.join(", ");
-            var columnBlock = $("<div class='masterData-panel'>");
-            columnBlock.append($("<div>").append($("<span class='masterData-column'>").css("background", columnLegendColor).text(columnsKey)));
-            columnMapping.options.forEach(function (option, optionIndex) {
-                var isSelected = cardState.optionIndexByColumns[columnsKey] == optionIndex;
-                var probabilityFill = $("<div class='masterData-probabilityFill'>").css("width", option.probability + "%");
-                var probability = $("<div class='masterData-probability'>").append($("<div class='masterData-probabilityBar'>").append(probabilityFill), $("<span>").text(option.probability + "%"));
-                var propertyText = { existingProperty: self.getClassLabel(option.propertySource, option.propertyLabel), newProperty: option.newPropertyName }[option.kind];
-                var onClassText = option.onClass != classMapping.classLabel ? ", on " + option.onClass : "";
-                var optionTitle = (propertyText || self.mappingKindLabels[option.kind]) + onClassText;
-                var optionButton = $("<button type='button' class='masterData-option'>").toggleClass("masterData-selected", isSelected);
-                optionButton.append(
-                    $("<div class='masterData-optionTitle'>").append(
-                        $("<span class='masterData-radio'>"),
-                        $("<span>").text(optionTitle),
-                        $("<span class='masterData-badge'>").text(self.mappingKindLabels[option.kind]),
-                        probability,
-                    ),
-                    self.getFieldsTable([
-                        ["Range", option.range ? option.range + (option.dateFormat ? ", read as " + option.dateFormat : "") : null],
-                        ["Gives", option.detail],
-                    ]),
-                );
-                if (option.problem) {
-                    optionButton.append($("<div class='masterData-note'>").text(option.problem));
+    // the columns by table then by group of values, each with the option it takes; the implicit classes in chips, decided
+    // later; a column another class maps here shown read only, chosen on its card; the columns of kind other counted, the
+    // columns left out folded
+    self.getMappingColumnsDiv = function (cardState, mappingView) {
+        var hasSeveralTables = mappingView.tableViews.length > 1;
+        var columnsDiv = $("<div class='masterData-stepContent'>");
+        mappingView.tableViews.forEach(function (tableView) {
+            if (hasSeveralTables) {
+                var keyText = tableView.keyColumns.length > 0 ? ", by " + tableView.keyColumns.join(", ") : "";
+                columnsDiv.append($("<div class='masterData-tableTitle'>").text("table " + tableView.table + keyText));
+            }
+            tableView.groups.forEach(function (group) {
+                var groupDiv = $("<div class='masterData-group'>").append($("<div class='masterData-groupTitle'>").append($("<span>").text(group.title), $("<span>").text(group.mappingColumns.length)));
+                if (group.groupKey == "implicit") {
+                    groupDiv.append(self.getImplicitColumnChips(cardState, group));
+                    columnsDiv.append(groupDiv);
+                    return;
                 }
-                optionButton.on("click", function () {
-                    cardState.optionIndexByColumns[columnsKey] = optionIndex;
-                    self.renderMappingCard();
+                var groupTable = $("<table class='masterData-fields'>");
+                group.mappingColumns.forEach(function (mappingColumn) {
+                    var columnRows = mappingColumn.ownerClassLabel ? self.getForeignColumnRow(cardState, mappingColumn) : self.getMappingColumnRows(cardState, mappingColumn.columnsKey, mappingColumn.columnMapping);
+                    groupTable.append(columnRows);
                 });
-                columnBlock.append(optionButton);
+                columnsDiv.append(groupDiv.append(groupTable));
             });
-            var evidenceTexts = columnMapping.evidences.map((evidence) => evidence.column + ": " + self.getColumnEvidenceText(evidence));
-            columnBlock.append($("<div class='masterData-evidenceText'>").text(evidenceTexts.join("\n")), $("<div>").text(columnMapping.reason));
-            columnsDiv.append(columnBlock);
         });
-        if (classMapping.unmappedColumns.length > 0) {
-            var unmappedDetails = $("<details>").append($("<summary>").text(classMapping.unmappedColumns.length + " columns left unmapped"));
-            classMapping.unmappedColumns.forEach(function (unmappedColumn) {
-                unmappedDetails.append(
-                    $("<div>").append(
-                        $("<span class='masterData-column'>").css("background", columnLegendColor).text(unmappedColumn.column),
-                        $("<span>").text(" " + unmappedColumn.reason),
-                        $("<div class='masterData-evidenceText'>").text(self.getColumnEvidenceText(unmappedColumn.evidence)),
-                    ),
-                );
+        if (mappingView.otherKindCount > 0) {
+            columnsDiv.append($("<div class='masterData-note'>").text(mappingView.otherKindCount + " columns of kind other, the links of step 4 among them"));
+        }
+        if (mappingView.leftOutColumnsKeys.length > 0) {
+            var classMapping = cardState.classMapping;
+            var unmappedTable = $("<table class='masterData-fields'>");
+            mappingView.leftOutColumnsKeys.forEach(function (columnsKey) {
+                var columnMapping = classMapping.columnMappings.find((candidateMapping) => candidateMapping.columns.join(", ") == columnsKey);
+                unmappedTable.append(self.getMappingColumnRows(cardState, columnsKey, columnMapping));
             });
+            var unmappedDetails = $("<details>").append($("<summary>").text(mappingView.leftOutColumnsKeys.length + " columns left out"), unmappedTable);
+            unmappedDetails.prop("open", mappingView.leftOutColumnsKeys.indexOf(cardState.openedColumnsKey) > -1);
             columnsDiv.append(unmappedDetails);
         }
         return columnsDiv;
     };
 
+    // what the data shows of a column, one value of each of its columns, and why the AI chose its options, a column left
+    // out included
+    self.getMappingColumnHelp = function (classMapping, columnsKey, columnMapping) {
+        var getSampleText = function (evidence) {
+            var hasSample = evidence && evidence.sampleValues.length > 0;
+            var sampleText = hasSample ? '"' + String(evidence.sampleValues[0]).slice(0, self.exampleValueMaxLength) + '"' : "";
+            return sampleText;
+        };
+        if (columnMapping) {
+            var evidenceTexts = columnMapping.evidences.map((evidence) => evidence.column + ": " + self.getColumnEvidenceText(evidence));
+            var sampleTexts = columnMapping.evidences.map(getSampleText);
+            var mappedColumnHelp = { evidenceText: evidenceTexts.join("\n"), reason: columnMapping.reason, sampleText: sampleTexts.join(" + ") };
+            return mappedColumnHelp;
+        }
+        var unmappedColumn = classMapping.unmappedColumns.find((candidateColumn) => candidateColumn.column == columnsKey);
+        var columnHelp = {
+            evidenceText: unmappedColumn ? self.getColumnEvidenceText(unmappedColumn.evidence) : "",
+            reason: unmappedColumn ? unmappedColumn.reason : "",
+            sampleText: unmappedColumn ? getSampleText(unmappedColumn.evidence) : "",
+        };
+        return columnHelp;
+    };
+
+    // the implicit classes in chips; one of this class opens its choices below the chips, one of another class names it
+    self.getImplicitColumnChips = function (cardState, group) {
+        var chipsDiv = $("<div>");
+        var openedChooser = null;
+        group.mappingColumns.forEach(function (mappingColumn) {
+            var columnChip = $("<button type='button' class='masterData-optionChip'>").text(mappingColumn.columnsKey);
+            if (mappingColumn.ownerClassLabel) {
+                chipsDiv.append(columnChip.prop("disabled", true).attr("title", "chosen on the " + mappingColumn.ownerClassLabel + " card"));
+                return;
+            }
+            var isOpened = cardState.openedColumnsKey == mappingColumn.columnsKey;
+            columnChip.toggleClass("masterData-optionChipOpened", isOpened).attr("title", self.getMappingOptionText(mappingColumn.option, cardState.classMapping));
+            columnChip.on("click", function () {
+                cardState.openedColumnsKey = isOpened ? null : mappingColumn.columnsKey;
+                self.renderMappingCard();
+            });
+            chipsDiv.append(columnChip);
+            if (isOpened) {
+                openedChooser = self.getMappingOptionChooser(cardState, mappingColumn.columnsKey, mappingColumn.columnMapping);
+            }
+        });
+        if (openedChooser) {
+            chipsDiv.append(openedChooser);
+        }
+        return chipsDiv;
+    };
+
+    // a column another class maps onto this one: what it gives, and the card where it is chosen
+    self.getForeignColumnRow = function (cardState, mappingColumn) {
+        var columnHelp = self.getMappingColumnHelp(cardState.classMapping, mappingColumn.columnsKey, mappingColumn.columnMapping);
+        var columnChip = $("<span class='masterData-column'>").css("background", self.getLegendItem("Column").color).text(mappingColumn.columnsKey).attr("title", columnHelp.evidenceText);
+        var ownerButton = $("<button type='button' class='masterData-optionChip'>").text("on the " + self.getClassLabel(self.currentSource, mappingColumn.ownerClassLabel) + " card");
+        ownerButton.on("click", function () {
+            self.showMappingCard({ data: { type: "Class", label: mappingColumn.ownerClassLabel } });
+        });
+        var optionText = $("<span>").text(self.getMappingOptionName(mappingColumn.option) + " ");
+        var foreignRow = $("<tr>").append($("<td class='masterData-fieldName'>").append(columnChip), $("<td>").append(optionText, ownerButton));
+        return foreignRow;
+    };
+
+    // the row of a column, and below it its choices when it is open
+    self.getMappingColumnRows = function (cardState, columnsKey, columnMapping) {
+        var classMapping = cardState.classMapping;
+        var columnHelp = self.getMappingColumnHelp(classMapping, columnsKey, columnMapping);
+        var reason = columnHelp.reason;
+        var columnChip = $("<span class='masterData-column'>").css("background", self.getLegendItem("Column").color).text(columnsKey).attr("title", columnHelp.evidenceText);
+        var pickedOption = self.getPickedMappingOption(cardState, columnsKey, columnMapping);
+        var isUserOption = Boolean(cardState.userOptionByColumns[columnsKey]);
+        var optionChip = $("<button type='button' class='masterData-optionChip'>")
+            .toggleClass("masterData-optionChipOpened", cardState.openedColumnsKey == columnsKey)
+            .toggleClass("masterData-optionChipUser", isUserOption)
+            .text(pickedOption ? self.getMappingOptionText(pickedOption, classMapping) : "unmapped")
+            .attr("title", reason || "");
+        optionChip.on("click", function () {
+            cardState.openedColumnsKey = cardState.openedColumnsKey == columnsKey ? null : columnsKey;
+            self.renderMappingCard();
+        });
+        var optionCell = $("<td>").append(optionChip);
+        if (columnHelp.sampleText) {
+            optionCell.append($("<div class='masterData-example'>").text("e.g. " + columnHelp.sampleText));
+        }
+        if (pickedOption && pickedOption.problem) {
+            optionCell.append($("<div class='masterData-note'>").text(pickedOption.problem));
+        }
+        var columnRows = [$("<tr>").append($("<td class='masterData-fieldName'>").append(columnChip), optionCell)];
+        if (cardState.openedColumnsKey == columnsKey) {
+            columnRows.push($("<tr>").append($("<td colspan='2'>").append(self.getMappingOptionChooser(cardState, columnsKey, columnMapping))));
+        }
+        return columnRows;
+    };
+
+    // an option in one line: its property or kind, the other class it goes on, its range, its probability
+    self.getMappingOptionText = function (option, classMapping) {
+        var onClassText = option.onClass && option.onClass != classMapping.classLabel ? " on " + option.onClass : "";
+        var rangeText = option.range ? " (" + option.range + ")" : "";
+        var probabilityText = option.probability === null || option.probability === undefined ? ", by hand" : ", " + option.probability + "%";
+        var optionText = self.getMappingOptionName(option) + onClassText + rangeText + probabilityText + (option.problem ? " ⚠" : "");
+        return optionText;
+    };
+
+    // the options of the AI for a column, then Other: a property of the ontologies, a new property or another kind, its
+    // range, date format and class set below once made
+    self.getMappingOptionChooser = function (cardState, columnsKey, columnMapping) {
+        var classMapping = cardState.classMapping;
+        var chooserDiv = $("<div class='masterData-optionChooser'>");
+        var aiOptions = columnMapping ? columnMapping.options : [];
+        aiOptions.forEach(function (option, optionIndex) {
+            var isSelected = !cardState.userOptionByColumns[columnsKey] && cardState.optionIndexByColumns[columnsKey] == optionIndex;
+            var optionButton = $("<button type='button' class='masterData-option'>").toggleClass("masterData-selected", isSelected);
+            var probabilityParts = [];
+            if (option.probability !== null && option.probability !== undefined) {
+                var probabilityFill = $("<div class='masterData-probabilityFill'>").css("width", option.probability + "%");
+                probabilityParts.push($("<div class='masterData-probability'>").append($("<div class='masterData-probabilityBar'>").append(probabilityFill), $("<span>").text(option.probability + "%")));
+            }
+            var onClassText = option.onClass != classMapping.classLabel ? ", on " + option.onClass : "";
+            optionButton.append(
+                $("<div class='masterData-optionTitle'>").append(
+                    $("<span class='masterData-radio'>"),
+                    $("<span>").text(self.getMappingOptionName(option) + onClassText),
+                    $("<span class='masterData-badge'>").text(self.mappingKindLabels[option.kind]),
+                    probabilityParts,
+                ),
+                self.getFieldsTable([
+                    ["Range", option.range ? option.range + (option.dateFormat ? ", read as " + option.dateFormat : "") : null],
+                    ["Gives", option.detail],
+                ]),
+            );
+            if (option.problem) {
+                optionButton.append($("<div class='masterData-note'>").text(option.problem));
+            }
+            optionButton.on("click", function () {
+                delete cardState.userOptionByColumns[columnsKey];
+                cardState.optionIndexByColumns[columnsKey] = optionIndex;
+                self.renderMappingCard();
+            });
+            chooserDiv.append(optionButton);
+        });
+        chooserDiv.append(self.getMappingOtherDiv(cardState, columnsKey));
+        return chooserDiv;
+    };
+
+    // Other: what the user picks becomes the option of the column, its range, date format and class then set here; under
+    // each choice an example of what rows give
+    self.getMappingOtherDiv = function (cardState, columnsKey) {
+        var classMapping = cardState.classMapping;
+        var classText = self.getClassLabel(self.currentSource, classMapping.classLabel);
+        var getKindExample = function (kind) {
+            var kindExample = $("<div class='masterData-example'>").text(self.mappingKindExamples[kind]);
+            return kindExample;
+        };
+        var otherDiv = $("<div class='masterData-panel'>").append($("<div class='masterData-optionTitle'>").text("Something else: what should " + columnsKey + " become?"));
+        var setUserOption = function (userOption) {
+            userOption.onClass = classMapping.classLabel;
+            cardState.userOptionByColumns[columnsKey] = userOption;
+            self.renderMappingCard();
+        };
+        var propertySearch = $("<input type='text' placeholder='search a property of the ontologies'>").css("width", "100%");
+        var propertyResults = $("<div>");
+        var readSearchedText = function () {
+            var typedText = propertySearch.val().trim();
+            var searchedText = typedText.toLowerCase();
+            return searchedText;
+        };
+        propertySearch.on("input", function () {
+            var searchedText = readSearchedText();
+            propertyResults.empty();
+            if (searchedText.length < 2) {
+                return;
+            }
+            self.loadMappingProperties(function (error, propertyByIri) {
+                // the answer of a search typed over since
+                if (readSearchedText() != searchedText) {
+                    return;
+                }
+                if (error) {
+                    return propertyResults.text(error);
+                }
+                propertyResults.empty();
+                var matchingIris = Object.keys(propertyByIri).filter((propertyIri) => (propertyByIri[propertyIri].label + " " + propertyIri).toLowerCase().indexOf(searchedText) > -1);
+                var shownIris = matchingIris.slice(0, self.propertySearchResultCount);
+                shownIris.forEach(function (propertyIri) {
+                    var property = propertyByIri[propertyIri];
+                    var propertyText = self.getClassLabel(property.source, property.label) + (property.range ? " (" + property.range + ")" : "");
+                    var propertyButton = $("<button type='button' class='masterData-optionChip'>").text(propertyText).attr("title", propertyIri);
+                    propertyButton.on("click", function () {
+                        setUserOption({ kind: "existingProperty", propertyIri: propertyIri, propertyLabel: property.label, propertySource: property.source, range: property.range || "xsd:string" });
+                    });
+                    propertyResults.append(propertyButton);
+                });
+            });
+        });
+        var newPropertyInput = $("<input type='text' placeholder='new property name' size='18'>");
+        var newPropertyButton = $("<button type='button' class='masterData-optionChip'>").text("Create");
+        newPropertyButton.on("click", function () {
+            var newPropertyName = newPropertyInput.val().trim();
+            if (!newPropertyName) {
+                return;
+            }
+            setUserOption({ kind: "newProperty", newPropertyName: newPropertyName, range: "xsd:string" });
+        });
+        var kindButtons = self.mappingOtherKinds.map(function (kind) {
+            var kindButton = $("<button type='button' class='masterData-otherKind'>").append($("<span>").text(self.mappingOtherKindLabels[kind]), getKindExample(kind));
+            kindButton.on("click", function () {
+                setUserOption({ kind: kind });
+            });
+            return kindButton;
+        });
+        var leaveOutButton = $("<button type='button' class='masterData-optionChip'>").text("Nothing, leave it out");
+        leaveOutButton.on("click", function () {
+            setUserOption({ kind: "unmapped" });
+        });
+        otherDiv.append(
+            $("<div class='masterData-otherChoice'>").append(
+                $("<b>").text("Keep it as a value of the " + classText),
+                $("<div class='masterData-hint'>").text("text, a number or a date, through a property"),
+                getKindExample("existingProperty"),
+                propertySearch,
+                propertyResults,
+                $("<div>").append(newPropertyInput, " ", newPropertyButton),
+            ),
+            $("<div class='masterData-otherChoice'>").append(
+                $("<b>").text("Make each value a node of its own"),
+                $("<div class='masterData-hint'>").text("linked to the " + classText + ", its class decided later"),
+                kindButtons,
+            ),
+            $("<div class='masterData-otherChoice'>").append(leaveOutButton, getKindExample("unmapped")),
+        );
+        var userOption = cardState.userOptionByColumns[columnsKey];
+        if (userOption) {
+            otherDiv.append(self.getUserOptionFields(cardState, userOption));
+        }
+        return otherDiv;
+    };
+
+    // the class, range and date format of the option the user made, changeable before Apply
+    self.getUserOptionFields = function (cardState, userOption) {
+        var classMapping = cardState.classMapping;
+        var rowClassLabels = [classMapping.classLabel].concat(classMapping.rowResources.map((rowResource) => rowResource.classLabel));
+        var onClassSelect = $("<select>");
+        rowClassLabels.forEach((rowClassLabel) => onClassSelect.append($("<option>").val(rowClassLabel).text(rowClassLabel)));
+        onClassSelect.val(userOption.onClass).on("change", function () {
+            userOption.onClass = onClassSelect.val();
+            self.renderMappingCard();
+        });
+        var fields = [["On class", onClassSelect]];
+        var isProperty = userOption.kind == "existingProperty" || userOption.kind == "newProperty";
+        if (isProperty) {
+            var rangeSelect = $("<select>");
+            self.mappingRanges.forEach((range) => rangeSelect.append($("<option>").val(range).text(range)));
+            // a range of the ontology outside the list stays as it is
+            if (self.mappingRanges.indexOf(userOption.range) < 0) {
+                rangeSelect.append($("<option>").val(userOption.range).text(userOption.range));
+            }
+            rangeSelect.val(userOption.range).on("change", function () {
+                userOption.range = rangeSelect.val();
+                self.renderMappingCard();
+            });
+            fields.push(["Range", rangeSelect]);
+        }
+        if (isProperty && userOption.range && userOption.range.indexOf("xsd:date") == 0) {
+            var dateFormatSelect = $("<select>").append($("<option>").val("").text("as stored"));
+            self.mappingDateFormats.forEach((dateFormat) => dateFormatSelect.append($("<option>").val(dateFormat).text(dateFormat)));
+            dateFormatSelect.val(userOption.dateFormat || "").on("change", function () {
+                userOption.dateFormat = dateFormatSelect.val() || null;
+                self.renderMappingCard();
+            });
+            fields.push(["Date format", dateFormatSelect]);
+        }
+        var fieldsTable = $("<table class='masterData-fields'>");
+        fields.forEach(function ([fieldName, fieldControl]) {
+            fieldsTable.append($("<tr>").append($("<td class='masterData-fieldName'>").text(fieldName), $("<td>").append(fieldControl)));
+        });
+        return fieldsTable;
+    };
+
+    // the properties a column may take, read once per source
+    self.loadMappingProperties = function (callback) {
+        if (self.mappingProperties && self.mappingProperties.source == self.currentSource) {
+            return callback(null, self.mappingProperties.propertyByIri);
+        }
+        var source = self.currentSource;
+        $.ajax({
+            type: "GET",
+            url: Config.apiUrl + "/ai/aiMappingWorkflow/mappingProperties?" + new URLSearchParams({ source: source }).toString(),
+            dataType: "json",
+            success: function (result) {
+                self.mappingProperties = { source: source, propertyByIri: result.propertyByIri };
+                callback(null, result.propertyByIri);
+            },
+            error: function (error) {
+                callback(AIColumnClassSuggestion.getErrorText(error));
+            },
+        });
+    };
+
     // the guess of a step the chat changed on the user's request: the graph of the step shown is drawn again, and the card
     // open shows the change
-    self.replaceGuess = function (guessKey, guess) {
+    self.replaceGuess = function (guessKey, guess, nextGuesses) {
         self.currentAiKeys[guessKey] = guess;
+        // the next steps the server carried the change to
+        Object.entries(nextGuesses || {}).forEach(([nextGuessKey, nextGuess]) => (self.currentAiKeys[nextGuessKey] = nextGuess));
         self.drawWorkflowTabs();
         var changedStepIndex = self.workflowSteps.findIndex((workflowStep) => workflowStep.guessKey == guessKey);
         // a change of an earlier step may make the step shown outdated, or no longer reached
@@ -1760,7 +2500,7 @@ var AIMappingWorkflow = (function () {
                 return $("#aiMappingWorkflow_card").empty();
             }
             var arrowLinks = Object.values(self.linksByEdgeId).find((edgeLinks) => edgeLinks.indexOf(savedLink) > -1);
-            self.currentLinkCard = { link: savedLink, edgeLinks: arrowLinks };
+            self.currentLinkCard = { link: savedLink, edgeLinks: arrowLinks, assumption: self.currentLinkCard.assumption };
             return self.renderLinkCard();
         }
         var card = self.entryCard;
@@ -1816,57 +2556,50 @@ var AIMappingWorkflow = (function () {
             $("<span class='masterData-class'>").text(classLabel),
             self.getFieldsTable([
                 ["Definition", entry.definition],
-                [self.workflowSteps[self.currentStepIndex].reasonLabel, entry.reason],
-                ["About", entry.aboutMasterData],
-                ["Joins", (entry.joins || []).join(", ")],
                 ["Tables", (entry.tables || []).join(", ")],
-                ["Implicit in", (entry.columns || []).join(", ")],
-                ["Claimed by other associations too", (entry.contestedTables || []).join(", ")],
-                ["Data", entry.hasNoData ? "no table or column of the database carries it: it takes part in no link" : null],
+                ["Columns", (entry.columns || []).join(", ")],
+                ["Also claimed", (entry.contestedTables || []).join(", ")],
+                ["Data", entry.hasNoData ? "none, no relation" : null],
             ]),
         );
         cardDiv.append(headerPanel);
 
         var stepNumber = 1;
-        var evidence = entry.evidence;
-        var evidenceDiv = null;
-        if (evidence && evidence.rows) {
-            var evidenceTable = $("<table class='masterData-evidenceTable'>");
-            var headerCells = evidence.columns.map((column) => $("<th>").text(column));
-            evidenceTable.append($("<tr>").append(headerCells));
-            evidence.rows.forEach(function (evidenceRow) {
-                var valueCells = evidenceRow.map((value) => $("<td>").text(value));
-                evidenceTable.append($("<tr>").append(valueCells));
-            });
-            evidenceDiv = $("<div>").append($("<div>").text(evidence.purpose), $("<div class='masterData-evidence'>").append(evidenceTable));
-        }
+        // what the data say under a reading, the real rows showing it, and the question settling it
+        // one box per reading: what the data say, its example rows and the question for the business folded under it
+        var getReadingEvidence = function (reading) {
+            var readingEvidence = $("<div class='masterData-readingEvidence'>");
+            var moreDetails = $("<details>").append($("<summary>").text("More details"), self.getFieldsTable([["In the data", reading.inData]]));
+            if (reading.example) {
+                var exampleTable = $("<table class='masterData-evidenceTable'>");
+                var headerCells = reading.example.columns.map((column) => $("<th>").text(column));
+                exampleTable.append($("<tr>").append(headerCells));
+                reading.example.rows.forEach(function (exampleRow) {
+                    var valueCells = exampleRow.map((value) => $("<td>").text(value));
+                    exampleTable.append($("<tr>").append(valueCells));
+                });
+                moreDetails.append($("<div class='masterData-evidence'>").append(exampleTable));
+            }
+            moreDetails.append(self.getFieldsTable([["Ask the business", reading.askBusiness]]));
+            readingEvidence.append(moreDetails);
+            return readingEvidence;
+        };
         // a guess saved before the readings shared the class of the entry: each reading has its own class, picked first
         var readingClassKeys = new Set(card.readings.map((reading) => reading.classKey));
         var isReadingPickedFirst = readingClassKeys.size > 1;
         if (card.readings.length > 1 && !isReadingPickedFirst) {
             var rowsDiv = $("<div class='masterData-stepContent'>");
-            rowsDiv.append($("<div class='masterData-step'>").text("What one row of " + entry.label + " may denote"), evidenceDiv);
+            rowsDiv.append($("<div class='masterData-step'>").text("One row is"));
             card.readings.forEach(function (reading) {
-                rowsDiv.append(
-                    $("<div class='masterData-panel'>").append(
-                        $("<b>").text(reading.label),
-                        self.getFieldsTable([
-                            ["A row is", reading.rowIs],
-                            ["In the data", reading.inData],
-                            ["Ask the business", reading.askBusiness],
-                        ]),
-                    ),
-                );
+                var readingBox = $("<div class='masterData-readingBox'>").append($("<div>").append($("<b>").text(reading.label + ": "), $("<span>").text(self.getRowIsText(reading))), getReadingEvidence(reading));
+                rowsDiv.append(readingBox);
             });
-            rowsDiv.append($("<div class='masterData-note'>").text("The superclass chosen below settles what a row denotes."));
             cardDiv.append(rowsDiv);
         }
         if (isReadingPickedFirst) {
             var readingsDiv = $("<div class='masterData-stepContent'>");
-            readingsDiv.append(getStepTitle(stepNumber, "What does one row of " + entry.label + " denote?"));
+            readingsDiv.append(getStepTitle(stepNumber, "One row is"));
             stepNumber++;
-            readingsDiv.append(evidenceDiv);
-            readingsDiv.append($("<div class='masterData-note'>").text("The data cannot settle it: ask the business, the answer decides the superclass below."));
             card.readings.forEach(function (reading, readingIndex) {
                 var titleElements = [$("<span>").text(reading.label)];
                 // the first reading is the one the data point to most
@@ -1878,19 +2611,14 @@ var AIMappingWorkflow = (function () {
                     card.superClassId = null;
                     self.renderEntryCard();
                 };
-                var readingFields = [
-                    ["A row is", reading.rowIs],
-                    ["In the data", reading.inData],
-                    ["Ask the business", reading.askBusiness],
-                    ["Class definition", reading.definition],
-                ];
-                readingsDiv.append(getOptionButton(readingIndex == card.readingIndex, titleElements, readingFields, pickReading));
+                var readingBox = $("<div class='masterData-readingBox'>").append(getOptionButton(readingIndex == card.readingIndex, titleElements, [["", self.getRowIsText(reading)]], pickReading), getReadingEvidence(reading));
+                readingsDiv.append(readingBox);
             });
             cardDiv.append(readingsDiv);
         }
 
         var superClassDiv = $("<div class='masterData-stepContent'>");
-        superClassDiv.append(getStepTitle(stepNumber, "Choose the superclass of " + classLabel));
+        superClassDiv.append(getStepTitle(stepNumber, "Superclass"));
         var writtenText = "nothing chosen yet";
         var isChoiceOpen = classification.classKind == "newClass";
         if (classification.classKind == "existingClass") {
@@ -1916,11 +2644,11 @@ var AIMappingWorkflow = (function () {
                     self.renderEntryCard();
                 };
                 var localClass = self.getLocalClass(parentOption);
+                // a reading named only when the row may denote several things
                 var superClassFields = [
-                    ["Definition", parentOption.definition],
+                    ["If a row is", parentOption.readings && card.readings.length > 1 ? parentOption.readings.join(", ") : null],
+                    ["Under", localClass ? localClass.superClassLabel : null],
                     ["Impact", parentOption.impact],
-                    ["Rests on", parentOption.readings ? parentOption.readings.join(", ") : null],
-                    ["Local class under", localClass ? localClass.superClassLabel : null],
                 ];
                 superClassDiv.append(getOptionButton(isSelected, [$("<span class='masterData-class'>").text(parentLabel), probability], superClassFields, pickSuperClass));
             });
@@ -1938,9 +2666,8 @@ var AIMappingWorkflow = (function () {
                 $("<div class='masterData-stepContent'>").append(
                     $("<div class='masterData-step'>").text("Two meanings at once?"),
                     self.getFieldsTable([
-                        ["Second class", split.newLabel + " subClassOf " + splitParentLabel + ", same rows and identifier"],
+                        ["Second class", split.newLabel + " subClassOf " + splitParentLabel],
                         ["Why", split.reason],
-                        ["Definition", split.definition],
                     ]),
                     splitButton,
                 ),
@@ -1953,13 +2680,13 @@ var AIMappingWorkflow = (function () {
             self.applyDecision(entry, { readingIndex: card.readingIndex, superClassId: card.superClassId });
         });
         // nothing written yet: every superclass goes on to the links, which settle it
-        var leaveOpenButton = $("<button type='button' class='masterData-applyButton'>").text("Leave open until the links");
+        var leaveOpenButton = $("<button type='button' class='masterData-applyButton'>").text("Leave open until the relations");
         leaveOpenButton.prop("disabled", !isChoiceOpen || Boolean(entry.decision));
         leaveOpenButton.on("click", function () {
             self.applyDecision(entry, { readingIndex: card.readingIndex, superClassId: null, isLeftToLinks: true });
         });
         if (entry.decision && entry.decision.isLeftToLinks) {
-            writtenText = "nothing yet, the links settle the superclass";
+            writtenText = "nothing yet, the relations settle the superclass";
         }
         // back to the options of the AI, the upper class taken as the class included
         var isClassReplaced = card.readings.some((reading) => reading.replacedClassification);
@@ -1972,6 +2699,12 @@ var AIMappingWorkflow = (function () {
         var footer = $("<div class='masterData-footer'>");
         footer.append($("<div>").append($("<span class='masterData-writtenLabel'>").text("Will be written"), $("<span>").text(writtenText)), $("<div class='masterData-footerButtons'>").append(undoButton, leaveOpenButton, applyButton));
         cardDiv.append(footer);
+    };
+
+    // what one row is under a reading, without the "One row is" its title already says
+    self.getRowIsText = function (reading) {
+        var rowIsText = (reading.rowIs || "").replace(self.rowIsPrefixRegex, "");
+        return rowIsText;
     };
 
     // a change of the change_guess tool of the chat, made by the user from the graph or a card; the guess comes back as
@@ -1993,7 +2726,7 @@ var AIMappingWorkflow = (function () {
                 if (self.currentDatabaseId != databaseId) {
                     return;
                 }
-                self.replaceGuess(result.guessKey, result.guess);
+                self.replaceGuess(result.guessKey, result.guess, result.nextGuesses);
                 UI.message(CommonBotFunctions.escapeHtml(result.summary));
                 if (callback) {
                     callback();
@@ -2013,14 +2746,27 @@ var AIMappingWorkflow = (function () {
         var edgeLinks = nodeOrEdge ? self.linksByEdgeId[nodeOrEdge.id] || [] : [];
         var cardLink = self.currentLinkCard ? self.currentLinkCard.link : null;
         self.popupMenuLink = edgeLinks.indexOf(cardLink) > -1 ? cardLink : edgeLinks[0] || null;
+        var guessKey = self.workflowSteps[self.currentStepIndex].guessKey;
         var html = "";
         if (self.popupMenuEntry) {
             html += '    <span class="popupMenuItem" onclick="AIMappingWorkflow.showClassChoiceDialog()">Choose the class</span>';
             html += '    <span class="popupMenuItem" onclick="AIMappingWorkflow.renameEntry()">Rename</span>';
+            html += '    <span class="popupMenuItem" onclick="AIMappingWorkflow.showDefinitionDialog()">Definition</span>';
+            html += '    <span class="popupMenuItem" onclick="AIMappingWorkflow.showEntryTablesDialog()">Tables</span>';
+            html += '    <span class="popupMenuItem" onclick="AIMappingWorkflow.showAddReadingDialog()">Add a reading</span>';
+            if (self.getReadings(self.popupMenuEntry).length > 1) {
+                html += '    <span class="popupMenuItem" onclick="AIMappingWorkflow.showRemoveReadingDialog()">Remove a reading</span>';
+            }
             html += '    <span class="popupMenuItem" onclick="AIMappingWorkflow.removeEntry()">Remove</span>';
         } else if (self.popupMenuLink) {
             html += '    <span class="popupMenuItem" onclick="AIMappingWorkflow.showPropertyChoiceDialog()">Choose the property</span>';
             html += '    <span class="popupMenuItem" onclick="AIMappingWorkflow.removeLink()">Remove</span>';
+        } else if (guessKey == "linksGuess") {
+            html += '    <span class="popupMenuItem" onclick="AIMappingWorkflow.showAddLinkDialog(false)">Add a relation on a key</span>';
+            html += '    <span class="popupMenuItem" onclick="AIMappingWorkflow.showAddLinkDialog(true)">Add a relation on a row</span>';
+        } else if (guessKey != "mappingGuess") {
+            html += '    <span class="popupMenuItem" onclick="AIMappingWorkflow.showAddEntryDialog()">Add ' + (guessKey == "eventsGuess" ? "an association" : "a class") + "</span>";
+            html += '    <span class="popupMenuItem" onclick="AIMappingWorkflow.showAddLocalClassDialog()">Add a local class above classes</span>';
         } else {
             return;
         }
@@ -2063,10 +2809,243 @@ var AIMappingWorkflow = (function () {
     self.removeLink = function () {
         PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
         var link = self.popupMenuLink;
-        if (!confirm("Remove the link " + link.fromClass + " -> " + link.toClass + " from the guess?")) {
+        if (!confirm("Remove the relation " + link.fromClass + " -> " + link.toClass + " from the guess?")) {
             return;
         }
         self.changeGuessByHand("remove_link", { link: link.id });
+    };
+
+    // the tables of the database open, with their columns, read once per database for the forms
+    self.loadDatabaseColumns = function (callback) {
+        if (self.databaseColumns && self.databaseColumns.databaseId == self.currentDatabaseId) {
+            return callback(null, self.databaseColumns.columnsByTable);
+        }
+        var databaseId = self.currentDatabaseId;
+        $.ajax({
+            type: "GET",
+            url: Config.apiUrl + "/databases/model?" + new URLSearchParams({ name: databaseId, type: "sql" }).toString(),
+            dataType: "json",
+            success: function (columnsByTable) {
+                self.databaseColumns = { databaseId: databaseId, columnsByTable: columnsByTable };
+                callback(null, columnsByTable);
+            },
+            error: function (error) {
+                callback(AIColumnClassSuggestion.getErrorText(error));
+            },
+        });
+    };
+
+    // a form in the small dialog, its values given to onValidate by field name. A field is { name, label, kind, value,
+    // options }: kind "text", "textarea", "select" (options, or getOptions(values) read again when another select
+    // changes), or "tables", an ordered list of tables, the main one first
+    self.showFormDialog = function (title, fields, onValidate) {
+        var form = $("<div style='display: flex; flex-direction: column; gap: 8px; min-width: 420px'>");
+        var tablesByField = {};
+        var inputsByName = {};
+        var readValues = function () {
+            var values = {};
+            fields.forEach(function (field) {
+                values[field.name] = field.kind == "tables" ? tablesByField[field.name].slice() : inputsByName[field.name].val();
+            });
+            return values;
+        };
+        var fillSelect = function (field, values) {
+            var select = inputsByName[field.name];
+            var selectedValue = select.val() || field.value;
+            var options = field.getOptions ? field.getOptions(values) : field.options;
+            select.empty();
+            options.forEach((option) => select.append($("<option>").val(option).text(option)));
+            select.val(options.indexOf(selectedValue) > -1 ? selectedValue : options[0]);
+        };
+        fields.forEach(function (field) {
+            var row = $("<label style='display: flex; flex-direction: column'>").append($("<span>").text(field.label));
+            if (field.kind == "tables") {
+                tablesByField[field.name] = (field.value || []).slice();
+                var tablesList = $("<div>");
+                var drawTables = function () {
+                    tablesList.empty();
+                    tablesByField[field.name].forEach(function (table, tableIndex) {
+                        var removeButton = $("<button type='button' class='slsv-invisible-button'>").text(" x");
+                        removeButton.on("click", function () {
+                            tablesByField[field.name].splice(tableIndex, 1);
+                            drawTables();
+                        });
+                        tablesList.append($("<div>").append($("<span>").text((tableIndex == 0 ? "main: " : "") + table), removeButton));
+                    });
+                };
+                var tableSelect = $("<select>");
+                field.options.forEach((option) => tableSelect.append($("<option>").val(option).text(option)));
+                var addButton = $("<button type='button' class='slsv-button-1'>").text("Add the table");
+                addButton.on("click", function () {
+                    if (tablesByField[field.name].indexOf(tableSelect.val()) < 0) {
+                        tablesByField[field.name].push(tableSelect.val());
+                    }
+                    drawTables();
+                });
+                drawTables();
+                row.append(tablesList, $("<div style='display: flex; gap: 4px'>").append(tableSelect, addButton));
+            } else if (field.kind == "select") {
+                inputsByName[field.name] = $("<select>");
+                row.append(inputsByName[field.name]);
+            } else {
+                inputsByName[field.name] = field.kind == "textarea" ? $("<textarea rows='4'>") : $("<input type='text'>");
+                inputsByName[field.name].val(field.value || "");
+                row.append(inputsByName[field.name]);
+            }
+            form.append(row);
+        });
+        var selectFields = fields.filter((field) => field.kind == "select");
+        selectFields.forEach((field) => fillSelect(field, readValues()));
+        // a select depending on another one follows its change
+        selectFields.forEach(function (field) {
+            inputsByName[field.name].on("change", function () {
+                selectFields.forEach(function (otherField) {
+                    if (otherField != field && otherField.getOptions) {
+                        fillSelect(otherField, readValues());
+                    }
+                });
+            });
+        });
+        var validateButton = $("<button type='button' class='slsv-button-1'>").text("OK");
+        validateButton.on("click", function () {
+            onValidate(readValues());
+        });
+        form.append(validateButton);
+        $("#smallDialogDiv").empty().append(form);
+        UI.openDialog("smallDialogDiv", { title: title });
+        UI.clampAndCenterDialog("smallDialogDiv");
+    };
+
+    // a class of steps 1 and 2 or an association of step 3 the AI missed, with its tables; its superclass is chosen after,
+    // as for any entry
+    self.showAddEntryDialog = function () {
+        PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+        self.loadDatabaseColumns(function (error, columnsByTable) {
+            if (error) {
+                return MainController.errorAlert(error);
+            }
+            var tableNames = Object.keys(columnsByTable).sort();
+            var fields = [
+                { name: "newLabel", label: "Label", kind: "text" },
+                { name: "definition", label: "Definition", kind: "textarea" },
+                { name: "tables", label: "Tables holding its rows, the main one first", kind: "tables", options: tableNames },
+            ];
+            self.showFormDialog("Add " + self.workflowSteps[self.currentStepIndex].entryLegend.toLowerCase(), fields, function (values) {
+                self.changeGuessByHand("add_entry", values, self.closeChoiceDialog);
+            });
+        });
+    };
+
+    // the tables of an entry: changed on step 3, the links of step 4 are computed again from them
+    self.showEntryTablesDialog = function () {
+        PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+        var guessEntry = self.popupMenuEntry;
+        self.loadDatabaseColumns(function (error, columnsByTable) {
+            if (error) {
+                return MainController.errorAlert(error);
+            }
+            var currentTables = self.getEntryDataNames(guessEntry).filter((dataName) => Object.hasOwn(columnsByTable, dataName));
+            var fields = [{ name: "tables", label: "Tables holding the rows of " + guessEntry.label + ", the main one first", kind: "tables", value: currentTables, options: Object.keys(columnsByTable).sort() }];
+            self.showFormDialog("Tables of " + guessEntry.label, fields, function (values) {
+                self.changeGuessByHand("set_entry_tables", { entry: guessEntry.label, tables: values.tables }, self.closeChoiceDialog);
+            });
+        });
+    };
+
+    self.showDefinitionDialog = function () {
+        PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+        var guessEntry = self.popupMenuEntry;
+        var reading = self.getReadings(guessEntry)[self.getEntryReadingIndex(guessEntry)];
+        var fields = [{ name: "definition", label: "Definition of the class of " + guessEntry.label, kind: "textarea", value: reading.definition || guessEntry.definition }];
+        self.showFormDialog("Definition of " + guessEntry.label, fields, function (values) {
+            self.changeGuessByHand("update_class", { entry: guessEntry.label, reading: reading.label, definition: values.definition }, self.closeChoiceDialog);
+        });
+    };
+
+    // another reading of what one row of the entry denotes; its superclass is chosen after, as for any class
+    self.showAddReadingDialog = function () {
+        PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+        var guessEntry = self.popupMenuEntry;
+        var fields = [
+            { name: "newLabel", label: "Label of the reading", kind: "text" },
+            { name: "rowIs", label: "What one row is under this reading", kind: "textarea" },
+            { name: "inData", label: "What in the data points to it", kind: "textarea" },
+            { name: "definition", label: "Definition of its class", kind: "textarea" },
+        ];
+        self.showFormDialog("Add a reading to " + guessEntry.label, fields, function (values) {
+            values.entry = guessEntry.label;
+            self.changeGuessByHand("add_reading", values, self.closeChoiceDialog);
+        });
+    };
+
+    self.showRemoveReadingDialog = function () {
+        PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+        var guessEntry = self.popupMenuEntry;
+        var readingLabels = self.getReadings(guessEntry).map((reading) => reading.label);
+        var fields = [{ name: "reading", label: "Reading to remove", kind: "select", options: readingLabels }];
+        self.showFormDialog("Remove a reading of " + guessEntry.label, fields, function (values) {
+            self.changeGuessByHand("remove_reading", { entry: guessEntry.label, reading: values.reading }, self.closeChoiceDialog);
+        });
+    };
+
+    // a local class of the ontology between an upper class and entries, as a client above reseller and individual customer:
+    // its label, then its superclass in the tree of the upper ontologies
+    self.showAddLocalClassDialog = function () {
+        PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+        var fields = [
+            { name: "newLabel", label: "Label", kind: "text" },
+            { name: "definition", label: "Definition", kind: "textarea" },
+        ];
+        self.showFormDialog("Add a local class", fields, function (values) {
+            var onSelect = function (event, selected) {
+                var nodeData = selected.node.data || {};
+                if (!nodeData.termIri) {
+                    return;
+                }
+                values.superClassIri = nodeData.termIri;
+                self.changeGuessByHand("add_local_class", values, self.closeChoiceDialog);
+            };
+            self.showChoiceDialog("Superclass of " + values.newLabel, [], "classes", "Classes", { selectTreeNodeFn: onSelect });
+        });
+    };
+
+    // a link the AI missed between two classes of the graph, on a foreign key checked in the data or on a row holding both;
+    // its property is chosen after, as for any link
+    self.showAddLinkDialog = function (isOnRow) {
+        PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+        self.loadDatabaseColumns(function (error, columnsByTable) {
+            if (error) {
+                return MainController.errorAlert(error);
+            }
+            var classLabels = Object.keys(self.linkNodeIdByLabel).sort();
+            var tableNames = Object.keys(columnsByTable).sort();
+            var fields = [
+                { name: "fromClass", label: "From the class", kind: "select", options: classLabels },
+                { name: "toClass", label: "To the class", kind: "select", options: classLabels },
+            ];
+            if (isOnRow) {
+                fields.push({ name: "sameRowTable", label: "Table whose rows hold both", kind: "select", options: tableNames });
+            } else {
+                fields.push(
+                    { name: "table", label: "Table of the key", kind: "select", options: tableNames },
+                    { name: "column", label: "Its column", kind: "select", getOptions: (values) => columnsByTable[values.table] || [] },
+                    { name: "referencedTable", label: "Table it points at", kind: "select", options: tableNames },
+                    { name: "referencedColumn", label: "Column it points at", kind: "select", getOptions: (values) => columnsByTable[values.referencedTable] || [] },
+                );
+            }
+            self.showFormDialog("Add a relation", fields, function (values) {
+                var linkInput = { fromClass: values.fromClass, toClass: values.toClass };
+                if (isOnRow) {
+                    linkInput.sameRowTable = values.sameRowTable;
+                } else {
+                    linkInput.table = values.table;
+                    linkInput.columns = [values.column];
+                    linkInput.referencedTable = values.referencedTable;
+                    linkInput.referencedColumns = [values.referencedColumn];
+                }
+                self.changeGuessByHand("add_link", linkInput, self.closeChoiceDialog);
+            });
+        });
     };
 
     // the upper ontologies the guesses are classified in: the imports of the source small enough to be read whole
@@ -2206,6 +3185,14 @@ var AIMappingWorkflow = (function () {
         };
         var contextMenu = function (treeNode) {
             var items = {};
+            if (treeNode.data && treeNode.data.superClassId) {
+                items.removeOption = {
+                    label: "Remove this option",
+                    action: function () {
+                        self.changeGuessByHand("remove_superclass_option", { entry: guessEntry.label, reading: reading.label, superClass: treeNode.data.superClassId }, self.closeChoiceDialog);
+                    },
+                };
+            }
             if (treeNode.data && treeNode.data.termIri) {
                 items.isTheClass = {
                     label: "Is the class itself",
@@ -2273,53 +3260,11 @@ var AIMappingWorkflow = (function () {
         self.showChoiceDialog("Property of " + link.fromClass + " -> " + link.toClass, proposalNodes, "properties", "Properties", { selectTreeNodeFn: onSelect, contextMenu: contextMenu });
     };
 
-    // the decision goes in the keys of the database in the mapping, read again right before the write so that nothing the
-    // server wrote meanwhile is lost
+    // a decision taken on the card goes through the server as the changes of the chat, which carries it to the next steps
     self.applyDecision = function (guessEntry, decision) {
-        var databaseId = self.currentDatabaseId;
-        self.readMappingFile(function (error, mapping) {
-            if (error) {
-                return MainController.errorAlert(error);
-            }
-            var databaseSource = mapping.options.config.databaseSources[databaseId];
-            var guessKey = self.workflowSteps[self.currentStepIndex].guessKey;
-            var savedGuess = databaseSource && databaseSource.aiKeys ? databaseSource.aiKeys[guessKey] : null;
-            var savedEntry = savedGuess ? self.getGuessEntries(savedGuess).find((savedGuessEntry) => savedGuessEntry.label == guessEntry.label) : null;
-            if (!savedEntry) {
-                return MainController.errorAlert("The guess of " + guessEntry.label + " is no longer in the mapping: open the database again.");
-            }
-            savedEntry.decision = decision;
-            // logged as the chat logs its changes, without rationale: the user chose on the card
-            if (!savedGuess.changeLog) {
-                savedGuess.changeLog = [];
-            }
-            savedGuess.changeLog.push({
-                change: "apply_decision",
-                entry: savedEntry.label,
-                summary: decision.isLeftToLinks ? "left open until the links" : "decided on the card",
-                userRequest: null,
-                rationale: null,
-                queries: [],
-                at: new Date().toISOString(),
-            });
-            $.ajax({
-                type: "POST",
-                url: Config.apiUrl + "/data/file",
-                data: { dir: "graphs/", fileName: self.getMappingFileName(), data: JSON.stringify(mapping, null, 2) },
-                dataType: "json",
-                success: function () {
-                    guessEntry.decision = decision;
-                    self.currentGuess.changeLog = savedGuess.changeLog;
-                    self.drawGuessGraph();
-                    // the last decision of a step opens the next one
-                    self.drawWorkflowTabs();
-                    UI.message(CommonBotFunctions.escapeHtml("Choice saved for " + guessEntry.label));
-                },
-                error: function (saveError) {
-                    MainController.errorAlert(saveError);
-                },
-            });
-        });
+        var reading = self.getReadings(guessEntry)[decision.readingIndex];
+        var decideInput = { entry: guessEntry.label, reading: reading.label, superClass: decision.superClassId, isLeftToLinks: Boolean(decision.isLeftToLinks) };
+        self.changeGuessByHand("apply_decision", decideInput);
     };
 
     return self;

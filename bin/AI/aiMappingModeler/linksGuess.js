@@ -3,9 +3,10 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { databaseModel } from "../../../model/databases.js";
 import { askKeyModel, keyDetectionModelId, getKeyDetection, writeMappingAiKeys, readDatabaseSchema, addAiKeysToSchema, aiForeignKeyPrefix } from "./keyDetection.js";
-import { getGuessPhaseStep, describeDecidedMasterData, describeGuessedDatabase, layOutReadings, readGuessedEntries, classifyClasses, findByLabel, findParentOption, getPropertySource, getGuessEntries } from "./masterData.js";
+import { getGuessPhaseStep, carryStepGuessedAgain, describeDecidedMasterData, describeGuessedDatabase, layOutReadings, readGuessedEntries, classifyClasses, findByLabel, findParentOption, getPropertySource, getGuessEntries } from "./masterData.js";
 import { getPreparedSource, getNotPreparedError } from "./sourcePreparation.js";
 import { getTermIri } from "../ontologyFromDb/mappings/mappingAnswer.js";
+import { readFittingPropertiesByClassPair } from "./columnRestrictionSuggestion.js";
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const eventsGuessPromptPath = join(currentDirectory, "prompts/events_guess.md");
@@ -28,8 +29,8 @@ function getDecidedClassLabel(guessEntry, guess) {
     return classification.classKind == "newClass" || classification.classKind == "existingClass" ? classification.classLabel : guessEntry.label;
 }
 
-// what each entry of the guesses a step was built from was, by entry label: its class label and its decision; the
-// client compares them with the current entries to tell the step is outdated, a rename or a removal included
+// what each entry of the guesses a step was built from was, by entry label: its class label and its decision; a change
+// carried to the next steps compares them to find the classes renamed or removed
 function getEntriesGuessedFrom(guesses) {
     const entriesGuessedFrom = {};
     guesses.forEach(function (guess) {
@@ -154,7 +155,7 @@ function getForeignKeyGroups(schema, aiKeys) {
 }
 
 function getNewLink(linkId, fromClass, toClass, viaEvent) {
-    const link = { id: linkId, fromClass: fromClass, toClass: toClass, viaEvent: viaEvent, foreignKey: null, rowColumns: null, sameRowTable: null, propertyOptions: [], cardinality: "", inverseCardinality: "", reason: "", decision: null };
+    const link = { id: linkId, fromClass: fromClass, toClass: toClass, viaEvent: viaEvent, foreignKey: null, rowColumns: null, sameRowTable: null, propertyOptions: [], hasNoAllowedProperty: false, cardinality: "", inverseCardinality: "", reason: "", decision: null };
     return link;
 }
 
@@ -320,10 +321,12 @@ function getObjectPropertiesText(modelText) {
 }
 
 // what each class is under, by class label: anchorTexts its decided superclass, or every superclass it may still take,
-// the alternatives the properties are proposed for, written as their options in parentOptionsByClass
+// the alternatives the properties are proposed for, written as their options in parentOptionsByClass; upperClassesByClass
+// the IRI of each, with the superclass label an option assuming it names, null once decided
 function describeClassAnchors(guesses) {
     const anchorTexts = {};
     const parentOptionsByClass = {};
+    const upperClassesByClass = {};
     guesses.forEach(function (guess) {
         getGuessEntries(guess).forEach(function (entry) {
             const classLabel = getDecidedClassLabel(entry, guess);
@@ -341,19 +344,98 @@ function describeClassAnchors(guesses) {
             }
             if (classification.classKind == "existingClass") {
                 anchorTexts[classLabel] = classLabel + " is the upper class " + classification.classLabel;
+                upperClassesByClass[classLabel] = [{ classIri: classification.classId, superClass: null }];
                 return;
             }
             const chosenParent = entry.decision ? findParentOption(classification.parentOptions, entry.decision.superClassId) : null;
             if (chosenParent) {
                 anchorTexts[classLabel] = classLabel + " subClassOf " + chosenParent.parentLabel;
+                upperClassesByClass[classLabel] = [{ classIri: chosenParent.parentId, superClass: null }];
             } else if (classification.parentOptions.length > 0) {
                 const optionTexts = classification.parentOptions.map((parentOption) => parentOption.parentLabel + " " + parentOption.probability + "%");
                 anchorTexts[classLabel] = classLabel + " not decided, subClassOf one of: " + optionTexts.join(", ");
                 parentOptionsByClass[classLabel] = classification.parentOptions;
+                upperClassesByClass[classLabel] = classification.parentOptions.map((parentOption) => ({ classIri: parentOption.parentId, superClass: parentOption.parentLabel }));
             }
         });
     });
-    return { anchorTexts, parentOptionsByClass };
+    return { anchorTexts, parentOptionsByClass, upperClassesByClass };
+}
+
+// the alternatives a link is proposed under, as link_properties.md asks, each with the upper class IRIs of both ends: the
+// end not assumed keeps every superclass it may still take, a link from a class to itself assumes both ends at once
+function getLinkAlternatives(link, upperClassesByClass) {
+    const fromUpperClasses = upperClassesByClass[link.fromClass] || [];
+    const toUpperClasses = upperClassesByClass[link.toClass] || [];
+    const allFromIris = fromUpperClasses.map((upperClass) => upperClass.classIri);
+    const allToIris = toUpperClasses.map((upperClass) => upperClass.classIri);
+    const isLinkToItself = link.fromClass == link.toClass;
+    if (fromUpperClasses.length > 0 && fromUpperClasses[0].superClass) {
+        const fromAlternatives = fromUpperClasses.map((upperClass) => ({
+            assumption: { class: link.fromClass, superClass: upperClass.superClass },
+            fromIris: [upperClass.classIri],
+            toIris: isLinkToItself ? [upperClass.classIri] : allToIris,
+        }));
+        return fromAlternatives;
+    }
+    if (toUpperClasses.length > 0 && toUpperClasses[0].superClass) {
+        const toAlternatives = toUpperClasses.map((upperClass) => ({ assumption: { class: link.toClass, superClass: upperClass.superClass }, fromIris: allFromIris, toIris: [upperClass.classIri] }));
+        return toAlternatives;
+    }
+    const decidedAlternatives = [{ assumption: null, fromIris: allFromIris, toIris: allToIris }];
+    return decidedAlternatives;
+}
+
+function getAssumptionKey(assumption) {
+    const assumptionKey = assumption ? assumption.class + "|" + assumption.superClass : "";
+    return assumptionKey;
+}
+
+// per link, the properties whose domain and range fit its two classes by assumption key, each way: what a property
+// option of the link may be, proposed by the model, the chat or the user
+async function readAllowedLinkProperties(links, upperClassesByClass, preparedSource, source, userContext) {
+    const linkAlternatives = links.map((link) => getLinkAlternatives(link, upperClassesByClass));
+    const classPairs = [];
+    linkAlternatives.forEach(function (alternatives) {
+        alternatives.forEach(function (alternative) {
+            alternative.fromIris.forEach(function (fromIri) {
+                alternative.toIris.forEach(function (toIri) {
+                    classPairs.push({ fromClass: fromIri, toClass: toIri }, { fromClass: toIri, toClass: fromIri });
+                });
+            });
+        });
+    });
+    const fittingPropertiesByClassPair = await readFittingPropertiesByClassPair(source, classPairs, preparedSource, userContext);
+    const allowedByLink = linkAlternatives.map(function (alternatives) {
+        const allowedByAssumption = {};
+        alternatives.forEach(function (alternative) {
+            allowedByAssumption[getAssumptionKey(alternative.assumption)] = getAlternativeProperties(alternative, fittingPropertiesByClassPair);
+        });
+        return allowedByAssumption;
+    });
+    return { linkAlternatives, allowedByLink };
+}
+
+// whether a property may carry a link, its way and under the superclass the option assumes, from allowedByLink of the link
+function isLinkOptionAllowed(allowedByAssumption, propertyIri, isInverse, assumption) {
+    const allowedProperties = allowedByAssumption[getAssumptionKey(assumption)];
+    const allowedWayProperties = allowedProperties ? (isInverse ? allowedProperties.inverseProperties : allowedProperties.forwardProperties) : null;
+    const isAllowed = Boolean(allowedWayProperties) && allowedWayProperties.has(propertyIri);
+    return isAllowed;
+}
+
+// the properties whose domain and range fit an alternative of a link, each way: forward from its FROM class to its TO
+// class, inverse the other way
+function getAlternativeProperties(alternative, fittingPropertiesByClassPair) {
+    const forwardProperties = new Set();
+    const inverseProperties = new Set();
+    alternative.fromIris.forEach(function (fromIri) {
+        alternative.toIris.forEach(function (toIri) {
+            (fittingPropertiesByClassPair[fromIri + " " + toIri] || []).forEach((propertyIri) => forwardProperties.add(propertyIri));
+            (fittingPropertiesByClassPair[toIri + " " + fromIri] || []).forEach((propertyIri) => inverseProperties.add(propertyIri));
+        });
+    });
+    return { forwardProperties, inverseProperties };
 }
 
 // the class and the superclass an option assumes, as the guess writes them; null when the class is decided or the
@@ -366,11 +448,12 @@ function readAssumption(answeredAssumption, parentOptionsByClass) {
     return assumption;
 }
 
-// the options of the links: each link keeps the options the model named, valid in one of the upper ontologies and, for
-// an option assuming a superclass, valid among the options of its class, in the order the model wrote them, at most
-// maxPropertyOptions per superclass assumed; the cardinality is read from the answer too
-function readPropertyOptions(links, answeredLinks, preparedSource, parentOptionsByClass) {
+// the options of the links: each link keeps the options the model named among the properties allowed for it, under the
+// superclass the option assumes, in the order the model wrote them, at most maxPropertyOptions per superclass assumed;
+// the cardinality is read from the answer too
+function readPropertyOptions(links, answeredLinks, preparedSource, parentOptionsByClass, allowedByLink) {
     const answeredByLinkIndex = {};
+    let droppedOptionCount = 0;
     (Array.isArray(answeredLinks) ? answeredLinks : []).forEach(function (answeredLink) {
         if (answeredLink && answeredLink.link > 0) {
             answeredByLinkIndex[answeredLink.link] = answeredLink;
@@ -391,7 +474,11 @@ function readPropertyOptions(links, answeredLinks, preparedSource, parentOptions
             if (option.assumes && !assumption) {
                 return;
             }
-            const assumptionKey = assumption ? assumption.class + "|" + assumption.superClass : "";
+            const assumptionKey = getAssumptionKey(assumption);
+            if (!isLinkOptionAllowed(allowedByLink[linkIndex], propertyIri, Boolean(option.inverse), assumption)) {
+                droppedOptionCount++;
+                return;
+            }
             optionCountByAssumption[assumptionKey] = (optionCountByAssumption[assumptionKey] || 0) + 1;
             if (optionCountByAssumption[assumptionKey] > maxPropertyOptions) {
                 return;
@@ -415,6 +502,7 @@ function readPropertyOptions(links, answeredLinks, preparedSource, parentOptions
         link.cardinality = cardinalityWords.includes(answeredCardinality) ? answeredCardinality : "";
         link.inverseCardinality = cardinalityWords.includes(answeredInverseCardinality) ? answeredInverseCardinality : "";
     });
+    return droppedOptionCount;
 }
 
 // the words link_properties.md asks for a cardinality
@@ -427,16 +515,38 @@ function readText(value) {
 
 // the property options of every link, by the object properties of the upper ontologies, for each alternative of an
 // undecided class
-async function guessLinkProperties(links, classAnchors, domain, preparedSource, tellStep) {
+async function guessLinkProperties(links, classAnchors, domain, preparedSource, source, userContext, tellStep) {
     if (links.length == 0) {
         return null;
     }
+    // a property is proposed only when its domain and range fit both classes: the model chooses among them
+    tellStep("the properties whose domain and range fit each link are read in the upper ontologies");
+    const { linkAlternatives, allowedByLink } = await readAllowedLinkProperties(links, classAnchors.upperClassesByClass, preparedSource, source, userContext);
+    const getPropertyText = function (propertyIri) {
+        const propertySource = getPropertySource(preparedSource, propertyIri);
+        const property = propertySource ? preparedSource.ontologyModels[propertySource].properties[propertyIri] : null;
+        const propertyText = (property?.label || propertyIri) + " <" + propertyIri + ">";
+        return propertyText;
+    };
     const linkLines = links.map(function (link, linkIndex) {
         const linkLine = "Link " + (linkIndex + 1) + ": " + link.fromClass + " -> " + link.toClass + (link.viaEvent ? ", participation in " + link.viaEvent : "") + ", " + describeLinkEvidence(link);
         const anchorLines = [classAnchors.anchorTexts[link.fromClass], classAnchors.anchorTexts[link.toClass]].filter(Boolean);
+        linkAlternatives[linkIndex].forEach(function (alternative) {
+            const assumptionKey = getAssumptionKey(alternative.assumption);
+            const allowedProperties = allowedByLink[linkIndex][assumptionKey];
+            const forwardTexts = Array.from(allowedProperties.forwardProperties).map(getPropertyText);
+            const inverseTexts = Array.from(allowedProperties.inverseProperties).map(getPropertyText);
+            const assumptionText = alternative.assumption ? "if " + alternative.assumption.class + " is a " + alternative.assumption.superClass + ", " : "";
+            anchorLines.push(assumptionText + "allowed: " + (forwardTexts.join(", ") || "none") + "; allowed with inverse true: " + (inverseTexts.join(", ") || "none"));
+        });
         const indentedAnchorLines = anchorLines.map((anchorLine) => "\n  " + anchorLine);
         const anchoredLinkLine = linkLine + indentedAnchorLines.join("");
         return anchoredLinkLine;
+    });
+    links.forEach(function (link, linkIndex) {
+        const allowedAlternatives = Object.values(allowedByLink[linkIndex]);
+        const hasBothUpperClasses = Boolean(classAnchors.upperClassesByClass[link.fromClass]) && Boolean(classAnchors.upperClassesByClass[link.toClass]);
+        link.hasNoAllowedProperty = hasBothUpperClasses && allowedAlternatives.every((allowedProperties) => allowedProperties.forwardProperties.size == 0 && allowedProperties.inverseProperties.size == 0);
     });
     const propertiesText = getObjectPropertiesText(preparedSource.modelText);
     const linkPropertiesPrompt = readFileSync(linkPropertiesPromptPath, "utf8") + "\n\n# Upper ontologies, most abstract first\n\n" + propertiesText + "\n\n# Domain\n\n" + domain + "\n\n# Links\n\n" + linkLines.join("\n\n") + "\n";
@@ -445,7 +555,8 @@ async function guessLinkProperties(links, classAnchors, domain, preparedSource, 
     if (answer.error) {
         return { error: answer.error };
     }
-    readPropertyOptions(links, answer.answer?.links, preparedSource, classAnchors.parentOptionsByClass);
+    const droppedOptionCount = readPropertyOptions(links, answer.answer?.links, preparedSource, classAnchors.parentOptionsByClass, allowedByLink);
+    tellStep(droppedOptionCount + " options outside the properties allowed by domain and range dropped");
     return null;
 }
 
@@ -514,7 +625,7 @@ async function guessEvents(source, databaseId, userInfo, tellStep) {
         guessedAt: new Date().toISOString(),
     };
     if (eventClasses.length > 0) {
-        await layOutReadings(eventClasses, domain, getGuessPhaseStep(tellStep, 3));
+        await layOutReadings(eventClasses, domain, connection, databaseModel.getClientDriver(database.driver), getGuessPhaseStep(tellStep, 3));
         const decidedClasses = describedMasterData.decidedClasses.concat(describedImportantClasses.decidedClasses);
         const classified = await classifyClasses(source, domain, eventClasses, decidedClasses, preparedSource, getGuessPhaseStep(tellStep, 4));
         if (classified.error) {
@@ -524,14 +635,16 @@ async function guessEvents(source, databaseId, userInfo, tellStep) {
     }
     // read again: decisions taken while the model worked are kept
     const savedAiKeys = (await getKeyDetection(source, databaseId)).aiKeys;
+    const guessBefore = savedAiKeys.eventsGuess;
     savedAiKeys.eventsGuess = eventsGuess;
+    const nextGuesses = guessBefore ? carryStepGuessedAgain(savedAiKeys, "eventsGuess", guessBefore, schema) : {};
     await writeMappingAiKeys(source, databaseId, savedAiKeys);
-    return { eventsGuess };
+    return { eventsGuess, nextGuesses };
 }
 
 // { linksGuess } or { error }, step 4 of the workflow: the links between the classes of steps 1 to 3 along the keys of
 // the database, each with the properties of the upper ontologies, per alternative of a class still undecided
-async function guessLinks(source, databaseId, userInfo, tellStep) {
+async function guessLinks(source, databaseId, userInfo, userSources, tellStep) {
     const aiKeys = (await getKeyDetection(source, databaseId)).aiKeys;
     const classGuesses = getClassGuesses(aiKeys);
     if (classGuesses.error) {
@@ -548,7 +661,8 @@ async function guessLinks(source, databaseId, userInfo, tellStep) {
     const { schema } = await readDatabaseSchema(databaseId, userInfo);
     const classGuessList = [classGuesses.masterDataGuess, classGuesses.importantClassesGuess, eventsGuess];
     const links = computeLinks(schema, aiKeys, eventsGuess);
-    const propertiesError = await guessLinkProperties(links, describeClassAnchors(classGuessList), classGuesses.masterDataGuess.domain, preparedSource, tellStep);
+    const userContext = { user: userInfo, userSources: userSources };
+    const propertiesError = await guessLinkProperties(links, describeClassAnchors(classGuessList), classGuesses.masterDataGuess.domain, preparedSource, source, userContext, tellStep);
     if (propertiesError) {
         return propertiesError;
     }
@@ -560,4 +674,4 @@ async function guessLinks(source, databaseId, userInfo, tellStep) {
     return { linksGuess };
 }
 
-export { guessEvents, guessLinks, getDecidedClassLabel, getEntriesGuessedFrom, getClassGuesses, describeClassAnchors };
+export { guessEvents, guessLinks, getDecidedClassLabel, getEntriesGuessedFrom, getClassGuesses, describeClassAnchors, computeLinks, readAllowedLinkProperties, isLinkOptionAllowed };

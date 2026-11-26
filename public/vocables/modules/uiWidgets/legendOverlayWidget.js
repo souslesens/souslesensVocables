@@ -764,13 +764,24 @@ var LegendOverlayWidget = (function () {
             html += "<span style='width:14px; height:3px; background:" + self.escapeHtml(safeColor) + "; display:inline-block; border-radius:50%;'></span>";
             return html;
         }
-        if (type === "dashed") {
-            html += "<span style='width:14px; height:0; display:inline-block; border-top:3px dashed " + self.escapeHtml(safeColor) + ";'></span>";
+        if (type === "dashed" || type === "dotted") {
+            html += "<span style='width:14px; height:0; display:inline-block; border-top:3px " + type + " " + self.escapeHtml(safeColor) + ";'></span>";
+            return html;
+        }
+        // a node frame: thick, or dashed
+        if (type === "frame" || type === "dashedFrame") {
+            var frameBorder = type === "frame" ? "3px solid #333" : "1px dashed #333";
+            html += "<span style='width:16px; height:10px; background:" + self.escapeHtml(safeColor) + "; border:" + frameBorder + "; display:inline-block; border-radius:2px;'></span>";
             return html;
         }
 
         if (type === "rect") {
             html += "<span style='width:18px; height:10px; background:" + self.escapeHtml(safeColor) + "; display:inline-block; border-radius:2px;'></span>";
+            return html;
+        }
+
+        if (type === "ellipse") {
+            html += "<span style='width:16px; height:10px; background:" + self.escapeHtml(safeColor) + "; display:inline-block; border-radius:50%; box-shadow:1px 2px 3px rgba(0,0,0,0.35);'></span>";
             return html;
         }
 

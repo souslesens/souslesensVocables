@@ -2,11 +2,13 @@ import { readFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { databaseModel } from "../../../model/databases.js";
-import { askKeyModel, describeKeyedDatabase, keyDetectionModelId, getKeyDetection, writeMappingAiKeys, readDatabaseSchema, addAiKeysToSchema } from "./keyDetection.js";
+import { askKeyModel, readJsonAnswer, describeKeyedDatabase, keyDetectionModelId, getKeyDetection, writeMappingAiKeys, readDatabaseSchema, addAiKeysToSchema } from "./keyDetection.js";
 import { getTermIri } from "../ontologyFromDb/mappings/mappingAnswer.js";
 import { readClassAnswer } from "./columnClassSuggestion.js";
+import { runAgentLoop } from "../ontologyFromDb/revision/revisionAgent.js";
 import { getPreparedSource, getNotPreparedError } from "./sourcePreparation.js";
 import { changeGuessMapping, mappingChangeNames } from "./mappingGuess.js";
+import { getDecidedClassLabel, getEntriesGuessedFrom, describeClassAnchors, readAllowedLinkProperties, isLinkOptionAllowed, computeLinks } from "./linksGuess.js";
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const masterDataGuessPromptPath = join(currentDirectory, "prompts/master_data_guess.md");
@@ -26,6 +28,23 @@ const statementSeparatorRegex = /;/;
 const trailingSemicolonRegex = /;\s*$/;
 const maxReadings = 3;
 const evidenceRowLimit = 20;
+// the rows a reading shows as its example: a few, read by a person at a glance
+const exampleRowLimit = 3;
+// the queries the model runs to test the readings of one class, more cost time, fewer leave a reading untested
+const maxReadingQueries = 6;
+
+const runSqlTool = {
+    name: "run_sql",
+    description: "Run one read-only SELECT on the database the user opened. At most 20 rows come back, the user sees them as a table under the answer.",
+    input_schema: {
+        type: "object",
+        properties: {
+            purpose: { type: "string", description: "What the rows show, in one short sentence, written above the table." },
+            sql: { type: "string", description: "One SELECT or WITH statement, table names without schema prefix." },
+        },
+        required: ["purpose", "sql"],
+    },
+};
 const evidenceQueryTimeoutMs = 10000;
 const evidenceValueMaxLength = 60;
 // the knex client of the databases the evidence queries run on, as databaseModel.getClientDriver names it
@@ -106,6 +125,7 @@ function readReadings(answeredEntry, masterDataEntry) {
             label: readingLabel,
             rowIs: readText(answeredReading.rowIs),
             inData: readText(answeredReading.inData),
+            exampleQueryNumber: Number(answeredReading.exampleQuery) || null,
             askBusiness: readText(answeredReading.askBusiness),
             definition: readText(answeredReading.definition),
             classKey: masterDataEntry.label,
@@ -114,25 +134,86 @@ function readReadings(answeredEntry, masterDataEntry) {
     return readings;
 }
 
-// the readings of what a row denotes, laid out by the model from the data the evidence queries read; an entry without
-// data read, or that the model leaves without a reading, keeps one reading
-async function layOutReadings(guessEntries, domain, tellStep) {
+// the readings of what a row denotes, each class tested by the model with queries of its own before it answers, all the
+// classes at once; an entry without data read, or that the model leaves without a reading, keeps one reading
+async function layOutReadings(guessEntries, domain, connection, clientDriver, tellStep) {
     const evidencedEntries = guessEntries.filter((guessEntry) => guessEntry.evidence && !guessEntry.evidence.error);
-    let answeredEntries = [];
-    if (evidencedEntries.length > 0) {
-        const entryTexts = evidencedEntries.map((guessEntry) => "## " + guessEntry.label + "\n" + guessEntry.definition + "\n" + getEvidenceText(guessEntry.evidence));
-        const readingsPrompt = readFileSync(masterDataReadingsPromptPath, "utf8") + "\n\n# Domain\n\n" + domain + "\n\n# Classes\n\n" + entryTexts.join("\n\n") + "\n";
-        tellStep("the model reads what a row denotes for " + evidencedEntries.length + " classes, about a minute");
-        const readingsAnswer = await askKeyModel(readingsPrompt);
-        if (readingsAnswer.error) {
-            console.warn("[aiMappingModeler/masterData] readings not laid out by the AI: " + readingsAnswer.error);
-        }
-        answeredEntries = Array.isArray(readingsAnswer.answer?.classes) ? readingsAnswer.answer.classes : [];
-    }
-    guessEntries.forEach(function (masterDataEntry) {
-        const answeredEntry = masterDataEntry.evidence ? findByLabel(answeredEntries, masterDataEntry.label) : null;
-        masterDataEntry.readings = readReadings(answeredEntry, masterDataEntry) || [getDefaultReading(masterDataEntry)];
+    tellStep("the model tests what a row denotes for " + evidencedEntries.length + " classes with queries of its own, a few minutes");
+    const answeredEntries = await Promise.all(evidencedEntries.map((guessEntry) => testEntryReadings(guessEntry, domain, connection, clientDriver)));
+    evidencedEntries.forEach(function (guessEntry, entryIndex) {
+        const testedEntry = answeredEntries[entryIndex];
+        guessEntry.readings = readReadings(testedEntry.answer, guessEntry);
+        // the example of a reading: rows of a query the model ran and saw, never a query written blind
+        (guessEntry.readings || []).forEach(function (reading) {
+            const exampleQuery = testedEntry.queries[reading.exampleQueryNumber - 1];
+            if (exampleQuery && exampleQuery.rows.length > 0) {
+                reading.example = { purpose: exampleQuery.purpose, columns: exampleQuery.columns, rows: exampleQuery.rows.slice(0, exampleRowLimit) };
+            }
+            delete reading.exampleQueryNumber;
+        });
     });
+    guessEntries.forEach(function (guessEntry) {
+        if (!guessEntry.readings) {
+            guessEntry.readings = [getDefaultReading(guessEntry)];
+        }
+    });
+}
+
+// { answer, queries } of one class: the model runs at most maxReadingQueries queries, numbered from 1, then answers its
+// readings; an answer the model could not give is null
+async function testEntryReadings(guessEntry, domain, connection, clientDriver) {
+    const readingLabels = (guessEntry.readings || []).map((reading) => reading.label);
+    // an entry read again keeps the labels of its readings, which the decisions of the user name
+    const keptReadingsText = readingLabels.some(Boolean) ? "\n\nReadings to keep: " + readingLabels.join("; ") : "";
+    const system =
+        readFileSync(masterDataReadingsPromptPath, "utf8").split("{maxReadingQueries}").join(String(maxReadingQueries)) +
+        "\n\n# Domain\n\n" +
+        domain +
+        "\n\n# Class\n\n## " +
+        guessEntry.label +
+        "\n" +
+        guessEntry.definition +
+        "\nTables: " +
+        (guessEntry.tables || []).join(", ") +
+        "\n" +
+        getEvidenceText(guessEntry.evidence) +
+        keptReadingsText +
+        "\n";
+    const queries = [];
+    const runSql = async function (toolInput) {
+        if (queries.length >= maxReadingQueries) {
+            return { error: "no query left: answer now" };
+        }
+        const queryResult = await runEvidenceQuery(connection, clientDriver, String(toolInput.sql || ""));
+        if (queryResult.error) {
+            return queryResult;
+        }
+        queries.push({ purpose: readText(toolInput.purpose), columns: queryResult.columns, rows: queryResult.rows });
+        const numberedResult = { queryNumber: queries.length, columns: queryResult.columns, rows: queryResult.rows };
+        return numberedResult;
+    };
+    let answerText = null;
+    try {
+        answerText = await runAgentLoop({
+            system: system,
+            conversation: [{ role: "user", content: "Test the readings of " + guessEntry.label + " in the data, then answer." }],
+            tools: [runSqlTool],
+            toolFunctionsByName: { run_sql: runSql },
+            getToolOutcome: () => null,
+            usage: { input_tokens: 0, output_tokens: 0 },
+            sendProgress: () => null,
+            isRequestClosed: () => false,
+            model: keyDetectionModelId,
+        });
+    } catch (loopError) {
+        console.warn("[aiMappingModeler/masterData] readings of " + guessEntry.label + " not tested by the AI: " + loopError.message);
+    }
+    const readAnswer = answerText ? readJsonAnswer(answerText) : { error: "no answer" };
+    if (readAnswer.error) {
+        console.warn("[aiMappingModeler/masterData] readings of " + guessEntry.label + " not read: " + readAnswer.error);
+    }
+    const testedEntry = { answer: readAnswer.answer || null, queries: queries };
+    return testedEntry;
 }
 
 // the upper ontology defining a class, the first checked ontology holding it; null for a class none of them holds
@@ -259,8 +340,8 @@ async function classifyClasses(source, domain, guessEntries, decidedClasses, pre
     const decidedClassesText = decidedClassLines.length > 0 ? "\n\n# Classes already decided\n\n" + decidedClassLines.join("\n") : "";
     const classificationPrompt =
         classificationPromptText.slice(0, answerSectionStart) +
-        "\n# Upper ontologies, most abstract first\n" +
-        preparedSource.classesText +
+        "\n# Upper ontologies, most specific first\n" +
+        preparedSource.specificFirstClassesText +
         "\n\n# Domain\n\n" +
         domain +
         "\n\n# Classes\n\n" +
@@ -369,7 +450,7 @@ async function guessMasterData(source, database, connection, schema, columnsByTa
     if (masterData.length == 0) {
         return masterDataGuess;
     }
-    await layOutReadings(masterData, masterDataGuess.domain, tellGuessStep);
+    await layOutReadings(masterData, masterDataGuess.domain, connection, databaseModel.getClientDriver(database.driver), tellGuessStep);
     const classified = await classifyClasses(source, masterDataGuess.domain, masterData, [], preparedSource, tellGuessStep);
     if (classified.error) {
         console.warn("[aiMappingModeler/masterData] " + database.database + ": master data not classified by the AI: " + classified.error);
@@ -509,7 +590,7 @@ async function guessImportantClasses(source, databaseId, userInfo, tellStep) {
         guessedAt: new Date().toISOString(),
     };
     if (importantClasses.length > 0) {
-        await layOutReadings(importantClasses, masterDataGuess.domain, getGuessPhaseStep(tellStep, 3));
+        await layOutReadings(importantClasses, masterDataGuess.domain, connection, databaseModel.getClientDriver(database.driver), getGuessPhaseStep(tellStep, 3));
         const classified = await classifyClasses(source, masterDataGuess.domain, importantClasses, decidedMasterData.decidedClasses, preparedSource, getGuessPhaseStep(tellStep, 4));
         if (classified.error) {
             return { error: classified.error };
@@ -518,9 +599,11 @@ async function guessImportantClasses(source, databaseId, userInfo, tellStep) {
     }
     // read again: decisions taken while the model worked are kept
     const savedAiKeys = (await getKeyDetection(source, databaseId)).aiKeys;
+    const guessBefore = savedAiKeys.importantClassesGuess;
     savedAiKeys.importantClassesGuess = importantClassesGuess;
+    const nextGuesses = guessBefore ? carryStepGuessedAgain(savedAiKeys, "importantClassesGuess", guessBefore, schema) : {};
     await writeMappingAiKeys(source, databaseId, savedAiKeys);
-    return { importantClassesGuess };
+    return { importantClassesGuess, nextGuesses };
 }
 
 // { guessEntry, readingIndex, classification } of the reading the chat names, or { error } naming what the guess holds;
@@ -623,7 +706,10 @@ function changeGuessEntry(preparedSource, guess, source, changeName, changeInput
     const { guessEntry, readingIndex, classification } = found;
     const parentOptions = classification && classification.classKind == "newClass" ? classification.parentOptions : [];
     let summary = null;
-    if (changeName == "apply_decision") {
+    if (changeName == "apply_decision" && changeInput.isLeftToLinks) {
+        guessEntry.decision = { readingIndex: readingIndex, superClassId: null, isLeftToLinks: true };
+        summary = guessEntry.label + " left open until the relations";
+    } else if (changeName == "apply_decision") {
         const chosenParent = changeInput.superClass ? findParentOption(parentOptions, changeInput.superClass) : null;
         if (classification.classKind == "newClass" && !chosenParent) {
             const parentLabels = parentOptions.map((parentOption) => parentOption.parentLabel);
@@ -827,7 +913,373 @@ function changeGuessEntry(preparedSource, guess, source, changeName, changeInput
 
 // the links changes of the chat on the guess of step 4, and the names of their inputs; an error names the link to act on
 const guessKeyByStep = { masterData: "masterDataGuess", importantClasses: "importantClassesGuess", events: "eventsGuess", links: "linksGuess", mapping: "mappingGuess" };
-const linkChangeNames = ["apply_link_decision", "undo_link_decision", "add_link_property_option", "remove_link_property_option", "remove_link"];
+const linkChangeNames = ["apply_link_decision", "undo_link_decision", "add_link_property_option", "remove_link_property_option", "remove_link", "add_link"];
+// the changes reading the tables of the database
+const databaseChangeNames = ["add_entry", "set_entry_tables", "add_link"];
+// the guesses of the steps in their order: a change of one is carried to the next ones; the mapping of step 5 names the
+// classes in the mappings of other classes too, it is guessed again
+const stepGuessKeys = ["masterDataGuess", "importantClassesGuess", "eventsGuess", "linksGuess"];
+// a double quote inside a quoted Postgres name is written twice
+const doubleQuoteRegex = /"/g;
+// the distinct key values a link added by the user is checked on, enough to tell a key from a coincidence within the
+// timeout of an evidence query
+const keyCheckSampleSize = 1000;
+
+// { tables } as the database names them, or { error }: a name is taken as written first, then whatever its case when one
+// table alone has it, as EQUI2 and equi2 are two tables
+function readTableNames(tableNames, columnsByTable) {
+    const databaseTables = Object.keys(columnsByTable);
+    const tables = [];
+    for (const tableName of Array.isArray(tableNames) ? tableNames : []) {
+        const writtenTable = readText(tableName);
+        const lowerCaseTable = writtenTable.toLowerCase();
+        const sameCaseTables = databaseTables.filter((databaseTable) => databaseTable.toLowerCase() == lowerCaseTable);
+        const databaseTable = databaseTables.includes(writtenTable) ? writtenTable : sameCaseTables.length == 1 ? sameCaseTables[0] : null;
+        if (!databaseTable) {
+            return { error: "no table " + JSON.stringify(writtenTable) + " in the database" + (sameCaseTables.length > 1 ? ", write one of " + sameCaseTables.join(", ") : "") };
+        }
+        if (!tables.includes(databaseTable)) {
+            tables.push(databaseTable);
+        }
+    }
+    return { tables };
+}
+
+// { columns } of a table as the database names them, or { error }
+function readColumnNames(table, columnNames, columnsByTable) {
+    const tableColumns = (columnsByTable[table] || []).map((tableColumn) => tableColumn.column_name);
+    const columns = [];
+    for (const columnName of Array.isArray(columnNames) ? columnNames : []) {
+        const writtenColumn = readText(columnName);
+        const lowerCaseColumn = writtenColumn.toLowerCase();
+        const databaseColumn = tableColumns.includes(writtenColumn) ? writtenColumn : tableColumns.find((tableColumn) => tableColumn.toLowerCase() == lowerCaseColumn);
+        if (!databaseColumn) {
+            return { error: "no column " + JSON.stringify(writtenColumn) + " in " + table };
+        }
+        columns.push(databaseColumn);
+    }
+    if (columns.length == 0) {
+        return { error: "name the columns of " + table };
+    }
+    return { columns };
+}
+
+// the tables holding the rows of an entry, on the entry; a class of steps 1 and 2 has them in the classTables of step 3 too,
+// which the links are computed from
+function setEntryTables(aiKeys, guessKey, guess, guessEntry, tables) {
+    guessEntry.tables = tables;
+    if (guessKey != "eventsGuess" && aiKeys.eventsGuess) {
+        aiKeys.eventsGuess.classTables[getDecidedClassLabel(guessEntry, guess)] = tables;
+    }
+}
+
+// { summary, entryLabel } of a class or an association the user adds, with its tables and its superclass options, or { error }
+function addEntry(preparedSource, aiKeys, guessKey, guess, source, changeInput, columnsByTable) {
+    const label = readText(changeInput.newLabel);
+    if (!label) {
+        return { error: "a new class needs a label" };
+    }
+    const lowerCaseLabel = label.toLowerCase();
+    const isClassLabelTaken = getGuessEntries(guess).some((guessEntry) => getDecidedClassLabel(guessEntry, guess).toLowerCase() == lowerCaseLabel);
+    if (findByLabel(getGuessEntries(guess), label) || isClassLabelTaken) {
+        return { error: label + " is already in the guess" };
+    }
+    const tableNames = readTableNames(changeInput.tables, columnsByTable);
+    if (tableNames.error) {
+        return { error: tableNames.error };
+    }
+    const parentOptions = [];
+    for (const optionInput of changeInput.superClassOptions || []) {
+        const optionParent = getParentOption(preparedSource, guess, source, optionInput);
+        if (optionParent.error) {
+            return { error: optionParent.error };
+        }
+        parentOptions.push(optionParent.parentOption);
+    }
+    const definition = readText(changeInput.definition);
+    const addedEntry = { label: label, definition: definition, reason: readText(changeInput.rationale), readings: [getDefaultReading({ label: label, definition: definition })] };
+    getGuessEntries(guess).push(addedEntry);
+    guess.classificationByClass[label] = { classKind: "newClass", classLabel: label, parentOptions: parentOptions };
+    if (tableNames.tables.length > 0) {
+        setEntryTables(aiKeys, guessKey, guess, addedEntry, tableNames.tables);
+    }
+    const tablesText = tableNames.tables.length > 0 ? ", on " + tableNames.tables.join(", ") : "";
+    const summary = label + " added" + tablesText;
+    return { summary, entryLabel: label };
+}
+
+// { summary, entryLabel } of the tables of an entry the user changes, or { error }
+function changeEntryTables(aiKeys, guessKey, guess, changeInput, columnsByTable) {
+    const guessEntry = findByLabel(getGuessEntries(guess), changeInput.entry);
+    if (!guessEntry) {
+        return { error: "no entry " + JSON.stringify(changeInput.entry) + " in the guess" };
+    }
+    const tableNames = readTableNames(changeInput.tables, columnsByTable);
+    if (tableNames.error) {
+        return { error: tableNames.error };
+    }
+    // the first table is the main one, whose key names a row of the class
+    setEntryTables(aiKeys, guessKey, guess, guessEntry, tableNames.tables);
+    const summary = "tables of " + guessEntry.label + ": " + (tableNames.tables.join(", ") || "none");
+    return { summary, entryLabel: guessEntry.label };
+}
+
+// the class label of each class of steps 1 to 3, by lower case label, as the links name them
+function getLinkClassLabels(aiKeys) {
+    const classLabelByLowerCase = {};
+    ["masterDataGuess", "importantClassesGuess", "eventsGuess"].forEach(function (guessKey) {
+        const guess = aiKeys[guessKey];
+        if (!guess) {
+            return;
+        }
+        getGuessEntries(guess).forEach(function (guessEntry) {
+            const classLabel = getDecidedClassLabel(guessEntry, guess);
+            classLabelByLowerCase[classLabel.toLowerCase()] = classLabel;
+        });
+    });
+    return classLabelByLowerCase;
+}
+
+// { matchedText } of the distinct values of a foreign key found in the referenced table, on a sample, or { error } when
+// none is; a query the database stops leaves the key unchecked rather than refused
+async function checkForeignKeyInData(databaseSchema, foreignKey) {
+    const quoteName = (name) => '"' + name.replace(doubleQuoteRegex, '""') + '"';
+    // one text value per key, a composite key joined by a separator no value is compared with
+    const getKeyValueSql = (columns) => columns.map((column) => quoteName(column) + "::text").join(" || '|' || ");
+    const sql =
+        "SELECT COUNT(*) AS sampled_values, COUNT(referenced.key_value) AS found_values FROM (SELECT DISTINCT " +
+        getKeyValueSql(foreignKey.columns) +
+        " AS key_value FROM " +
+        quoteName(foreignKey.table) +
+        " WHERE " +
+        quoteName(foreignKey.columns[0]) +
+        " IS NOT NULL ORDER BY key_value LIMIT " +
+        keyCheckSampleSize +
+        ") AS keyed LEFT JOIN (SELECT DISTINCT " +
+        getKeyValueSql(foreignKey.referencedColumns) +
+        " AS key_value FROM " +
+        quoteName(foreignKey.referencedTable) +
+        ") AS referenced ON keyed.key_value = referenced.key_value";
+    const clientDriver = databaseModel.getClientDriver(databaseSchema.database.driver);
+    const evidence = await runEvidenceQuery(databaseSchema.connection, clientDriver, sql);
+    if (evidence.error) {
+        return { matchedText: "not checked in the data: " + evidence.error };
+    }
+    const [sampledValues, foundValues] = evidence.rows[0];
+    if (Number(foundValues) == 0) {
+        return { error: "no value of " + foreignKey.table + "." + foreignKey.columns.join(", ") + " is found in " + foreignKey.referencedTable + ", the key joins nothing" };
+    }
+    const matchedText = foundValues + " of " + sampledValues + " distinct values found in " + foreignKey.referencedTable;
+    return { matchedText };
+}
+
+// what a link is whatever its id: its two classes and the key, row or columns carrying it; the ids of the links of the AI
+// name their classes only when a key is shared
+function getLinkIdentityKey(link) {
+    const foreignKey = link.foreignKey;
+    const keyText = foreignKey ? foreignKey.table + "." + foreignKey.columns.join(",") + "->" + foreignKey.referencedTable + "." + foreignKey.referencedColumns.join(",") : "";
+    const carrierText = link.sameRowTable || keyText || (link.rowColumns || []).join(",");
+    const linkIdentityKey = link.fromClass + "|" + link.toClass + "|" + carrierText;
+    return linkIdentityKey;
+}
+
+// { summary, entryLabel } of a link the user adds between two classes of steps 1 to 3, or { error }: on a foreign key whose
+// values are found in the referenced table, or on a row of a table holding both classes; its property is added after
+async function addLink(aiKeys, guess, changeInput, databaseSchema) {
+    const classLabelByLowerCase = getLinkClassLabels(aiKeys);
+    const fromClass = classLabelByLowerCase[readText(changeInput.fromClass).toLowerCase()];
+    const toClass = classLabelByLowerCase[readText(changeInput.toClass).toLowerCase()];
+    if (!fromClass || !toClass) {
+        return { error: "name two classes of steps 1 to 3: " + Object.values(classLabelByLowerCase).join(", ") };
+    }
+    const columnsByTable = databaseSchema.columnsByTable;
+    const link = {
+        id: null,
+        fromClass: fromClass,
+        toClass: toClass,
+        viaEvent: null,
+        foreignKey: null,
+        rowColumns: null,
+        sameRowTable: null,
+        propertyOptions: [],
+        cardinality: "",
+        inverseCardinality: "",
+        reason: readText(changeInput.rationale),
+        decision: null,
+        isAddedByUser: true,
+    };
+    let evidenceText = null;
+    if (readText(changeInput.sameRowTable)) {
+        const rowTable = readTableNames([changeInput.sameRowTable], columnsByTable);
+        if (rowTable.error) {
+            return { error: rowTable.error };
+        }
+        link.sameRowTable = rowTable.tables[0];
+        link.id = link.sameRowTable + " row " + fromClass + "->" + toClass;
+        evidenceText = "both in one row of " + link.sameRowTable;
+    } else {
+        const keyTables = readTableNames([changeInput.table, changeInput.referencedTable], columnsByTable);
+        if (keyTables.error) {
+            return { error: keyTables.error };
+        }
+        const [table, referencedTable] = keyTables.tables.length == 2 ? keyTables.tables : [keyTables.tables[0], keyTables.tables[0]];
+        const keyColumns = readColumnNames(table, changeInput.columns, columnsByTable);
+        const referencedColumns = readColumnNames(referencedTable, changeInput.referencedColumns, columnsByTable);
+        const columnsError = keyColumns.error || referencedColumns.error;
+        if (columnsError) {
+            return { error: columnsError };
+        }
+        if (keyColumns.columns.length != referencedColumns.columns.length) {
+            return { error: "the key names as many columns as the referenced columns" };
+        }
+        link.foreignKey = { table: table, columns: keyColumns.columns, referencedTable: referencedTable, referencedColumns: referencedColumns.columns, foundInData: true };
+        const checked = await checkForeignKeyInData(databaseSchema, link.foreignKey);
+        if (checked.error) {
+            return { error: checked.error };
+        }
+        link.id = table + ".(" + keyColumns.columns.join(", ") + ")->" + referencedTable + ".(" + referencedColumns.columns.join(", ") + ") " + fromClass + "->" + toClass;
+        evidenceText = table + "." + keyColumns.columns.join(", ") + " matches " + referencedTable + "." + referencedColumns.columns.join(", ") + ", " + checked.matchedText;
+    }
+    const sameLink = guess.links.find((guessLink) => getLinkIdentityKey(guessLink) == getLinkIdentityKey(link));
+    if (sameLink) {
+        return { error: "the relation " + sameLink.id + " already joins these classes on this key" };
+    }
+    guess.links.push(link);
+    const summary = "relation " + fromClass + " -> " + toClass + " added: " + evidenceText;
+    return { summary, entryLabel: link.id };
+}
+
+// the links of step 4 follow a change of the tables: a link computed again keeps its options and its decision, a link
+// gone with its table leaves, a link the user added stays, one the user removed stays out; { linksText } says what changed
+function recomputeLinks(aiKeys, schema) {
+    const linksGuess = aiKeys.linksGuess;
+    const linkByIdentity = {};
+    linksGuess.links.forEach((link) => (linkByIdentity[getLinkIdentityKey(link)] = link));
+    const removedIdentities = (linksGuess.removedLinks || []).map(getLinkIdentityKey);
+    const allComputedLinks = computeLinks(schema, aiKeys, aiKeys.eventsGuess);
+    const computedLinks = allComputedLinks.filter((computedLink) => !removedIdentities.includes(getLinkIdentityKey(computedLink)));
+    const computedIdentities = new Set(computedLinks.map(getLinkIdentityKey));
+    const keptLinks = computedLinks.map((computedLink) => linkByIdentity[getLinkIdentityKey(computedLink)] || computedLink);
+    const userLinks = linksGuess.links.filter((link) => link.isAddedByUser && !computedIdentities.has(getLinkIdentityKey(link)));
+    const addedCount = computedLinks.filter((computedLink) => !linkByIdentity[getLinkIdentityKey(computedLink)]).length;
+    const removedCount = linksGuess.links.filter((link) => !link.isAddedByUser && !computedIdentities.has(getLinkIdentityKey(link))).length;
+    linksGuess.links = keptLinks.concat(userLinks);
+    const linksText = "relations of step 4: " + addedCount + " added, without property yet, " + removedCount + " removed";
+    return { linksText };
+}
+
+// the next steps keep up with a change of the entries of a step: a class renamed is renamed in the tables of step 3 and the
+// links of step 4, a class removed leaves them, and what the next steps were guessed from is updated for the entries
+// changed, so that none of them is to guess again. entriesBefore is getEntriesGuessedFrom of the guess before the change
+function carryEntryChange(aiKeys, guessKey, guess, entriesBefore) {
+    const entriesAfter = getEntriesGuessedFrom([guess]);
+    // several entries may hold one class, a master data and an important class included: it is renamed or removed once
+    // no entry of any step holds it any more
+    const heldClassLabels = Object.values(getLinkClassLabels(aiKeys));
+    const classLabelsAfter = new Set(heldClassLabels);
+    const classLabelsBefore = new Set(Object.values(entriesBefore).map((guessedEntry) => guessedEntry.classLabel));
+    const renamedClasses = {};
+    const removedClasses = [];
+    Object.entries(entriesBefore).forEach(function ([entryLabel, entryBefore]) {
+        if (classLabelsAfter.has(entryBefore.classLabel)) {
+            return;
+        }
+        const entryAfter = entriesAfter[entryLabel];
+        if (entryAfter && !classLabelsBefore.has(entryAfter.classLabel)) {
+            renamedClasses[entryBefore.classLabel] = entryAfter.classLabel;
+        } else if (!removedClasses.includes(entryBefore.classLabel)) {
+            removedClasses.push(entryBefore.classLabel);
+        }
+    });
+    const eventsGuess = guessKey == "eventsGuess" ? null : aiKeys.eventsGuess;
+    if (eventsGuess) {
+        removedClasses.forEach((removedClass) => delete eventsGuess.classTables[removedClass]);
+        Object.entries(renamedClasses).forEach(function ([classLabelBefore, classLabelAfter]) {
+            if (eventsGuess.classTables[classLabelBefore]) {
+                eventsGuess.classTables[classLabelAfter] = eventsGuess.classTables[classLabelBefore];
+                delete eventsGuess.classTables[classLabelBefore];
+            }
+        });
+    }
+    const linksGuess = aiKeys.linksGuess;
+    if (linksGuess) {
+        linksGuess.links = linksGuess.links.filter((link) => !removedClasses.includes(link.fromClass) && !removedClasses.includes(link.toClass));
+        const renameLinkClasses = function (link) {
+            link.fromClass = renamedClasses[link.fromClass] || link.fromClass;
+            link.toClass = renamedClasses[link.toClass] || link.toClass;
+        };
+        linksGuess.links.forEach(function (link) {
+            renameLinkClasses(link);
+            link.propertyOptions.forEach(function (option) {
+                if (option.assumes) {
+                    option.assumes.class = renamedClasses[option.assumes.class] || option.assumes.class;
+                }
+            });
+        });
+        (linksGuess.removedLinks || []).forEach(renameLinkClasses);
+    }
+    const changedEntryLabels = Object.keys(entriesBefore).filter((entryLabel) => JSON.stringify(entriesBefore[entryLabel]) != JSON.stringify(entriesAfter[entryLabel]));
+    const addedEntryLabels = Object.keys(entriesAfter).filter((entryLabel) => !entriesBefore[entryLabel]);
+    const carriedEntryLabels = changedEntryLabels.concat(addedEntryLabels);
+    stepGuessKeys.slice(stepGuessKeys.indexOf(guessKey) + 1).forEach(function (nextGuessKey) {
+        const nextGuess = aiKeys[nextGuessKey];
+        if (!nextGuess) {
+            return;
+        }
+        // a guess saved before entriesGuessedFrom keeps the decisions of the master data only
+        const isLegacyGuess = !nextGuess.entriesGuessedFrom;
+        const guessedEntries = isLegacyGuess ? nextGuess.decisionsByMasterData : nextGuess.entriesGuessedFrom;
+        if (!guessedEntries) {
+            return;
+        }
+        carriedEntryLabels.forEach(function (entryLabel) {
+            const entryAfter = entriesAfter[entryLabel];
+            delete guessedEntries[entryLabel];
+            if (!entryAfter) {
+                return;
+            }
+            if (!isLegacyGuess) {
+                guessedEntries[entryLabel] = entryAfter;
+            } else if (entryAfter.superClassId !== null || entryAfter.readingIndex !== null) {
+                guessedEntries[entryLabel] = { readingIndex: entryAfter.readingIndex, superClassId: entryAfter.superClassId };
+            }
+        });
+    });
+}
+
+// the guesses of the steps after guessKey, by key, sent back to the client once a change was carried to them
+function getNextGuesses(aiKeys, guessKey) {
+    const nextGuesses = {};
+    stepGuessKeys.slice(stepGuessKeys.indexOf(guessKey) + 1).forEach(function (nextGuessKey) {
+        if (aiKeys[nextGuessKey]) {
+            nextGuesses[nextGuessKey] = aiKeys[nextGuessKey];
+        }
+    });
+    return nextGuesses;
+}
+
+// a new class of steps 1 and 2 takes part in the relations through the tables the model named for it, if any
+function carryStepGuessedAgain(aiKeys, guessKey, guessBefore, schema) {
+    const guess = aiKeys[guessKey];
+    carryEntryChange(aiKeys, guessKey, guess, getEntriesGuessedFrom([guessBefore]));
+    const eventsGuess = aiKeys.eventsGuess;
+    if (guessKey != "eventsGuess" && eventsGuess) {
+        getGuessEntries(guess).forEach(function (guessEntry) {
+            const classLabel = getDecidedClassLabel(guessEntry, guess);
+            if (!eventsGuess.classTables[classLabel] && guessEntry.tables && guessEntry.tables.length > 0) {
+                eventsGuess.classTables[classLabel] = guessEntry.tables;
+            }
+        });
+        const classLabels = [];
+        [aiKeys.masterDataGuess, aiKeys.importantClassesGuess].forEach((classGuess) => getGuessEntries(classGuess).forEach((guessEntry) => classLabels.push(getDecidedClassLabel(guessEntry, classGuess))));
+        eventsGuess.classesWithoutTables = classLabels.filter((classLabel) => !eventsGuess.classTables[classLabel]);
+    }
+    if (aiKeys.linksGuess && eventsGuess) {
+        recomputeLinks(aiKeys, schema);
+    }
+    const nextGuesses = getNextGuesses(aiKeys, guessKey);
+    return nextGuesses;
+}
 
 // { link } or { error }, of one link of a links guess by its id
 function findGuessLink(guess, linkId) {
@@ -848,12 +1300,27 @@ function findLinkOption(link, optionReference) {
     return link.propertyOptions.find((option) => option.propertyIri == optionReference || String(option.propertyLabel).toLowerCase() == lowerCaseOptionReference) || null;
 }
 
-// { summary, entryLabel } of one change on one link of a links guess, or { error }
-function changeGuessLink(preparedSource, guess, changeName, changeInput) {
+// { assumption } the property may carry the link under, by the domain and range of the upper ontologies, null when the
+// link touches no undecided class, or { error }: an option the user or the chat adds follows the rule of the model
+async function readAllowedAssumption(aiKeys, link, propertyIri, isInverse, preparedSource, source, userContext) {
+    const classGuesses = [aiKeys.masterDataGuess, aiKeys.importantClassesGuess, aiKeys.eventsGuess].filter((classGuess) => classGuess);
+    const classAnchors = describeClassAnchors(classGuesses);
+    const { linkAlternatives, allowedByLink } = await readAllowedLinkProperties([link], classAnchors.upperClassesByClass, preparedSource, source, userContext);
+    const allowedAlternative = linkAlternatives[0].find((alternative) => isLinkOptionAllowed(allowedByLink[0], propertyIri, isInverse, alternative.assumption));
+    if (!allowedAlternative) {
+        const wayText = isInverse ? link.toClass + " to " + link.fromClass : link.fromClass + " to " + link.toClass;
+        return { error: "the domain and range of " + propertyIri + " do not fit a relation from " + wayText + " under the superclasses of these classes" };
+    }
+    return { assumption: allowedAlternative.assumption };
+}
+
+// { summary, entryLabel } of one change on one link of a links guess, or { error }; allowedAssumption is the superclass an
+// added option holds under, read by readAllowedAssumption
+function changeGuessLink(preparedSource, guess, changeName, changeInput, allowedAssumption) {
     const linkId = readText(changeInput.link);
     const link = linkId ? findGuessLink(guess, linkId) : null;
     if (!link) {
-        return { error: "no link " + JSON.stringify(linkId) + " in the links guess, name its id" };
+        return { error: "no relation " + JSON.stringify(linkId) + " in linksGuess, name its id" };
     }
     let summary = null;
     if (changeName == "apply_link_decision") {
@@ -862,13 +1329,13 @@ function changeGuessLink(preparedSource, guess, changeName, changeInput) {
             return { error: "no property " + JSON.stringify(changeInput.property) + " among the options of " + link.id };
         }
         link.decision = { propertyIri: option.propertyIri };
-        summary = "link " + link.fromClass + " -> " + link.toClass + " decided: " + option.propertyLabel;
+        summary = "relation " + link.fromClass + " -> " + link.toClass + " decided: " + option.propertyLabel;
     } else if (changeName == "undo_link_decision") {
         if (!link.decision) {
-            return { error: "the link " + link.id + " is not decided" };
+            return { error: "the relation " + link.id + " is not decided" };
         }
         delete link.decision;
-        summary = "link " + link.fromClass + " -> " + link.toClass + " not decided";
+        summary = "relation " + link.fromClass + " -> " + link.toClass + " not decided";
     } else if (changeName == "add_link_property_option") {
         const propertyIri = getTermIri(readText(changeInput.propertyIri), preparedSource.modelPrefixes);
         const propertySource = propertyIri && getPropertySource(preparedSource, propertyIri);
@@ -878,15 +1345,20 @@ function changeGuessLink(preparedSource, guess, changeName, changeInput) {
         if (findLinkOption(link, propertyIri)) {
             return { error: preparedSource.ontologyModels[propertySource].properties[propertyIri].label + " is already an option of " + link.id };
         }
-        link.propertyOptions.push({
+        const addedOption = {
             propertyIri: propertyIri,
             propertyLabel: preparedSource.ontologyModels[propertySource].properties[propertyIri].label,
             propertySource: propertySource,
             definition: readText(changeInput.definition),
             probability: Math.min(100, Math.max(0, Number(changeInput.probability) || 0)),
             inverse: Boolean(changeInput.inverse),
-        });
-        summary = "property added to the link " + link.id;
+        };
+        if (allowedAssumption) {
+            addedOption.assumes = allowedAssumption;
+        }
+        link.propertyOptions.push(addedOption);
+        const assumptionText = allowedAssumption ? ", if " + allowedAssumption.class + " is a " + allowedAssumption.superClass : "";
+        summary = "property " + addedOption.propertyLabel + " added to the relation " + link.id + assumptionText;
     } else if (changeName == "remove_link_property_option") {
         const removedOption = findLinkOption(link, changeInput.property);
         if (!removedOption) {
@@ -896,18 +1368,23 @@ function changeGuessLink(preparedSource, guess, changeName, changeInput) {
         if (link.decision?.propertyIri == removedOption.propertyIri) {
             delete link.decision;
         }
-        summary = "property removed from the link " + link.id;
+        summary = "property removed from the relation " + link.id;
     } else if (changeName == "remove_link") {
         guess.links.splice(guess.links.indexOf(link), 1);
-        summary = "link " + link.id + " removed";
+        // the links computed again from the tables leave it out, its classes renamed with the others
+        const removedLink = { fromClass: link.fromClass, toClass: link.toClass, foreignKey: link.foreignKey, sameRowTable: link.sameRowTable, rowColumns: link.rowColumns };
+        guess.removedLinks = (guess.removedLinks || []).concat([removedLink]);
+        summary = "relation " + link.id + " removed";
     }
     return { summary, entryLabel: linkId };
 }
 
 // the changes the chat makes to the guess of a workflow step when the user asks, an entry changed, a link changed, or a
 // local class added, logged with what the user asked, the rationale of the model and the queries it read before, so that
-// the next steps and the chat read why each choice was made; { summary, guessKey, guess } once written in the mapping, or { error }
-async function changeGuess(source, databaseId, changeName, changeInput, chatEvidence) {
+// the next steps and the chat read why each choice was made; { summary, guessKey, guess, nextGuesses } once written in the
+// mapping, nextGuesses the guesses of the next steps by key, which the change carried to, or { error }.
+// userContext { user, userSources } opens the database for the changes reading its tables
+async function changeGuess(source, databaseId, changeName, changeInput, chatEvidence, userContext) {
     const rationale = readText(changeInput.rationale);
     if (!rationale) {
         return { error: "give the rationale of the change" };
@@ -927,7 +1404,7 @@ async function changeGuess(source, databaseId, changeName, changeInput, chatEvid
     }
     const stepGuessKey = guessKey == "linksGuess" || guessKey == "mappingGuess" ? guessKey : "entries";
     if (changedGuessKey != stepGuessKey) {
-        const changedTexts = { entries: "the entries of steps 1 to 3", linksGuess: "the links of step 4", mappingGuess: "the class mappings of step 5" };
+        const changedTexts = { entries: "the entries of steps 1 to 3", linksGuess: "the relations of step 4", mappingGuess: "the class mappings of step 5" };
         const wrongStepError = changeName + " changes " + changedTexts[changedGuessKey] + ", not the " + guessKey;
         return { error: wrongStepError };
     }
@@ -939,17 +1416,49 @@ async function changeGuess(source, databaseId, changeName, changeInput, chatEvid
     if (!preparedSource) {
         return { error: getNotPreparedError(source) };
     }
+    const aiKeys = keyDetection.aiKeys;
+    const databaseSchema = databaseChangeNames.includes(changeName) ? await readDatabaseSchema(databaseId, userContext.user) : null;
+    const entriesBefore = changedGuessKey == "entries" ? getEntriesGuessedFrom([guess]) : null;
+    const newLabel = readText(changeInput.newLabel);
+    if (changeName == "update_class" && newLabel) {
+        const renamedEntry = findByLabel(getGuessEntries(guess), changeInput.entry);
+        const ownClassLabel = renamedEntry ? getDecidedClassLabel(renamedEntry, guess).toLowerCase() : null;
+        const heldClassLabel = getLinkClassLabels(aiKeys)[newLabel.toLowerCase()];
+        if (heldClassLabel && heldClassLabel.toLowerCase() != ownClassLabel) {
+            return { error: heldClassLabel + " is already the class of another entry, give another label" };
+        }
+    }
     let changed = null;
-    if (changedGuessKey == "linksGuess") {
-        changed = changeGuessLink(preparedSource, guess, changeName, changeInput);
+    if (changeName == "add_link") {
+        changed = await addLink(aiKeys, guess, changeInput, databaseSchema);
+    } else if (changeName == "add_link_property_option") {
+        const link = findGuessLink(guess, readText(changeInput.link));
+        const propertyIri = getTermIri(readText(changeInput.propertyIri), preparedSource.modelPrefixes);
+        const allowed = link && propertyIri ? await readAllowedAssumption(aiKeys, link, propertyIri, Boolean(changeInput.inverse), preparedSource, source, userContext) : { assumption: null };
+        changed = allowed.error ? allowed : changeGuessLink(preparedSource, guess, changeName, changeInput, allowed.assumption);
+    } else if (changedGuessKey == "linksGuess") {
+        changed = changeGuessLink(preparedSource, guess, changeName, changeInput, null);
     } else if (changedGuessKey == "mappingGuess") {
-        changed = changeGuessMapping(guess, changeName, changeInput);
-    } else {
+        changed = await changeGuessMapping(guess, changeName, changeInput, preparedSource, userContext);
+    } else if (changeName == "add_local_class") {
         // a local class belongs to the ontology, to no entry of the guess
-        changed = changeName == "add_local_class" ? addLocalClass(preparedSource, guess, source, changeInput) : changeGuessEntry(preparedSource, guess, source, changeName, changeInput);
+        changed = addLocalClass(preparedSource, guess, source, changeInput);
+    } else if (changeName == "add_entry") {
+        changed = addEntry(preparedSource, aiKeys, guessKey, guess, source, changeInput, databaseSchema.columnsByTable);
+    } else if (changeName == "set_entry_tables") {
+        changed = changeEntryTables(aiKeys, guessKey, guess, changeInput, databaseSchema.columnsByTable);
+    } else {
+        changed = changeGuessEntry(preparedSource, guess, source, changeName, changeInput);
     }
     if (changed.error) {
         return { error: changed.error };
+    }
+    if (changedGuessKey == "entries") {
+        carryEntryChange(aiKeys, guessKey, guess, entriesBefore);
+    }
+    const isTablesChange = changeName == "set_entry_tables" || changeName == "add_entry";
+    if (isTablesChange && aiKeys.linksGuess && aiKeys.eventsGuess) {
+        changed.summary += "; " + recomputeLinks(aiKeys, databaseSchema.schema).linksText;
     }
     const linksGuess = keyDetection.aiKeys.linksGuess;
     if (guessKey == "eventsGuess" && changeName == "remove_entry" && linksGuess) {
@@ -969,7 +1478,8 @@ async function changeGuess(source, databaseId, changeName, changeInput, chatEvid
         at: new Date().toISOString(),
     });
     await writeMappingAiKeys(source, databaseId, keyDetection.aiKeys);
-    return { summary: changed.summary, guessKey, guess };
+    const nextGuesses = changedGuessKey == "entries" ? getNextGuesses(aiKeys, guessKey) : {};
+    return { summary: changed.summary, guessKey, guess, nextGuesses };
 }
 
-export { guessMasterData, guessImportantClasses, getGuessPhaseStep, runEvidenceQuery, changeGuess, linkChangeNames, describeDecidedMasterData, describeGuessedDatabase, layOutReadings, readGuessedEntries, classifyClasses, findByLabel, findParentOption, getPropertySource, getGuessEntries };
+export { runSqlTool, guessMasterData, guessImportantClasses, carryStepGuessedAgain, getGuessPhaseStep, runEvidenceQuery, changeGuess, linkChangeNames, describeDecidedMasterData, describeGuessedDatabase, layOutReadings, readGuessedEntries, classifyClasses, findByLabel, findParentOption, getPropertySource, getGuessEntries };

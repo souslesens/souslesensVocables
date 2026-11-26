@@ -19,7 +19,7 @@ export default function () {
             const tellStep = function (stepText) {
                 SocketManager.message(clientSocketId, keyDetectionChannel, { databaseId: databaseId, message: "Links: " + stepText });
             };
-            const guessed = await guessLinks(source, databaseId, found.userInfo, tellStep);
+            const guessed = await guessLinks(source, databaseId, found.userInfo, found.userSources, tellStep);
             if (guessed.error) {
                 return res.status(409).json({ error: guessed.error });
             }
@@ -56,7 +56,7 @@ export default function () {
         responses: {
             200: {
                 description:
-                    "{ linksGuess: { links: [{ id, fromClass, toClass, viaEvent, foreignKey, rowColumns, sameRowTable, propertyOptions: [{ propertyIri, propertyLabel, probability, inverse, reason, assumes }], cardinality, inverseCardinality, decision }], decisionsByClass, model, guessedAt } }",
+                    "{ linksGuess: { links: [{ id, fromClass, toClass, viaEvent, foreignKey, rowColumns, sameRowTable, propertyOptions: [{ propertyIri, propertyLabel, probability, inverse, reason, assumes }], hasNoAllowedProperty, cardinality, inverseCardinality, decision }], decisionsByClass, model, guessedAt } }",
             },
             404: { description: "The source is unknown to the user." },
             409: { description: "The classes of steps 1 to 3 are not guessed, the ontologies are not prepared, or the model failed." },

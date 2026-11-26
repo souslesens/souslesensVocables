@@ -168,6 +168,12 @@ async function askKeyModel(prompt) {
     if (cutAnswerError) {
         return { error: cutAnswerError };
     }
+    const readAnswer = readJsonAnswer(answerText);
+    return readAnswer;
+}
+
+// { answer } or { error }: the JSON object of an answer, in a code fence or not
+function readJsonAnswer(answerText) {
     const jsonBlockMatch = answerText.match(jsonBlockRegex);
     try {
         const answer = JSON.parse(jsonBlockMatch ? jsonBlockMatch[1] : answerText);
@@ -649,4 +655,4 @@ function getKnownAiKeys(databaseId) {
     return knownAiKeys;
 }
 
-export { startKeyDetection, followKeyDetection, getKeyDetection, clearKeyDetection, getKnownAiKeys, addAiKeysToSchema, askKeyModel, describeKeyedDatabase, keyDetectionModelId, writeMappingAiKeys, readDatabaseSchema, keyDetectionChannel, aiForeignKeyPrefix };
+export { startKeyDetection, followKeyDetection, getKeyDetection, clearKeyDetection, getKnownAiKeys, addAiKeysToSchema, askKeyModel, readJsonAnswer, describeKeyedDatabase, keyDetectionModelId, writeMappingAiKeys, readDatabaseSchema, keyDetectionChannel, aiForeignKeyPrefix };

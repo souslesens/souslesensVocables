@@ -83,21 +83,19 @@ function getDirectionKey(fromColumn, toColumn) {
     return directionKey;
 }
 
-// per direction { from, to } between two { column, classId }, the properties whose domain or range fit both classes,
-// read as the plugin checks its restrictions: the source with every ontology it imports, directly or not
-async function readAllowedProperties(directions, request, preparedSource, userContext) {
-    if (!globalThis.Config.sources[request.source]) {
-        setRunnerSource(request.source, userContext.userSources[request.source]);
+// the properties whose domain or range fit both classes of each { fromClass, toClass }, by "fromClass toClass", read as
+// the plugin checks its restrictions: the source with every ontology it imports, directly or not
+async function readFittingPropertiesByClassPair(source, classPairs, preparedSource, userContext) {
+    if (!globalThis.Config.sources[source]) {
+        setRunnerSource(source, userContext.userSources[source]);
     }
-    // two columns of one class read the same pair
+    // two columns or two links between the same classes read the same pair
     const classPairsByKey = {};
-    directions.forEach(function (direction) {
-        classPairsByKey[direction.from.classId + " " + direction.to.classId] = { fromClass: direction.from.classId, toClass: direction.to.classId };
-    });
+    classPairs.forEach((classPair) => (classPairsByKey[classPair.fromClass + " " + classPair.toClass] = classPair));
     const classPairKeys = Object.keys(classPairsByKey);
     // a name of its own: the runner keeps a model by source name, and two requests may run at once
-    const checkSource = request.source + "#restrictionSuggestion" + Date.now() + Math.random();
-    globalThis.Config.sources[checkSource] = { ...globalThis.Config.sources[request.source], imports: preparedSource.checkedOntologies };
+    const checkSource = source + "#restrictionSuggestion" + Date.now() + Math.random();
+    globalThis.Config.sources[checkSource] = { ...globalThis.Config.sources[source], imports: preparedSource.checkedOntologies };
     const pairReadings = classPairKeys.map(function (classPairKey) {
         const classPair = classPairsByKey[classPairKey];
         return getPairProperties(checkSource, classPair.fromClass, classPair.toClass, userContext);
@@ -112,6 +110,13 @@ async function readAllowedProperties(directions, request, preparedSource, userCo
         }
         fittingPropertiesByClassPair[classPairKeys[classPairIndex]] = settledReading.value.fittingProperties;
     }
+    return fittingPropertiesByClassPair;
+}
+
+// per direction { from, to } between two { column, classId }, the properties whose domain or range fit both classes
+async function readAllowedProperties(directions, request, preparedSource, userContext) {
+    const classPairs = directions.map((direction) => ({ fromClass: direction.from.classId, toClass: direction.to.classId }));
+    const fittingPropertiesByClassPair = await readFittingPropertiesByClassPair(request.source, classPairs, preparedSource, userContext);
     const allowedPropertiesByDirection = {};
     directions.forEach(function (direction) {
         const fittingProperties = fittingPropertiesByClassPair[direction.from.classId + " " + direction.to.classId];
@@ -505,4 +510,4 @@ async function judgeImplicitCandidates(implicitCandidates, messageParams) {
     return { implicitObject: judgedObject };
 }
 
-export { suggestColumnRestrictions, judgeImplicitObject };
+export { suggestColumnRestrictions, judgeImplicitObject, readFittingPropertiesByClassPair };

@@ -28,6 +28,20 @@
     .masterData-databaseList button {
         text-align: left;
     }
+    /* one proposal of a card, its details folded under "More details" */
+    .masterData-readingBox {
+        background: #ffffff;
+        border: 1px solid #c9d3d6;
+        border-radius: 10px;
+        padding: 8px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .masterData-readingBox summary {
+        cursor: pointer;
+        color: #3557a8;
+    }
     .masterData-panel {
         background: #e9eeef;
         border-radius: 14px;
@@ -40,6 +54,141 @@
         display: flex;
         align-items: center;
         gap: 8px;
+    }
+    .masterData-help {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        line-height: 16px;
+        text-align: center;
+        border-radius: 50%;
+        background: #d0d7de;
+        font-size: 11px;
+        cursor: help;
+    }
+    .masterData-optionChip {
+        border: 1px solid #c9d3d6;
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 2px 10px;
+        margin: 2px 4px 2px 0;
+        cursor: pointer;
+        text-align: left;
+    }
+    .masterData-optionChip:hover,
+    .masterData-optionChipOpened {
+        border-color: #3e3efc;
+    }
+    .masterData-optionChipUser {
+        background: #eef0ff;
+    }
+    .masterData-optionChip:disabled {
+        color: #7a8a8e;
+        cursor: default;
+    }
+    .masterData-optionChooser {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 6px 0 10px;
+    }
+    .masterData-uriExample {
+        font-family: monospace;
+        font-size: 12px;
+        word-break: break-all;
+    }
+    .masterData-uriBuilder {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 4px;
+        font-family: monospace;
+        font-size: 12px;
+    }
+    .masterData-uriBuilder input {
+        border: none;
+        border-radius: 14px;
+        background: #ffffff;
+        padding: 3px 8px;
+        font-family: monospace;
+        color: #3e3efc;
+    }
+    .masterData-uriBase {
+        color: #7a8a8e;
+    }
+    .masterData-uriValue {
+        border-radius: 3px;
+        padding: 2px 6px;
+        color: #3d2e00;
+    }
+    .masterData-tableTitle {
+        font-weight: bold;
+        color: #6f6f6f;
+        padding-top: 6px;
+    }
+    .masterData-group {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .masterData-groupTitle {
+        display: flex;
+        justify-content: space-between;
+        font-weight: bold;
+        border-bottom: 1px solid #d4dadc;
+        padding-bottom: 2px;
+    }
+    .masterData-otherChoice {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 8px 10px;
+        border-radius: 14px;
+        background: #ffffff;
+    }
+    .masterData-otherKind {
+        display: grid;
+        grid-template-columns: 140px 1fr;
+        gap: 8px;
+        text-align: left;
+        border: 1px solid #eef1f2;
+        border-radius: 10px;
+        background: #fbfcfc;
+        padding: 4px 8px;
+        cursor: pointer;
+    }
+    .masterData-hint {
+        color: #7a8a8e;
+        font-size: 12px;
+    }
+    /* what one row gives for a choice, under the choice */
+    .masterData-example {
+        color: #3557a8;
+        font-size: 11px;
+        font-style: italic;
+        overflow-wrap: anywhere;
+    }    #aiMappingWorkflow_mappingList {
+        padding: 16px;
+        overflow: auto;
+        height: 100%;
+    }
+    .masterData-mappingList {
+        border-collapse: collapse;
+    }
+    .masterData-mappingList th,
+    .masterData-mappingList td {
+        padding: 6px 14px;
+        text-align: left;
+        border-bottom: 1px solid #e3e8ea;
+    }
+    .masterData-mappingList tr:hover td {
+        background: #f2f7f9;
+        cursor: pointer;
+    }
+    #aiMappingWorkflow_mappingBack {
+        position: absolute;
+        top: 10px;
+        left: 10px;
     }
     .masterData-class {
         background: #00afef;
@@ -208,12 +357,6 @@
     .masterData-applyButton:disabled {
         background: #b8c2c5;
         cursor: not-allowed;
-    }
-    /* what the data shows of a column, measured in the database */
-    .masterData-evidenceText {
-        font-size: 12px;
-        color: #6b7a7d;
-        white-space: pre-line;
     }
     /* Undo the choice beside Apply, at the end of the card */
     .masterData-footerButtons {

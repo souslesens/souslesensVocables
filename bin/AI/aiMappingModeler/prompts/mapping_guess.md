@@ -21,7 +21,6 @@ Each option is one kind of this list:
     • subclassPerValue: the column holds codes, each naming a kind of the class, and many rows share each code: one subclass of the class per value.
     • individualPerValue: the column holds codes of a list, a priority, a status, a type, too few rows per code for a kind of their own or a list of its own: one individual per value, each row linked to its own.
     • implicitClass: the column names another object, a person, a team, a supplier, coming back over many rows: a class of its own, one instance per value.
-    • eventInstant: a date of a process or event, the start or the end of a process the row is about, or of one of the classes of the row. A date of the record itself stays a property.
     • identifierClass: an identifier living on its own, assigned, replaced or recorded with data of its own. A serial number identifies an item and stays a property of it.
     • splitValue: one value holds several codes, separated by spaces or commas: one individual per code, the row linked to each.
     • unmapped: the column says nothing of the business, or repeats another one; give the reason.
@@ -35,6 +34,6 @@ Rules
     • Probabilities of the options of one column add up to 100. The first option is the one you would take.
 
 Answer
-Write one JSON object and nothing else, no code fence. Each detail is one short English sentence on what the option gives, each reason one short English sentence citing what the data shows.
+Write one JSON object and nothing else, no code fence. Each detail says in at most 10 English words what the option gives, each reason in at most 12 English words what the data shows.
 {"instance":{"identifierColumns":["..."],"uriType":"fromLabel","prefixURI":"...","labelColumn":"...","reason":"..."},"columns":[{"columns":["..."],"reason":"...","options":[{"kind":"existingProperty","propertyIri":"full IRI of the list, for existingProperty only","newPropertyName":"for newProperty only","onClass":"the class or a resource of the row, as named","range":"xsd:string","dateFormat":null,"detail":"...","probability":0}]}],"unmapped":[{"column":"...","reason":"..."}]}
 range and dateFormat only for existingProperty and newProperty, null otherwise.

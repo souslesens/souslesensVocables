@@ -16,11 +16,11 @@ export default function () {
             }
             const cardInput = changeInput || {};
             cardInput.rationale = "changed by the user on the card";
-            const changed = await changeGuess(source, databaseId, change, cardInput, { userRequest: null, queries: [] });
+            const changed = await changeGuess(source, databaseId, change, cardInput, { userRequest: null, queries: [] }, { user: found.userInfo, userSources: found.userSources });
             if (changed.error) {
                 return res.status(409).json({ error: changed.error });
             }
-            res.status(200).json({ summary: changed.summary, guessKey: changed.guessKey, guess: changed.guess });
+            res.status(200).json({ summary: changed.summary, guessKey: changed.guessKey, guess: changed.guess, nextGuesses: changed.nextGuesses });
         } catch (error) {
             console.error("aiMappingWorkflow/guessChange route error:", error);
             res.status(error.status || 500).json({ error: error.message });
@@ -51,7 +51,7 @@ export default function () {
             },
         ],
         responses: {
-            200: { description: "{ summary, guessKey, guess }: the guess changed, as saved" },
+            200: { description: "{ summary, guessKey, guess, nextGuesses }: the guess changed, as saved, and the guesses of the next steps the change was carried to" },
             404: { description: "The source is unknown to the user." },
             409: { description: "The change does not apply to the guess, its message says why." },
         },

@@ -19,10 +19,12 @@ const frequentValueCount = 6;
 const sampleRowCount = 5;
 const parallelModelCallCount = 3;
 // the kinds of mapping a column may take, as prompts/mapping_guess.md lists them
-const mappingKinds = ["existingProperty", "newProperty", "subclassPerValue", "individualPerValue", "implicitClass", "eventInstant", "identifierClass", "splitValue", "unmapped", "other"];
+const mappingKinds = ["existingProperty", "newProperty", "subclassPerValue", "individualPerValue", "implicitClass", "identifierClass", "splitValue", "unmapped", "other"];
 const uriTypes = ["fromLabel", "blankNode", "randomIdentifier"];
 const dateRanges = ["xsd:date", "xsd:dateTime"];
 const sqlDateTypeRegex = /date|timestamp/;
+const uriSchemeRegex = /^https?:\/\//;
+const trailingUriSeparatorRegex = /[#/]$/;
 // the phases of the progress bar: the properties, the columns, the model
 const mappingPhaseCount = 3;
 const mappingChangeNames = ["apply_class_mapping", "undo_class_mapping"];
@@ -159,6 +161,19 @@ async function readAvailableProperties(preparedSource, userContext) {
             propertyByIri[propertyIri] = propertyByIri[propertyIri] || { label: nonObjectProperty.label || propertyIri, range: nonObjectProperty.range || null, source: modelSource };
         }
     });
+    // a vocabulary lists the properties of the vocabularies it uses too: a property is named by the one of its namespace.
+    // The graphUris of the vocabularies differ from their namespaces by the scheme and the last separator
+    for (const [propertyIri, property] of Object.entries(propertyByIri)) {
+        const iriWithoutScheme = propertyIri.replace(uriSchemeRegex, "");
+        const namespaceSource = basicVocabularySources.find(function (vocabularySource) {
+            const graphUri = globalThis.Config.basicVocabularies[vocabularySource].graphUri;
+            const graphUriWithoutScheme = graphUri.replace(uriSchemeRegex, "");
+            const namespace = graphUriWithoutScheme.replace(trailingUriSeparatorRegex, "");
+            const separatorAfterNamespace = iriWithoutScheme.charAt(namespace.length);
+            return iriWithoutScheme.startsWith(namespace) && (separatorAfterNamespace == "#" || separatorAfterNamespace == "/");
+        });
+        property.source = namespaceSource || property.source;
+    }
     return propertyByIri;
 }
 
@@ -373,9 +388,40 @@ async function guessMapping(source, databaseId, userInfo, userSources, tellStep)
     return { mappingGuess };
 }
 
+// the option a column choice names: one of the AI by optionIndex, or one given by the user, checked as an option of the
+// model is; { columnMapping, unmappedColumn, option, optionIndex } or { error }
+function readColumnChoice(classMapping, columnChoice, propertyByIri) {
+    const columnMapping = classMapping.columnMappings.find((candidateMapping) => candidateMapping.columns.join(", ") == columnChoice.columns);
+    if (!columnChoice.option) {
+        if (!columnMapping || !columnMapping.options[columnChoice.optionIndex]) {
+            const noOptionError = "no option " + columnChoice.optionIndex + " for the columns " + JSON.stringify(columnChoice.columns) + " of " + classMapping.classLabel;
+            return { error: noOptionError };
+        }
+        return { columnMapping: columnMapping, optionIndex: columnChoice.optionIndex };
+    }
+    // a column the model left out can be mapped by the user
+    const unmappedColumn = columnMapping ? null : classMapping.unmappedColumns.find((candidateColumn) => candidateColumn.column == columnChoice.columns);
+    if (!columnMapping && !unmappedColumn) {
+        const noColumnError = JSON.stringify(columnChoice.columns) + ": no column of " + classMapping.table;
+        return { error: noColumnError };
+    }
+    const evidences = columnMapping ? columnMapping.evidences : [unmappedColumn.evidence];
+    const option = readMappingOption(columnChoice.option, classMapping, evidences, propertyByIri);
+    // an option of the user is valid or refused, never kept with a problem as one of the model is
+    if (option.problem) {
+        return { error: columnChoice.columns + ": " + option.problem };
+    }
+    if (option.kind == "newProperty" && !option.newPropertyName) {
+        return { error: "name the new property" };
+    }
+    option.probability = null;
+    option.detail = "chosen by the user";
+    return { columnMapping: columnMapping, unmappedColumn: unmappedColumn, option: option };
+}
+
 // a class mapping applied with the instance and the option chosen for each column on its card, or undone; { summary,
 // entryLabel } or { error }
-function changeGuessMapping(guess, changeName, changeInput) {
+async function changeGuessMapping(guess, changeName, changeInput, preparedSource, userContext) {
     const classLabel = readText(changeInput.classLabel);
     const classMapping = guess.classMappings.find((candidateMapping) => candidateMapping.classLabel == classLabel);
     if (!classMapping) {
@@ -388,7 +434,16 @@ function changeGuessMapping(guess, changeName, changeInput) {
             return { error: notAppliedError };
         }
         classMapping.decision = null;
-        classMapping.columnMappings.forEach((columnMapping) => (columnMapping.decision = null));
+        // what the user added goes: the options made by hand, the columns mapped from the unmapped ones go back there
+        classMapping.columnMappings.forEach(function (columnMapping) {
+            columnMapping.decision = null;
+            columnMapping.options = columnMapping.options.filter((option) => option.probability !== null);
+        });
+        const columnsMappedByHand = classMapping.columnMappings.filter((columnMapping) => columnMapping.unmappedReason !== undefined);
+        columnsMappedByHand.forEach(function (columnMapping) {
+            classMapping.unmappedColumns.push({ column: columnMapping.columns[0], reason: columnMapping.unmappedReason, evidence: columnMapping.evidences[0] });
+        });
+        classMapping.columnMappings = classMapping.columnMappings.filter((columnMapping) => columnMapping.unmappedReason === undefined);
         const undoneSummary = "mapping of " + classLabel + " undone";
         return { summary: undoneSummary, entryLabel: classLabel };
     }
@@ -412,22 +467,57 @@ function changeGuessMapping(guess, changeName, changeInput) {
         return { error: uriTypeError };
     }
     const columnChoices = Array.isArray(changeInput.columnChoices) ? changeInput.columnChoices : [];
-    for (const columnChoice of columnChoices) {
-        const columnMapping = classMapping.columnMappings.find((candidateMapping) => candidateMapping.columns.join(", ") == columnChoice.columns);
-        if (!columnMapping || !columnMapping.options[columnChoice.optionIndex]) {
-            const noOptionError = "no option " + columnChoice.optionIndex + " for the columns " + JSON.stringify(columnChoice.columns) + " of " + classLabel;
-            return { error: noOptionError };
-        }
+    const choiceColumns = columnChoices.map((columnChoice) => columnChoice.columns);
+    const repeatedColumns = choiceColumns.find((columns, choiceIndex) => choiceColumns.indexOf(columns) != choiceIndex);
+    if (repeatedColumns) {
+        const repeatedChoiceError = "one choice per column: " + repeatedColumns + " is given twice";
+        return { error: repeatedChoiceError };
     }
-    columnChoices.forEach(function (columnChoice) {
-        const columnMapping = classMapping.columnMappings.find((candidateMapping) => candidateMapping.columns.join(", ") == columnChoice.columns);
-        columnMapping.decision = { optionIndex: columnChoice.optionIndex };
+    const hasUserProperty = columnChoices.some((columnChoice) => columnChoice.option?.kind == "existingProperty");
+    const propertyByIri = hasUserProperty ? await readAvailableProperties(preparedSource, userContext) : {};
+    // every choice read before any is written: one wrong choice leaves the mapping as it was
+    const readChoices = columnChoices.map((columnChoice) => readColumnChoice(classMapping, columnChoice, propertyByIri));
+    const wrongChoice = readChoices.find((readChoice) => readChoice.error);
+    if (wrongChoice) {
+        return { error: wrongChoice.error };
+    }
+    readChoices.forEach(function (readChoice) {
+        let columnMapping = readChoice.columnMapping;
+        if (readChoice.unmappedColumn) {
+            columnMapping = {
+                columns: [readChoice.unmappedColumn.column],
+                reason: "",
+                evidences: [readChoice.unmappedColumn.evidence],
+                options: [],
+                decision: null,
+                unmappedReason: readChoice.unmappedColumn.reason,
+            };
+            classMapping.columnMappings.push(columnMapping);
+            classMapping.unmappedColumns = classMapping.unmappedColumns.filter((unmappedColumn) => unmappedColumn != readChoice.unmappedColumn);
+        }
+        let optionIndex = readChoice.optionIndex;
+        if (readChoice.option) {
+            // the same choice made again takes the option it added before
+            const optionFields = ["kind", "propertyIri", "newPropertyName", "onClass", "range", "dateFormat"];
+            optionIndex = columnMapping.options.findIndex((existingOption) => optionFields.every((optionField) => existingOption[optionField] == readChoice.option[optionField]));
+            if (optionIndex < 0) {
+                columnMapping.options.push(readChoice.option);
+                optionIndex = columnMapping.options.length - 1;
+            }
+        }
+        columnMapping.decision = { optionIndex: optionIndex };
     });
     classMapping.decision = {
-        instance: { identifierColumns: identifierColumns, uriType: instance.uriType, prefixURI: readText(instance.prefixURI), labelColumn: instance.labelColumn || null },
+        instance: {
+            identifierColumns: identifierColumns,
+            uriType: instance.uriType,
+            prefixURI: readText(instance.prefixURI),
+            suffixURI: readText(instance.suffixURI),
+            labelColumn: instance.labelColumn || null,
+        },
     };
     const appliedSummary = "mapping of " + classLabel + " applied";
     return { summary: appliedSummary, entryLabel: classLabel };
 }
 
-export { guessMapping, changeGuessMapping, mappingChangeNames };
+export { guessMapping, changeGuessMapping, mappingChangeNames, readAvailableProperties };

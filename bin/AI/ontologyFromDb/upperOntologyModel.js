@@ -207,21 +207,24 @@ async function getLocalAnnotationValues(graphUri, localAnnotationIris, userConte
     return valuesByAnnotationByTerm;
 }
 
-// the classes alone of each upper ontology, with what it takes to read back an answer naming one of them
+// the classes alone of each upper ontology, with what it takes to read back an answer naming one of them. The same
+// sections also come most specific first, each still holding only the terms it writes when read most abstract first
 async function getUpperOntologyClassesText(upperOntologies, userContext) {
     const writtenTerms = new Set();
     const classLabelByIri = {};
-    let modelText = "";
+    const ontologySections = [];
     for (const upperOntology of upperOntologies) {
         const enrichedModel = await getEnrichedOntologyModel(upperOntology, userContext);
         const classEntries = getUnwrittenClassEntries(enrichedModel, writtenTerms);
         for (const [classIri, ontologyClass] of Object.entries(enrichedModel.classes)) {
             classLabelByIri[classIri] = ontologyClass.label || classIri;
         }
-        modelText += "\n## " + upperOntology + "\n\n" + classEntries.join("\n") + "\n";
+        ontologySections.push("\n## " + upperOntology + "\n\n" + classEntries.join("\n") + "\n");
     }
-    const prefixedModel = getPrefixedModelText(modelText, {});
-    return { text: prefixedModel.text, prefixes: prefixedModel.prefixes, classLabelByIri: classLabelByIri };
+    const prefixedModel = getPrefixedModelText(ontologySections.join(""), {});
+    const specificFirstSections = ontologySections.slice().reverse();
+    const specificFirstModel = getPrefixedModelText(specificFirstSections.join(""), {});
+    return { text: prefixedModel.text, specificFirstText: specificFirstModel.text, prefixes: prefixedModel.prefixes, classLabelByIri: classLabelByIri };
 }
 
 // read from the graph, whatever answer format produced the version and whatever was edited in it since

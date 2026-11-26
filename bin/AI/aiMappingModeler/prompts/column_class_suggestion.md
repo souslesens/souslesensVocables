@@ -32,7 +32,7 @@ A table that only hands out its key to other tables is no business object of its
 3. Otherwise declare a new local class
 This is an application ontology: a business object that the business gives a narrower meaning than any imported class gets its own local class.
 Assign exactly one named direct superclass, an imported class or a local class that the new class narrows.
-When several classes fit, choose the deepest one whose definition holds for every instance. Walk down from the most abstract ontology to the most specific one, in the order the ontologies are given, and stop at the last class whose definition still fits. Illustrative examples with IOF Core and BFO:
+When several classes fit, choose the deepest one whose definition holds for every instance. Walk down from the most abstract ontology to the most specific one, whatever order they are given in, and stop at the last class whose definition still fits. Illustrative examples with IOF Core and BFO:
     • A bike frame production run: not BFO process, not IOF Core PlannedProcess, but IOF Core ManufacturingProcess, or AssemblyProcess if it joins components.
     • A manufactured bike: not BFO material entity or BFO object, but IOF Core MaterialArtifact, or Assembly if it is made of components.
     • A vendor company: not IOF Core Organization but BusinessOrganization.

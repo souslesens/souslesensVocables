@@ -44,6 +44,7 @@ async function buildPreparedSource(source, upperOntologies, databaseIds, userCon
     const preparedSource = {
         checkedOntologies: checkedOntologies,
         classesText: upperOntologyClasses.text,
+        specificFirstClassesText: upperOntologyClasses.specificFirstText,
         classPrefixes: upperOntologyClasses.prefixes,
         classLabelByIri: upperOntologyClasses.classLabelByIri,
         modelText: upperOntologyModel.text,

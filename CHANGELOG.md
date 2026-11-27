@@ -2,6 +2,61 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.19.0](https://github.com/souslesens/souslesensVocables/compare/3.18.0...3.19.0) (2026-11-27)
+
+
+### Features
+
+* **ai:** the ontology model text can be compacted, without anonymous nodes, with grouped restrictions, cut definitions and a depth limit ([a5e8975](https://github.com/souslesens/souslesensVocables/commit/a5e89754a31fcfb34e921bda1b1a6ef8ff48342b))
+* **ai:** upperOntologyModel.js and the annotations query of enrichedOntologyModel.js, copied as OK/2026_11_14 has them at bdfa41089 ([61e8dd4](https://github.com/souslesens/souslesensVocables/commit/61e8dd4b1d247c9a0ad63081110e0853c1566112))
+* **api:** add local CSV-to-database route as Python API fallback ([604856e](https://github.com/souslesens/souslesensVocables/commit/604856edadf679ff3ea9bcc11af2a7e9bb01568a))
+* **api:** GET /ontologyModels/enriched returns the ontology model with its restrictions, axioms, definitions and examples ([1e6f237](https://github.com/souslesens/souslesensVocables/commit/1e6f2378445060c19f53ed669c80c90bb51e5763))
+* **containers:** Add selected node to container adds every node selected on the whiteboard ([58cd55a](https://github.com/souslesens/souslesensVocables/commit/58cd55abda551054a90031377bc67ef9320f1d5d))
+* **containers:** the top containers hang under a root node of the tree, no longer under a root container written in the graph ([ef873c5](https://github.com/souslesens/souslesensVocables/commit/ef873c55fda11b47da033d388a73ea35da0dd9a9))
+* **containers:** the tree root node is labelled rootContainer ([c6218a0](https://github.com/souslesens/souslesensVocables/commit/c6218a0622bb7b1cc84b7dc1850ff8765f72a377))
+* **download-graph-modal:** explain that imports must be included to open the graph in Protégé ([90a1cc8](https://github.com/souslesens/souslesensVocables/commit/90a1cc825afb431200a02548e9e52d2848fa9cb2))
+* **graph-management:** the Delete button is labelled Clear ([51f100e](https://github.com/souslesens/souslesensVocables/commit/51f100ebdf892643ce06578b7bc615ab2e05fc6d))
+* **indexation:** the bot lists the default predicates in its first choice ([5652b77](https://github.com/souslesens/souslesensVocables/commit/5652b77214160ef2f62b63ad856c899f16fc2d97))
+* **lineage:** a source can be versioned in a git repository, as tags and branches pushed with the user's token ([0260ef5](https://github.com/souslesens/souslesensVocables/commit/0260ef5c07fd9ba49cdd279c48797efb4ea687df))
+* **lineage:** a version must follow Semantic Versioning and be higher than the last one ([7b725c6](https://github.com/souslesens/souslesensVocables/commit/7b725c60f665fc924621594b140d3130be228b7d))
+* **lineage:** a version writes its description in the commit and in a CHANGELOG.md of the source folder ([c43c730](https://github.com/souslesens/souslesensVocables/commit/c43c730d0ead8663365d75e01a5de71050461b4c))
+* **lineage:** Refresh indexes no longer asks for a confirmation ([9225b35](https://github.com/souslesens/souslesensVocables/commit/9225b35db8ef94b6260eec02905281b87fe5935e))
+* **lineage:** the changelog entry of a version has its time and links to the tag and to the changes since the previous version ([c04025e](https://github.com/souslesens/souslesensVocables/commit/c04025e9523161ea5efefc95132ef337d1ddbb8f))
+* **lineage:** the changelog heading of a version links to its tag ([b4dc2ba](https://github.com/souslesens/souslesensVocables/commit/b4dc2ba0fd8bc4133733ffb00752b08f89cd4aa2))
+* **lineage:** the Selection dialog checks the nodes selected on the whiteboard ([aaedf5a](https://github.com/souslesens/souslesensVocables/commit/aaedf5a931556735f1509cb0b258108091d8368f))
+* **llm:** a codex provider runs the callers' models on Codex through the developer's ChatGPT login ([bf6f6e1](https://github.com/souslesens/souslesensVocables/commit/bf6f6e1a7a04137d4fc61d4875748235ff5f3cd4))
+* **llm:** a local claudeCode provider answers through the claude -p CLI ([664c15e](https://github.com/souslesens/souslesensVocables/commit/664c15e4671df706b8ee2fcc695c7b97f2e72ca5))
+* **llm:** openai/gpt-6.1-terra runs on sonnet with claudeCode and on gpt-6.1-terra with codex ([df27b52](https://github.com/souslesens/souslesensVocables/commit/df27b52331c293372c75b7904c02e6541426c41d))
+* **llm:** the Claude Code adapter streams the answer and the reasoning ([c92337e](https://github.com/souslesens/souslesensVocables/commit/c92337e76da0b9b580a79e5b03493f875773d803))
+* **llm:** the claudeCode adapter takes an abortSignal that stops claude -p at once ([b65e6d0](https://github.com/souslesens/souslesensVocables/commit/b65e6d0114cdfdfe5f6d3c7126e5d063fcf7b15f))
+* **llm:** the claudeCode provider runs the OpenRouter models of the callers on their Claude equivalent ([14da2b0](https://github.com/souslesens/souslesensVocables/commit/14da2b05ad7b97cfca478c2e83dd6bacde96be58))
+* **llm:** the claudeCode provider takes the path of the claude CLI, for Windows where spawn cannot run claude.cmd ([ca927d6](https://github.com/souslesens/souslesensVocables/commit/ca927d6493c0e0bb337526891edf19bee5fb4b52))
+* **mainapp:** add CSV upload to a database from the ConfigEditor ([5c0c51a](https://github.com/souslesens/souslesensVocables/commit/5c0c51a0bc33024e675bffb43516ebb0d54ece51))
+* **mainapp:** support Excel upload and prefill table name in CSV modal ([c18ed06](https://github.com/souslesens/souslesensVocables/commit/c18ed061a5d7b63680717f0d332b25f3b6df043d))
+* **metadata:** the AI writes the description of a source that has none, from its ontology model ([ff5de4c](https://github.com/souslesens/souslesensVocables/commit/ff5de4c7837938186145229370dc4b8dfb5f8ec3))
+* **ontology:** the classes of the enriched ontology model carry their parents in the Lineage tree ([9e487c8](https://github.com/souslesens/souslesensVocables/commit/9e487c8001c4417e5c9ba0cd462204bc8d1c073b))
+
+
+### Bug Fixes
+
+* **containers:** a new container keeps its label and its Container type in the tree ([b95dc15](https://github.com/souslesens/souslesensVocables/commit/b95dc156f3c7c3b8cbc3c58acbfc81a7b433ec41))
+* **containers:** the search tree shows the top containers matching the term ([df648ec](https://github.com/souslesens/souslesensVocables/commit/df648ec88b95f8a7d2f724627ea6fd9d8692f1fe))
+* **indexation:** a class is indexed when it has a label among the default or chosen predicates, not only rdfs:label ([d4bbac7](https://github.com/souslesens/souslesensVocables/commit/d4bbac7c15250ff95b45062e9e400e7b02860531))
+* **indexation:** a class with no label is indexed under the name of its URI, as a last resort ([faa27de](https://github.com/souslesens/souslesensVocables/commit/faa27de1c6b0d9082b15b8f937bc9089a2600543))
+* **lineage:** a new restriction id always holds a letter, so it is never written as a real blank node ([48b119c](https://github.com/souslesens/souslesensVocables/commit/48b119c63baf93e142ac0ee601ceb1eaaed05b3e))
+* **lineage:** beyond 1000 restrictions the first 1000 are drawn instead of none ([adecead](https://github.com/souslesens/souslesensVocables/commit/adecead72895c2d9d76dd56f4980a1ece775cdaa))
+* **lineage:** only an administrator or the owner of a source can version it ([5df09b7](https://github.com/souslesens/souslesensVocables/commit/5df09b7477ddbe6b35506ee631fb74b092b7b99c))
+* **lineage:** the predicates graph keeps 1000 results, as its alert says, instead of 3000 ([f5375d9](https://github.com/souslesens/souslesensVocables/commit/f5375d96e3b6c4bfe9c60c3c6b4ff516d8ef1d00))
+* **lineage:** the Relations bot draws only the restrictions of the chosen property ([fae0857](https://github.com/souslesens/souslesensVocables/commit/fae0857c4a476b2a9774097d2a7d35b0913f611c))
+* **lineage:** the source file of a version no longer carries the user and password of its SPARQL server ([e2f48cc](https://github.com/souslesens/souslesensVocables/commit/e2f48ccc8d28240780370feb36228fdd7fbf60da))
+* **lineage:** Ungroup removes the group node from the selection, Children and Parents no longer run on a removed node ([62ee5d4](https://github.com/souslesens/souslesensVocables/commit/62ee5d439fed2194efb4612c4318d352b652975f))
+* **llm:** claude -p dying without a reason gives an explicit error, an odd output line no longer crashes the server ([b0b6dd6](https://github.com/souslesens/souslesensVocables/commit/b0b6dd620eaff268daa132b08f94b29d21dbe8fc))
+* **mappingModeler:** a click on the graph closes the context menu of a node ([8e9931f](https://github.com/souslesens/souslesensVocables/commit/8e9931f0e0d275192f951f351f24eeed31c9e205))
+* **ontology:** the axioms of the upper ontologies name their terms by label, the imported ones included ([4ac9da8](https://github.com/souslesens/souslesensVocables/commit/4ac9da88144ec31e41ac9d5ac4973f3c69d8db18))
+* **ontology:** the definitions of the 2026 IOF releases are read as definitions ([47569b7](https://github.com/souslesens/souslesensVocables/commit/47569b78a13f7921cd3a05b7a970cac68099d0a1))
+* **predicates:** a property with an rdfs:Resource range or no range gets a text field that also takes a URI ([7590ef3](https://github.com/souslesens/souslesensVocables/commit/7590ef36aa33b36d70ecfc7112ef67e0d62f894e))
+* **restriction:** a cardinality restriction id always holds a letter, so it is never written as a real blank node ([3308d26](https://github.com/souslesens/souslesensVocables/commit/3308d26eedd48e1dd44538afb585009d8f249fe3))
+
 ## [3.18.0](https://github.com/souslesens/souslesensVocables/compare/3.17.0...3.18.0) (2026-11-09)
 
 
